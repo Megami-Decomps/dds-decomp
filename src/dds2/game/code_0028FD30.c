@@ -342,24 +342,24 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
     MantraMenuWork *state = &resource->menu;
     MantraNodePos *node;
     MantraNodePos *neighbor;
-    s32 selected;
-    s8 position;
+    s32 selectedUnitIndex;
+    s8 neighborIndex;
     s8 attempts = 0;
     s8 result;
     u16 i;
-    u16 id;
+    u16 neighborNodeId;
 
-    selected = (u16)mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
+    selectedUnitIndex = (u16)mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
     if (state->navigationState == 0 || state->navigationState == 7) {
         node = state->defaultSelector;
-        position = mnuGetMantraNeighborIndexForDirection(resource, directionFlags);
+        neighborIndex = mnuGetMantraNeighborIndexForDirection(resource, directionFlags);
         for (;;) {
-            result = mnuClassifyMantraNeighborStatus(resource, node, position);
+            result = mnuClassifyMantraNeighborStatus(resource, node, neighborIndex);
             switch (result) {
                 case -1:
                     return 0;
                 case 0:
-                    state->defaultSelector = node->neighbors[position];
+                    state->defaultSelector = node->neighbors[neighborIndex];
                     if (state->navigationState == 0) {
                         state->navigationState = 4;
                     }
@@ -368,10 +368,10 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
                     if ((directionFlags & 0xa) != 0 || attempts == 2) {
                         for (i = 0; i < 50; i++) {
                             if (mnuMantraAlternateNeighborRows[i].id == node->selector.fields.index) {
-                                id = mnuMantraAlternateNeighborRows[i].neighbors[position];
-                                if (id != 0) {
-                                    neighbor = mnuGetMantraNodePositionRecord(id);
-                                    if ((state->slots[selected]->flags[neighbor->selector.fields.index] & 15) != 3) {
+                                neighborNodeId = mnuMantraAlternateNeighborRows[i].neighbors[neighborIndex];
+                                if (neighborNodeId != 0) {
+                                    neighbor = mnuGetMantraNodePositionRecord(neighborNodeId);
+                                    if ((state->slots[selectedUnitIndex]->flags[neighbor->selector.fields.index] & 15) != 3) {
                                         state->defaultSelector = neighbor;
                                         if (state->navigationState == 0) {
                                             state->navigationState = 4;
@@ -388,21 +388,21 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
                     }
                     /* Try the opposite direction when this neighbor is unavailable. */
                 case 2:
-                    if (position == 1 || position == 4) {
+                    if (neighborIndex == 1 || neighborIndex == 4) {
                         return 0;
                     }
-                    if (position == 0) {
-                        position = 5;
-                    } else if (position == 5) {
-                        position = 0;
-                    } else if (position == 2) {
-                        position = 3;
-                    } else if (position == 3) {
-                        position = 2;
+                    if (neighborIndex == 0) {
+                        neighborIndex = 5;
+                    } else if (neighborIndex == 5) {
+                        neighborIndex = 0;
+                    } else if (neighborIndex == 2) {
+                        neighborIndex = 3;
+                    } else if (neighborIndex == 3) {
+                        neighborIndex = 2;
                     }
                     attempts++;
                     if (attempts == 2) {
-                        neighbor = mnuResolveSpecialMantraNeighbor(resource, state->defaultSelector->selector.fields.index, position);
+                        neighbor = mnuResolveSpecialMantraNeighbor(resource, state->defaultSelector->selector.fields.index, neighborIndex);
                         if (neighbor != NULL) {
                             state->defaultSelector = neighbor;
                             if (state->navigationState == 0) {
@@ -415,7 +415,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
                     }
                     break;
                 case 3:
-                    state->defaultSelector = node->neighbors[position]->neighbors[position];
+                    state->defaultSelector = node->neighbors[neighborIndex]->neighbors[neighborIndex];
                     if (state->navigationState == 0) {
                         state->navigationState = 4;
                     }
