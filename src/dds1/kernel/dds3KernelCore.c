@@ -624,9 +624,9 @@ u32 kwlnTaskGetTimer(KwlnTask* task)
     return task->timer;
 }
 
-void kwlnTaskSetUserValue(KwlnTask* task, u32 value)
+void kwlnTaskSetUserValue(KwlnTask* task, u32 userValue)
 {
-    task->userValue = value;
+    task->userValue = userValue;
 }
 
 u32 kwlnTaskGetUserValue(KwlnTask* task)
