@@ -21,6 +21,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "prf_skill_list_buffer.h"
 #include "eff_random.h"
 #include "fr_font.h"
@@ -1758,7 +1759,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 }
 
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 index);
 
 /* Draw one equipped-skill row: the skill's range icon and cost, or an empty
  * placeholder bar. The row is highlighted under an unlocked cursor or when
@@ -1924,7 +1925,7 @@ void mnuNoOpItemSelectionTeardown(s32 context) {
 
 extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 index);
 typedef struct MnuCategoryPositions {
     s32 entries[4][2];
 } MnuCategoryPositions;
@@ -2080,7 +2081,7 @@ s32 mnuIsSkillCodeInBitset(s32 skillCode, u32 *bits) {
 }
 
 /* DDS2 page setup uses the same full owners as the surrounding menu code. */
-extern struct MenuPanelState *mnuCreatePanelState(s32, s32);
+extern struct MenuPanelState *mnuCreatePanelState(s32 width, s32 height);
 extern void mnuSetPanelFirstGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
 extern void mnuSetPanelSecondGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
 extern void mnuSetPanelThirdGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, const s32 *);
@@ -2929,8 +2930,8 @@ extern MenuPoint D_00437C10[];
 extern MenuPoint D_00437C18[];
 extern const char *mnuComboGunRequirementTexts[16];
 extern u8 (*D_00435E68)[33];
-extern s32 ptyGetAffinityKind(s32, s32);
-extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+extern s32 ptyGetAffinityKind(s32 affinityId, s32 index);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index);
 
 /* Draw each of the command's three partner requirements. */
 void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
@@ -3016,9 +3017,8 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
-extern s32 ptyMatchAffinityPermutation(s32 *, s32);
-extern u16 mnuPickPairedTableValue(s32, s32);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
+extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
 extern void ptySkillMenuDrawEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Construct the linkage-skill list, retaining blank rows for available commands
@@ -3062,7 +3062,7 @@ void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
                     node->sortKeySecondary = sortRank;
                 }
                 {
-                    s32 unavailable = ptyMatchAffinityPermutation((s32 *)frontline, skill);
+                    s32 unavailable = ptyMatchAffinityPermutation((const s32 *)frontline, skill);
                     /* The permutation matcher returns only 0 or 1. A consumed
                      * local keeps the inverted result as XOR, rather than a
                      * comparison against a rematerialized loop constant. */
@@ -3390,11 +3390,11 @@ void mnuRetireCampSpark(MenuCampEffect *effects, s32 index) {
     effects->count = effects->count - 1;
 }
 
-void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
+void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], surface);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
@@ -3486,43 +3486,43 @@ extern MenuBadgeLayout D_0042AED0;
     } \
 }
 
-void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
+void mnuDrawBadgeFade(MenuCampEffect *set, s32 surface) {
     MenuBadgeLayout layout = D_0042AED0;
     s32 handle;
     if (!(set->resources.packet.type & 4)) {
         handle = set->resources.packet.items[layout.place[0].slot];
-        effDrawTextureSlotWithBlendedCornerColors(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, arg);
+        effDrawTextureSlotWithBlendedCornerColors(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, surface);
         itfGridLookupValueOrDefault((s32)set->resources.packet.sheets[0], handle);
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
     if (!(set->resources.packet.type & 2)) {
-        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], surface);
     }
 }
 
 extern MenuBadgeLayout D_0042AEE8;
 
-void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
+void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface) {
     MenuBadgePlace blank[1];
     MenuBadgeLayout layout;
     u32 i;
 
     memset(blank, 0, sizeof(blank));
     layout = D_0042AEE8;
-    sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
-    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, surface);
     for (i = 0; i < 1; i++) {
-        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], surface);
     }
     if (!(set->resources.packet.type & 2)) {
         for (i = 0; i < 2; i++) {
-            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], surface);
         }
     }
     if (!(set->resources.packet.type & 4)) {
-        mnuDrawBadgeFade(set, arg);
+        mnuDrawBadgeFade(set, surface);
     }
-    mnuDrawLayeredCampGridAndSparks(set, arg);
+    mnuDrawLayeredCampGridAndSparks(set, surface);
 }
 
 void mnuEnableCampBadgeFade(u32 *flags) {
@@ -4214,11 +4214,11 @@ typedef struct MenuPosTable3 {
 
 extern MenuPosTable3 D_0042AF48;
 
-void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg);
+void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 surface);
 
 extern MenuPosTable D_0042AF60;
 
-void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg);
+void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 surface);
 
 typedef struct MenuOffsets {
     s32 x0;
@@ -4229,7 +4229,7 @@ typedef struct MenuOffsets {
 
 extern MenuOffsets D_0042AF90;
 
-void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg);
+void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 surface);
 
 extern void mnuDrawIconPanelFade();
 

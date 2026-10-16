@@ -9,14 +9,11 @@
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_task_queue_mutation.h"
 
 
 
 extern KwlnTask* kwlnActiveTaskHead;
-
-extern void kwlnTaskRemoveFromStateQueue(KwlnTask* task);
-
-extern void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask* task);
 
 extern void kwlnTaskActivate(KwlnTask* task);
 

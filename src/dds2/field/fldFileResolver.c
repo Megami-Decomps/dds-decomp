@@ -48,10 +48,8 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 #include "dds3_world_secondary.h"
 struct EffWorldNode;
-extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
-extern s32 fldGetRecordValueById(s32 id);
-extern void fldSetRecordValueById(s32 id, s32 value);
 extern s32 strcmp(const char *left, const char *right);
 
 struct EffWorldNode *fldCreateDummyMatter(void) {
@@ -88,10 +86,10 @@ EffWorldNode *fldResolveWorldObjectByResourceId(u32 id) {
                     }
                 }
             } else {
-                EffWorldNode *object = (EffWorldNode *)(u32)fldGetRecordValueById(resource->id);
+                EffWorldNode *object = fldGetRecordWorldNodeById(resource->id);
                 if (object == NULL) {
                     object = fldCreateDummyMatter();
-                    fldSetRecordValueById(resource->id, (s32)object);
+                    fldSetRecordWorldNodeById(resource->id, object);
                 }
                 return object;
             }
@@ -152,13 +150,14 @@ extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
 extern EffWorldNode *evtSpawnActionObj9(s32);
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
-extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
+extern void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
+                                               u32 id, s32 sceneFlag, s32 ownerIndex);
 extern s32 fldParseRoomNumberFromName(char *);
-extern void dds3SetPathStateValue(EffWorldNode *, u32);
+extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
 
@@ -556,7 +555,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void *sdfConsAllocateColumnPacket(s32);
 
 
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
@@ -686,9 +685,9 @@ extern char fldEncounterTaskName[];
 extern void btlClearRuntimeState(void);
 
 
-extern void fldUpdateCameraModelMotion(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames);
 
-extern s32 fldGetLocationCoordinateValue(s32, s32);
+extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 
 extern FldCamRow fldCameraFollowRows[];
 
@@ -727,18 +726,19 @@ extern u32 D_00438EC4;
 extern s32 D_00435FA0;
 extern s16 D_00389874[];
 extern s32 fldParseRoomNumberFromName(char *);
-extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
+extern void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
+                                               u32 id, s32 sceneFlag, s32 ownerIndex);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
-extern void dds3SetPathStateValue(EffWorldNode *, u32);
-extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
+extern EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name);
+extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);
 extern void func_0014C9B0(u32, f32 *, f32, f32, f32);
-extern s32 fldSetSparkVectors(s32, const u128 *, const u128 *);
-extern void fldAppendPendingSoundForScene(s32, f32, f32, f32, f32);
+extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation);
+extern void fldAppendPendingSoundForScene(s32 id, f32 radius, f32 x, f32 y, f32 z);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 
 /* Serialized transforms leave the position W component zero. */
@@ -962,12 +962,11 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern struct DevRequest *D_00435FA4;
 struct EffWorldNode;
-extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
 extern void dds3CreateObjectModelAndMotion(void *);
-extern void fldSetRecordValueById(s32, s32);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
@@ -1047,7 +1046,7 @@ void fldCreateResourceScriptObjects(void) {
                 k = 0;
                 for (; k < binding->names->count; k++, name++) {
                     if (strcmp(resource->name, name->name) == 0) {
-                        fldSetRecordValueById(binding->id, (s32)object);
+                        fldSetRecordWorldNodeById(binding->id, object);
                         break;
                     }
                 }
@@ -1066,11 +1065,11 @@ void fldCreateResourceScriptObjects(void) {
 #include "dds3_path.h"
 #include "fld_resource_resolver.h"
 
-extern s32 fldTestMapSlotValueFlag(s32, u32, s32);
-extern s32 fldTestRoomModeFlag(s32, u32, s32);
+extern s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
-extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *object);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *, f32);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
@@ -1178,8 +1177,8 @@ void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
     fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 1);
 }
 
-s32 fldGetTransferChunkPayload(s32 record) {
-    return record + 0xc;
+u8 *fldGetTransferChunkPayload(FldTransferChunk *chunk) {
+    return (u8 *)chunk + sizeof(*chunk);
 }
 
 void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
@@ -1631,7 +1630,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
                 D_00435FB4 = (u32)roomData;
                 D_00435FB0 = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
-                fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
+                fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
                 break;
             case 2:
                 fldCachedRoomF1ResourceAllocation = 0;
@@ -1640,7 +1639,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
                 D_00435FAC = (u32)roomData;
                 D_00435FA8 = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
-                fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload((s32)chunk));
+                fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
                 break;
             }
             index++;
@@ -1667,7 +1666,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         D_00435FB4 = (u32)roomData;
         D_00435FB0 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
+        fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldFormatAreaDirectory(directory, area, 1);
@@ -1680,7 +1679,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         D_00435FBC = (u32)roomData;
         D_00435FB8 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
+        fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
     if (isField == 0) {
         sprintf(path, D_00436038, name);
@@ -1692,11 +1691,11 @@ u32 fldLoadAreaRoomResources(const char *name) {
         D_00435FAC = (u32)roomData;
         D_00435FA8 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload((s32)chunk));
+        fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
     }
     fldCreateResourceScriptObjects();
     fldActivateRoomFlagObjects();
-    if (sceneWork->unk58 != 0 && area < 200 && fldAreaCachedResource != 0) {
+    if (sceneWork->retainCachedAreaResource != 0 && area < 200 && fldAreaCachedResource != 0) {
         D_00435FDC = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
         memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00435FDC),
                (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)fldAreaCachedResource),
@@ -3040,10 +3039,10 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     }
 }
 
-void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
+void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text) {
     struct FrFontGlyph *object;
 
-    object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
+    object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, colors, text, 0);
     frFontDrawGlyphInDefaultMode(object);
     frFontQueueGlyphForCurrentDrawBuffer(object);
 }
@@ -3378,7 +3377,7 @@ s32 fldEncProc(KwlnTask *task) {
     return 0;
 }
 
-void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
+void fldRequestEncounterWithFade(u32 encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
@@ -3386,11 +3385,11 @@ void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
         return;
     }
     sndSetSequenceVolumePan(0xf, 0x7f, 0x3f);
-    fldSetEncounterMode(mode);
+    fldSetEncounterMode(encounterMode);
 }
 
-s32 fldSetEncounterMode(s32 mode) {
-    fldEncounterRuntimeState = mode;
+s32 fldSetEncounterMode(s32 encounterMode) {
+    fldEncounterRuntimeState = encounterMode;
     D_0043608C = 0;
     if (fldGetEncounterRuntimeResult() == 0) {
         if (fldEncounterRuntimeState < 3) {
@@ -3447,7 +3446,7 @@ void fldProbeCameraSupportSurface(void) {
     if (fldValueRecords == 0) {
         return;
     }
-    node = (EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value;
+    node = ((FldValueRecord *)fldValueRecords)[index].worldNode;
     if (node != NULL) {
         offset[0] = node->inner->position[0];
         offset[1] = node->inner->position[1];
@@ -3533,7 +3532,7 @@ void fldInterpolateCameraEndpoints(void) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012FA58);
 
 extern void dds3SetCameraVector(EffWorldNode *camera, u128 *worldEye);
-extern f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by);
+extern f32 fldGetNormalizedComplementaryAngle(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 
@@ -3647,7 +3646,7 @@ void fldClearCameraMoveMode(void) {
     D_004360AC = 0;
 }
 
-extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
+extern f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz);
 extern void fldSetCameraObjectHighlightFlag(void);
 extern void fldClearSceneModelColors(void);
 extern void fldMarkPrimaryObjectByPeerPresence(void);
@@ -4082,7 +4081,7 @@ void fldUpdateCameraTarget(void) {
 }
 
 extern const PcpVectorCopyF32 D_00413280;
-extern f32 fldAngleDifference(f32 current, f32 target);
+extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void fldRefreshAreaStateFromPosition(f32 *);
 
@@ -4374,7 +4373,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 extern f32 fldSnapAngleToCompassPoint(f32);
 extern f32 fldSnapAngleToCompassOctant(f32);
 extern f32 fldSnapAngleToCardinalDirection(f32);
-extern s32 fldIsNearSpark(f32, f32, f32);
+extern s32 fldIsNearSpark(f32 x, f32 y, f32 z);
 extern void fldClassifyMovementAgainstZoneFaces(f32 *);
 extern void fldRestoreSceneModelColors(void);
 extern void fldClearSceneModelColors(void);
@@ -4863,7 +4862,7 @@ clear_highlight:
 
 extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
-extern void fldDispatchCameraModelFrameEvents(s32, s32);
+extern void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector);
 extern s32 fldUpdateFieldPlayerMovement(void);
 extern u32 D_00389988[];
 extern s32 D_003897C0[];
@@ -5571,10 +5570,10 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 
 
 extern s32 kwlnSetDrawColorTarget(s32, void *);
-extern s32 kwlnSetLightColorTarget(s32, s32, void *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
-extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
+extern s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetSwayMode(u32);
 extern u32 D_00436138, D_0043613C;
 extern f32 D_00436140;

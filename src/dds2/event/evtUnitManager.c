@@ -24,7 +24,6 @@ extern u8 kwlnDefaultColorVector[];
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);
-extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -48,11 +47,11 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
     f32 segment;
 
     saved = evtGetValueScaleFactor((EvtScaledValue *)path);
-    evtScaleValueByMultiplier((s32)path, 0.0f);
+    evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
     dds3InterpolatePathVectorVU(path);
     do {
         VU0_MOVE_VF(vf11, vf10);
-        evtScaleValueByMultiplier((s32)path, t);
+        evtScaleValueByMultiplier((EvtScaledValue *)path, t);
         dds3InterpolatePathVectorVU(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
@@ -61,16 +60,16 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
         VU0_MOVE_VF(vf10, vf12);
         t += step;
     } while (t <= 1.0f);
-    evtScaleValueByMultiplier((s32)path, saved);
+    evtScaleValueByMultiplier((EvtScaledValue *)path, saved);
     return length;
 }
 
 extern f32 D_00438A48, D_00438A4C;
 #include "dds3_world_primary.h"
-extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId);
 extern void kwlnBuildShortestArcQuaternion(void);
-extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
+extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
@@ -677,8 +676,8 @@ void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColo
 }
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from evtLoadUnitDirectionVectorVU to vec20 */
-void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
-    unit->directionMode = arg;
+void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 directionMode) {
+    unit->directionMode = directionMode;
     VU0_CLEAR_W(vf10);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
@@ -731,22 +730,22 @@ void evtSetUnitStatusFlags(EvtUnit *unit) {
     unit->flags = unit->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
 }
 
-void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
-    if (arg == 0) {
+void evtConfigureUnitTransition(EvtUnit *unit, s32 duration) {
+    if (duration == 0) {
         unit->flags &= ~0x700;
         unit->flags &= ~0x5000;
         unit->flags &= ~0x2800;
     } else {
-        evtInitializeUnitColorTransition(unit, arg, 0, 0);
+        evtInitializeUnitColorTransition(unit, duration, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
         VU0_MOVE_VF(vf10, vf0);
-        evtSetUnitNormalizedDirection(unit, arg);
+        evtSetUnitNormalizedDirection(unit, duration);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }
 }
 
-EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
-    EffWorldNode *obj = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, EFF_WORLD_KIND_FOLLOW_MODEL);
+EvtUnit *evtGetWorldUnitNestedValue(s32 worldObjectKey) {
+    EffWorldNode *obj = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
         return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
@@ -859,9 +858,9 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
     return 0;
 }
 
-void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 first, s32 second) {
-    unit->firstSlot = first;
-    unit->secondSlot = second;
+void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot) {
+    unit->firstSlot = firstSlot;
+    unit->secondSlot = secondSlot;
 }
 
 void evtActivateStoredUnitMotionSlot(EvtUnit *work) {

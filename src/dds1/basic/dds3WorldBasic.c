@@ -8,8 +8,8 @@ extern EffWorldNode *dds3ActiveWorld;
 
 void effObjNodeDestroy(EffWorldNode *node);
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
-void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
-void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
+void dds3ReleaseWorldValueEntries(WorldValueIndices *object);
+void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *iterator);
 
 #define DDS3_WORLD_NODE_KIND 1
 #define DDS3_WORLD_INDEX_NODE_BYTES 0x10
@@ -27,9 +27,9 @@ void dds3DestroyWorld(void) {
 }
 
 /* Set the primary world node without releasing it; no world is a no-op. */
-void dds3SetWorldObject(EffWorldNode *primaryObject) {
+void dds3SetWorldObject(EffWorldNode *primaryWorldNode) {
     if (dds3ActiveWorld != NULL) {
-        ((WorldInfo *)dds3ActiveWorld->data)->primaryObject = primaryObject;
+        ((WorldInfo *)dds3ActiveWorld->data)->primaryObject = primaryWorldNode;
     }
 }
 
@@ -45,9 +45,9 @@ void *dds3GetWorldObject(void) {
 }
 
 /* Set the secondary world node without releasing it; no world is a no-op. */
-void dds3SetWorldSecondaryObject(EffWorldNode *secondaryObject) {
+void dds3SetWorldSecondaryObject(EffWorldNode *secondaryWorldNode) {
     if (dds3ActiveWorld != NULL) {
-        ((WorldInfo *)dds3ActiveWorld->data)->secondaryObject = secondaryObject;
+        ((WorldInfo *)dds3ActiveWorld->data)->secondaryObject = secondaryWorldNode;
     }
 }
 
@@ -270,7 +270,7 @@ s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNo
     if (dds3GetWorldValueCount(indexNode) != 0) {
         dds3ResetObjectValueCursor(indexNode);
         do {
-            if (dds3SeekWorldNode(indexNode, (u32)targetNode) != 1) {
+            if (dds3SeekWorldNode(indexNode, targetNode) != 1) {
                 break;
             }
             dds3RemoveCurrentWorldValueEntry(indexNode);
@@ -283,7 +283,7 @@ s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNo
 /* Search from the current cursor without resetting it; leave it on a match.
  * A NULL payload terminates before comparison, even if later entries remain,
  * so a NULL target never matches. Return 1 for a match, otherwise 0. */
-s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord) {
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, const EffWorldNode *targetNode) {
     u32 candidateWord;
 
     do {
@@ -291,7 +291,7 @@ s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord) {
         if (candidateWord == 0) {
             return 0;
         }
-        if (targetWord == candidateWord) {
+        if ((u32)targetNode == candidateWord) {
             return 1;
         }
     } while (dds3AdvanceObjectValueCursor(indexNode) != 0);

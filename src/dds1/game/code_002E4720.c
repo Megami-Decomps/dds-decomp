@@ -123,14 +123,14 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
-extern void sdfDevUnlinkAndFreeState(DevState *arg0);
+extern void sdfDevUnlinkAndFreeState(DevState *state);
 
-extern void sdfDevRecycleCompletedState(DevState *arg0);
+extern void sdfDevRecycleCompletedState(DevState *state);
 
 extern DevState *sdfDevCreateCallbackState(const char *path,
-                                void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
+                                void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
-extern s32 sceClose(s32 arg0);
+extern s32 sceClose(s32 fd);
 
 extern s32 DIntr(DevState *arg0);
 
@@ -140,7 +140,7 @@ extern void EIntr(void);
 
 extern void sceCdPowerOff(void *arg0);
 
-extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 
@@ -180,16 +180,16 @@ extern u16 sdfDefaultDevRequestOptions;
 
 extern s32 sdfDevResolvePathForWorker(const char *path, char **outResolvedPath);
 
-extern void sdfDevEnqueueStateAndWakeWorker(DevState *);
+extern void sdfDevEnqueueStateAndWakeWorker(DevState *state);
 
-extern DevState *sdfDevAllocState(void *, s32, s32,
-                                void (*)(DevState *, s32, s32, s32, s32), s32);
+extern DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
+                                void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
 extern u8 sdfDevModuleLoaded;
 
 extern u8 D_003BD478;
 
-extern s32 func_00312618(const char *, s32, void *, s32 *);
+extern s32 func_00312618(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
 extern void sdfDebugPrintf(const char *);
 
@@ -532,7 +532,7 @@ typedef struct SdfDiscFileRecord {
 
 extern SdfDiscFileRecord D_003F9FC0;
 extern s32 sceOpen();
-extern s32 sdfDevSeekFile(s32, s32, s32);
+extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
@@ -718,13 +718,13 @@ s32 sdfDevGetFileSize(void) {
 
 extern s32 sceOpen();
 
-extern s32 sdfDevSeekFile(s32, s32, s32);
+extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 extern s32 func_002FF538(s32);
 
-extern s32 func_0030EF30(s32, s32, s32);
+extern s32 func_0030EF30(s32 fileHandle, s32 buffer, s32 byteCount);
 
-extern s32 sceWrite(s32, s32, s32);
+extern s32 sceWrite(s32 fileHandle, s32 buffer, s32 byteCount);
 
 extern void FlushCache(s32);
 
@@ -756,7 +756,7 @@ extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_002F4558(s32, s32, s32);
 
-extern void sdfDevLoadWholeFile(const char *);
+extern void sdfDevLoadWholeFile(const char *fileName);
 
 extern char D_003B4578[];
 
@@ -929,7 +929,7 @@ s32 sdfPathExists(char *path) {
 }
 
 void sdfDevWaitThenReleaseCommandState(DevState *state) {
-    sdfDevQueueActiveOperation();
+    sdfDevQueueActiveOperation(state);
     WaitSema(sdfDevReplySemaphore);
     sdfDevQueueReleaseState(state);
 }
@@ -1621,13 +1621,13 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
 }
 
 /* Queue a byte-counted write; return -1 without changing an inactive request. */
-s32 sdfDevQueueWrite(DevState *state, void *buffer, s32 byteCount) {
+s32 sdfDevQueueWrite(DevState *state, const void *buffer, s32 byteCount) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
     state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_WRITE;
-    state->requestData = buffer;
+    state->requestData = (void *)buffer;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
@@ -1644,7 +1644,7 @@ s32 sdfDevReactivate(DevState *state) {
 
 /* Active state and close operation share an ID; retain the original byte assignment. */
 s32 sdfDevQueueActiveOperation(DevState *request) {
-    s8 requestState = request->state;
+    SdfDevStateCode requestState = request->state;
 
     if (requestState != SDF_DEV_STATE_ACTIVE) {
         return -1;

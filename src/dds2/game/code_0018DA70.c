@@ -107,7 +107,7 @@ extern u32 fldIsUpdateInhibited(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
-void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
 {
     f32 centerX, centerY, scale, cosine, sine;
     f32 scaledU, scaledV, u, v;
@@ -202,7 +202,7 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
 }
 
 
-void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
 {
     quad->color[0] = 0x80;
     quad->color[1] = 0x80;
@@ -246,7 +246,7 @@ void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
 }
 
 
-void effDrawBlurRectangle(EffBlurQuad *source)
+void effDrawBlurRectangle(const EffBlurQuad *source)
 {
     SdfListHead *list;
     void *tag;
@@ -381,7 +381,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 
 
 /* Build the two draw packets for `source` and append them to `list`. */
-void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPointCoordinates) {
+void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixedPointCoordinates) {
     void *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
@@ -406,7 +406,7 @@ extern u32 fldIsUpdateInhibited(void);
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void effDrawBlurSource(BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
+void effDrawBlurSource(const BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
     void *list;
 
     if (fldIsUpdateInhibited() == 0) {
@@ -432,7 +432,7 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
 
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {
+EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
     dst->texture = effGetBillResourceTexture(2);

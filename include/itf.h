@@ -14,8 +14,12 @@ typedef struct BtlFade {
     s16 phase;
     s16 alpha;
     s16 timer;
-    u32 unk08;
+    u32 textAdvanceFrameCount; /* 0x08: entry advances count frames before triangle skip. */
 } BtlFade;
+
+typedef char BtlFade_size_must_be_0x0C[(sizeof(BtlFade) == 0x0C) ? 1 : -1];
+typedef char BtlFade_textAdvanceFrameCount_offset_must_be_0x08[
+    ((u32)&((BtlFade *)0)->textAdvanceFrameCount == 0x08) ? 1 : -1];
 
 /* Common draw record allocated by the interface object constructors (0x40). */
 /* Allocation fields own general-heap descriptors, not retained payload addresses. */
@@ -227,12 +231,17 @@ typedef struct ItfMesEntryBlock {
     ItfMesTable *table;
     FrFontGlyph *glyphChain;
     s8 textState;
-    u8 unk11;
+    u8 textInterfaceMask; /* 0x11: result of itfTestTextInterfaceMask(3). */
     u8 color[4];
     s16 lineCount;
     s16 itemIndex;
     s16 tableCount;
 } ItfMesEntryBlock;
+
+typedef char ItfMesEntryBlock_size_must_be_0x1C[
+    (sizeof(ItfMesEntryBlock) == 0x1C) ? 1 : -1];
+typedef char ItfMesEntryBlock_textInterfaceMask_offset_must_be_0x11[
+    ((u32)&((ItfMesEntryBlock *)0)->textInterfaceMask == 0x11) ? 1 : -1];
 
 typedef struct ItfMesOption {
     s16 id;

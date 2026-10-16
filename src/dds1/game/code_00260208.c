@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_stage_test_api.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "brs_primary_panel_update_api.h"
@@ -652,18 +653,18 @@ s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *context) {
 }
 
 
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     u32 i;
 
     for (i = 0; i < 3; i++) {
         u16 id = refs->id;
-        u8 param = refs->param;
+        u8 quantityDelta = refs->param;
 
         refs++;
         if (id != 0) {
-            ptyAdjustItemQuantity(id, param);
+            ptyAdjustItemQuantity(id, quantityDelta);
         }
     }
 }
@@ -1103,8 +1104,7 @@ extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource
                                  s32 option);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
-extern void evtStageTestQueueMotion(s32 kind, u32 index);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void sndQueueSoundId(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {

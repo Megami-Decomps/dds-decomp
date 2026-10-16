@@ -188,7 +188,7 @@ extern s32 btlIsEffectPhaseInRange(s32 unused, s32 value);
 extern u32 btlIsInSpecialModeRange(u32 unused0, u32 unused1, s32 action);
 extern s32 btlIsSpecialActionKind(BtlLinkedCommand *command);
 extern u32 btlMapActionToCode(s32 action);
-extern s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1);
+extern s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 commandResult);
 extern s32 btlMapSkillRange(u32 skill);
 extern s32 btlMapSkillToCode(s32 skill);
 extern s32 btlMapSpeciesToActionVariant(u8 *unit, s32 action);

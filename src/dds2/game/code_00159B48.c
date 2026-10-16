@@ -120,7 +120,7 @@ SdfTex *effGetBillResourceTexture(s32 index) {
     return ((BillObj *)effBillResourceOwners[index])->child->texture;
 }
 
-void effCopyVector(void *dst, void *src) {
+void effCopyVector(void *dst, const void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -301,14 +301,16 @@ void billSetAnimationFrameWithOneTickHold(BillObj *effect, u32 startFrame) {
 }
 
 /* Read the animation modulus of the first entry, if this is a list billboard. */
-s32 billGetFirstEntryFramePeriod(BillObj *effect) {
+s32 billGetFirstEntryFramePeriod(const BillObj *effect) {
     if (effect->kind == 1) {
-        return (effect->resolvedEntries)->entry->frameCount;
+        const BillOut *entry = effect->resolvedEntries;
+        const BillAnimationEntry *frame = entry->entry;
+        return frame->frameCount;
     }
     return 0;
 }
 
-u16 billGetKindOneParameter(BillObj *effect) {
+u16 billGetKindOneParameter(const BillObj *effect) {
     if (effect->kind == 1) {
         return effect->animationActive;
     }

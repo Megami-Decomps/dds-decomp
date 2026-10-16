@@ -134,16 +134,16 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
 EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
 void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 
-void effAppendBlurRectanglePackets(void *list, EffBlurQuad *source, u8 fixedPointCoordinates);
-void effDrawBlurSource(EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
-void effDrawBlurRectangle(EffBlurQuad *source);
-void effBlurDrawFramebufferQuad(EffBlurQuad *source);
+void effAppendBlurRectanglePackets(void *list, const EffBlurQuad *source, u8 fixedPointCoordinates);
+void effDrawBlurSource(const EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
+void effDrawBlurRectangle(const EffBlurQuad *source);
+void effBlurDrawFramebufferQuad(const EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 /* Borrow the live textured-blur owner; callers do not acquire or release it. */
 EffBlurTemplate *effGetCh71Work(void);
 /* Borrow the live scatter-blur owner; callers do not acquire or release it. */
 EffBlurScatterWork *effGetCh72Work(void);
-EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
+EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *body);
 void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters);
 void effCopyFilterBlurParameters(EffBlurScatterParams *parameters);
 void effCopyStaggeredBlurParameters(EffBlurScaleParams *parameters);

@@ -443,7 +443,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 sprintf(char *, const char *, ...);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
 extern void mnuShowMantraUnitPanel(struct MantraDrawPool *pool);
@@ -639,9 +638,10 @@ s32 mtrMantraEquipUpdate(void) {
 
 extern void dspRequestMessageWindowModeOne(void);
 extern void mnuUpdateMantraDrawPool(struct MantraDrawPool *pool);
-extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                s32 flags, s32 context);
 extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *, MenuProgressHost *, s32);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);

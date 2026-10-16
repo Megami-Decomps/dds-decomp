@@ -1464,7 +1464,7 @@ MantraNodePos *mnuFindCompatibleMantraNeighbor(MnuStatusResource *object, u16 no
     return NULL;
 }
 
-extern void mnuStorePanelEntry(s32, s32);
+extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
 extern void mnuRefreshMantraUnitNodeFlags(s32);
 
 /* Collect selected neighbours, then advance their three rank chains for at most 20 passes. */

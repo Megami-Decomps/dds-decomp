@@ -38,8 +38,8 @@ struct SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
 void sdfGetGeneralHeapStats(SdfGeneralHeapStats *stats);
 void sdfGetChipHeapStats(SdfChipHeapStats *stats);
 
-u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
-s32 sdfMemoryGetBlockSize(struct SdfMemBlock *block);
+u32 sdfMemoryGetBlockAddress(const struct SdfMemBlock *block);
+s32 sdfMemoryGetBlockSize(const struct SdfMemBlock *block);
 /* Advance one descriptor; return NULL when its successor is the end marker. */
 struct SdfMemBlock *sdfMemoryNextBlock(struct SdfMemBlock *block);
 

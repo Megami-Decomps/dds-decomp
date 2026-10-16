@@ -46,11 +46,12 @@ void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
     sdfReleaseResourceAllocation(resources->allocation);
 }
 
-extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 extern struct EffectSlotSet *mnuMantraSpriteSlots[];
 
-void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
-    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)mnuMantraSpriteSlots[0], 0x25, param);
+void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 surface) {
+    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)mnuMantraSpriteSlots[0], 0x25, surface);
 }
 
 struct MovieCueNode {
@@ -171,7 +172,8 @@ void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
     sdfReleaseChipBlock(work);
 }
-extern void mnuDrawSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite,
+                                     s32 placementIndex, s32 flags, s32 context);
 extern void mnuTickMantraSparkParticles(DspParticleState *);
 extern void mnuDrawMantraSparkBackdrop(DspParticleState *, s32, s32);
 
@@ -316,7 +318,8 @@ void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, Me
     }
 }
 
-extern void mnuDrawSceneEntrySpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSceneEntrySpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+                                                s32 placementIndex, s32 flags, s32 context);
 
 /* Choose draw codes from profile-match, cap and entry-state flags; cap overlay is half-strength. */
 void mnuDrawMantraEntryStatusOverlays(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, MnuMantraGridEntry *entry, s32 drawArg) {
@@ -348,7 +351,8 @@ typedef struct MnuProfileIdList {
 extern const MnuProfileIdList D_003AFA00;
 extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
-extern void mnuDrawMantraSceneSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                                s32 flags, s32 context);
 
 /* Draw cap markers, with a second marker for the first four profiles. */
 void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
@@ -573,7 +577,7 @@ typedef struct Bytes7 {
 } Bytes7;
 
 extern Bytes7 D_003BC4E8[];
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 /* Select the cost marker from the record's icon index and draw at the fixed badge offset. */
 void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amount, s32 drawArg) {

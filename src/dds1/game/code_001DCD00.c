@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -95,7 +96,6 @@ extern s8 effSharedRandomState[];
 
 extern s8 effSharedRandomState[];
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 extern void btlUnitGetBodyPosVU(u8 *);
 
 extern char D_003BB5F8[];
@@ -563,10 +563,10 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *actor) {
     }
 }
 
-extern void func_001E0B68(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
+extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
 extern void btlPrepareCameraMode6Participants(BtlLinkedCommand *, BtlCamState *);
 extern void btlPrepareCameraMode7Participants(BtlLinkedCommand *, BtlCamState *);
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -610,7 +610,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
-                        func_001E0B68(action, &action->frontCamera, &action->backCamera);
+                        btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                     } else {
                         btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
                     }
@@ -620,7 +620,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                     action->motionParameter = 30.0f;
                     action->flags |= 0x841;
                 } else {
-                    func_001E1288(action, &action->frontCamera, 3);
+                    btlBuildActorPairFramingCameraPose(action, &action->frontCamera, 3);
                     btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
                     action->backCamera.distance += -100.0f;
                     action->motionParameter = 50.0f;
@@ -683,7 +683,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
                         ((effMiscRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
-                func_001E0B68(action, &action->frontCamera, &action->backCamera);
+                btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
@@ -756,8 +756,8 @@ extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
-extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
+extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
+extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -839,7 +839,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     } else {
                         f32 distance;
 
-                        func_001E1288(action, &action->frontCamera, 1);
+                        btlBuildActorPairFramingCameraPose(action, &action->frontCamera, 1);
                         btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
                         if (reduceDistance) {
                             action->frontCamera.distance *= 0.75f;
@@ -861,7 +861,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 } else {
                     f32 distance;
 
-                    func_001E1288(action, &action->frontCamera, 3);
+                    btlBuildActorPairFramingCameraPose(action, &action->frontCamera, 3);
                     btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
                     distance = action->backCamera.distance;
                     action->flags |= 0x41;
@@ -882,7 +882,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 if (choice != 0) {
                     f32 distance;
 
-                    func_001E16C0(action, &action->frontCamera);
+                    btlBuildTargetGroupFramingCameraPose(action, &action->frontCamera);
                     btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
                     distance = action->backCamera.distance;
                     action->flags |= 0x41;
@@ -917,7 +917,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             } else {
                 f32 distance;
 
-                func_001E1288(action, &action->frontCamera, 2);
+                btlBuildActorPairFramingCameraPose(action, &action->frontCamera, 2);
                 btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
                 distance = action->backCamera.distance;
                 action->flags |= 0x41;
@@ -1175,7 +1175,7 @@ extern s32 datActionAnimationRecords;
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlInitializeActionCamera(BtlLinkedCommand *);
-extern void func_001E0B68(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
+extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlSelectLinkageSkillCameraPreset();
 
 void btlSelectActionCameraPose(BtlLinkedCommand *action) {
@@ -1214,7 +1214,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
             return;
         }
         if ((action->task->unit->status.flags & 0x400) && hasFlag200 == 0 && hasFlag400 == 1) {
-            func_001E0B68(action, &action->frontCamera, &action->backCamera);
+            btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
             action->flags |= 0x10000;
             return;
         }

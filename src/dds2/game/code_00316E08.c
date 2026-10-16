@@ -538,7 +538,45 @@ void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry) {
     mdlLoadViewerPackage(5, entry->unk12, 0x101, entry->unk0C, entry->unk1C);
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", mnuLoadSectionObjectListWithRelocations);
+extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size);
+
+/* Copy a section's object payload into a fresh block and relocate it in place.
+ * The data starts with a 16-byte header and five information words (payload
+ * size, object count, an unused word, relocation size and an unused word). */
+MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data) {
+    u8 header[16];
+    u32 info[5];
+    u32 offset;
+    u8 *payload;
+    SdfMemBlock *block;
+    MnuSectionObjectList *list;
+    u8 *objects;
+    SdfMemBlock *relocBlock;
+    u32 *offsets;
+
+    memcpy(header, data, sizeof(header));
+    offset = sizeof(header);
+    memcpy(info, (u8 *)data + offset, sizeof(info));
+    offset += sizeof(info);
+    payload = (u8 *)data + offset;
+    block = sdfAllocGeneralBlock(info[0] + 0x10);
+    list = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
+    objects = (u8 *)(list + 1);
+    list->allocation = block;
+    list->count = info[1];
+    list->objects = objects;
+    memset(objects, 0, info[0]);
+    offset = sizeof(*list);
+    memcpy((u8 *)list + offset, payload, info[0]);
+    payload += info[0];
+    relocBlock = sdfAllocGeneralBlock(info[3]);
+    offsets = (u32 *)sdfMemoryGetBlockAddress(relocBlock);
+    memset(offsets, 0, info[3]);
+    memcpy(offsets, payload, info[3]);
+    dds3ApplyRelocationOffsets(objects, (u32)objects, offsets, info[3]);
+    sdfReleaseResourceAllocation(relocBlock);
+    return list;
+}
 
 /* State-zero update entry in the shooting-scene callback table; no work in retail. */
 u32 mnuShootingState0UpdateNoOp(void) {

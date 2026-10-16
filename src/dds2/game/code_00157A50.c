@@ -11,7 +11,7 @@
 #include "eff_bill_resource_init.h"
 
 #include "sdf.h"
-EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
+EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
     EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
     u32 argument = (u32)source->instance;
 

@@ -16,7 +16,6 @@ extern f32 D_0040B530[4];
 
 extern f32 D_00435B38;
 
-extern f32 sdfAcosTable(f32 dot);
 
 
 /* vu0 routine: vf10 = quaternion product vf10 * vf11 */
@@ -81,7 +80,6 @@ void effMiscQuaternionToMatrixVU(void)
     VU0_QUAT_TO_MATRIX_VF10();
 }
 
-extern f32 sdfWrapAngle(f32 angle);
 
 /* The quaternion scratch is read only by the lqc2 asm through its address, so
  * it is volatile: retail stores its four components in program order. */

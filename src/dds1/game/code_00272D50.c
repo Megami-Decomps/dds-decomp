@@ -70,7 +70,7 @@ extern void mnuDrawStaffItemListEntry(s32, s32, s32, struct MenuList *, struct M
 extern s32 mnuIsBulletItemId(s32);
 extern char *D_003BAA84;
 extern s32 mnuIsSolarPricedItemId(s32);
-extern s32 evtCheckValueThreshold(s32, s32);
+extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 
 void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
@@ -385,7 +385,7 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
 
 extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the

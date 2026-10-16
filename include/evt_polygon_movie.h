@@ -141,8 +141,11 @@ PolyMovieWork *evtPolygonMovieAllocWork(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
 void evtPolygonMovieSetFlagBits(struct KwlnTask *task, u32 bits);
 void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
+void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
+s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1
+void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32 end);
 PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode);
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
 #elif VERSION_DDS2

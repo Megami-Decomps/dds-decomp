@@ -4,15 +4,11 @@
 #include "snd_command_packet.h"
 #include "snd_midi_state_views.h"
 
-u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 size);
-
 void sndEnsureMidiBankResident(s32 trackId);
-
-u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
 extern SndTrackSlot sndTrackBalanceEntries[];
 
-extern s32 sndFindPackedTrackLoadStatus(s32 id);
+extern s32 sndFindPackedTrackLoadStatus(s32 packedTrack);
 
 extern s32 sndRequestedMidiBankId;
 
@@ -207,10 +203,10 @@ void sndStartTrackExtended(s32 trackId) {
     sndQueueCommandPacket(0x20, 0, &packet, 0x10);
 }
 
-void sndReleaseTrackHandle(u32 value) {
+void sndReleaseTrackHandle(u32 trackHandle) {
     u32 packet[4];
 
-    packet[0] = value;
+    packet[0] = trackHandle;
     sndQueueCommandPacket(0xd0, 0, packet, 0x10);
 }
 

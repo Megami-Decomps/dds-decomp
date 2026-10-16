@@ -201,3 +201,26 @@ The tools must not write compiler registers or memory to select a desired
 answer. Output-altering diagnostics, if performed separately, are ineligible
 for matching regardless of how many native words they resemble. Only observational traces with ordinary-output parity support the conclusions
 here.
+
+## Publishing action camera parameters before flags
+
+The group-size action camera pair (DDS1 `0x001E0B68`, DDS2
+`0x001EE458`, 568 bytes each) illustrates two ordinary source facts.
+Its final configuration assigns `motionParameter` before setting the command
+flags. A read-only scheduler/jump trace of the older reversed source showed
+that the parameter store consumed the final command-pointer use. Scheduler
+register weights placed that store before the flags store, and `jump2` then
+merged the flags store with the one-actor branch, removing eight bytes.
+Writing the parameter before the flags in C moves that final pointer use
+to the flags update, reproducing the distinct native tails.
+
+The remaining six instruction differences were the mode value's register
+handoff. The pose provider already interprets its integer argument as a byte
+mode. Keeping that actual mode in a `u8` local, with the unchanged `s32`
+callee parameter, preserves the chooser temporary and the promoted value
+across the two calls. The allocator trace shows `combine_regs` rejecting
+the chooser/preserved-value merge; the native argument register and saved
+register copy then emerge without extra source uses. Ordinary and observed
+compiler outputs were byte equal. Both complete camera owners remained
+exact after these changes. These observations explain the reconstruction;
+they do not establish a unique original spelling.

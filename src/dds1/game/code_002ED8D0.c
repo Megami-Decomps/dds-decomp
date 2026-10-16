@@ -30,7 +30,7 @@ typedef struct PacAlloc {
     s32 resource;
 } PacAlloc;
 
-extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 context);
+extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *strrchr(const char *text, s32 delimiter);
 extern s32 strcasecmp(const char *text, const char *suffix);
@@ -110,7 +110,6 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
                                         sdfMoviePacStreamReadCallback, owner, descriptor->source);
 }
 
-extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 extern void sdfSoundStopMoviePlayback(void);

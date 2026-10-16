@@ -23,12 +23,12 @@
 #define EFF_CHANNEL_RGB_COLOR 0x00808080
 #define EFF_PRIMITIVE_CUBIC_MODE 0
 
-extern void effSamplePrimitiveCurveVertex(EffVert *arg0, EffPrimitiveCurve *arg1, s32 arg2, f32 arg3);
-extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
+extern void effSamplePrimitiveCurveVertex(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t);
+extern void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t);
 extern u8 effDefaultRandomState[];
-extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
+extern void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex);
 extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
-extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *arg0, f32 *arg1);
+extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents);
 extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.

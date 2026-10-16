@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "sdf_trig.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_unique_chunk_value_api.h"
@@ -56,20 +57,23 @@ extern EvtUnitVectorSlot evtUnitVectorSlots[10];
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
-    f32 unk10;          /* 0x10 */
+    f32 scaleFactor;    /* 0x10: uniform model scale, also used by stage tests. */
     u8 pad14[0x04];     /* 0x14 */
     f32 unk18;          /* 0x18 */
     f32 unk1C;          /* 0x1C */
     u8 pad20[0x250];    /* 0x20 */
 } Entry270;
 
+typedef char Entry270_scaleFactor_offset_check[
+    ((u32)&((Entry270 *)0)->scaleFactor == 0x10) ? 1 : -1];
+typedef char Entry270_size_check[(sizeof(Entry270) == 0x270) ? 1 : -1];
+
 extern Entry270 *D_00435DF0;
-extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
-extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 
-extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
+extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 
 #include "dds3_world_primary.h"
 
@@ -96,7 +100,7 @@ extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
 
 
-extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 
 extern s32 sdfDebugPrintf(const char *fmt, ...);
 
@@ -110,11 +114,11 @@ extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
 extern char D_00421A78[];
 
-extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
+extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector);
 
 extern u8 D_00421A90[];
 
-extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
+extern void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *secondVector);
 
 extern u8 D_00421B20[];
 
@@ -122,17 +126,17 @@ extern void *effObjCreateKindFromResource(s32 kind, void *resource);
 
 extern u8 D_00421B70[];
 
-extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
+extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource);
 
-extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
+extern void evtConfigureUnitTransition(EvtUnit *unit, s32 duration);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
-extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
+extern void effObjReplaceActiveEventNode(void *effectObject, u32 entryId);
 
 extern char D_00421AF8[];
 
@@ -140,9 +144,9 @@ extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 extern s32 scrGetWindow(void);
 
 
-extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
+extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
 
-extern void evtActivateStoredUnitMotionSlot(u32 arg0);
+extern void evtActivateStoredUnitMotionSlot(u32 unitAddress);
 
 extern f32 evtComputeClampedModelScale(s32);
 
@@ -163,11 +167,11 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
 }
 
 /* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
-void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
+void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 worldObjectKey, s32 frames) {
     EffWorldNode *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
-    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), worldObjectKey, 0x11);
     if (worldUnit != NULL) {
         source = worldUnit->data;
         evtBeginVectorTransition(work, (s128 *)&source->rotation, frames);
@@ -176,10 +180,10 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
+void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     f32 *destination = work->targetVector;
 
-    work->motionSubmode = mode;
+    work->motionSubmode = motionSubmode;
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
     work->linkedUnit = NULL;
@@ -191,24 +195,24 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
+void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     EffWorldNode *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
-    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), worldObjectKey, 0x11);
     if (worldUnit != NULL) {
         source = worldUnit->data;
-        evtBeginUnitVectorTransition(work, mode, (s128 *)&source->position, unused, frames, valueB6, callback, unusedLast);
+        evtBeginUnitVectorTransition(work, motionSubmode, (s128 *)&source->position, unused, frames, valueB6, callback, unusedLast);
         work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
         work->linkedUnit = worldUnit;
     }
 }
 
-void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
+void evtSetUnitPathFollow(EvtUnit *work, s32 pathObjectKey, s32 frames, s32 valueB6, s32 pathFollowMode, s32 dirFlag, s32 sideMode) {
     EffWorldNode *pathSource;
     Dds3PathCurveWork *path;
 
-    pathSource = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x10);
+    pathSource = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), pathObjectKey, 0x10);
     if (pathSource == NULL) {
         return;
     }
@@ -219,14 +223,14 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     work->pathHandle = (s32)path;
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
-        evtScaleValueByMultiplier((s32)path, 0.0f);
+        evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
         sdfSetFloatCounterDirection((s32)path, 0);
     } else {
-        evtScaleValueByMultiplier((s32)path, 1.0f);
+        evtScaleValueByMultiplier((EvtScaledValue *)path, 1.0f);
         sdfSetFloatCounterDirection((s32)path, 1);
         work->pathSpeed = -work->pathSpeed;
     }
-    switch (mode) {
+    switch (pathFollowMode) {
     case 0:
         work->motionSubmode = 0;
         work->flags &= ~2;
@@ -418,85 +422,85 @@ s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
     return 0;
 }
 
-void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
+void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey) {
     void *world;
 
     world = dds3GetWorldObject();
-    return dds3FindWorldObjectNodeByKey(world, id, kind);
+    return dds3FindWorldObjectNodeByKey(world, worldObjectKey, objectKind);
 }
 
 u32 evtGetWorldObjectId(void) {
     void *world;
     EffWorldNode *object;
-    s32 id;
+    s32 playerObjectKey;
 
     world = dds3GetWorldObject();
     object = dds3GetWorldPlayerObject(world);
-    id = -1;
+    playerObjectKey = -1;
     if (object != NULL) {
-        id = object->key;
+        playerObjectKey = object->key;
     }
-    scrSetIntegerReturnValue(id);
+    scrSetIntegerReturnValue(playerObjectKey);
     return 1;
 }
 
 u32 evtOpCreateLinkedCameraViewer(void) {
-    s32 param0;
-    s32 param1;
-    s32 value;
+    s32 slotKind;
+    s32 resource;
+    s32 viewerObjectKey;
 
-    param0 = scrReadIntParameter(0);
-    param1 = scrReadIntParameter(1);
-    value = mdlSpawnLinkedCameraSlotViewerObject(param0, param1);
-    scrSetIntegerReturnValue(value);
+    slotKind = scrReadIntParameter(0);
+    resource = scrReadIntParameter(1);
+    viewerObjectKey = mdlSpawnLinkedCameraSlotViewerObject(slotKind, resource);
+    scrSetIntegerReturnValue(viewerObjectKey);
     return 1;
 }
 
 u32 evtOpBindMotionSoundToModel(void) {
-    s32 param0;
-    s32 rid;
-    s32 model;
-    KwlnTask *task;
+    s32 eventId;
+    s32 resourceId;
+    s32 modelKey;
+    KwlnTask *motionSeTask;
 
     if (scrGetCurrentContext() == 0) {
         return 1;
     }
-    param0 = scrReadIntParameter(0);
-    rid = scrReadIntParameter(1);
-    model = evtCreateModelFromPackResource(param0, rid);
-    if (model < 0) {
+    eventId = scrReadIntParameter(0);
+    resourceId = scrReadIntParameter(1);
+    modelKey = evtCreateModelFromPackResource(eventId, resourceId);
+    if (modelKey < 0) {
         evtPrintDeveloperConsoleMessage("MODEL_BE not fount RID = %d!\n", scrReadIntParameter(1));
         return 1;
     }
-    param0 = scrReadIntParameter(0);
-    rid = scrReadIntParameter(1);
-    task = evtCreateMotionSeTask(model, param0, rid);
-    if (task != 0) {
-        kwlnTaskAddChild(evtFindTaskById(scrReadIntParameter(0)), task);
+    eventId = scrReadIntParameter(0);
+    resourceId = scrReadIntParameter(1);
+    motionSeTask = evtCreateMotionSeTask(modelKey, eventId, resourceId);
+    if (motionSeTask != 0) {
+        kwlnTaskAddChild(evtFindTaskById(scrReadIntParameter(0)), motionSeTask);
     }
     /* The original success path ends in this void call, without a return. */
-    scrSetIntegerReturnValue(model);
+    scrSetIntegerReturnValue(modelKey);
 }
 
 u32 evtOpUseSourceVectorForWorldObject(void) {
-    u32 scriptParam0;
-    u32 scriptParam1;
+    u32 targetKey;
+    u32 sourceKey;
 
-    scriptParam0 = scrReadIntParameter(0);
-    scriptParam1 = scrReadIntParameter(1);
-    mdlAttachWorldObjectToSourceVector(scriptParam0, scriptParam1);
+    targetKey = scrReadIntParameter(0);
+    sourceKey = scrReadIntParameter(1);
+    mdlAttachWorldObjectToSourceVector(targetKey, sourceKey);
     return 1;
 }
 
 u32 evtScriptSetWorldUnitFlagMask(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
@@ -507,13 +511,13 @@ u32 evtScriptSetWorldUnitFlagMask(void) {
 
 u32 evtScriptClearWorldUnitFlagMask(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
@@ -524,13 +528,13 @@ u32 evtScriptClearWorldUnitFlagMask(void) {
 
 u32 evtOpClearWorldObjectStateFlags(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
@@ -541,13 +545,13 @@ u32 evtOpClearWorldObjectStateFlags(void) {
 
 u32 evtOpQueueWorldObjectPendingValue(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
@@ -557,13 +561,13 @@ u32 evtOpQueueWorldObjectPendingValue(void) {
 
 u32 evtOpClearWorldObjectPendingValue(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
@@ -618,13 +622,13 @@ u32 evtOpModelLodChg(void) {
 u32 evtSetWorldUnitPosition(void) {
     f32 vector[4];
     void *world;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
 
     memset(vector, 0, 0x10);
     world = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(world, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(world, worldObjectKey, 5);
     if (unit == NULL) {
         return 1;
     }
@@ -638,7 +642,7 @@ u32 evtSetWorldUnitPosition(void) {
 u32 evtOpSetWorldUnitRotationFromAngles(void) {
     f32 v[4];
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     f32 toRad;
     f32 x;
@@ -647,8 +651,8 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     memset(v, 0, 0x10);
     v[3] = 1.0f;
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return 1;
     }
@@ -667,14 +671,14 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
 u32 evtSetWorldUnitScale(void) {
     f32 vector[4];
     void *world;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
 
     memset(vector, 0, 0x10);
     vector[3] = 1.0f;
     world = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(world, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(world, worldObjectKey, 5);
     if (unit == NULL) {
         return 1;
     }
@@ -707,11 +711,11 @@ u32 evtOpSetUnitParams5(void) {
         return 1;
     }
     {
-        s32 scriptParam1 = scrReadIntParameter(1);
-        s32 scriptParam2 = scrReadIntParameter(2);
-        s32 scriptParam3 = scrReadIntParameter(3);
-        s32 scriptParam4 = scrReadIntParameter(4);
-        evtPrepareUnitMotionState(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4);
+        s32 motionId = scrReadIntParameter(1);
+        s32 startFrame = scrReadIntParameter(2);
+        s32 endFrame = scrReadIntParameter(3);
+        s32 mode = scrReadIntParameter(4);
+        evtPrepareUnitMotionState(unit, motionId, startFrame, endFrame, mode);
     }
     return 1;
 }
@@ -740,17 +744,17 @@ void evtInvokeStoredWindowMotion(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421810);
 
-void evtLipsExecFunction(s32 id, s32 motion) {
+void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
     void *unit = NULL;
     MdlCtx *model = NULL;
     EffWorldNode *node;
 
-    if (id == 0) {
+    if (unitUniqueId == 0) {
         return;
     }
     for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = ((EvtLipsLink *)node->data)->mh->model;
-        if (sdfGetUniqueChunkValue(model->inner) == id) {
+        if (sdfGetUniqueChunkValue(model->inner) == unitUniqueId) {
             unit = ((EvtLipsLink *)node->data)->unit;
             break;
         }
@@ -759,13 +763,13 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         sdfDebugPrintf("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (motion >= mdlGetNodeRefHalf(model, 2)) {
+    if (motionId >= mdlGetNodeRefHalf(model, 2)) {
         sdfDebugPrintf("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
-    evtConfigureUnitMotionSlot(unit, 2, motion, 0, 5, 1);
-    D_004371F0 = id;
-    sdfDebugPrintf("<lips %d %d> \n", id, motion);
+    evtConfigureUnitMotionSlot(unit, 2, motionId, 0, 5, 1);
+    D_004371F0 = unitUniqueId;
+    sdfDebugPrintf("<lips %d %d> \n", unitUniqueId, motionId);
 }
 
 void evtLipsStopFunction(void) {
@@ -804,9 +808,9 @@ u32 evtOpBeginWindowCallback(void) {
         return 1;
     }
     {
-        s32 scriptParam1 = scrReadIntParameter(1);
-        s32 scriptParam2 = scrReadIntParameter(2);
-        evtStoreUnitMotionSlotSelection(unit, scriptParam1, scriptParam2);
+        s32 firstSlot = scrReadIntParameter(1);
+        s32 secondSlot = scrReadIntParameter(2);
+        evtStoreUnitMotionSlotSelection(unit, firstSlot, secondSlot);
         evtWindowMotionUnit = (u32)unit;
     }
     {
@@ -827,9 +831,9 @@ u32 evtOpActivateUnitMotionOnWindowEvent(void) {
         return 1;
     }
     {
-        s32 scriptParam1 = scrReadIntParameter(1);
-        s32 scriptParam2 = scrReadIntParameter(2);
-        evtStoreUnitMotionSlotSelection(unit, scriptParam1, scriptParam2);
+        s32 firstSlot = scrReadIntParameter(1);
+        s32 secondSlot = scrReadIntParameter(2);
+        evtStoreUnitMotionSlotSelection(unit, firstSlot, secondSlot);
         evtActivateStoredUnitMotionSlot((u32)unit);
         evtWindowMotionUnit = (u32)unit;
     }
@@ -844,12 +848,12 @@ u32 evtOpActivateUnitMotionOnWindowEvent(void) {
 }
 
 u32 evtOpIsUnitMotionIdleOrTimed(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     u32 ret = 1;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return ret;
     }
@@ -857,18 +861,18 @@ u32 evtOpIsUnitMotionIdleOrTimed(void) {
 }
 
 u32 evtOpTestUnitMotionNodeFlag(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
-    s32 off;
+    s32 motionNodeIndex;
     u32 ret = 1;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return ret;
     }
-    off = scrReadIntParameter(1);
-    if (((unit->slotFlags[off] & 1) & 0xFF) == 0) {
+    motionNodeIndex = scrReadIntParameter(1);
+    if (((unit->slotFlags[motionNodeIndex] & 1) & 0xFF) == 0) {
         return ret;
     }
     return mdlGetNodeMotionTerminalStatus(unit->owner, scrReadIntParameter(1)) != 0;
@@ -876,13 +880,13 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
@@ -899,11 +903,11 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     }
     unit->motionTicks = 0;
     {
-        s32 mode = scrReadIntParameter(2);
-        s32 objectId = scrReadIntParameter(1);
+        s32 motionSubmode = scrReadIntParameter(2);
+        s32 worldObjectKey = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(3);
         s32 valueB6 = scrReadIntParameter(4);
-        evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
+        evtBeginUnitTransitionTowardWorldObject(unit, motionSubmode, worldObjectKey, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         evtUnitPrepareVerticalMoveSteps(unit);
@@ -920,13 +924,13 @@ u32 evtOpStartUnitPathFollow(void) {
     }
     unit->motionTicks = 0;
     {
-        s32 objectId = scrReadIntParameter(1);
+        s32 pathObjectKey = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(5);
         s32 valueB6 = scrReadIntParameter(6);
-        s32 mode = scrReadIntParameter(2);
+        s32 pathFollowMode = scrReadIntParameter(2);
         s32 dirFlag = scrReadIntParameter(4);
         s32 sideMode = scrReadIntParameter(3);
-        evtSetUnitPathFollow(unit, objectId, frames, valueB6, mode, dirFlag, sideMode);
+        evtSetUnitPathFollow(unit, pathObjectKey, frames, valueB6, pathFollowMode, dirFlag, sideMode);
     }
     return 1;
 }
@@ -939,23 +943,23 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
         return 1;
     }
     {
-        s32 index = scrReadIntParameter(1);
+        s32 tableValueIndex = scrReadIntParameter(1);
         s32 value = scrReadIntParameter(2);
-        unit->tableValues[index] = value;
-        unit->unk108[index] = 0;
-        unit->unk120[index] = 0;
-        unit->unk138[index] = 1.0f;
+        unit->tableValues[tableValueIndex] = value;
+        unit->unk108[tableValueIndex] = 0;
+        unit->unk120[tableValueIndex] = 0;
+        unit->unk138[tableValueIndex] = 1.0f;
     }
     return 1;
 }
 
 /* Store the script-supplied value for the selected event unit. */
 u32 evtCommandSetUnitValue(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return 1;
     }
@@ -965,11 +969,11 @@ u32 evtCommandSetUnitValue(void) {
 
 /* Store the two script-supplied world-unit state values. */
 u32 evtCmdSetWorldUnitStatePair(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return 1;
     }
@@ -979,11 +983,11 @@ u32 evtCmdSetWorldUnitStatePair(void) {
 }
 
 u32 evtCmdPrepareUnitMotionAndLogState(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return 1;
     }
@@ -994,20 +998,20 @@ u32 evtCmdPrepareUnitMotionAndLogState(void) {
 }
 
 u32 evtOpAttachUnitToWorldObject(void) {
-    s32 id;
+    s32 unitObjectKey;
     EvtUnit *unit;
-    s32 objectId;
+    s32 worldObjectKey;
     s32 frames;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    unitObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(unitObjectKey);
     if (unit == NULL) {
         return 1;
     }
     unit->motionTicks = 0;
-    objectId = scrReadIntParameter(1);
+    worldObjectKey = scrReadIntParameter(1);
     frames = scrReadIntParameter(2);
-    evtAttachSecondaryWorldUnit(unit, objectId, frames);
+    evtAttachSecondaryWorldUnit(unit, worldObjectKey, frames);
     return 1;
 }
 
@@ -1167,11 +1171,11 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
 }
 
 u32 evtUnitClearFlagBit(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit != NULL) {
         unit->owner->flags &= ~MDL_SKIP_TRANSFORMS;
     }
@@ -1179,11 +1183,11 @@ u32 evtUnitClearFlagBit(void) {
 }
 
 u32 evtUnitSetFlagBit(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit != NULL) {
         unit->owner->flags |= MDL_SKIP_TRANSFORMS;
     }
@@ -1191,34 +1195,34 @@ u32 evtUnitSetFlagBit(void) {
 }
 
 u32 evtCommandFlagSelectedUnitStatus(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     evtSetUnitStatusFlags(unit);
     return 1;
 }
 
 u32 evtCommandBeginSelectedUnitTransition(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
-    s32 param1;
+    s32 duration;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
-    param1 = scrReadIntParameter(1);
-    evtConfigureUnitTransition(unit, param1);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
+    duration = scrReadIntParameter(1);
+    evtConfigureUnitTransition(unit, duration);
     return 1;
 }
 
 u8 evtUnitHasNoStatusFlags(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     u8 active;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     active = evtTestUnitStatusFlags(unit);
     return active == 0;
 }
@@ -1301,12 +1305,12 @@ u32 evtOpSetUnitPackedAlpha(void) {
 }
 
 u32 evtOpSetUnitValueTransitionTarget(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     EffWorldNode *target;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     target = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(2));
     if (target == NULL) {
         return 1;
@@ -1316,14 +1320,14 @@ u32 evtOpSetUnitValueTransitionTarget(void) {
 }
 
 u32 evtOpEndUnitValueTransition(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
-    s32 param1;
+    s32 duration;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
-    param1 = scrReadIntParameter(1);
-    evtEndUnitValueTransition(unit, param1);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
+    duration = scrReadIntParameter(1);
+    evtEndUnitValueTransition(unit, duration);
     return 1;
 }
 
@@ -1444,26 +1448,26 @@ u32 evtOpBuiltin359NoOp(void) {
 }
 
 u32 evtUnitCheckModelCut(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
-    u32 param1;
+    u32 entryId;
 
-    id = scrReadIntParameter(0);
-    unit = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (unit != NULL) {
-        param1 = scrReadIntParameter(1);
-        if (param1 >= 3U) {
-            evtPrintDeveloperConsoleMessage(D_00421AF8, param1);
+        entryId = scrReadIntParameter(1);
+        if (entryId >= 3U) {
+            evtPrintDeveloperConsoleMessage(D_00421AF8, entryId);
             return 1;
         } else {
-            effObjReplaceActiveEventNode(unit, param1);
+            effObjReplaceActiveEventNode(unit, entryId);
         }
     }
     return 1;
 }
 
-f32 evtComputeClampedModelScale(s32 index) {
-    f32 scale = (D_00435DF0[index].unk18 + D_00435DF0[index].unk1C * 0.5f) * 0.5f * D_00435DF0[index].unk10 * (1.0f / 70.0f);
+f32 evtComputeClampedModelScale(s32 modelRecordIndex) {
+    f32 scale = (D_00435DF0[modelRecordIndex].unk18 + D_00435DF0[modelRecordIndex].unk1C * 0.5f) * 0.5f * D_00435DF0[modelRecordIndex].scaleFactor * (1.0f / 70.0f);
 
     if (scale > 2.0f) {
         scale = 2.0f;
@@ -1478,16 +1482,16 @@ u32 evtOpSetModelCutAndScale(void) {
 
     unit = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (unit != NULL) {
-        s32 mode = scrReadIntParameter(1);
-        s32 index;
-        if ((u32)mode >= 3) {
-            evtPrintDeveloperConsoleMessage(D_00421AF8, mode);
+        s32 entryId = scrReadIntParameter(1);
+        s32 modelRecordIndex;
+        if ((u32)entryId >= 3) {
+            evtPrintDeveloperConsoleMessage(D_00421AF8, entryId);
             return 1;
         }
-        effObjReplaceActiveEventNode(unit, mode);
-        index = scrReadIntParameter(2);
-        if (index >= 0) {
-            f32 value = evtComputeClampedModelScale(index);
+        effObjReplaceActiveEventNode(unit, entryId);
+        modelRecordIndex = scrReadIntParameter(2);
+        if (modelRecordIndex >= 0) {
+            f32 value = evtComputeClampedModelScale(modelRecordIndex);
             void *target = ((EvtModelHeader *)unit->data)->target2C;
             if (target != NULL) {
                 effEventSetScale(target, value);
@@ -1592,11 +1596,11 @@ u32 evtOpCreateMagatuhiEffect2FromTaskResource(void) {
 }
 
 u32 evtOpRunWorldEffectReadyAction(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *obj;
 
-    id = scrReadIntParameter(0);
-    obj = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    obj = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (obj != NULL) {
         effObjDispatchReadyState((EffWorldNode *)obj);
     }
@@ -1604,11 +1608,11 @@ u32 evtOpRunWorldEffectReadyAction(void) {
 }
 
 u32 evtOpRunWorldEffectReadyActionDuplicate(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *obj;
 
-    id = scrReadIntParameter(0);
-    obj = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    obj = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (obj != NULL) {
         effObjDispatchReadyState((EffWorldNode *)obj);
     }
@@ -1616,11 +1620,11 @@ u32 evtOpRunWorldEffectReadyActionDuplicate(void) {
 }
 
 u32 evtScriptDestroyWorldEffectObject(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *obj;
 
-    id = scrReadIntParameter(0);
-    obj = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    obj = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (obj != NULL) {
         dds3RemoveWorldObjectNode(obj);
     }

@@ -122,7 +122,7 @@ extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 
 struct SdfMemBlock;
 
@@ -2672,7 +2672,7 @@ struct SdfMemBlock;
 extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
 extern void fileDestroyMemoryCardMenuTask(KwlnTask *task);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 
 void fileStartMemoryCardMenuForMode(s32 mode) {
     FilePacRequest *request;
@@ -3234,7 +3234,7 @@ s32 fileApplySelectedLoadResult(void) {
         mdlFlagSet(0x80E);
         state = datGameState;
         startBranchFlag = fileLoadSelectionWork->startBranchFlag;
-        state->header.unk2C |= 0x80000000;
+        state->header.saveFlags2 |= 0x80000000;
         if (startBranchFlag) {
             mtrMantraEventBitReset();
             ptyResetPartyRecordsAndProfiles();
@@ -3242,7 +3242,7 @@ s32 fileApplySelectedLoadResult(void) {
         }
     } else {
         mdlFlagClear(0x80E);
-        datGameState->header.unk2C &= 0x7FFFFFFF;
+        datGameState->header.saveFlags2 &= 0x7FFFFFFF;
     }
     if (mdlFlagTest(0xB8F)) {
         mdlFlagClear(0x801);
@@ -3490,9 +3490,9 @@ void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
     DatGameState *state = datGameState;
 
     state->header.savedMoney = source->money;
-    state->header.unk24 = source->saveWords.words[0];
-    state->header.unk28 = source->saveWords.words[1];
-    state->header.unk2C = source->saveWords.words[2];
+    state->header.saveFlags = source->saveWords.words[0];
+    state->header.saveFlags1 = source->saveWords.words[1];
+    state->header.saveFlags2 = source->saveWords.words[2];
 }
 
 void fileCopyRecordHeader(FileSavePreviewRecord *destination, const void *source) {
@@ -4204,7 +4204,7 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
 }
 
 
-void fileDrawConfigurationMenuBackground(void *arg) {
+void fileDrawConfigurationMenuBackground(void *unusedTask) {
     s16 sprites[5][4] = {
         {0, 2, 99, -57},
         {0, 3, -31, 365},
@@ -4498,8 +4498,8 @@ void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
     VU0_LOAD_VF(vf10, quaternion);
 }
 
-FileJobPayload *fileCreateJob(u16 type) {
-    u16 kind = type;
+FileJobPayload *fileCreateJob(FileJobType type) {
+    FileJobType kind = type;
     FileJobPayload *job = sdfAllocSizeClassBlock(0x2C);
     memset(job, 0, 0x2C);
     job->unk0 = 200;

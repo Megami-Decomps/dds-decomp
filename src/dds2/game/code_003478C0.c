@@ -41,9 +41,10 @@ extern SdfStreamState D_0047BCC0;
 extern u8 D_0047BE40[];
 
 extern s32 D_0047BE00[];
-extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32, s32, s32, s32), s32);
+extern DevState *sdfDevCreateCallbackState(const char *path,
+                                          s32 (*callback)(DevState *, s32, s32, s32, s32),
+                                          s32 callbackContext);
 extern s32 sdfDevQueueControlRequest();
-extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
 extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
@@ -528,7 +529,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
         D_0047BE00[0] = state->transferredBytes;
         break;
     case SDF_STREAM_COMMAND_RELEASE_STATE:
-        sdfDevQueueActiveOperation(state->deviceState, request, request);
+        sdfDevQueueActiveOperation(state->deviceState);
         WaitSema(state->semaphore);
         sdfDevQueueReleaseState(state->deviceState);
         state->deviceState = 0;

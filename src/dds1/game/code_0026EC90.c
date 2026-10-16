@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
+#include "sdf_trig.h"
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "sdf.h"
@@ -38,7 +39,7 @@ extern char D_003B1A78[]; /* "mnuMovieDraw" */
 extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void mnuInitializeMovieRollEntry(void);
-extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
+extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
 extern void func_002ECCF8(void *, SdfPoolNode *);
 
 /* Three signed image-relative control points per movie image bank. */
@@ -52,7 +53,6 @@ typedef char StaffImageCornersSizeCheck[(sizeof(StaffImageCorners) == 12) ? 1 : 
 extern StaffImageCorners mnuStaffRollImageFadeControlPoints[];
 extern MnuStaffImageRecord mnuStaffRollImageRecords[];
 extern s32 D_003BC614;
-extern f32 sdfSinPoly(f32);
 extern s32 mnuCheckMovieDecoderStatus(void);
 extern s32 mnuGetMoviePlaybackMode(void);
 extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha,

@@ -19,7 +19,7 @@ void sdfVuLoadRotationMatrixY(f32 angle);
 void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 
 /* Load matrix into the VU0 scratch bank and postmultiply the primary bank. */
-void sdfPostmultiplyVuMatrixFromMemory(void *matrix);
+void sdfPostmultiplyVuMatrixFromMemory(const void *matrix);
 
 /* Multiply the quaternions in vf10 and vf11, writing the product to vf10. */
 void effMiscQuatMultiplyVU(void);

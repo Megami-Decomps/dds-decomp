@@ -11,6 +11,7 @@
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
+#include "eff_inner_float_api.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
@@ -37,7 +38,7 @@ extern s32 scrGetCommandTimer(void);
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
 
-void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
+void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
@@ -690,7 +691,6 @@ s32 evtCommandWaitCameraOwnerResourceScale(void) {
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
-extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommandCreateWorldEffectObject(void) {
@@ -788,8 +788,8 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
 }
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *);
-extern void sdfSetFloatCounterDirection(u32 *, u32);
+extern void dds3ReplaceObjectResource(EffWorldNode *object);
+extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
 s32 evtCommandAttachObjectPath(void) {

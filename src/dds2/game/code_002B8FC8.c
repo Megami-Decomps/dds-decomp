@@ -91,7 +91,7 @@ typedef struct MenuIconState MenuIconState;
 
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
-extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key);
 
 extern s32 D_00435E5C;
 
@@ -669,7 +669,7 @@ void mnuSpawnSpark(MenuCampEffect *fx);
 
 void mnuRetireCampSpark(MenuCampEffect *, s32 index);
 
-void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg);
+void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface);
 
 
 
@@ -696,11 +696,11 @@ extern MenuBadgeLayout D_0042AED0;
     } \
 }
 
-void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg);
+void mnuDrawBadgeFade(MenuCampEffect *set, s32 surface);
 
 extern MenuBadgeLayout D_0042AEE8;
 
-void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg);
+void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface);
 
 void mnuEnableCampBadgeFade(u32 *flags);
 
@@ -733,7 +733,7 @@ void mnuClearListFlagsOneAndTwo(u32 *flags);
 u32 mnuTestListFlagTwo(u32 *flags);
 
 /* Return the stored row step times the visible row count, in native units. */
-s32 mnuGetListViewportHeight(MenuList *list) {
+s32 mnuGetListViewportHeight(const MenuList *list) {
     return list->rowStep * list->visibleCount;
 }
 
@@ -1290,7 +1290,7 @@ typedef struct MenuPosTable3 {
 
 extern const MenuPosTable3 D_0042AF48;
 
-void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg) {
+void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 surface) {
     MenuPosTable3 table = D_0042AF48;
     s32 width = state->sprite[0]->workEntries->sourceWidth << 4;
     s32 i;
@@ -1308,7 +1308,7 @@ void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, 
         if (i == 2 && mode == 2) {
             continue;
         }
-        effDrawTextureSlotWithBlendedCornerColors(x + table.pos[i].x, y + table.pos[i].y, z, a, 1, state->sprite[i], 0, arg);
+        effDrawTextureSlotWithBlendedCornerColors(x + table.pos[i].x, y + table.pos[i].y, z, a, 1, state->sprite[i], 0, surface);
     }
     state->sprite[0]->workEntries->geometry.bounds[2] = width;
     if (state->count >= 3) {
@@ -1318,12 +1318,12 @@ void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, 
 
 extern const MenuPosTable D_0042AF60;
 
-void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
+void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 surface) {
     MenuPosTable table = D_0042AF60;
     s32 i;
     for (i = 0; i < state->count; i++) {
         if (i != 3 && i != 5) {
-            effDrawTextureSlotWithBlendedCornerColors(x + table.pos[i].x, y + table.pos[i].y, z, w, 1, state->sprite[i], 0, arg);
+            effDrawTextureSlotWithBlendedCornerColors(x + table.pos[i].x, y + table.pos[i].y, z, w, 1, state->sprite[i], 0, surface);
         }
     }
 }
@@ -1337,10 +1337,10 @@ typedef struct MenuOffsets {
 
 extern const MenuOffsets D_0042AF90;
 
-void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
+void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 surface) {
     MenuOffsets offset = D_0042AF90;
-    effDrawTextureSlotWithBlendedCornerColors(x + offset.x0, y + offset.y0, z, w, 1, state->sprite[0], 0, arg);
-    effDrawTextureSlotWithBlendedCornerColors(x + offset.x1, y + offset.y1, z, w, 1, state->sprite[1], 0, arg);
+    effDrawTextureSlotWithBlendedCornerColors(x + offset.x0, y + offset.y0, z, w, 1, state->sprite[0], 0, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + offset.x1, y + offset.y1, z, w, 1, state->sprite[1], 0, surface);
 }
 
 extern void mnuDrawIconPanelFade();

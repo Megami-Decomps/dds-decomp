@@ -23,7 +23,7 @@ extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 
 
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
@@ -257,59 +257,59 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     }
 }
 
-void mnuDrawMantraUpNavigationPulse(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraUpNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawPlacedSpriteFromTable(0, -10, 0, (s32)(scale * t), 0, param);
+    mnuDrawPlacedSpriteFromTable(0, -10, 0, (s32)(scale * t), 0, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 0, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 0, context);
 }
 
-void mnuDrawMantraRightNavigationPulse(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraRightNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawPlacedSpriteFromTable(10, 0, 0, (s32)(scale * t), 1, param);
+    mnuDrawPlacedSpriteFromTable(10, 0, 0, (s32)(scale * t), 1, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 1, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 1, context);
 }
 
-void mnuDrawMantraDownNavigationPulse(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraDownNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawPlacedSpriteFromTable(0, 10, 0, (s32)(scale * t), 2, param);
+    mnuDrawPlacedSpriteFromTable(0, 10, 0, (s32)(scale * t), 2, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 2, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 2, context);
 }
 
-void mnuDrawMantraLeftNavigationPulse(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraLeftNavigationPulse(s32 frame, s32 size, s32 context) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawPlacedSpriteFromTable(-10, 0, 0, (s32)(scale * t), 3, param);
+    mnuDrawPlacedSpriteFromTable(-10, 0, 0, (s32)(scale * t), 3, context);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 3, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 3, context);
 }
 
-void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 param) {
+void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 context) {
     s8 enabled[4] __attribute__((aligned(4)));
     const u32 clearWord = 0;
     MantraPulseAnimationWork *pulse = &display->pulse;
@@ -357,22 +357,22 @@ void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 p
         case 0:
             mnuDrawMantraUpNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
-                          param);
+                          context);
             break;
         case 1:
             mnuDrawMantraDownNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
-                          param);
+                          context);
             break;
         case 2:
             mnuDrawMantraLeftNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
-                          param);
+                          context);
             break;
         case 3:
             mnuDrawMantraRightNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
-                          param);
+                          context);
             break;
         }
     }

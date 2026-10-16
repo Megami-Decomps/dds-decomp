@@ -13,11 +13,9 @@
 #include "sdf_texture_offset_list.h"
 
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
-extern void sdfFreezeFloatCounter(struct EvtScaledValue *);
-extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *);
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *object);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 
@@ -55,10 +53,10 @@ extern char D_003C8C60[];
 extern char D_003C8C80[];
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void mdlSpawnViewerWorldObject(void);
-extern void sdfSetViewFieldOfView(f32);
-extern void dds3DrawSetIndexedWord(u32, s32);
-extern void kwlnDrawCopyWords20(void *);
-extern void kwlnDrawCopyRow128(void *);
+extern void sdfSetViewFieldOfView(f32 fieldOfView);
+extern void dds3DrawSetIndexedWord(u32 value, s32 index);
+extern void kwlnDrawCopyWords20(void *source);
+extern void kwlnDrawCopyRow128(void *source);
 extern void sprintf(char *, const char *, ...);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
@@ -89,8 +87,9 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     return 1;
 }
 
-extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
-                                                       const SdfTextureOffsetListHeader *, u32 flags);
+extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,
+                                                       u32 resource0Data, u32 resource1Data,
+                                                       const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
@@ -120,7 +119,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
 
 extern void sprintf(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
-extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
+extern s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option);
 extern void sdfDebugPrintf(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
@@ -170,7 +169,6 @@ void evtClearWorldSlotStatusFlag(void *object) {
     }
 }
 
-extern void evtScaleValueByMultiplier(f32 multiplier, struct EvtScaledValue *slotData);
 
 /* Scale the object's retained path time within the clamped multiplier range. */
 void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
@@ -184,7 +182,7 @@ void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
         if (multiplier > 1.0f) {
             multiplier = 1.0f;
         }
-        evtScaleValueByMultiplier(multiplier, (struct EvtScaledValue *)slotData);
+        evtScaleValueByMultiplier((EvtScaledValue *)slotData, multiplier);
     }
 }
 

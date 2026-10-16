@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
@@ -305,7 +306,7 @@ extern u8 *btlFindUnitByModeClear(s32);
 
 extern u8 *btlFindUnitByModeFlagged(s32);
 
-extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *, s32, s32, s32, s32, u8);
+extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 extern char D_0041B768[];
 
@@ -415,7 +416,7 @@ void btlUpdateEventPlayback(void) {
                     MdlCtx *model = ext->owner;
                     ext->flags &= ~0xA0;
                     ext->motionState = 0;
-                    mdlAddEntryPlain(model, 0, unit->unkEC);
+                    mdlAddEntryPlain(model, 0, unit->motionId);
                     sdfMotionSampleAtFrame(model->first, 26.0f);
                     unit->status.flags &= 0x7FFFFFFF;
                     unit->status.flags &= ~0x40000000;
@@ -716,7 +717,7 @@ u8 btlAreModelChangeTasksFinished(void) {
 s32 btlCommandPlayUnitMotion(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
-    s32 index = scrReadIntParameter(2);
+    s32 motionIndex = scrReadIntParameter(2);
     BtlUnit *unit;
 
     if (choice == 0) {
@@ -730,11 +731,12 @@ s32 btlCommandPlayUnitMotion(void) {
     if ((unit->status.flags & 2) == 0) {
         return 1;
     }
-    if (index >= 0) {
-        if (index < 0x1D) {
-            btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind((u8 *)unit, index), 1.0f);
+    if (motionIndex >= 0) {
+        if (motionIndex < 0x1D) {
+            btlApplyScaledUnitEffectParameter(unit, motionIndex,
+                btlGetSlotRateKind((u8 *)unit, motionIndex), 1.0f);
         } else {
-            mdlAddEntryPlainEx(unit->ext->owner, 0, index, 0.0f, 0.0f);
+            mdlAddEntryPlainEx(unit->ext->owner, 0, motionIndex, 0.0f, 0.0f);
         }
     }
     return 1;
@@ -855,9 +857,9 @@ u32 btlCommandGetGroupSlotAuxValue(void) {
 
 /* Add one item under the retail signed upper-bound check, then complete the command. */
 u32 btlCommandAddOneItem(void) {
-    s32 index = scrReadIntParameter(0);
-    if (index < 0x100) {
-        ptyAdjustItemQuantity(index, 1);
+    s32 itemId = scrReadIntParameter(0);
+    if (itemId < 0x100) {
+        ptyAdjustItemQuantity(itemId, 1);
     }
     return 1;
 }
@@ -1124,7 +1126,7 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
-    if (*(u32 *)((u8 *)btlGetRuntime() + 0x220) & 0x800) {
+    if (*(u32 *)((u8 *)btlGetRuntime() + 0x220) & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         return 0;
     }
     if (commandId <= 0) {
@@ -2455,7 +2457,6 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuRecordNoOp(u32);
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern s32 btlDebugModelEditorActionNames[], btlDebugModelMotionNames[];
 extern BtlDebugValueMenu btlDebugPartyRecordEditor, btlDebugPositionEditor, btlDebugTransformEditor, btlDebugActorStatusEditor;
 extern BtlDebugValueEntry btlDebugActorStatusEditorRows[];
@@ -2786,15 +2787,15 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.x, btlDebugPartyRecordEditor.y + btlDebugPartyRecordEditor.count * 10 + 4,
             btlDebugModelMotionNames[D_00436E58]);
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.unk20) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.shotRadius) {
             battle->battleFlags |= 0x800000;
         } else {
             battle->battleFlags &= ~0x800000;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.unk24) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.positionGuideScale) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->positionGuideScale * unit->scale);
         }
         selectedAddress = btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress;
         if (((u32)selectedAddress >= (u32)&btlDebugEditorActorStatus.position[0] &&
@@ -2804,10 +2805,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else {
             battle->unk220 &= ~0x200;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.unk0C) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.unk0C * btlDebugEditorActorStatus.scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
         if (btlDebugActorStatusEditor.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
@@ -2875,7 +2876,6 @@ extern char D_00436F58[];
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern char *sdfDevGetPathBuffer(void);
 
@@ -2916,8 +2916,8 @@ void btlWriteActorModelTableFile(void) {
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[4], (double)btlDebugEditorActorStatus.z);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[5], (double)btlDebugEditorActorStatus.reach);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[6], (double)btlDebugEditorActorStatus.height);
-    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[7], (double)btlDebugEditorActorStatus.unk20);
-    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.unk24);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[7], (double)btlDebugEditorActorStatus.shotRadius);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.positionGuideScale);
     cursor += sprintf(cursor, D_00436F10, btlDebugModelTableLabels[9]);
     switch (btlDebugEditorActorStatus.shadowKind) {
     case 0: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_NON"); break;
@@ -2946,7 +2946,7 @@ void btlWriteActorModelTableFile(void) {
         }
         rowCursor += sizeof(BtlActorMotionSlot);
         cursor += sprintf(cursor, D_00436F40, (double)motion->alphaFrameScale);
-        cursor += sprintf(cursor, D_00436F48, (double)motion->unk0C);
+        cursor += sprintf(cursor, D_00436F48, (double)motion->muzzleGuideScale);
         cursor += sprintf(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
         cursor += sprintf(cursor, D_00436F50);
     }
@@ -2993,8 +2993,8 @@ extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(u32);
 extern void btlDebugMenuAfterRecordNoOp(void);
-extern s32 btlGetConditionalEncounterInterval(s32);
-extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
+extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
+extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
 /* Preview/select a debug encounter or pack; return one when it can launch. */

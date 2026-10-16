@@ -154,7 +154,7 @@ typedef struct EvtUnit {
     s8 firstSlot;                  /* 0xD0: consumed by stored-slot activation */
     s8 secondSlot;                 /* 0xD1 */
     u8 padD2;
-    u8 unkD3;                     /* 0xD3: byte parameter written by timeline keys */
+    u8 shadowLevel;                /* 0xD3: timeline-key value passed to fldDrawShadowDisc. */
     f32 shadowY;                    /* 0xD4: float parameter written by timeline keys */
     u32 referenceAngleCacheFlags;   /* 0xD8: bit 0 marks a valid cached angle. */
     f32 cachedReferenceAngleDegrees; /* 0xDC: cached reference angle in degrees. */

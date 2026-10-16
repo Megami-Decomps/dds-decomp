@@ -21,6 +21,7 @@ void billInitializeCommonDrawState(struct BillObj *billboard);
 struct BillChildPayload *billCreateChildPayloadFromTextureResource(void *resource);
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildParameter(struct BillObj *billboard, u32 parameter);
+void billSetVariantValue(struct BillObj *billboard, s32 value);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
 /* Radian rotation of the billboard quad in its plane. */
@@ -29,8 +30,8 @@ void billSetBillboardMode(struct BillObj *billboard, s32 mode);
 void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
 void billSetAnimationFrameForImmediateAdvance(struct BillObj *billboard, u32 frame);
 void billSetAnimationFrameWithOneTickHold(struct BillObj *billboard, u32 frame);
-s32 billGetFirstEntryFramePeriod(struct BillObj *billboard);
-u16 billGetKindOneParameter(struct BillObj *billboard);
+s32 billGetFirstEntryFramePeriod(const struct BillObj *billboard);
+u16 billGetKindOneParameter(const struct BillObj *billboard);
 void billReleaseSharedEntryBlock(struct BillData *data);
 void effReleaseSharedTextureRecord(struct BillChildPayload *child);
 struct BillChildPayload *billStepAnimationEntryAndUpdateChild(

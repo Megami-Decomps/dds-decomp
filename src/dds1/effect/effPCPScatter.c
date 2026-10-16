@@ -176,8 +176,8 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
     particle->angleStep = work->params.initialAngleStep;
 }
 
-extern u128 *effPcpScatterGetRecordAddress(PcpScatterPool *, s32);
-extern u32 *effPcpScatterGetAuxRecordAddress(PcpScatterPool *, s32);
+extern u128 *effPcpScatterGetRecordAddress(PcpScatterPool *pool, s32 index);
+extern u32 *effPcpScatterGetAuxRecordAddress(PcpScatterPool *pool, s32 index);
 extern void effPcpScatterDrawPool(PcpScatterPool *);
 extern f32 sdfAtan2Poly(f32 ratio);
 
@@ -1021,7 +1021,7 @@ extern u32 effScatterPoolTriangleIndices[];
 extern u32 effScatterPoolTexcoords[];
 extern SdfPoolNode *effScatterPoolDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
 /* Return the trailing control block after zeroing two record arrays.
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */

@@ -430,7 +430,8 @@ s32 fldCmdSetLookAtHeading(void) {
 extern u32 fldGetPlayerSceneState(void);
 
 
-extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
+                                                       f32 *targetPositionOut);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -583,7 +584,7 @@ s32 fldCmdSetFieldParameterPair(void) {
     return 1;
 }
 
-extern void fldSetFadeTarget(s32, s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 
 extern void fldSetSwayMode(s32);
 
@@ -598,7 +599,7 @@ s32 fldCmdSetFadeAndSway(void) {
     return 1;
 }
 
-extern void fldSetRoomModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 
@@ -717,7 +718,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     return 1;
 }
 
-extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 s32 fldCmdApplyRoomObjectModeZero(void) {
@@ -813,7 +814,7 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
 
 extern s32 D_0032E3C4[];
 
-extern void fldSetRoomSceneFlag(s32, s32, s32, s32);
+extern void fldSetRoomSceneFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldCmdSetSceneBits(void) {
     s32 world;
@@ -872,9 +873,9 @@ s32 fldCmdSetSceneBitsBarrierRoom(void) {
 
 extern s32 D_0032E3C4[];
 
-extern s32 fldSetMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern s32 fldSetAlternateMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetAlternateMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldOpClearMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
@@ -924,7 +925,7 @@ s32 fldOpSetAlternateMapTargetFlag(void) {
     return 1;
 }
 
-extern void fldSetMapSlotByte(s32, s32, s32, s32);
+extern void fldSetMapSlotByte(s32 area, s32 slotIndex, s32 valueIndex, s32 value);
 
 s32 fldCmdSetMapSlotByte(void) {
     s32 world;
@@ -947,35 +948,35 @@ s32 fldCmdSetMapSlotByte(void) {
     return 1;
 }
 
-extern void fldSetFlagBit(s32, s32, s32);
+extern void fldSetFlagBit(s32 area, s32 floor, s32 flagNumber);
 
 s32 fldCmdSetFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_0032E3C0[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_0032E3C4[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldSetFlagBit(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldSetFlagBit(area, floor, flagNumber);
     return 1;
 }
 
-extern void fldClearFloorFlag(s32, s32, s32);
+extern void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 s32 fldCmdClearFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_0032E3C0[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_0032E3C4[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldClearFloorFlag(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldClearFloorFlag(area, floor, flagNumber);
     return 1;
 }
 
-extern void fldSetMapSlotAuxiliaryFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotAuxiliaryFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
@@ -1037,7 +1038,7 @@ s32 fldOpSetRoomStateFlags(void) {
     return 1;
 }
 
-extern void fldSetMapSlotValueFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotValueFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldCmdSetSceneBitsValue(void) {
     s32 world;

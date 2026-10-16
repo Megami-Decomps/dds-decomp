@@ -72,7 +72,6 @@ void effMiscQuaternionToMatrixVU(void)
     VU0_QUAT_TO_MATRIX_VF10();
 }
 
-extern f32 sdfWrapAngle(f32 angle);
 
 /* The quaternion scratch is read only by the lqc2 asm through its address, so
  * it is volatile: retail stores its four components in program order. */
@@ -130,7 +129,6 @@ void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
 
 INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8038);
 
-extern f32 sdfAcosTable(f32 dot);
 
 /* vu0 routine: blend vf10/vf11 along the shorter quaternion arc into vf10.
  * blendAmount is used without clamping; the final step normalizes either blend. */

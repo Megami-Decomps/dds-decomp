@@ -82,16 +82,16 @@ extern EvtActiveFlagTable evtActiveEntryFlags;
 
 extern u32 evtDisplayValues[];
 
-extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
+extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 
 
 #include "dds3_world_secondary.h"
-extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void itfPanelSetStatus(s32, s32);
-extern void itfPanelSetPairFirst(s32, s32);
-extern void itfMesStartEntry(s32, s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
+extern void itfPanelSetStatus(s32 windowIndex, s32 status);
+extern void itfPanelSetPairFirst(s32 windowIndex, s32 status);
+extern void itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern char mnuTerminalPopupEntries[];
-extern void itfMesDestroyWindowIfPresent(s32);
+extern void itfMesDestroyWindowIfPresent(s32 window);
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;
 extern s32 D_003BAA78;
@@ -225,7 +225,7 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
     return 1;
 }
 
-extern s32 evtIsActiveFlagSet(s32);
+extern s32 evtIsActiveFlagSet(s32 flagIndex);
 extern char D_003AF710[];
 extern char D_0036AE48[];
 
@@ -593,8 +593,8 @@ s32 dspCaptureWindowSecondPanelValue(void) {
     return 1;
 }
 
-extern s8 itfPanelGetStatus(s32 index);
-extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
+extern s8 itfPanelGetStatus(s32 windowIndex);
+extern s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
@@ -640,7 +640,7 @@ void dspRequestMessageWindowModeOne(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+extern void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText);
 
 void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
     itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceText);
@@ -697,18 +697,18 @@ s32 evtIsActiveFlagSet(s32 flagIndex) {
 }
 
 /* Reject only indices at/above the upper bound; negative indices are not checked. */
-s32 evtSetBoundedDisplayValue(s32 index, s32 value) {
-    if (index >= EVT_DISPLAY_VALUE_COUNT) {
+s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value) {
+    if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
         return 0;
     }
-    evtDisplayValues[index] = value;
+    evtDisplayValues[displayValueIndex] = value;
     return 1;
 }
 
 /* Clamp only the upper side to the last display slot; negative indices pass through. */
-u32 evtGetBoundedDisplayValue(s32 index) {
-    index = (index < EVT_DISPLAY_VALUE_COUNT) ? index : EVT_LAST_DISPLAY_VALUE;
-    return evtDisplayValues[index];
+u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
+    displayValueIndex = (displayValueIndex < EVT_DISPLAY_VALUE_COUNT) ? displayValueIndex : EVT_LAST_DISPLAY_VALUE;
+    return evtDisplayValues[displayValueIndex];
 }
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
@@ -722,11 +722,11 @@ s32 evtOpSetActiveEntryFlag(void) {
 /* Script opcode: return a display-table value, clamping only its upper index.
  * It does not activate or test an active-entry flag. */
 s32 evtOpReadDisplayValue(void) {
-    s32 index = scrReadIntParameter(0);
-    if (index >= EVT_DISPLAY_VALUE_COUNT) {
-        index = EVT_LAST_DISPLAY_VALUE;
+    s32 displayValueIndex = scrReadIntParameter(0);
+    if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
+        displayValueIndex = EVT_LAST_DISPLAY_VALUE;
     }
-    scrSetIntegerReturnValue(evtDisplayValues[index]);
+    scrSetIntegerReturnValue(evtDisplayValues[displayValueIndex]);
     return 1;
 }
 

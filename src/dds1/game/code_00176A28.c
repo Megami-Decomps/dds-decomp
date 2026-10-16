@@ -63,7 +63,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     sdfSetPrimaryStateFloat(work->drawAsset, 1.0f);
     entry = work->entries;
     for (i = 0; i < count; i++, entry++) {
-        entry->value = 0x80808080;
+        entry->color = 0x80808080;
     }
     memset(&effResourceDrawParams, 0, sizeof(effResourceDrawParams));
     effResourceDrawParams.primitive = 0x4000;
@@ -116,7 +116,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
             effResourceDrawParams.normals = work->normals;
             remaining = work->vertexCount;
         }
-        effResourceDrawParams.color = entry->value;
+        effResourceDrawParams.color = entry->color;
         effResourceDrawParams.parameterCount = 16;
         effResourceDrawParams.vertexCount = 48;
         while (remaining >= 48) {
@@ -236,7 +236,7 @@ void effGetResourceEntryPosition(EffResourceWork *work, s32 index, f32 *vec) {
 }
 
 void effSetResourceEntryValue(EffResourceWork *work, s32 index, u32 value) {
-    work->entries[index].value = value;
+    work->entries[index].color = value;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */

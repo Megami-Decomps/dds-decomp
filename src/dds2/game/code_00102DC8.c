@@ -69,7 +69,7 @@ extern void kwlnPadStartMotor(u32, u8, s32);
 #include "sdf_packet_alloc.h"
 
 
-extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
+extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
 
 extern u32 kwlnTextureGetPageIndex(void);
 
@@ -627,7 +627,7 @@ void kwlnPadStartMotor(u32 motor, u8 level, s32 duration) {
     }
 }
 
-extern void sdfDevConsSetEntryPair(s32, s32, s32);
+extern void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 /* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
 void kwlnPadResetMotorLevelsAndOutput(void) {
@@ -1171,8 +1171,8 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfAppendPacket(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].overlayLightPacket);
 }
 
-extern void sdfGraphSetDisplayMode(s32);
-extern void kwlnInitializeFrameDrawPackets(s32);
+extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
+extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 extern void evtInitializeFrameStatePacketTemplates(void);
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
@@ -1240,10 +1240,9 @@ extern void kwlnTextureReleaseHeldReference(void);
 extern void kwlnInitHeldTextureScenePackets(void);
 extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
-extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
-s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
+s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 aspect) {
     SdfTex *texture;
 
     if (kwlnHeldTextureReference != 0) {
@@ -1263,7 +1262,7 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     kwlnHeldTextureReference = texture;
     sdfTexSetClampMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
     sdfTexCreateFirstPacket(texture);
-    D_0037F7B0.camera.aspect = value;
+    D_0037F7B0.camera.aspect = aspect;
     D_0037F7B0.camera.width = width;
     D_0037F7B0.camera.height = height;
     kwlnInitHeldTextureScenePackets();

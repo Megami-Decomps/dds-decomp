@@ -952,14 +952,14 @@ u8 btlPassesStatusEntryGate(BtlUnit *actor) {
 
 extern const s32 btlElementMasks[20];
 
-s32 btlElementToBitIndex(s32 mask, s32 index) {
+s32 btlElementToBitIndex(s32 mask, s32 elementIndex) {
     s32 table[20];
     memcpy(table, btlElementMasks, sizeof(table));
-    if ((mask & table[index]) == 0) {
+    if ((mask & table[elementIndex]) == 0) {
         return 0x80;
     }
-    if (index != 0) {
-        return index - 1;
+    if (elementIndex != 0) {
+        return elementIndex - 1;
     }
     return -1;
 }

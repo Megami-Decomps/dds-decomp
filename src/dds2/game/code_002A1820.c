@@ -762,8 +762,8 @@ extern void mnuSlideBarSetStateB(u32 *state, u32 mode);
 extern void mnuSlideBarSetStateSmall(u32 *state, u32 mode);
 extern void mnuPairedSlideBarSetState(PickList *work, s32 state);
 extern void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer);
-extern void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value);
-extern void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1);
+extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
+extern void mnuArmTitleMovieDrawAndResetFrame(u32 movieIndex, s32 startTransparent);
 extern u32 mnuIsTitleMovieDrawActive(void);
 extern void mnuResetMovieWorkState(void *work);
 

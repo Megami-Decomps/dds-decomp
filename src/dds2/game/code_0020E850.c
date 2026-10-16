@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
@@ -149,7 +150,6 @@ void func_0020EA10(void) {
 }
 
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);
@@ -951,7 +951,7 @@ s32 btlCompleteEffectTaskImmediately(void *unused) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
+BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
@@ -963,7 +963,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
     task->callback = btlCompleteEffectTaskImmediately;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = arg;
+    *(u16 *)&link->arg = messageId;
     link->elapsedTicks = 0;
     return task;
 }
@@ -1233,7 +1233,7 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 }
 
 extern AiSpecies *datEnemyAiRecords;
-extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 arg);
+extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 requestedRow);
 extern s32 btlExecuteAiTableAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
@@ -1318,9 +1318,9 @@ void btlPickCommandHighestMpTarget(s32 context) {
 
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
 
-/* Select by group element checks; value is the query input, not a status mask. */
-void btlPickCommandElementCheckedTarget(s32 context, s32 value) {
-    btlSelectTargetsPassingCheck(context, value);
+/* Select by group element checks; action is the query input, not a status mask. */
+void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action) {
+    btlSelectTargetsPassingCheck(commandContext, action);
 }
 
 extern void btlSelectTargetsByActionMask(s32, s32);

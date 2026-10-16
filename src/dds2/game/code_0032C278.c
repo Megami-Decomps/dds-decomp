@@ -26,6 +26,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
 #include "sdf_pending.h"
+#include "sdf_queued_resource_api.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "sdf_gs_flat_shapes.h"
@@ -1829,7 +1830,7 @@ SdfModel *sdfCreateBufferedTransformSlot(void) {
     VU0_STORE_VF(vf0, slot->rotationQuaternion);
     VU0_SET_ONES_XYZ(vf10);
     VU0_STORE_VF(vf10, slot->scaleVector);
-    slot->unk1A = -1;
+    slot->drawFlags = -1;
     slot->color = 0x80808080;
     return slot;
 }
@@ -1843,8 +1844,6 @@ void sdfDestroyObjectList(SdfModel *owner) {
     sdfDestroyDevRequest(owner->list);
     sdfReleaseChipBlock(owner);
 }
-
-extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
     if (slot == NULL) {

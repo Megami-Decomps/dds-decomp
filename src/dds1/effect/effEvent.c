@@ -370,7 +370,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 commandIndex, s32 format) {
     scene->append(scene, (SdfListHead *)task);
 }
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
@@ -439,9 +439,60 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
+#include "eff_packet_params.h"
+#include "sdf_asset_create.h"
+#include "sdf_asset_state.h"
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
+extern SdfAsset *D_003BB068;
+extern f32 D_003BB06C;
+extern f32 D_003D6760[4][4];
+extern u32 D_00355870[4];
+extern SdfPoolNode D_00325028;
+extern void *effCreateVertexDrawPacket(EffPacketParams *params);
+
+void func_0018ED80(f32 *position) {
+    SdfAsset *asset = D_003BB068;
+    SdfListHead *list;
+    EffPacketParams packet;
+
+    if (asset == NULL) {
+        asset = sdfCreateAssetWithDrawEntries();
+        D_003BB068 = asset;
+        sdfSetPrimaryStateFloat(asset, 1.0f);
+    }
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfVuLoadRotationMatrixZ(D_003BB06C);
+    D_003BB06C += 0.10471974313259125f;
+    VU0_LOAD_VF(vf10, position);
+    VU0_ADD_XYZ(vf31, vf31, vf10);
+    sdfConsAppendVuPacket(list, NULL);
+    memset(&packet, 0, 0x2C);
+    packet.primitive = 0x4000;
+    D_003D6760[2][2] = 0.0f;
+    packet.colors = D_00355870;
+    packet.color = 0x80808080;
+
+    D_003D6760[0][0] = 0.0f;
+    D_003D6760[0][1] = 0.0f;
+    D_003D6760[0][2] = 0.0f;
+    D_003D6760[1][0] = 15.0f;
+    D_003D6760[1][1] = -30.0f;
+    D_003D6760[1][2] = 0.0f;
+    D_003D6760[2][0] = -15.0f;
+    D_003D6760[2][1] = -30.0f;
+
+    packet.parameterCount = 1;
+    packet.vertexCount = 3;
+    packet.positions = (u128 *)D_003D6760;
+    packet.texcoords = NULL;
+    sdfConsAppendAssetPacket(list, D_003BB068, NULL);
+    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&packet));
+    D_00325028.append(&D_00325028, list);
+}
+
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
@@ -1112,7 +1163,7 @@ typedef struct {
 } __attribute__((packed)) FileRecordHeader;
 
 
-extern void effBattleSetScale(BattleEffect *, f32);
+extern void effBattleSetScale(BattleEffect *effect, f32 scale);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
@@ -1229,7 +1280,7 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
 }
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
-EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
+EffEventLight *effEventLightCreate(SoundMixer *mixer, f32 param) {
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->init.orientation[3] = 1.0f;
@@ -1244,7 +1295,7 @@ EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
     work->init.position[0] = 0;
     work->init.position[2] = 0;
     work->init.position[3] = 0;
-    work->handle = effEventCloneSoundMixer(arg);
+    work->handle = effEventCloneSoundMixer(mixer);
     work->owner = effEventCreate(work->handle, 0, &work->init);
     work->active = 1;
     return work;
@@ -1300,24 +1351,24 @@ extern u8 sdfViewUpVector[];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
-void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
+void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params) {
     f32 out[EFF_EVENT_VECTOR_COMPONENTS];
     f32 dir[EFF_EVENT_VECTOR_COMPONENTS];
     f32 pos[EFF_EVENT_VECTOR_COMPONENTS];
     f32 radius;
     f32 half;
     f32 y;
-    s32 rangeOverride = param->rangeOverride;
-    u8 directionMode = param->directionMode;
-    u8 aimMode = param->aimMode;
+    s32 rangeOverride = params->rangeOverride;
+    u8 directionMode = params->directionMode;
+    u8 aimMode = params->aimMode;
 
     if (rangeOverride == 0) {
-        radius = src->range;
+        radius = source->range;
     } else {
         radius = (f32)rangeOverride;
     }
-    half = src->height * 0.5f;
-    PCP_COPY_VECTOR(pos, src->position);
+    half = source->height * 0.5f;
+    PCP_COPY_VECTOR(pos, source->position);
     if (aimMode == 5) {
         if (directionMode == 8 || directionMode == 10) {
             y = -1.0f;
@@ -1356,7 +1407,7 @@ void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
         dir[0] = 0.0f;
         dir[2] = 1.0f;
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, src->orientation);
+        VU0_LOAD_VF(vf10, source->orientation);
         effMiscQuaternionToMatrixVU();
         sdfVuLoadSecondaryRotationMatrixY(D_003563B8[directionMode]);
         sdfComposeVuMatrixFromRegisters();
@@ -1918,7 +1969,7 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
     return work;
 }
 
-extern u32 effParamTableGetWord2(void *data, s32 index);
+extern u32 effParamTableGetWord2(void *data, s32 recordIndex);
 
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
 void effEventParticleSetCreateFromTable(void *data) {

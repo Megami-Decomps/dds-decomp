@@ -13,7 +13,7 @@ extern void evtPrintDeveloperConsoleMessage();
 
 extern void mnuClearCampResourceFlagEntries(void);
 
-extern void mnuSynchronizeMantraModelFlags(s32 arg);
+extern void mnuSynchronizeMantraModelFlags(s32 mode);
 
 extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
 
@@ -25,13 +25,19 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 typedef struct MtrCell {
     s16 x;
     s16 y;
-    s16 unk04;
-    s16 unk06;
+    s16 remainingFrames;
+    s16 durationFrames;
     s8 direction;
     s8 state;
     u8 remainingDepth;
     u8 unk0B;
 } MtrCell;
+
+typedef char MtrCellRemainingFramesOffsetCheck[
+    ((u32)&((MtrCell *)0)->remainingFrames == 0x04) ? 1 : -1];
+typedef char MtrCellDurationFramesOffsetCheck[
+    ((u32)&((MtrCell *)0)->durationFrames == 0x06) ? 1 : -1];
+typedef char MtrCellSizeCheck[sizeof(MtrCell) == 0x0C ? 1 : -1];
 
 /* Native cell storage and callback; geometry is shared with the draw callback. */
 typedef struct MtrGrid {
@@ -75,7 +81,7 @@ void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, 
 
     for (i = 0; i < grid->count; i++, cell++) {
         if (cell->state != 0) {
-            f32 fade = sdfSinPoly((f32)cell->unk04 / (f32)cell->unk06 * 3.141592503f);
+            f32 fade = sdfSinPoly((f32)cell->remainingFrames / (f32)cell->durationFrames * 3.141592503f);
             grid->draw(x + cell->x, y + cell->y, z, (s32)((f32)alpha * fade), grid, flags, context);
         }
     }
@@ -120,7 +126,7 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
             cell->remainingDepth = source->remainingDepth - 1;
             cell->direction = direction;
             countdown = (u16)grid->delayRange - (u16)grid->depthStep;
-            cell->unk04 = cell->unk06 = countdown;
+            cell->remainingFrames = cell->durationFrames = countdown;
         } else {
             s32 countdown;
             f32 random = effMiscRandUnitFloat(NULL);
@@ -130,7 +136,7 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
             cell->remainingDepth = grid->initialDepth;
             cell->direction = 0;
             countdown = (u16)grid->delayRange;
-            cell->unk04 = cell->unk06 = countdown;
+            cell->remainingFrames = cell->durationFrames = countdown;
         }
     }
     return cell;
@@ -186,8 +192,8 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     }
 }
 
-void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4, s32 arg5, s32 arg6) {
-    uiDrawUniformColorRect(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
+void mnuDrawCellScaledGrid(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
+    uiDrawUniformColorRect(x << 4, y << 3, z, grid->unk1C << 4, grid->unk1E << 3, alpha | 0x80808000, context);
 }
 
 void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
@@ -196,11 +202,11 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
 
     for (i = 0; i < grid->count; i++, cell++) {
         if (cell->state != 0) {
-            cell->unk04--;
-            if (cell->unk04 == cell->unk06 - 5 && cell->remainingDepth != 0) {
+            cell->remainingFrames--;
+            if (cell->remainingFrames == cell->durationFrames - 5 && cell->remainingDepth != 0) {
                 mtrSpawnGridPropagationCells(grid, cell, cell->state);
             }
-            if (cell->unk04 == 0) {
+            if (cell->remainingFrames == 0) {
                 cell->state = 0;
             }
         }

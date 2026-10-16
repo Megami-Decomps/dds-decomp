@@ -120,7 +120,7 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 u32 mnuTestListFlagTwo(u32 *flags);
 
 /* Return the stored row step times the visible row count, in native units. */
-s32 mnuGetListViewportHeight(MenuList *list) {
+s32 mnuGetListViewportHeight(const MenuList *list) {
     return list->rowStep * list->visibleCount;
 }
 
@@ -463,8 +463,8 @@ void mnuDrawWindowEntryDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer 
     }
 }
 
-void mnuDrawMenuEntryDecorationSprites(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
-    mnuDrawWindowEntryDecorations(x, y, depth, (MenuWindowContainer *)menu, param);
+void mnuDrawMenuEntryDecorationSprites(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
+    mnuDrawWindowEntryDecorations(x, y, depth, (MenuWindowContainer *)menu, drawArg);
 }
 
 void mnuDrawWindowFrameAndOverlay(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
@@ -684,17 +684,17 @@ void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, EffMappedResour
 
 /* Always draw slot zero; masks one/two select the two three-slot banks.
  * Reset the six auxiliary slots through the existing grid lookup after drawing. */
-void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
-    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, param);
+void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 drawArg) {
+    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, drawArg);
     if (mask & 1) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, drawArg);
     }
     if (mask & 2) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, drawArg);
     }
     itfGridLookupValueOrDefault((s32)(u32)group->sprites[1], 0);
     itfGridLookupValueOrDefault((s32)(u32)group->sprites[2], 0);
@@ -1564,13 +1564,13 @@ void mnuFreeIconSprites(MenuSprites *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuSprites *menu, s32 param) {
+void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuSprites *menu, s32 surface) {
     u32 i;
 
     if (skip == 0) {
-        effDrawSpriteWithCornerFade(0, 0, depth, menu->profileFade, 0, menu->firstSprite, 0, param);
+        effDrawSpriteWithCornerFade(0, 0, depth, menu->profileFade, 0, menu->firstSprite, 0, surface);
         for (i = 0; i < 4; i++) {
-            effDrawSpriteWithCornerFade(0, 0, depth, menu->profileFade, 0, menu->sprites[i], 0, param);
+            effDrawSpriteWithCornerFade(0, 0, depth, menu->profileFade, 0, menu->sprites[i], 0, surface);
         }
     }
 }
@@ -1622,7 +1622,7 @@ void mnuReleaseFourResourceList(MenuIconBundle *list) {
     sdfReleaseChipBlock(list);
 }
 
-void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBundle *sprites, s32 param) {
+void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBundle *sprites, s32 surface) {
     s32 px = x + 0x120;
     s32 py = y + 0x30;
     s32 alpha = sprites->fade;
@@ -1630,10 +1630,10 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
     s32 nextAlpha;
     s32 lowerAlpha;
 
-    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[0], 0, param);
-    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[1], 0, param);
-    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[2], 0, param);
-    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[3], 0, param);
+    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[0], 0, surface);
+    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[1], 0, surface);
+    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[2], 0, surface);
+    effDrawSpriteWithCornerFade(px, py, z, alpha, 0, sprites->sprite[3], 0, surface);
     if (sprites->fadeOut == 0) {
         fade = sprites->fade;
         nextAlpha = fade + 0x10;
@@ -2269,7 +2269,7 @@ extern char D_003BC720[];
 extern u8 D_003BC730[];
 extern char D_003BC738[];
 
-void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 param) {
+void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 surface) {
     char text[0x20];
     EffectSlotSet **sprite = page->overlaySprites;
     u32 i = 0;
@@ -2282,9 +2282,9 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     alpha = page->drawAlpha;
     color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
     x += page->slideOffset * 16;
-    effDrawSpriteWithCornerFade(x, y, z, alpha, 0, page->primarySprite, 0, param);
+    effDrawSpriteWithCornerFade(x, y, z, alpha, 0, page->primarySprite, 0, surface);
     do {
-        effDrawSpriteWithCornerFade(x, y, z, alpha, 0, *sprite++, 0, param);
+        effDrawSpriteWithCornerFade(x, y, z, alpha, 0, *sprite++, 0, surface);
         i++;
     } while (i < 2);
     if (value != 0) {
@@ -2295,7 +2295,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         glyph = itfCreateFont2TextGlyph(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
-    frFontDrawGlyphChain(glyph, 1, param);
+    frFontDrawGlyphChain(glyph, 1, surface);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
@@ -2325,9 +2325,9 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     }
 }
 
-extern void prfCopyMantraNamePart(u32 textId, s32 arg1, char *out);
+extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 
-void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
+void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
     struct FrFontGlyph *glyph;
     s32 width;
@@ -2337,12 +2337,12 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     frFontSetChildColors(glyph, color);
     width = frFontMeasureGlyphChain(glyph) + 8;
     frFontSetGlyphPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
-    frFontDrawGlyphChain(glyph, 1, param);
+    frFontDrawGlyphChain(glyph, 1, surface);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
-                     s32 partyIndex, s32 param) {
+                     s32 partyIndex, s32 surface) {
     u8 *outValue;
     s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
@@ -2353,12 +2353,12 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
         if (prfResolveMantraNameOrFallback(code & 0xFFFF, &outValue) != 0) {
-            mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, param);
+            mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, surface);
             return;
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         frFontCenterGlyphChainAt(0x1710, 0x5F0, glyph);
-        frFontDrawGlyphChain(glyph, 1, param);
+        frFontDrawGlyphChain(glyph, 1, surface);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -2427,19 +2427,19 @@ INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC738);
 
 INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC740);
 
-void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, MenuPageSlot *panel, s32 mode, s32 param) {
+void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, MenuPageSlot *panel, s32 mode, s32 surface) {
     s32 pos[2] = {0x180, 0xE0};
 
     if (mode == 0) {
-        effDrawSpriteWithCornerFade(x, y, z, 0x100, 1, panel->icon[0], 0, param);
+        effDrawSpriteWithCornerFade(x, y, z, 0x100, 1, panel->icon[0], 0, surface);
         x += pos[0];
         y += pos[1];
-        effDrawSpriteWithCornerFade(x, y, z, 0x100, 1, panel->leftHandle, 0, param);
+        effDrawSpriteWithCornerFade(x, y, z, 0x100, 1, panel->leftHandle, 0, surface);
         if (panel->rightHandle == 0) {
-            effDrawSpriteWithCornerFade(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, param);
+            effDrawSpriteWithCornerFade(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, surface);
         } else {
-            effDrawSpriteWithCornerFade(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, param);
-            effDrawSpriteWithCornerFade(x + 0x790, y + 0x70, z, 0x100, 1, panel->rightHandle, 0, param);
+            effDrawSpriteWithCornerFade(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, surface);
+            effDrawSpriteWithCornerFade(x + 0x790, y + 0x70, z, 0x100, 1, panel->rightHandle, 0, surface);
         }
     }
 }

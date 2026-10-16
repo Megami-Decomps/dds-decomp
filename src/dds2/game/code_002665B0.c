@@ -51,7 +51,6 @@ extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, s
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
-extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern s8 D_00437859;
 
 typedef struct MenuSlotState {
@@ -147,7 +146,7 @@ extern void mnuDrawTerminalBackdrop(s32);
 extern s8 mnuTerminalTaskState;
 
 
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option);
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
@@ -188,7 +187,7 @@ extern struct MenuList *mnuCreateListState();
 extern u8 D_00437870[];
 
 
-extern s32 mnuPercentOrHundred(u16, u16);
+extern s32 mnuPercentOrHundred(s32 value, s32 total);
 
 extern void mnuDrawPanelSequenceByRow(MenuPageBar *, s32, s32 *, s32, s32, EffectSlotSet *);
 
@@ -1005,14 +1004,14 @@ extern void fldProcessDeferredSceneCommand(void);
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
-void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
-    MenuSlotState *work = (MenuSlotState *)kwlnTaskGetUserValue(arg);
+void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
+    MenuSlotState *work = (MenuSlotState *)kwlnTaskGetUserValue(task);
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
         mnuReleaseTerminalSceneResources(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
-        mnuDrainPanelTransitions(&work->transitionWork, arg);
+        mnuDrainPanelTransitions(&work->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfReleaseResourceAllocation(work->heapHandle);
@@ -1713,7 +1712,6 @@ extern void mnuSelectFirstListNode(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 

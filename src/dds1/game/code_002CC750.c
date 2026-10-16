@@ -1436,7 +1436,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
 
 extern SdfPoolNode *D_00398098[];
 #include "sdf_packet_alloc.h"
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
  * count is reused first as an entry count and then as a vertex count. */

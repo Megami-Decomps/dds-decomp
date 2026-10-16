@@ -43,19 +43,19 @@
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
  * step-before-index, and all callers are verified. */
-extern void evtSubmitEventRequest(s32, s32);
+extern void evtSubmitEventRequest(s32 eventId, s32 requestMode);
 extern void evtSubmitEventRequestImmediate(s32);
 #include "dds3_world_primary.h"
 extern void fldUpdateCameraHeadingTransition(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 
 extern f32 D_0038A6F0[4];
-extern void evtAdvanceSolarClockAndExpireControls(f32);
+extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
-extern s32 ptyAnyUnitFlagMatch(u32, s32);
-extern void ptyApplyFieldHpAttrition(s32);
-extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern void ptyApplyFieldHpAttrition(s32 attritionMode);
+extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 
 extern s32 fldDeferredCommand;
 
@@ -82,7 +82,7 @@ extern void fldInitializeAreaWork(void);
 
 extern void fldRebuildFieldScene(void);
 
-extern void fldApplySkyLightSet(u32, s32);
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 extern void fldResetSparkRewardProfileIndex(void);
 
@@ -141,7 +141,7 @@ extern void fldPrepareSceneBgmArchive(void);
 
 extern s32 fldRestartSceneResourceTask(void);
 
-extern s32 fldSetEncounterMode(s32);
+extern s32 fldSetEncounterMode(s32 encounterMode);
 
 extern void fldStartDeferredFieldExit(void);
 
@@ -199,7 +199,7 @@ void fldClearPrimarySceneFlag(void);
 
 extern char D_00412F30[];
 
-extern struct ScrData *scrFindNamedProcessNode(char *arg0);
+extern struct ScrData *scrFindNamedProcessNode(char *name);
 
 extern char D_00412F58[];
 
@@ -250,7 +250,7 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 struct EffWorldNode;
 
 
-extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
+extern f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 
 extern u8 D_0037F530[];
 
@@ -298,14 +298,14 @@ extern void fldResetPlayerSceneTransformState(void);
 
 extern u32 D_00435F78;
 
-extern void fldSetPendingAreaAndFloor(s32, s32);
+extern void fldSetPendingAreaAndFloor(s32 area, s32 floor);
 
 void fldUnloadPlayerModel(void);
 
 extern void dds3ClearObjectFlags(u32, s32);
 
 
-extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
+extern void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 
@@ -381,9 +381,9 @@ extern char D_00435ED0[];
 
 extern char D_00435ED8[];
 
-/* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 x, s32 y);
+/* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
-/* Read the matching location record's fourth signed halfword; zero on miss. */ s32 fldGetLocationCoordinateValue(s32 x, s32 y);
+/* Read the matching location record's fourth signed halfword; zero on miss. */ s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 
 void fldTestDrawCreate(void);
 
@@ -587,7 +587,7 @@ f32 fldSnapAngleToCompassOctant(f32 angle) {
     return angle;
 }
 
-extern f32 fldAngleDifference(f32, f32);
+extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 
 f32 fldSnapAngleToCardinalDirection(f32 angle) {
     f32 best;
@@ -664,8 +664,8 @@ f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 to
     return result;
 }
 
-f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
-    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(ax, ay, bx, by) + 90.0f);
+f32 fldGetNormalizedComplementaryAngle(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
+    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(fromX, fromZ, toX, toZ) + 90.0f);
     return (f32)(angle % 360);
 }
 
@@ -944,7 +944,7 @@ extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceR
 extern void *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void fldApplySceneLightSet(s32, s32);
+extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
 extern void fldSpawnPlayerUnits(f32 *transform);
 extern void fldCreateChaseCameraObject(void);
 extern void fldPreparePlayerSceneCameraTarget(void);
@@ -2396,7 +2396,66 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00124040", fldProcDraw);
+#include "fld_encounter_runtime_api.h"
+extern void fldDrawFloorQuad(s32, s32, const char *);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern void func_0014DEA8(void);
+extern void fldDrawAutomapWhenReady(void);
+extern void func_001208D0(void);
+extern void fldTickWeatherEffectNodes(void);
+extern s32 D_003899A8[];
+extern s32 D_003899B0[];
+extern s32 D_00435F8C;
+s32 fldProcDraw(KwlnTask *task) {
+    s32 flags;
+    FldSequenceController *lifecycle = &fldSceneLifecycleFlags;
+
+    if (dds3AdminGetRequestedMode() != -1) {
+        return 0;
+    }
+    if (fldGetResourceReadyFlag() == 1) {
+        if (D_003899A8[0] == 1) {
+            fldDrawFloorQuad(0x40, 0xC0, "NowLoading...");
+        }
+        if (!lifecycle->stage) {
+            return 0;
+        }
+    } else {
+        if (!lifecycle->stage) {
+            return 0;
+        }
+    }
+    if (fldGetEncounterRuntimeResult() != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (fldGetCampSceneControlMode() == 1) {
+        return 0;
+    }
+    if (fldGetSceneReadyFlag() == 0 && fldGetCampSceneControlMode() == 0 &&
+        fldIsEventPhaseAtLeastTwo() == 0) {
+        func_0014DEA8();
+    }
+    fldDrawAutomapWhenReady();
+    func_001208D0();
+    if (fldAreaState.transitionMode != 0) {
+        fldTickWeatherEffectNodes();
+    }
+    if (lifecycle->stage >= 2 && D_003899B0[0] != 0 &&
+        fldGetEncounterRuntimeResult() == 0) {
+    flags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
+    if (flags & 0x40) {
+        effBlurStepScatterSlotsAndDraw(D_00435F74);
+        return 0;
+    }
+    if (flags & 0x80) {
+        effBlurStepScatterSlotsAndDraw(D_00435F74);
+    }
+    }
+    return 0;
+}
 
 void fldSetSceneLifecycleFlags(u32 mask) {
     u32 *flags = &fldSceneLifecycleFlags.flags;
@@ -2446,7 +2505,7 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
         scene->sequenceCode = record->code;
         scene->room = record->kind;
         scene->sequenceMode = record->unk_62;
-        scene->unk58 = record->enabled;
+        scene->retainCachedAreaResource = record->enabled;
         scene->secondaryState = record->mode;
         scene->cameraLinkMode = record->link;
         strcpy(scene->cameraName, record->detail);
@@ -2566,3 +2625,8 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FD0);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FE0);
 
+/* Validate the packet where its native initialization is reconstructed. */
+typedef char FieldSequenceRecord_size_check[
+    (sizeof(FieldSequenceRecord) == 0xA0) ? 1 : -1];
+typedef char FieldSequenceRecord_enabled_offset_check[
+    ((u32)&((FieldSequenceRecord *)0)->enabled == 0x58) ? 1 : -1];

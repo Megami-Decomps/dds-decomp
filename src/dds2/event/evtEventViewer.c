@@ -245,7 +245,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 id, EvtRuntime *viewer) {
     return entry;
 }
 
-s32 evtEventViewerCountEntriesById(s32 id, EvtRuntime *viewer) {
+s32 evtEventViewerCountEntriesById(s32 entryType, EvtRuntime *viewer) {
     EvtRuntimeGroup *node;
     s32 currentId;
     s32 count;
@@ -255,7 +255,7 @@ s32 evtEventViewerCountEntriesById(s32 id, EvtRuntime *viewer) {
     while (node != NULL) {
         currentId = node->type;
         node = node->next;
-        if (currentId == id) {
+        if (currentId == entryType) {
             count++;
         }
     }
@@ -421,11 +421,9 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer) {
         (const u8 *)viewer->entryName[index]);
 }
 
-struct PolyMovieObject;
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
-extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
-extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
+extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
@@ -716,12 +714,12 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 
 extern u16 D_004372B0;
 extern s32 evtViewerTestIndexedCondition(u32 encodedId);
-extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
-extern s32 evtSetBgmVolumePan(s32, s32);
-extern s32 evtPlayBgm(s32, s32);
-extern s32 evtFadeInBgm(s32, s32);
-extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
-extern void evtTransitionBgm(s32, s32);
+extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
+extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
+extern s32 evtPlayBgm(s32 id, s32 fade);
+extern s32 evtFadeInBgm(s32 id, s32 fade);
+extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
+extern void evtTransitionBgm(s32 id, s32 fade);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
@@ -735,7 +733,7 @@ extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern u32 itfMesGetWindowEntryItems(s32 window, s32 entry);
 extern s32 itfMesSelectTableItemText(s32 window, s32 entry, s32 unused);
-extern s32 itfMesStartEntry(s32 window, s32 entry, s32 unused);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void itfMesBuildOptionList(s32 window, s32 entry);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
@@ -998,7 +996,7 @@ extern u32 kwlnDrawControlFlags;
 
 void fldInitializeCameraColorResource(void);
 
-extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
+extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
 extern s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx);
 
 struct EvtRuntime;
@@ -1022,7 +1020,6 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 extern char evtViewerTaskName[]; /* "EventViewer" */
 
 
-struct PolyMovieObject;
 
 /* Each timeline parameter word's scalar format is selected by the track kind. */
 
@@ -1132,7 +1129,7 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateTimelineGroupState);
 
 
-extern void evtEndUnitValueTransition(EvtUnit *, s32);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
 
 /* At time, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
@@ -1197,7 +1194,6 @@ void evtEventViewerUpdateUnitTransitions(s32 time, EvtRuntime *viewer) {
 
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
 extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
-extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
  * unit's byte and float parameters from the active kind-3/4 key to the next
@@ -1268,7 +1264,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
             }
         }
         if (next == NULL) {
-            unit->unkD3 = current->p0C.b[1];
+            unit->shadowLevel = current->p0C.b[1];
             unit->shadowY = current->p14.f;
         } else {
             startFrame = current->frame;
@@ -1281,7 +1277,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
             if (next->p0C.sb[0] == 0 || next->p0C.sb[0] == 2) {
                 t = 0.0f;
             }
-            unit->unkD3 = evtMovieInterpolateIntIfEnabled(0, t, current->p0C.b[1], next->p0C.b[1]);
+            unit->shadowLevel = evtMovieInterpolateIntIfEnabled(0, t, current->p0C.b[1], next->p0C.b[1]);
             if (next->p0C.b[0] < 2) {
                 t = 0.0f;
             }
@@ -1306,18 +1302,20 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
     evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
-extern void evtViewerClampMovieTimes(s32, EvtRuntime *);
-extern void evtViewerSyncWorldGroups(u32, EvtRuntime *);
-extern void evtViewerApplyGlyphLodChannel(s32, EvtRuntime *);
-extern void evtEventViewerAttachIndexedObject(s32, EvtRuntime *);
-extern void evtViewerActivateWindowForGlyphEntry(s32, EvtRuntime *);
-extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
-extern void evtEventViewerApplyEffectChannels(s32, EvtRuntime *);
-extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
-extern void evtViewerUpdateShopFlagTrack(EvtRuntime *);
-extern s32 evtViewerTestIndexedCondition(u32);
-extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
-extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer);
+extern void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer);
+extern void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer);
+extern void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer);
+extern void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer);
+extern void evtViewerCountFlaggedUpdates(EvtRuntime *viewer);
+extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
+extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
+extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
+extern s32 evtViewerTestIndexedCondition(u32 encodedId);
+extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position,
+                                           s32, EvtRuntime *viewer);
+extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
+                                        s32 interval, EvtRuntime *viewer);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
 extern u8 kwlnDrawOverlayEnabled;
 extern EvtRuntimeGroup *D_004372B8;
@@ -1510,7 +1508,7 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
+extern void evtSetMovieClipPositionClampedToDuration(s32 movie, s32 unused, s32 start, s32 end, s32 offset);
 
 
 /* Clamps each movie object's playback interval using its linked track's first
@@ -1563,7 +1561,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 }
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
-extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *, s32, s32);
+extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel);
 
 void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
                    EvtRuntime *viewer, s32 mode) {
@@ -1805,7 +1803,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
     }
 }
 
-extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
+extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 void evtViewerMarkWindowActive(EvtRuntime *);
 
 /* Activates the message window thirty frames before a kind-4 key when its
@@ -2062,8 +2060,6 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     return best;
 }
 
-extern void sdfFreezeFloatCounter(struct EvtScaledValue *counter);
-extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *counter);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
 void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
@@ -2272,10 +2268,10 @@ u16 evtViewerPopHistory(EvtRuntime *viewer) {
     return id;
 }
 
-extern s16 itfPanelGetPairFirst(s32);
-extern void itfPanelSetPairFirst(s32,s16);
-extern void itfMesCleanupWindow(s32,s32);
-extern void itfMesResetWindow(s32);
+extern s16 itfPanelGetPairFirst(s32 windowIndex);
+extern void itfPanelSetPairFirst(s32 windowIndex, s16 status);
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
+extern void itfMesResetWindow(s32 window);
 void evtViewerMarkWindowInactive(EvtRuntime *);
 void evtViewerUpdateWindowShadeFade(EvtRuntime *);
 
@@ -3762,7 +3758,7 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 evtViewerPickNextHandler(KwlnTask *);
+extern s32 evtViewerPickNextHandler(KwlnTask *task);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
 s32 evtViewerUpdateFrame(KwlnTask *task) {

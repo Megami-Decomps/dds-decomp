@@ -163,7 +163,7 @@ typedef struct SdfModel {
     struct Motion *motionList;
     u8 unk18;
     u8 flags;
-    s16 unk1A;
+    u16 drawFlags;
     u32 color;
     f32 matrix[4][4];
     f32 rotationQuaternion[4];
@@ -181,6 +181,8 @@ typedef struct SdfModel {
 } SdfModel;
 
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
+typedef char SdfModel_drawFlags_at_1A[
+    ((u32)&((SdfModel *)0)->drawFlags == 0x1A) ? 1 : -1];
 typedef char SdfModel_chunkTable_at_90[
     ((u32)&((SdfModel *)0)->chunkTable == 0x90) ? 1 : -1];
 typedef char SdfModel_scalarOverrideFirst_at_88[

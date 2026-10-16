@@ -44,7 +44,7 @@ typedef char EffExpandedEntriesOffsetCheck[((u32)&((EffExpandedList *)0)->entrie
 typedef char EffExpandedHandlesOffsetCheck[((u32)&((EffExpandedList *)0)->handles == 0x14) ? 1 : -1];
 typedef char EffExpandedCountOffsetCheck[((u32)&((EffExpandedList *)0)->totalEntryCount == 0x18) ? 1 : -1];
 
-s32 effCountExpandedEntries(EffExpandedList *list);
+s32 effCountExpandedEntries(const EffExpandedList *list);
 EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj);
 void effReleaseReferenceHolder(EffExpandedList *holder);
 

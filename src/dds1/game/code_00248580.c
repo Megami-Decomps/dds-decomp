@@ -62,7 +62,7 @@ extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 
 
@@ -112,7 +112,7 @@ extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 extern void *mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
 
-extern s32 mnuPercentOrHundred(u16, u16);
+extern s32 mnuPercentOrHundred(s32 value, s32 total);
 
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
@@ -129,7 +129,7 @@ extern s32 sprintf(char *, const char *, ...);
 
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
-extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
+extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 surface);
 extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, MenuSimpleSpriteState *, s32);
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
@@ -273,10 +273,10 @@ void mnuUpdateGroupResources(u8 *scene) {
 }
 
 /* Release each progress node's child panel, leaving the nodes/list intact. */
-void mnuDestroyThresholdNodePanels(s32 owner) {
+void mnuDestroyThresholdNodePanels(s32 hostAddress) {
     s32 entry;
 
-    for (entry = (s32)((MenuTerminalWork *)owner)->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
+    for (entry = (s32)((MenuTerminalWork *)hostAddress)->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
         mnuReleaseDualPercentPanel(((struct MenuListNode *)entry)->childPanel);
     }
 }
@@ -476,14 +476,14 @@ void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct Menu
 
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
-    struct MenuList *list = mnuCreateListState(0, count, 0x15, callback);
+struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEntryIndex, s32 ownerAddress) {
+    struct MenuList *list = mnuCreateListState(0, count, 0x15, ownerAddress);
     s32 entryIndex;
-    list->context = (void *)callback;
+    list->context = (void *)ownerAddress;
     list->drawCallback = mnuDrawThresholdNodeWithSelectedAccents;
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
-        if (entryIndex != excluded) {
+        if (entryIndex != excludedEntryIndex) {
             struct MenuListNode *node = mnuListAppendNode(list, D_003BC3F8);
             node->camp.value = items[entryIndex];
         }
@@ -493,15 +493,15 @@ struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, 
 
 
 /* Mark the selected command-list node only for modes zero/one and an idle owner. */
-void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
-    s32 state = ((MenuTerminalWork *)object)->mode;
+void mnuHighlightProgressNodeFromOwnerSelection(s32 hostAddress) {
+    s32 state = ((MenuTerminalWork *)hostAddress)->mode;
     if (state < 2) {
         if (state < 0) {
             return;
         }
-        if (((MenuTerminalWork *)object)->owner->count == 0) {
+        if (((MenuTerminalWork *)hostAddress)->owner->count == 0) {
             struct MenuListNode *selected = mnuWalkNodeList(2 - mnuShouldExcludeTerminalMenuEntry(),
-                                                              ((MenuTerminalWork *)object)->listResource);
+                                                              ((MenuTerminalWork *)hostAddress)->listResource);
             ((struct MenuListNode *)selected)->flags48 |= 1;
         }
     }
@@ -509,8 +509,8 @@ void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
 
 
 /* Highlight the mode-zero or mode-two command node only while the progress list is idle. */
-void mnuHighlightProgressNodeByMode(s32 object) {
-    s32 state = ((MenuTerminalWork *)object)->mode;
+void mnuHighlightProgressNodeByMode(s32 hostAddress) {
+    s32 state = ((MenuTerminalWork *)hostAddress)->mode;
     s32 selectedIndex;
     if (state != 0) {
         if (state != 2) {
@@ -520,9 +520,9 @@ void mnuHighlightProgressNodeByMode(s32 object) {
     } else {
         selectedIndex = 3 - mnuShouldExcludeTerminalMenuEntry();
     }
-    if (((MenuTerminalWork *)object)->list->count == 0) {
+    if (((MenuTerminalWork *)hostAddress)->list->count == 0) {
         struct MenuListNode *node = mnuWalkNodeList(selectedIndex,
-                                                    ((MenuTerminalWork *)object)->listResource);
+                                                    ((MenuTerminalWork *)hostAddress)->listResource);
         ((struct MenuListNode *)node)->flags48 |= 1;
     }
 }
@@ -537,7 +537,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     s32 table[15];
     s32 row;
     s32 count;
-    s32 excluded = -1;
+    s32 excludedEntryIndex = -1;
 
     memcpy(table, mnuTerminalMenuTemplate, 0x3C);
 
@@ -547,14 +547,14 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         row = 0;
         count = 5;
         if (mnuShouldExcludeTerminalMenuEntry() != 0) {
-            excluded = 1;
+            excludedEntryIndex = 1;
         }
         break;
     case 1:
         row = 1;
         count = 4;
         if (mnuShouldExcludeTerminalMenuEntry() != 0) {
-            excluded = 1;
+            excludedEntryIndex = 1;
         }
         break;
     default:
@@ -562,7 +562,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         count = 2;
         break;
     }
-    host->listResource = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excluded, (s32)host);
+    host->listResource = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, (s32)host);
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles(host->imageHandles);
     mnuUpdateGroupResources((u8 *)host);
@@ -592,7 +592,6 @@ extern void evtCreateEventScriptProcess(s32);
 
 extern void evtClearActiveFlag(s32);
 
-extern s32 evtSetBoundedDisplayValue(s32, s32);
 
 /* Close via a black fade for modes one/two, otherwise request process 0x322.
  * All paths clear active flag zero and set display slot one. No sound call occurs here. */
@@ -842,8 +841,8 @@ void mnuTerminalCreateEffects(MenuTerminalWork *state) {
 }
 
 /* Destroy every retained effect batch; the slots and terminal allocation are not cleared. */
-void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
-    EffMappedResource **batch = ((MenuTerminalWork *)object)->effect;
+void mnuDestroyAllMenuSlotEffectBatches(s32 workAddress) {
+    EffMappedResource **batch = ((MenuTerminalWork *)workAddress)->effect;
     u32 i;
 
     for (i = 0; i < MNU_EFFECT_BATCH_COUNT; i++) {
@@ -918,14 +917,14 @@ extern s8 mnuTerminalTaskState;
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
-void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
-    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(arg);
+void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
+    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(task);
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
         mnuReleaseResourceHandles((u32 *)work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
-        mnuDrainPanelTransitions(&work->transitionWork, arg);
+        mnuDrainPanelTransitions(&work->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfReleaseResourceAllocation(work->allocation);
@@ -2209,7 +2208,6 @@ s32 evtBDispatchSync(KwlnTask *request) {
 }
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Bind the selected text row to message slot zero, then start the entry prompt. */

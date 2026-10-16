@@ -46,7 +46,7 @@ typedef struct DatCommandRecord {
     u8 targetType;                 /* 0x08; SKILL.TBL target_type */
     u8 options;                    /* 0x09 */
     u8 targetFlags;                /* 0x0A: command target-policy flags */
-    u8 unk_0B;
+    u8 distributeRandomTargetHits;
     u16 restriction;               /* 0x0C */
     u8 unk_0E[3];
     u8 stat11;
@@ -64,7 +64,7 @@ typedef struct DatCommandRecord {
     s32 requirementBits;           /* 0x28 */
     u8 entryChange; /* Interpreted as a signed actor-entry delta. */
     u8 stat2D;
-    u16 unk2E;
+    u16 commandEffectId;
     u32 unk30;                    /* 0x30: unsigned selector; DDS2 001B14EC, DDS1 001D1004. */
     s16 criticalPercent; /* 100 forces the critical result. */
     s16 stat36;
@@ -77,6 +77,7 @@ typedef char DatCommandCostOffsetCheck[((u32)&((DatCommandRecord *)0)->costMode 
 typedef char DatCommandAttributeOffsetCheck[((u32)&((DatCommandRecord *)0)->attribute == 0x24) ? 1 : -1];
 typedef char DatCommandRequirementOffsetCheck[((u32)&((DatCommandRecord *)0)->requirementBits == 0x28) ? 1 : -1];
 typedef char DatCommandLastStatOffsetCheck[((u32)&((DatCommandRecord *)0)->stat36 == 0x36) ? 1 : -1];
+typedef char DatCommandCommandEffectIdOffsetCheck[((u32)&((DatCommandRecord *)0)->commandEffectId == 0x2E) ? 1 : -1];
 typedef char DatCommandEffectTypeOffsetCheck[((u32)&((DatCommandRecord *)0)->effectType == 0x02) ? 1 : -1];
 typedef char DatCommandHpTypeOffsetCheck[((u32)&((DatCommandRecord *)0)->hpType == 0x16) ? 1 : -1];
 typedef char DatCommandHpPowerOffsetCheck[((u32)&((DatCommandRecord *)0)->hpPower == 0x18) ? 1 : -1];

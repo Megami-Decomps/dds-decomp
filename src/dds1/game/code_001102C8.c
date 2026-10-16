@@ -85,7 +85,7 @@ u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value) {
     return 1;
 }
 
-u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object) {
+u32 dds3ReadIndexedWorldObjectWord(const WorldValueIndices *object) {
     if (object->entryCount == 0) {
         return 0;
     }

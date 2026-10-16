@@ -75,7 +75,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32 statIndex);
 
-extern u32 sdfRollActionHit(s32 channel, s32 arg1, DatPartyRecord *item);
+extern u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *item);
 
 extern void scrDestroyWorkTask(void);
 
@@ -134,11 +134,11 @@ u32 sdfGetFloatCounterDirection(u32 *source) {
     return *source;
 }
 
-void evtScaleValueByMultiplier(float multiplier, EvtScaledValue *value) {
+void evtScaleValueByMultiplier(EvtScaledValue *value, float multiplier) {
     value->scaled = multiplier * value->base;
 }
 
-float evtGetValueScaleFactor(EvtScaledValue *value) {
+float evtGetValueScaleFactor(const EvtScaledValue *value) {
     return value->scaled / value->base;
 }
 
@@ -287,9 +287,9 @@ void sdfSaveResetSnapshot(void) {
     D_00435DB8 = datGameState->header.status;
     D_00435DBC = datGameState->header.secondTick;
     D_00435DC0 = datGameState->header.savedMoney;
-    D_00385218.words[0] = datGameState->header.unk24;
-    D_00385218.words[1] = datGameState->header.unk28;
-    D_00385218.words[2] = datGameState->header.unk2C;
+    D_00385218.words[0] = datGameState->header.saveFlags;
+    D_00385218.words[1] = datGameState->header.saveFlags1;
+    D_00385218.words[2] = datGameState->header.saveFlags2;
     D_00438E90 = mnuCreateFlagEntries();
     D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E94);
@@ -333,9 +333,9 @@ void sdfRestoreResetSnapshot(void) {
     datGameState->header.secondTick = D_00435DBC;
     datGameState->header.savedMoney = D_00435DC0;
     datGameState->header.playTicks = datGameState->header.secondTick;
-    datGameState->header.unk24 = D_00385218.words[0];
-    datGameState->header.unk28 = D_00385218.words[1];
-    datGameState->header.unk2C = D_00385218.words[2];
+    datGameState->header.saveFlags = D_00385218.words[0];
+    datGameState->header.saveFlags1 = D_00385218.words[1];
+    datGameState->header.saveFlags2 = D_00385218.words[2];
     mnuApplyCampResourceFlagEntries(D_00438E90);
     sdfReleaseResourceAllocation(D_00438E90);
 
@@ -738,7 +738,7 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
+u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -750,8 +750,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
     s32 hit;
     u16 flag;
 
-    mask = datCommandRecords[index].attribute.parts.valueMask;
-    if (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
+    mask = datCommandRecords[channel].attribute.parts.valueMask;
+    if (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         count = 0;
         for (bit = 0; bit < 16; bit++) {
             if ((mask >> bit) & 1) {
@@ -762,10 +762,10 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
         mask = 1 << list[effMiscRandMod(0, count)];
     }
     if (mask != 0 &&
-        (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
-         datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
+        (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
+         datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
-        if (!(datCommandRecords[index].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
+        if (!(datCommandRecords[channel].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
             if (datGetEffectiveAffinity(packed, kind) & 0x170000) {
                 return 0;
             }
@@ -810,8 +810,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
         return 0;
     }
     hit = 1;
-    if (datCommandRecords[index].attribute.parts.hitChance < 100) {
-        scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
+    if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
+        scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
         sdfDebugPrintf(D_00412B08, scaled, ratio, mask);
         roll = effMiscRandMod(0, 100);
         hit = roll < scaled;

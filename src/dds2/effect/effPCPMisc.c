@@ -3122,7 +3122,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpBlockSetUpdate);
 
-void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src) {
+void effPcpCopyVector60(EffPCPBlockSetWork *work, const void *src) {
     PCP_COPY_VECTOR(work->params.position, src);
 }
 
@@ -3131,7 +3131,7 @@ void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 value) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src) {
+void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, const void *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
@@ -3292,7 +3292,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     work->frame = frame + 1;
 }
 
-void effPcpRotateSetChildVectors(EffPCPRotateWork *work, void *src) {
+void effPcpRotateSetChildVectors(EffPCPRotateWork *work, const void *src) {
     u32 i;
     EffPCPBlockSetWork **blockSets;
 
@@ -3312,7 +3312,7 @@ void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
     }
 }
 
-void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
+void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, const void *src) {
     u32 i;
     EffPCPBlockSetWork **blockSets;
 
@@ -4712,7 +4712,7 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
-extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **table, SdfModel *model);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
 void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {

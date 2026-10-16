@@ -66,7 +66,7 @@ extern void *billGetWorkTransformMatrix(void *packet);
 extern void effBlurBuildSamplingQuad();
 
 extern void effAppendBlurRenderState(void *, s32, SdfTex *);
-extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
+extern void effAppendBlurRectanglePackets(void *, const EffBlurQuad *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
@@ -112,7 +112,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
 
 
 void effBlurBuildSamplingQuad(source, data, fixedPoint)
-    EffBlurQuad *source;
+    const EffBlurQuad *source;
     EffBlurDrawData *data;
     u8 fixedPoint;
 {
@@ -171,7 +171,7 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
 }
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
-void effBlurDrawFramebufferQuad(EffBlurQuad *source)
+void effBlurDrawFramebufferQuad(const EffBlurQuad *source)
 {
     SdfListHead *list;
     void *tag;

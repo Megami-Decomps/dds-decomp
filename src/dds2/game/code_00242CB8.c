@@ -14,8 +14,8 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
-extern void fldSetFadeTarget(s32, s32, s32);
-extern void evtBeginSkyParameterTransition(s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void evtBeginSkyParameterTransition(s32 duration, s32 target);
 
 extern s32 scrReadIntParameter(s32 idx);
 
@@ -46,7 +46,7 @@ extern char D_00421FE8[];
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
-extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
+extern void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
 s32 evtCommandWaitLightResourceScale(void) {
@@ -301,7 +301,7 @@ void evtClearSolarOverlayControl(void) {
 
 /* Reset the field-transition expiry counter at world offset 0xA4C. */
 void evtResetFieldTransitionCounter(void) {
-    datGameState->world.unkA4C = 0;
+    datGameState->world.fieldTransitionCycleCount = 0;
 }
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
@@ -397,9 +397,9 @@ extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
-void evtAdvanceSolarClockAndExpireControls(f32 delta) {
+void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
     if (datGameState->world.flags & 1) {
-        datGameState->world.phaseTimer += delta;
+        datGameState->world.phaseTimer += travelDistance;
         if (datGameState->world.phaseTimer > 4500.0f) {
             datGameState->world.phaseTimer = 0;
             evtSetSolarPhase((datGameState->world.phase + 1) & 0xF);
@@ -409,10 +409,10 @@ void evtAdvanceSolarClockAndExpireControls(f32 delta) {
                 fldConsumeSecondarySceneFlag();
             }
             if (datGameState->world.fieldFlags & 4) {
-                datGameState->world.unkA4C++;
-                if (datGameState->world.unkA4C >= 6U) {
+                datGameState->world.fieldTransitionCycleCount++;
+                if (datGameState->world.fieldTransitionCycleCount >= 6U) {
                     fldConsumeFieldTransitionFlag();
-                    datGameState->world.unkA4C = 0;
+                    datGameState->world.fieldTransitionCycleCount = 0;
                 }
             }
             if (datGameState->world.fieldFlags & 8) {
@@ -429,7 +429,7 @@ void evtAdvanceSolarClockAndExpireControls(f32 delta) {
                     datGameState->world.secondaryPhase = 0;
                 }
             }
-            datGameState->world.unkA48 = 0;
+            datGameState->world.specialEncounterAttemptCount = 0;
         }
     }
 }
@@ -466,7 +466,7 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
     evtSetSolarPhase(0);
     datGameState->world.secondaryPhase = 0;
     datGameState->world.overlayFlag = 0;
-    datGameState->world.unkA4C = 0;
+    datGameState->world.fieldTransitionCycleCount = 0;
 }
 
 void evtStopSolarOverlay(void) {

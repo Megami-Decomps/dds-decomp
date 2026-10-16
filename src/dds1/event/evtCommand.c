@@ -11,6 +11,7 @@
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
+#include "eff_inner_float_api.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
@@ -38,7 +39,7 @@ s32 scrReadIntParameter(s32 idx);
 
 s32 scrGetCommandTimer(void);
 
-void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
+void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
@@ -148,7 +149,6 @@ extern void *memset(void *dst, s32 value, u32 size);
 
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 
-extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 /* Copy two source points into the primary effect object. */
 s32 evtCommandCopyEffectSourcePoints(void) {
@@ -817,8 +817,8 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
 }
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *);
-extern void sdfSetFloatCounterDirection(u32 *, u32);
+extern void dds3ReplaceObjectResource(EffWorldNode *object);
+extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
 s32 evtCommandAttachObjectPath(void) {

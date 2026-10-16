@@ -2,7 +2,7 @@
 """Run decomp-permuter on a draft compiled inside its real unit.
 
     tools/perm_unit.py import src/dds1/game/code_00202178.c func_00203BA8 draft.c
-    ../decomp-permuter/permuter.py build/permuter/dds1_func_00203BA8 -j8 --best-only --stop-on-zero
+    ../decomp-permuter/permuter.py build/permuter/dds1_func_00203BA8 -j8 --best-only --stack-diffs --stop-on-zero
 
 `import` writes build/permuter/<version>_<func>/. Each candidate is spliced
 back into the unit in place of the function's INCLUDE_ASM (draft.c may carry
@@ -18,6 +18,10 @@ scores 0.
 Only passes that keep source ordinary are enabled (NEAT_WEIGHTS). A permuter
 hit is a hint, not landable code: reduce it to the smallest ordinary change
 and verify the full build (docs/CONTRIBUTING.md).
+The dump hook upper-cases sp/s8, so the permuter's stack wildcards never
+apply and frame or local-offset differences always count (with or without
+--stack-diffs). Still check the reduced source with tools/check_unit.py in
+the complete unit before landing.
 
 Needs a decomp-permuter checkout (DECOMP_PERMUTER, default ../decomp-permuter
 next to the repository) and pycparser/toml for the Python running `import`.
@@ -236,6 +240,7 @@ def cmd_import(a: argparse.Namespace) -> None:
     sys.path.insert(0, str(perm))
     spec.loader.exec_module(imp)
     base, _ = imp.prune_source(src, True, fn)
+    from src.ast_util import process_pragmas
     (out / "base.c").write_text(base)
 
     me = Path(__file__).resolve()
@@ -245,13 +250,18 @@ def cmd_import(a: argparse.Namespace) -> None:
 
     fast = prototypes_only(template, full[find_def(full, fn)[0]:find_def(full, fn)[1]])
     dumps = []
-    for name in ("fast", "full"):
-        if name == "fast":
-            (out / "template_fast.c").write_text(fast)
-        else:
-            (out / "template_fast.c").unlink()
-        subprocess.run([out / "compile.sh", out / "base.c", "-o", out / f"check_{name}.o"])
-        dumps.append(dump(out / f"check_{name}.o")[3:])
+    # base.c keeps parser-safe asm pragmas; validate the decoded source that
+    # the permuter actually sends to the compiler, not ignored GCC pragmas.
+    with tempfile.TemporaryDirectory(dir=out) as t:
+        check_source = Path(t) / "base.c"
+        check_source.write_text(process_pragmas(base))
+        for name in ("fast", "full"):
+            if name == "fast":
+                (out / "template_fast.c").write_text(fast)
+            else:
+                (out / "template_fast.c").unlink()
+            subprocess.run([out / "compile.sh", check_source, "-o", out / f"check_{name}.o"], check=True)
+            dumps.append(dump(out / f"check_{name}.o")[3:])
     if dumps[0] == dumps[1] and len(dumps[0]) > 3:
         (out / "template_fast.c").write_text(fast)
     print("prototype-only unit:", "same code, used" if dumps[0] == dumps[1] else "differs, full unit used")
@@ -285,7 +295,7 @@ def cmd_cc(a: argparse.Namespace) -> None:
         if r.returncode:
             sys.exit(r.stderr[-2000:])
         (Path(t) / "f.s").write_text(strip_other_code((Path(t) / "u.s").read_text(), fn))
-        r = subprocess.run([AS, "-EL", "-G8", "-Iinclude", "-o", Path(a.output).resolve(), f"{t}/f.s"],
+        r = subprocess.run([AS, "-EL", "-G8", "-g", "-Iinclude", "-o", Path(a.output).resolve(), f"{t}/f.s"],
                            cwd=ROOT, capture_output=True, text=True)
         if r.returncode:
             sys.exit(r.stderr[-2000:])
@@ -306,7 +316,10 @@ def dump(o: Path) -> list[str]:
             elif kind in ("R_MIPS_HI16", "R_MIPS_LO16", "R_MIPS_GPREL16"):
                 out[-1] = re.sub(r"(,|\t)(-?(0x)?[0-9a-f]+)(\(|$)", r"\1<sym>\4", out[-1])
             continue
-        out.append(re.sub(r"-?\d+\(gp\)", "<sym>(gp)", line))
+        line = re.sub(r"-?\d+\(gp\)", "<sym>(gp)", line)
+        # Upper-case sp/s8 so the scorer's stack wildcards never apply: a zero
+        # score must mean the frame and local offsets match too.
+        out.append(re.sub(r"\b(sp|s8)\b", lambda m: m.group(1).upper(), line))
     return out
 
 

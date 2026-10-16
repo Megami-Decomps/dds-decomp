@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "mnu.h"
 #include "brs_level_progress_api.h"
+#include "evt_stage_test_api.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -236,7 +237,7 @@ extern s32 D_003BAA70;
 extern void mnuDestroyWindowContainer(u32);
 
 extern u8 mnuCampPartySelectionReturnPopupEntry[];
-extern struct MenuPanelState *mnuCreatePanelState(s32, s32);
+extern struct MenuPanelState *mnuCreatePanelState(s32 width, s32 height);
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuGetIndexedNonzeroEffect(s32);
@@ -1296,8 +1297,6 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
 }
 
 extern s32 evtStageTestHasPendingMotion();
-extern u32 evtStageTestCountFlags(s32);
-extern void evtStageTestQueueMotion(s32, u32);
 
 typedef struct MenuIdleVoiceState {
     u8 pad00[0x28];
@@ -1383,7 +1382,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 }
 
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 index);
 
 /* Draw an equipped skill's range and cost, or the two empty-slot markers. */
 void ptySkillMenuDrawEquippedSkillEntry(s32 x, s32 y, s32 depth, struct MenuList *list,

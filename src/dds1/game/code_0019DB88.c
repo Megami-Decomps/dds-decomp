@@ -24,15 +24,15 @@ extern ItfMesGlobals itfMesWork;
 
 
 
-extern void itfMesShiftPanelVertically(ItfMesState *, s32);
-extern void itfMesSetChildChainFlags(FrFontGlyph *, u8);
-extern s32 itfMesNthClearBit(s32, u32);
+extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
+extern void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue);
+extern s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask);
 extern s32 sndSeqSelectPoll(ItfMesState *);
 extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
 extern s32 frFontMeasureGlyphStripWidth();
 
-extern UiSprite *itfCreateUiSpriteByKind(s32, u32);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
@@ -120,7 +120,7 @@ void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
     }
     cur->glyphChain = NULL;
     cur->textState = 0;
-    cur->unk11 = 0;
+    cur->textInterfaceMask = 0;
     cur->lineCount = 0;
     cur->itemIndex = 0;
     cur->tableCount = 0;
@@ -176,7 +176,7 @@ void itfResetBattleFadeState(BtlFade *fade, s32 preserveKind) {
     fade->phase = 0;
     fade->timer = 0;
     fade->alpha = 0x40;
-    fade->unk08 = 0;
+    fade->textAdvanceFrameCount = 0;
 }
 
 void btlSetFadePhaseAlphaTimer(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
@@ -348,7 +348,57 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", itfMesAdvanceEntryText);
+extern u32 itfMessageFlags;
+void itfMesAdvanceEntryText(ItfMesState *mes) {
+    ItfMesEntryBlock *entryBlock = &mes->entryBlock;
+    u32 flags;
+
+    if (entryBlock->textState != 1) {
+        return;
+    }
+    flags = mes->flags;
+    if ((flags & 7) == 4) {
+        mes->fade.textAdvanceFrameCount++;
+        if (mes->flags & 0x800000) {
+            entryBlock->textState = -1;
+            return;
+        }
+        if (!(mes->flags & 0x100000)) {
+            mes->fade.kind = 1;
+        }
+        if (!(D_00324510.confirm < 0 || D_00324510.primaryCancel < 0 ||
+              (D_00324510.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
+              entryBlock->textInterfaceMask != 0) {
+            return;
+        }
+        if (entryBlock->textInterfaceMask != 0) {
+            sndSetSequenceVolumePan(9, 0x7F, 0x3F);
+        }
+        itfResetBattleFadeState(&mes->fade, 0);
+        entryBlock->itemIndex++;
+        if (entryBlock->itemIndex >= entryBlock->tableCount) {
+            entryBlock->textState = -1;
+            return;
+        }
+        itfMesInitCharTable((s32 *)mes->textSlots.addresses);
+        if (mes->temporaryFontEntry != 0) {
+            frFontLoadTemporaryEntry(mes->temporaryFontEntry);
+        }
+        itfMesBuildEntryGlyph(mes);
+        itfMesCreatePanelOriginFrameWhenVisible(mes);
+        mes->flags = (mes->flags & ~7) | 3;
+        return;
+    }
+    if ((D_00324510.confirm < 0 || D_00324510.primaryCancel < 0 || (D_00324510.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
+        !(mes->flags & 0x1000000) && !(mes->flags & 0x400000)) {
+        frFontEnableNodeContextModes(entryBlock->glyphChain);
+        if (mes->blk14.glyphChain != NULL) {
+            frFontEnableContextMode(mes->blk14.glyphChain);
+        }
+        flags = mes->flags;
+    }
+    mes->flags = flags & ~0x1000000;
+}
 
 void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
@@ -572,7 +622,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     if (!(flags & 0x20000) && (flags & 7) >= 3) {
         if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
             if ((panel->flags & 7) != 4) {
-                panel->fade.unk08 = 0;
+                panel->fade.textAdvanceFrameCount = 0;
                 panel->flags = (panel->flags & ~7) | 4;
             }
         }
@@ -627,7 +677,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_00357FC8[];
 #include "sdf_packet_alloc.h"
-extern void itfDrawThreePanelBorderBands(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 extern void itfSendTablePacket(SdfListHead *, s32, s32);
@@ -1013,7 +1063,7 @@ s32 btlEditCameraFieldOfView(void) {
                     (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
     D_00325708.append(&D_00325708, list);
-    if (D_00324510.cancel < 0) {
+    if (D_00324510.secondaryCancel < 0) {
         return -1;
     }
     D_003D73C0.degrees = sdfSceneProjectionParameters.camera.fov * radiansToDegrees;
@@ -1190,7 +1240,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }
-        if ((u8)D_00324510.cancel & 2) {
+        if ((u8)D_00324510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -1246,7 +1296,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
                 }
             }
         }
-        if (D_00324510.cancel < 0) {
+        if (D_00324510.secondaryCancel < 0) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }

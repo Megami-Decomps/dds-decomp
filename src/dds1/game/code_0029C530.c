@@ -2220,9 +2220,9 @@ extern u8 *billAllocQuadNode(u8 *);
 
 extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
-extern void billInitializeEmitterRows(u8 *, u8 *);
+extern void billInitializeEmitterRows(u8 *work, u8 *descriptor);
 
-extern void billInitializeQuadRows(u8 *, u8 *);
+extern void billInitializeQuadRows(u8 *work, u8 *descriptor);
 
 u8 *billCloneAnimatedTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
@@ -2485,15 +2485,15 @@ u8 *billAllocEmitterNode(u8 *config) {
     return node;
 }
 
-void billInitializeEmitterRows(u8 *node, u8 *config) {
-    u32 count = ((EffBillTimedHeader *)config)->count;
+void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
+    transform = (f32 *)((EffBillFrameState *)work)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -3202,15 +3202,15 @@ u8 *billAllocQuadNode(u8 *config) {
     return node;
 }
 
-void billInitializeQuadRows(u8 *node, u8 *config) {
-    u32 count = ((EffBillTimedHeader *)config)->count;
+void billInitializeQuadRows(u8 *work, u8 *descriptor) {
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
+    transform = (f32 *)((EffBillFrameState *)work)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -4785,7 +4785,7 @@ extern EffectSurfaceNode *effResourceReferenceReplaceFromFile(u8 *);
 
 extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
 
-extern void effReplaceSurfaceResourceHolder(s32, u32);
+extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
 
 EffectSurfaceNode *effInitializeSurfaceForKind(u8 *work) {
     EffectSurfaceNode *node = effResourceReferenceReplaceFromFile(work);
@@ -8457,7 +8457,7 @@ extern u32 effBTLFieldColorGetOverrideSelector(void);
 
 extern u32 effBTLFieldColorGetFinalSelector(void);
 
-extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
+extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
 
 void effGetWorldVector(u32 which) {
     EffectVectorRequest request;
@@ -8959,7 +8959,7 @@ typedef struct EffCopiedSpawnList {
     u32 count;
     FldSpawnBatch *groups;
 } EffCopiedSpawnList;
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 
 /* Capture constructor arguments before consuming the entry; see
  * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */

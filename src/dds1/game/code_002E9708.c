@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ee_mmi.h"
 #include "sdf_resource.h"
@@ -73,7 +74,7 @@ extern char D_00398948[];
 extern s32 sdfSoundRpcSemaphore;
 extern s32 SignalSema(s32);
 extern void FlushCache(s32);
-extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 extern s32 GetThreadId(void);
 extern void sceSifSetRpcQueue(void *, s32);
 extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
@@ -89,7 +90,7 @@ extern char D_003B4900[];
 extern char *D_00398968[];
 
 extern s32 DIntr(void);
-extern void sdfDispatchNextStreamNode(s32);
+extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
 typedef void *(*SdfSoundReadCallback)(s32);
@@ -100,10 +101,6 @@ typedef union SdfSoundCommand {
 
 extern SdfSoundCommand D_003BD494;
 
-u32 sndSendCommandPacket(u32 command, u32 value, void *data, u32 size);
-
-u32 sndQueueCommandPacket(u32 command, u32 value, void *data, u32 size);
-
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_003BDAA8;
@@ -111,13 +108,13 @@ extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
 extern s32 iWakeupThread(s32 threadId);
 extern s32 sceIpuSync(s32, s32);
-extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
+extern void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void sdfRemoveHandler(void *);
 extern s32 sdfDisableDmacChannel(s32);
 
-extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32);
+extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32 capacity);
 
 
 extern SdfStreamFrameNode *sdfStreamNodeListHead;
@@ -230,8 +227,7 @@ extern SdfSoundRpcRequest *D_003BDA74;
 extern s32 D_003BDA78;
 extern DevState *D_003BDA7C;
 extern SdfSoundResidentBuffer D_003FEA98;
-extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
-extern s32 sdfDevQueueActiveOperation(DevState *);
+extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */

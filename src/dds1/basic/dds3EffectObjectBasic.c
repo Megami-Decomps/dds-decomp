@@ -44,7 +44,7 @@ typedef ObjectTransform EffectParameters;
 typedef EffWorldNode EffectObj;
 
 void effObjFreeInner(EffWorldNode *node);
-void dds3DestroyObjectBase(void *arg);
+void dds3DestroyObjectBase(void *objectBase);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
 EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra);
@@ -75,8 +75,8 @@ extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 
 extern void effObjInnerVecBackup(ObjectTransform *node);
-extern void effMagatuhiCopyFloatBlock(void *, const void *);
-extern void effMagatuhiSetControlPointParams(void *, const void *);
+extern void effMagatuhiCopyFloatBlock(void *work, const void *src);
+extern void effMagatuhiSetControlPointParams(void *work, const void *src);
 
 
 
@@ -93,7 +93,7 @@ void effObjReleaseObjectData(EffectObj *obj) {
 }
 
 #include "dds3_world_primary.h"
-extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effMiscNormalizeVU(void);
 

@@ -17,9 +17,9 @@ s32 dds3GetCameraMode(EffWorldNode *object) {
     return ((CameraData *)object->data)->eyeIsRelative;
 }
 
-void dds3SetCameraMode(EffWorldNode *object, s32 value) {
-    if (((CameraData *)object->data)->eyeIsRelative != value) {
-        ((CameraData *)object->data)->eyeIsRelative = value;
+void dds3SetCameraMode(EffWorldNode *camera, s32 mode) {
+    if (((CameraData *)camera->data)->eyeIsRelative != mode) {
+        ((CameraData *)camera->data)->eyeIsRelative = mode;
     }
 }
 

@@ -6,9 +6,9 @@
 struct FileRequest;
 
 /* Loaded resource values remain 32-bit words; only the request owner is opaque. */
-u32 fileGetResourceHandle(struct FileRequest *request);
-u32 fileGetLoadedDataAddress(struct FileRequest *request);
-u32 fileGetResourceSize(struct FileRequest *request);
+u32 fileGetResourceHandle(const struct FileRequest *request);
+u32 fileGetLoadedDataAddress(const struct FileRequest *request);
+u32 fileGetResourceSize(const struct FileRequest *request);
 s32 filePollEntryCleanup(struct FileRequest *request);
 
 #ifdef VERSION_DDS1
@@ -28,8 +28,8 @@ void fileQueueFlaggedDispatchRequest(const char *requestName);
 struct FileRequest *fileQueueDefaultCallbackRequest(const char *requestName);
 struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName);
 
-s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
-s32 fileRequestIsReady(struct FileRequest *request);
+s32 fileIsRequestReadyInCurrentMode(const struct FileRequest *request);
+s32 fileRequestIsReady(const struct FileRequest *request);
 void fileWaitReady(struct FileRequest *request);
 void fileWaitForRequestReady(struct FileRequest *request);
 void fileReqStartCardDetection(u32 port);

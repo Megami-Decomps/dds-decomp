@@ -27,7 +27,7 @@ struct EffectSlotSet;
 #define MNU_SELECTED_ROW_SPRITE 12
 #define MNU_UNSELECTED_ROW_SPRITE 14
 
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 
 
@@ -73,7 +73,8 @@ typedef struct {
 extern DspEntrySpriteLookup D_003BC448[];
 extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
-extern void mnuDrawPlacedSpriteByIndex(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                       s32 mode, s32 context);
 extern void sprintf(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
@@ -183,7 +184,8 @@ void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue
 
 extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
 extern struct EffectSlotSet *mnuMantraSpriteSlots[];
-extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 
 void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
                               u16 unusedSceneId, s32 unusedContext) {
@@ -248,7 +250,6 @@ extern DspMantraName *D_003BAA78;
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(u16);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
@@ -363,7 +364,8 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
     }
 }
 
-extern void mnuDrawSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite,
+                                     s32 placementIndex, s32 flags, s32 context);
 
 void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
     f32 fraction;
@@ -650,7 +652,46 @@ void itfDspDrawPair(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
 void func_00256E88(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00256E90);
+#include "eff.h"
+
+/* The common placement table entry's sprite, re-derived at each use as retail does. */
+#define MANTRA_COMMON_SPRITE(i)                                                                              \
+    (&mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[i].resourceIndex]                                 \
+          ->workEntries[mnuMantraCommonSpritePlacements[i].spriteIndex])
+
+extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
+void func_00256E90(s32 frame, s32 unused, s32 alpha, s32 context) {
+    f32 alphaValue;
+    f32 fade;
+    f32 scale;
+    f32 inset;
+    f32 halfWidth;
+    f32 angle;
+    s32 y;
+
+    if (frame < 5) {
+        fade = ((f32)frame) * 0.25f;
+    } else {
+        fade = 1.0f;
+    }
+    alphaValue = (f32)alpha;
+    scale = 2.0f - fade;
+    inset = fade * 16.0f;
+    halfWidth = ((f32)(MANTRA_COMMON_SPRITE(20)->geometry.bounds[2] >> 5)) * (scale - 1.0f);
+    y = ((f32)(-(MANTRA_COMMON_SPRITE(20)->geometry.bounds[3] >> 4))) * (scale - 1.0f);
+    {
+        s32 scaledAlpha = alphaValue * fade;
+        mnuDrawScaledPlacedSprite((inset + (-16.0f)) - halfWidth, y, 0, scaledAlpha, 20, context, scale,
+                                  scale);
+        mnuDrawScaledPlacedSprite((16.0f - inset) - halfWidth, y, 0, scaledAlpha, 21, context, scale, scale);
+    }
+    fade = ((f32)frame) / 5.0f;
+    angle = fade * 3.141592503f;
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSinPoly(angle), 20, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSinPoly(angle), 21, context);
+}
+
+#undef MANTRA_COMMON_SPRITE
 
 extern s32 mnuGetSelectedNodeValue(void);
 
@@ -692,3 +733,4 @@ INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC478);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC480);
 
+#include "evt_message_window_api.h"

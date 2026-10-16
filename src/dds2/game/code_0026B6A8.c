@@ -293,7 +293,7 @@ void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vert
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
-extern void itfConfigureSurfaceAlphaBlendMode(s32, s32);
+extern void itfConfigureSurfaceAlphaBlendMode(s32 mode, s32 surface);
 typedef struct DspStripVerticalOffsets {
     s8 values[2][2][6];
 } DspStripVerticalOffsets;

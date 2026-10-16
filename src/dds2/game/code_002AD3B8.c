@@ -71,7 +71,7 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
 extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
-extern void mnuDrawCampIconBackdropByKind(s32, s32);
+extern void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task);
 extern void mnuDrawCampGridAndLabel(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void mnuSetMenuPageFlags(MenuSprites *, u32);

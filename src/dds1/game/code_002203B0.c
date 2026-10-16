@@ -173,7 +173,6 @@ s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit) {
     return 0;
 }
 
-extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
 
 s32 evtUnitStepScaledValue(EvtUnit *unit) {
     f32 t;
@@ -203,7 +202,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
         if (1.0f < t) {
             t = 1.0f;
         }
-        evtScaleValueByMultiplier((void *)unit->pathHandle, t);
+        evtScaleValueByMultiplier((EvtScaledValue *)unit->pathHandle, t);
         dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;

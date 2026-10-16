@@ -15,22 +15,21 @@
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *object);
 
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
-void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
-void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
 extern const char evtFieldScriptTerminationFormat[0x28];
 extern void sdfDebugPrintf(const char *format, ...);
 
 extern EffWorldNode *dds3AppendWorldNode(void);
-extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
-                                                       const SdfTextureOffsetListHeader *, u32 flags);
+extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,
+                                                       u32 resource0Data, u32 resource1Data,
+                                                       const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern void mdlSpawnViewerWorldObject(void);
-extern void sdfSetViewFieldOfView(f32);
-extern void dds3DrawSetIndexedWord(u32, s32);
-extern void kwlnDrawCopyWords20(void *);
-extern void kwlnDrawCopyRow128(void *);
+extern void sdfSetViewFieldOfView(f32 fieldOfView);
+extern void dds3DrawSetIndexedWord(u32 value, s32 index);
+extern void kwlnDrawCopyWords20(void *source);
+extern void kwlnDrawCopyRow128(void *source);
 extern const char evtStageResourcePathFormat[0x10];
 extern char D_00367DF0[];
 extern char D_00367EB0[];
@@ -119,7 +118,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
     return 1;
 }
 
-extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
+extern s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option);
 extern char evtScriptResourcePathBuffer[];
 
 void evtCreateEventScriptProcess(s32 eventId) {
@@ -169,7 +168,6 @@ void evtClearWorldSlotStatusFlag(void *object)
     }
 }
 
-extern void evtScaleValueByMultiplier(f32 multiplier, struct EvtScaledValue *slotData);
 
 /* Scale the object's retained path time within the clamped multiplier range. */
 void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
@@ -183,7 +181,7 @@ void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
         if (multiplier > 1.0f) {
             multiplier = 1.0f;
         }
-        evtScaleValueByMultiplier(multiplier, (struct EvtScaledValue *)slotData);
+        evtScaleValueByMultiplier((EvtScaledValue *)slotData, multiplier);
     }
 }
 

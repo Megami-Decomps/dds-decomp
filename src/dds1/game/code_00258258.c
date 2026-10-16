@@ -245,7 +245,58 @@ void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackSt
 
 
 
-INCLUDE_ASM(const s32, "game/code_00258258", mnuUpdateMantraGridEntryPulse);
+extern f32 effMiscRandUnitFloat(void *state);
+static inline s16 mnuRandomPulseDuration(void *state) {
+    return effMiscRandUnitFloat(state) * 120.0f + 30.0f;
+}
+
+void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
+    MnuMantraGridPulse *pulse = &entry->pulse;
+    s32 timer = pulse->timer + 1;
+    f32 random;
+
+    pulse->timer = timer;
+    if ((s16)timer < pulse->duration) {
+        return;
+    }
+    pulse->timer = 0;
+    random = effMiscRandUnitFloat(0);
+    switch (pulse->mode) {
+    case 1:
+        if (random < 0.3f) {
+            pulse->mode = 2;
+            pulse->duration = 50;
+            return;
+        }
+        if (random < 0.5f) {
+            pulse->mode = 5;
+            pulse->duration = 60;
+            return;
+        }
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    case 2:
+        pulse->mode = 3;
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    case 3:
+        if (effMiscRandUnitFloat(0) < 0.1f) {
+            pulse->mode = 4;
+            pulse->duration = 50;
+            return;
+        }
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    case 0:
+    case 4:
+    case 5:
+        pulse->mode = 1;
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    default:
+        return;
+    }
+}
 
 
 void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,

@@ -68,7 +68,7 @@ extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
 extern s32 D_003BD854;
-extern void btlPickCommandElementCheckedTarget(s32, s32);
+extern void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action);
 extern void btlPickCommandTargetExcludingActor(s32, s32);
 extern void btlPickCommandLowestHpBlockTarget(s32, u16);
 extern void btlSelectCommandTargetsByMode(s32, u16);
@@ -89,7 +89,7 @@ extern u8 D_003BB818[];
 extern u8 sdfPfsDebugMode;
 
 
-extern s32 sceDopen(char *);
+extern s32 sceDopen(char *path);
 
 extern s32 btlBuiltinResourceNameIndex;
 
@@ -2308,7 +2308,7 @@ void func_001FADE8(void) {
 void btlPointLightMenuNoOp(void) {
 }
 
-extern void evtConfigureUnitTransition(s32, s32);
+extern void evtConfigureUnitTransition(s32 unitAddress, s32 duration);
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     s32 state = (s32)(u32)btlGetRuntime();
@@ -3043,9 +3043,9 @@ void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32
 }
 
 /* Read the browser descriptor's zero-based selected entry index. */
-u32 btlGetResourceBrowserSelectedIndex(s32 recordAddress) {
-    const u32 *recordWords = (const u32 *)recordAddress;
-    return recordWords[5];
+u32 btlGetResourceBrowserSelectedIndex(
+    const BtlResourceDescriptor *descriptor) {
+    return descriptor->selectedIndex;
 }
 
 u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor) {
@@ -3079,8 +3079,9 @@ s32 btlTrimResourceName(BtlResourceDescriptor *descriptor, char *output) {
 
 
 /* Return the selected entry's category-specific metadata word unchanged. */
-u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
-    return resource->selectedEntry->value;
+u32 btlGetResourcePathVariant(const BtlResourceDescriptor *resource) {
+    const BtlResourceEntry *entry = resource->selectedEntry;
+    return entry->value;
 }
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
@@ -3317,11 +3318,11 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
     record->nameLength = strlen(name);
 }
 
-void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithExtension(const struct BtlResourceNameRecord *record, char *output) {
     sprintf(output, D_003BB818, record->resourceName, record->extension);
 }
 
-void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *record, char *output) {
     sprintf(output, D_003BB820, record->resourceName);
 }
 

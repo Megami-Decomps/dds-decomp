@@ -83,7 +83,7 @@ swaps. This pinned compiler compares fixed quantity numbers `0/1`, `1/2`, `0/1`
 while swapping entries in the order vector. It does not compare the quantities
 currently stored in those entries. Four or more quantities use `qsort` instead.
 
-For example, the selected-camera provider `func_001E0398` has quantities with
+For example, the selected-camera provider `btlBuildRandomTargetCameraStates` has quantities with
 priorities `[2500, 8000, 3333]`. The actual priority order evolves as follows:
 
 ```text
