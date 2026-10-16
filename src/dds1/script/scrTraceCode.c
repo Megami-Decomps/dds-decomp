@@ -79,10 +79,10 @@ u32 scrStoreGlobalInteger(ScrData *scr)
 
 u32 scrStoreGlobalFloat(ScrData *scr)
 {
-    f32 value;
+    f32 floatValue;
 
-    value = bfStackPopFloat(scr);
-    datGameState->floats[scr->instructions[scr->pc].parts.sOperand] = value;
+    floatValue = bfStackPopFloat(scr);
+    datGameState->floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
     return 1;
 }
