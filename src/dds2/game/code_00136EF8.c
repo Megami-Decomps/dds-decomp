@@ -3350,7 +3350,7 @@ s32 fldGetActorMotionEntry(u32 attribute) {
         D_004361D8 = D_00391FA0[motionIndex].sceneBitsBarrierRoomName;
         return 0;
     case 5:
-        return D_00391FA0[motionIndex].unk44;
+        return D_00391FA0[motionIndex].attribute5Value;
     case 6:
         flags = actor->flags64;
         if (flags & 1) {
