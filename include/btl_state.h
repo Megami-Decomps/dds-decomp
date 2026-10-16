@@ -208,7 +208,7 @@ typedef struct BtlState {
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk_1FC; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
     struct EffWorldNode *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
-    s32 listener; /* 0x204: stored world-node address. */
+    struct EffWorldNode *sceneLightNode; /* 0x204: action node used for scene-light transitions. */
     s32 currentScene; /* 0x208 */
     s32 queuedScene; /* 0x20C */
     s32 scenePhaseFrame; /* 0x210: scene-phase counter, distinct from the +0x1F0 model-update clock. */
@@ -366,7 +366,7 @@ typedef char BtlSceneLightDds1Offset2[((unsigned int)&((BtlState *)0)->baselineA
 typedef char BtlSceneLightDds1Offset3[((unsigned int)&((BtlState *)0)->lightDirection == 0x40) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
-typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->listener == 0x204) ? 1 : -1];
+typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->sceneLightNode == 0x204) ? 1 : -1];
 typedef char BtlStateTotalApOffset[((unsigned int)&((BtlState *)0)->totalAp == 0x2D0) ? 1 : -1];
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];

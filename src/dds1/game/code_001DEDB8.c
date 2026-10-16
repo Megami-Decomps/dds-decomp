@@ -6247,13 +6247,13 @@ void btlInitCursorAndApplyAction(BtlLinkedCommand *actor, BtlCamState *target) {
 
 void btlAdvanceWorldCounterAndSpawnActionObject(void) {
     u32 counter;
-    s32 context;
+    BtlState *context;
     struct EffWorldNode *object;
 
-    context = (s32)(u32)btlGetRuntime();
+    context = (BtlState *)btlGetRuntime();
     counter = dds3AdvanceWorldCounter();
     object = evtSpawnActionObj9(counter);
-    *(u32 *)(context + 0x204) = (u32)object;
+    context->sceneLightNode = object;
     D_003BB694 = 0;
 }
 
@@ -6554,7 +6554,7 @@ extern void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 blendFram
 /* Stage light/ambient RGB on the scene node and start its frames-long blend. */
 void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    s32 listener = work->listener;
+    EffWorldNode *listener = work->sceneLightNode;
 
     D_003D74A0.transform.position[0] = lightColor[0];
     D_003D74A0.transform.position[1] = lightColor[1];
@@ -6569,8 +6569,8 @@ void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 f
     D_003D74A0.transform.rotation[1] = 0.0f;
     D_003D74A0.transform.rotation[2] = 0.0f;
     D_003D74A0.transform.rotation[3] = 0.0f;
-    dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_003D74A0);
-    evtBeginUnitValueColorTransition((EffWorldNode *)work->listener, frames);
+    dds3LoadWorldTransformSetup(listener, &D_003D74A0);
+    evtBeginUnitValueColorTransition(work->sceneLightNode, frames);
 }
 
 extern SdfFlagListParams D_0035F5F8;
@@ -6866,7 +6866,7 @@ void *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
 s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
     BtlState *work;
     BtlUnit *unit;
-    s32 listener;
+    EffWorldNode *listener;
     u32 firstColor;
     u32 secondColor;
     u32 packedStart[4];
@@ -6884,7 +6884,7 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
         if (D_00324770[0][0] == 0.0f && D_00324770[0][1] == 0.0f && D_00324770[0][2] == 0.0f) {
             VEC3_SPLAT(D_00324770[0], 0.0078125f);
         }
-        listener = work->listener;
+        listener = work->sceneLightNode;
         D_003D74A0.transform.position[0] = work->baselineLightColor[0];
         D_003D74A0.transform.position[1] = work->baselineLightColor[1];
         D_003D74A0.transform.position[2] = work->baselineLightColor[2];
@@ -6898,8 +6898,8 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
         D_003D74A0.transform.rotation[1] = 0.0f;
         D_003D74A0.transform.rotation[2] = 0.0f;
         D_003D74A0.transform.rotation[3] = 0.0f;
-        dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_003D74A0);
-        evtBeginUnitValueColorTransition((EffWorldNode *)work->listener, args->value);
+        dds3LoadWorldTransformSetup(listener, &D_003D74A0);
+        evtBeginUnitValueColorTransition(work->sceneLightNode, args->value);
         PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);
         PCP_COPY_VECTOR_F32(work->ambientColor, work->baselineAmbientColor);
         PCP_COPY_VECTOR_F32(work->lightDirection, work->baselineLightDirection);
