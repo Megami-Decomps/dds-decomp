@@ -132,7 +132,7 @@ extern void fldSetSecondarySceneFlag(void);
 extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
 
-extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
+extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot);
 extern char D_003BC7C8[];
 
 
