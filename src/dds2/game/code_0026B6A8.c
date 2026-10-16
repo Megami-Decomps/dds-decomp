@@ -241,8 +241,8 @@ s32 mnuFirstPresentMainCharacterIndex(void) {
     return 0;
 }
 
-s32 mnuGetScrollingStripCountForLayout(s32 index) {
-    return index == 1 ? 4 : 6;
+s32 mnuGetScrollingStripCountForLayout(s32 layout) {
+    return layout == 1 ? 4 : 6;
 }
 
 void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
