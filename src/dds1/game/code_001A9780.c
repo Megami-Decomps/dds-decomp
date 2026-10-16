@@ -6659,7 +6659,96 @@ void btlDrawCommandClassRows(s32 sceneContext) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001BDF60);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BE590);
+/* BattleSelectionWork with its screen positions viewed as [row][x,y] pairs. */
+typedef struct SelView { s8 selectedRow; u8 pad01; s16 rowFade[4]; u8 pad0A[2]; s32 pos[4][2]; } SelView;
+void func_001BE590(BattleSceneObject *object) {
+    extern u16 btlReadUnitStatusMask(DatPartyRecord *);
+    extern void itfSetTextDrawLimit(s32);
+    extern const u32 D_003A2E70[3];
+    extern const u32 D_003A2E80[3];
+    typedef struct CommandLabelBank { const u8 *text[3]; } CommandLabelBank;
+    CommandLabelBank revertLabels;
+    CommandLabelBank transformLabels;
+    BtlState *battle;
+    s16 cursor;
+    s32 selected;
+    s32 total;
+    s32 shown;
+    CommandLabelBank *labels;
+    s32 row = 0;
+
+    memcpy(&revertLabels, D_003A2E70, sizeof(revertLabels));
+    memcpy(&transformLabels, D_003A2E80, sizeof(transformLabels));
+    battle = (BtlState *)btlGetRuntime();
+    cursor = (s16)object->selections[3].cursor;
+    selected = (s16)object->selections[3].entry;
+    shown = (s32)btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+    total = (s32)btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 1);
+    labels = (btlUnitStatusPair(object->owner->unit) & 0x1400) != 0
+                 ? &revertLabels : &transformLabels;
+    if (row < shown && cursor < total) {
+        do {
+            u32 color;
+            s32 x;
+            s32 y;
+            struct FrFontGlyph *glyph;
+            SelView *selection;
+
+            switch (row) {
+            case 0:
+                if ((btlReadUnitStatusMask(&object->owner->unit->partyRecord) & 0x1000) != 0) {
+                    color = 0x504F6140;
+                } else {
+                    color = selected == cursor ? 0x89FEFF80 : 0xA09DC380;
+                }
+                break;
+            case 1: {
+                DatGameState *state = datGameState;
+                s32 count = state->partyCount;
+                /* Count active members, then convert to available capacity. */
+                s16 capacity = 0;
+                if (count > 0) {
+                    DatPartyRecord *party = state->party;
+                    s32 remainingCount = count;
+                    do {
+                        if ((party->flags & 2) != 0) {
+                            capacity++;
+                        }
+                        party++;
+                        remainingCount--;
+                    } while (remainingCount != 0);
+                }
+                capacity = (s16)((u16)state->partyCount - capacity);
+                if ((datBattleSceneRecords[battle->battleMode].flags & 0x800) != 0) {
+                    capacity = 0;
+                }
+                color = capacity != 0
+                          ? (selected == cursor ? 0x89FEFF80 : 0xA09DC380)
+                          : 0x504F6140;
+                break;
+            }
+            case 2: /* Withdraw is the third entry of both label banks. */
+            default:
+                color = btlIsSceneActorLimitSatisfied((s32)object->owner->unit, 1) == 0
+                          ? (selected == cursor ? 0x89FEFF80 : 0xA09DC380)
+                          : 0x504F6140;
+                break;
+            }
+            selection = (SelView *)btlLinkedSelectionTaskBuffer;
+            x = selection->pos[row][0];
+            y = selection->pos[row][1];
+            color = (color & ~0xFFU) | (u32)selection->rowFade[row];
+            row++;
+            itfSetTextDrawLimit(0x13);
+            glyph = itfCreateConvertedTextGlyph((x + 15) << 4, (y + 3) << 3,
+                        0xFF0010, color, labels->text[cursor], 0);
+            frFontDrawGlyphWithSharedFlags(glyph, 1);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            itfSetTextDrawLimit(-1);
+            cursor++;
+        } while (row < shown && cursor < total);
+    }
+}
 
 extern const BattlePanelColors D_003A2E90;
 
