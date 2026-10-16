@@ -10,7 +10,7 @@ struct MantraPanelAnimation;
 extern struct MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
 extern void ptyApplyProfile(DatPartyRecord *, u16);
-extern void mnuStorePanelEntry(s32, s32);
+extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
 
 static inline u16 *mantraFlagEntry(MantraFlagResource *work, s32 id) {
     return work->flags + id;

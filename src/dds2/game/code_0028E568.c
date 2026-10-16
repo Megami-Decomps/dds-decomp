@@ -45,7 +45,7 @@ extern u32 mnuGetSelectedMantraUnitIndex(struct MnuStatusResource *);
 extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(struct MantraPanelPool *, s32, s8, s16, s16, u32);
 extern void mnuOffsetPanelAndSetVisualParams(struct MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
 extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
-extern void mnuStorePanelEntry(s32, s32);
+extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
 
 /* Mark the selected mantra node and start its panel animation. */
 void mnuActivateMantraNode(MnuStatusResource *menu, u16 nodeId) {
