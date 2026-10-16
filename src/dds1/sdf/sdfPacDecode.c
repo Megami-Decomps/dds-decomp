@@ -26,7 +26,7 @@ enum {
 
 void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfDecodePacNodeAndAdvanceTail(PacState *state);
-void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
+void sdfRelocatePackedResourceWords(void *words, void *relocationBase, void *table, s32 tableBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
 void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
