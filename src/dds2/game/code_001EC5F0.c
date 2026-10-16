@@ -7329,8 +7329,8 @@ void btlUpdateJobPositionFromModel(s32 *args) {
     fileQueueUpdate(node->queue);
 }
 
-void sndDestroyFileQueueWrapper(u32 queue) {
-    SoundHandleNode *node = (SoundHandleNode *)queue;
+void sndDestroyFileQueueWrapper(u32 handle) {
+    SoundHandleNode *node = (SoundHandleNode *)handle;
     fileQueueDestroy(node->queue);
     sdfReleaseChipBlock(node);
 }
