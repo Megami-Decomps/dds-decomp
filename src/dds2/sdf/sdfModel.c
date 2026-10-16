@@ -334,7 +334,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, const f32 (*parentM
     f32 *zAxis;
     f32 *scale;
     f32 *translation;
-    const f32 (*transformed)[4];
+    f32 (*transformed)[4];
     u8 *workspace;
     SdfDrawNode *child;
 
@@ -350,7 +350,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, const f32 (*parentM
     VU0_LOAD_VF_MEMORY(vf31, translation);
     VU0_LOAD_MATRIX_B(parentMatrix);
     sdfMultiplyVuMatrixInPlace();
-    transformed = (const f32 (*)[4])drawNode->worldMatrix;
+    transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
     workspace = drawNode->workspace;
     if (workspace != NULL) {
