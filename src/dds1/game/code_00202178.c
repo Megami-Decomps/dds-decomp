@@ -3637,7 +3637,7 @@ void btlConfigureRavanaUnitDimensions(BtlUnit *unit) {
     unit->status.stateFlags |= 0x200;
     unit->height = 100.0f;
     unit->reach = 25.0f;
-    unit->unkB8 = 100.0f;
+    unit->geometryHeight = 100.0f;
     unit->bodyRadius = 25.0f;
     if (((BtlBossEffectPayload *)battleData)->selectedId != unit->lookupId) {
         entry = btlFindUnitByActor(unit);
@@ -3918,7 +3918,7 @@ void btlRefreshRavanaUnitModelsAndPose(void) {
                             btlInitializeEffectVectorsFromSourceRecords(unit, effect->header.actor->resourceKind,
                                                                         effect->header.actor->species);
                             unit->height = 100.0f;
-                            unit->unkB8 = 100.0f;
+                            unit->geometryHeight = 100.0f;
                             unit->reach = 25.0f;
                             unit->bodyRadius = 25.0f;
                             unit->bodyOffsetZ += 150.0f;

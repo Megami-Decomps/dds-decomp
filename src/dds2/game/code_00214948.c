@@ -2926,7 +2926,7 @@ extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 static inline void btlCopyFormationDimensions(BtlUnit *unit) {
     PCP_COPY_VECTOR(unit->muzzleOffset, unit->bodyOffset);
     unit->bodyRadius = unit->reach;
-    unit->unkB8 = unit->height;
+    unit->geometryHeight = unit->height;
 }
 
 /* btlUpdateSpecialActorFormation */
@@ -5871,14 +5871,14 @@ void btlSetSpecialEnemyGeometry(void) {
                         unit->muzzleOffset[2] = -780.0f;
                         unit->muzzleOffset[3] = 0.0f;
                         unit->bodyRadius = 600.0f;
-                        unit->unkB8 = 1000.0f;
+                        unit->geometryHeight = 1000.0f;
                         /* Both geometry records share the offset and extents. */
                         unit->bodyOffset[0] = unit->muzzleOffset[0];
                         unit->bodyOffset[1] = unit->muzzleOffset[1];
                         unit->bodyOffset[2] = unit->muzzleOffset[2];
                         unit->bodyOffset[3] = unit->muzzleOffset[3];
                         unit->reach = unit->bodyRadius;
-                        unit->height = unit->unkB8;
+                        unit->height = unit->geometryHeight;
                     }
                 }
             }
