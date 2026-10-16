@@ -10,12 +10,12 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s8 D_0040B7D9[];
 
 
-u32 scrGetProcedureAddress(s32 index) {
-    return scrCurrentContext->procedures[index].addr;
+u32 scrGetProcedureAddress(s32 procedureIndex) {
+    return scrCurrentContext->procedures[procedureIndex].addr;
 }
 
-u32 scrGetLabelAddress(s32 index) {
-    return scrCurrentContext->labels[index].addr;
+u32 scrGetLabelAddress(s32 labelIndex) {
+    return scrCurrentContext->labels[labelIndex].addr;
 }
 
 u32 scrGetProgramCounter(void) {
