@@ -353,7 +353,8 @@ typedef struct MantraFileRequest {
 
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
-extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                s32 flags, s32 context);
 void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *handle, s32 packet);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
