@@ -86,11 +86,11 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 }
 
 
-u8 mnuGetItemRequirementCount(s32 index) {
-    if (index == 0) {
+u8 mnuGetItemRequirementCount(s32 itemId) {
+    if (itemId == 0) {
         return 0;
     }
-    return datGameState->itemRequirementCounts[index - 0xC0];
+    return datGameState->itemRequirementCounts[itemId - 0xC0];
 }
 
 extern s32 D_00435E3C;
