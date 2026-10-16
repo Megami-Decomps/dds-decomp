@@ -95,10 +95,10 @@ u8 mnuGetItemRequirementCount(s32 index) {
 
 extern s32 D_00435E3C;
 
-s8 mnuGetItemRequirementValue(s32 value) {
-    s32 index = value - 0xC0;
+s8 mnuGetItemRequirementValue(s32 itemId) {
+    s32 index = itemId - 0xC0;
 
-    if (value == 0) {
+    if (itemId == 0) {
         return 0;
     }
     return *(s8 *)(D_00435E3C + index * 6 + 5);
