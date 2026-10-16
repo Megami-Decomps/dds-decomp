@@ -16,6 +16,7 @@
 #include "sdf_model_copy.h"
 #include "sdf_asset_state.h"
 #include "sdf_pending.h"
+#include "sdf_queued_resource_api.h"
 #include "sdf_draw.h"
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
