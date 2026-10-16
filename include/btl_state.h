@@ -240,8 +240,8 @@ typedef struct BtlState {
     u8 pad25F[5];
     u32 motionSeLoadFrame; /* 0x264: disabled at -1; native updater tests the signed word. */
     u32 skillSeLoadFrame; /* 0x268: same signed disabled sentinel. */
-    u16 unk26C;
-    u16 unk26E;
+    u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
+    u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 encounterPack; /* 0x270: ENC PACK test selection (btlUpdateDebugEncounterSelector) */
     s32 adjustmentGroupIndex; /* 0x274: encounter reward lookup in code_001A1960 */
     s32 adjustmentEntryIndex; /* 0x278: entry within that encounter group */
@@ -371,6 +371,10 @@ typedef char BtlSideFloorResourceOffset[
 typedef char BtlMotionSeOwnersOffset[((unsigned int)&((BtlState *)0)->soundSlotOwners == 0x23C) ? 1 : -1];
 typedef char BtlMotionSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
 typedef char BtlSkillSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];
+typedef char BtlDefeatedLevelCountDds1Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelCount == 0x26C) ? 1 : -1];
+typedef char BtlDefeatedLevelTotalDds1Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelTotal == 0x26E) ? 1 : -1];
 typedef char BtlTimingRateOffset[((unsigned int)&((BtlState *)0)->timingRate == 0x490) ? 1 : -1];
 typedef char BtlHitResultOverrideOffset[((unsigned int)&((BtlState *)0)->hitResultOverride == 0x59C) ? 1 : -1];
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
@@ -477,8 +481,8 @@ typedef struct BtlState {
     u8 pad286[2];
     u32 motionSeLoadFrame; /* 0x288: -1 disables the motion-SE ATRAC3 buffer delay. */
     u32 unk28C;
-    u16 unk290;
-    u16 unk292;
+    u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
+    u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 effectLayer; /* 0x294 */
     s32 adjustmentGroupIndex; /* 0x298: encounter pack's group selector */
     s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
@@ -646,6 +650,10 @@ typedef struct BtlState {
 typedef char BtlEscapeAttemptCountDds2Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x278) ? 1 : -1];
 typedef char BtlMotionSeLoadFrameDds2Offset[
     ((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x288) ? 1 : -1];
+typedef char BtlDefeatedLevelCountDds2Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelCount == 0x290) ? 1 : -1];
+typedef char BtlDefeatedLevelTotalDds2Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelTotal == 0x292) ? 1 : -1];
 typedef char BtlSceneLightOffset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightOffset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
 typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];

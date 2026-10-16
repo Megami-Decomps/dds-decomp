@@ -954,8 +954,8 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     moneyRatio = 1.0f;
     averageLevel = btlAverageLevelsForMaskExcludingStatus20(4);
     defeatedLevel = averageLevel;
-    if (scene->unk26C != 0) {
-        defeatedLevel = (u16)(scene->unk26E / scene->unk26C);
+    if (scene->defeatedLevelCount != 0) {
+        defeatedLevel = (u16)(scene->defeatedLevelTotal / scene->defeatedLevelCount);
     }
     band = 0;
     for (levelLimit = 10; levelLimit < 100 && averageLevel >= levelLimit; levelLimit += 10) {

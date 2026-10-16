@@ -1140,8 +1140,8 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 work->moneyReward += btlGetEnemyMoney(action->unit, recipient);
                 recipient->status.stateFlags |= 0x400;
             }
-            runtime->unk292 += recipient->partyRecord.level;
-            runtime->unk290++;
+            runtime->defeatedLevelTotal += recipient->partyRecord.level;
+            runtime->defeatedLevelCount++;
         }
         work->groups[targetIndex].interval = btlGetActorDisplayByteWithDefault(source, command);
         work->groups[targetIndex].count = hitCount;
