@@ -443,12 +443,12 @@ u32 evtOpBindMotionSoundToModel(void) {
 }
 
 u32 evtOpUseSourceVectorForWorldObject(void) {
-    s32 param0;
-    s32 param1;
+    u32 targetKey;
+    u32 sourceKey;
 
-    param0 = scrReadIntParameter(0);
-    param1 = scrReadIntParameter(1);
-    mdlAttachWorldObjectToSourceVector(param0, param1);
+    targetKey = scrReadIntParameter(0);
+    sourceKey = scrReadIntParameter(1);
+    mdlAttachWorldObjectToSourceVector(targetKey, sourceKey);
     return 1;
 }
 
