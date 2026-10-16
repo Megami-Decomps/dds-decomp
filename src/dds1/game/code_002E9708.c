@@ -74,7 +74,7 @@ extern char D_00398948[];
 extern s32 sdfSoundRpcSemaphore;
 extern s32 SignalSema(s32);
 extern void FlushCache(s32);
-extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 extern s32 GetThreadId(void);
 extern void sceSifSetRpcQueue(void *, s32);
 extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
