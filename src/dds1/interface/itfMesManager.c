@@ -74,14 +74,14 @@ s32 itfGetTextLipsUnitId();
 
 s32 itfGetTextLipsMotionId();
 
-void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue);
+void itfMesSetNodeChainRenderValue(FrFontGlyph *glyph, s32 renderValue);
 
-FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node);
+FrFontGlyph *itfMesGetLastNode(FrFontGlyph *glyph);
 
 
 void itfMesInitCharTable(s32 *table);
 
-s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
+s32 itfMesMaxGroupedExtent(FrFontGlyph *glyph);
 
 extern s32 itfUpdateActiveMessageWindows(void);
 
@@ -1356,56 +1356,56 @@ FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
  * return NULL if discarding preceding rows exhausts the chain. */
-FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *node, s32 from, s32 to) {
+FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *glyph, s32 from, s32 to) {
     s32 rowsToDiscard = to - from - 1;
-    s32 rowY = node->y;
+    s32 rowY = glyph->y;
     FrFontGlyph *nextNode;
     FrFontGlyph *rowHead;
     FrFontGlyph *rowTail;
 
     while (rowsToDiscard > 0) {
-        while (rowY == node->y) {
-            nextNode = node->previous;
-            node->next = NULL;
-            node->chainHead = node;
-            node->previous = NULL;
-            frFontQueueGlyphForCurrentDrawBuffer(node);
-            node = nextNode;
-            if (node == NULL) {
+        while (rowY == glyph->y) {
+            nextNode = glyph->previous;
+            glyph->next = NULL;
+            glyph->chainHead = glyph;
+            glyph->previous = NULL;
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            glyph = nextNode;
+            if (glyph == NULL) {
                 return NULL;
             }
         }
         rowsToDiscard--;
-        rowY = node->y;
+        rowY = glyph->y;
     }
-    rowHead = node;
+    rowHead = glyph;
     do {
-        rowTail = node;
-        node = node->previous;
-    } while (node != NULL && rowY == node->y);
-    while (node != NULL) {
-        nextNode = node->previous;
-        node->next = NULL;
-        node->chainHead = node;
-        node->previous = NULL;
-        frFontQueueGlyphForCurrentDrawBuffer(node);
-        node = nextNode;
+        rowTail = glyph;
+        glyph = glyph->previous;
+    } while (glyph != NULL && rowY == glyph->y);
+    while (glyph != NULL) {
+        nextNode = glyph->previous;
+        glyph->next = NULL;
+        glyph->chainHead = glyph;
+        glyph->previous = NULL;
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        glyph = nextNode;
     }
     rowHead->next = NULL;
     rowTail->previous = NULL;
-    for (node = rowHead; node != NULL; node = node->previous) {
+    for (glyph = rowHead; glyph != NULL; glyph = glyph->previous) {
         /* Despite its current name, this link points to the retained row tail. */
-        node->chainHead = rowTail;
+        glyph->chainHead = rowTail;
     }
     return rowHead;
 }
 
 /* Return the final previous-linked glyph; input must be non-NULL. */
-FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node) {
-    while (node->previous != NULL) {
-        node = node->previous;
+FrFontGlyph *itfMesGetLastNode(FrFontGlyph *glyph) {
+    while (glyph->previous != NULL) {
+        glyph = glyph->previous;
     }
-    return node;
+    return glyph;
 }
 
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
@@ -1428,60 +1428,60 @@ s32 itfMesCountSpanSteps(FrFontGlyph *last, FrFontGlyph *first) {
 }
 
 /* Translate every linked node in text units; a NULL chain is a no-op. */
-void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy) {
-    if (node == NULL) {
+void itfMesOffsetNodeChain(FrFontGlyph *glyph, s32 dx, s32 dy) {
+    if (glyph == NULL) {
         return;
     }
     do {
-        node->x += dx;
-        node->y += dy;
-        node = node->previous;
-    } while (node != NULL);
+        glyph->x += dx;
+        glyph->y += dy;
+        glyph = glyph->previous;
+    } while (glyph != NULL);
 }
 
 /* Assign the render value across the complete chain; a NULL chain is a no-op. */
-void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue) {
-    while (node != NULL) {
-        node->renderValueOrSetupOrShade.renderValue = renderValue;
-        node = node->previous;
+void itfMesSetNodeChainRenderValue(FrFontGlyph *glyph, s32 renderValue) {
+    while (glyph != NULL) {
+        glyph->renderValueOrSetupOrShade.renderValue = renderValue;
+        glyph = glyph->previous;
     }
 }
 
 /* Skip (rowCount - rowIndex - 1) preceding y-groups when positive, then set each
  * child's flag byte in the next row. Requires non-NULL input; past-end is a no-op. */
-void itfMesSetRowItemFlag(FrFontGlyph *node, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
+void itfMesSetRowItemFlag(FrFontGlyph *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
     s32 rowsToSkip = rowCount - rowIndex - 1;
-    s32 rowY = node->y;
+    s32 rowY = glyph->y;
     s32 currentY = rowY;
     FrFontChildGlyph *child;
     u8 flagValue;
 
     while (rowsToSkip > 0) {
         while (rowY == currentY) {
-            node = node->previous;
-            if (node == NULL) {
+            glyph = glyph->previous;
+            if (glyph == NULL) {
                 return;
             }
-            currentY = node->y;
+            currentY = glyph->y;
         }
         rowsToSkip--;
         rowY = currentY;
     }
     flagValue = requestedFlagValue;
     do {
-        for (child = node->firstChild; child != NULL; child = child->next) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
             child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
-        node = node->previous;
-    } while (node != NULL && rowY == node->y);
+        glyph = glyph->previous;
+    } while (glyph != NULL && rowY == glyph->y);
 }
 
 /* Set every child's flag byte across the parent chain; NULL is a no-op. */
-void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue) {
+void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue) {
     FrFontChildGlyph *child;
 
-    for (; node != NULL; node = node->previous) {
-        for (child = node->firstChild; child != NULL; child = child->next) {
+    for (; glyph != NULL; glyph = glyph->previous) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
             child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
     }
@@ -1489,11 +1489,11 @@ void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue) {
 
 /* Clear each child's low color byte, then OR the unmasked input word.
  * High input bits can therefore also change the upper bytes. */
-void itfMesRecolorNodeChildren(FrFontGlyph *node, u32 color) {
+void itfMesRecolorNodeChildren(FrFontGlyph *glyph, u32 color) {
     FrFontChildGlyph *child;
 
-    for (; node != NULL; node = node->previous) {
-        for (child = node->firstChild; child != NULL; child = child->next) {
+    for (; glyph != NULL; glyph = glyph->previous) {
+        for (child = glyph->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = child->parentDimensionsOrRenderWord.renderWord & ITF_MES_COLOR_BYTE_CLEAR_MASK | color;
         }
     }
@@ -1501,17 +1501,17 @@ void itfMesRecolorNodeChildren(FrFontGlyph *node, u32 color) {
 
 /* Find the maximum summed advance of contiguous equal-y groups, scaled by 16.
  * NULL returns zero; the initial zero also excludes negative group totals. */
-s32 itfMesMaxGroupedExtent(FrFontGlyph *node) {
+s32 itfMesMaxGroupedExtent(FrFontGlyph *glyph) {
     s32 maxAdvance = 0;
 
-    while (node != NULL) {
-        s32 rowY = node->y;
+    while (glyph != NULL) {
+        s32 rowY = glyph->y;
         s32 rowAdvance = 0;
 
         do {
-            rowAdvance += node->advance;
-            node = node->previous;
-        } while (node != NULL && rowY == node->y);
+            rowAdvance += glyph->advance;
+            glyph = glyph->previous;
+        } while (glyph != NULL && rowY == glyph->y);
         if (rowAdvance > maxAdvance) {
             maxAdvance = rowAdvance;
         }
@@ -1537,10 +1537,10 @@ s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask) {
 
 /* Enable parent contexts whose first child's tested flag is zero.
  * NULL chain is allowed, but every visited node must have a first child. */
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node) {
-    for (; node != NULL; node = node->previous) {
-        if (node->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
-            frFontEnableContextMode(node);
+void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *glyph) {
+    for (; glyph != NULL; glyph = glyph->previous) {
+        if (glyph->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
+            frFontEnableContextMode(glyph);
         }
     }
 }

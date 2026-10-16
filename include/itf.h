@@ -311,13 +311,13 @@ void itfMesResetCursorState(ItfMesEntryBlock *cursor, s32 resetPosition);
 
 FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask,
     s32 x, s32 y, s32 renderValue);
-FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *node, s32 from, s32 to);
-FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node);
-void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue);
-void itfMesRecolorNodeChildren(FrFontGlyph *node, u32 color);
+FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *glyph, s32 from, s32 to);
+FrFontGlyph *itfMesGetLastNode(FrFontGlyph *glyph);
+void itfMesSetNodeChainRenderValue(FrFontGlyph *glyph, s32 renderValue);
+void itfMesRecolorNodeChildren(FrFontGlyph *glyph, u32 color);
 s32 itfMesCountSpanSteps(FrFontGlyph *last, FrFontGlyph *first);
 void itfMesCopyGlyphShade(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock);
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node);
+void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *glyph);
 
 void itfPanelReleasePrimitiveResources(UiSprite *sprite);
 FrFontGlyph *itfDrawDefaultColorText(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub);
