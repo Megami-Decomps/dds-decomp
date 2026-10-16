@@ -113,7 +113,7 @@ extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
 extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 extern void fldApplyPendingCameraHeading(void);
-extern void fldApplyRoomObjectModeZero(s32, s32, void *, s32);
+extern void fldApplyRoomObjectModeZero(s32 world, s32 stage, void *roomName, s32 mode);
 extern void fldBeginNpcInteractionById(s32);
 extern s32 D_003898FC[];
 extern s32 D_00389780[];
@@ -3793,7 +3793,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
 void func_00143C90(void) {
 }
 
-extern void fldApplyRoomObjectModeOne(s32, s32, void *, s32);
+extern void fldApplyRoomObjectModeOne(s32 world, s32 stage, void *roomName, s32 mode);
 
 void fldApplyCurrentAreaActorEntries(void) {
     FldActorEntry *entry;
