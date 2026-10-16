@@ -836,8 +836,8 @@ void evtUnitSetStoredParameter(EvtUnit *unit, s32 value) {
     unit->unkBC = value;
 }
 
-void evtSetTransitionMotionScale(EvtUnit *unit, f32 value) {
-    unit->transitionMotionScale = value;
+void evtSetTransitionMotionScale(EvtUnit *unit, f32 transitionMotionScale) {
+    unit->transitionMotionScale = transitionMotionScale;
 }
 
 void evtStoreUnitMotionShortParameters(EvtUnit *unit, s32 a, s32 b) {
