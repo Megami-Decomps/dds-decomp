@@ -346,7 +346,7 @@ s32 dspCaptureWindowSecondPanelValue(void) {
     return 1;
 }
 
-extern s8 itfPanelGetStatus(s32 index);
+extern s8 itfPanelGetStatus(s32 windowIndex);
 
 extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 
@@ -415,7 +415,7 @@ s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
 
-extern void itfPanelSetStatus(s32, s32);
+extern void itfPanelSetStatus(s32 windowIndex, s32 status);
 
 /* Enable clears both disable flags and restores panel/control state one.
  * Disable sets the gate and flags, but deliberately leaves the control byte alone.

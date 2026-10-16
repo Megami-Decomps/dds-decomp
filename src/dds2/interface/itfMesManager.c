@@ -2482,7 +2482,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7C08);
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfUpdateSoundSelectorOptions);
 
 extern s32 itfMesStartEntry(s32 window, s32 entry, s32 option);
-extern void itfPanelSetStatus(s32 window, s8 status);
+extern void itfPanelSetStatus(s32 windowIndex, s8 status);
 extern void itfUpdateSoundSelectorOptions(void);
 extern s32 D_00438F2C;
 extern s32 D_00438F30;
