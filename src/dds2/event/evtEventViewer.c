@@ -1514,29 +1514,29 @@ extern void evtSetMovieClipPositionClampedToDuration(s32 movie, s32 unused, s32 
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset), endTime, and the current key's extra parameter. */
 void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
-    s32 table;
-    s32 slots;
-    s32 object;
-    EvtRuntimeGroup *node;
-    s32 time;
+    s32 worldTable;
+    s32 worldSlots;
+    s32 movieObject;
+    EvtRuntimeGroup *trackEntry;
+    s32 startFrame;
     s32 extra;
     EvtRuntimeChild *glyph;
 
     if (dds3GetWorldObject() != 0) {
-        table = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
-        if (table != 0) {
-            slots = (s32)((EvtWorldTable *)table)->slots;
-            if (slots != 0) {
-                object = (s32)((EvtWorldSlot *)slots)[EVT_WORLD_SLOT_MOVIE].head;
-                if (object != 0) {
+        worldTable = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
+        if (worldTable != 0) {
+            worldSlots = (s32)((EvtWorldTable *)worldTable)->slots;
+            if (worldSlots != 0) {
+                movieObject = (s32)((EvtWorldSlot *)worldSlots)[EVT_WORLD_SLOT_MOVIE].head;
+                if (movieObject != 0) {
                     do {
-                        node = viewer->groups;
-                        while (node != NULL) {
-                            if (node->info != NULL && (void *)object == dds3GetSlot(node->info, 1)) {
-                                if (node->type == 2) {
-                                    time = 0;
-                                    if (node->childCount != 0) {
-                                        time = node->children->frame;
+                        trackEntry = viewer->groups;
+                        while (trackEntry != NULL) {
+                            if (trackEntry->info != NULL && (void *)movieObject == dds3GetSlot(trackEntry->info, 1)) {
+                                if (trackEntry->type == 2) {
+                                    startFrame = 0;
+                                    if (trackEntry->childCount != 0) {
+                                        startFrame = trackEntry->children->frame;
                                     }
                                     glyph = (EvtRuntimeChild *)evtViewFindGlyphAtOrBefore(viewer);
                                     extra = 0;
@@ -1544,16 +1544,16 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                         extra = glyph->p0C.sh[1];
                                     }
                                 } else {
-                                    time = node->metadata.value;
+                                    startFrame = trackEntry->metadata.value;
                                     extra = 0;
                                 }
-                                evtSetMovieClipPositionClampedToDuration(object, 0, time, endTime, extra);
+                                evtSetMovieClipPositionClampedToDuration(movieObject, 0, startFrame, endTime, extra);
                                 break;
                             }
-                            node = node->next;
+                            trackEntry = trackEntry->next;
                         }
-                        object = (s32)((EffWorldNode *)object)->next;
-                    } while (object != 0);
+                        movieObject = (s32)((EffWorldNode *)movieObject)->next;
+                    } while (movieObject != 0);
                 }
             }
         }
