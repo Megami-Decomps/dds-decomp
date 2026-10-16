@@ -124,6 +124,7 @@ EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
 #include "eff_light.h"
 #include "fld_area_work.h"
+#include "fld_collision_geometry.h"
 #include "fld_spawn_collision.h"
 
 struct EffNodeDescriptor;
@@ -155,7 +156,7 @@ extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
-extern void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
+extern void fldBuildCollisionRecordsFromGeometry(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
@@ -727,7 +728,7 @@ extern u32 D_00438EC4;
 extern s32 D_00435FA0;
 extern s16 D_00389874[];
 extern s32 fldParseRoomNumberFromName(char *);
-extern void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
+extern void fldBuildCollisionRecordsFromGeometry(FldCollisionDescriptor *geometry, f32 *translation,
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
