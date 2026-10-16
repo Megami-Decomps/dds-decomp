@@ -181,11 +181,11 @@ s32 scrCommandTestIndexedCodeBit(void)
 
 s32 scrCommandStartPadMotor(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnPadStartMotor(p0, p1 & 0xFF, scrReadIntParameter(2));
+    s32 motor;
+    s32 level;
+    motor = scrReadIntParameter(0);
+    level = scrReadIntParameter(1);
+    kwlnPadStartMotor(motor, level & 0xFF, scrReadIntParameter(2));
     return 1;
 }
 
