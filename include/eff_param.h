@@ -34,10 +34,35 @@ typedef char EffParamWorkEx_size_must_be_0xC[(sizeof(EffParamWorkEx) == 0xC) ? 1
 
 typedef char EffParamWork_size_must_be_8[(sizeof(EffParamWork) == 8) ? 1 : -1];
 
+/* The table starts with 0x10 bytes of header, followed by 0x10-byte records.
+ * Each blockOffset is signed and relative to the start of the whole table. */
+typedef struct EffParamTableRecord {
+    u32 word0;
+    s32 blockOffset;
+    u32 kindAndFlags;
+    u32 wordC;
+} EffParamTableRecord;
+
+typedef struct EffParamTable {
+    u8 header[0x10];
+    EffParamTableRecord records[1];
+} EffParamTable;
+
+typedef char EffParamTableRecord_size_must_be_0x10[
+    (sizeof(EffParamTableRecord) == 0x10) ? 1 : -1];
+typedef char EffParamTableRecord_blockOffset_at_4[
+    ((u32)&((EffParamTableRecord *)0)->blockOffset == 4) ? 1 : -1];
+typedef char EffParamTableRecord_kindAndFlags_at_8[
+    ((u32)&((EffParamTableRecord *)0)->kindAndFlags == 8) ? 1 : -1];
+typedef char EffParamTable_records_at_0x10[
+    ((u32)&((EffParamTable *)0)->records == 0x10) ? 1 : -1];
+
 /* Return a borrowed block at the selected record's signed relative offset. */
-void *effParamTableGetBlock(void *table, s32 recordIndex);
+void *effParamTableGetBlock(const EffParamTable *table, s32 recordIndex);
+u32 effParamTableGetWord(const EffParamTable *table, s32 recordIndex);
+u32 effParamTableGetWord2(const EffParamTable *table, s32 recordIndex);
 EffParamWork *effParamWorkCreate(u16 kind, void *source);
-EffParamWork *effParamCreateFromTable(void *table, s32 recordIndex);
+EffParamWork *effParamCreateFromTable(const EffParamTable *table, s32 recordIndex);
 EffParamWork *effParamWorkDuplicate(EffParamWork *source);
 void *effParamWorkGetData(EffParamWork *work);
 void effParamWorkInvokeCallback(EffParamWork *work);
