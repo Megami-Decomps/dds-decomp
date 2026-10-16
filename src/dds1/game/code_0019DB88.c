@@ -52,7 +52,7 @@ extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
 
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *seq);
 
-extern void itfMesSetRowItemFlag(FrFontGlyph *sequence, s32 index, s32 count, s32 selected);
+extern void itfMesSetRowItemFlag(FrFontGlyph *glyphChain, s32 rowIndex, s32 rowCount, s32 requestedFlagValue);
 extern s8 D_00324530[];
 
 

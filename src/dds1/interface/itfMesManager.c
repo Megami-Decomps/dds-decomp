@@ -1445,10 +1445,10 @@ void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue) {
     }
 }
 
-/* Skip (last - first - 1) preceding y-groups when positive, then set each
+/* Skip (rowCount - rowIndex - 1) preceding y-groups when positive, then set each
  * child's flag byte in the next row. Requires non-NULL input; past-end is a no-op. */
-void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedFlags) {
-    s32 rowsToSkip = last - first - 1;
+void itfMesSetRowItemFlag(FrFontGlyph *node, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
+    s32 rowsToSkip = rowCount - rowIndex - 1;
     s32 rowY = node->y;
     s32 currentY = rowY;
     FrFontChildGlyph *child;
@@ -1465,7 +1465,7 @@ void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedF
         rowsToSkip--;
         rowY = currentY;
     }
-    flagValue = requestedFlags;
+    flagValue = requestedFlagValue;
     do {
         for (child = node->firstChild; child != NULL; child = child->next) {
             child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
