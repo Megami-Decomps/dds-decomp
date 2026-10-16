@@ -2195,7 +2195,7 @@ void fldReleaseResourceSlots(void) {
     frFontSetSharedRenderFlags(0x54);
 }
 
-extern void sdfReleaseDevSlot(SdfModel *, s32, s32);
+extern void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release);
 
 void fldReleaseSceneDevSlotsAndTextures(void) {
     s32 i;
