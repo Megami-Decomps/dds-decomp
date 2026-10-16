@@ -563,7 +563,136 @@ f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
     return reach;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureEffectTargetGroupBounds);
+f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
+    f32 position[4] __attribute__((aligned(16)));
+    BtlUnit *unit;
+    f32 top;
+    f32 halfTop;
+    f32 rightZ;
+    f32 scale;
+    f32 rightX;
+    f32 leftX;
+    f32 halfZ;
+    f32 reach;
+    f32 leftZ;
+    f32 halfX;
+    f32 minZ;
+    f32 maxZ;
+    f32 minX;
+    f32 maxX;
+    f32 minTop;
+    f32 maxTop;
+    f32 maxReach;
+    s32 needsFirstSample;
+    s64 statusBits;
+
+    needsFirstSample = 1;
+    maxReach = 0.0f;
+    maxTop = 0.0f;
+    unit = ((BtlState *)btlGetRuntime())->units;
+    minTop = 0.0f;
+    maxX = 0.0f;
+    minX = 0.0f;
+    maxZ = 0.0f;
+    minZ = 0.0f;
+    if (unit != NULL) {
+        do {
+            statusBits = btlUnitStatusPair(unit);
+            if ((statusBits & 0x21) && (unit->status.flags & mask)) {
+                btlUnitGetMuzzlePosVU(unit);
+                VU0_STORE_VF(vf10, position);
+                scale = unit->scale;
+                reach = unit->reach * scale;
+                rightX = position[0] + reach;
+                rightZ = position[2] + reach;
+                leftX = position[0] - reach;
+                leftZ = position[2] - reach;
+                top = (unit->height * scale * 0.5f) - position[1];
+                if (needsFirstSample != 0) {
+                    maxReach = reach;
+                    if (leftX < rightX) {
+                        maxX = rightX;
+                        minX = leftX;
+                    } else {
+                        maxX = leftX;
+                        minX = rightX;
+                    }
+                    if (leftZ < rightZ) {
+                        maxZ = rightZ;
+                        minZ = leftZ;
+                    } else {
+                        maxZ = leftZ;
+                        minZ = rightZ;
+                    }
+                    minTop = top;
+                    needsFirstSample = 0;
+                    maxTop = minTop;
+                } else {
+                    if (maxReach < reach) {
+                        maxReach = reach;
+                    }
+                    if (maxX < rightX) {
+                        maxX = rightX;
+                    }
+                    if (rightX < minX) {
+                        minX = rightX;
+                    }
+                    if (maxX < leftX) {
+                        maxX = leftX;
+                    }
+                    if (leftX < minX) {
+                        minX = leftX;
+                    }
+                    if (maxZ < rightZ) {
+                        maxZ = rightZ;
+                    }
+                    if (rightZ < minZ) {
+                        minZ = rightZ;
+                    }
+                    if (maxZ < leftZ) {
+                        maxZ = leftZ;
+                    }
+                    if (leftZ < minZ) {
+                        minZ = leftZ;
+                    }
+                    if (maxTop < top) {
+                        maxTop = top;
+                    }
+                    if (top < minTop) {
+                        minTop = top;
+                    }
+                }
+            }
+            unit = unit->nextActor;
+        } while (unit != NULL);
+    }
+    position[0] = (maxX + minX) * 0.5f;
+    position[1] = -maxTop * 0.5f;
+    position[2] = (maxZ + minZ) * 0.5f;
+    halfX = (maxX - minX) * 0.5f;
+    halfZ = (maxZ - minZ) * 0.5f;
+    position[3] = 0.0f;
+    halfTop = maxTop * 0.5f;
+    if (halfZ < halfX) {
+        reach = halfTop;
+        if (reach < halfX) {
+            reach = halfX;
+        }
+    } else {
+        reach = halfZ;
+        if (!(halfTop < reach)) {
+            reach = halfTop;
+        }
+    }
+    VU0_LOAD_VF_MEMORY(vf10, position);
+    if (outMaxTop != NULL) {
+        *outMaxTop = maxTop;
+    }
+    if (outMinTop != NULL) {
+        *outMinTop = minTop;
+    }
+    return reach;
+}
 
 /* Maximum top bound among active units matching any mask bit; zero if none. */
 f32 btlGetMaxUnitTop(u32 mask) {
