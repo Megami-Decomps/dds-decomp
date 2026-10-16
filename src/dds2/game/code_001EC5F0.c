@@ -5770,7 +5770,7 @@ u32 btlPollFieldArchiveLoad(args)
                 switch (i) {
                 case 0:
                     blocks->fieldTBResourceId = (s32)(u32)node->resourceHandle;
-                    args->fieldTB = node->dataCursor;
+                    args->fieldTB = (const SdfTextureOffsetListHeader *)node->dataCursor;
                     break;
                 case 1:
                     blocks->fieldF2ResourceId = (s32)(u32)node->resourceHandle;
@@ -5790,7 +5790,7 @@ u32 btlPollFieldArchiveLoad(args)
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
             evtCreateWorldObjectFromResource(args->stage, args->variant,
                                              args->fieldF1, args->fieldF2,
-                                             (const SdfTextureOffsetListHeader *)args->fieldTB, 0);
+                                             args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
                 sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
