@@ -11,7 +11,7 @@ extern u8 D_003BD39C;
 s32 D_003BD2D0 __attribute__((section(".sdata"), aligned(8))) = 0x100000;
 void (*sdfTickCallback)(void) __attribute__((section(".sdata"))) = NULL;
 
-extern void sdfSleepThreadCount(s32);
+extern void sdfSleepThreadCount(s32 count);
 
 extern void sdfPadUpdatePorts(void);
 
