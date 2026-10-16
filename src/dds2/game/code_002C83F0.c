@@ -392,7 +392,7 @@ s32 fileManUpdate(void) {
     activeSlots = work->activeSlots;
     while (activeSlots != 0) {
         u32 slot = work->currentSlot;
-        u8 *input = work->buffer + (slot << 16);
+        const u8 *input = work->buffer + (slot << 16);
         FileTransferJob *job = (FileTransferJob *)work->slots[slot].request;
         u8 kind = job->kind;
 

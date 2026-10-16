@@ -51,7 +51,7 @@ typedef struct PacState {
     s32 (*packetCallback)(); /* 0x04: event callbacks have different arities */
     void (*onInput)(struct PacState *); /* 0x08 */
     void (*onComplete)(struct PacState *); /* 0x0C */
-    u8 *inputCursor; /* 0x10 */
+    const u8 *inputCursor; /* 0x10 */
     s32 inputAvailable; /* 0x14 */
     s32 consumedBytes; /* 0x18 */
     u8 *outputCursor; /* 0x1C */
@@ -79,7 +79,7 @@ typedef char PacState_queueTail_must_be_at_0x34[
     ((u32)&((PacState *)0)->queueTail == 0x34) ? 1 : -1];
 
 void sdfPacInitializeDispatchPacket(PacState *state, void *callbackAddress);
-s32 sdfPacFeedInput(PacState *state, u8 *input, s32 inputByteCount);
+s32 sdfPacFeedInput(PacState *state, const u8 *input, s32 inputByteCount);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacReadListAllocationCount(PacState *state);
 void sdfPacSkipAllocationEntryBytes(PacState *state);

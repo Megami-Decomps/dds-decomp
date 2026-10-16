@@ -302,7 +302,7 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s3
     if (flags & 2) {
         sdfPacUsePacketPayloadMemory(&request);
     }
-    sdfPacFeedInput(&request, (u8 *)(u32)requestFirst, requestSecond);
+    sdfPacFeedInput(&request, (const u8 *)(u32)requestFirst, requestSecond);
     mdlApplyGroupedPartPackets(request.queueHead, first, second, flags);
     sdfPacReleasePacketQueueNodes(&request);
 }

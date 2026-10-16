@@ -42,7 +42,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 sdfPacFeedInput(PacState *state, u8 *input, s32 inputByteCount) {
+s32 sdfPacFeedInput(PacState *state, const u8 *input, s32 inputByteCount) {
     s32 consumeBytes;
 
     state->inputCursor = input;
@@ -356,7 +356,7 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
     buffer->remainingBytes = packet->payloadSize - PAC_HEADER_BYTES;
     if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
         state->onInput = sdfPacSkipResourceChunk;
-        buffer->cursor = state->inputCursor - PAC_HEADER_BYTES;
+        buffer->cursor = (u8 *)(state->inputCursor - PAC_HEADER_BYTES);
         return;
     }
     if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
