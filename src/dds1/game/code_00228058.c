@@ -34,8 +34,8 @@ extern char D_003BBDC8[];
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 
-extern void fldSetFadeTarget(s32, s32, s32);
-extern void evtBeginSkyParameterTransition(s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void evtBeginSkyParameterTransition(s32 duration, s32 target);
 
 s32 scrReadIntParameter(s32 idx);
 extern void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
