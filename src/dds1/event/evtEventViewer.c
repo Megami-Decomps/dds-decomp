@@ -331,31 +331,31 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 entryType, EvtRuntime *viewer)
 s32 evtEventViewerCountEntriesById(s32 entryType, EvtRuntime *viewer)
 {
     EvtRuntimeGroup *entry;
-    s32 count;
+    s32 matchingEntryCount;
 
-    count = 0;
+    matchingEntryCount = 0;
     entry = viewer->groups;
     while (entry != NULL) {
         if (entry->type == entryType) {
-            count = count + 1;
+            matchingEntryCount = matchingEntryCount + 1;
         }
         entry = entry->next;
     }
-    return count;
+    return matchingEntryCount;
 }
 
 s32 evtEventViewerCountEntries(EvtRuntime *viewer)
 {
     EvtRuntimeGroup *entry;
-    s32 count;
+    s32 entryCount;
 
-    count = 0;
+    entryCount = 0;
     entry = viewer->groups;
     while (entry != NULL) {
-        count = count + 1;
+        entryCount = entryCount + 1;
         entry = entry->next;
     }
-    return count;
+    return entryCount;
 }
 
 /* Sum nodeCount over entries: mode 2 skips ids 5/0x13, mode 3 takes only those. */
