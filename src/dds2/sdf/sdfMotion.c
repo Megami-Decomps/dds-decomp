@@ -259,20 +259,20 @@ s32 sdfMotionUpdate(Motion *motion) {
 }
 
 /* State 6 parks motion processing, retaining the previous state to resume. */
-void sdfMotionSuspend(Motion *state) {
+void sdfMotionSuspend(Motion *motion) {
     u8 previousState;
 
-    previousState = state->state;
+    previousState = motion->state;
     if (previousState != SDF_MOTION_STATE_SUSPENDED) {
-        state->previousState = previousState;
-        state->state = SDF_MOTION_STATE_SUSPENDED;
+        motion->previousState = previousState;
+        motion->state = SDF_MOTION_STATE_SUSPENDED;
     }
 }
 
 /* Resume only a suspended motion, restoring the state saved by suspend. */
-void sdfMotionResume(Motion *state) {
-    if (state->state == SDF_MOTION_STATE_SUSPENDED) {
-        state->state = state->previousState;
+void sdfMotionResume(Motion *motion) {
+    if (motion->state == SDF_MOTION_STATE_SUSPENDED) {
+        motion->state = motion->previousState;
     }
 }
 
