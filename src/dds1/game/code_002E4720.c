@@ -722,7 +722,7 @@ extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 extern s32 func_002FF538(s32);
 
-extern s32 func_0030EF30(s32, s32, s32);
+extern s32 func_0030EF30(s32 fileHandle, s32 buffer, s32 byteCount);
 
 extern s32 sceWrite(s32, s32, s32);
 
