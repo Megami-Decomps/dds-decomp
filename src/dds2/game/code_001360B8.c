@@ -60,7 +60,7 @@ extern void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA,
                                        f32 x, f32 y, f32 z);
 
 /* Apply the selected scene-light set with the requested transition duration. */
-void fldApplySceneLightSet(s32 index, s32 mode) {
+void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -71,24 +71,24 @@ void fldApplySceneLightSet(s32 index, s32 mode) {
 
     if (D_00389780[0] < 200) {
         if (D_004360E8 == 0 && D_00389780[0] < 40) {
-            mode = 0;
+            durationMode = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (mode != 0) {
+        if (durationMode != 0) {
             duration = defaultDuration;
         }
-        if (mode >= 2) {
-            duration = mode;
+        if (durationMode >= 2) {
+            duration = durationMode;
         }
-        if (D_00436168 != index) {
-            if (index == 0) {
-                index = D_00436128;
+        if (D_00436168 != lightSetIndex) {
+            if (lightSetIndex == 0) {
+                lightSetIndex = D_00436128;
             }
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
             D_0043616C = D_00389988[11];
-            D_00389988[11] = index;
-            D_00436168 = index;
+            D_00389988[11] = lightSetIndex;
+            D_00436168 = lightSetIndex;
             area = light->fadeArea;
             D_00389988[13] = area;
             D_00389988[14] = light->displayStateSlot14;
