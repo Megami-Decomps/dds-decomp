@@ -981,7 +981,7 @@ extern void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex);
 
 s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
-    s32 total = 0;
+    s32 totalAdvance = 0;
     u32 offset = 0;
     u32 length;
 
@@ -1009,9 +1009,9 @@ s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
         }
         frFontFillGlyphMetrics(&work, glyphIndex);
         offset++;
-        total += work.advance;
+        totalAdvance += work.advance;
     }
-    return total;
+    return totalAdvance;
 }
 
 /* Slots 0/1 use the shared default size; later slots read their resource width.
