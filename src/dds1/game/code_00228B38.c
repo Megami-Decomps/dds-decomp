@@ -38,17 +38,17 @@ void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite) {
     effDestroyResourceSlotSet(*sprite);
 }
 
-void evtInitializeSolarOverlay(s32 object) {
-    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
-    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, object);
-    uiDrawActiveSurfaceRegion(object);
-    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
+void evtInitializeSolarOverlay(s32 renderHandle) {
+    sdfSubmitGsTestOneRegisterPacket(0x30000, renderHandle);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, renderHandle);
+    uiDrawActiveSurfaceRegion(renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, renderHandle);
 }
 
-void evtFinalizeSolarOverlay(s32 object) {
-    sdfDispatchSurfaceWithPreparedTexturePacket(object);
-    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
-    sdfSubmitGsTestOneRegisterPacket(0x50000, object);
+void evtFinalizeSolarOverlay(s32 renderHandle) {
+    sdfDispatchSurfaceWithPreparedTexturePacket(renderHandle);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, renderHandle);
 }
 
 void evtPrepareSolarOverlayTestState(s32 renderHandle) {
