@@ -88,12 +88,12 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work);
 void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
 void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
 void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #else
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
 void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
