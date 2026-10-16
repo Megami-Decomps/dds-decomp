@@ -5594,7 +5594,145 @@ void fldDispatchTargetGuideMotionUpdate(void) {
     mode = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001526B8);
+extern void fldSetTargetGuideMode(s32 mode);
+extern s32 fldCanUseTargetGuideInCurrentScene(s32 area, s32 room);
+extern FieldGridCoordPair D_003AA530[];
+extern FieldGridCoordPair D_003AA558[];
+extern FieldGridCoordPair D_003AA620[];
+extern FieldGridCoordPair D_003AA6A8[10];
+extern FieldGridCoordPair D_003AA6D0[10];
+extern FieldGridCoordPair D_003AA6F8[10];
+
+void func_001526B8(void) {
+    FieldTargetGuideState *state;
+    FieldGridCoordPair *point;
+    u32 index;
+    f32 playerX;
+    f32 playerZ;
+    if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1) == 0) {
+        return;
+    }
+    D_004363C0 = 0x190;
+    D_004363C2 = 0x190;
+    switch (fldAreaState.floor + 1) {
+    case 11: {
+        FieldTargetGuideState *state;
+        fldLoadTargetGuideResource();
+        playerZ = fldAreaState.z;
+        playerX = fldAreaState.x;
+        D_004363BC = -0x960;
+        D_004363BE = 0xAF0;
+        state = &fldTargetGuideState;
+        state->gridX = 0;
+        state->gridY = 0;
+        fldFindNearestOccupiedMapGridCell(playerX, playerZ, &D_00438EF8.x, &D_00438EF8.y);
+        if (mdlFlagTest(0x4D0) != 0) {
+            u16 encodedX = (u16)D_003AA530[0].x;
+            u16 encodedY = (u16)D_003AA530[0].y;
+            state->cycleRoute = D_003AA530;
+            state->gridX = encodedX;
+            state->gridY = encodedY;
+            state->position[0] = (f32)D_004363BC + (f32)(s16)encodedX * (f32)D_004363C0;
+            state->position[2] = (f32)D_004363BE + (f32)(s16)encodedY * (f32)-D_004363C2;
+            fldSetTargetGuideMode(1);
+            return;
+        }
+        for (index = 0; index < 5; index++) {
+            point = &D_003AA6A8[index * 2];
+            if (point[0].x == D_00438EF8.x && point[0].y == D_00438EF8.y) {
+                fldTargetGuideState.gridX = point[1].x;
+                fldTargetGuideState.gridY = point[1].y;
+            }
+        }
+        fldSetTargetGuideMode(0);
+        break;
+    }
+    case 14: {
+        FieldTargetGuideState *state;
+        fldLoadTargetGuideResource();
+        playerZ = fldAreaState.z;
+        playerX = fldAreaState.x;
+        D_004363BC = -0x960;
+        D_004363BE = 0x960;
+        state = &fldTargetGuideState;
+        state->gridX = 0;
+        state->gridY = 0;
+        fldFindNearestOccupiedMapGridCell(playerX, playerZ, &D_00438EF8.x, &D_00438EF8.y);
+        if (mdlFlagTest(0x4D0) != 0) {
+            u16 encodedX = (u16)D_003AA558[0].x;
+            u16 encodedY = (u16)D_003AA558[0].y;
+            state->cycleRoute = D_003AA558;
+            state->gridX = encodedX;
+            state->gridY = encodedY;
+            state->position[0] = (f32)D_004363BC + (f32)(s16)encodedX * (f32)D_004363C0;
+            state->position[2] = (f32)D_004363BE + (f32)(s16)encodedY * (f32)-D_004363C2;
+            fldSetTargetGuideMode(1);
+            return;
+        }
+        for (index = 0; index < 5; index++) {
+            point = &D_003AA6D0[index * 2];
+            if (point[0].x == D_00438EF8.x && point[0].y == D_00438EF8.y) {
+                fldTargetGuideState.gridX = point[1].x;
+                fldTargetGuideState.gridY = point[1].y;
+            }
+        }
+        fldSetTargetGuideMode(0);
+        break;
+    }
+    case 16: {
+        FieldTargetGuideState *state;
+        fldLoadTargetGuideResource();
+        playerZ = fldAreaState.z;
+        playerX = fldAreaState.x;
+        D_004363BC = -0x960;
+        D_004363BE = 0x960;
+        state = &fldTargetGuideState;
+        state->gridX = 0;
+        state->gridY = 0;
+        fldFindNearestOccupiedMapGridCell(playerX, playerZ, &D_00438EF8.x, &D_00438EF8.y);
+        if (mdlFlagTest(0x4D0) != 0) {
+            u16 encodedX = (u16)D_003AA620[0].x;
+            u16 encodedY = (u16)D_003AA620[0].y;
+            state->cycleRoute = D_003AA620;
+            state->gridX = encodedX;
+            state->gridY = encodedY;
+            state->position[0] = (f32)D_004363BC + (f32)(s16)encodedX * (f32)D_004363C0;
+            state->position[2] = (f32)D_004363BE + (f32)(s16)encodedY * (f32)-D_004363C2;
+            fldSetTargetGuideMode(1);
+            break;
+        }
+        for (index = 0; index < 5; index++) {
+            point = &D_003AA6F8[index * 2];
+            if (point[0].x == D_00438EF8.x && point[0].y == D_00438EF8.y) {
+                fldTargetGuideState.gridX = point[1].x;
+                fldTargetGuideState.gridY = point[1].y;
+            }
+        }
+        fldSetTargetGuideMode(0);
+        break;
+    }
+    case 18:
+        fldSetTargetGuideMode(14);
+        break;
+    }
+    state = &fldTargetGuideState;
+    state->moveTimer = -20;
+    state->routeIndex = 0;
+    state->routeEnd = 0;
+    state->position[1] = 0.0f;
+    state->targetYaw = 0.0f;
+    state->stepDistance = 0.0f;
+    state->updateFlags = 0;
+    state->position[0] = (f32)D_004363BC + (f32)D_004363C0 * (f32)state->gridX;
+    state->position[2] = (f32)D_004363BE + (f32)-D_004363C2 * (f32)state->gridY;
+    if (state->guideMode != 14) {
+        state->guideMode = 0;
+    }
+    state->viewAngleError = 0.0f;
+    state->unk2A = 0;
+    state->disabled = 0;
+    fldUpdateTargetGuideEffects();
+}
 
 extern void fldReleaseTargetGuideResource(void);
 
