@@ -216,7 +216,7 @@ extern s32 D_00435F80;
 
 extern u32 fldDeferredCommandParameter;
 
-extern void func_001411F8(u32 arg0);
+extern void func_001411F8(u32 sceneAction);
 
 extern void dds3WorkClear(void);
 
@@ -2594,16 +2594,16 @@ void fldDispatchDeferredFieldCommand(void) {
     }
 }
 
-void fldSetPendingSceneAction(u32 argument) {
-    D_00435F70 = argument;
+void fldSetPendingSceneAction(u32 sceneAction) {
+    D_00435F70 = sceneAction;
 }
 
 void fldRunPendingSceneAction(void) {
-    u32 argument;
+    u32 sceneAction;
 
-    argument = D_00435F70;
-    if (argument != 0) {
-        func_001411F8(argument);
+    sceneAction = D_00435F70;
+    if (sceneAction != 0) {
+        func_001411F8(sceneAction);
         D_00435F70 = 0;
     }
 }
