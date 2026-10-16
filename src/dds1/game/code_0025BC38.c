@@ -574,7 +574,7 @@ typedef struct Bytes7 {
 } Bytes7;
 
 extern Bytes7 D_003BC4E8[];
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 /* Select the cost marker from the record's icon index and draw at the fixed badge offset. */
 void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amount, s32 drawArg) {

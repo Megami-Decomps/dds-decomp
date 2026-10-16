@@ -5,7 +5,7 @@
 #include "mnu_scene_work.h"
 #include "dsp_name.h"
 
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 extern TaskWork *mnuSceneResourceContext;
 extern u32 *mnuGetSelectedNodeValue(void);
 extern s32 mnuDrawMantraSparkScene();

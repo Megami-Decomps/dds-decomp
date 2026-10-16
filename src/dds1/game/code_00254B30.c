@@ -27,7 +27,7 @@ struct EffectSlotSet;
 #define MNU_SELECTED_ROW_SPRITE 12
 #define MNU_UNSELECTED_ROW_SPRITE 14
 
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 
 
