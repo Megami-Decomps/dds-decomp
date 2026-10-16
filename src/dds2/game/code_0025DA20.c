@@ -1833,16 +1833,16 @@ s32 mnuCampGetRankedItemPrice(s32 entryIndex, s32 halfPrice) {
     return price;
 }
 
-s32 mnuCampFindListedItemIndex(s32 id) {
+s32 mnuCampFindListedItemIndex(s32 itemId) {
     u16 *entry = (u16 *)mnuCampListedItems;
-    u32 index = 0;
+    u32 listedItemIndex = 0;
     do {
-        if (id == *entry) {
-            return index;
+        if (itemId == *entry) {
+            return listedItemIndex;
         }
         entry += 4;
-        index++;
-    } while (index < 3);
+        listedItemIndex++;
+    } while (listedItemIndex < 3);
     return -1;
 }
 
