@@ -2525,7 +2525,120 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D50);
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D60);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7C08);
+extern const s32 D_00414D60[12][4];
+extern s16 D_00438F34;
+extern s32 D_00438F30;
+extern s16 D_00438F38;
+extern SdfPoolNode D_003805A8;
+extern const s32 D_00414E20[7][4];
+extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);
+void func_001A7C08(s32 mode) {
+    DrawVertex borderRect[2];
+    DrawColorRec borderColor;
+    s32 rectangleData[12][4];
+    s32 textureData[7][4];
+    SdfTex *texture = itfMesWork.windowTexture;
+    SdfListHead *packet;
+    s32 (*rectangles)[4];
+    s32 (*textures)[4];
+    s32 i;
+    s32 alpha;
+    s32 rectIndex;
+    s32 textureIndex;
+
+    memset(&borderColor, 0, sizeof(borderColor));
+    borderColor.components[3] = 0x80;
+    rectangles = memcpy(rectangleData, &D_00414D60, sizeof(rectangleData));
+    textures = memcpy(textureData, &D_00414E20, sizeof(textureData));
+
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+
+    if (mode == 0) {
+        alpha = D_00438F34;
+        itfQueueOffsetTexturedRect(rectangles[0], textures[0], 0, 0,
+                                  alpha, texture, packet);
+        alpha = D_00438F34;
+        itfQueueOffsetTexturedRect(rectangleData[5], textureData[4], 0, 0,
+                                  alpha, texture, packet);
+        alpha = D_00438F34;
+        itfQueueOffsetTexturedRect(rectangleData[6], textureData[4], 0, 0,
+                                  alpha, texture, packet);
+
+        alpha = (D_00438F34 * 77) / 128;
+        borderColor.components[3] = alpha;
+        borderRect[0].x = rectangleData[11][0] << 4;
+        borderRect[0].y = rectangleData[11][1] << 3;
+        borderRect[1].x = rectangleData[11][2] << 4;
+        borderRect[1].y = rectangleData[11][3] << 3;
+        itfDrawThreePanelBorderBands(borderRect, &borderColor, 0, 0xCF0, packet);
+    } else {
+        alpha = D_00438F34;
+        rectIndex = 7;
+        textureIndex = 5;
+        for (i = 0; i < 4; i++) {
+            itfQueueOffsetTexturedRect(rectangles[rectIndex], textures[textureIndex], 0, 0,
+                                      alpha, texture, packet);
+        }
+        alpha = D_00438F34;
+        rectIndex = 8;
+        textureIndex = 6;
+        for (i = 0; i < 4; i++) {
+            itfQueueOffsetTexturedRect(rectangles[rectIndex], textures[textureIndex], 0, 0,
+                                      alpha, texture, packet);
+        }
+        alpha = D_00438F34;
+        rectIndex = 9;
+        textureIndex = 5;
+        for (i = 0; i < 4; i++) {
+            itfQueueOffsetTexturedRect(rectangles[rectIndex], textures[textureIndex], 0, 0,
+                                      alpha, texture, packet);
+        }
+        alpha = D_00438F34;
+        rectIndex = 10;
+        textureIndex = 6;
+        for (i = 0; i < 4; i++) {
+            itfQueueOffsetTexturedRect(rectangles[rectIndex], textures[textureIndex], 0, 0,
+                                      alpha, texture, packet);
+        }
+        alpha = D_00438F34;
+        rectIndex = 3;
+        textureIndex = 2;
+        for (i = 0; i < 9; i++) {
+            itfQueueOffsetTexturedRect(rectangles[rectIndex], textures[textureIndex], i * 25, 0,
+                                      alpha, texture, packet);
+        }
+        alpha = D_00438F34;
+        rectIndex = 4;
+        textureIndex = 3;
+        for (i = 0; i < 8; i++) {
+            itfQueueOffsetTexturedRect(rectangles[rectIndex], textures[textureIndex], i * 25, 0,
+                                      alpha, texture, packet);
+        }
+        itfQueueOffsetTexturedRect(rectangleData[1], textureData[1],
+                                  25 * D_00438F30, 0, D_00438F34, texture, packet);
+        itfQueueOffsetTexturedRect(rectangleData[2], textureData[1],
+                                  25 * D_00438F30, 0, D_00438F34, texture, packet);
+    }
+
+    sdfSubmitGsTestOneRegisterPacket(0x5101B, 0x53);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x53);
+    D_003805A8.append(&D_003805A8, packet);
+
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    if (mode != 0) {
+        sdfSubmitGsAlphaOneRegisterPacket(0x48, 0x53);
+        alpha = (D_00438F38 * D_00438F34) / 128;
+        itfQueueOffsetTexturedRect(rectangleData[1], textureData[1],
+                                  25 * D_00438F30, 0, alpha, texture, packet);
+        alpha = (D_00438F38 * D_00438F34) / 128;
+        itfQueueOffsetTexturedRect(rectangleData[2], textureData[1],
+                                  25 * D_00438F30, 0, alpha, texture, packet);
+        D_003805A8.append(&D_003805A8, packet);
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfUpdateSoundSelectorOptions);
 
