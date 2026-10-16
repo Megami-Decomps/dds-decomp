@@ -187,7 +187,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
 
 
-extern void mnuSetTitleSequenceVolumePan(u32);
+extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
 extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
@@ -650,7 +650,7 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
-void mnuSetTitleSequenceVolumePan(u32);
+void mnuSetTitleSequenceVolumePan(u32 sequenceId);
 
 void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *entry, s32 context, s32 index) {
