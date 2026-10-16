@@ -6404,3 +6404,10 @@ INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A9C);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AA0);
 
+/* Validate retained command fields beside their native initialization. */
+typedef char BattleIndexWork_summonId_offset_check[
+    ((u32)&((BattleIndexWork *)0)->summonId == 0x18) ? 1 : -1];
+typedef char BattleIndexWork_battleExperienceReward_offset_check[
+    ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
+typedef char BattleIndexWork_moneyReward_offset_check[
+    ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];

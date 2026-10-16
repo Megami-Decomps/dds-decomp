@@ -13912,3 +13912,8 @@ size and `enabled` offset `0x58` after code and data. Keeping those assertions
 in the shared header changes three load-scheduling instructions in an unrelated
 DDS1 actor-transition consumer. Both constructor owners retain the unchanged
 checks; the record type and all runtime operations remain shared and exact.
+
+The battle-index reset owners use the same placement for the `summonId`,
+`battleExperienceReward` and `moneyReward` offset checks. Header-level
+assertions otherwise expand an unrelated alternate effect callback from
+80 to 84 bytes in full-unit compilation. The resetters write all three fields.
