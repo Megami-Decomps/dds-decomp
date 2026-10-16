@@ -739,15 +739,15 @@ s32 evtCommandCreateWorldEffectObject(void) {
 
 s32 evtCommandDestroyEffectUnitById(void)
 {
-    s32 id;
-    void *unit;
+    s32 effectUnitId;
+    void *effectUnit;
 
-    id = scrReadIntParameter(0);
-    unit = evtFindWorldObjectByIdAndKind(4, id);
-    if (unit == NULL) {
+    effectUnitId = scrReadIntParameter(0);
+    effectUnit = evtFindWorldObjectByIdAndKind(4, effectUnitId);
+    if (effectUnit == NULL) {
         return 1;
     }
-    dds3RemoveWorldObjectNode(unit);
+    dds3RemoveWorldObjectNode(effectUnit);
     return 1;
 }
 
