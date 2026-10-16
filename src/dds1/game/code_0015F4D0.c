@@ -58,18 +58,6 @@ typedef struct BillWork {
     u8 stagedValue;
 } BillWork;
 
-typedef struct BillEntry {
-    u8 pad00[0x10];
-    u32 value;
-} BillEntry;
-
-typedef struct BillEntryOwner {
-    u8 pad00[0x14];
-    BillEntry *entries;
-    u8 pad18[4];
-    u32 value1C; /* matches DDS2 EffectDispatchState at +0x1C */
-} BillEntryOwner;
-
 void *effBillCreateDispatch(s32 index, void *arg) {
     EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
 
@@ -139,8 +127,8 @@ u8 billGetCurrentValue(BillWork *work) {
     return work->currentValue;
 }
 
-void billSetDispatchedObjectValue1C(BillEntryOwner *owner, u32 value) {
-    owner->value1C = value;
+void billSetDispatchedObjectValue1C(EffectDispatchState *effect, u32 value) {
+    effect->value1C = value;
 }
 
 extern f32 D_0034E580[4];
@@ -176,8 +164,8 @@ void effAppendOffsetTriangle(EffOffsetTriangleView *work, const f32 *position) {
     work->count = count + 3;
 }
 
-void effBillSetEntryValue(BillEntryOwner *owner, s32 index, u32 value) {
-    owner->entries[index].value = value;
+void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {
+    effect->entries[index].value = value;
 }
 
 void *billGetWorkTransformMatrix(void *packet) {
