@@ -5771,7 +5771,7 @@ void fldApplyPendingSceneValueWithSpeed(s32 speed) {
 }
 
 /*BEGIN fldTransitionSkyLightSet*/
-void fldTransitionSkyLightSet(s32 index, s32 mode) {
+void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5793,7 +5793,7 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
         if (mode >= 2) {
             duration = mode;
         }
-        if (D_00436128 != index) {
+        if (D_00436128 != lightSetIndex) {
             previousIndex = D_00436158;
             if (D_00436138 == 0) {
                 previousIndex = D_00436128;
@@ -5810,10 +5810,10 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
             D_00436160 = D_00436130;
             D_00436164 = D_00436134;
             D_00436138 = 1;
-            D_00436128 = index;
+            D_00436128 = lightSetIndex;
             if (fldAreaState.sceneCommand == 0) {
-                light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
-                D_00389988[11] = index;
+                light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
+                D_00389988[11] = lightSetIndex;
                 area = light->fadeArea;
                 D_00389988[13] = area;
                 D_00389988[14] = light->displayStateSlot14;

@@ -5681,7 +5681,7 @@ extern void kwlnSetBackgroundColorTarget(s32, f32 *);
 extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
 extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
-void fldTransitionSkyLightSet(s32 index, s32 mode) {
+void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5703,7 +5703,7 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
         if (mode >= 2) {
             duration = mode;
         }
-        if (D_003BAD98 != index) {
+        if (D_003BAD98 != lightSetIndex) {
             previousIndex = D_003BADC8;
             if (D_003BADA8 == 0) {
                 previousIndex = D_003BAD98;
@@ -5720,10 +5720,10 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
             D_003BADD0 = D_003BADA0;
             D_003BADD4 = D_003BADA4;
             D_003BADA8 = 1;
-            D_003BAD98 = index;
+            D_003BAD98 = lightSetIndex;
             if (fldAreaState.sceneCommand == 0) {
-                light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
-                D_0032E570[11] = index;
+                light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
+                D_0032E570[11] = lightSetIndex;
                 area = light->fadeArea;
                 D_0032E570[13] = area;
                 D_0032E570[14] = light->displayStateSlot14;
