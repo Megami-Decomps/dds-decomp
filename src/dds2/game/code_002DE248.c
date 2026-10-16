@@ -14179,7 +14179,7 @@ u32 effRemoveListEntry(EffectList *list) {
 s32 effPollResourceList(EffectList *list) {
     EffectListNode *node = list->first;
     EffLoadedItem *item;
-    u32 buffer;
+    struct SdfMemBlock *allocation;
 
     if (node != NULL) {
         switch (list->mode) {
@@ -14206,10 +14206,10 @@ s32 effPollResourceList(EffectList *list) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
                         node = list->first;
-                        buffer = item->allocationHandle;
-                        *node->reference = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)buffer, node->kind);
+                        allocation = item->allocationHandle;
+                        *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
                         if (node->kind == 0) {
-                            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
+                            sdfReleaseResourceAllocation(allocation);
                         }
                         effRemoveListEntry(list);
                     }

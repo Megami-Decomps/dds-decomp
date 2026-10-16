@@ -3,11 +3,13 @@
 
 #include "common.h"
 
+struct SdfMemBlock;
+
 /* Entry view followed by the effect resource-list completion consumer. */
 typedef struct EffLoadedItem {
     struct EffLoadedItem *next; /* 0x00 */
     u8 opaque04[4];             /* 0x04 */
-    u32 allocationHandle;       /* 0x08: used as an SdfMemBlock handle. */
+    struct SdfMemBlock *allocationHandle; /* 0x08: allocation descriptor. */
     u8 opaque0C[4];             /* 0x0C */
     u8 kind;                    /* 0x10: the consumer accepts kind 1. */
 } EffLoadedItem;
