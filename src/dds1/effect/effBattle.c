@@ -154,7 +154,7 @@ extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request
 extern void effBattleMiscBuildBasis(EffectVectorRequest *request, u128 *out);
 extern f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request);
 extern u32 effBTLFieldColorGetOverrideSelector(void); extern u32 effBTLFieldColorGetFinalSelector(void);
-extern u32 effMultiplyPackedColors(u32, u32); extern u32 effBattleCalcFadeTint(u32, u32);
+extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB); extern u32 effBattleCalcFadeTint(u32, u32);
 extern void kwlnFadeSetupFrames(s32, s32); extern void mdlLoadTertiaryVectorVU(MdlCtx *);
 extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode);
 extern void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *command, s32 frame);
