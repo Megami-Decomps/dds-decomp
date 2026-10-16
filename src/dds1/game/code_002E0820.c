@@ -249,9 +249,9 @@ s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount) {
     return (registerCount * loopCount + 2) << SDF_DMA_QWORD_SHIFT;
 }
 
-/* Include the DMA/GIF header space in a measured payload byte count. */
-s32 sdfConsMeasurePacketWithHeader(s32 payloadBytes) {
-    return payloadBytes + 0x20;
+/* Return the packet payload address after the DMA/GIF header. */
+s32 sdfConsMeasurePacketWithHeader(s32 packetAddress) {
+    return packetAddress + 0x20;
 }
 
 /* Build packed GIF NLOOP/NREG/PRIM fields and its VIF DIRECT command. */
