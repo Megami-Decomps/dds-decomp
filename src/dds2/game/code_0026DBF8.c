@@ -147,7 +147,7 @@ extern s32 mnuDrawMantraTitle();
 extern u32 mnuInitMantraTitleDraw();
 extern void mnuReleaseMantraTitleDraw();
 extern s32 mnuUpdateMantraInfoPulseFade();
-extern void mnuDrawMantraInfoPanel();
+extern s32 mnuDrawMantraInfoPanel();
 extern u32 mnuInitMantraInfoDraw();
 extern void mnuReleaseMantraInfoDraw();
 extern s32 mnuDrawMantraGauge();
@@ -2225,7 +2225,146 @@ s32 mnuUpdateMantraInfoPulseFade(s32 unused, s32 item) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraInfoPanel);
+s32 mnuDrawMantraInfoPanel(s32 unused, MantraDrawItem *item) {
+    MantraPulseState *pulse = item->data;
+    f32 visibility;
+    s32 alpha;
+    s32 entry;
+    s32 showCost;
+    s32 clock, remaining;
+    s32 duration;
+    f32 opacity, position;
+    if (pulse->reverse) visibility = (f32)pulse->countdown / 5.0f;
+    else visibility = 1.0f;
+    alpha = (s32)(128.0f * pulse->value * visibility);
+    entry = pulse->x;
+    if (pulse->y != 2 && pulse->y != 3) entry = 0;
+    showCost = pulse->y != 3;
+    switch (pulse->state) {
+    case 1:
+    case 6:
+        clock = pulse->timer;
+        duration = 16;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawOptionalMantraLabel(0,0,0,(s32)(alpha * opacity),entry,0x53);
+        clock = pulse->timer - 8;
+        duration = 8;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 4;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawMantraLabelA((s32)((1.0f-position)*64.0f),0,0,(s32)(alpha*opacity),entry,0x53);
+        clock = pulse->timer - 10;
+        duration = 8;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 4;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawMantraDigitRow((s32)((1.0f-position)*64.0f),0,0,(s32)(alpha*opacity),entry,0x53);
+        clock = pulse->timer - 11;
+        duration = 8;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 4;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawMantraCostCounter((s32)((1.0f-position)*64.0f),0,0,(s32)(alpha*opacity),entry,showCost,0x53);
+        break;
+    case 2:
+        mnuDrawOptionalMantraLabel(0,0,0,alpha,entry,0x53);
+        mnuDrawMantraLabelA(0,0,0,alpha,entry,0x53);
+        mnuDrawMantraDigitRow(0,0,0,alpha,entry,0x53);
+        mnuDrawMantraCostCounter(0,0,0,alpha,entry,showCost,0x53);
+        break;
+    case 3:
+    case 5:
+        do {
+            remaining = 21 - pulse->timer;
+            clock = remaining;
+            duration = 16;
+        } while (0);
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        clock -= 5;
+        mnuDrawOptionalMantraLabel(0,0,0,(s32)(alpha*opacity),entry,0x53);
+        duration = 8;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 4;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawMantraLabelA((s32)((1.0f-position)*-64.0f),0,0,(s32)(alpha*opacity),entry,0x53);
+        clock = remaining - 10;
+        duration = 8;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 4;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawMantraDigitRow((s32)((1.0f-position)*-64.0f),0,0,(s32)(alpha*opacity),entry,0x53);
+        clock = remaining - 13;
+        duration = 8;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 4;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        mnuDrawMantraCostCounter((s32)((1.0f-position)*-64.0f),0,0,(s32)(alpha*opacity),entry,showCost,0x53);
+        break;
+    }
+    return 0;
+}
 
 MantraDrawItem *mnuRegisterMantraGaugeDraw(MantraDrawPool *pool) {
     return mnuRegisterMantraDrawItem(pool, 8, mnuUpdateMantraGaugeFade, mnuDrawMantraGauge,
