@@ -1891,7 +1891,7 @@ u32 mnuCampChooseSolarWeightedOption(s32 row) {
     s32 chance = effMiscRand(0) & 0xFF;
     u8 *item = mnuCampListedItemSolarWeightsView + row * 8;
     s32 total = 0;
-    u32 index = 0;
+    u32 optionIndex = 0;
     do {
         if (evtGetMirroredSolarPhase() == 8) {
             total += item[-3];
@@ -1899,11 +1899,11 @@ u32 mnuCampChooseSolarWeightedOption(s32 row) {
             total += item[0];
         }
         if (total >= chance) {
-            return index;
+            return optionIndex;
         }
-        index++;
+        optionIndex++;
         item++;
-    } while (index < 3);
+    } while (optionIndex < 3);
     return 0;
 }
 
