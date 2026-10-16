@@ -222,7 +222,121 @@ flash:
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawLevelProgressDetails);
+#include "eff.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern void *memcpy(void *, const void *, u32);
+extern s32 sprintf(char *, const char *, ...);
+extern const char D_003BC578[];
+
+void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                                BrsProgressRow *row, s32 context, s32 index) {
+    typedef struct BrsLevelCornerColors { u32 values[4]; } BrsLevelCornerColors;
+    extern const BrsLevelCornerColors D_003AFC50;
+    char text[32];
+    BrsLevelCornerColors colors;
+    u32 color = work->levelAnimation[index].alpha | 0x80808000;
+    u32 fade = 0x100 - work->fadeProgress;
+    s16 candidate;
+    s16 nextLevel;
+    s16 level;
+    s32 totalProgress;
+    s32 levelDelta;
+    s32 baseExp;
+    s32 progress;
+    s32 required;
+    struct FrFontGlyph *glyph;
+    s32 rawPercent;
+    s32 displayPercent;
+    EffectSlotSet *resource;
+    BdWork *bar;
+    EffectSlotDescription *description;
+    s32 width;
+    s32 slot = 20;
+
+    colors = D_003AFC50;
+    colors.values[0] = color;
+    colors.values[1] = color;
+    colors.values[2] = color;
+    colors.values[3] = color;
+    level = work->levelAnimation[index].level;
+    totalProgress = work->levelAnimation[index].currentProgress;
+    candidate = work->levelAnimation[index].level + 1;
+    nextLevel = candidate < 2 ? 1 : (candidate > 99 ? 99 : candidate);
+    if (level < 99) {
+        levelDelta = level - row->unit->level;
+        baseExp = (s32)ptyComputeTotalExp(row->unit, levelDelta);
+        if (totalProgress < baseExp) {
+            progress = totalProgress;
+            required = (s32)ptyComputeTotalExp(row->unit, nextLevel - level + levelDelta);
+        } else {
+            progress = totalProgress - baseExp;
+            required = (s32)ptyComputeTotalExp(row->unit, nextLevel - level + levelDelta) - baseExp;
+        }
+        if (work->levelAnimation[index].completionFlashActive != 0 &&
+            work->levelAnimation[index].state == 3) {
+            required = 0;
+            progress = 0;
+        }
+        if (row->unit->hp != 0 && !(row->unit->status & 0x4000)) {
+            color = uiBlendColors(0x80808080, 0x80808000, fade);
+        } else {
+            color = uiBlendColors(0x4F4E4E80, 0x4F4E4E00, fade);
+        }
+        sprintf(text, D_003BC578, required - progress);
+        glyph = itfCreateFont2TextGlyph(x + 0xC10, y + 0x98, z, color, text, NULL);
+        frFontDrawGlyphChain(glyph, 1, context);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        if (progress > 0) {
+            if (required != 0) {
+                displayPercent = progress * 1000 / required;
+                if (displayPercent >= 1001) {
+                    if (required < progress) {
+                        displayPercent %= 1000;
+                    }
+                }
+                rawPercent = displayPercent;
+                if (work->levelAnimation[index].progressInitialized == 0) {
+                    work->levelAnimation[index].previousProgress = displayPercent;
+                    work->levelAnimation[index].progressInitialized = 1;
+                }
+                if (displayPercent < 41) {
+                    displayPercent = 40;
+                }
+                if (work->levelAnimation[index].remaining == 0) {
+                    if (work->levelAnimation[index].previousProgress < rawPercent) {
+                        if (rawPercent - work->levelAnimation[index].previousProgress < 11) {
+                            displayPercent += 10;
+                        }
+                    }
+                }
+                displayPercent = displayPercent < 1 ? 0 : (displayPercent > 1000 ? 1000 : displayPercent);
+                resource = work->teardownResource;
+                bar = &resource->workEntries[slot];
+                description = &resource->descriptions[slot];
+                bar->geometry.bounds[2] = (bar->sourceWidth << 4) * displayPercent / 1000;
+                width = description->colors[2] - description->colors[0];
+                width = width * displayPercent / 1000 - width;
+                bar->parameters[2] = width;
+                effDrawSpriteWithCornerColors(x + 0x9B0, y + 0x120, z, colors.values,
+                                              0, resource, slot, context);
+                work->teardownResource->workEntries[slot].parameters[2] = 0;
+                work->teardownResource->workEntries[slot].geometry.bounds[2] = work->teardownResource->workEntries[slot].sourceWidth * 16;
+            }
+        }
+        if (work->levelAnimation[index].completionFlashActive != 0) {
+            color = work->levelAnimation[index].iconOpacity | 0x80808000;
+            colors.values[0] = color;
+            colors.values[1] = color;
+            colors.values[2] = color;
+            colors.values[3] = color;
+            effDrawSpriteWithCornerColors(x + 0x9B0, y + 0x120, z, colors.values,
+                                          0, work->teardownResource, 20, context);
+        }
+    }
+}
 
 
 void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
