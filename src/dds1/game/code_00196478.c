@@ -477,13 +477,13 @@ s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub) {
 }
 
 /* Return the selected resource header's cell width; index is unchecked. */
-u16 frFontGetSlotCellWidth(s32 index) {
-    return frFontWork.entries[index].resourceHeader->cellWidth;
+u16 frFontGetSlotCellWidth(s32 slotIndex) {
+    return frFontWork.entries[slotIndex].resourceHeader->cellWidth;
 }
 
 /* Return the selected resource header's cell height; index is unchecked. */
-u16 frFontGetSlotCellHeight(s32 index) {
-    return frFontWork.entries[index].resourceHeader->cellHeight;
+u16 frFontGetSlotCellHeight(s32 slotIndex) {
+    return frFontWork.entries[slotIndex].resourceHeader->cellHeight;
 }
 
 void itfSetTextDrawLimit(s32 limit) {
