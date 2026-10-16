@@ -88,7 +88,7 @@ void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *resources) {
 }
 
 
-void mnuDrawMovieSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGroup *group, s32 a5) {
+void mnuDrawMovieSpriteGroup(s32 x, s32 y, s32 z, s32 alpha, MnuSpriteResourceGroup *group, s32 context) {
     s32 i;
     SdfList *list;
     SdfListNode *node;
@@ -114,13 +114,13 @@ void mnuDrawMovieSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGr
             switch (elem->variant) {
             case 0:
                 /* retail arm 0x0026E448 */
-                scaled = (s32)((f32)a3 * wave);
-                mnuDrawMovieParticleSprite(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
+                scaled = (s32)((f32)alpha * wave);
+                mnuDrawMovieParticleSprite(x + elem->x, y + elem->y, z, scaled, context);
                 break;
             case 1:
                 /* retail arm 0x0026E478 */
-                scaled = (s32)((f32)a3 * wave);
-                mnuDrawMovieParticleSprite(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
+                scaled = (s32)((f32)alpha * wave);
+                mnuDrawMovieParticleSprite(x + elem->x, y + elem->y, z, scaled, context);
                 break;
             }
             node = node->next;
