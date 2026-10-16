@@ -3828,7 +3828,7 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 target[4], f32 scale, s8 mode) {
+BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 targetOrientation[4], f32 interpolationRate, s8 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
     u8 *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -3838,13 +3838,13 @@ BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 
     task->callback = btlStepUnitRotationNlerp;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    ((BtlVectorTaskArgs *)args)->scale = scale;
+    ((BtlVectorTaskArgs *)args)->scale = interpolationRate;
     ((BtlVectorTaskArgs *)args)->mode2C = mode;
     ((BtlVectorTaskArgs *)args)->unit30 = (u32)unit;
     ((BtlVectorTaskArgs *)args)->state24 = 0;
     ((BtlVectorTaskArgs *)args)->state28 = 0;
     PCP_COPY_VECTOR(args, unit->orientation);
-    PCP_COPY_VECTOR(args + 0x10, target);
+    PCP_COPY_VECTOR(args + 0x10, targetOrientation);
     return task;
 }
 
