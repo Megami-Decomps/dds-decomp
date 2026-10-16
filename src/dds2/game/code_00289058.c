@@ -40,11 +40,11 @@ DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *resource) {
     return resource->list->cursor->partyRecord;
 }
 
-DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *object, s32 index) {
-    struct MenuListNode *node = object->list->first;
+DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *resource, s32 nodeIndex) {
+    struct MenuListNode *node = resource->list->first;
     s32 current = 0;
     while (node != 0) {
-        if (current == index) {
+        if (current == nodeIndex) {
             return node->partyRecord;
         }
         node = node->next;
