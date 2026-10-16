@@ -10,6 +10,7 @@
 #include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
+#include "dds3_object_flags.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "mdl.h"
@@ -116,9 +117,6 @@ extern s32 D_00435EF8;
 extern void fldSetCameraMoveMode(s32 mode);
 
 extern void fldClearCameraMoveMode(void);
-
-
-extern u8 dds3TestObjectFlags(void *object, u32 mask);
 
 
 extern void fldSubmitBackgroundResourcePacket(void);

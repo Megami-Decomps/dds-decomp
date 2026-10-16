@@ -33,6 +33,7 @@
 #include "fld_spawn_event.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
+#include "dds3_object_flags.h"
 #include "sdf_texture_file.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "evt_action_object.h"
@@ -3850,7 +3851,7 @@ s32 fldSyncObjectFlagsB(void) {
     if (fldSecondarySceneObject == 0) {
         return 0;
     }
-    result = dds3TestObjectFlags(fldPlayerObject, 1);
+    result = dds3TestObjectFlags((EffWorldNode *)fldPlayerObject, 1);
     if (result != 0) {
         dds3SetObjectFlags(fldSecondarySceneObject, 1);
         result = 0;
