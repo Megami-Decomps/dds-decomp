@@ -510,7 +510,132 @@ f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
     return reach;
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6970);
+f32 func_001F6970(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
+    f32 position[4] __attribute__((aligned(16)));
+    BtlUnit *unit;
+    f32 scale;
+    f32 reach;
+    f32 top;
+    f32 leftX;
+    f32 rightX;
+    f32 leftZ;
+    f32 rightZ;
+    f32 minX;
+    f32 maxX;
+    f32 minZ;
+    f32 maxZ;
+    f32 minTop;
+    f32 maxTop;
+    f32 maxReach;
+    f32 halfWidth;
+    f32 halfDepth;
+    f32 halfHeight;
+    s32 first;
+
+    first = 1;
+    maxTop = 0.0f;
+    unit = ((BtlState *)btlGetRuntime())->units;
+    maxReach = 0.0f;
+    minTop = 0.0f;
+    maxX = 0.0f;
+    minX = 0.0f;
+    maxZ = 0.0f;
+    minZ = 0.0f;
+    for (; unit != NULL; unit = unit->next) {
+        if (!(btlUnitStatusPair(unit) & 0x21) || !(unit->status.flags & mask)) {
+            continue;
+        }
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, position);
+        scale = unit->scale;
+        reach = unit->reach * scale;
+        rightX = position[0] + reach;
+        leftX = position[0] - reach;
+        rightZ = position[2] + reach;
+        leftZ = position[2] - reach;
+        top = (unit->height * scale * 0.5f) - position[1];
+        if (first) {
+            maxReach = reach;
+            if (leftX < rightX) {
+                maxX = rightX;
+                minX = leftX;
+            } else {
+                maxX = leftX;
+                minX = rightX;
+            }
+            if (leftZ < rightZ) {
+                maxZ = rightZ;
+                minZ = leftZ;
+            } else {
+                maxZ = leftZ;
+                minZ = rightZ;
+            }
+            minTop = top;
+            first = 0;
+            maxTop = minTop;
+        } else {
+            if (maxReach < reach) {
+                maxReach = reach;
+            }
+            if (maxX < rightX) {
+                maxX = rightX;
+            }
+            if (rightX < minX) {
+                minX = rightX;
+            }
+            if (maxX < leftX) {
+                maxX = leftX;
+            }
+            if (leftX < minX) {
+                minX = leftX;
+            }
+            if (maxZ < rightZ) {
+                maxZ = rightZ;
+            }
+            if (rightZ < minZ) {
+                minZ = rightZ;
+            }
+            if (maxZ < leftZ) {
+                maxZ = leftZ;
+            }
+            if (leftZ < minZ) {
+                minZ = leftZ;
+            }
+            if (maxTop < top) {
+                maxTop = top;
+            }
+            if (top < minTop) {
+                minTop = top;
+            }
+        }
+    }
+    position[3] = 0.0f;
+    position[0] = (maxX + minX) * 0.5f;
+    halfWidth = (maxX - minX) * 0.5f;
+    position[1] = -maxTop * 0.5f;
+    position[2] = (maxZ + minZ) * 0.5f;
+    halfDepth = (maxZ - minZ) * 0.5f;
+    halfHeight = maxTop * 0.5f;
+    if (halfDepth < halfWidth) {
+        reach = halfHeight;
+        if (reach < halfWidth) {
+            reach = halfWidth;
+        }
+    } else {
+        reach = halfDepth;
+        if (!(halfHeight < reach)) {
+            reach = halfHeight;
+        }
+    }
+    VU0_LOAD_VF_MEMORY(vf10, position);
+    if (outMaxTop != NULL) {
+        *outMaxTop = maxTop;
+    }
+    if (outMinTop != NULL) {
+        *outMinTop = minTop;
+    }
+    return reach;
+}
 
 /* Maximum top bound among active units matching any mask bit; zero if none. */
 f32 btlGetMaxUnitTop(u32 mask) {
