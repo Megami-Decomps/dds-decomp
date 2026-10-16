@@ -821,7 +821,7 @@ extern void mnuRequestIndexedMovieResource(s32);
 extern void kwlnFadeBackgroundStartIn(s32);
 extern u16 D_003BBE78;
 extern char D_003ACFE8[];
-extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
+extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 extern s32 evtViewerTestIndexedCondition(u32);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
@@ -1743,7 +1743,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
     }
 }
 
-extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
+extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 void evtViewerMarkWindowActive(EvtRuntime *viewer);
 
 /* Activates the message window thirty frames before a kind-4 key when its
