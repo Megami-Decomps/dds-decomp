@@ -290,7 +290,7 @@ void effFillRandRecords(EffEmit *emitter) {
     } while (recordIndex < recordCount);
 }
 
-extern void effBuildAndDispatch(EffPrimitiveCurve *, s32);
+extern void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents);
 
 EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
     SdfMemBlock *primaryResource = sdfAllocGeneralBlock(0x2C);
