@@ -67,11 +67,11 @@ void brsDecaySharedAnimCounter(BrsSkillPackageWork *work) {
 extern u8 brsLevelStepThresholds[];
 
 /* Read the value paired with the highest of three thresholds not above input. */
-u8 brsGetLevelStepForValue(s32 value) {
+u8 brsGetLevelStepForValue(s32 level) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (value >= brsLevelStepThresholds[i * 2]) {
+        if (level >= brsLevelStepThresholds[i * 2]) {
             return brsLevelStepThresholds[i * 2 + 1];
         }
     }
