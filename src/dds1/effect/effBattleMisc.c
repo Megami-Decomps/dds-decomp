@@ -360,6 +360,6 @@ void effBattleMiscBuildBasis(EffectVectorRequest *request, u128 *out) {
     VU0_STORE_MATRIX(out);
 }
 
-u32 effBattleMiscGetTableEntry(s32 index) {
-    return effBattleTransitionDurations[index];
+u32 effBattleMiscGetTableEntry(s32 durationIndex) {
+    return effBattleTransitionDurations[durationIndex];
 }
