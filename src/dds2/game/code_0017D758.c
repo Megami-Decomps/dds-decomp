@@ -29,8 +29,8 @@ void effScatterCopyFlatParameterVector(PcpScatterPlainInstance *work, void *src)
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
-void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 value) {
-    work->scale = value;
+void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 scale) {
+    work->scale = scale;
 }
 
 /* Set the instance color used by the particle fade pass. */
