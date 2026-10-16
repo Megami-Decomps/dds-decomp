@@ -110,8 +110,8 @@ extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg
 extern u8 D_003AC520[];
 extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
 
-extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
-extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
+extern void evtConfigureUnitTransition(EvtUnit *unit, s32 duration);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
@@ -1165,12 +1165,12 @@ u32 evtCommandFlagSelectedUnitStatus(void) {
 u32 evtCommandBeginSelectedUnitTransition(void) {
     s32 worldObjectKey;
     EvtUnit *unit;
-    s32 param1;
+    s32 duration;
 
     worldObjectKey = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(worldObjectKey);
-    param1 = scrReadIntParameter(1);
-    evtConfigureUnitTransition(unit, param1);
+    duration = scrReadIntParameter(1);
+    evtConfigureUnitTransition(unit, duration);
     return 1;
 }
 
@@ -1283,12 +1283,12 @@ u32 evtOpSetUnitValueTransitionTarget(void) {
 u32 evtOpEndUnitValueTransition(void) {
     s32 worldObjectKey;
     EvtUnit *unit;
-    s32 param1;
+    s32 duration;
 
     worldObjectKey = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(worldObjectKey);
-    param1 = scrReadIntParameter(1);
-    evtEndUnitValueTransition(unit, param1);
+    duration = scrReadIntParameter(1);
+    evtEndUnitValueTransition(unit, duration);
     return 1;
 }
 
