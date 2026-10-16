@@ -563,10 +563,10 @@ void scrClearProfileFlagsTable(void) {
 INCLUDE_ASM(const s32, "game/code_00313BB8", ptyApplyProfile);
 
 /* Test the first bit of the decoded profile flag pair for this unit. */
-s32 ptyTestPrimaryProfileFlag(DatPartyRecord *work, u16 id) {
+s32 ptyTestPrimaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
     u32 word, shift;
     prfDecodeFlagPair(id, &word, &shift);
-    return (datGameState->mantraBits[work->unitId].words[word] & (1 << shift)) != 0;
+    return (datGameState->mantraBits[partyRecord->unitId].words[word] & (1 << shift)) != 0;
 }
 
 /* Require the primary profile flag for every row not marked as excluded. */
@@ -591,10 +591,10 @@ void ptySetSecondaryProfileFlag(DatPartyRecord *unit, u16 id) {
 }
 
 /* Test the second bit of the decoded profile flag pair for this unit. */
-s32 ptyTestSecondaryProfileFlag(DatPartyRecord *work, u16 id) {
+s32 ptyTestSecondaryProfileFlag(DatPartyRecord *partyRecord, u16 id) {
     u32 word, shift;
     prfDecodeFlagPair(id, &word, &shift);
-    return (datGameState->mantraBits[work->unitId].words[word] & (1 << (shift + 1))) != 0;
+    return (datGameState->mantraBits[partyRecord->unitId].words[word] & (1 << (shift + 1))) != 0;
 }
 
 u32 scrGetSelectedScriptEntryId(DatPartyRecord *work) {
@@ -727,11 +727,11 @@ u32 scrGetSecondaryScriptFlag(DatPartyRecord *work, u16 flagId) {
 
 /* Bit 1 takes precedence and returns state 2; otherwise return boolean bit 0.
  * The secondary bit does not affect this state. */
-u32 ptyGetSkillNibbleState(DatPartyRecord *work, u16 flagId) {
+u32 ptyGetSkillNibbleState(DatPartyRecord *partyRecord, u16 flagId) {
     u32 wordIndex, bitShift;
     u32 flagWord;
-    scrDecodePackedFlagIndex(work, flagId, &wordIndex, &bitShift);
-    flagWord = work->skillFlags[wordIndex];
+    scrDecodePackedFlagIndex(partyRecord, flagId, &wordIndex, &bitShift);
+    flagWord = partyRecord->skillFlags[wordIndex];
     if (flagWord & (SCR_SKILL_STATE_TWO_BIT << bitShift)) {
         return 2;
     }
