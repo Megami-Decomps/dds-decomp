@@ -638,16 +638,16 @@ void sdfCounterTickCountdown(void) {
 }
 
 /* Enabling a stopped timer starts it at one; disabling clears it. */
-void mnuSetMapTimerFlags(s32 flags) {
+void mnuSetMapTimerFlags(s32 mapTimerFlags) {
     SdfCounterTimer *timer = sdfActiveCounterRuntime->state.timer;
-    if ((flags & 1) != 0) {
+    if ((mapTimerFlags & 1) != 0) {
         if (timer->mapTimerPrimary == 0) {
             timer->mapTimerPrimary = 1;
         }
     } else {
         timer->mapTimerPrimary = 0;
     }
-    if ((flags & 2) != 0) {
+    if ((mapTimerFlags & 2) != 0) {
         if (timer->mapTimerSecondary == 0) {
             timer->mapTimerSecondary = 1;
         }
