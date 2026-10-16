@@ -832,8 +832,8 @@ s32 evtGetUnitMotionState(EvtUnit *unit) {
 }
 
 /* Callers pass the promoted full-width value; only the low halfword is stored. */
-void evtUnitSetStoredParameter(EvtUnit *unit, s32 value) {
-    unit->unkBC = value;
+void evtUnitSetStoredParameter(EvtUnit *unit, s32 storedParameter) {
+    unit->unkBC = storedParameter;
 }
 
 void evtSetTransitionMotionScale(EvtUnit *unit, f32 transitionMotionScale) {
@@ -863,8 +863,8 @@ void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlo
     unit->secondSlot = secondSlot;
 }
 
-void evtActivateStoredUnitMotionSlot(EvtUnit *work) {
-    evtConfigureUnitMotionSlot(work, work->firstSlot, work->secondSlot, 0, 0, 2);
+void evtActivateStoredUnitMotionSlot(EvtUnit *unit) {
+    evtConfigureUnitMotionSlot(unit, unit->firstSlot, unit->secondSlot, 0, 0, 2);
 }
 
 void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 slotAValue, s32 slotBValue,

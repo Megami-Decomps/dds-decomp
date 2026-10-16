@@ -816,13 +816,13 @@ void evtUnitSetStoredParameter(EvtUnit *unit, s32 storedParameter) {
     unit->unkBC = storedParameter;
 }
 
-void evtSetTransitionMotionScale(EvtUnit *work, f32 transitionMotionScale) {
-    work->transitionMotionScale = transitionMotionScale;
+void evtSetTransitionMotionScale(EvtUnit *unit, f32 transitionMotionScale) {
+    unit->transitionMotionScale = transitionMotionScale;
 }
 
-void evtStoreUnitMotionShortParameters(EvtUnit *work, s32 firstParameter, s32 secondParameter) {
-    work->unkBE = firstParameter;
-    work->unkC0 = secondParameter;
+void evtStoreUnitMotionShortParameters(EvtUnit *unit, s32 firstParameter, s32 secondParameter) {
+    unit->unkBE = firstParameter;
+    unit->unkC0 = secondParameter;
 }
 
 s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
@@ -843,8 +843,8 @@ void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlo
     unit->secondSlot = secondSlot;
 }
 
-void evtActivateStoredUnitMotionSlot(EvtUnit *work) {
-    evtConfigureUnitMotionSlot(work, work->firstSlot, work->secondSlot, 0, 0, 2);
+void evtActivateStoredUnitMotionSlot(EvtUnit *unit) {
+    evtConfigureUnitMotionSlot(unit, unit->firstSlot, unit->secondSlot, 0, 0, 2);
 }
 
 void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 slotAValue, s32 slotBValue,
