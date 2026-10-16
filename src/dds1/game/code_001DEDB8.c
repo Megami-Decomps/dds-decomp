@@ -399,7 +399,6 @@ void btlClearAllUnitDefeatCandidatesTask(void);
 
 void btlClearUnitDefeatCandidate(BtlUnit *object);
 
-void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src);
 
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
 

@@ -5836,7 +5836,7 @@ void btlClearPendingSoundList(void) {
     work->battleFlags &= ~0x10;
 }
 
-void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src) {
+void btlCopyMotionTransform(BtlCamState *dst, const BtlCamState *src) {
     PCP_COPY_VECTOR(dst->position, src->position);
     PCP_COPY_VECTOR(dst->direction, src->direction);
     dst->distance = src->distance;
@@ -6174,6 +6174,14 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
 }
 
 /* Let the runtime hook handle the actor before dispatching its camera step. */
+/* Validate retained command fields beside their native initialization. */
+typedef char BattleIndexWork_summonId_offset_check[
+    ((u32)&((BattleIndexWork *)0)->summonId == 0x18) ? 1 : -1];
+typedef char BattleIndexWork_battleExperienceReward_offset_check[
+    ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
+typedef char BattleIndexWork_moneyReward_offset_check[
+    ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];
+
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3D38);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3D50);
@@ -6225,11 +6233,3 @@ INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB660);
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB664);
 
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB668);
-
-/* Validate retained command fields beside their native initialization. */
-typedef char BattleIndexWork_summonId_offset_check[
-    ((u32)&((BattleIndexWork *)0)->summonId == 0x18) ? 1 : -1];
-typedef char BattleIndexWork_battleExperienceReward_offset_check[
-    ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
-typedef char BattleIndexWork_moneyReward_offset_check[
-    ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];
