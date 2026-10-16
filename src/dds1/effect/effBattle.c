@@ -173,7 +173,7 @@ void effBattleUpdate(BattleEffect *work) {
     BtlUnit *unit;
     EffBattleEntryList *list;
     EffBattleEntry *entry;
-    s32 index;
+    s32 entryIndex;
     s32 count;
     const u32 frame = work->currentFrame;
     u16 flags = work->flags;
@@ -263,7 +263,7 @@ void effBattleUpdate(BattleEffect *work) {
 
         entry = list->entries;
         count = list->count;
-        for (index = 0; index < count; index++, entry++) {
+        for (entryIndex = 0; entryIndex < count; entryIndex++, entry++) {
             f32 scalar = 0.0f;
             f32 matrixOutput[4][4];
             s32 hidden;
@@ -289,7 +289,7 @@ void effBattleUpdate(BattleEffect *work) {
                     }
                 }
             }
-            if (work->parameterWorks[index] == NULL) {
+            if (work->parameterWorks[entryIndex] == NULL) {
                 continue;
             }
 
@@ -308,23 +308,23 @@ void effBattleUpdate(BattleEffect *work) {
             if ((work->flags & 0x10) == 0) {
                 EffectVectorRequest *request = (EffectVectorRequest *)&entry->aimParams;
                 effBattleMiscQueryPosition(unit, request, (u128 *)localVector);
-                effParamWorkCallback0(work->parameterWorks[index], localVector);
+                effParamWorkCallback0(work->parameterWorks[entryIndex], localVector);
                 switch (request->kind) {
                 case 0:
                 case 4:
-                    effParamWorkCallback2(work->parameterWorks[index], baseMatrix);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], baseMatrix);
                     break;
                 case 6:
-                    effParamWorkCallback2(work->parameterWorks[index], overrideMatrix);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], overrideMatrix);
                     break;
                 case 7:
-                    effParamWorkCallback2(work->parameterWorks[index], finalMatrix);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], finalMatrix);
                     break;
                 case 1:
-                    effParamWorkCallback2(work->parameterWorks[index], alternateMatrix);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], alternateMatrix);
                     break;
                 case 2:
-                    effParamWorkCallback2(work->parameterWorks[index], oppositeMatrix);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], oppositeMatrix);
                     break;
                 case 3:
                     break;
@@ -333,7 +333,7 @@ void effBattleUpdate(BattleEffect *work) {
                     VU0_LOAD_MATRIX_B(baseMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
                     break;
                 case 8:
                     if ((unit->status.flags & 2) != 0) {
@@ -349,7 +349,7 @@ void effBattleUpdate(BattleEffect *work) {
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
                     break;
 
                 case 9:
@@ -366,7 +366,7 @@ void effBattleUpdate(BattleEffect *work) {
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
                     break;
 
                 case 10:
@@ -383,18 +383,18 @@ void effBattleUpdate(BattleEffect *work) {
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
-                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[entryIndex], matrixOutput);
                     break;
                 default:
                     break;
                 }
                 effBattleMiscBuildBasis(request, (u128 *)basisMatrix);
-                effParamWorkCallback4(work->parameterWorks[index], basisMatrix);
+                effParamWorkCallback4(work->parameterWorks[entryIndex], basisMatrix);
                 scalar = effBattleMiscQueryScalar(unit, request);
-                effParamWorkCallback5(work->parameterWorks[index], scalar);
-                effParamWorkCallback3(work->parameterWorks[index], color);
+                effParamWorkCallback5(work->parameterWorks[entryIndex], scalar);
+                effParamWorkCallback3(work->parameterWorks[entryIndex], color);
             }
-            effParamWorkInvokeCallback(work->parameterWorks[index]);
+            effParamWorkInvokeCallback(work->parameterWorks[entryIndex]);
         }
     }
 
