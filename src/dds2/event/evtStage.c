@@ -87,8 +87,9 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     return 1;
 }
 
-extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
-                                                       const SdfTextureOffsetListHeader *, u32 flags);
+extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,
+                                                       u32 resource0Data, u32 resource1Data,
+                                                       const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
