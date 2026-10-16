@@ -2088,11 +2088,11 @@ void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, 
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, EffectSlotSet *resource) {
+void mnuAttachPartyIconBundle(s32 slotIndex, MenuPageWindow *menu, EffectSlotSet *resource) {
     MenuIconBundle *bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    menu->slots[index].iconBundle = bundle;
+    menu->slots[slotIndex].iconBundle = bundle;
 }
 
 void mnuReleasePartyIconBundles(MenuPageWindow *menu) {

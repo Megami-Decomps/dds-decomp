@@ -1658,11 +1658,11 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource) {
+void mnuAttachPartyIconBundle(s32 slotIndex, MenuPageWindow *window, u32 resource) {
     MenuIconBundle *sprites;
 
     sprites = mnuCreateFadeSpriteResourceSet(resource);
-    window->slots[index].iconBundle = sprites;
+    window->slots[slotIndex].iconBundle = sprites;
 }
 
 void mnuReleasePartyIconBundles(MenuPageWindow *window) {
