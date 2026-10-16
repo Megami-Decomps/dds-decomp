@@ -6,17 +6,17 @@
 
 
 /* Queue the backing allocation, if present, then free the range-data block.
- * A nonzero resourceAddress must match a used general-heap block.
+ * A non-NULL resourceData must match a used general-heap block.
  * The owning object's rangeData member is not cleared by this release. */
 void dds3ReleaseModelRangeData(Dds3ModelRangeObjectView *object) {
     Dds3ModelRangeDataView *rangeData;
-    s32 resourceAddress;
+    void *resourceData;
     SdfMemBlock *allocation;
 
     rangeData = object->rangeData;
-    resourceAddress = rangeData->resourceAddress;
-    if (resourceAddress != 0) {
-        allocation = sdfFindGeneralBlockByAddress((void *)resourceAddress);
+    resourceData = rangeData->resourceData;
+    if (resourceData != NULL) {
+        allocation = sdfFindGeneralBlockByAddress(resourceData);
         sdfQueueGeneralAllocationRelease(allocation);
     }
     sdfReleaseChipBlock(rangeData);
