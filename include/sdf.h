@@ -267,8 +267,8 @@ typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *,
 void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *, u8 *, s32);
 void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
 void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
-s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
-s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
+s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount);
+s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount);
 void sdfAdvanceStreamPlayback(s32 cadence);
 /* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
 void sdfSetStreamFrameDrawMode(u32 mode);
