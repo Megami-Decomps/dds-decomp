@@ -43,7 +43,7 @@
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
  * step-before-index, and all callers are verified. */
-extern void evtSubmitEventRequest(s32, s32);
+extern void evtSubmitEventRequest(s32 eventId, s32 requestMode);
 extern void evtSubmitEventRequestImmediate(s32);
 #include "dds3_world_primary.h"
 extern void fldUpdateCameraHeadingTransition(void);
