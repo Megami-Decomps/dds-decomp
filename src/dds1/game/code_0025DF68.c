@@ -207,10 +207,75 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawMenuItemListRow);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawCampItemListRow);
-
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char D_003BC500[];
+void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct MenuListNode *node, s32 mode) {
+    char text[16];
+    struct EffectSlotSet *layer = D_003BC520;
+    MnuShopListContext *context = list->context;
+    s32 first = list->head->index;
+    s32 index = node->index;
+    s32 row = index - first;
+    f32 fade = 1.0f;
+    f32 pulse;
+    s32 selected = 0;
+    u32 color;
+    FrFontGlyph *glyph;
+
+    switch (context->mode) {
+    case 1: {
+        f32 position = (f32)row / (f32)list->visibleCount;
+        f32 progress = (f32)context->countdown / 10.0f;
+
+        position = position * 0.5f + 0.5f;
+        fade = progress + progress;
+        fade *= position;
+        if (fade > 1.0f) {
+            fade = 1.0f;
+        }
+        fade = 1.0f - fade;
+        break;
+    }
+    case 2:
+        fade = (f32)context->countdown * 0.25f;
+        break;
+    }
+    if (node == list->cursor) {
+        context->unk08++;
+        if (context->unk08 > 60) {
+            context->unk08 = 0;
+        }
+        pulse = sdfSinPoly((f32)context->unk08 / 60.0f * 3.1415926f) * fade;
+        index = list->cursor->index;
+        row = index - first;
+        effDrawSpriteWithCornerFade(0x3D0, (row * 21 + 0x98) << 3, 0, (u32)(fade * 256.0f), 0, layer, 0x20, mode);
+        effDrawSpriteWithCornerFade(0xC90, (row * 21 + 0x98) << 3, 0, (u32)(fade * 256.0f), 0, layer, 0x21, mode);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[19][BRS_ICON_X] << 4, (mnuCommonIconPlacements[19][BRS_ICON_Y] + row * 21) << 3, 0,
+                                    (u32)(fade * 256.0f), 0, layer, mnuCommonIconPlacements[19][BRS_ICON_ID], mode);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[19][BRS_ICON_X] << 4, (mnuCommonIconPlacements[19][BRS_ICON_Y] + row * 21) << 3, 0,
+                                    (u32)(pulse * 256.0f), 0, layer, mnuCommonIconPlacements[19][BRS_ICON_ID], mode);
+        selected = 1;
+    }
+    color = 0xA09DC300;
+    if (node->flags48 & 1) {
+        color |= (s32)(fade * 64.0f);
+    } else {
+        color |= (s32)(fade * 128.0f);
+    }
+    glyph = itfCreateConvertedTextGlyph(0x570, (row * 21 + 0x99) << 3, z, color, (const u8 *)node->value, NULL);
+    if (selected) {
+        frFontSetChildChainFirstOption(glyph, 4);
+    }
+    if (list->id & 1) {
+        sprintf(text, D_003BC500, node->camp.value);
+        glyph = itfCreateFont2TextGlyph(0xFF0, (row * 21 + 0x9D) << 3, z, color, text, glyph);
+        if (selected) {
+            frFontSetChildChainFirstOption(glyph, 4);
+        }
+    }
+    frFontDrawGlyphChain(glyph, 1, mode);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
 void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
