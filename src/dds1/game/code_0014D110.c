@@ -576,11 +576,11 @@ s32 fldCmdSetSceneControlValue(void) {
 }
 
 s32 fldCmdSetFieldParameterPair(void) {
-    s32 value;
+    s32 durationMode;
 
     D_0032E570[11] = scrReadIntParameter(0);
-    value = scrReadIntParameter(1);
-    fldApplySkyLightSet(D_0032E570[11], value);
+    durationMode = scrReadIntParameter(1);
+    fldApplySkyLightSet(D_0032E570[11], durationMode);
     return 1;
 }
 
