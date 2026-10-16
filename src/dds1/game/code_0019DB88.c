@@ -857,7 +857,7 @@ void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     D_00325708.append(&D_00325708, list);
 }
 
-void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
+void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 boundsMode) {
     UiSprite *sprite = object->sprite;
     s32 *bounds;
     s32 dx;
@@ -880,7 +880,7 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
             dy *= 8;
         }
         if (dx != 0 || dy != 0) {
-            switch (mode) {
+            switch (boundsMode) {
             case 0:
                 itfAdvancePanelLayoutAndNotify(sprite, dx, dy, 0, 0, 0);
                 bounds[0] += dx;
