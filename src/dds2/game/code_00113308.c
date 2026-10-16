@@ -859,8 +859,9 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00113308", effObjOpacityPassEnabled);
-
 /* Shadow projection reads this byte from the native unit layout. */
 typedef char EvtUnitShadowLevelOffsetCheck[
     ((u32)&((EvtUnit *)0)->shadowLevel == 0xD3) ? 1 : -1];
+
+INCLUDE_SDATA(const s32, "game/code_00113308", effObjOpacityPassEnabled);
+

@@ -133,12 +133,6 @@ u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
     return color[0];
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_004144A0);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_004144B0);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_004144C0);
-
 #include "btl.h"
 #include "eff.h"
 #include "mdl.h"
@@ -165,6 +159,12 @@ extern void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand
 extern void effParamWorkCallback0(EffParamWork *, void *); extern void effParamWorkCallback2(EffParamWork *, void *);
 extern void effParamWorkCallback3(EffParamWork *, u32); extern void effParamWorkCallback4(EffParamWork *, void *);
 extern void effParamWorkCallback5(EffParamWork *, f32); extern void effParamWorkInvokeCallback(EffParamWork *);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_004144A0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_004144B0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_004144C0);
 
 void effBattleUpdate(BattleEffect *work) {
     BtlUnit *unit;

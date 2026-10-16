@@ -717,6 +717,7 @@ void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32
     }
 }
 
+#include "evt_message_window_api.h"
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC448);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC450);
@@ -733,4 +734,3 @@ INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC478);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC480);
 
-#include "evt_message_window_api.h"
