@@ -236,7 +236,7 @@ typedef struct EffVec4 {
 extern EffVec4 D_0039F720;
 extern EffVec4 D_0039F730;
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
-extern void effObjInnerVecInit(ObjectTransform *);
+extern void effObjInnerVecInit(ObjectTransform *transform);
 extern s32 func_00222ED8(ObjectTransform *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);

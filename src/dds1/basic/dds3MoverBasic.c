@@ -5,7 +5,7 @@
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
-extern void effObjInnerVecInit(ObjectTransform *);
+extern void effObjInnerVecInit(ObjectTransform *transform);
 
 
 #define DDS3_MOVER_POSITION_COPY_KIND 6
