@@ -10271,7 +10271,6 @@ evtViewerPushMode5CommandHistory = 0x0024B678; // type:func
 evtEventViewerHandleKeyEditCommand = 0x0024B6A8; // type:func
 evtViewCmdNoOp = 0x0024C9D0; // type:func
 evtEventViewerCommitGroupSelection = 0x0024CA28; // type:func
-func_0024CE18 = 0x0024CE18; // type:func
 evtEventViewerCopyEffectSetupPayload = 0x0024D148; // type:func
 evtViewerSkipsTitleStreamWait = 0x0024D760; // type:func
 evtViewerSkipsCampSceneIdRelease = 0x0024D908; // type:func
