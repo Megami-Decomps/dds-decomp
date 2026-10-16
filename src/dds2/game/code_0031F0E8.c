@@ -148,20 +148,19 @@ void dds3ReleasePackedValueBuffer(u32 node) {
 
 extern void *memset(void *, s32, u32);
 
-/* Allocate the named reference and its writable name. Native clears the first
- * four name bytes, then returns the record through the existing address word. */
-u32 dds3AllocateNamedReference(void) {
+/* Allocate the named reference and its writable name. */
+DdsNamedRecord *dds3AllocateNamedReference(void) {
     DdsNamedRecord *record = sdfAllocHeapMemory(sizeof(DdsNamedRecord));
     record->name = sdfAllocHeapMemory(DDS_NAMED_RECORD_NAME_BYTES);
     record->value = 0;
     memset(record->name, 0, sizeof(record->name));
-    return (u32)record;
+    return record;
 }
 
 /* Release a named reference's owned name buffer and the reference record. */
-void dds3ReleaseNamedReference(u32 referenceAddress) {
-    sdfFreeHeapMemory((void *)*(u32 *)referenceAddress);
-    sdfFreeHeapMemory((void *)referenceAddress);
+void dds3ReleaseNamedReference(DdsNamedRecord *record) {
+    sdfFreeHeapMemory(record->name);
+    sdfFreeHeapMemory(record);
 }
 
 
@@ -173,7 +172,7 @@ void dds3DestroyPackedSegmentCallback(u32 index, u32 blockAddress) {
 
 /* Named-reference-list onRemove callback: release the removed node's value. */
 void dds3DestroyNamedReferenceCallback(u32 index, u32 referenceAddress) {
-    dds3ReleaseNamedReference(referenceAddress);
+    dds3ReleaseNamedReference((DdsNamedRecord *)referenceAddress);
 }
 
 
@@ -243,7 +242,6 @@ void dds3WritePackedValue(destination, datum, size)
     dds3AppendPackedBytes((DdsPackedObject *)destination, value, size);
 }
 
-extern u32 dds3AllocateNamedReference(void);
 extern char D_00438960[];
 /* SDK sprintf returns the formatted byte count. */
 extern s32 sprintf(char *dst, const char *format, ...);
@@ -261,32 +259,32 @@ void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
         }
         node = node->next;
     }
-    record = (DdsNamedRecord *)dds3AllocateNamedReference();
+    record = dds3AllocateNamedReference();
     sprintf(record->name, D_00438960, name);
     dds3AppendIndexedListNode((MnuCallbackList *)object->namedReferences, 0, (u32)record);
     record->value = object->maxPackedOffset;
 }
 
 void dds3RecordNamedReference(u32 context, const char *name) {
-    u32 record = dds3AllocateNamedReference();
-    strncpy((char *)((DdsNamedRecord *)record)->name, name, DDS_NAMED_RECORD_NAME_BYTES);
+    DdsNamedRecord *record = dds3AllocateNamedReference();
+    strncpy(record->name, name, DDS_NAMED_RECORD_NAME_BYTES);
     dds3AppendIndexedListNode((MnuCallbackList *)((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
-    ((DdsNamedRecord *)record)->value = ((DdsPackedObject *)context)->maxPackedOffset;
+    record->value = ((DdsPackedObject *)context)->maxPackedOffset;
     dds3WritePackedValue(context, -1, 4);
 }
 
 
 /* Walk the named-record list; names occupy at most 0x40 bytes. */
-u32 dds3FindNamedRecord(u32 context, const char *name) {
+DdsNamedRecord *dds3FindNamedRecord(u32 context, const char *name) {
     DdsNamedNode *node = ((DdsNamedList *)context)->first;
     while (node) {
         DdsNamedRecord *record = node->record;
         if (strncmp(record->name, name, DDS_NAMED_RECORD_NAME_BYTES) == 0) {
-            return (u32)record;
+            return record;
         }
         node = node->next;
     }
-    return 0;
+    return NULL;
 }
 
 /* Split a packed segment:offset reference and resolve it to a live address. */
@@ -308,14 +306,15 @@ s32 dds3ApplyNamedRelocations(u32 *object) {
     if (node != NULL) {
         do {
             DdsNamedRecord *record = node->record;
-            u32 found = dds3FindNamedRecord(((DdsPackedObject *)object)->namedReferences, record->name);
+            DdsNamedRecord *found = dds3FindNamedRecord(
+                ((DdsPackedObject *)object)->namedReferences, record->name);
             u32 address;
             u32 replacement;
-            if (found == 0) {
+            if (found == NULL) {
                 return 0;
             }
             address = dds3ResolvePackedOffset(object, record->value);
-            replacement = ((DdsNamedRecord *)found)->value;
+            replacement = found->value;
             node = node->next;
             *(u32 *)address = replacement;
         } while (node != NULL);
