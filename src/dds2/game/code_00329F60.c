@@ -738,14 +738,14 @@ void sdfTexQueueImageUpload(SdfImageUploadRequest *request) {
         oldTail->vifCodes = 0;
         oldTail->tag = ((u64)(u32)setup << 32) | 0x20000000ULL;
     } else {
-        queue->dmaPacketHead = (void *)(u32)setup;
+        queue->dmaPacketHeadAddress = (u32)setup;
     }
     queue->packetTail = (SdfTextureDmaTail *)packet;
     SignalSema(queue->semaphoreId);
 }
 
 
-void sdfTexEnqueuePacketWithSemaphore(s32 address, SdfTextureDmaTail *packet) {
+void sdfTexEnqueuePacketWithSemaphore(SdfDmaAddress packetAddress, SdfTextureDmaTail *packet) {
     SdfTextureQueue *obj = &sdfTextureQueueWork;
     SdfTextureDmaTail *last;
 
@@ -753,9 +753,9 @@ void sdfTexEnqueuePacketWithSemaphore(s32 address, SdfTextureDmaTail *packet) {
     last = obj->packetTail;
     if (last != NULL) {
         last->vifCodes = 0;
-        last->tag = ((u64)(address & 0x0FFFFFFF) << 32) | 0x20000000;
+        last->tag = ((u64)(packetAddress & 0x0FFFFFFF) << 32) | 0x20000000;
     } else {
-        obj->dmaPacketHead = (void *)address;
+        obj->dmaPacketHeadAddress = packetAddress;
     }
     obj->packetTail = packet;
     SignalSema(obj->semaphoreId);
@@ -788,7 +788,7 @@ void sdfTexQueueResourceRelease(s32 address) {
 void sdfResetSemaphoreState(SdfTextureQueue *semaphore) {
     semaphore->releaseHead = NULL;
     semaphore->releaseTail = NULL;
-    semaphore->dmaPacketHead = NULL;
+    semaphore->dmaPacketHeadAddress = 0;
     semaphore->packetTail = NULL;
 }
 /* DMA-completion callback for the image-upload waiter; the channel argument is unused. Returns -1. */
@@ -813,16 +813,16 @@ void sdfFlushImageUploadQueue(void) {
     SdfTextureQueue *work = &sdfTextureQueueWork;
     SdfTextureReleaseHead *entry;
     SdfTextureDmaTail *packet;
-    void *dmaPacket;
+    SdfDmaAddress dmaPacketAddress;
 
     WaitSema(work->semaphoreId);
     entry = work->releaseHead;
-    dmaPacket = work->dmaPacketHead;
+    dmaPacketAddress = work->dmaPacketHeadAddress;
     packet = work->packetTail;
     sdfResetSemaphoreState(work);
     SignalSema(work->semaphoreId);
 
-    if (dmaPacket != NULL) {
+    if (dmaPacketAddress != 0) {
         s32 threadId = GetThreadId();
         s32 handlerId = func_003659C0(1, sdfWakeImageUploadThreadOnDmac, 0, threadId);
         u64 tag = ((u64)((u32)D_0040B2B0 & 0x0FFFFFFF) << 32) | 0x20000000;
@@ -833,7 +833,7 @@ void sdfFlushImageUploadQueue(void) {
         channel = (u32 *)sceDmaGetChan(1);
         channel[0] |= 0x40;
         FlushCache(0);
-        sceDmaSend((void *)channel, dmaPacket);
+        sceDmaSend((void *)channel, (void *)dmaPacketAddress);
         SleepThread();
         RemoveDmacHandler(1, handlerId);
     }

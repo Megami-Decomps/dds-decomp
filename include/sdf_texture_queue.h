@@ -11,12 +11,14 @@ typedef struct SdfTextureDmaTail {
     u64 vifCodes;
 } SdfTextureDmaTail;
 
+typedef u32 SdfDmaAddress;
+
 /* The semaphore protects independent release-node and DMA-packet chains. */
 typedef struct SdfTextureQueue {
     s32 semaphoreId;
     SdfTextureReleaseHead *releaseHead;
     SdfTextureReleaseHead *releaseTail;
-    void *dmaPacketHead;
+    SdfDmaAddress dmaPacketHeadAddress; /* 0x0C: EE physical address of the queued DMA chain */
     SdfTextureDmaTail *packetTail;
 } SdfTextureQueue;
 
@@ -27,10 +29,10 @@ typedef char SdfTextureQueue_layout[
     (sizeof(SdfTextureQueue) == 0x14 &&
      (u32)&((SdfTextureQueue *)0)->releaseHead == 0x04 &&
      (u32)&((SdfTextureQueue *)0)->releaseTail == 0x08 &&
-     (u32)&((SdfTextureQueue *)0)->dmaPacketHead == 0x0C &&
+     (u32)&((SdfTextureQueue *)0)->dmaPacketHeadAddress == 0x0C &&
      (u32)&((SdfTextureQueue *)0)->packetTail == 0x10) ? 1 : -1];
 
-/* address is the DMA packet address; packetTail is its terminal tag. */
-void sdfTexEnqueuePacketWithSemaphore(s32 address, SdfTextureDmaTail *packetTail);
+/* packetAddress is the EE DMA address; packetTail points to its terminal tag. */
+void sdfTexEnqueuePacketWithSemaphore(SdfDmaAddress packetAddress, SdfTextureDmaTail *packetTail);
 
 #endif /* SDF_TEXTURE_QUEUE_H */
