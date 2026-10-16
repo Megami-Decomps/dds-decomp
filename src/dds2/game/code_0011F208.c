@@ -642,7 +642,7 @@ static inline void fldDrawPercentGlyph(s32 x, s32 y, u32 color, s32 glyph) {
     fldDrawConvertedTextGlyph(x, y / 2, color, D_00387C20[glyph]);
 }
 
-void func_00120528(s32 x, s32 y, s32 value) {
+void fldDrawPercentValue(s32 x, s32 y, s32 value) {
     s32 negative = 0;
     s32 digit;
 

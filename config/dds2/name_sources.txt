@@ -9745,3 +9745,4 @@
 0x003396D0	sdfModelBuildKind3CommandPacket	inferred	Builds a packet for a model command-list entry with kind 3; caller supplies the node, payload, render state, frame and skip flag, and appends the returned packet when nonzero.
 0x001969B8	effDrawRotatingTriangleAtPosition	inferred	Builds and queues a three-vertex draw packet at the supplied position; each call advances its cached rotation angle by six degrees. DDS2 rotates around Y; paired with DDS1 0x0018ED80.
 0x0024CE18	evtViewCmdSetObjectTarget	inferred	Stores selected world-object targets and resolved name indices in the pending event-viewer command entry; paired title implementation.
+0x00120528	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldDrawConvertedTextGlyph
