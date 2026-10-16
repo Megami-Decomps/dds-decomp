@@ -147,17 +147,17 @@ void sndReleaseMidiTrack(s32 id) {
 }
 
 /* Read the byte used as the minuend by the nonnegative balance query. */
-u8 sndGetTrackBalanceFirstComponent(s32 index) {
-    return sndTrackBalanceEntries[index].balanceFirstComponent;
+u8 sndGetTrackBalanceFirstComponent(s32 trackSlotIndex) {
+    return sndTrackBalanceEntries[trackSlotIndex].balanceFirstComponent;
 }
 
 /* Read the byte subtracted by the nonnegative balance query. */
-u8 sndGetTrackBalanceSecondComponent(s32 index) {
-    return sndTrackBalanceEntries[index].balanceSecondComponent;
+u8 sndGetTrackBalanceSecondComponent(s32 trackSlotIndex) {
+    return sndTrackBalanceEntries[trackSlotIndex].balanceSecondComponent;
 }
 
-s32 sndGetNonnegativeEntryBalance(s32 index) {
-    SndTrackSlot *entry = &sndTrackBalanceEntries[index];
+s32 sndGetNonnegativeEntryBalance(s32 trackSlotIndex) {
+    SndTrackSlot *entry = &sndTrackBalanceEntries[trackSlotIndex];
     s32 difference = entry->balanceFirstComponent - entry->balanceSecondComponent;
 
     if (difference <= 0) {
