@@ -181,9 +181,9 @@ typedef struct SdfModel {
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
-    /* Model scale: read as f32 by sdfVuSetGlobalScale's caller and copied
-     * unchanged into the three-scalar VIF payload (DDS1 0x2D9530). */
-    f32 unk94;
+    /* Model scale read by sdfVuSetGlobalScale and copied unchanged into the
+     * three-scalar VIF payload (DDS1 0x2D9530). */
+    f32 modelScale;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];
 } SdfModel;
@@ -195,8 +195,8 @@ typedef char SdfModel_chunkTable_at_90[
     ((u32)&((SdfModel *)0)->chunkTable == 0x90) ? 1 : -1];
 typedef char SdfModel_secondaryLighting_at_84[
     ((u32)&((SdfModel *)0)->secondaryLighting == 0x84) ? 1 : -1];
-typedef char SdfModel_unk94_at_94[
-    ((u32)&((SdfModel *)0)->unk94 == 0x94) ? 1 : -1];
+typedef char SdfModel_modelScale_at_94[
+    ((u32)&((SdfModel *)0)->modelScale == 0x94) ? 1 : -1];
 typedef char SdfModel_scalarOverrideFirst_at_88[
     ((u32)&((SdfModel *)0)->scalarOverrideFirst == 0x88) ? 1 : -1];
 typedef char SdfModel_scalarOverrideSecond_at_8C[
