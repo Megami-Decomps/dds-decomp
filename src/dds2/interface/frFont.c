@@ -7,6 +7,7 @@
 #include "fr_font_measure.h"
 #include "fr_font_glyph_measure.h"
 #include "itf.h"
+#include "fr_font_temporary_entry_api.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
 #include "kwln.h"
@@ -943,8 +944,8 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
 }
 
 /* Bind the caller's font data into the reserved temporary entry. */
-void frFontLoadTemporaryEntry(u32 fontData) {
-    frFontBindResourceSections(FR_FONT_TEMPORARY_SLOT, (u8 *)fontData, 0);
+void frFontLoadTemporaryEntry(u8 *fontData) {
+    frFontBindResourceSections(FR_FONT_TEMPORARY_SLOT, fontData, 0);
 }
 
 /* Free the reserved temporary font entry. */

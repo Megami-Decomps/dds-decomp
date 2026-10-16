@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
 #include "fr_font_glyph_chain_count.h"
@@ -80,10 +81,6 @@ FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node);
 void itfMesInitCharTable(s32 *table);
 
 s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
-
-extern void frFontLoadTemporaryEntry(u32 fontData);
-
-
 
 extern s32 itfUpdateActiveMessageWindows(void);
 
@@ -849,14 +846,14 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesSub *previous = mes->sub;
     ItfMesEntry *entry;
-    s32 temporaryFontEntry;
+    u8 *temporaryFontEntry;
 
     mes->sub = sub;
     itfMesRelocate((ItfMesRelocHeader *)sub);
     entry = itfMesGetNextEntry(sub);
     temporaryFontEntry = 0;
     if (sub->magic == ITF_MES_MAGIC_MSG1) {
-        temporaryFontEntry = *(s32 *)((u8 *)entry + 8);
+        temporaryFontEntry = *(u8 **)((u8 *)entry + 8);
     }
     mes->temporaryFontEntry = temporaryFontEntry;
     return previous;
