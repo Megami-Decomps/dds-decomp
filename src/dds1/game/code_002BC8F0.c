@@ -630,7 +630,7 @@ void effResetSlotWork(EffectSlotSet *work, u32 slotIndex) {
 /* Acquire missing selected handles or clear slots; clearAllSlots does not release textures.
  * Return the address following the processed resource-table entries.
  */
-u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllSlots, s32 selectedSlot) {
+u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllSlots, s32 selectedSlot) {
     u32 slotIndex = 0;
     u8 *entryBytes = resourceBytes;
 
@@ -655,7 +655,7 @@ u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             slotIndex++;
         } while (slotIndex < set->textureCount);
     }
-    return (u32)entryBytes;
+    return entryBytes;
 }
 
 void effResolveAndReleaseResource(EffectSlotSet *owner) {
