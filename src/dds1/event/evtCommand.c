@@ -38,7 +38,7 @@ s32 scrReadIntParameter(s32 idx);
 
 s32 scrGetCommandTimer(void);
 
-void *evtFindWorldObjectByIdAndKind(s32 type, s32 worldObjectKey);
+void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);

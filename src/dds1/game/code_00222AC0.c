@@ -382,11 +382,11 @@ s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
     return 0;
 }
 
-void *evtFindWorldObjectByIdAndKind(s32 kind, s32 worldObjectKey) {
+void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey) {
     void *world;
 
     world = dds3GetWorldObject();
-    return dds3FindWorldObjectNodeByKey(world, worldObjectKey, kind);
+    return dds3FindWorldObjectNodeByKey(world, worldObjectKey, objectKind);
 }
 
 u32 evtGetWorldObjectId(void) {
