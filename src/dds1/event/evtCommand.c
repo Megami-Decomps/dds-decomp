@@ -219,14 +219,14 @@ s32 evtCommandSetMagatuhiSourcePoints(void) {
 
 s32 evtCommandEnablePathUnit(void)
 {
-    s32 id;
-    void *unit;
+    s32 effectId;
+    void *effectObject;
 
-    id = scrReadIntParameter(0);
-    unit = evtFindWorldObjectByIdAndKind(7, id);
-    if (unit != NULL) {
-        evtDispatchSupportedNodeOnClear(unit, 1);
-        effObjSetFlags(unit, 1);
+    effectId = scrReadIntParameter(0);
+    effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+    if (effectObject != NULL) {
+        evtDispatchSupportedNodeOnClear(effectObject, 1);
+        effObjSetFlags(effectObject, 1);
     }
     return 1;
 }
