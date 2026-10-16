@@ -427,15 +427,15 @@ s32 scrCmdSetDrawFloatPairByMode(void) {
 s32 scrCmdSetPackedDrawComponentBytes(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p3 = scrReadIntParameter(3);
-    p2 = scrReadIntParameter(2);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetC70Second(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = scrReadIntParameter(0);
+    byte3 = scrReadIntParameter(3);
+    byte2 = scrReadIntParameter(2);
+    byte1 = scrReadIntParameter(1);
+    kwlnDrawSetC70Second(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -509,15 +509,15 @@ s32 scrCmdConfigureFilterBlur(void)
 s32 scrCmdSetFilterBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p3 = scrReadIntParameter(3);
-    p2 = scrReadIntParameter(2);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetCd0Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = scrReadIntParameter(0);
+    byte3 = scrReadIntParameter(3);
+    byte2 = scrReadIntParameter(2);
+    byte1 = scrReadIntParameter(1);
+    kwlnDrawSetCd0Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -588,15 +588,15 @@ s32 scrCmdConfigureStaggeredBlur(void)
 s32 scrCmdSetStaggeredBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p3 = scrReadIntParameter(3);
-    p2 = scrReadIntParameter(2);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetD30Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = scrReadIntParameter(0);
+    byte3 = scrReadIntParameter(3);
+    byte2 = scrReadIntParameter(2);
+    byte1 = scrReadIntParameter(1);
+    kwlnDrawSetD30Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -662,15 +662,15 @@ s32 scrCmdConfigureRectangleBlur(void)
 s32 scrCmdSetRectangleBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p3 = scrReadIntParameter(3);
-    p2 = scrReadIntParameter(2);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetD88First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = scrReadIntParameter(0);
+    byte3 = scrReadIntParameter(3);
+    byte2 = scrReadIntParameter(2);
+    byte1 = scrReadIntParameter(1);
+    kwlnDrawSetD88First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -731,15 +731,15 @@ s32 scrCmdSetIndexedDrawMode(void)
 s32 scrCmdSetColorRectanglePackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p3 = scrReadIntParameter(3);
-    p2 = scrReadIntParameter(2);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetDc8First(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = scrReadIntParameter(0);
+    byte3 = scrReadIntParameter(3);
+    byte2 = scrReadIntParameter(2);
+    byte1 = scrReadIntParameter(1);
+    kwlnDrawSetDc8First(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
@@ -792,15 +792,15 @@ s32 scrCmdSetTexturedSquareDrawMode(void)
 s32 scrCmdSetTexturedSquarePackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
-    s32 p2;
-    s32 p0;
-    s32 p3;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p3 = scrReadIntParameter(3);
-    p2 = scrReadIntParameter(2);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetE08Fourth(((p0 & 0xFF) | (p3 << 24)) | (((p2 & 0xFF) << 16) | ((p1 & 0xFF) << 8)));
+    s32 byte2;
+    s32 byte0;
+    s32 byte3;
+    s32 byte1;
+    byte0 = scrReadIntParameter(0);
+    byte3 = scrReadIntParameter(3);
+    byte2 = scrReadIntParameter(2);
+    byte1 = scrReadIntParameter(1);
+    kwlnDrawSetE08Fourth(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
     return 1;
 }
 
