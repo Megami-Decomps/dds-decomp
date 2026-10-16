@@ -1675,9 +1675,9 @@ void mnuReleasePartyIconBundles(MenuPageWindow *window) {
     }
 }
 
-s32 mnuPercentOrHundred(s32 value, s32 total) {
-    if (total > 0) {
-        return value * 100 / total;
+s32 mnuPercentOrHundred(s32 currentAmount, s32 maximumAmount) {
+    if (maximumAmount > 0) {
+        return currentAmount * 100 / maximumAmount;
     }
     return 100;
 }
