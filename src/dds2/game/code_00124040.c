@@ -305,7 +305,7 @@ void fldUnloadPlayerModel(void);
 extern void dds3ClearObjectFlags(u32, s32);
 
 
-extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
+extern void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 
