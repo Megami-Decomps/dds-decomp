@@ -1127,20 +1127,20 @@ s32 mnuUpdateMantraPanelStatusFromFlags(s32 unused0, s32 unused1, s32 unused2, s
 }
 
 
-void mnuStartMantraPanelEntryTransition(MnuStatusResource *object) {
-    object->menu.panelTransitionTimer = 0;
-    object->menu.panelTransitionMode = 1;
+void mnuStartMantraPanelEntryTransition(MnuStatusResource *resource) {
+    resource->menu.panelTransitionTimer = 0;
+    resource->menu.panelTransitionMode = 1;
 }
 
-void mnuStartMantraPanelExitTransition(MnuStatusResource *object) {
-    object->menu.panelTransitionTimer = 0;
-    object->menu.panelTransitionMode = 2;
+void mnuStartMantraPanelExitTransition(MnuStatusResource *resource) {
+    resource->menu.panelTransitionTimer = 0;
+    resource->menu.panelTransitionMode = 2;
 }
 
 
 /* Advances the 6-frame countdown of mode 1 (-> 3) or mode 2 (-> 0). */
-void mnuAdvanceMantraPanelTransitionTimer(MnuStatusResource *object) {
-    MantraMenuWork *state = &object->menu;
+void mnuAdvanceMantraPanelTransitionTimer(MnuStatusResource *resource) {
+    MantraMenuWork *state = &resource->menu;
 
     switch (state->panelTransitionMode) {
     case 0:
