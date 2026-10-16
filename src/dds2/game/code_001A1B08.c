@@ -52,7 +52,7 @@ extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);
 extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
 extern u8 D_004365D8[8];
 extern u8 D_004365E0[8];
-extern void itfDrawThreePanelBorderBands(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
+extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail, s32 borderWidth, SdfListHead *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
