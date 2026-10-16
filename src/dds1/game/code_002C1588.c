@@ -614,19 +614,19 @@ GridTextListItem *itfFindGridNodeByKey(u32 key, GridTextWidget *widget) {
     return item;
 }
 
-s32 sdfGridSeekSelectedNodeByIndex(s32 index, GridTextWidget *widget) {
+s32 sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
     s16 count = widget->itemCount;
     u16 width;
     GridTextListItem *first;
 
-    if (index >= count) {
+    if (itemsToAdvance >= count) {
         return 0;
     }
     first = widget->head;
     widget->cursorRow = 0;
     widget->firstVisible = first;
     widget->selected = first;
-    if (index > 0) {
+    if (itemsToAdvance > 0) {
         width = (u16)widget->rows;
         do {
             GridTextListItem *current = widget->firstVisible;
@@ -637,7 +637,7 @@ s32 sdfGridSeekSelectedNodeByIndex(s32 index, GridTextWidget *widget) {
             }
             current = widget->selected;
             widget->selected = current->next;
-        } while (--index != 0);
+        } while (--itemsToAdvance != 0);
     }
     return 1;
 }
