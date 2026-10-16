@@ -336,10 +336,10 @@ s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId) {
     return 0;
 }
 
-u32 sdfGetUniqueChunkValue(SdfModel *model) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
+u32 sdfGetUniqueChunkValue(const SdfModel *model) {
+    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
-        return *(u32 *)((u8 *)chunk + sizeof(*chunk));
+        return *(const u32 *)((const u8 *)chunk + sizeof(*chunk));
     }
     return 0;
 }

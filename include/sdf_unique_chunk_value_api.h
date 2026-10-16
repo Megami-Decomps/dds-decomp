@@ -5,6 +5,6 @@
 
 struct SdfModel;
 
-u32 sdfGetUniqueChunkValue(struct SdfModel *model);
+u32 sdfGetUniqueChunkValue(const struct SdfModel *model);
 
 #endif /* SDF_UNIQUE_CHUNK_VALUE_API_H */
