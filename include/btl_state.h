@@ -5,6 +5,9 @@
 #include "btl_command.h"
 #include "btl_runtime.h"
 
+/* Broadens command targeting and suppresses command-block reasons when set. */
+#define BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS 0x800
+
 struct KwlnTask;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
@@ -201,7 +204,7 @@ typedef struct BtlState {
     s32 frame; /* 0x1F0 */
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
+    u32 unk_1FC; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
     struct EffWorldNode *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
     s32 listener; /* 0x204: stored world-node address. */
     s32 currentScene; /* 0x208 */
@@ -438,7 +441,7 @@ typedef struct BtlState {
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk220;
+    u32 unk220; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
     struct EffWorldNode *cameraObject; /* 0x224: world camera stored at 001E9514. */
     struct EffWorldNode *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
     s32 currentScene; /* 0x22C */

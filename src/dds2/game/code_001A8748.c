@@ -1979,7 +1979,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         mask = -1;
         break;
     }
-    if (battle->unk220 & 0x800) {
+    if (battle->unk220 & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         mode = 3;
         flags &= ~0xB;
         mask = 0;

@@ -862,7 +862,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
-    if (((BtlState *)btlGetRuntime())->unk_1FC & 0x800) {
+    if (((BtlState *)btlGetRuntime())->unk_1FC & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         return 0;
     }
     if (commandId <= 0) {
