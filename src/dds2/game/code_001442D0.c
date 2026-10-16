@@ -4864,7 +4864,7 @@ typedef struct FieldTargetGuideState {
     f32 stepDistance;
     s32 age;
     s32 updateFlags;
-    s32 unk54;
+    s32 guideMotionIndex; /* 0x54: animation index submitted to the guide model. */
     f32 targetDistance; /* 0x58 */
     f32 targetBearing;  /* 0x5C */
     f32 viewAngleError; /* 0x60 */
@@ -4875,11 +4875,15 @@ typedef struct FieldTargetGuideState {
     s32 cycleIndex;
 } FieldTargetGuideState;
 
+typedef char FieldTargetGuideStateGuideMotionIndexOffsetCheck[
+    ((u32)&((FieldTargetGuideState *)0)->guideMotionIndex == 0x54) ? 1 : -1];
+typedef char FieldTargetGuideStateSizeCheck[sizeof(FieldTargetGuideState) == 0x74 ? 1 : -1];
+
 extern FieldTargetGuideState fldTargetGuideState;
 
 void fldResetViewState(void) {
     fldTargetGuideState.unk6C = -1;
-    fldTargetGuideState.unk54 = 0;
+    fldTargetGuideState.guideMotionIndex = 0;
     fldTargetGuideState.updateFlags = 0;
     fldTargetGuideState.guideMode = 0;
     fldTargetGuideState.mode = 0;
@@ -5048,10 +5052,10 @@ f32 fldApproachTargetAngleWithMinimumStep(f32 cur, f32 target, f32 speed, f32 mi
 
 extern FieldGridCoordPair D_00438EF8;
 
-/* Change the guide's update mode, flagging the change. */
+/* Change the guide's model motion index, flagging the change. */
 static inline void fldSetTargetGuideUpdateMode(s32 value) {
-    if (fldTargetGuideState.unk54 != value) {
-        fldTargetGuideState.unk54 = value;
+    if (fldTargetGuideState.guideMotionIndex != value) {
+        fldTargetGuideState.guideMotionIndex = value;
         fldTargetGuideState.updateFlags |= 2;
     }
 }
@@ -5092,7 +5096,7 @@ static inline void fldSetTargetGuideIdleMode(FieldTargetGuideState *state, s32 m
     state->updateFlags |= 2;
     state->unk2A = 0;
     state->stepDistance = 0.0f;
-    state->unk54 = 0;
+    state->guideMotionIndex = 0;
 }
 
 /* Switch the field target guide's motion mode, routing it toward the player
@@ -5125,7 +5129,7 @@ void fldSetTargetGuideMotionMode(s32 mode) {
     } else {
         if (mode == 4) {
             state->moveTimer = 0x3C;
-            state->unk54 = 0x14;
+            state->guideMotionIndex = 0x14;
             state->updateFlags |= 2;
             state->mode = mode;
             state->unk2A = 0;
@@ -5518,9 +5522,9 @@ void fldUpdateTargetGuideEffects(void) {
     }
 
     if (fldTargetGuideState.updateFlags & 0x20) {
-        mdlAddEntryFlagged(model, 0, fldTargetGuideState.unk54);
+        mdlAddEntryFlagged(model, 0, fldTargetGuideState.guideMotionIndex);
     } else if (fldTargetGuideState.updateFlags & 2) {
-        animation = fldTargetGuideState.unk54;
+        animation = fldTargetGuideState.guideMotionIndex;
         changeAnimation = 1;
         /* Only zero and the 16..18 family suppress a repeated animation. */
         if (animation == 0) {
@@ -5540,7 +5544,7 @@ compare_animation:
 apply_animation:
         if (changeAnimation) {
             model->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx(model, 0, fldTargetGuideState.unk54, 6.0f, 6.0f);
+            mdlAddEntryFlaggedEx(model, 0, fldTargetGuideState.guideMotionIndex, 6.0f, 6.0f);
         }
     }
 
