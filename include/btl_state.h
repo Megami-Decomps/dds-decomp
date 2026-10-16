@@ -440,7 +440,7 @@ typedef struct BtlState {
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
     u32 unk220;
     struct EffWorldNode *cameraObject; /* 0x224: world camera stored at 001E9514. */
-    s32 unk228;
+    struct EffWorldNode *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
     s32 currentScene; /* 0x22C */
     s32 queuedScene;
     s32 frame;
@@ -672,6 +672,8 @@ typedef char BtlFieldResourceIdsSpanCheck[
       (unsigned int)&((BtlState *)0)->fieldF1ResourceId) == 0xC) ? 1 : -1];
 typedef char BtlSpawnCountOffsetCheck[
     ((unsigned int)&((BtlState *)0)->spawnCount == 0x27E) ? 1 : -1];
+typedef char BtlSceneLightNodeOffsetCheck[
+    ((unsigned int)&((BtlState *)0)->sceneLightNode == 0x228) ? 1 : -1];
 typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
