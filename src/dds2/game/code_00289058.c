@@ -54,8 +54,8 @@ DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *object, s32 index) {
 }
 
 /* Return the selected mantra-unit row used to index this menu's slot arrays. */
-u32 mnuGetSelectedMantraUnitIndex(MnuStatusResource *object) {
-    return object->list->cursor->index;
+u32 mnuGetSelectedMantraUnitIndex(MnuStatusResource *resource) {
+    return resource->list->cursor->index;
 }
 
 u32 mnuRetreatNodeCursorAndClearListFlags(MnuStatusResource *object) {
