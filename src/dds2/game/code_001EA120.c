@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -67,7 +68,6 @@ extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
@@ -83,7 +83,6 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);

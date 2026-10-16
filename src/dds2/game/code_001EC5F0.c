@@ -5,6 +5,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "mnu_title_stream.h"
@@ -226,7 +227,6 @@ struct FileQueue;
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
 
@@ -264,7 +264,6 @@ extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);

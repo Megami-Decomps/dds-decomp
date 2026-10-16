@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_active_api.h"
@@ -49,7 +50,6 @@ extern u32 btlGetEffectValue(void);
 extern u32 btlGetSelectedBossEffectId(void);
 
 extern u32 btlGetSpecialModeEffectValue(void);
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 
 

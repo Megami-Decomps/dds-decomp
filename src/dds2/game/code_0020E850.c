@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
@@ -149,7 +150,6 @@ void func_0020EA10(void) {
 }
 
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);

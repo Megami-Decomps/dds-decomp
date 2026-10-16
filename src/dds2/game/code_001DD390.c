@@ -3,6 +3,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
@@ -196,7 +197,6 @@ extern void btlApplyUnitModelScaledValue(u8 *);
 
 extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
@@ -2909,7 +2909,6 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
     }
 }
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 

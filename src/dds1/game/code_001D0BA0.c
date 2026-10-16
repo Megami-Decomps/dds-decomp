@@ -3,6 +3,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_unit_fade_task_args.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -212,7 +213,6 @@ extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);

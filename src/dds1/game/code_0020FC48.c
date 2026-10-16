@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_background_fade_api.h"
@@ -2223,7 +2224,6 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, void *);
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
@@ -2601,7 +2601,6 @@ extern char D_003BBB08[];
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern char *sdfDevGetPathBuffer(void);
 

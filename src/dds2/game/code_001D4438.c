@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
 #include "btl_task_state6_api.h"
@@ -1475,7 +1476,6 @@ extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
 extern u32 btlGetIndexListCount(BtlIndexList *list);
 extern void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern s32 btlGetSlotRateKind(u8 *unit, s32 index);
 extern s32 btlMapActionCode(s32 unused, u32 id);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
@@ -2574,7 +2574,6 @@ void btlMarkLinkedActorStatusFlag(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
