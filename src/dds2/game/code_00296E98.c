@@ -1093,7 +1093,7 @@ s32 brsTaskIsFadeIdle(void) {
     return evtStageTestAdvanceResourceWork() != 1;
 }
 
-void mnuRefreshSelectedUnitPanels(u32 unused, BrsSkillPackageWork *menu) {
+void mnuRefreshSelectedUnitPanels(u32 unusedPartyRecord, BrsSkillPackageWork *menu) {
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuReleaseAndRefreshWindowSlots(&menu->partyWindow);
     mnuRefreshPartyPanelBars(&menu->partyWindow);
