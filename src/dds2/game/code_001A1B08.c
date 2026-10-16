@@ -646,7 +646,7 @@ s32 itfPanelStartEntry(void) {
 
 /* Forward this record's layout sprite address and the supplied value; index is unchecked. */
 void itfPanelEmitRecord(s32 windowIndex, s32 topDelta) {
-    itfAdvancePanelLayoutAndNotify(itfWindowSlots[windowIndex].ptr->layoutSpriteAddress, 0, topDelta, 0, 0, 0);
+    itfAdvancePanelLayoutAndNotify(itfWindowSlots[windowIndex].ptr->layoutSprite, 0, topDelta, 0, 0, 0);
 }
 
 /* Return the signed byte entry status; this is separate from the option-block s16 status. */
