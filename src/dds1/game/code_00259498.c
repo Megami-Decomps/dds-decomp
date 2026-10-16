@@ -23,7 +23,7 @@ extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 
 
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
