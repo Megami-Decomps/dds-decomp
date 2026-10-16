@@ -1992,7 +1992,7 @@ INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3A40);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3A50);
 
-s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
+s32 btlEvalTaskCondition(TaskCondition *condition, s32 currentCount) {
     s32 result = 0;
     SoundTask *task;
 
@@ -2003,7 +2003,7 @@ s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
         result = 1;
         break;
     case BTL_TASK_CONDITION_COUNT_REACHED:
-        if (!(value < condition->value.count)) {
+        if (!(currentCount < condition->value.count)) {
             result = 1;
         }
         break;
