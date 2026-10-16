@@ -19,7 +19,7 @@ extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
 
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
-BillData *billCreateAnimationDataFromResource(void *arg);
+BillData *billCreateAnimationDataFromResource(void *resourceData);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
 #include "sdf_packet_alloc.h"
@@ -743,9 +743,9 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
 
 extern s32 sdfDebugPrintf(const char *format, ...);
 
-BillData *billCreateAnimationDataFromResource(void *resource) {
-    u8 *sourceBytes = resource;
-    s32 *resourceHeader = resource;
+BillData *billCreateAnimationDataFromResource(void *resourceData) {
+    u8 *sourceBytes = resourceData;
+    s32 *resourceHeader = resourceData;
     s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
     s32 childCount = *childOffsetCursor++;
     SdfMemBlock *allocation;

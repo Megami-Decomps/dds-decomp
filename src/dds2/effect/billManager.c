@@ -22,7 +22,7 @@ extern void billAppendPairedQuadEntry(BillObj *, BillRenderPair *);
 
 
 
-BillData *billCreateAnimationDataFromResource(void *arg);
+BillData *billCreateAnimationDataFromResource(void *resourceData);
 
 extern BillDispatch D_003AA998[];
 
@@ -751,9 +751,9 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
 
 extern s32 sdfDebugPrintf(const char *format, ...);
 
-BillData *billCreateAnimationDataFromResource(void *resource) {
-    u8 *sourceBytes = resource;
-    s32 *resourceHeader = resource;
+BillData *billCreateAnimationDataFromResource(void *resourceData) {
+    u8 *sourceBytes = resourceData;
+    s32 *resourceHeader = resourceData;
     s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
     s32 childCount = *childOffsetCursor++;
     SdfMemBlock *allocation;
