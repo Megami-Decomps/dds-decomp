@@ -2404,14 +2404,14 @@ void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     D_00380708.append(&D_00380708, list);
 }
 
-void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 boundsMode) {
-    UiSprite *sprite = object->sprite;
+void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
+    UiSprite *sprite = panel->sprite;
     s32 *bounds;
     s32 dx;
     s32 dy;
 
     if (sprite != NULL) {
-        bounds = object->bounds;
+        bounds = panel->bounds;
         if (D_0037F510.coarseDown & 2) {
             dx = -16;
         } else {
