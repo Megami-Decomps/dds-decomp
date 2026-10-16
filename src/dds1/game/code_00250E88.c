@@ -778,7 +778,7 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
-extern s32 mnuDrawLoadedProgressPanels(void *, MenuProgressHost *, s32);
+extern s32 mnuDrawLoadedProgressPanels(void *control, MenuProgressHost *work, s32 context);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
