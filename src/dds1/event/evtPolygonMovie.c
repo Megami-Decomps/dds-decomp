@@ -975,8 +975,8 @@ void evtClearContextFlag(KwlnTask *task) {
     context->flags = context->flags & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
-void evtDestroyTaskHierarchy(u32 task) {
-    kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 1);
+void evtDestroyTaskHierarchy(u32 taskHandle) {
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)taskHandle, 1);
 }
 
 /* Allocate the picture task's flag and texture state. */
