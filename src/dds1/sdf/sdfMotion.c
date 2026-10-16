@@ -47,7 +47,7 @@ typedef struct FuncTab {
 void *sdfDispatchAssetCommandWord(void *motion, s32 packedCommand, s32 unusedTargetIndex);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval);
-extern s32 (*D_003981B8[])(void *object, s32 selector);
+extern s32 (*D_003981B8[])(void *binding, s32 selector);
 extern s32 (*D_00398248[])(void *handlerContext, s32 handlerIndex);
 extern SdfMotionBindingDispatch D_003981D0;
 extern SdfMotionBindingDispatch D_003981E8;
@@ -66,8 +66,8 @@ extern SdfMotionBindingDispatch D_00398330;
 extern SdfMotionBindingDispatch D_00398348;
 
 /* Release the allocation retained by this motion binding. */
-void sdfInvokeMotionObjectCallback(SdfMotionBindingHead *object) {
-    object->dispatch->releaseStorage(object);
+void sdfInvokeMotionObjectCallback(SdfMotionBindingHead *binding) {
+    binding->dispatch->releaseStorage(binding);
 }
 
 /* Install the binding's dispatch table and source without touching its payload. */
@@ -111,8 +111,8 @@ void sdfDestroyMotion(Motion *node)
     Motion **prev;
     Motion *cur;
     DevRequest *request;
-    void **objects;
-    s32 objectCount;
+    void **bindings;
+    s32 bindingCount;
     s32 i;
 
     if (node == NULL) {
@@ -129,10 +129,10 @@ void sdfDestroyMotion(Motion *node)
         }
     }
     request = node->request;
-    objectCount = request->usedCount;
-    objects = request->buffer;
-    for (i = 0; i < objectCount; i++) {
-        sdfInvokeMotionObjectCallback(objects[i]);
+    bindingCount = request->usedCount;
+    bindings = request->buffer;
+    for (i = 0; i < bindingCount; i++) {
+        sdfInvokeMotionObjectCallback(bindings[i]);
     }
     sdfDestroyDevRequest(node->request);
     sdfReleaseChipBlock(node);
@@ -144,15 +144,15 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     s32 i;
     MotionEntry *entry;
     u8 *bindingData;
-    SdfMotionBindingHead *object;
+    SdfMotionBindingHead *binding;
 
     motion->motionIndex = motionIndex;
     if (blendDurationFrames > 0.0f) {
         motion->blendDurationFrames = blendDurationFrames;
         motion->blendStartFrame = -blendLeadFrames;
         for (i = 0; i < motion->request->usedCount; i++) {
-            object = ((void **)motion->request->buffer)[i];
-            object->dispatch->capturePrevious(object);
+            binding = ((void **)motion->request->buffer)[i];
+            binding->dispatch->capturePrevious(binding);
         }
     } else {
         motion->blendDurationFrames = 0.0f;
@@ -172,8 +172,8 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     motion->frameCount = entry->frameCount;
     bindingData = (u8 *)entry->bindingData;
     for (i = 0; i < motion->request->usedCount; i++) {
-        object = ((void **)motion->request->buffer)[i];
-        object->dispatch->bindKeyTrack(object, (SdfMotionKeyTrack *)bindingData);
+        binding = ((void **)motion->request->buffer)[i];
+        binding->dispatch->bindKeyTrack(binding, (SdfMotionKeyTrack *)bindingData);
         bindingData += ((SdfMotionKeyTrack *)bindingData)->nextTrackOffsetBytes;
     }
 }
@@ -189,7 +189,7 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
     f32 elapsed;
     f32 duration;
     f32 weight;
-    SdfMotionBindingHead *object;
+    SdfMotionBindingHead *binding;
 
     motion->state = SDF_MOTION_STATE_SAMPLING;
     duration = motion->blendDurationFrames;
@@ -205,14 +205,14 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
             frame = 0.0f;
         }
         for (i = 0; i < motion->request->usedCount; i++) {
-            object = ((void **)motion->request->buffer)[i];
-            object->dispatch->blend(object, frame, weight);
+            binding = ((void **)motion->request->buffer)[i];
+            binding->dispatch->blend(binding, frame, weight);
         }
     } else {
         count = motion->request->usedCount;
         for (i = 0; i < count; i++) {
-            object = ((void **)motion->request->buffer)[i];
-            object->dispatch->sample(object, frame);
+            binding = ((void **)motion->request->buffer)[i];
+            binding->dispatch->sample(binding, frame);
         }
     }
 }
@@ -389,8 +389,8 @@ void sdfMotionBlendFiveKeyValues(SdfMotionKeyInterval *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
-    return D_003981B8[(u16)selector](object, selector);
+s32 sdfDispatchMotionBySelector(void *binding, s32 selector) {
+    return D_003981B8[(u16)selector](binding, selector);
 }
 
 void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
