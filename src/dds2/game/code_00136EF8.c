@@ -248,7 +248,7 @@ typedef struct {
     u32 actorId;
     u32 unk08;
     u32 firstKey;
-    u32 unk10;
+    u32 secondaryMotion;
     u32 secondKey;
     u32 transitionKey;
     s32 firstFrame;
@@ -260,6 +260,9 @@ typedef struct {
     f32 secondValues[3];
     f32 secondStep[3];
 } FldActorRow; /* 0x5C bytes */
+typedef char FldActorRow_secondaryMotion_offset_must_be_0x10[
+    ((u32)&((FldActorRow *)0)->secondaryMotion == 0x10) ? 1 : -1];
+typedef char FldActorRow_size_must_be_0x5C[sizeof(FldActorRow) == 0x5C ? 1 : -1];
 
 extern FldActorRow fldActorSlots[];
 
@@ -3209,7 +3212,7 @@ void fldResetActorSlots(void) {
         fldActorSlots[actorIndex].actorId = 0;
         fldActorSlots[actorIndex].unk08 = 0;
         fldActorSlots[actorIndex].firstKey = -1;
-        fldActorSlots[actorIndex].unk10 = 0;
+        fldActorSlots[actorIndex].secondaryMotion = 0;
         fldActorSlots[actorIndex].secondKey = -1;
         fldActorSlots[actorIndex].transitionKey = -1;
         fldActorSlots[actorIndex].firstFrame = 0;
@@ -3386,7 +3389,7 @@ void fldInitializeActorMotionSlots(void) {
             }
             primaryMotion = actor->motion;
             row->kind = 1;
-            row->unk10 = actor->secondaryMotion;
+            row->secondaryMotion = actor->secondaryMotion;
             row->unk08 = primaryMotion;
             row->firstFrame = 0;
             row->secondFrame = 0;
@@ -3527,7 +3530,7 @@ void fldInitializeActorMotionSlots(void) {
                 row->firstStep[2] = 0.0f;
             }
             if (row->secondKey != (u32)-1) {
-                switch (row->unk10) {
+                switch (row->secondaryMotion) {
                 case 1:
                     switch (secondDirection) {
                     case 0:
