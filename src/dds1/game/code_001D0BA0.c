@@ -5341,9 +5341,9 @@ void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
     scene->cameraCommand.flags &= ~0x2000;
 }
 
-void btlNormalizeActionCameraKeyScales(s32 action) {
+void btlNormalizeActionCameraKeyScales(BtlLinkedCommand *action) {
     f32 *key = (f32 *)action;
-    u32 flags = *(u32 *)(action + 0xF0);
+    u32 flags = action->flags;
     u32 i;
     if (flags & 2) {
         for (i = 0; i < 4; i++, key += 12) {
