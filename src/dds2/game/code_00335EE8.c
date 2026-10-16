@@ -11,7 +11,7 @@
 
 extern SdfMotionBindingDispatch D_0040B480;
 
-extern s32 (*sdfMotionCommandHandlers[])(void *a0, s32 a1);
+extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command);
 
 extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
 
