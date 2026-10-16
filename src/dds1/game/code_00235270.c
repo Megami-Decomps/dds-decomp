@@ -1581,7 +1581,7 @@ void evtDrawMessageDataRow(SdfListHead *list, s32 x, s32 y, u32 kind, EvtRuntime
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
         if (ctx->windowContext->handle == -1) {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
-        } else if (itfMesGetWindowEntryItems(ctx->windowContext->handle, ctx->value & 0xFFF) == 0) {
+        } else if (itfMesGetWindowEntryItems(ctx->windowContext->handle, ctx->value & 0xFFF) == NULL) {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
         } else {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
@@ -1663,10 +1663,10 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         handle = ctx->windowContext->handle;
         if (handle != -1) {
             if (branch == 0) {
-                if (itfMesGetWindowEntryItems(handle, number) == 0) {
+                if (itfMesGetWindowEntryItems(handle, number) == NULL) {
                     return 1;
                 }
-            } else if (itfMesGetWindowEntryItems(handle, number) == 1) {
+            } else if (itfMesGetWindowEntryItems(handle, number) == (u32 *)1) {
                 return 1;
             }
         }
