@@ -27,7 +27,7 @@ enum {
 
 extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
-extern void fldSetRelocateOnRelease(u32);
+extern void fldSetRelocateOnRelease(u32 relocateOnRelease);
 extern u32 kwlnDrawControlFlags;
 
 extern s32 D_004377D8;
