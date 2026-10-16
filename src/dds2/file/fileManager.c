@@ -1,5 +1,6 @@
 #include "sdf_chip.h"
 #include "file.h"
+#include "file_pac.h"
 #include "sdf_pac_state.h"
 #include "file_request_api.h"
 #include "sdf_dev_state.h"
@@ -141,7 +142,7 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
-struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
+struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
     u8 *requestWork;
     PacState *dispatchPacket;
 
@@ -152,14 +153,14 @@ struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, vo
     if (flags != 0) {
         sdfPacUseHighAddressAllocator(dispatchPacket);
     }
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName,
+    fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_PAC, requestName,
                              (void *)onComplete, (void *)userData);
-    return (struct FileRequest *)requestWork;
+    return (struct FilePacRequest *)requestWork;
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
 struct FileRequest *fileQueuePlainDispatchRequest(const char *requestName) {
-    return fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
+    return (struct FileRequest *)fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
 }
 
 /* Queue PAC work with extra packet setup enabled and no completion context. */

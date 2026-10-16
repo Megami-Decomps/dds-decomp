@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct FileRequest;
+struct FilePacRequest;
 struct SdfMemBlock;
 
 /* Return the request's allocation descriptor without changing ownership. */
@@ -18,8 +19,8 @@ struct FileRequest *fileAllocateDispatchRequest(const char *requestName, u32 fla
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, u32 callbackMode,
                                               u32 callbackAddress, u32 userData);
 #else
-struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
-                                          s32 onComplete, s32 userData);
+struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
+                                             s32 onComplete, s32 userData);
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode,
                                               s32 callbackAddress, s32 userData);
 #endif
