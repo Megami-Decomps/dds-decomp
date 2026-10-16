@@ -18,19 +18,19 @@ INCLUDE_ASM(const s32, "game/code_00253E58", mnuHandleMantraSceneInput);
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
-void mnuDrawPanelWithPackedColorPattern(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0) {
+void mnuDrawPanelWithPackedColorPattern(s32 x, s32 y, s32 width, s32 fade, s32 t0) {
     u32 arr[4];
     s32 v;
 
-    v = (s32)(((f32)(a3 << 4)) * 0.0078125f);
+    v = (s32)(((f32)(fade << 4)) * 0.0078125f);
     v |= 0x0A050700;
     arr[0] = v;
     arr[1] = v;
     arr[2] = v;
     arr[3] = v;
-    a1 += 0x32;
-    a1 *= 8;
-    uiDrawGradientColorRect(a0 * 16, a1, a2, 0x2000, 0xC70, arr, t0);
+    y += 0x32;
+    y *= 8;
+    uiDrawGradientColorRect(x * 16, y, width, 0x2000, 0xC70, arr, t0);
 }
 
 /* Fill-level dispatch: direct, inverted, or sin-pulsed, then the shared layers. */
