@@ -510,7 +510,7 @@ f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
     return reach;
 }
 
-f32 func_001F6970(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
+f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
     f32 position[4] __attribute__((aligned(16)));
     BtlUnit *unit;
     f32 scale;
