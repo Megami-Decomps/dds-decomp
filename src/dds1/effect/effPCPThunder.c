@@ -1847,8 +1847,8 @@ void *effGetPairedBlurResourceVectorRecordAddress(void *vectorRecord) {
 
 /* Sets the blend colour word of a resource handle (see the blur caller in
    code_00185E18.c). */
-void effSetResourceBlendColor(u32 handle, u32 color) {
-    *(u32 *)(handle + 0x120) = color;
+void effSetResourceBlendColor(void *resource, u32 color) {
+    *(u32 *)((u8 *)resource + 0x120) = color;
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
