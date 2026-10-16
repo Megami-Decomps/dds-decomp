@@ -455,7 +455,7 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
     return 0x10000 / totalDuration;
 }
 
-s32 itfGridShrinkBoundsAndFadeThresholdAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridShrinkBoundsAndFadeThresholdAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -465,13 +465,13 @@ s32 itfGridShrinkBoundsAndFadeThresholdAlpha(BdWork *rectangle, BdWork *out, Eff
     s32 factor;
     s32 i = 0;
 
-    table = (GridAngleTable *)owner->source->status;
+    table = (GridAngleTable *)timedState->source->status;
     deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
     deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
     for (; i < 2; i++) {
         s32 delta = deltas[i];
         s32 magnitude = delta < 0 ? -delta : delta;
-        s32 amount = magnitude * owner->value / 0x10000;
+        s32 amount = magnitude * timedState->value / 0x10000;
         if (delta > 0) {
             dimensions[i] = delta - amount;
         } else {
@@ -482,10 +482,10 @@ s32 itfGridShrinkBoundsAndFadeThresholdAlpha(BdWork *rectangle, BdWork *out, Eff
     destColor = geometry->cornerColors;
     sourceColor = rectangle->savedColors;
     for (i = 0; i < 4; i++, destColor++, sourceColor++) {
-        if (owner->value < factor) {
+        if (timedState->value < factor) {
             u32 color = *sourceColor;
             s32 alpha = *(u8 *)sourceColor;
-            *destColor = (color & ~0xFF) | (alpha * owner->value / factor);
+            *destColor = (color & ~0xFF) | (alpha * timedState->value / factor);
         } else {
             *destColor = *sourceColor;
         }
