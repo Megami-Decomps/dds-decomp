@@ -334,7 +334,7 @@ EffectOwnerRecord *list;
     } while (--bucketCountdown >= 0);
 }
 
-extern void itfGridLookupValueOrDefault(void *, s32);
+extern void itfGridLookupValueOrDefault(void *object, s32 key);
 
 /* Dispatch every bucket record and optionally refresh its owner/slot lookup. */
 u32 effDispatchRecordBuckets(u32 refresh, EffectOwnerRecord *list, s32 drawOption) {
