@@ -8195,8 +8195,8 @@ void sndSetStationedSeVolume(u32 sequence) {
     sndSetSequenceVolumePan(sequence, 0x58, 0x3f);
 }
 
-void sndSetStationedSeHighVolume(u32 arg0) {
-    sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
+void sndSetStationedSeHighVolume(u32 sequence) {
+    sndSetSequenceVolumePan(sequence, 0x7f, 0x3f);
 }
 
 
