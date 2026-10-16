@@ -1307,10 +1307,10 @@ extern void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer);
 extern void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer);
 extern void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer);
 extern void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer);
-extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
+extern void evtViewerCountFlaggedUpdates(EvtRuntime *viewer);
 extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
-extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
-extern void evtViewerUpdateShopFlagTrack(EvtRuntime *);
+extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
+extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
 extern s32 evtViewerTestIndexedCondition(u32 encodedId);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
@@ -3756,7 +3756,7 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 evtViewerPickNextHandler(KwlnTask *);
+extern s32 evtViewerPickNextHandler(KwlnTask *task);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
 s32 evtViewerUpdateFrame(KwlnTask *task) {
