@@ -4284,7 +4284,7 @@ extern char *sdfDevGetPathBuffer(void);
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 sceOpen(const char *path, s32 flags, ...);
 extern s32 sceClose(s32 descriptor);
-extern s32 sdfPfsSendPathRequest(const char *device, s32 flags);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
 extern char D_004377C8[];

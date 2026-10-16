@@ -42,26 +42,27 @@ u32 uiScaleColorRgb(u32 color, u32 scaleFactor) {
     return (red << 24) | (green << 16) | (blue << 8) | alpha;
 }
 
-/* Blend two packed 8-bit-channel colors: weight t (mirrored above 0x100) for the first, 0x100 - t for the second. */
-u32 uiBlendColors(u32 c0, u32 c1, u32 t) {
-    u32 a0 = c0 >> 24;
-    u32 r0 = (c0 & 0xFF0000) >> 16;
-    u32 g0 = (c0 & 0xFF00) >> 8;
-    u32 b0 = c0 & 0xFF;
-    u32 a1 = c1 >> 24;
-    u32 r1 = (c1 & 0xFF0000) >> 16;
-    u32 g1 = (c1 & 0xFF00) >> 8;
-    u32 b1 = c1 & 0xFF;
+/* Blend packed 8-bit-channel colors; weight is mirrored above 0x100 for the
+ * first color, with 0x100 - weight used for the second. */
+u32 uiBlendColors(u32 firstColor, u32 secondColor, u32 weight) {
+    u32 a0 = firstColor >> 24;
+    u32 r0 = (firstColor & 0xFF0000) >> 16;
+    u32 g0 = (firstColor & 0xFF00) >> 8;
+    u32 b0 = firstColor & 0xFF;
+    u32 a1 = secondColor >> 24;
+    u32 r1 = (secondColor & 0xFF0000) >> 16;
+    u32 g1 = (secondColor & 0xFF00) >> 8;
+    u32 b1 = secondColor & 0xFF;
     u32 inv;
 
-    if (t > 0x100) {
-        t = 0x200 - t;
+    if (weight > 0x100) {
+        weight = 0x200 - weight;
     }
-    inv = 0x100 - t;
-    a0 = (a0 * t + a1 * inv) >> 8;
-    r0 = (r0 * t + r1 * inv) >> 8;
-    g0 = (g0 * t + g1 * inv) >> 8;
-    b0 = (b0 * t + b1 * inv) >> 8;
+    inv = 0x100 - weight;
+    a0 = (a0 * weight + a1 * inv) >> 8;
+    r0 = (r0 * weight + r1 * inv) >> 8;
+    g0 = (g0 * weight + g1 * inv) >> 8;
+    b0 = (b0 * weight + b1 * inv) >> 8;
     return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
 }
 

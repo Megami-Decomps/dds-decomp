@@ -94,7 +94,7 @@ EffThunderParameterHead *effThunderGetParameterHead(EffThunderVectorWork *work) 
     return &work->head;
 }
 
-extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
+extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
 
 

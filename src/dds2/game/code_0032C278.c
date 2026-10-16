@@ -21,7 +21,7 @@
 /* Polled in a spin-wait below; its writer is outside this C unit. */
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
-extern s32 sdfDoubleBufferAllocation;
+extern struct SdfMemBlock *sdfDoubleBufferAllocation;
 #include "sdf.h"
 #include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
@@ -535,13 +535,13 @@ void sdfResizeDoubleBuffer(s32 bufferBytes) {
     s32 allocationAddress;
 
     if (sdfDoubleBufferAllocation != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(sdfDoubleBufferAllocation));
+        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
         sdfDoubleBufferAllocation = 0;
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
     sdfPacketBufferSize = bufferBytes;
-    sdfDoubleBufferAllocation = (u32)sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
-    allocationAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(sdfDoubleBufferAllocation));
+    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    allocationAddress = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
     sdfPacketBuffers[0] = allocationAddress;
     sdfPacketBuffers[1] = allocationAddress + bufferBytes;
 }
@@ -1975,7 +1975,7 @@ void sdfLinkRouteNode(SdfDrawNode *node, SdfDrawNode *owner) {
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPendingQueueSemaphore);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", sdfDoubleBufferAllocation);
+INCLUDE_SDATA(const struct SdfMemBlock *, "game/code_0032C278", sdfDoubleBufferAllocation);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPacketBufferSize);
 

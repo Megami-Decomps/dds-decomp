@@ -91,7 +91,7 @@ void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern void memset();
 extern void memcpy();
-extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
+extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 void polyInitializeBandRecordAges(PolyBand *band);
 void polyInitializeArcRecordAges(PolyArc *arc);
 void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand);

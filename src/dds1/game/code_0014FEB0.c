@@ -93,7 +93,7 @@ void effBillDispatchAll(void) {
     }
 }
 
-BillChildPayload *billCreateChildPayloadFromTextureResource(void *resource) {
+BillChildPayload *billCreateChildPayloadFromTextureResource(SdfTextureFileHeader *resource) {
     struct SdfMemBlock *allocation;
     BillPacketWork *work;
     BillChildPayload *child;

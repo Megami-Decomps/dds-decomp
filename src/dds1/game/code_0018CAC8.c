@@ -45,7 +45,8 @@ extern char D_003BB058[];
 extern char D_003BB060[];
 extern char *D_003557A8[];
 extern s32 sceDread(s32 directory, EffDirEnt *entry);
-extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, s32 requestData,
+                                      s32 dataBytes, s32 markHistory);
 extern s32 sceDclose(s32 directory);
 extern s32 sprintf(char *destination, const char *format, ...);
 extern s32 sceDopen(void *path);

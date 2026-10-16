@@ -4143,7 +4143,7 @@ u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 value, s32 option, s32 value08) {
+BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondColor, s32 duration) {
     BtlRuntimeTask *task = btlAllocTask(16);
     BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -4154,9 +4154,9 @@ BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 value, s32 option, s32 va
     task->callback = btlApplyUnitFxWhenLoaded;
     args = btlGetTaskArguments(task);
     args->unk_0C = (u32)unit;
-    args->value = value;
-    args->option = option;
-    args->unk_08 = value08;
+    args->value = firstColor;
+    args->option = secondColor;
+    args->unk_08 = duration;
     return task;
 }
 

@@ -9,6 +9,7 @@ struct BillOut;
 struct BillChildPayload;
 struct BillSnapshot;
 struct SdfTex;
+struct SdfTextureFileHeader;
 
 void billDispatchByKind(struct BillObj *obj);
 struct SdfTex *effGetBillResourceTexture(s32 index);
@@ -18,7 +19,8 @@ struct BillObj *effCreateBillboardSharingIndexedResource(s32 index);
 struct BillObj *billCreateIndexed(s32 kind, u32 data);
 struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
 void billInitializeCommonDrawState(struct BillObj *billboard);
-struct BillChildPayload *billCreateChildPayloadFromTextureResource(void *resource);
+struct BillChildPayload *billCreateChildPayloadFromTextureResource(
+    struct SdfTextureFileHeader *resource);
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildParameter(struct BillObj *billboard, u32 parameter);
 void billSetVariantValue(struct BillObj *billboard, s32 variantValue);

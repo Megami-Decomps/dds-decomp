@@ -131,6 +131,8 @@ typedef struct BattleController {
 } BattleController;
 typedef char BattleControllerTotalApOffsetCheck[
     ((u32)&((BattleController *)0)->totalAp == 0x2F8) ? 1 : -1];
+typedef char BattleControllerDrawTaskOffsetCheck[
+    ((u32)&((BattleController *)0)->drawTask == 0x2C4) ? 1 : -1];
 
 extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
 

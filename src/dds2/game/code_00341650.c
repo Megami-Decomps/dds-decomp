@@ -174,7 +174,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 }
 
 /* Allocate one aligned IOP block and distribute its address among active buffers. */
-void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
+void sndAllocateAlignedIopBuffers(s32 *bufferSizes, s32 bufferCount) {
     SndIopBuffer *buffer;
     s32 totalBytes;
     s32 alignedBytes;
@@ -186,7 +186,7 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     totalBytes = 0;
     bufferIndex = 0;
     do {
-        alignedBytes = (*requestedSizes++ + (SND_IOP_BUFFER_ALIGNMENT - 1)) &
+        alignedBytes = (*bufferSizes++ + (SND_IOP_BUFFER_ALIGNMENT - 1)) &
                        ~(SND_IOP_BUFFER_ALIGNMENT - 1);
         buffer->size = alignedBytes;
         buffer++;

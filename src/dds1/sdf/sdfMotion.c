@@ -46,8 +46,8 @@ typedef struct FuncTab {
 
 void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
-s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);
-extern s32 (*D_003981B8[])(void *a0, s32 a1);
+s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval);
+extern s32 (*D_003981B8[])(void *object, s32 selector);
 extern s32 (*D_00398248[])(void *handlerContext, s32 handlerIndex);
 extern SdfMotionBindingDispatch D_003981D0;
 extern SdfMotionBindingDispatch D_003981E8;
@@ -402,7 +402,7 @@ void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
     binding->node = drawNode;
 }
 
-SdfMotionDrawBinding *sdfMotionCreateDrawVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotionCreateDrawVectorBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfAllocSizeClassBlock(0x20);
@@ -434,7 +434,7 @@ void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
 }
 
-SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfAllocSizeClassBlock(0x20);
@@ -491,7 +491,7 @@ void sdfMotionBlendInterpolatedEulerRotation(SdfMotionDrawBinding *binding, f32 
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfAllocSizeClassBlock(0x20);
@@ -523,7 +523,7 @@ void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fra
     VU0_STORE_VF(vf10, binding->node->scale);
 }
 
-SdfMotionDrawBinding *sdfMotionCreateQuaternionBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+SdfMotionDrawBinding *sdfMotionCreateQuaternionBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
     binding = sdfAllocSizeClassBlock(0x20);
@@ -578,7 +578,7 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-SdfMotionKeyFlagBinding *sdfMotionCreateKeyFlagBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+SdfMotionKeyFlagBinding *sdfMotionCreateKeyFlagBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionKeyFlagBinding *binding;
 
     binding = sdfAllocSizeClassBlock(0x14);

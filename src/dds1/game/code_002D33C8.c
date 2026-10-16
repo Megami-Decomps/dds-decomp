@@ -499,19 +499,19 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
     return pendingWork;
 }
 
-extern s32 sdfDoubleBufferAllocation;
+extern struct SdfMemBlock *sdfDoubleBufferAllocation;
 
 /* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
 void sdfResizeDoubleBuffer(s32 bufferBytes) {
     s32 allocationAddress;
     if (sdfDoubleBufferAllocation != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(sdfDoubleBufferAllocation));
+        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
         sdfDoubleBufferAllocation = 0;
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
     sdfPacketBufferSize = bufferBytes;
-    sdfDoubleBufferAllocation = (u32)sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
-    allocationAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(sdfDoubleBufferAllocation));
+    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    allocationAddress = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
     sdfPacketBuffers[0] = allocationAddress;
     sdfPacketBuffers[1] = allocationAddress + bufferBytes;
 }
@@ -1962,7 +1962,7 @@ void sdfLinkRouteNode(SdfDrawNode *node, SdfDrawNode *owner) {
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPendingQueueSemaphore);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDoubleBufferAllocation);
+INCLUDE_SDATA(const struct SdfMemBlock *, "game/code_002D33C8", sdfDoubleBufferAllocation);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBufferSize);
 

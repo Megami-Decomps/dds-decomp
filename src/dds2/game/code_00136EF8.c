@@ -3175,7 +3175,76 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
+extern void fldRequestAreaResource(s32 area, s32 room);
+
+/* Each warp kind keeps its own arm; retail compiles them separately and merges the tails. */
+void func_00141F58(const char *name) {
+    FldActorEntry *entry;
+    s32 area;
+    s32 room;
+    s32 i;
+
+    if (name == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldActorEntries[i];
+        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind == 1 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->warpEntry;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 2 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->warpEntry;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 3 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->warpEntry;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 4 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->warpEntry;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 5 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->warpEntry;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        }
+    }
+}
 
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
