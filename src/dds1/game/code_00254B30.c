@@ -250,7 +250,6 @@ extern DspMantraName *D_003BAA78;
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(u16);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
@@ -734,3 +733,4 @@ INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC478);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC480);
 
+#include "evt_message_window_api.h"

@@ -11,5 +11,6 @@ u32 evtFinishMessageWindowAndNotify(void);
 s32 evtGetMessageWindowControlState(void);
 
 s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value);
+void evtSetMessageWindowOptionWhenOpen(s32 option);
 
 #endif
