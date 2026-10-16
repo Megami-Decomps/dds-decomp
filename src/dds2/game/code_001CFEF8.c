@@ -78,7 +78,7 @@ extern void btlBossDebugPrintf(const char *, ...);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void btlSetCommandPanelFadeMode(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
 
 extern void btlResetDebugEncounterSelection(s32);
 
