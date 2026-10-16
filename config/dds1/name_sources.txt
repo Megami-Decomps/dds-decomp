@@ -2975,7 +2975,7 @@
 0x001BEA80	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001BF488	fldGetSceneObjectState	inferred	Returns active scene object state or zero without an active task. [names_reviewed5.tsv]
 0x001BF790	btlRequestCommandPanelClose	inferred	Existing matched helper requests command object state5 and visual-panel state3; native command callback returns -1 at state5, so this is a close request; identifier only.
-0x001BF7C8	fldGetSceneDirectionStepOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
+0x001BF7C8	btlGetTargetRowAnimationOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
 0x001C1188	btlDrawCenteredPanelSegments	inferred	Draws centered battle panel segments using width-derived positions. [names_reviewed12.tsv]
 0x001C1290	btlUpdateTargetSelectionTask	inferred	Existing matched target-selection task updates selection input and target actor panels in state 2; state 6 returns -1; identifier only.
 0x001C1708	btlCreateTargetSelectionTask	inferred	Existing matched creator closes auxiliary battle panels, creates the target-selection input/draw task and records its handle; identifier only.
@@ -9688,3 +9688,8 @@
 0x00355AB8	effRectangleBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the rectangle blur setup pass. Identifier-only; twin 0x003B23E8 in DDS2. [PurC data b14; matched-C evidence]
 0x00355F48	effFramebufferQuadSetupRecord	inferred	confidence=high; EffEventSetupRecord for the framebuffer-quad setup pass. Identifier-only; twin 0x003B2878 in DDS2. [PurC data b14; matched-C evidence]
 0x00356048	effSolidRectangleSetupRecord	inferred	confidence=high; EffEventSetupRecord for the solid-rectangle setup pass. Identifier-only; twin 0x003B2978 in DDS2. [PurC data b14; matched-C evidence]
+0x003BD824	itfTestOverlayPhase	inferred	battle overlay color/phase data renamed from D_003BD824; referenced from the battle overlay unit code_001A04C0.c.
+0x003BD828	itfTestOverlayPhaseStep	inferred	battle overlay color/phase data renamed from D_003BD828; referenced from the battle overlay unit code_001A04C0.c.
+0x003D73E0	itfOverlayColorEditorWork	inferred	battle overlay color/phase data renamed from D_003D73E0; referenced from the battle overlay unit code_001A04C0.c.
+0x00358390	itfTestOverlayColor	inferred	battle overlay color/phase data renamed from D_00358390; referenced from the battle overlay unit code_001A04C0.c.
+0x00358360	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_00358360; referenced from the battle overlay unit code_001A04C0.c.

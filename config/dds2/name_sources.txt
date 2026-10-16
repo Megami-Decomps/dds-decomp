@@ -2528,7 +2528,7 @@
 0x001CA9C0	btlHaveActiveSceneActorEntriesCleared	inferred	Returns true when none of the active actors has enabled entry flags at offset 0x120.
 0x001CAA30	fldSelectSceneMode	inferred	priority chain of mdlFlagTest checks returning scene mode 0..6
 0x001CB158	btlRequestCommandPanelClose	inferred	Existing matched helper requests command object state5 and visual-panel state3; native command callback returns -1 at state5, so this is a close request; identifier only.
-0x001CB190	fldGetSceneDirectionStepOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
+0x001CB190	btlGetTargetRowAnimationOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
 0x001CC7C8	btlDrawCenteredPanelSegments	inferred	Draws centered battle panel segments using width-derived positions. [names_reviewed12.tsv]
 0x001CC8D0	btlUpdateTargetSelectionTask	inferred	Existing matched target-selection task updates selection input and target actor panels in state 2; state 6 returns -1; identifier only.
 0x001CC9C0	btlCreateTargetSelectionWork	inferred	Existing matched SceneAiWork allocator builds candidate and selected-target index lists, chooses the initial selection and sets state 1; retain both games existing signatures; identifier only.
@@ -2539,7 +2539,7 @@
 0x001CCC18	btlGetSelectedTargetList	inferred	Existing matched getter returns selection listB at work+0x10; actor-command initialization copies this list into command target indices; retain existing pointer/u32 views; identifier only.
 0x001CCC38	btlCreateTargetSelectionTask	inferred	Existing matched creator closes auxiliary battle panels, creates the target-selection input/draw task and records its handle; identifier only.
 0x001CCD50	btlRequestTargetSelectionClose	inferred	Native 001C1838/001C183C and twin 001CCD68/001CCD6C store state 6; selector callback case 6 returns -1, so this requests closing rather than marking active; identifier only.
-0x001CE3E8	fldScaleSceneCoordinateRecord	inferred	Scales the selected scene record's X by sixteen and Y by eight into its displayed-coordinate fields.
+0x001CE3E8	btlScaleEffectSlotSourceBounds	inferred	Scales the selected scene record's X by sixteen and Y by eight into its displayed-coordinate fields.
 0x001CE548	fldSetSceneSlotRange	inferred	Extends active scene slot range, initializes new slot flags and records upper bound.
 0x001CF500	fldInitSceneFadeRecords	inferred	copies the active scene slots into the 8 fading records (alpha 0x80, target -1) and clears the rest [names_M91_D2Battle.tsv]
 0x001CF630	btlFindSceneSlotRecord	inferred	Existing matched borrowed-record getter follows btlFindSceneSlotById, returning runtime slots[index] or zero; preserves D1typed pointer and D2integer-argument/u8-pointer signatures; identifier only.
@@ -9714,3 +9714,8 @@
 0x003B23E8	effRectangleBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the rectangle blur setup pass. Identifier-only; twin 0x00355AB8 in DDS1. [PurC data b14; matched-C evidence]
 0x003B2878	effFramebufferQuadSetupRecord	inferred	confidence=high; EffEventSetupRecord for the framebuffer-quad setup pass. Identifier-only; twin 0x00355F48 in DDS1. [PurC data b14; matched-C evidence]
 0x003B2978	effSolidRectangleSetupRecord	inferred	confidence=high; EffEventSetupRecord for the solid-rectangle setup pass. Identifier-only; twin 0x00356048 in DDS1. [PurC data b14; matched-C evidence]
+0x00438F3C	itfTestOverlayPhase	inferred	battle overlay color/phase data renamed from D_00438F3C; referenced from the battle overlay unit code_001A04C0.c.
+0x00438F40	itfTestOverlayPhaseStep	inferred	battle overlay color/phase data renamed from D_00438F40; referenced from the battle overlay unit code_001A04C0.c.
+0x00452E90	itfOverlayColorEditorWork	inferred	battle overlay color/phase data renamed from D_00452E90; referenced from the battle overlay unit code_001A04C0.c.
+0x003B4D80	itfTestOverlayColor	inferred	battle overlay color/phase data renamed from D_003B4D80; referenced from the battle overlay unit code_001A04C0.c.
+0x003B4D50	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_003B4D50; referenced from the battle overlay unit code_001A04C0.c.
