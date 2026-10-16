@@ -1136,39 +1136,39 @@ s32 evtCommandCreatePolygonMovie(void) {
 
 /* Look up a world unit across the six kinds before trying the fallback slot. */
 s32 evtCommandSetWorldSlotStatusFlag(void) {
-    s32 unit;
+    s32 slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
-    if (unit == 0) {
-        unit = (s32)(u32)fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (unit == 0) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
+    if (slotObject == 0) {
+        slotObject = (s32)(u32)fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (slotObject == 0) {
             return 1;
         }
     }
-    evtSetWorldSlotStatusFlag((void *)(u32)unit);
+    evtSetWorldSlotStatusFlag((void *)(u32)slotObject);
     return 1;
 }
 
 /* Clear the first matching unit's status flag, using the same fallback search. */
 s32 evtCommandClearWorldSlotStatusFlag(void) {
-    s32 unit;
+    s32 slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
-    if (unit == 0) {
-        unit = (s32)(u32)fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (unit == 0) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
+    if (slotObject == 0) {
+        slotObject = (s32)(u32)fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (slotObject == 0) {
             return 1;
         }
     }
-    evtClearWorldSlotStatusFlag((void *)(u32)unit);
+    evtClearWorldSlotStatusFlag((void *)(u32)slotObject);
     return 1;
 }
 
