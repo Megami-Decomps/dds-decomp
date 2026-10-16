@@ -646,7 +646,7 @@ typedef struct SdfAssetEntry {
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
     u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
-    u32 unk10;             /* 0x10 */
+    u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
     u32 unk14;             /* 0x14 */
     u32 pad18;             /* 0x18 */
     f32 unk1C;             /* 0x1C */
@@ -664,6 +664,8 @@ typedef struct SdfAssetEntry {
 
 typedef char SdfAssetEntry_size_must_be_0xA0[
     (sizeof(SdfAssetEntry) == 0xA0) ? 1 : -1];
+typedef char SdfAssetEntry_primaryStateWordThird_offset_must_be_0x10[
+    ((u32)&((SdfAssetEntry *)0)->primaryStateWordThird == 0x10) ? 1 : -1];
 typedef char SdfAssetEntry_primaryTextureState_offset_must_be_0x38[
     ((u32)&((SdfAssetEntry *)0)->primaryTextureState == 0x38) ? 1 : -1];
 typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[
