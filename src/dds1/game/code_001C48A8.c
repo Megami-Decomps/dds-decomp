@@ -164,22 +164,22 @@ u32 func_001C48B0(void) {
     return 0;
 }
 
-void fldBattleSceneEnterInit(u8 *arg0) {
-    BattleSceneWork *work = (BattleSceneWork *)arg0;
+void fldBattleSceneEnterInit(u8 *scene) {
+    BattleSceneWork *work = (BattleSceneWork *)scene;
     u32 id = work->sceneId;
     if (id < 0x400 && (datBattleSceneRecords[id].flags & 0x8000) != 0) {
-        *(u32 *)(arg0 + 0x1F8) |= 8;
+        *(u32 *)(scene + 0x1F8) |= 8;
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
     }
     if (btlRollSurpriseAttack() != 0) {
-        *(u8 *)(arg0 + 0x24A) = 2;
+        *(u8 *)(scene + 0x24A) = 2;
     } else {
-        *(u8 *)(arg0 + 0x24A) = 0;
+        *(u8 *)(scene + 0x24A) = 0;
     }
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(work->sceneId);
     sndStartBattleSceneStream(work->streamAdjustmentIndex, work->sceneId);
-    VU0_STORE_VF($vf0, arg0);
+    VU0_STORE_VF($vf0, scene);
 }
 
 s32 btlLoadBankWhenTasksIdle(void) {
@@ -499,8 +499,8 @@ extern s32 btlIsFadeOutCompleteOrIdle(void);
 
 extern s32 btlAreWorkBuffersReady(void);
 
-s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
-    BattleSceneWork *work = (BattleSceneWork *)arg0;
+s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
+    BattleSceneWork *work = (BattleSceneWork *)scene;
     u32 i;
 
     if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
@@ -508,7 +508,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
-        *(u8 *)(arg0 + 0x258) = 0;
+        *(u8 *)(scene + 0x258) = 0;
         btlSelectSerialEncounter();
         if (datBattleSceneRecords[work->sceneId].itemDropId != 0) {
             for (i = 0; i < datBattleSceneRecords[work->sceneId].itemDropCount; i++) {
@@ -738,9 +738,9 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
     }
 }
 
-s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
+s32 fldSceneStateWaitScriptRelease(u8 *scene) {
     s32 finished = 1;
-    s32 state = *(s32 *)(arg0 + 0x21C);
+    s32 state = *(s32 *)(scene + 0x21C);
 
     switch (state) {
     case 0xF000002:
@@ -757,9 +757,9 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
         break;
     case 0xF000000:
         finished = 0;
-        if (*(s32 *)(arg0 + 0x210) == 0x14) {
-            btlCreateGuidePanelTask(*(s32 *)(arg0 + 0x4A0), *(s32 *)(arg0 + 0x220));
-        } else if (*(s32 *)(arg0 + 0x210) >= 0x2D) {
+        if (*(s32 *)(scene + 0x210) == 0x14) {
+            btlCreateGuidePanelTask(*(s32 *)(scene + 0x4A0), *(s32 *)(scene + 0x220));
+        } else if (*(s32 *)(scene + 0x210) >= 0x2D) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_00324530[1] < 0) {
                     btlRequestGuidePanelClose();
@@ -780,11 +780,11 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
     }
 
     if (finished != 0) {
-        if ((*(u32 *)(arg0 + 0x1F4) & 0x800) == 0) {
+        if ((*(u32 *)(scene + 0x1F4) & 0x800) == 0) {
             fldEnableSceneGroupAdvancement();
-            *(u32 *)(arg0 + 0x1F4) &= ~0x400;
-            *(u32 *)(arg0 + 0x1F4) &= ~0x1000;
-            *(u32 *)(arg0 + 0x1F4) &= ~0x20;
+            *(u32 *)(scene + 0x1F4) &= ~0x400;
+            *(u32 *)(scene + 0x1F4) &= ~0x1000;
+            *(u32 *)(scene + 0x1F4) &= ~0x20;
             return 6;
         }
         return 9;
