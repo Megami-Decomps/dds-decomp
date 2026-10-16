@@ -109,7 +109,6 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action);
 
 /* Allocate a native header followed by capacity pointer entries. */ BtlIndexList *btlAllocateIndexList(s32 capacity);
 
-void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src);
 
 void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action);
 

@@ -4,7 +4,7 @@
 #include "btl_command.h"
 
 /* Copies both vectors, distance and field of view. */
-void btlCopyMotionTransform(BtlCamState *destination, BtlCamState *source);
+void btlCopyMotionTransform(BtlCamState *destination, const BtlCamState *source);
 /* Field of view is stored in radians. */
 void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians);
 

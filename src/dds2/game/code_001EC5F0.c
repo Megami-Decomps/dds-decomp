@@ -345,7 +345,6 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor);
 
 void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
-void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src);
 
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
 
