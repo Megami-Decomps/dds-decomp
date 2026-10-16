@@ -1925,29 +1925,29 @@ u8 mnuCampChooseWeightedTableValue(void) {
 
 s32 mnuCampFindFreeWideEntryIndex(s32 row) {
     s32 *entry = (s32 *)(mnuCampWideRewardIdView + row * 0xC0);
-    s32 index = 0;
+    s32 entryIndex = 0;
     do {
         s32 value = *entry;
         entry += 3;
         if (value == 0) {
-            return index;
+            return entryIndex;
         }
-        index++;
-    } while (index < 16);
+        entryIndex++;
+    } while (entryIndex < 16);
     return 15;
 }
 
 s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row) {
     s32 *entry = (s32 *)(mnuCampCompactEntries + row * 0x44);
-    s32 index = 0;
+    s32 entryIndex = 0;
     do {
         s32 value = *entry;
         entry += 2;
         if (value == 0) {
-            return index;
+            return entryIndex;
         }
-        index++;
-    } while (index < 8);
+        entryIndex++;
+    } while (entryIndex < 8);
     return 7;
 }
 
