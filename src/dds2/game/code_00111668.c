@@ -3,13 +3,13 @@
 #include "dds3obj.h"
 #include "dds3_path.h"
 
-extern void dds3ReleaseObjectResource(EffWorldNode *object);
+extern void dds3ReleaseObjectResource(EffWorldNode *slotObject);
 
-void dds3ReleaseWorldSlotResource(EffWorldNode *object) {
+void dds3ReleaseWorldSlotResource(EffWorldNode *slotObject) {
     Dds3SlotResource *resource;
 
-    resource = object->data;
-    dds3ReleaseObjectResource(object);
+    resource = slotObject->data;
+    dds3ReleaseObjectResource(slotObject);
     dds3ExchangeSlot(resource->target, 0, 1);
     sdfReleaseChipBlock(resource);
 }
