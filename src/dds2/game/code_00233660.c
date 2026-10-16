@@ -3204,8 +3204,8 @@ extern MdlValueEdit D_003C8B08[];
 
 /* Step the number being edited in table slot `index`: coarse steps (A) and fine steps (B),
    held-button repeat, wrapping from one end of [min, max] to the other on a fresh press. */
-void mdlViewerStepEditedNumericValue(s32 index) {
-    MdlValueEdit *edit = &D_003C8B08[index];
+void mdlViewerStepEditedNumericValue(s32 valueEditIndex) {
+    MdlValueEdit *edit = &D_003C8B08[valueEditIndex];
     f32 *target = edit->target;
     s32 value = (s32)(*target + 0.5f);
     s32 stepA;
