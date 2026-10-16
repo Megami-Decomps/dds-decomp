@@ -143,7 +143,7 @@ extern s32 mnuDrawMantraBackgroundMaskPulse();
 extern u32 mnuInitMantraBackgroundMaskDraw();
 extern void mnuReleaseMantraBackgroundMaskDraw();
 extern s32 mnuUpdateMantraTitleBlinkFade();
-extern void mnuDrawMantraTitle();
+extern s32 mnuDrawMantraTitle();
 extern u32 mnuInitMantraTitleDraw();
 extern void mnuReleaseMantraTitleDraw();
 extern s32 mnuUpdateMantraInfoPulseFade();
@@ -2019,7 +2019,86 @@ s32 mnuUpdateMantraTitleBlinkFade(s32 unused, s32 item) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraTitle);
+s32 mnuDrawMantraTitle(s32 unused, MantraDrawItem *item) {
+    s32 anchors[3][2] = { { 39, 41 }, { 39, 54 }, { 51, 48 } };
+    MantraBlinkState *blink = (MantraBlinkState *)item->data;
+    s8 firstIndex;
+    s8 secondIndex;
+    s32 clock;
+    s32 pulseClock;
+    s32 mode;
+    f32 firstPulse;
+    f32 secondPulse;
+    f32 blend;
+
+    if (blink->state == 4) {
+        return 0;
+    }
+    clock = blink->clock;
+    pulseClock = clock - 1;
+    firstIndex = pulseClock / 12;
+    firstPulse = (f32)(pulseClock - firstIndex * 12) / 12.0f;
+    pulseClock = clock - 19;
+    if (pulseClock < 0) {
+        pulseClock = clock + 17;
+    }
+    secondIndex = pulseClock / 12;
+    secondPulse = (f32)(pulseClock - secondIndex * 12) / 12.0f;
+    blend = 0.0f;
+    firstPulse = (sdfSinPoly(firstPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
+    secondPulse = (sdfSinPoly(secondPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
+    if (blink->unk2 != 0) {
+        mode = blink->unk2;
+    } else if ((s16)blink->variant != 0) {
+        mode = 2;
+    } else {
+        mode = 0;
+    }
+    switch (mode) {
+    case 0: {
+        f32 complement;
+        if (blink->delay > 0) {
+            blend = (f32)blink->delay / 10.0f;
+            mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * blend), 0x64, 0, 0x53);
+            mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * blend), 0x65, 0, 0x53);
+        }
+        complement = 1.0f - blend;
+        mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * complement), 0x2A, 0, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * complement), 0x2D, 0, 0x53);
+        break;
+    }
+    case 1: {
+        f32 complement;
+        if (blink->delay > 0) {
+            blend = (f32)blink->delay / 10.0f;
+            mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * blend), 0x2A, 0, 0x53);
+            mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * blend), 0x2D, 0, 0x53);
+        }
+        complement = 1.0f - blend;
+        mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * complement), 0x64, 0, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * complement), 0x65, 0, 0x53);
+        break;
+    }
+    case 2: {
+        f32 complement;
+        if (blink->delay > 0) {
+            blend = (f32)blink->delay / 10.0f;
+            mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * blend), 0x2A, 0, 0x53);
+            mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * blend), 0x2D, 0, 0x53);
+        }
+        complement = 1.0f - blend;
+        mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * complement), 0x64, 0, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, (s32)(blink->value * 128.0f * complement), 0x6D, 0, 0x53);
+        break;
+    }
+    }
+    firstPulse *= blink->value;
+    mnuDrawMantraSprite(anchors[firstIndex][0], anchors[firstIndex][1], 0,
+                       (s32)(firstPulse * 128.0f), 0x2B, 0, 0x53);
+    mnuDrawMantraSprite(anchors[secondIndex][0], anchors[secondIndex][1], 0,
+                       (s32)(secondPulse * 128.0f), 0x2C, 0, 0x53);
+    return 0;
+}
 
 MantraDrawItem *mnuRegisterMantraInfoDraw(MantraDrawPool *pool) {
     return mnuRegisterMantraDrawItem(pool, 7, mnuUpdateMantraInfoPulseFade, mnuDrawMantraInfoPanel,
