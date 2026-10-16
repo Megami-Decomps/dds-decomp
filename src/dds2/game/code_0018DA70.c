@@ -101,7 +101,7 @@ struct SdfDmaNode;
 extern SdfPoolNode D_003803E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 extern u32 fldIsUpdateInhibited(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
