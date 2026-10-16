@@ -197,7 +197,7 @@ extern char D_00419B88[];
 
 extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
-extern u32 btlAverageLevelsForMaskExcludingStatus20(s32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern AiSpecies D_003BEDD0[];
 
