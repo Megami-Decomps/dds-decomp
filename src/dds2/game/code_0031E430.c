@@ -14,10 +14,10 @@ extern void (*sdfTickCallback)(void);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 /* Draw the indexed glyph at its per-glyph origin with the current tint. */
-void mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 extent, s32 index, s32 effect) {
-    s32 texture = mnuGetIndexedFadeTexture(index);
-    effDrawTextureSlotWithBlendedCornerColors(x + D_0040B088[index].x,
-                         y + D_0040B088[index].y,
+void mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 extent, s32 glyphIndex, s32 effect) {
+    s32 texture = mnuGetIndexedFadeTexture(glyphIndex);
+    effDrawTextureSlotWithBlendedCornerColors(x + D_0040B088[glyphIndex].x,
+                         y + D_0040B088[glyphIndex].y,
                          0, extent * 2, 0, itfFadeTint, texture, effect);
 }
 
