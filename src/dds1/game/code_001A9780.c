@@ -2671,11 +2671,11 @@ s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BattlePanelEdgeWork *w
     return 0;
 }
 
+extern f32 D_003A2460[4];
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2450);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2460);
 
-extern f32 D_003A2460[4];
 void func_001AF058(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
     /* Animation fields use the existing panel-edge payload view. */
     BattlePanelEdgeWork *panel = (BattlePanelEdgeWork *)work;
@@ -3740,6 +3740,16 @@ void btlCreateMessageWindow(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B4D58);
 
+extern const BattlePanelColors D_003A2AF0;
+extern s32 fldGetSceneObjectState(void);
+extern s32 btlGetActorCommandClass(BattleSceneObject *,s8);
+extern u32 btlGetCommandOptionCount(s32,s8,s8);
+extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
+extern void btlBuildEligibleActorList(s32,s16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *);
+extern void btlReleaseRegisteredTaskBuffer(KwlnTask *);
+extern void func_001B4D58(s32,s32,u32,u32,u16,s16);
+extern u8 D_00358FE0[];
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A70);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A80);
@@ -3758,16 +3768,6 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AE0);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AF0);
 
-extern const BattlePanelColors D_003A2AF0;
-extern s32 fldGetSceneObjectState(void);
-extern s32 btlGetActorCommandClass(BattleSceneObject *,s8);
-extern u32 btlGetCommandOptionCount(s32,s8,s8);
-extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
-extern void btlBuildEligibleActorList(s32,s16 *);
-extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *);
-extern void btlReleaseRegisteredTaskBuffer(KwlnTask *);
-extern void func_001B4D58(s32,s32,u32,u32,u16,s16);
-extern u8 D_00358FE0[];
 s32 func_001B4F10(KwlnTask *task) {
     BattlePanelColors colors = D_003A2AF0;
     BattleSceneObject *object = NULL;

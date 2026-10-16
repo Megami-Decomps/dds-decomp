@@ -3566,11 +3566,11 @@ s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BattlePanelEdgeWork *w
     return 0;
 }
 
+extern f32 D_00415F90[4];
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F80);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F90);
 
-extern f32 D_00415F90[4];
 void func_001B9C70(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
     /* Animation fields use the existing panel-edge payload view. */
     BattlePanelEdgeWork *panel = (BattlePanelEdgeWork *)work;
