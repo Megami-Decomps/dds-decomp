@@ -1048,7 +1048,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             group->entries[hitIndex].flags = operandFlags;
             if ((source->status.flags & 0x400) && (target->status.flags & 0x200)) {
                 if (btlRollAllFearChance((s32)source, target, kind, press, group->targetSpecialHit)) {
-                    work->unk64 = 1;
+                    work->refreshEligibleActors = 1;
                     allFear = 1;
                 }
             }
@@ -1268,7 +1268,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->battleExperienceReward = 0;
     work->moneyReward = 0;
     work->flags = 0;
-    work->unk64 = 0;
+    work->refreshEligibleActors = 0;
     work->unk60 = 0;
     for (i = 0; i < 13; i++) {
         work->groups[i].count = 0;

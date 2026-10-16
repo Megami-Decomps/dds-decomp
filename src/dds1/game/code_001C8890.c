@@ -1354,7 +1354,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
             state->postTargetHook(action, action->indexWork.skillId, indexedTarget, masterOwner, lastOperandHandle, -1);
         groupDelay += actionFrames;
     }
-    if (action->indexWork.unk5E != 0) {
+    if (action->indexWork.refreshEligibleActors != 0) {
         task = btlCreateRefreshEligibleActorsTask();
         task->startCondition.kind = 7;
         task->startCondition.value.handle = commandOwner;
@@ -1893,7 +1893,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             task->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(task);
         }
-        if (action->indexWork.unk5E != 0) {
+        if (action->indexWork.refreshEligibleActors != 0) {
             task = btlCreateRefreshEligibleActorsTask();
             task->startCondition.kind = 7;
             task->startCondition.value.handle = commandOwner;
