@@ -36,27 +36,27 @@ EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *owner) {
 }
 
 /* Install the relative-transform callback used when no path is retained. */
-void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update) {
-    Dds3SlotResource *resource = object->data;
+void dds3SetSlotValue(EffWorldNode *slotObject, Dds3MoverUpdate update) {
+    Dds3SlotResource *resource = slotObject->data;
 
     resource->update = update;
 }
 
 /* Cache the source object address for the next curve-work replacement. */
 /* Cache the source address consumed by the slot's later path replacement. */
-void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject) {
-    Dds3SlotResource *resource = object->data;
+void dds3SetSlotKey(EffWorldNode *slotObject, EffWorldNode *sourceObject) {
+    Dds3SlotResource *resource = slotObject->data;
 
     resource->sourceObject = sourceObject;
 }
 
 /* Free the old curve work before constructing its replacement from the stored
  * source object address. The source is not an integer resource ID. */
-void dds3ReplaceObjectResource(EffWorldNode *object) {
+void dds3ReplaceObjectResource(EffWorldNode *slotObject) {
     Dds3SlotResource *resource;
     Dds3PathCurveWork *pathWork;
 
-    resource = object->data;
+    resource = slotObject->data;
     if (resource->path != 0) {
         dds3FreePathObject(resource->path);
     }
@@ -65,11 +65,11 @@ void dds3ReplaceObjectResource(EffWorldNode *object) {
 }
 
 /* Release nonzero curve work and clear its handle, retaining the source address. */
-void dds3ReleaseObjectResource(EffWorldNode *object) {
+void dds3ReleaseObjectResource(EffWorldNode *slotObject) {
     Dds3SlotResource *resource;
     Dds3PathCurveWork *pathWork;
 
-    resource = object->data;
+    resource = slotObject->data;
     pathWork = resource->path;
     if (pathWork != 0) {
         dds3FreePathObject(pathWork);
@@ -78,14 +78,14 @@ void dds3ReleaseObjectResource(EffWorldNode *object) {
 }
 
 /* Return the currently stored curve-work handle. */
-Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *object) {
-    Dds3SlotResource *resource = object->data;
+Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *slotObject) {
+    Dds3SlotResource *resource = slotObject->data;
 
     return resource->path;
 }
 
-void dds3InvokeMoverUpdate(EffWorldNode *object) {
-    dds3UpdateMoverTransform(object);
+void dds3InvokeMoverUpdate(EffWorldNode *slotObject) {
+    dds3UpdateMoverTransform(slotObject);
 }
 
 /* Number of slots a given object kind occupies in the slot ring. */
