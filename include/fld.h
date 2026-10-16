@@ -190,7 +190,7 @@ typedef struct FldFileResource {
     u32 word04;
     const char *name;
     u32 word0C;
-    f32 *transform;
+    const f32 *transform; /* Serialized translation and rotation input. */
     u32 word14;
     FldFileNameTable *names;
     u32 word1C;

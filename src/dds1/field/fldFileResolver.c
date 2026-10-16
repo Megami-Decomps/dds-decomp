@@ -701,7 +701,7 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
 void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
-    f32 *transform;
+    const f32 *transform;
     FldFileResource *resource;
     u32 count;
     u32 i;
@@ -9330,7 +9330,7 @@ void fldInitializeActorMotionSlots(void) {
                     if (D_003307B0[slotIndex]->name != NULL &&
                         strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
                         FldFileResource *resource = D_003307B0[slotIndex];
-                        f32 *transform = resource->transform;
+                        const f32 *transform = resource->transform;
                         row->actorId = resource->id;
                         rotation[0] = transform[4];
                         rotation[1] = transform[5];
@@ -9369,7 +9369,7 @@ void fldInitializeActorMotionSlots(void) {
                         if (D_003307B0[slotIndex]->name != NULL &&
                             strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
                             FldFileResource *resource = D_003307B0[slotIndex];
-                            f32 *transform = resource->transform;
+                            const f32 *transform = resource->transform;
                             row->actorId = resource->id;
                             rotation[0] = transform[4];
                             rotation[1] = transform[5];
@@ -9405,7 +9405,7 @@ void fldInitializeActorMotionSlots(void) {
                         if (D_003307B0[slotIndex]->name != NULL &&
                             strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
                             FldFileResource *resource = D_003307B0[slotIndex];
-                            f32 *transform = resource->transform;
+                            const f32 *transform = resource->transform;
                             row->actorId = resource->id;
                             rotation[0] = transform[4];
                             rotation[1] = transform[5];

@@ -765,7 +765,7 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
 void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
-    f32 *transform;
+    const f32 *transform;
     FldFileResource *resource;
     u32 count;
     u32 i;
