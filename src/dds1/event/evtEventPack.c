@@ -40,23 +40,23 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 /* Decode one retained unit payload and return its new viewer-object key. */
 s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
-    EvtPackLoadState *data;
+    EvtPackLoadState *packState;
     EvtPackEntry *entry;
     s32 entryIndex;
     s32 entrySize;
     u8 *payload;
     s32 unitKey;
 
-    data = evtGetEventPackLoadState(eventId);
+    packState = evtGetEventPackLoadState(eventId);
     entryIndex = 0;
-    if (data->header->entryCount > 0) {
-        entry = data->entries;
+    if (packState->header->entryCount > 0) {
+        entry = packState->entries;
         do {
             if (entry->secondaryResourceId == resourceId) {
                 switch (entry->kind) {
                 case 5:
                     entrySize = entry->dataSize;
-                    payload = data->data + entry->dataOffset;
+                    payload = packState->data + entry->dataOffset;
                     sdfDebugPrintf("unit decode rid:%d, size:%d\n", resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
@@ -79,7 +79,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 }
             }
             entry++;
-        } while (++entryIndex < data->header->entryCount);
+        } while (++entryIndex < packState->header->entryCount);
     }
     return -1;
 }
