@@ -220,8 +220,8 @@ void mnuDrawSelectionLabel(s32 selection) {
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
-extern s32 ptyGetAffinityKind(s32, s32);
-extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+extern s32 ptyGetAffinityKind(s32 affinityId, s32 index);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index);
 extern s32 mnuLookupRangeEntry(u16);
 extern const u8 *mnuComboGunRequirementTexts[16];
 extern const u8 *D_003BAA8C;
@@ -310,8 +310,8 @@ s32 mnuHasAvailableSlotResource(s32 id) {
 }
 
 extern void ptyDrawLinkageSkillEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
-extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
-extern u16 mnuPickPairedTableValue(s32, s32);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
+extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
 extern const u8 D_003BC708[];
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern void mnuSortItems(MenuList *, s32, s32);
