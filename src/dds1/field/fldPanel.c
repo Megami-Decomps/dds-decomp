@@ -9,11 +9,11 @@ extern KwlnTask *fldInputPanelTaskHandle;
 
 
 
-void fldReleasePanelState(KwlnTask *task) {
-    void *panelState;
+void fldReleasePanelState(KwlnTask *panelTask) {
+    void *panelChipBlock;
 
-    panelState = (void *)kwlnTaskGetUserValue(task);
-    sdfReleaseChipBlock(panelState);
+    panelChipBlock = (void *)kwlnTaskGetUserValue(panelTask);
+    sdfReleaseChipBlock(panelChipBlock);
     fldInputPanelTaskHandle = 0;
 }
 
@@ -27,11 +27,11 @@ void fldDestroyPanelTaskIfPresent(void) {
     }
 }
 
-void *fldSetTitleBannerPending(s32 pending) {
+void *fldSetTitleBannerPending(s32 isPending) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
-    menu->pending = pending;
+    menu->pending = isPending;
     return menu;
 }
 
