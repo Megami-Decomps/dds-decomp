@@ -229,7 +229,7 @@ void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *iterator) {
 /* Return this index record's values to the active world's free-entry chain. */
 void dds3ReleaseWorldValueEntries(WorldValueIndices *object) {
     WorldInfo *world;
-    s32 index;
+    s32 entryIndex;
 
     if (object == NULL) {
         return;
@@ -241,10 +241,10 @@ void dds3ReleaseWorldValueEntries(WorldValueIndices *object) {
         return;
     }
     world = dds3ActiveWorld->data;
-    index = object->headIndex;
-    while (index >= 0) {
-        world->entries[index].value = 0;
-        index = world->entries[index].nextIndex;
+    entryIndex = object->headIndex;
+    while (entryIndex >= 0) {
+        world->entries[entryIndex].value = 0;
+        entryIndex = world->entries[entryIndex].nextIndex;
     }
     if (world->freeTailIndex < 0) {
         world->freeHeadIndex = object->headIndex;
