@@ -27,9 +27,9 @@ typedef struct VuBlendNode {
 
 void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {
-        void *sourceA = node->sourceA;
-        void *sourceB = node->sourceB;
-        VU0_BLEND_NODE_XY(node, sourceA, sourceB);
+        void *firstSourceRow = node->sourceA;
+        void *secondSourceRow = node->sourceB;
+        VU0_BLEND_NODE_XY(node, firstSourceRow, secondSourceRow);
         node = node->next;
     }
 }
@@ -37,9 +37,9 @@ void sdfVuBlendNodeXY(VuBlendNode *node) {
 /* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x40 */
 void sdfVuBlendNodeVectors(VuBlendNode *node) {
     while (node != NULL) {
-        void *sourceA = node->sourceA;
-        void *sourceB = node->sourceB;
-        VU0_BLEND_NODE_VECTORS(node, sourceA, sourceB);
+        void *firstSourceRow = node->sourceA;
+        void *secondSourceRow = node->sourceB;
+        VU0_BLEND_NODE_VECTORS(node, firstSourceRow, secondSourceRow);
         node = node->next;
     }
 }
