@@ -55,7 +55,7 @@ extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32, s32);
 extern void ptyApplyFieldHpAttrition(s32);
-extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 
 extern s32 fldDeferredCommand;
 
