@@ -1098,8 +1098,8 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 recipient->status.stateFlags |= 2;
             }
             work->moneyReward += btlGetEnemyMoney((u8 *)action->unit, (u8 *)recipient);
-            runtime->unk26E += recipient->partyRecord.level;
-            runtime->unk26C++;
+            runtime->defeatedLevelTotal += recipient->partyRecord.level;
+            runtime->defeatedLevelCount++;
             recipient->status.stateFlags |= 0x400;
         }
         work->groups[targetIndex].interval = btlGetActorDisplayByteWithDefault((s32)source, command);
