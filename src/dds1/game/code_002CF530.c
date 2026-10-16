@@ -64,7 +64,37 @@ void sdfPanicHaltPrintf(const char *format, ...) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002CF530", sdfAddHandler);
+extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
+extern s32 func_0030A710(s32, s32, s32, s32);
+extern s32 func_0030A740(s32, s32, s32, s32);
+extern s32 AddSbusIntcHandler(s32, s32);
+
+SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
+    SdfHandlerNode *node;
+    s32 id;
+
+    switch (kind) {
+    case 0:
+        id = func_0030A710(channel, handler, arg, next);
+        break;
+    case 1:
+        id = func_0030A740(channel, handler, arg, next);
+        break;
+    case 2:
+        id = AddSbusIntcHandler(channel, handler);
+        break;
+    default:
+        sdfPanicHaltPrintf("sdfAddHandler : unknown type %d\n", kind);
+        break;
+    }
+    node = sdfAllocateBlockBySizeThreshold(sizeof(*node));
+    node->handlerKind = kind;
+    node->channel = channel;
+    node->handlerId = id;
+    node->next = sdfHandlerNodeListHead;
+    sdfHandlerNodeListHead = node;
+    return node;
+}
 
 void sdfRemoveHandler(SdfHandlerNode *target) {
     SdfHandlerNode **link = &sdfHandlerNodeListHead;
