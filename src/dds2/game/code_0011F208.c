@@ -1083,14 +1083,14 @@ s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex) {
 
 /* Search location records 1..639; a miss returns the reserved first record,
  * not NULL, so callers can read the fallback record's fields. */
-s16 *fldFindLocationCoordinateRecord(s32 x, s32 y) {
+s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex) {
     u8 *records = (u8 *)D_00387D70;
     u8 *yColumn = records + 2;
     s32 index = 1;
     do {
         s32 offset = index * 8;
         index++;
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
+        if (area == *(s16 *)(offset + (s32)records) && locationIndex == *(s16 *)(offset + (s32)yColumn)) {
             return (s16 *)(offset + (s32)records);
         }
     } while (index < FIELD_LOCATION_COORDINATE_SCAN_LIMIT);
@@ -1098,7 +1098,7 @@ s16 *fldFindLocationCoordinateRecord(s32 x, s32 y) {
 }
 
 /* Read the matching location record's fourth signed halfword; zero on miss. */
-s32 fldGetLocationCoordinateValue(s32 x, s32 y) {
+s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex) {
     u8 *records = (u8 *)D_00387D70;
     u8 *yColumn = records + 2;
     u8 *valueColumn = records + 6;
@@ -1106,7 +1106,7 @@ s32 fldGetLocationCoordinateValue(s32 x, s32 y) {
     do {
         s32 offset = index * 8;
         index++;
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
+        if (area == *(s16 *)(offset + (s32)records) && locationIndex == *(s16 *)(offset + (s32)yColumn)) {
             return *(s16 *)(offset + (s32)valueColumn);
         }
     } while (index < FIELD_LOCATION_COORDINATE_SCAN_LIMIT);

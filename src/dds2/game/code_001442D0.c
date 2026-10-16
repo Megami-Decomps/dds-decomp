@@ -3383,7 +3383,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
 }
 
 extern s32 fldGetSparkDialogPhase(void);
-extern s16 *fldFindLocationCoordinateRecord(s32, s32);
+extern s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
 void fldDrawLocationPanel(void) {
     u32 color;

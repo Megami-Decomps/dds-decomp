@@ -1173,7 +1173,7 @@ s32 fldLoadAreaResource(void) {
     return 0;
 }
 
-extern s32 fldGetLocationCoordinateValue(s32, s32);
+extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 extern void sdfRaiseDeviceThreadPriority(void);
 extern s32 D_003BAC80;
 extern void fldFreeDisplayObjects(void);
@@ -4804,7 +4804,7 @@ s32 fldUpdateCameraObjectPose(void) {
     return 0;
 }
 
-extern s32 fldGetLocationCoordinateValue(s32, s32);
+extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 
 void fldSetCameraNodeModeWithTen(void) {
