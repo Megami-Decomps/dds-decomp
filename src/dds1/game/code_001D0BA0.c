@@ -5026,7 +5026,7 @@ BtlUnit *btlCreateUnit(void) {
     BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(allocation);
     BtlActorWork *work;
     memset(unit, 0, 0x348);
-    unit->handle = (u32)allocation;
+    unit->allocation = allocation;
     unit->identity = btlAdvanceRuntimeSequenceCounter();
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
