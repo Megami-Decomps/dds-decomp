@@ -9,7 +9,7 @@
 extern s32 scrTestEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
 extern void scrClearEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
 
-extern s32 mnuMantraPanelPositionTable;
+extern EvtLoadedRecord *mnuMantraPanelPositionTable;
 
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
 

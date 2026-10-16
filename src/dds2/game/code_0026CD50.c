@@ -20,7 +20,7 @@
 
 #define PRF_ATTRIBUTE_MULTIPLE_SENTINEL 5
 
-extern s32 mnuMantraPanelPositionTable;
+extern EvtLoadedRecord *mnuMantraPanelPositionTable;
 
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
 
@@ -163,19 +163,18 @@ void mnuLoadMantraPanelPositionTable(u32 resourceId) {
     if (mnuMantraPanelPositionTable != 0) {
         mnuReleaseMantraPanelPositionTable();
     }
-    mnuMantraPanelPositionTable = (s32)evtCreateLoadedRecord(resourceId);
+    mnuMantraPanelPositionTable = evtCreateLoadedRecord(resourceId);
 }
 
 /* Release the retained panel-position handle and clear the global table address. */
 void mnuReleaseMantraPanelPositionTable(void) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle));
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)mnuMantraPanelPositionTable->handle);
     mnuMantraPanelPositionTable = 0;
 }
 
 /* Return a 32-byte panel record using the same signed low-halfword index convention. */
 struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
-    return (struct MantraNodePos *)(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->recordsAddress +
-                                    ((index << 0x10) >> 0xb));
+    return (struct MantraNodePos *)(mnuMantraPanelPositionTable->recordsAddress + ((index << 0x10) >> 0xb));
 }
 
 extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
