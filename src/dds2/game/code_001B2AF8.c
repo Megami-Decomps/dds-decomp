@@ -2040,9 +2040,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = (s32)(u32)sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
-        btlResourceBlock->nameB = (s32)(u32)sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
-        btlResourceBlock->nameC = (s32)(u32)sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
+        btlResourceBlock->resourceAllocationA = sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
+        btlResourceBlock->resourceAllocationB = sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
+        btlResourceBlock->resourceAllocationC = sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_00436800 = 1;
@@ -2059,11 +2059,11 @@ void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
         btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+            btlResourceBlock->resourceAllocationA, 0);
         btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+            btlResourceBlock->resourceAllocationB, 0);
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
+            btlResourceBlock->resourceAllocationC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
