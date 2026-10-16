@@ -278,11 +278,11 @@ s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 condition) {
     }
 }
 
-void btlFormatBattleEffectResourceName(s32 record, s32 action, s32 pathBuffer) {
+void btlFormatBattleEffectResourceName(BtlTask *actor, s32 action, char *pathBuffer) {
     if (action != 0xd5) {
         return;
     }
-    sprintf(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(datActionAnimationRecords + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
+    sprintf(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(datActionAnimationRecords + 0x1aa4), actor->indexWork.summonId - 0x13d);
 }
 
 /* Hariti's spawn-limit override caps the active enemy count at seven. */
