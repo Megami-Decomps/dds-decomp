@@ -2263,7 +2263,66 @@ s32 fldProcSequence(KwlnTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00122030", fldProcDraw);
+#include "fld_encounter_runtime_api.h"
+extern void fldDrawFloorQuad(s32, s32, const char *);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern void func_00149B68(void);
+extern void fldDrawAutomapWhenReady(void);
+extern void func_0011EA10(void);
+extern void fldTickWeatherEffectNodes(void);
+extern s32 D_0032E590[];
+extern s32 D_0032E598[];
+extern s32 D_003BABFC;
+s32 fldProcDraw(KwlnTask *task) {
+    s32 flags;
+    FldSequenceController *lifecycle = &fldSceneLifecycleFlags;
+
+    if (dds3AdminGetRequestedMode() != -1) {
+        return 0;
+    }
+    if (fldGetResourceReadyFlag() == 1) {
+        if (D_0032E590[0] == 1) {
+            fldDrawFloorQuad(0x40, 0xC0, "NowLoading...");
+        }
+        if (!lifecycle->stage) {
+            return 0;
+        }
+    } else {
+        if (!lifecycle->stage) {
+            return 0;
+        }
+    }
+    if (fldGetEncounterRuntimeResult() != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (fldGetCampSceneControlMode() == 1) {
+        return 0;
+    }
+    if (fldGetSceneReadyFlag() == 0 && fldGetCampSceneControlMode() == 0 &&
+        fldIsEventPhaseAtLeastTwo() == 0) {
+        func_00149B68();
+    }
+    fldDrawAutomapWhenReady();
+    func_0011EA10();
+    if (fldAreaState.transitionMode != 0) {
+        fldTickWeatherEffectNodes();
+    }
+    if (lifecycle->stage >= 2 && D_0032E598[0] != 0 &&
+        fldGetEncounterRuntimeResult() == 0) {
+    flags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
+    if (flags & 0x40) {
+        effBlurStepScatterSlotsAndDraw(D_003BABE4);
+        return 0;
+    }
+    if (flags & 0x80) {
+        effBlurStepScatterSlotsAndDraw(D_003BABE4);
+    }
+    }
+    return 0;
+}
 
 /* Lifecycle flags and the separate scene-control flags have independent
  * set, clear and test operations. */
