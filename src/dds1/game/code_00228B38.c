@@ -4,7 +4,8 @@
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
-extern void evtDrawSolarNoiseLayerAtCenteredScale(s32, s32, s32, s32, s32, s32, s32, s32, f32);
+extern void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer,
+                                                   s32 mode, s32 contextHandle, s32 color, f32 scale);
 
 
 typedef struct {
