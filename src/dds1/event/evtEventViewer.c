@@ -672,12 +672,12 @@ void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 value, s
     return effect;
 }
 
-void evtEventViewerFreeBuffer(EvtRuntimeChild *work)
+void evtEventViewerFreeBuffer(EvtRuntimeChild *node)
 {
-    if (work->payload != NULL) {
-        dds3RemoveWorldObjectNode(work->payload);
+    if (node->payload != NULL) {
+        dds3RemoveWorldObjectNode(node->payload);
     }
-    work->payload = NULL;
+    node->payload = NULL;
 }
 
 
