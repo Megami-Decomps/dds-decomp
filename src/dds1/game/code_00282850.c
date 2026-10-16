@@ -315,8 +315,8 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow
 }
 
 /* Same as mnuDrawStageTestList with no override value. */
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 surface) {
-    mnuDrawStageTestList(x, y, z, 0, menu, surface);
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *menu, s32 surface) {
+    mnuDrawStageTestList(x, y, depth, 0, menu, surface);
 }
 
 
