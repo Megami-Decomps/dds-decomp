@@ -1248,9 +1248,9 @@ s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
 extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
-extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
-extern void mnuOrEntryFlags(u32, u32 *);
+extern void mnuInitializeMapPacket(u32 packetValue, u32 *values, s32 count, MapPacket *packet);
+extern void mnuCopyCampEffectRowData(const CampEffectRows *source, MenuEffectResources *resources);
+extern void mnuOrEntryFlags(u32 flags, u32 *entryFlags);
 
 void mnuInitializeCampEffectResources(EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
