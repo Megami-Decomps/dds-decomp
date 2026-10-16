@@ -416,8 +416,8 @@ void mnuClearCampResourceFlagEntries(void) {
 extern const CampMapArguments D_00424DE0;
 extern const CampEffectRows D_00424E10;
 extern const char D_00424E30[];
-extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
+extern void mnuInitializeMapPacket(u32 packetValue, u32 *values, s32 count, MapPacket *packet);
+extern void mnuCopyCampEffectRowData(const CampEffectRows *source, MenuEffectResources *resources);
 
 void mnuLoadCampEffectMapResources(struct EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424DE0;
