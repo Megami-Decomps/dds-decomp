@@ -631,12 +631,12 @@ s32 scrCmdBeginStaggeredBlurDeactivation(void)
 s32 scrCmdConfigureRectangleBlur(void)
 {
     s32 blendControl;
-    s32 mode;
+    s32 blendMode;
     f32 rotation;
     f32 scale;
 
-    mode = scrReadIntParameter(2);
-    switch (mode) {
+    blendMode = scrReadIntParameter(2);
+    switch (blendMode) {
     case 0:
         blendControl = 0x44;
         break;
@@ -702,10 +702,10 @@ s32 scrCmdBeginRectangleBlurDeactivation(void)
 
 s32 scrCmdSetIndexedDrawMode(void)
 {
-    s32 mode;
+    s32 blendMode;
     s32 blendControl;
-    mode = scrReadIntParameter(0);
-    switch (mode)
+    blendMode = scrReadIntParameter(0);
+    switch (blendMode)
     {
     case 1:
         blendControl = 0x48;
@@ -763,10 +763,10 @@ s32 scrCmdBeginColorRectangleDeactivation(void)
 
 s32 scrCmdSetTexturedSquareDrawMode(void)
 {
-    s32 p0;
+    s32 blendMode;
     s32 blendControl;
-    p0 = scrReadIntParameter(0);
-    switch (p0)
+    blendMode = scrReadIntParameter(0);
+    switch (blendMode)
     {
     case 1:
         blendControl = 0x48;
@@ -806,11 +806,11 @@ s32 scrCmdSetTexturedSquarePackedColor(void)
 
 s32 scrCmdSetTexturedSquareIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetE08Triple(p0, p1, scrReadIntParameter(2));
+    s32 extent;
+    s32 centerX;
+    extent = scrReadIntParameter(0);
+    centerX = scrReadIntParameter(1);
+    kwlnDrawSetE08Triple(extent, centerX, scrReadIntParameter(2));
     return 1;
 }
 
@@ -873,9 +873,9 @@ s32 scrCommandIsProcessControlFlagClear(void)
 
 s32 scrCommandAdjustItemQuantity(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    ptyAdjustItemQuantity(p0, scrReadIntParameter(1));
+    s32 itemId;
+    itemId = scrReadIntParameter(0);
+    ptyAdjustItemQuantity(itemId, scrReadIntParameter(1));
     return 1;
 }
 
