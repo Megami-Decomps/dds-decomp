@@ -6748,17 +6748,17 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         sprintf(path, D_003A4B98, stage, stage, variant);
         result = 0;
-        args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
+        args->frontHandle = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BB8, path);
         sprintf(path, D_003A4BC8, stage, stage, variant);
-        args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
+        args->sideHandle = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BE8, path);
     } else {
         if (args->frontHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->frontHandle) != 0) {
+            if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
                 work->frontFloorResource =
-                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->frontHandle)));
-                filePollEntryCleanup((struct FileRequest *)(u32)args->frontHandle);
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->frontHandle)));
+                filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf(D_003A4BF8);
             } else {
@@ -6766,10 +6766,10 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             }
         }
         if (args->sideHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->sideHandle) != 0) {
+            if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
                 work->sideFloorResource =
-                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->sideHandle)));
-                filePollEntryCleanup((struct FileRequest *)(u32)args->sideHandle);
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->sideHandle)));
+                filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf(D_003A4C10);
             } else {

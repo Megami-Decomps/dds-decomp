@@ -5833,16 +5833,16 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         sprintf(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
         result = 0;
-        args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
+        args->frontHandle = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:load 0[%s]\n", path);
         sprintf(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
-        args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
+        args->sideHandle = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:load 1[%s]\n", path);
     } else {
         if (args->frontHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->frontHandle) != 0) {
-                work->primaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->frontHandle)));
-                filePollEntryCleanup((struct FileRequest *)(u32)args->frontHandle);
+            if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
+                work->primaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->frontHandle)));
+                filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
             } else {
@@ -5850,9 +5850,9 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             }
         }
         if (args->sideHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->sideHandle) != 0) {
-                work->secondaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->sideHandle)));
-                filePollEntryCleanup((struct FileRequest *)(u32)args->sideHandle);
+            if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
+                work->secondaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->sideHandle)));
+                filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
             } else {
