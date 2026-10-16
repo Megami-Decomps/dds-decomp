@@ -305,7 +305,7 @@ extern u8 *btlFindUnitByModeClear(s32);
 
 extern u8 *btlFindUnitByModeFlagged(s32);
 
-extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *, s32, s32, s32, s32, u8);
+extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 extern char D_0041B768[];
 

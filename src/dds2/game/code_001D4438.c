@@ -2577,7 +2577,7 @@ void btlMarkLinkedActorStatusFlag(ActionStateLink *task) {
 extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
-extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 model, s32 variant, s32 motion, s32 frames, u8 mode);
+extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *resource, BtlUnit *unit, u64 wait);

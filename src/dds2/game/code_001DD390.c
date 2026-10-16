@@ -4108,7 +4108,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
 
 extern u32 btlUpdateModelChangeTask(BtlModelChangeArgs *);
 
-BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08, s32 value0C, s32 value10, u8 flag19) {
+BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(BtlModelChangeArgs));
     BtlModelChangeArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -4120,11 +4120,11 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
     task->callback = btlUpdateModelChangeTask;
     args = btlGetTaskArguments(task);
     args->unit = unit;
-    args->resourceKind = option;
-    args->resourceId = value08;
-    args->delay = value0C;
-    args->duration = value10;
-    args->transitionMode = flag19;
+    args->resourceKind = resourceKind;
+    args->resourceId = resourceId;
+    args->delay = delay;
+    args->duration = duration;
+    args->transitionMode = transitionMode;
     args->phase = 0;
     args->elapsed = 0;
     return task;

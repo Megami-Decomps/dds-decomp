@@ -252,7 +252,7 @@ extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
 void btlResolveActionTargetResults(BtlTask *task, BattleIndexWork *work);
 
-extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
+extern u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 extern s32 btlCountTasksByKind(u16 kind);
 
@@ -4013,7 +4013,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
 
 extern u32 btlUpdateModelChangeTask(BtlModelChangeArgs *);
 
-u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5) {
+u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode) {
     u8 *task = btlAllocTask(0x1C);
     BtlModelChangeArgs *args;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -4025,11 +4025,11 @@ u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u
     *(void **)(task + 0x4C) = btlUpdateModelChangeTask;
     args = btlGetTaskArguments(task);
     args->unit = (BtlUnit *)unit;
-    args->resourceKind = arg1;
-    args->resourceId = arg2;
-    args->delay = arg3;
-    args->duration = arg4;
-    args->transitionMode = arg5;
+    args->resourceKind = resourceKind;
+    args->resourceId = resourceId;
+    args->delay = delay;
+    args->duration = duration;
+    args->transitionMode = transitionMode;
     args->phase = 0;
     args->elapsed = 0;
     return task;
