@@ -546,10 +546,10 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
 }
 
 u8 btlHasAvailableOption(u32 actorAddress) {
-    s64 temp_v0;
+    s64 availableOptionCount;
 
-    temp_v0 = btlCollectAvailableOptionSkills(actorAddress, 0);
-    return temp_v0 != 0;
+    availableOptionCount = btlCollectAvailableOptionSkills(actorAddress, 0);
+    return availableOptionCount != 0;
 }
 
 s32 btlChooseRandomAvailableOption(s32 object) {
