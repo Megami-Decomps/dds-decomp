@@ -136,10 +136,10 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
 }
 
 #include "sdf.h"
+#include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dma_packet_header.h"
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
-extern u32 sdfBuildCompactVertexVifPacket(const u128 *, const void *, const void *, const void *, s32, void *(*)(s32));
 extern s16 D_003D6670[15][8];
 extern SdfPoolNode *D_00355720[4];
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
@@ -156,6 +156,7 @@ void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work) {
     f32 point[4];
     SdfListHead *list;
     u32 packet;
+    u32 *vertexPacket;
     f32 (*historyPositions)[4];
     f32 *widthFactors;
     u32 *palette;
@@ -236,9 +237,9 @@ void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work) {
                     offsets[pendingCount][7] = size;
                     pendingCount++;
                     if (pendingCount == 15) {
-                        packet = sdfBuildCompactVertexVifPacket((u128 *)positions,
+                        vertexPacket = sdfBuildCompactVertexVifPacket((u128 *)positions,
                             colors, D_003D6670, offsets, 15, 0);
-                        sdfAppendPacket(list, packet);
+                        sdfAppendPacket(list, (u32)vertexPacket);
                         pendingCount = 0;
                     }
                     historyIndex++;
@@ -247,9 +248,9 @@ void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work) {
         }
     }
     if (pendingCount != 0) {
-        packet = sdfBuildCompactVertexVifPacket((u128 *)positions,
+        vertexPacket = sdfBuildCompactVertexVifPacket((u128 *)positions,
             colors, D_003D6670, offsets, pendingCount, 0);
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)vertexPacket);
     }
     D_00355720[work->unk10]->append(D_00355720[work->unk10], list);
 }

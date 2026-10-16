@@ -1,4 +1,5 @@
 #include "sdf_projection.h"
+#include "sdf_compact_vertex_vif_packet.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -1631,8 +1632,6 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
 struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
-extern u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,
-    const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32));
 extern SdfPoolNode D_003252A8;
 
 /* DDS1 event-bill renderer, reconstructed from the native owner and its
