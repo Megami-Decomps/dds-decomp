@@ -756,7 +756,7 @@ extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_002F4558(s32, s32, s32);
 
-extern void sdfDevLoadWholeFile(const char *);
+extern void sdfDevLoadWholeFile(const char *fileName);
 
 extern char D_003B4578[];
 

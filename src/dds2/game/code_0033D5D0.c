@@ -177,7 +177,7 @@ extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_0034D400(s32, s32, s32);
 
-extern void sdfDevLoadWholeFile(const char *);
+extern void sdfDevLoadWholeFile(const char *fileName);
 
 typedef struct Bytes7 {
     s8 b[7];
