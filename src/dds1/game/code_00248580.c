@@ -493,15 +493,15 @@ struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEn
 
 
 /* Mark the selected command-list node only for modes zero/one and an idle owner. */
-void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
-    s32 state = ((MenuTerminalWork *)object)->mode;
+void mnuHighlightProgressNodeFromOwnerSelection(s32 hostAddress) {
+    s32 state = ((MenuTerminalWork *)hostAddress)->mode;
     if (state < 2) {
         if (state < 0) {
             return;
         }
-        if (((MenuTerminalWork *)object)->owner->count == 0) {
+        if (((MenuTerminalWork *)hostAddress)->owner->count == 0) {
             struct MenuListNode *selected = mnuWalkNodeList(2 - mnuShouldExcludeTerminalMenuEntry(),
-                                                              ((MenuTerminalWork *)object)->listResource);
+                                                              ((MenuTerminalWork *)hostAddress)->listResource);
             ((struct MenuListNode *)selected)->flags48 |= 1;
         }
     }
@@ -509,8 +509,8 @@ void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
 
 
 /* Highlight the mode-zero or mode-two command node only while the progress list is idle. */
-void mnuHighlightProgressNodeByMode(s32 object) {
-    s32 state = ((MenuTerminalWork *)object)->mode;
+void mnuHighlightProgressNodeByMode(s32 hostAddress) {
+    s32 state = ((MenuTerminalWork *)hostAddress)->mode;
     s32 selectedIndex;
     if (state != 0) {
         if (state != 2) {
@@ -520,9 +520,9 @@ void mnuHighlightProgressNodeByMode(s32 object) {
     } else {
         selectedIndex = 3 - mnuShouldExcludeTerminalMenuEntry();
     }
-    if (((MenuTerminalWork *)object)->list->count == 0) {
+    if (((MenuTerminalWork *)hostAddress)->list->count == 0) {
         struct MenuListNode *node = mnuWalkNodeList(selectedIndex,
-                                                    ((MenuTerminalWork *)object)->listResource);
+                                                    ((MenuTerminalWork *)hostAddress)->listResource);
         ((struct MenuListNode *)node)->flags48 |= 1;
     }
 }
