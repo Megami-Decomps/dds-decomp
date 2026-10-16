@@ -69,7 +69,7 @@ extern f32 D_00438A48, D_00438A4C;
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId);
 extern void kwlnBuildShortestArcQuaternion(void);
-extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
+extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
