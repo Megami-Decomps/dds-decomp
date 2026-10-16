@@ -221,7 +221,7 @@ extern f32 D_00452FB0[];
 
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void evtConfigureUnitTransition(s32, s32);
+extern void evtConfigureUnitTransition(s32 unitAddress, s32 duration);
 
 extern u8 D_00436C50[];
 

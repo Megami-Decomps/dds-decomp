@@ -2308,7 +2308,7 @@ void func_001FADE8(void) {
 void btlPointLightMenuNoOp(void) {
 }
 
-extern void evtConfigureUnitTransition(s32, s32);
+extern void evtConfigureUnitTransition(s32 unitAddress, s32 duration);
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     s32 state = (s32)(u32)btlGetRuntime();
