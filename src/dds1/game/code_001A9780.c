@@ -7354,7 +7354,29 @@ void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
     work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C2E90);
+void func_001C2E90(EffectSlotSet *work, s32 entry, s32 *offsetX, s32 *offsetY, f32 percent) {
+    f32 scale = percent / 100.0f;
+    s32 width = work->workEntries[entry].geometry.bounds[2];
+    s32 height = work->workEntries[entry].geometry.bounds[3];
+    s32 x;
+    s32 y;
+
+    if (scale >= 1.0f) {
+        x = -((f32)(width >> 4) * (scale - 1.0f) * 0.5f);
+    } else {
+        x = (f32)(width >> 4) * (1.0f - scale) * 0.5f;
+    }
+    width = (f32)width * scale;
+    if (scale >= 1.0f) {
+        y = -((f32)(height >> 3) * (scale - 1.0f) * 0.5f);
+    } else {
+        y = (f32)(height >> 3) * (1.0f - scale) * 0.5f;
+    }
+    work->workEntries[entry].geometry.bounds[3] = (f32)height * scale;
+    work->workEntries[entry].geometry.bounds[2] = width;
+    *offsetX = x;
+    *offsetY = y;
+}
 
 void fldSetSceneSlotRange(s32 index) {
     SceneSlotFadeWork *scene = D_003BD83C;
