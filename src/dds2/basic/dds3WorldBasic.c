@@ -46,7 +46,7 @@ void dds3SetWorldObject(EffWorldNode *primaryWorldNode) {
 }
 
 /* Return the selected primary object, or NULL when no world is active. */
-void *dds3GetWorldObject(void) {
+EffWorldNode *dds3GetWorldObject(void) {
     EffWorldNode *world;
 
     world = dds3ActiveWorld;
@@ -64,7 +64,7 @@ void dds3SetWorldSecondaryObject(EffWorldNode *secondaryWorldNode) {
 }
 
 /* Return the selected secondary object, or NULL when no world is active. */
-void *dds3GetWorldSecondaryObject(void) {
+EffWorldNode *dds3GetWorldSecondaryObject(void) {
     EffWorldNode *world;
 
     world = dds3ActiveWorld;
