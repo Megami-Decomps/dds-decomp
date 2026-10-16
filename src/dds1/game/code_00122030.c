@@ -658,15 +658,15 @@ void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, 
         }
     }
     record->unk_30 = 0;
-    record->unk_3c = 0;
-    record->unk_38 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
     record->enabled = 1;
     record->mode = 2;
     record->kind = kind;
     record->code = 0;
-    record->unk_62 = 0;
+    record->sequenceMode = 0;
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     memset(record->note, 0, sizeof(record->note));
@@ -686,15 +686,15 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
         }
     }
     record->unk_30 = 0;
-    record->unk_3c = 0;
-    record->unk_38 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
     record->enabled = 1;
     record->mode = 3;
     record->kind = kind;
     record->code = 0;
-    record->unk_62 = 0;
+    record->sequenceMode = 0;
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     memset(record->note, 0, sizeof(record->note));
@@ -713,8 +713,8 @@ void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s3
         }
     }
     record->unk_30 = 0;
-    record->unk_3c = 0;
-    record->unk_38 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
     record->enabled = 1;
@@ -722,7 +722,7 @@ void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s3
     record->code = code;
     record->link = link;
     record->mode = 2;
-    record->unk_62 = 0;
+    record->sequenceMode = 0;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
     record->options = 0;
@@ -740,15 +740,15 @@ void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 k
         }
     }
     record->unk_30 = 0;
-    record->unk_3c = 0;
-    record->unk_38 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->stage = stage;
     record->enabled = 1;
     record->mode = 2;
     record->kind = kind;
     record->code = code;
-    record->unk_62 = 0;
+    record->sequenceMode = 0;
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     strcpy(record->note, subname);
@@ -758,8 +758,8 @@ void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 k
 void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, s32 link, const char *subname) {
     record->unk_30 = 0;
-    record->unk_3c = 0;
-    record->unk_38 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
     strcpy(record->name, name);
     record->enabled = 1;
     record->stage = stage;
@@ -767,7 +767,7 @@ void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kin
     record->code = code;
     record->link = link;
     record->mode = 2;
-    record->unk_62 = 0;
+    record->sequenceMode = 0;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
     record->options = 0;
@@ -2365,13 +2365,13 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
     controller->flags = 0;
     scene->primaryState = mode;
     if (mode == 0) {
-        scene->sequenceWord3C = record->unk_3c;
-        scene->sequenceWord38 = record->unk_38;
+        scene->sequenceWord3C = record->sequenceWord3C;
+        scene->sequenceWord38 = record->sequenceWord38;
         strcpy(scene->entryName, record->name);
         scene->area = record->stage;
         scene->sequenceCode = record->code;
         scene->room = record->kind;
-        scene->sequenceMode = record->unk_62;
+        scene->sequenceMode = record->sequenceMode;
         scene->retainCachedAreaResource = record->enabled;
         scene->secondaryState = record->mode;
         scene->cameraLinkMode = record->link;
