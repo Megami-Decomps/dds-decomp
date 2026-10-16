@@ -7864,8 +7864,9 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
 
 
 
-extern void func_001C0EF0(void);
-extern void func_001C1300(void);
+/* Retail returns 0 or 1 from both; this caller discards the result. */
+extern s32 func_001C0EF0(void);
+extern s32 func_001C1300(void);
 extern void func_001B5A20(BattleSceneObject *);
 /* Task-update result: retail returns 0 or -1, even when this caller discards it. */
 extern s32 func_001BFB58(KwlnTask *);
