@@ -179,28 +179,28 @@ ScrData *scrFindNamedProcessNode(char *name) {
 }
 
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
-s32 bfFindScriptIndexByName(const BfFlw0Header *header, const char *name) {
+s32 bfFindScriptIndexByName(const BfFlw0Header *header, const char *procedureName) {
     const ScrLabel *procedures = NULL;
     const ScrSection *sections;
-    s32 i;
-    s32 k;
+    s32 sectionIndex;
+    s32 procedureIndex;
 
     if (header == NULL) {
         return -1;
     }
     sections = header->sections;
-    for (i = 0; i < header->sectionCount; i++) {
-        if (sections[i].type == 0) {
-            procedures = (const ScrLabel *)((const u8 *)header + sections[i].offset);
+    for (sectionIndex = 0; sectionIndex < header->sectionCount; sectionIndex++) {
+        if (sections[sectionIndex].type == 0) {
+            procedures = (const ScrLabel *)((const u8 *)header + sections[sectionIndex].offset);
             break;
         }
     }
     if (procedures == NULL) {
         return -1;
     }
-    for (k = 0; k < sections[i].count; k++) {
-        if (strcmp(procedures[k].name, name) == 0) {
-            return k;
+    for (procedureIndex = 0; procedureIndex < sections[sectionIndex].count; procedureIndex++) {
+        if (strcmp(procedures[procedureIndex].name, procedureName) == 0) {
+            return procedureIndex;
         }
     }
     return -1;
