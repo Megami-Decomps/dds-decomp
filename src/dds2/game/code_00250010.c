@@ -3666,17 +3666,17 @@ void evtWriteOutputBytes(s32 output, s32 data, s32 size) {
 }
 
 s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeAIndex = index++;
+                child->body.f.groupTypeAIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeElevenChildren(EvtRuntime *runtime) {
