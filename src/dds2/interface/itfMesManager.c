@@ -2309,9 +2309,9 @@ extern u8 D_003B49E8[];
 extern s32 D_003B4A08[];
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
+void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
     s32 bounds[4];
-    BtlFade *fade = &object->fade;
+    BtlFade *fade = &panel->fade;
     SdfListHead *packet;
     s32 expansion;
     SdfPoolNode *surface;
@@ -2323,10 +2323,10 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     D_003B4A08[3] = 0xFF;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->renderValue,
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, panel->renderValue,
                                   itfMesWork.windowTexture, 0, packet);
     D_003B4A08[3] = fade->alpha;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, panel->renderValue,
                                   itfMesWork.windowTexture, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
@@ -2336,11 +2336,11 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
         bounds[3] += expansion;
         D_003B4A08[3] = fade->timer;
         itfSendTablePacket(packet, 1, 0);
-        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
+        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, panel->renderValue,
                                       itfMesWork.windowTexture, 0, packet);
         itfSendTablePacket(packet, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[object->drawSurfaceIndex];
+    surface = &kwlnDrawSurfaces[panel->drawSurfaceIndex];
     surface->append(surface, packet);
 }
 
