@@ -163,11 +163,11 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
 }
 
 /* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
-void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
+void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 worldObjectKey, s32 frames) {
     EffWorldNode *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
-    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), worldObjectKey, 0x11);
     if (worldUnit != NULL) {
         source = worldUnit->data;
         evtBeginVectorTransition(work, (s128 *)&source->rotation, frames);
@@ -996,7 +996,7 @@ u32 evtCmdPrepareUnitMotionAndLogState(void) {
 u32 evtOpAttachUnitToWorldObject(void) {
     s32 id;
     EvtUnit *unit;
-    s32 objectId;
+    s32 worldObjectKey;
     s32 frames;
 
     id = scrReadIntParameter(0);
@@ -1005,9 +1005,9 @@ u32 evtOpAttachUnitToWorldObject(void) {
         return 1;
     }
     unit->motionTicks = 0;
-    objectId = scrReadIntParameter(1);
+    worldObjectKey = scrReadIntParameter(1);
     frames = scrReadIntParameter(2);
-    evtAttachSecondaryWorldUnit(unit, objectId, frames);
+    evtAttachSecondaryWorldUnit(unit, worldObjectKey, frames);
     return 1;
 }
 
