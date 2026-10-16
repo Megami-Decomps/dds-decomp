@@ -157,8 +157,8 @@ void mnuDrawMantraPulseGridAtUnitScale(s32 x, s32 y, s32 z, s32 alpha,
  * loops and the final-row bound in the band loop: one declared type, one
  * neutral name, as a C89 programmer with all declarations at the top would
  * write. That reuse is what retail's bytes require. */
-void mnuDrawMantraPulseGridAtScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-                   MnuProfileProgress *selection, SdfGrid *grid, s32 arg6,
+void mnuDrawMantraPulseGridAtScale(s32 x, s32 y, s32 z, s32 alpha,
+                   MnuProfileProgress *selection, SdfGrid *grid, s32 surface,
                    f32 scaleX, f32 scaleY) {
     MenuSceneWork *display;
     SdfGridCell *cell;
@@ -167,14 +167,14 @@ void mnuDrawMantraPulseGridAtScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
 
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
-        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row + 0x1F, 0x20, scaleX, scaleY, surface);
     }
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                mnuDrawScaledMantraGridEntry(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
+                mnuDrawScaledMantraGridEntry(x, y, z, alpha, selection, grid, scaleX, scaleY, cell, surface);
             }
             cell++;
             n--;
@@ -184,14 +184,14 @@ void mnuDrawMantraPulseGridAtScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
             ? 0x1E
             : 0x1A;
     for (row = 0; row <= n; row++) {
-        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row, 0x20, scaleX, scaleY, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row, 0x20, scaleX, scaleY, surface);
     }
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                mnuDrawMantraGridEntryIndicators(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
+                mnuDrawMantraGridEntryIndicators(x, y, z, alpha, selection, grid, scaleX, scaleY, cell, surface);
             }
             cell++;
             n--;
