@@ -667,7 +667,7 @@ extern s32 btlCountTasksByKind(u16);
 /* Returns nonzero when the scene is idle: frees every actor's unreferenced
  * resource node, then the caller's list node, and requires no waiting actor
  * or scene task of the listed kinds. */
-s32 fldCheckSceneResourcesIdle(BtlUnit *self) {
+s32 btlPollBattleResourceCleanup(BtlUnit *self) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     BtlUnit *actor;
     for (actor = scene->units; actor != 0; actor = actor->nextActor) {
@@ -709,7 +709,7 @@ s32 fldCheckSceneResourcesIdle(BtlUnit *self) {
     return btlCountTasksByKind(0x2E) == 0;
 }
 
-s32 fldReleaseIdleSceneActorResources(BtlUnit *actor) {
+s32 btlPollActorResourceCleanup(BtlUnit *actor) {
     if (actor->node318 != 0) {
         if (sndIsResourceNodeReferencedOrActive(actor->node318) != 0) {
             return 0;
@@ -852,7 +852,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 return;
             }
         }
-        if (!(flags & 0x8000) || fldCheckSceneResourcesIdle(unit) != 0) {
+        if (!(flags & 0x8000) || btlPollBattleResourceCleanup(unit) != 0) {
             if (btlBothSidesActive(unit) == 0) {
                 btlDispatchStateHandler(task, 0x1D);
                 return;
@@ -1254,7 +1254,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
     u16 index;
     if (!(scene->battleFlags & 0x20)) {
         if (sndHasActiveActor() == 0) {
-            if (fldCheckSceneResourcesIdle(task->unit) != 0) {
+            if (btlPollBattleResourceCleanup(task->unit) != 0) {
                 if (!(task->pendingFlags & 0x80)) {
                     index = task->unit->partyRecord.unitId;
                     scene->boundTask = 0;
@@ -1423,7 +1423,7 @@ void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlUnit *owner = task->unit;
     void (*hook)(u8 *);
-    if (fldCheckSceneResourcesIdle(owner) != 0) {
+    if (btlPollBattleResourceCleanup(owner) != 0) {
         if (task->indexWork.stage == 2) {
             btlStartTask(btlCreateEffObjB(owner, task->indexWork.parameter));
         }
@@ -3082,7 +3082,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     if ((unit->status.flags & 0x40) == 0) {
         return;
     }
-    if (fldReleaseIdleSceneActorResources(task->unit) != 0) {
+    if (btlPollActorResourceCleanup(task->unit) != 0) {
         if (unit->status.flags & 0x200) {
             btlClearPartyRecordStatusBits(&unit->partyRecord.flags, 8);
             btlMoveActorOutOfActiveParty(unit);
@@ -3416,7 +3416,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     if (!(unit->status.flags & 0x40)) {
         return;
     }
-    if (fldReleaseIdleSceneActorResources(unit) == 0) {
+    if (btlPollActorResourceCleanup(unit) == 0) {
         return;
     }
     unit->status.flags &= ~0xC0;
@@ -3821,7 +3821,7 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
     s32 hookResult;
     s32 entryFlags;
     if (unit->status.flags & 0x200) {
-        if (fldReleaseIdleSceneActorResources(unit) == 0) {
+        if (btlPollActorResourceCleanup(unit) == 0) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
@@ -3862,7 +3862,7 @@ void btlEnterDeadActionState(void) {
 
 void btlCommandTaskReleaseActor(ActionStateLink *task) {
     if ((task->pendingFlags & 8) != 0) {
-        if (fldReleaseIdleSceneActorResources(task->unit) == 0) {
+        if (btlPollActorResourceCleanup(task->unit) == 0) {
             return;
         }
         if (task->unit != 0) {
