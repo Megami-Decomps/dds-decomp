@@ -19,7 +19,7 @@ void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
 void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 void itfMesFinishWindowAndClearStatus(s32 window);
-void evtLipsExecFunction(s32 id, s32 motion);
+void evtLipsExecFunction(s32 unitUniqueId, s32 motionId);
 
 struct ItfMesBlk40;
 struct ItfMesBlkA4;

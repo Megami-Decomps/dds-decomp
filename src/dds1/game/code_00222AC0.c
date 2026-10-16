@@ -702,17 +702,17 @@ void evtInvokeStoredWindowMotion(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC2A0);
 
-void evtLipsExecFunction(s32 id, s32 motion) {
+void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
     void *unit = NULL;
     MdlCtx *model = NULL;
     EffWorldNode *node;
 
-    if (id == 0) {
+    if (unitUniqueId == 0) {
         return;
     }
     for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = ((EvtLipsLink *)node->data)->mh->model;
-        if (sdfGetUniqueChunkValue(model->inner) == id) {
+        if (sdfGetUniqueChunkValue(model->inner) == unitUniqueId) {
             unit = ((EvtLipsLink *)node->data)->unit;
             break;
         }
@@ -721,13 +721,13 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         sdfDebugPrintf("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (motion >= mdlGetNodeRefHalf(model, 2)) {
+    if (motionId >= mdlGetNodeRefHalf(model, 2)) {
         sdfDebugPrintf("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
-    evtConfigureUnitMotionSlot(unit, 2, motion, 0, 5, 1);
-    D_003BBDB0 = id;
-    sdfDebugPrintf("<lips %d %d> \n", id, motion);
+    evtConfigureUnitMotionSlot(unit, 2, motionId, 0, 5, 1);
+    D_003BBDB0 = unitUniqueId;
+    sdfDebugPrintf("<lips %d %d> \n", unitUniqueId, motionId);
 }
 
 void evtLipsStopFunction(void) {
