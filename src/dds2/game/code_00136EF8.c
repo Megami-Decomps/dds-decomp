@@ -8,6 +8,7 @@
 #include "fld_waypoint.h"
 #include "fld_npc_motion.h"
 #include "fld_inf.h"
+#include "fld_title_banner_menu.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_vu_matrix.h"
 #include "kwln_fade.h"
