@@ -313,7 +313,7 @@ extern void sndQueueSoundId(u32);
 
 extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
-extern s32 fldGetTransferChunkPayload(s32 arg0);
+extern s32 fldGetTransferChunkPayload(s32 record);
 
 extern s32 D_00389780[];
 
