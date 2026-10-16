@@ -2146,7 +2146,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     if ((unit->status.flags & 0x400) != 0) {
         btlStartTask(btlCreateEffObjB(unit, 0xC9));
         task = btlCreateEffObjD(unit, skill);
-        task->startDelay = action->indexWork.unk2D == 0 ? 24 : 12;
+        task->startDelay = action->indexWork.costValidationFailed == 0 ? 24 : 12;
         task->ownerId = actionOwner;
         btlStartTask(task);
     } else {
@@ -2159,7 +2159,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     for (groupIndex = 0; groupIndex < 3; groupIndex++) {
         if (actors[groupIndex] != NULL) {
             s32 resourceIndex;
-            if (action->indexWork.unk2D == 0) {
+            if (action->indexWork.costValidationFailed == 0) {
                 BtlRuntimeTask *soundTask = btlCreateHookedUnitSoundTask(actors[groupIndex], slot);
                 soundTask->startDelay = maxFrames - actorFrames[groupIndex];
                 btlStartTask(soundTask);
@@ -2203,10 +2203,10 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         task = btlCreateEffObjB(unit, action->indexWork.parameter);
         task->startCondition.kind = 7;
         task->startCondition.value.handle = masterOwner;
-        if (action->indexWork.unk2D == 0) task->ownerId = actionOwner;
+        if (action->indexWork.costValidationFailed == 0) task->ownerId = actionOwner;
         btlStartTask(task);
     }
-    if (action->indexWork.unk2D == 0) {
+    if (action->indexWork.costValidationFailed == 0) {
         task = btlCreateCommandSoundWithArguments((s32)action, (s32)companionA, (s32)companionB, 8, skill);
         task->startCondition.kind = 7;
         task->startCondition.value.handle = masterOwner;
