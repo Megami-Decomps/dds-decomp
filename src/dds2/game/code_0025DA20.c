@@ -1967,7 +1967,7 @@ typedef char CampWideRewardEntry_size_check[
 extern s32 mtrMantraFindIndex(s32);
 
 s32 mnuCampChooseWideRewardEntry(s32 row) {
-    s32 column = 0;
+    s32 entryIndex = 0;
     s32 eligibleCount = 0;
     s32 count = mnuCampFindFreeWideEntryIndex(row);
     s32 cumulative = 0;
@@ -1977,9 +1977,9 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
 
     if (count > 0) {
         s32 *output = indices;
-        for (; column < count; column++) {
+        for (; entryIndex < count; entryIndex++) {
             CampWideRewardEntry *entry = (CampWideRewardEntry *)(
-                mnuCampWideRewardEntries + column * sizeof(CampWideRewardEntry) + row * 0xC0);
+                mnuCampWideRewardEntries + entryIndex * sizeof(CampWideRewardEntry) + row * 0xC0);
             s32 id = entry->id;
             s32 allowed = 1;
 
@@ -1996,15 +1996,15 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
                 }
             }
             if (allowed != 0) {
-                *output++ = column;
+                *output++ = entryIndex;
                 eligibleCount++;
                 totalWeight += entry->weight;
             }
         }
     }
     roll = effMiscRand(NULL) % (totalWeight + 1);
-    for (column = 0; column < eligibleCount; column++) {
-        s32 selected = indices[column];
+    for (entryIndex = 0; entryIndex < eligibleCount; entryIndex++) {
+        s32 selected = indices[entryIndex];
         cumulative += mnuCampWideRewardEntries[selected * 0xC + row * 0xC0];
         if (cumulative >= roll) {
             return selected;
