@@ -135,8 +135,8 @@ typedef struct BtlCmdCtx {
     s32 commandMode;
     s32 commandValue;
     u8 pad28[4];
-    void *actionProbeFirst;
-    void *actionProbeSecond;
+    BtlUnit *actionProbeFirst;
+    BtlUnit *actionProbeSecond;
     u8 pad34[4];
     u32 parameter38; /* 0x38 */
     u8 pad3C[0x50];
