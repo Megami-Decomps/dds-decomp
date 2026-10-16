@@ -240,11 +240,11 @@ typedef struct EffVec4 {
 extern EffVec4 D_004128A0;
 extern EffVec4 D_004128B0;
 extern u8 dds3TestObjectFlags(void *object, u32 mask);
-extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
+extern u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjInnerVecInit(ObjectTransform *transform);
 extern s32 func_0023DA70(ObjectTransform *, EffWorldNode *);
 
-extern void effObjClearNodeFlags(ObjectTransform *, u32);
+extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effObjInnerVecBackup(ObjectTransform *inner);
