@@ -16,4 +16,6 @@ typedef char SndPadStepper_target_offset_must_be_0x04[
 typedef char SndPadStepper_index_offset_must_be_0x28[
     ((u32)&((SndPadStepper *)0)->index == 0x28) ? 1 : -1];
 
+void sndStepIndexByPad(SndPadStepper *stepper);
+
 #endif
