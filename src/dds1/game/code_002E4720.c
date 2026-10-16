@@ -140,7 +140,7 @@ extern void EIntr(void);
 
 extern void sceCdPowerOff(void *arg0);
 
-extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 
