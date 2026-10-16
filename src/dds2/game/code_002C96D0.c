@@ -4498,8 +4498,8 @@ void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
     VU0_LOAD_VF(vf10, quaternion);
 }
 
-FileJobPayload *fileCreateJob(u16 type) {
-    u16 kind = type;
+FileJobPayload *fileCreateJob(FileJobType type) {
+    FileJobType kind = type;
     FileJobPayload *job = sdfAllocSizeClassBlock(0x2C);
     memset(job, 0, 0x2C);
     job->unk0 = 200;

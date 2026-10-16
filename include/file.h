@@ -16,6 +16,9 @@ struct FileCbNode;
 struct FilePacRequest;
 struct SdfMemBlock;
 
+/* Selects the operation and callback rows used by a file job. */
+typedef u16 FileJobType;
+
 /* File-job buffer offsets are relative to the job unless allocation is retained. */
 typedef struct FileJobBufferSlot {
     u32 offset;
@@ -39,7 +42,7 @@ typedef struct FileJobPayloadBufferSlot {
  * refer to this object through their address-valued id field. */
 typedef struct FileJobPayload {
     u32 unk0;
-    u16 type;
+    FileJobType type;
     u16 unk6;
     void *data;
     u16 option;             /* selects primary payload interpretation */
@@ -61,7 +64,7 @@ FileJobPayload *fileJobCreateFromJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateChild(FileJobPayload *request);
 FileJobPayload *fileDuplicateJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateFromCommandState(const char *entry);
-FileJobPayload *fileCreateJob(u16 type);
+FileJobPayload *fileCreateJob(FileJobType type);
 void fileJobDestroy(FileJobPayload *job);
 void fileJobNotifyComplete(FileJobPayload *job);
 void fileJobInvokeTypeCallback(FileJobPayload *job);
@@ -97,7 +100,7 @@ void fileQueueNotifyAllJobsComplete(struct FileQueue *queue);
 /* Effect/file queue entries share this C0-byte record in both games. */
 typedef struct FileJob {
     u32 unk0;
-    u16 type;
+    FileJobType type;
     u16 unk6;
     void *data;
     u16 option;
@@ -128,6 +131,10 @@ typedef char FileJobPayloadBufferSlot_size_must_be_0x10[
     (sizeof(FileJobPayloadBufferSlot) == 0x10) ? 1 : -1];
 typedef char FileJob_size_must_be_0xC0[
     (sizeof(FileJob) == 0xC0) ? 1 : -1];
+typedef char FileJob_type_offset_must_be_0x04[
+    ((u32)&((FileJob *)0)->type == 0x04) ? 1 : -1];
+typedef char FileJobPayload_type_offset_must_be_0x04[
+    ((u32)&((FileJobPayload *)0)->type == 0x04) ? 1 : -1];
 
 /* Runtime queue owner; serialized images retain the same 0x90-byte header. */
 typedef struct FileQueue {
