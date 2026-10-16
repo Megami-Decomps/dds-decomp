@@ -266,13 +266,13 @@ void fileWaitIdle(void) {
     }
 }
 
-/* Create a kind-two request with the caller's output buffer and byte count.
- * The buffer address is stored in the existing value word at +0x24. */
-FileWindowSlot *fileWindowSlotCreate(const char *requestName, void *data, s32 size, s32 callbackAddress, s32 userDataAddress) {
+/* Create a kind-two request with the caller's source buffer and byte count.
+ * Its address is stored in the existing value word at +0x24. */
+FileWindowSlot *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 size, s32 callbackAddress, s32 userDataAddress) {
     FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
 
-    requestSlot->firstValue = (s32)data;
-    requestSlot->firstValueCopy = (s32)data;
+    requestSlot->firstValue = (s32)sourceData;
+    requestSlot->firstValueCopy = (s32)sourceData;
     requestSlot->secondValue = size;
     requestSlot->secondValueCopy = size;
     fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callbackAddress, userDataAddress);
@@ -280,8 +280,8 @@ FileWindowSlot *fileWindowSlotCreate(const char *requestName, void *data, s32 si
 }
 
 /* Queue the value-pair request and expose its opaque request handle. */
-struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, void *data, s32 size) {
-    return (struct FileRequest *)fileWindowSlotCreate(requestName, data, size, 0, 0);
+struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, const void *sourceData, s32 size) {
+    return (struct FileRequest *)fileWindowSlotCreate(requestName, sourceData, size, 0, 0);
 }
 
 
