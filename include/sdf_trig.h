@@ -7,5 +7,6 @@
 f32 sdfAtan2(f32 y, f32 x);
 f32 sdfSinPoly(f32 angle);
 f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+f32 sdfTableInterpolate(f32 value, const f32 *table, s32 sampleCount);
 
 #endif /* SDF_TRIG_H */
