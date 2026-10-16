@@ -9175,12 +9175,12 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     case 0:
         return D_00336A60[motionIndex].defaultMotionId;
     case 1:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].primaryName);
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].motionObjectName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
     case 2:
-        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].secondaryName);
+        objectNode = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[motionIndex].secondaryMotionObjectName);
         if (objectNode != NULL) {
             return objectNode->key;
         }
