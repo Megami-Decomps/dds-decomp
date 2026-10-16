@@ -294,7 +294,8 @@ extern s32 D_0043630C;
 extern u32 fldGetPlayerSceneState(void);
 
 
-extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
+                                                       f32 *targetPositionOut);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
