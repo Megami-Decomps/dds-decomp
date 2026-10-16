@@ -1677,7 +1677,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 
 
-extern void sdfDrawHeapMapOverlay(void *, s32, s32);
+extern void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y);
 extern void sprintf(char *, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
