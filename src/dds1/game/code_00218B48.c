@@ -2877,8 +2877,8 @@ extern f32 kwlnDefaultColorVector[4];
 extern char D_003BBCF8[]; /* ">" in .sdata */
 extern char D_003BBD00[]; /* "%6.2f" in .sdata */
 extern SdfPoolNode D_00325708;
-extern void fldStepValueByPad(f32 *, u8 *, f32, f32, f32, f32);
-extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
+extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
+extern void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values);
 /* Direction-preview packet builder consumes the vector loaded in vf10. */
 extern void *func_0011D6B0(s32, s32, s32, s32);
 
