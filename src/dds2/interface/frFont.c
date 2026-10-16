@@ -815,7 +815,7 @@ s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
 /* Draw every child glyph, advance each parent chain, and report its total
  * child-glyph count only while all control/fade conditions remain ready. DDS2 additionally
  * suppresses one result per positive draw-delay count. */
-s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
+s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 renderFlags) {
     FrFontChildGlyph *child;
     s32 ready = 1;
     s32 enabled = 1;
@@ -849,7 +849,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                                          child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
                                          glyph->renderValueOrSetupOrShade.renderValue, enabled,
                                          &child->cachedItem->list->uv,
-                                         atlas, flags);
+                                         atlas, renderFlags);
                         } else {
                             frFontDrawAtlasGlyph(x + child->x + xOffset, y + child->y,
                                          child->cellDimensions.cellWidth,
@@ -857,7 +857,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                                          child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
                                          glyph->renderValueOrSetupOrShade.renderValue, enabled,
                                          &child->sourceItem->list->uv,
-                                         atlas, flags);
+                                         atlas, renderFlags);
                         }
                         glyphState = child->parentDimensionsOrRenderWord.fadeByte.value;
                         if (glyphState != 0) {

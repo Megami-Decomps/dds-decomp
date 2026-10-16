@@ -695,12 +695,12 @@ void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
 }
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
-void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId) {
+void ptyApplySkillRecovery(DatPartyRecord *unit, u32 skillId) {
     f32 recoveryRate;
     s32 hpRecovery;
     s32 mpRecovery;
 
-    if (datUnitHasSkill(entry, skillId) == 0) {
+    if (datUnitHasSkill(unit, skillId) == 0) {
         return;
     }
     hpRecovery = 0;
@@ -709,23 +709,23 @@ void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId) {
     switch (skillId) {
     case 0x22B:
         if (recoveryRate > 0.0f) {
-            hpRecovery = (s32)((f32)entry->maxHp * recoveryRate);
-            mpRecovery = (s32)((f32)entry->maxMp * recoveryRate);
+            hpRecovery = (s32)((f32)unit->maxHp * recoveryRate);
+            mpRecovery = (s32)((f32)unit->maxMp * recoveryRate);
         }
         break;
     case 0x22A:
     case 0x22C:
     case 0x250:
         if (recoveryRate > 0.0f) {
-            mpRecovery = (s32)((f32)entry->maxMp * recoveryRate);
+            mpRecovery = (s32)((f32)unit->maxMp * recoveryRate);
         }
         break;
     }
     if (hpRecovery > 0) {
-        datAdjustCurrentHp(entry, hpRecovery);
+        datAdjustCurrentHp(unit, hpRecovery);
     }
     if (mpRecovery > 0) {
-        datAdjustCurrentMp(entry, mpRecovery);
+        datAdjustCurrentMp(unit, mpRecovery);
     }
 }
 
@@ -764,25 +764,25 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
  * value is intentionally reused: incoming command ID, then resolved result. */
-s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
+s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 value) {
     s32 commandId = value;
     DatCommandRecord *commands = datCommandRecords;
 
     value = 0;
     switch (commands[commandId].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
-        if (entry->flags & 0x20) {
+        if (battler->flags & 0x20) {
             return 0;
         }
-        value = entry->maxHp * commands[commandId].costPercentage / 100 +
+        value = battler->maxHp * commands[commandId].costPercentage / 100 +
                 commands[commandId].costBase;
         if (value <= 0) {
             value = 1;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
-        if ((entry->flags & 0x20) &&
-            (datEnemyRecords[entry->unitId].flags & 0x10)) {
+        if ((battler->flags & 0x20) &&
+            (datEnemyRecords[battler->unitId].flags & 0x10)) {
             return 0;
         }
         value = commands[commandId].costPercentage;

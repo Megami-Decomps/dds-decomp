@@ -55,15 +55,15 @@ void bfStackPushFloat(ScrData *script, f32 floatValue) {
 }
 
 
-void scrPushString(ScrData *script, char *value) {
+void scrPushString(ScrData *script, char *string) {
     script->stackTypes[script->sp] = 5;
-    script->stackValues[script->sp].s = value;
+    script->stackValues[script->sp].s = string;
     script->sp = script->sp + 1;
 }
 
-void scrPushTypeFourValue(ScrData *script, s32 value) {
+void scrPushTypeFourValue(ScrData *script, s32 programCounter) {
     script->stackTypes[script->sp] = 4;
-    script->stackValues[script->sp].i = value;
+    script->stackValues[script->sp].i = programCounter;
     script->sp = script->sp + 1;
 }
 
