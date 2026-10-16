@@ -46,7 +46,7 @@
 #define ITF_LINE_STRIP_PRIMITIVE_BITS 0x14A
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
