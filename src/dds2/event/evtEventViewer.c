@@ -1623,13 +1623,13 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
             s32 duration = key->p18.sh[0];
             s32 relativeFrame;
             s32 blendLead;
-            s32 count;
+            s32 nodeFrameCount;
 
             if (loopEnabled == 0) {
                 s32 keyFrame = key->frame;
-                count = (s32)mdlGetNodeFrameCount(model, channel);
+                nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
                 relativeFrame = frame - keyFrame + duration;
-                if (count - 1 < relativeFrame) {
+                if (nodeFrameCount - 1 < relativeFrame) {
                     mode = 1;
                 }
             }
@@ -1648,20 +1648,20 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
                                 (f32)blendLead, (f32)key->p0C.sb[3]);
             if (mode == 1) {
                 if (loopEnabled == mode) {
-                    count = (s32)mdlGetNodeFrameCount(model, channel);
-                    if (count != 0) {
-                        count = (s32)mdlGetNodeFrameCount(model, channel);
-                        sampleFrame = ((s32)frame - key->frame + duration) % count;
+                    nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                    if (nodeFrameCount != 0) {
+                        nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                        sampleFrame = ((s32)frame - key->frame + duration) % nodeFrameCount;
                     } else {
                         sampleFrame = 0;
                     }
                 } else {
                     s32 capturedFrame = key->frame;
-                    count = (s32)mdlGetNodeFrameCount(model, channel);
+                    nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
                     relativeFrame = frame - capturedFrame + duration;
-                    if (count - 1 < relativeFrame) {
-                        count = (s32)mdlGetNodeFrameCount(model, channel);
-                        sampleFrame = count - 1;
+                    if (nodeFrameCount - 1 < relativeFrame) {
+                        nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                        sampleFrame = nodeFrameCount - 1;
                     } else {
                         sampleFrame = (s32)frame - key->frame + duration;
                     }

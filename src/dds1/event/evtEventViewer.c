@@ -1573,7 +1573,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
 
         {
             s32 loopEnabled;
-            s32 count;
+            s32 nodeFrameCount;
 
             if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
@@ -1584,17 +1584,17 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
                                 0.0f, (f32)key->p0C.sb[3]);
             if (mode == 1) {
                 if (loopEnabled == mode) {
-                    count = (s32)mdlGetNodeFrameCount(model, channel);
-                    if (count != 0) {
-                        count = (s32)mdlGetNodeFrameCount(model, channel);
-                        sampleFrame = (frame - key->frame) % count;
+                    nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                    if (nodeFrameCount != 0) {
+                        nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                        sampleFrame = (frame - key->frame) % nodeFrameCount;
                     } else {
                         sampleFrame = 0;
                     }
                 } else {
                     s32 relativeFrame = frame - key->frame;
-                    count = (s32)mdlGetNodeFrameCount(model, channel);
-                    if (count < relativeFrame) {
+                    nodeFrameCount = (s32)mdlGetNodeFrameCount(model, channel);
+                    if (nodeFrameCount < relativeFrame) {
                         sampleFrame = (s32)mdlGetNodeFrameCount(model, channel);
                     } else {
                         sampleFrame = frame - key->frame;
