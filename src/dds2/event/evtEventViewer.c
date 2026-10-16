@@ -312,22 +312,22 @@ void evtEventViewerDestroyEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer) {
 }
 
 void evtViewerSetMinimumFromCurrent(EvtRuntime *range) {
-    s32 current;
+    s32 currentFrame;
 
-    current = range->curFrame;
-    range->headerFirst = current;
-    if (range->frameRange.word < current) {
-        range->frameRange.word = current;
+    currentFrame = range->curFrame;
+    range->headerFirst = currentFrame;
+    if (range->frameRange.word < currentFrame) {
+        range->frameRange.word = currentFrame;
     }
 }
 
 void evtViewerSetMaximumFromCurrent(EvtRuntime *range) {
-    s32 current;
+    s32 currentFrame;
 
-    current = range->curFrame;
-    range->frameRange.word = current;
-    if (current < range->headerFirst) {
-        range->headerFirst = current;
+    currentFrame = range->curFrame;
+    range->frameRange.word = currentFrame;
+    if (currentFrame < range->headerFirst) {
+        range->headerFirst = currentFrame;
     }
 }
 
