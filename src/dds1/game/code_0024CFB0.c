@@ -82,7 +82,7 @@ extern EvtActiveFlagTable evtActiveEntryFlags;
 
 extern u32 evtDisplayValues[];
 
-extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
+extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 
 
 #include "dds3_world_secondary.h"
