@@ -9779,7 +9779,7 @@ void func_00140F68(void) {
 extern s32 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void), fileMenuTaskExists(void);
 extern s32 fldHasKiretaLabelProcess(void), fldHasHirakenaiLabelProcess(void), fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern s32 frFontMeasureTextAdvance(void *, s32, s32);
+extern s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode);
 extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
