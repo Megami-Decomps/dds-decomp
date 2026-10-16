@@ -258,7 +258,7 @@ extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 extern s32 datActionAnimationRecords;
 
-extern s32 btlArrangeFormationSlots(s32 arg0);
+extern s32 btlArrangeFormationSlots(s32 filter);
 
 extern s8 effSharedRandomState[];
 
