@@ -155,7 +155,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 void btlSyncPlayerWork(BtlUnit *actor);
 
-void btlCreateTargetSelectionTask(s32 arg0);
+void btlCreateTargetSelectionTask(s32 sourceTask);
 
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
 
