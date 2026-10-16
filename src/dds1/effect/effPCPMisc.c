@@ -840,11 +840,11 @@ EffPCPSpawnOnceWork *effPcpSpawnOnceCreate(void *src) {
     dst = sdfAllocSizeClassBlock(0x1C);
     dst->primaryHandle = effParamCreateFromTable(src, 0);
     handle = effParamCreateFromTable(src, 1);
-    dst->unk00 = 0;
+    dst->vector[0] = 0;
     dst->secondaryHandle = handle;
-    dst->unk04 = 0;
+    dst->vector[1] = 0;
     dst->color = 0x80808080;
-    dst->unk08 = 0;
+    dst->vector[2] = 0;
     return dst;
 }
 
@@ -861,11 +861,11 @@ EffPCPSpawnOnceWork *effPcpSpawnOnceClone(EffPCPSpawnOnceWork *src) {
     dst = sdfAllocSizeClassBlock(0x1C);
     dst->primaryHandle = effParamWorkDuplicate(src->primaryHandle);
     handle = effParamWorkDuplicate(src->secondaryHandle);
-    dst->unk00 = 0;
+    dst->vector[0] = 0;
     dst->secondaryHandle = handle;
-    dst->unk04 = 0;
+    dst->vector[1] = 0;
     dst->color = 0x80808080;
-    dst->unk08 = 0;
+    dst->vector[2] = 0;
     return dst;
 }
 
@@ -874,7 +874,7 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
     u128 vec;
 
     obj = effParamWorkGetData(work->primaryHandle);
-    VU0_LOAD_VF_MEMORY(vf10, work);
+    VU0_LOAD_VF_MEMORY(vf10, work->vector);
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color);
     mdlProcessContextNodesAndTransforms(obj, D_00325828);
