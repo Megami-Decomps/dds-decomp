@@ -840,9 +840,9 @@ void evtSetTransitionMotionScale(EvtUnit *unit, f32 transitionMotionScale) {
     unit->transitionMotionScale = transitionMotionScale;
 }
 
-void evtStoreUnitMotionShortParameters(EvtUnit *unit, s32 a, s32 b) {
-    unit->unkBE = a;
-    unit->unkC0 = b;
+void evtStoreUnitMotionShortParameters(EvtUnit *unit, s32 firstParameter, s32 secondParameter) {
+    unit->unkBE = firstParameter;
+    unit->unkC0 = secondParameter;
 }
 
 s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
