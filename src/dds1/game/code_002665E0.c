@@ -603,9 +603,9 @@ extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 prfGetCapValue(u16);
 
-s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 index, s8 mode) {
+s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 rowIndex, s8 mode) {
     s32 result = 0;
-    s32 levelDelta = work->levelAnimation[index].level - progressRow->unit->level;
+    s32 levelDelta = work->levelAnimation[rowIndex].level - progressRow->unit->level;
     s32 nextLevelExp = ptyComputeTotalExp(progressRow->unit, levelDelta + 1);
     s32 range = nextLevelExp - ptyComputeTotalExp(progressRow->unit, levelDelta);
     s32 step;
@@ -615,11 +615,11 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
         range = ptyComputeTotalExp(progressRow->unit, levelDelta + 1);
     }
     if (mode == 0) {
-        if (work->levelAnimation[index].remaining > 0) {
-            if (work->levelAnimation[index].skipRamp == 0) {
-                work->levelAnimation[index].frames++;
-                work->levelAnimation[index].frames = work->levelAnimation[index].frames <= 0 ? 0 : (work->levelAnimation[index].frames > 120 ? 120 : work->levelAnimation[index].frames);
-                denominator = 150 - work->levelAnimation[index].frames;
+        if (work->levelAnimation[rowIndex].remaining > 0) {
+            if (work->levelAnimation[rowIndex].skipRamp == 0) {
+                work->levelAnimation[rowIndex].frames++;
+                work->levelAnimation[rowIndex].frames = work->levelAnimation[rowIndex].frames <= 0 ? 0 : (work->levelAnimation[rowIndex].frames > 120 ? 120 : work->levelAnimation[rowIndex].frames);
+                denominator = 150 - work->levelAnimation[rowIndex].frames;
                 step = 1;
                 if (range >= denominator) {
                     step = range / denominator;
@@ -628,23 +628,23 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
                 step = 10000;
             }
             if (work->skipProgressAnimation != 0) {
-                step = work->levelAnimation[index].remaining;
+                step = work->levelAnimation[rowIndex].remaining;
             }
-            work->levelAnimation[index].remaining -= step;
-            if (work->levelAnimation[index].remaining < 0) {
-                step += work->levelAnimation[index].remaining;
-                work->levelAnimation[index].remaining = 0;
+            work->levelAnimation[rowIndex].remaining -= step;
+            if (work->levelAnimation[rowIndex].remaining < 0) {
+                step += work->levelAnimation[rowIndex].remaining;
+                work->levelAnimation[rowIndex].remaining = 0;
             }
-            work->levelAnimation[index].remaining = work->levelAnimation[index].remaining <= 0 ? 0 : (work->levelAnimation[index].remaining > 0x1000000 ? 0x1000000 : work->levelAnimation[index].remaining);
+            work->levelAnimation[rowIndex].remaining = work->levelAnimation[rowIndex].remaining <= 0 ? 0 : (work->levelAnimation[rowIndex].remaining > 0x1000000 ? 0x1000000 : work->levelAnimation[rowIndex].remaining);
             result = step;
         }
     } else {
         range = prfGetCapValue(ptyGetCurrentProfileId(progressRow->unit));
-        if (work->profileAnimation[index].remaining > 0) {
-            if (work->profileAnimation[index].skipRamp == 0) {
-                work->profileAnimation[index].frames++;
-                work->profileAnimation[index].frames = work->profileAnimation[index].frames <= 0 ? 0 : (work->profileAnimation[index].frames > 120 ? 120 : work->profileAnimation[index].frames);
-                denominator = 150 - work->profileAnimation[index].frames;
+        if (work->profileAnimation[rowIndex].remaining > 0) {
+            if (work->profileAnimation[rowIndex].skipRamp == 0) {
+                work->profileAnimation[rowIndex].frames++;
+                work->profileAnimation[rowIndex].frames = work->profileAnimation[rowIndex].frames <= 0 ? 0 : (work->profileAnimation[rowIndex].frames > 120 ? 120 : work->profileAnimation[rowIndex].frames);
+                denominator = 150 - work->profileAnimation[rowIndex].frames;
                 step = 1;
                 if (range >= denominator) {
                     step = range / denominator;
@@ -653,14 +653,14 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
                 step = 10000;
             }
             if (work->skipProgressAnimation != 0) {
-                step = work->profileAnimation[index].remaining;
+                step = work->profileAnimation[rowIndex].remaining;
             }
-            work->profileAnimation[index].remaining -= step;
-            if (work->profileAnimation[index].remaining < 0) {
-                step += work->profileAnimation[index].remaining;
-                work->profileAnimation[index].remaining = 0;
+            work->profileAnimation[rowIndex].remaining -= step;
+            if (work->profileAnimation[rowIndex].remaining < 0) {
+                step += work->profileAnimation[rowIndex].remaining;
+                work->profileAnimation[rowIndex].remaining = 0;
             }
-            work->profileAnimation[index].remaining = work->profileAnimation[index].remaining <= 0 ? 0 : (work->profileAnimation[index].remaining > 0x1000000 ? 0x1000000 : work->profileAnimation[index].remaining);
+            work->profileAnimation[rowIndex].remaining = work->profileAnimation[rowIndex].remaining <= 0 ? 0 : (work->profileAnimation[rowIndex].remaining > 0x1000000 ? 0x1000000 : work->profileAnimation[rowIndex].remaining);
             result = step;
         }
     }
