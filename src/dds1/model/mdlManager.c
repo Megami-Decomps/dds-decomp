@@ -431,7 +431,9 @@ extern char *strrchr(const char *, s32);
 extern s32 strcasecmp(const char *, const char *);
 extern char D_003BBB68[];
 extern void sdfCreateSemaphoreFromOptions(void);
-extern s32 mdlRequestLoadWithCallback(s32, s32, s32, const char *, void (*)(u32), u32);
+extern s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg,
+                                     const char *requestPath,
+                                     void (*onComplete)(u32), u32 callbackArg);
 
 /* Resolve or schedule a grouped model asset; -1 denotes an existing request. */
 s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
