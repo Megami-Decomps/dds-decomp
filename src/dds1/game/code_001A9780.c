@@ -2675,7 +2675,172 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2450);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2460);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AF058);
+extern f32 D_003A2460[4];
+void func_001AF058(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
+    /* Animation fields use the existing panel-edge payload view. */
+    BattlePanelEdgeWork *panel = (BattlePanelEdgeWork *)work;
+    f32 center[4] __attribute__((aligned(16)));
+    s32 horizontalExtent;
+    s32 verticalExtent;
+
+    memcpy(center, D_003A2460, sizeof(center));
+    switch (work->page) {
+    case 0:
+        /* Audited original SDK pipeline: five stores precede all coordinate reads. */
+        VU0_LOAD_VF(vf10, center);
+        VU0_STORE_VF_UNCLOBBERED(vf10, panel->anchor);
+        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[3]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[0]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[1]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, panel->corners[2]);
+        {
+            f32 centerZ = panel->anchor[2] + 200.0f;
+            f32 lastZ = panel->corners[3][2] + 200.0f;
+            f32 firstZ = panel->corners[0][2] + 200.0f;
+            f32 secondZ = panel->corners[1][2] + 200.0f;
+            f32 thirdZ = panel->corners[2][2] + 200.0f;
+            f32 centerX = panel->anchor[0] - 200.0f;
+            f32 centerY = panel->anchor[1] - 174.0f;
+            f32 firstX = panel->corners[0][0] - 200.0f;
+            f32 firstY = panel->corners[0][1] - 174.0f;
+            f32 secondX = panel->corners[1][0] + 200.0f;
+            f32 secondY = panel->corners[1][1] + 174.0f;
+            f32 thirdX = panel->corners[2][0] - 200.0f;
+            f32 thirdY = panel->corners[2][1] + 174.0f;
+            f32 lastX = panel->corners[3][0] + 200.0f;
+            f32 lastY = panel->corners[3][1] - 174.0f;
+
+            work->page = 1;
+            panel->anchor[2] = centerZ;
+            panel->corners[3][2] = lastZ;
+            panel->corners[0][2] = firstZ;
+            panel->corners[1][2] = secondZ;
+            panel->corners[2][2] = thirdZ;
+            panel->anchor[0] = centerX;
+            panel->anchor[1] = centerY;
+            panel->corners[0][0] = firstX;
+            panel->corners[0][1] = firstY;
+            panel->corners[1][0] = secondX;
+            panel->corners[1][1] = secondY;
+            panel->corners[2][0] = thirdX;
+            panel->corners[2][1] = thirdY;
+            panel->corners[3][0] = lastX;
+            panel->corners[3][1] = lastY;
+        }
+        panel->timer = 0;
+        break;
+    case 1:
+        panel->timer++;
+        panel->timer = panel->timer <= 0 ? 0 :
+            panel->timer >= 10 ? 10 : panel->timer;
+        if (panel->timer >= 10) {
+            work->page = 2;
+        }
+        break;
+    case 2:
+        btlAdvancePanelCornerPhase(command, panel);
+        panel->alpha += 32;
+        panel->alpha = panel->alpha <= 0 ? 0 :
+            panel->alpha >= 128 ? 128 : panel->alpha;
+        if (panel->alpha >= 128) {
+            work->page = 3;
+        }
+        break;
+    case 3:
+        btlAdvancePanelCornerPhase(command, panel);
+        panel->timer++;
+        panel->timer = panel->timer <= 0 ? 0 :
+            panel->timer >= 26 ? 26 : panel->timer;
+        if (panel->timer >= 26) {
+            work->page = 4;
+            panel->timer = 180;
+        }
+        break;
+    case 4:
+    {
+        f32 insetLeft, insetRight, insetTop, insetBottom;
+        f32 insetLimit;
+        panel->timer = (panel->timer + 24) % 360;
+        horizontalExtent = (s32)(((sdfSinPoly((f32)((panel->timer + 90) % 360) /
+            180.0f * 3.14159f) + 1.0f) * 0.5f) * 40.0f + 0.0f);
+        verticalExtent = (s32)(((sdfSinPoly((f32)((panel->timer + 90) % 360) /
+            180.0f * 3.14159f) + 1.0f) * 0.5f) * 34.0f + 0.0f);
+        insetLeft = center[0] - 200.0f;
+        insetRight = center[0] + 200.0f;
+        insetTop = center[1] - 174.0f;
+        insetBottom = center[1] + 174.0f;
+        insetLimit = insetBottom - 32.0f;
+        insetLeft += (f32)horizontalExtent;
+        insetRight -= (f32)horizontalExtent;
+        insetTop += (f32)verticalExtent;
+        insetBottom -= (f32)verticalExtent;
+        panel->anchor[0] = insetLeft;
+        panel->anchor[1] = insetTop;
+        panel->corners[3][0] = insetLeft;
+        panel->corners[3][1] = insetTop;
+        panel->corners[0][0] = insetLeft;
+        panel->corners[0][1] = insetBottom;
+        panel->corners[1][0] = insetRight;
+        panel->corners[1][1] = insetTop;
+        panel->corners[2][0] = insetRight;
+        panel->corners[2][1] = insetBottom;
+        if (insetBottom <= insetLimit) {
+            panel->timer = 0;
+            work->page = 5;
+        }
+        break;
+    }
+    case 5:
+        panel->timer++;
+        panel->timer = panel->timer <= 0 ? 0 :
+            panel->timer >= 10 ? 10 : panel->timer;
+        if (panel->timer >= 10) {
+            work->page = 6;
+            panel->timer = 180;
+        }
+        break;
+    case 6:
+    case 7:
+    {
+        f32 fraction;
+        f32 outsetLeft, outsetRight, outsetTop, outsetBottom;
+        fraction = command->exponentialRange.end;
+        if (fraction >= 1.0f) {
+            fraction = 1.0f;
+        }
+        horizontalExtent = (s32)(fraction * 66.0f);
+        verticalExtent = (s32)(fraction * 58.0f);
+        outsetLeft = center[0] - 200.0f - (f32)horizontalExtent;
+        outsetRight = center[0] + 200.0f + (f32)horizontalExtent;
+        outsetTop = center[1] - 174.0f - (f32)verticalExtent;
+        outsetBottom = center[1] + 174.0f + (f32)verticalExtent;
+        panel->anchor[0] = outsetLeft;
+        panel->anchor[1] = outsetTop;
+        panel->corners[3][0] = outsetLeft;
+        panel->corners[3][1] = outsetTop;
+        panel->corners[0][0] = outsetLeft;
+        panel->corners[0][1] = outsetBottom;
+        panel->corners[1][0] = outsetRight;
+        panel->corners[1][1] = outsetTop;
+        panel->corners[2][0] = outsetRight;
+        panel->corners[2][1] = outsetBottom;
+        if (work->page == 6) {
+            if (outsetBottom >= 448.0f) {
+                panel->timer = 0;
+                work->page = 7;
+            }
+        } else {
+            panel->alpha -= 32;
+            panel->alpha = panel->alpha <= 0 ? 0 :
+                panel->alpha >= 128 ? 128 : panel->alpha;
+            if (panel->alpha <= 0) {
+                work->page = 8;
+            }
+        }
+        break;
+    }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001AF5D0);
 
@@ -3593,7 +3758,152 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AE0);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AF0);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B4F10);
+extern const BattlePanelColors D_003A2AF0;
+extern s32 fldGetSceneObjectState(void);
+extern s32 btlGetActorCommandClass(BattleSceneObject *,s8);
+extern u32 btlGetCommandOptionCount(s32,s8,s8);
+extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
+extern void btlBuildEligibleActorList(s32,s16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *);
+extern void btlReleaseRegisteredTaskBuffer(KwlnTask *);
+extern void func_001B4D58(s32,s32,u32,u32,u16,s16);
+extern u8 D_00358FE0[];
+s32 func_001B4F10(KwlnTask *task) {
+    BattlePanelColors colors = D_003A2AF0;
+    BattleSceneObject *object = NULL;
+    KwlnTask *panelTask;
+    BtlState *battle;
+    s16 count;
+    s16 optionCount;
+    s16 cursor;
+    s16 row;
+    u32 state;
+    s32 kind;
+    s32 selector;
+    s32 draw;
+    s32 i;
+
+    if (btlGetTrackedTaskHandle(4) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+
+    panelTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (panelTask != NULL) {
+        object = (BattleSceneObject *)kwlnTaskGetUserValue(panelTask);
+    }
+    draw = 0;
+    state = fldGetSceneObjectState();
+    switch (state) {
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+
+    {
+        BtlCommandHintWork *fadeWindow;
+    fadeWindow = (BtlCommandHintWork *)D_003BB3DC;
+    fadeWindow->fade += 0x20;
+    fadeWindow->fade = fadeWindow->fade <= 0 ? 0 :
+                   fadeWindow->fade > 0x80 ? 0x80 : fadeWindow->fade;
+
+    }
+    if (mdlFlagTest(0xC0E) == 0 && panelTask != NULL) {
+    kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
+    optionCount = (s16)btlGetCommandOptionCount((s32)object,
+                                         btlCommandPanelWork->classIndex, 1);
+    row = object->selections[kind].entry;
+    cursor = object->selections[kind].cursor;
+
+    switch (kind) {
+    case 0:
+        if ((cursor == 0 && row == 0) || optionCount - 1 == row) {
+            BtlCommandHintWork *hintWindow;
+            if (row == 0) {
+                BtlTask *owner = object->owner;
+                selector = (owner->unit->status.flags & 0x1000) != 0 ? 1 : 2;
+            } else {
+                selector = 3;
+            }
+            hintWindow = (BtlCommandHintWork *)D_003BB3DC;
+            func_001B4D58(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
+                          (s16)hintWindow->fade | 0x80808000, 0, selector);
+        } else {
+            BtlCommandHintWork *entryWindow;
+            u16 textId;
+            u16 *entries = btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
+            textId = entries[row - 1];
+            entryWindow = (BtlCommandHintWork *)D_003BB3DC;
+            func_001B4D58(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
+                          (s16)entryWindow->fade | 0x80808000, textId, 0);
+        }
+        draw = 1;
+        break;
+    case 4: {
+        BtlCommandHintWork *skillWindow;
+        u16 textId;
+        BattleRosterTable *entries = btlGetActorLinkageSkillList(object, (u16 *)&count);
+        textId=entries->entries[row].skill;
+        skillWindow = (BtlCommandHintWork *)D_003BB3DC;
+        draw = 1;
+        func_001B4D58(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
+                      (s16)skillWindow->fade | 0x80808000, textId, 0);
+        break;
+    }
+    case 2: {
+        BtlCommandHintWork *drawWindow;
+        u16 textId;
+        btlBuildEligibleActorList((s32)object,&count);
+        textId=D_00358FE0[row*2];
+        drawWindow=D_003BB3DC;
+        draw=1;
+        func_001B4D58(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
+        break;
+    }
+    case 3: {
+        BtlCommandHintWork *drawWindow;
+        s32 textKind;
+        if(row==0) {
+            textKind=(object->owner->unit->status.flags&0x1000)!=0?4:5;
+        } else {
+            textKind=row==1?6:7;
+        }
+        drawWindow=D_003BB3DC;
+        draw=1;
+        func_001B4D58(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
+        break;
+    }
+    case 6: {
+        BtlCommandHintWork *drawWindow = (BtlCommandHintWork *)D_003BB3DC;
+        draw = 1;
+        func_001B4D58(drawWindow->x + 0x13, drawWindow->y - 6, 0xFF0000,
+                      (s16)drawWindow->fade | 0x80808000, 0, 8);
+        break;
+    }
+    }
+
+    if (draw != 0) {
+    for (i = 0; i < 4; i++) {
+        colors.values[i] = btlSetSlotLowByteClamped(
+            btlResourceBlock->resA, 0x2A, i, (s16)D_003BB3DC->fade);
+    }
+    {
+    BtlCommandHintWork *spriteWindow = (BtlCommandHintWork *)D_003BB3DC;
+    effDrawSpriteWithCornerColors(spriteWindow->x << 4, spriteWindow->y << 3, 0, colors.values, 0,
+                  btlResourceBlock->resA, 0x2A, 0x53);
+    }
+    }
+    }
+    break;
+    case 5:
+        btlReleaseRegisteredTaskBuffer(task);
+        return -1;
+    }
+    return 0;
+}
 
 void btlReleaseRegisteredTaskBuffer(KwlnTask *unused) {
     btlGetRuntime();
@@ -6310,7 +6620,7 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001BF040);
 
 extern s32 func_001B5CD8(void);
 
-extern void func_001B60E8(void);
+extern s32 func_001B60E8(void);
 
 extern void func_001AADF8(BattleSceneObject *);
 

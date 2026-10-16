@@ -189,12 +189,12 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     return code;
 }
 
-s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
+s32 btlIsEffectPhaseInRange(s32 unused, s32 phase) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
     if (effect->linked.active != 1) {
         return 0;
     }
-    switch (value) {
+    switch (phase) {
     case 0x12:
     case 0x13:
         return 1;

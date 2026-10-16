@@ -25,6 +25,7 @@
 #include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_resource.h"
+#include "sdf_general_heap_api.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
 #include "bf_flw0_header.h"
@@ -1654,7 +1655,6 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
 }
 
 extern s32 DIntr(void);
-extern u32 sdfGetFirstGeneralHeapBlock(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
 extern void EIntr(void);
 
@@ -1672,7 +1672,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
     snapshot = (SdfHeapOverlayBlock *)sdfGetPacketCursor();
     restoreInterrupts = DIntr();
-    block = (SdfMemBlock *)sdfGetFirstGeneralHeapBlock();
+    block = sdfGetFirstGeneralHeapBlock();
     entry = snapshot;
     heapBase = sdfMemoryGetBlockAddress(block);
     /* Count only the interrupt-protected snapshot traversal. */

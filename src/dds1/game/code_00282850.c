@@ -1108,9 +1108,9 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
 }
 
 
-void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
-    panel->capValue = value;
-    panel->option = option;
+void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 optionValue) {
+    panel->capValue = capValue;
+    panel->option = optionValue;
 }
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
@@ -1268,7 +1268,94 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
     return (*flags & 0x200000) > 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDispatchPopupTransition);
+s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callback) {
+    MenuPopupState *state = work;
+    MenuPopupEntry **slot = (MenuPopupEntry **)entrySlot;
+    MenuPopupEntry *entry;
+    s32 accepted = 1;
+    s32 result = 0;
+    u32 flags;
+
+    if (callback == NULL) {
+        return 0;
+    }
+    if (slot == NULL) {
+        return 0;
+    }
+    entry = *slot;
+    if (entry == NULL) {
+        return 0;
+    }
+    flags = entry->flags;
+    if (flags & 0x400000) {
+        return 0;
+    }
+    switch (mode) {
+    case 0:
+        entry->flags = flags | 0x100000;
+        if (entry->canEnter != NULL) {
+            accepted = entry->canEnter(callback) != 0;
+        }
+        if (!accepted) {
+            if ((*slot)->flags & 1) {
+                goto enter;
+            }
+        } else {
+        enter:
+            if (!((*slot)->flags & 0x10000)) {
+                mnuApplyPanelTransitionAction(0, *slot, state, (u32)callback);
+                (*slot)->flags |= 0x10000;
+            }
+        }
+        if (accepted) {
+            result = (s32)(*slot)->start;
+            (*slot)->flags |= 0x200000;
+        } else {
+            flags = (*slot)->flags;
+            if (flags & 1) {
+                (*slot)->flags = flags | 0x400000;
+                (*slot)->start(callback);
+                (*slot)->flags &= ~0x400000;
+            }
+        }
+        break;
+    case 1:
+        if (flags & 0x100000) {
+            if (flags & 0x200000) {
+                result = (s32)entry->update;
+            } else if (flags & 1) {
+                entry->flags = flags | 0x400000;
+                entry->update(callback);
+                (*slot)->flags &= ~0x400000;
+            }
+        }
+        break;
+    case 2:
+        if (flags & 0x100000) {
+            if (flags & 0x200000) {
+                if (flags & 0x20000) {
+                    if (flags & 0x40000) {
+                        mnuApplyPanelTransitionAction(2, NULL, state, (u32)callback);
+                    } else {
+                        mnuApplyPanelTransitionAction(1, NULL, state, (u32)callback);
+                    }
+                }
+                /* Keep only the low 16 flag bits, read as a halfword. */
+                (*slot)->flags = *(u16 *)*slot;
+                state->entryAddress = state->lastEntryAddress;
+                state->lastEntryAddress = *slot;
+                result = (s32)(*slot)->finish;
+                *slot = NULL;
+            } else if (flags & 1) {
+                entry->flags = flags | 0x400000;
+                entry->finish(callback);
+                (*slot)->flags &= ~0x400000;
+            }
+        }
+        break;
+    }
+    return result;
+}
 
 /* Compare the popup state's current entry address, not an entry payload value. */
 
@@ -1946,8 +2033,8 @@ s32 ptyCountBulletItem(s32 bulletId) {
     return totalCount;
 }
 
-u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 value) {
-    entry->menuValue = value;
+u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue) {
+    entry->menuValue = menuValue;
     return 1;
 }
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf_general_heap_api.h"
 #include "sdf.h"
 #include "sdf_pending.h"
 
@@ -151,9 +152,9 @@ u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
     return block->state;
 }
 
-/* Return the first general-heap block, retaining the native integer representation. */
-u32 sdfGetFirstGeneralHeapBlock(void) {
-    return (u32)sdfGeneralHeap.head.next;
+/* Return the first general-heap allocation descriptor. */
+SdfMemBlock *sdfGetFirstGeneralHeapBlock(void) {
+    return sdfGeneralHeap.head.next;
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D00F8", D_003BD2DC);

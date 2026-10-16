@@ -1577,7 +1577,7 @@ void mnuReportCampProcessHalted(void) {
 
 extern s32 D_00357AB8[];
 
-UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value) {
+UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
     UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
 
@@ -1586,19 +1586,19 @@ UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value) {
     allocation = sdfAllocGeneralBlock(D_00357AB8[kind]);
     work->payloadAllocation = allocation;
     work->payload = (u32 *)sdfResourceRetainAddress(allocation);
-    if (value != 0) {
+    if (payload != 0) {
         switch (kind) {
         case 6:
-            *work->payload = value;
+            *work->payload = payload;
             break;
         case 7:
-            ((UiSpriteTexturePayload *)work->payload)->texture = (SdfTex *)value;
+            ((UiSpriteTexturePayload *)work->payload)->texture = (SdfTex *)payload;
             break;
         case 8:
-            ((UiSpriteBandPayload *)work->payload)->texture = (SdfTex *)value;
+            ((UiSpriteBandPayload *)work->payload)->texture = (SdfTex *)payload;
             break;
         case 9:
-            *work->payload = value;
+            *work->payload = payload;
             break;
         }
     }

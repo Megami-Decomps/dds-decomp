@@ -184,7 +184,7 @@ extern s32 btlInitializeResources(s32 unused, s32 resource);
 extern void btlInitializeUnitDisplaySpeciesAndFlags(u8 *unit);
 extern u8 btlIsCommandCodeF(u32 unused, s32 command);
 extern s32 btlIsEffectActor(BtlUnit *actor);
-extern s32 btlIsEffectPhaseInRange(s32 unused, s32 value);
+extern s32 btlIsEffectPhaseInRange(s32 unused, s32 phase);
 extern u32 btlIsInSpecialModeRange(u32 unused0, u32 unused1, s32 action);
 extern s32 btlIsSpecialActionKind(BtlLinkedCommand *command);
 extern u32 btlMapActionToCode(s32 action);

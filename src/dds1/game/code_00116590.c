@@ -38,7 +38,7 @@ void evtReleaseActionWorldNode(EffWorldNode *object) {
     dds3RemoveWorldObjectNode(object);
 }
 
-void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 value) {
+void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 blendFrames) {
     EffLightData *state = object->data;
     s32 color1[4];
     s32 color2[4];
@@ -46,11 +46,11 @@ void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 value) {
     u32 packed2;
 
     state->flags |= EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS;
-    if (value == 0) {
+    if (blendFrames == 0) {
         state->flags &= ~EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
     } else {
         state->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
-        state->blendFrames = value;
+        state->blendFrames = blendFrames;
         VU0_LOAD_VF(vf10, D_00324770[0]);
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;

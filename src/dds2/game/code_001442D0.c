@@ -2840,7 +2840,87 @@ void fldClearAllAreaFloorFlags(void) {
     } while (blockIndex < 10);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B0F8);
+extern f32 D_0043627C;
+extern void itfSetTextDrawLimit(s32 value);
+extern s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode);
+extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+
+/* Both banner coordinates are interpolated, including the fixed zero Y endpoint. */
+static inline f32 fldBannerCoordinate(f32 progress, f32 hidden, f32 shown) {
+    return progress * shown + (1.0f - progress) * hidden;
+}
+
+void func_0014B0F8(void) {
+    f32 progress;
+    s32 x, y;
+    s32 labelIndex;
+    s32 width;
+    s32 labelX;
+    if (fldAreaState.unk118 == 1) return;
+    if (fldAreaState.area >= 200) return;
+    switch (fldAreaState.unkD4) {
+    case 0:
+        progress = 0.0f;
+        D_0043627C = progress;
+        break;
+    case 2:
+        progress = D_0043627C;
+        if (progress > 0.0f) {
+            progress -= 0.1f;
+            if (progress < 0.0f) {
+                progress = 0.0f;
+                goto storeClampedProgress;
+            }
+            D_0043627C = progress;
+        }
+        break;
+    case 3:
+        progress = D_0043627C;
+        if (!(progress < 1.0f)) {
+            break;
+        }
+        progress += 0.1f;
+        if (!(1.0f < progress)) {
+            D_0043627C = progress;
+            break;
+        }
+        /* A completed fade-in uses the fully visible state. */
+    case 1:
+        progress = 1.0f;
+        D_0043627C = progress;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    default:
+        progress = D_0043627C;
+        break;
+    }
+    goto interpolate;
+storeClampedProgress:
+    D_0043627C = progress;
+interpolate:
+    x = (s32)fldBannerCoordinate(progress, 250.0f, 0.0f);
+    y = (s32)fldBannerCoordinate(progress, 0.0f, 0.0f);
+    itfSetTextDrawLimit(0x13);
+    if (fldAreaState.unkC8 != -1) {
+        if (D_0044FD48[fldAreaState.unkC8] < 2) return;
+        labelIndex = fldFindSecondaryMapLabelIndexByCoordinate(fldAreaState.area % 100, fldAreaState.unkC8);
+        width = frFontMeasureTextAdvance(D_0039E1A8[labelIndex].name, 1, 0);
+        fldDrawAnimatedFieldBanner(width, x, y);
+        if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
+        fldDrawConvertedTextGlyph(x + labelX, (y + 0x12) / 2, 0xF0DC6480, D_0039E1A8[labelIndex].name);
+    } else if (fldAreaState.unkC4 != fldAreaState.unkC8) {
+        if (D_0044FC98[fldAreaState.unkC4] < 2) return;
+        labelIndex = fldFindMapLabelIndexByCoordinate(fldAreaState.area % 100, fldAreaState.unkC4);
+        width = frFontMeasureTextAdvance(D_0039A5A8[labelIndex].name, 1, 0);
+        fldDrawAnimatedFieldBanner(width, x, y);
+        if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
+        fldDrawConvertedTextGlyph(x + labelX, (y + 0x12) / 2, 0xA09DC380, D_0039A5A8[labelIndex].name);
+    }
+    itfSetTextDrawLimit(-1);
+}
 
 extern s32 D_003A8E60[];
 
@@ -5514,7 +5594,145 @@ void fldDispatchTargetGuideMotionUpdate(void) {
     mode = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001526B8);
+extern void fldSetTargetGuideMode(s32 mode);
+extern s32 fldCanUseTargetGuideInCurrentScene(s32 area, s32 room);
+extern FieldGridCoordPair D_003AA530[];
+extern FieldGridCoordPair D_003AA558[];
+extern FieldGridCoordPair D_003AA620[];
+extern FieldGridCoordPair D_003AA6A8[10];
+extern FieldGridCoordPair D_003AA6D0[10];
+extern FieldGridCoordPair D_003AA6F8[10];
+
+void func_001526B8(void) {
+    FieldTargetGuideState *state;
+    FieldGridCoordPair *point;
+    u32 index;
+    f32 playerX;
+    f32 playerZ;
+    if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1) == 0) {
+        return;
+    }
+    D_004363C0 = 0x190;
+    D_004363C2 = 0x190;
+    switch (fldAreaState.floor + 1) {
+    case 11: {
+        FieldTargetGuideState *state;
+        fldLoadTargetGuideResource();
+        playerZ = fldAreaState.z;
+        playerX = fldAreaState.x;
+        D_004363BC = -0x960;
+        D_004363BE = 0xAF0;
+        state = &fldTargetGuideState;
+        state->gridX = 0;
+        state->gridY = 0;
+        fldFindNearestOccupiedMapGridCell(playerX, playerZ, &D_00438EF8.x, &D_00438EF8.y);
+        if (mdlFlagTest(0x4D0) != 0) {
+            u16 encodedX = (u16)D_003AA530[0].x;
+            u16 encodedY = (u16)D_003AA530[0].y;
+            state->cycleRoute = D_003AA530;
+            state->gridX = encodedX;
+            state->gridY = encodedY;
+            state->position[0] = (f32)D_004363BC + (f32)(s16)encodedX * (f32)D_004363C0;
+            state->position[2] = (f32)D_004363BE + (f32)(s16)encodedY * (f32)-D_004363C2;
+            fldSetTargetGuideMode(1);
+            return;
+        }
+        for (index = 0; index < 5; index++) {
+            point = &D_003AA6A8[index * 2];
+            if (point[0].x == D_00438EF8.x && point[0].y == D_00438EF8.y) {
+                fldTargetGuideState.gridX = point[1].x;
+                fldTargetGuideState.gridY = point[1].y;
+            }
+        }
+        fldSetTargetGuideMode(0);
+        break;
+    }
+    case 14: {
+        FieldTargetGuideState *state;
+        fldLoadTargetGuideResource();
+        playerZ = fldAreaState.z;
+        playerX = fldAreaState.x;
+        D_004363BC = -0x960;
+        D_004363BE = 0x960;
+        state = &fldTargetGuideState;
+        state->gridX = 0;
+        state->gridY = 0;
+        fldFindNearestOccupiedMapGridCell(playerX, playerZ, &D_00438EF8.x, &D_00438EF8.y);
+        if (mdlFlagTest(0x4D0) != 0) {
+            u16 encodedX = (u16)D_003AA558[0].x;
+            u16 encodedY = (u16)D_003AA558[0].y;
+            state->cycleRoute = D_003AA558;
+            state->gridX = encodedX;
+            state->gridY = encodedY;
+            state->position[0] = (f32)D_004363BC + (f32)(s16)encodedX * (f32)D_004363C0;
+            state->position[2] = (f32)D_004363BE + (f32)(s16)encodedY * (f32)-D_004363C2;
+            fldSetTargetGuideMode(1);
+            return;
+        }
+        for (index = 0; index < 5; index++) {
+            point = &D_003AA6D0[index * 2];
+            if (point[0].x == D_00438EF8.x && point[0].y == D_00438EF8.y) {
+                fldTargetGuideState.gridX = point[1].x;
+                fldTargetGuideState.gridY = point[1].y;
+            }
+        }
+        fldSetTargetGuideMode(0);
+        break;
+    }
+    case 16: {
+        FieldTargetGuideState *state;
+        fldLoadTargetGuideResource();
+        playerZ = fldAreaState.z;
+        playerX = fldAreaState.x;
+        D_004363BC = -0x960;
+        D_004363BE = 0x960;
+        state = &fldTargetGuideState;
+        state->gridX = 0;
+        state->gridY = 0;
+        fldFindNearestOccupiedMapGridCell(playerX, playerZ, &D_00438EF8.x, &D_00438EF8.y);
+        if (mdlFlagTest(0x4D0) != 0) {
+            u16 encodedX = (u16)D_003AA620[0].x;
+            u16 encodedY = (u16)D_003AA620[0].y;
+            state->cycleRoute = D_003AA620;
+            state->gridX = encodedX;
+            state->gridY = encodedY;
+            state->position[0] = (f32)D_004363BC + (f32)(s16)encodedX * (f32)D_004363C0;
+            state->position[2] = (f32)D_004363BE + (f32)(s16)encodedY * (f32)-D_004363C2;
+            fldSetTargetGuideMode(1);
+            break;
+        }
+        for (index = 0; index < 5; index++) {
+            point = &D_003AA6F8[index * 2];
+            if (point[0].x == D_00438EF8.x && point[0].y == D_00438EF8.y) {
+                fldTargetGuideState.gridX = point[1].x;
+                fldTargetGuideState.gridY = point[1].y;
+            }
+        }
+        fldSetTargetGuideMode(0);
+        break;
+    }
+    case 18:
+        fldSetTargetGuideMode(14);
+        break;
+    }
+    state = &fldTargetGuideState;
+    state->moveTimer = -20;
+    state->routeIndex = 0;
+    state->routeEnd = 0;
+    state->position[1] = 0.0f;
+    state->targetYaw = 0.0f;
+    state->stepDistance = 0.0f;
+    state->updateFlags = 0;
+    state->position[0] = (f32)D_004363BC + (f32)D_004363C0 * (f32)state->gridX;
+    state->position[2] = (f32)D_004363BE + (f32)-D_004363C2 * (f32)state->gridY;
+    if (state->guideMode != 14) {
+        state->guideMode = 0;
+    }
+    state->viewAngleError = 0.0f;
+    state->unk2A = 0;
+    state->disabled = 0;
+    fldUpdateTargetGuideEffects();
+}
 
 extern void fldReleaseTargetGuideResource(void);
 

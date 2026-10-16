@@ -5095,7 +5095,9 @@ s32 effCreateSurfaceNodeFromFile(s32 *source) {
     return (s32)object;
 }
 
-extern void effReleaseSurfaceGridBuffers(s32);
+typedef struct EffSurfaceGridNode EffSurfaceGridNode;
+
+extern void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *);
 
 void effDestroySurfaceNode(EffectSlotNode54 *node) {
     u32 i;
@@ -5120,7 +5122,7 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
     }
     if (node->index != 0) {
         for (i = 0; i < node->count; i++) {
-            effReleaseSurfaceGridBuffers(((u32 *)node->index)[i]);
+            effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
     }
@@ -5229,9 +5231,9 @@ void effCloneSurfaceGridResources(EffectSlotNode54 *dst, u8 *work) {
 
 
 
-extern u32 effCreateSurfaceGridNode(u32, u32);
+extern EffSurfaceGridNode *effCreateSurfaceGridNode(u32, u32);
 
-extern void effFillSurfaceGridColorGradient(u32, u32 *);
+extern void effFillSurfaceGridColorGradient(EffSurfaceGridNode *, u32 *);
 
 /* Replace the per-cell grid handles from the copied source header. kind is unused here. */
 void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
@@ -5239,7 +5241,7 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
     u32 *params = (u32 *)source;
     u32 size;
     u32 i;
-    u32 handle;
+    EffSurfaceGridNode *handle;
 
     node->params = *(EffSurfaceParams *)params;
     size = node->count * 4;
@@ -5248,7 +5250,7 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
     }
     if (node->index != 0) {
         for (i = 0; i < node->count; i++) {
-            effReleaseSurfaceGridBuffers(((u32 *)node->index)[i]);
+            effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
     }
@@ -5256,7 +5258,7 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
     node->index = sdfResourceRetainAddress((struct SdfMemBlock *)(node->handleBuffer));
     for (i = 0; i < node->count; i++) {
         handle = effCreateSurfaceGridNode(params[0], params[1]);
-        ((u32 *)node->index)[i] = handle;
+        ((u32 *)node->index)[i] = (u32)handle;
         effFillSurfaceGridColorGradient(handle, params + 2);
     }
 }
@@ -5413,7 +5415,7 @@ extern u8 D_003E9C40[];
 extern u8 D_003E9C90[];
 
 /* Surface node: 0x4C bytes at the end of the retained block, after the vertex rows. */
-typedef struct EffSurfaceGridNode {
+struct EffSurfaceGridNode {
     u8 pad_00[0x20];
     s32 rows;           // 0x20
     s32 field_24;       // 0x24
@@ -5426,9 +5428,11 @@ typedef struct EffSurfaceGridNode {
     u128 *queueA;         // 0x40
     u32 *queueB;         // 0x44
     struct SdfMemBlock *allocation; // 0x48
-} EffSurfaceGridNode;
+};
 
-u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
+typedef char EffSurfaceGridNodeSizeCheck[(sizeof(EffSurfaceGridNode) == 0x4C) ? 1 : -1];
+
+EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
     s32 rows = count * columns * 3 + 6;
     s32 size = rows * 20 + 0xA0;
     struct SdfMemBlock *base;
@@ -5462,11 +5466,10 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     D_00458340.parameters = (u32 *)D_003E9C90;
     D_00458340.parameterCount = 6;
     D_00458340.vertexCount = 8;
-    return (u32)node;
+    return node;
 }
 
-void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
-    EffSurfaceGridNode *node = (EffSurfaceGridNode *)nodeAddr;
+void effFillSurfaceGridColorGradient(EffSurfaceGridNode *node, u32 *colors) {
     u32 count = node->rows / 3;
     u32 *out = node->tail;
     f32 step = 1.0f / count;
@@ -5519,26 +5522,26 @@ void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
     }
 }
 
-void effReleaseSurfaceGridBuffers(s32 work) {
-    sdfQueueAssetRelease(((EffSurfaceGridNode *)work)->handle);
-    sdfReleaseResourceAllocation(((EffSurfaceGridNode *)work)->allocation);
+void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *node) {
+    sdfQueueAssetRelease(node->handle);
+    sdfReleaseResourceAllocation(node->allocation);
 }
 
-void effResetSurfaceGridFrame(s32 work) {
-    ((EffSurfaceGridNode *)work)->field_24 = 0;
-    ((EffSurfaceGridNode *)work)->field_28 = 3;
+void effResetSurfaceGridFrame(EffSurfaceGridNode *node) {
+    node->field_24 = 0;
+    node->field_28 = 3;
 }
 
 /* Three-vector sampler reads the primary surface ring counters. */
-void effCopyRingFrameVectors(u8 *work, s128 *dst, s32 frame) {
-    s32 index = ((EffSurfaceGridNode *)work)->field_28 - (((EffSurfaceGridNode *)work)->columns * (frame - 1) + frame) * 3;
+void effCopyRingFrameVectors(EffSurfaceGridNode *node, s128 *dst, s32 frame) {
+    s32 index = node->field_28 - (node->columns * (frame - 1) + frame) * 3;
     u128 *src;
     s32 i;
 
     if (index < 3) {
-        index += ((EffSurfaceGridNode *)work)->rows - 3;
+        index += node->rows - 3;
     }
-    src = ((EffSurfaceGridNode *)work)->buffer + index;
+    src = node->buffer + index;
     for (i = 0; i < 3; i++) {
         PCP_COPY_VECTOR(dst + i, src + i);
     }

@@ -112,7 +112,7 @@ void evtSetWorldSlotStatusFlag(void *unit);
 
 void evtClearWorldSlotStatusFlag(void *unit);
 
-void evtSetWorldSlotValue(void *unit, u32 value);
+void evtSetWorldSlotValue(void *unit, u32 direction);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 

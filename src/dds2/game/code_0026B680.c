@@ -2,7 +2,7 @@
 #include "dsp_channel.h"
 
 /* Pass the object's +0x60 word to the second operation after setup. */
-void evtCloseDisplayChannelAndEnsureMessageWindow(s32 objectAddress) {
+void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
     dspCloseChannel();
-    evtCreateMessageWindowIfMissing(*(u32 *)(objectAddress + 0x60));
+    evtCreateMessageWindowIfMissing(*(u32 *)((u8 *)context + 0x60));
 }

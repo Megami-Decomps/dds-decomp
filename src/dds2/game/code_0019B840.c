@@ -64,11 +64,11 @@ void itfSetTextDrawLimit(s32 value) {
 }
 
 /* Select by the low byte of slotId; enable the entry and store value + 1 as a byte. */
-void frFontSetEntryFlag(s32 slotId, s32 value) {
+void frFontSetEntryFlag(s32 slotId, s32 entryFlag) {
     FrFontEntry *entry = &frFontWork.entries[slotId & FR_FONT_BYTE_MASK];
 
     entry->flagBytes[0] = FR_FONT_ENTRY_ENABLED;
-    entry->flagBytes[1] = value + 1;
+    entry->flagBytes[1] = entryFlag + 1;
 }
 
 /* Reverse the four byte positions of a 32-bit word. */

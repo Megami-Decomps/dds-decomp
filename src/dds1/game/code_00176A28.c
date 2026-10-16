@@ -235,8 +235,8 @@ void effGetResourceEntryPosition(EffResourceWork *work, s32 index, f32 *vec) {
     vec[2] = src[2];
 }
 
-void effSetResourceEntryValue(EffResourceWork *work, s32 index, u32 value) {
-    work->entries[index].color = value;
+void effSetResourceEntryValue(EffResourceWork *work, s32 index, u32 color) {
+    work->entries[index].color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
