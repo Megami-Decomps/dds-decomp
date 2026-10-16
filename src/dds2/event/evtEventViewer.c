@@ -1684,24 +1684,24 @@ void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntim
 /* Updates world units at position using the first track whose owner word
  * matches that unit's object-chain node. */
 void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
-    u8 *list;
+    u8 *unitObject;
     EvtRuntimeGroup *node;
     EvtRuntimeGroup *found;
 
     if (dds3GetWorldObject() != 0) {
-        list = (u8 *)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
-        while (list != 0) {
+        unitObject = (u8 *)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+        while (unitObject != 0) {
             found = 0;
             for (node = viewer->groups; node != 0; node = node->next) {
-                if (node->info == (EffWorldNode *)list) {
+                if (node->info == (EffWorldNode *)unitObject) {
                     found = node;
                     break;
                 }
             }
             if (found != 0) {
-                evtViewerSyncModelMotionChannels(position, list, node, viewer, 0);
+                evtViewerSyncModelMotionChannels(position, unitObject, node, viewer, 0);
             }
-            list = (u8 *)((EffWorldNode *)list)->next;
+            unitObject = (u8 *)((EffWorldNode *)unitObject)->next;
         }
     }
 }
