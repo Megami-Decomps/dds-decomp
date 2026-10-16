@@ -6514,11 +6514,11 @@ void func_001C6648(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
             work->activeEntries[slot].presentation.hpHighlightLevel <= 0 ? 0 :
             work->activeEntries[slot].presentation.hpHighlightLevel > 0x7F ? 0x7F :
             work->activeEntries[slot].presentation.hpHighlightLevel;
-        if (++work->activeEntries[slot].presentation.unk1C0 >= 0x14) {
+        if (++work->activeEntries[slot].presentation.hpEffectTimer >= 0x14) {
             work->activeEntries[slot].presentation.hpState = 0;
             work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
             
-            work->activeEntries[slot].presentation.offset[0] = work->activeEntries[slot].presentation.unk1C0 = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+            work->activeEntries[slot].presentation.offset[0] = work->activeEntries[slot].presentation.hpEffectTimer = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
             work->activeEntries[slot].presentation.offset[1] = 0;
             btlClearFinishedActorSlotChannels(work, 0);
         }
@@ -6526,7 +6526,7 @@ void func_001C6648(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
     case 0x21:
         work->activeEntries[slot].presentation.hpState = 0;
         work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
-        work->activeEntries[slot].presentation.unk1C0 = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+        work->activeEntries[slot].presentation.hpEffectTimer = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
         work->activeEntries[slot].presentation.offset[0] = 0;
         work->activeEntries[slot].presentation.offset[1] = 0;
         break;
@@ -6535,14 +6535,14 @@ void func_001C6648(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
         work->activeEntries[slot].presentation.mpState != 0x21) {
         goto finished;
     }
-    work->activeEntries[slot].presentation.unk1C4++;
-    if (work->activeEntries[slot].presentation.unk1C4 < 20) {
+    work->activeEntries[slot].presentation.mpEffectTimer++;
+    if (work->activeEntries[slot].presentation.mpEffectTimer < 20) {
         goto finished;
     }
     work->activeEntries[slot].presentation.mpState = 0;
     work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
     work->activeEntries[slot].presentation.mpHighlightLevel = 0;
-    work->activeEntries[slot].presentation.unk1C4 = 0;
+    work->activeEntries[slot].presentation.mpEffectTimer = 0;
     btlClearFinishedActorSlotChannels(work, 0);
 finished:
     return;
@@ -6622,7 +6622,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
-                        work->activeEntries[slot].presentation.unk1C0 = 0;
+                        work->activeEntries[slot].presentation.hpEffectTimer = 0;
                         work->activeEntries[slot].presentation.offset[0] = 0;
                         work->activeEntries[slot].presentation.offset[1] = 0;
                     }
@@ -6648,7 +6648,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
-                work->activeEntries[slot].presentation.unk1C0 = 0;
+                work->activeEntries[slot].presentation.hpEffectTimer = 0;
                 work->activeEntries[slot].presentation.offset[0] = 0;
                 work->activeEntries[slot].presentation.offset[1] = 0;
                 work->activeEntries[slot].presentation.hpState++;
@@ -6687,7 +6687,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[0], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[1], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[2], 0, sizeof(BattleStatPulse));
-                work->activeEntries[slot].presentation.unk1C4 = 0;
+                work->activeEntries[slot].presentation.mpEffectTimer = 0;
                 work->activeEntries[slot].presentation.mpState++;
                 break;
             }
