@@ -327,8 +327,8 @@ s32 datFlagToElementIndex(s32 flag) {
 }
 
 /* Test the truncated current-HP percentage; maximum HP must be nonzero. */
-s32 datIsValueBelowQuarterMax(DatPartyRecord *object) {
-    return object->hp * DAT_PERCENT_SCALE / object->maxHp < DAT_QUARTER_PERCENT;
+s32 datIsValueBelowQuarterMax(DatPartyRecord *unit) {
+    return unit->hp * DAT_PERCENT_SCALE / unit->maxHp < DAT_QUARTER_PERCENT;
 }
 
 
