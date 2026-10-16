@@ -57,8 +57,11 @@ extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *recor
 /* Exported timed-state/runtime-list providers from the preceding unit. */
 extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
-extern void mnuUpdateTimedSpawns(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
-extern void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
+extern void mnuUpdateTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeList *runtimeList,
+                                 u32 x, u32 y, f32 angle);
+extern void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *callbackList,
+                                           MenuRuntimeList *runtimeList, s32 kindMask,
+                                           s32 x, s32 y, s32 enabled, f32 angle);
 extern void mnuDeactivateListRecord(MenuRuntimeList *, MenuRuntimeRecord *);
 extern void mnuAdvanceRuntimeAnimationRecords(void);
 
