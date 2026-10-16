@@ -918,7 +918,7 @@ void effFlashAccumulatingParticleAdvance(PcpFlashAccumulatingWork *work, s32 ind
     part->orbitAngle += work->increment;
 }
 
-extern void effFlashAccumulatingSetParticleColors(PcpFlashAccumulatingWork *, s32, u32);
+extern void effFlashAccumulatingSetParticleColors(PcpFlashAccumulatingWork *work, s32 index, u32 colorMultiplier);
 extern void effFlashAccumulatingBuildParticleQuads(PcpFlashAccumulatingWork *, s32);
 
 void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
