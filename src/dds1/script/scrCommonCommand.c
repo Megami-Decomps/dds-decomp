@@ -535,36 +535,37 @@ s32 scrCmdBeginFilterBlurDeactivation(void)
 
 s32 scrCmdConfigureStaggeredBlur(void)
 {
-    s32 p0;
-    s32 mode;
-    s32 sel;
-    f32 f1;
-    f32 f2;
-    f32 f3;
-    f32 f4;
-    f32 f5;
+    s32 count;
+    s32 blendMode;
+    s32 blendControl;
+    f32 phaseStep;
+    f32 spacing;
+    f32 uvDisplacementAngleDegrees;
+    f32 uvDisplacementAmplitude;
+    f32 angleStep;
 
-    mode = scrReadIntParameter(6);
-    switch (mode)
+    blendMode = scrReadIntParameter(6);
+    switch (blendMode)
     {
     case 1:
-        sel = 0x48;
+        blendControl = 0x48;
         break;
     case 2:
-        sel = 0x42;
+        blendControl = 0x42;
         break;
     case 0:
     default:
-        sel = 0x44;
+        blendControl = 0x44;
         break;
     }
-    p0 = scrReadIntParameter(0);
-    f1 = bfWaitReadArgFloat(1);
-    f2 = bfWaitReadArgFloat(2);
-    f3 = bfWaitReadArgFloat(3);
-    f4 = bfWaitReadArgFloat(4);
-    f5 = bfWaitReadArgFloat(5);
-    kwlnDrawSetD30Clamped(p0, f1, f2, f3, f4, f5, sel);
+    count = scrReadIntParameter(0);
+    phaseStep = bfWaitReadArgFloat(1);
+    spacing = bfWaitReadArgFloat(2);
+    uvDisplacementAngleDegrees = bfWaitReadArgFloat(3);
+    uvDisplacementAmplitude = bfWaitReadArgFloat(4);
+    angleStep = bfWaitReadArgFloat(5);
+    kwlnDrawSetD30Clamped(count, phaseStep, spacing, uvDisplacementAngleDegrees,
+                          uvDisplacementAmplitude, angleStep, blendControl);
     return 1;
 }
 
@@ -614,12 +615,12 @@ s32 scrCmdBeginStaggeredBlurDeactivation(void)
 s32 scrCmdConfigureRectangleBlur(void)
 {
     s32 blendControl;
-    s32 mode;
+    s32 blendMode;
     f32 rotation;
     f32 scale;
 
-    mode = scrReadIntParameter(2);
-    switch (mode) {
+    blendMode = scrReadIntParameter(2);
+    switch (blendMode) {
     case 0:
         blendControl = 0x44;
         break;
