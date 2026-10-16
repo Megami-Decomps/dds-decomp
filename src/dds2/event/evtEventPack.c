@@ -136,7 +136,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
 }
 
 s32 evtUpdateMotionSeTask(KwlnTask *task) {
-    EvtMotionSeTaskParams *params;
+    EvtMotionSeTaskParams *motionSeParams;
     EffWorldNode *node;
     EvtPackLoadState *packState;
     EvtUnit *unit;
@@ -146,19 +146,19 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     s32 cueIndex;
     EvtMotionSeCue *cues;
 
-    params = (EvtMotionSeTaskParams *)kwlnTaskGetUserValue(task);
+    motionSeParams = (EvtMotionSeTaskParams *)kwlnTaskGetUserValue(task);
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
-    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), params->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
+    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
     if (node == NULL) {
         return -1;
     }
-    packState = evtGetEventPackLoadState(params->eventTaskId);
+    packState = evtGetEventPackLoadState(motionSeParams->eventTaskId);
     if (packState == NULL) {
         return -1;
     }
-    if (params->eventTaskId < 600) {
+    if (motionSeParams->eventTaskId < 600) {
         return 0;
     }
     unit = ((EvtMotionSeUnitLink *)node->data)->unit;
@@ -169,12 +169,12 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     motionFrame = unit->owner->first->currentFrame;
     for (entryIndex = 0; entryIndex < packState->header->entryCount; entryIndex++) {
         if (packState->entries[entryIndex].kind == 6 &&
-            packState->entries[entryIndex].resourceId == params->resourceId &&
+            packState->entries[entryIndex].resourceId == motionSeParams->resourceId &&
             packState->entries[entryIndex].motionId == motionId) {
             cues = (EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
-                    evtSetBgmVolumePan(params->eventTaskId, cues[cueIndex].fade);
+                    evtSetBgmVolumePan(motionSeParams->eventTaskId, cues[cueIndex].fade);
                     sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
