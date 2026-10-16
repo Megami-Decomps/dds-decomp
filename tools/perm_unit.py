@@ -295,7 +295,7 @@ def cmd_cc(a: argparse.Namespace) -> None:
         if r.returncode:
             sys.exit(r.stderr[-2000:])
         (Path(t) / "f.s").write_text(strip_other_code((Path(t) / "u.s").read_text(), fn))
-        r = subprocess.run([AS, "-EL", "-G8", "-Iinclude", "-o", Path(a.output).resolve(), f"{t}/f.s"],
+        r = subprocess.run([AS, "-EL", "-G8", "-g", "-Iinclude", "-o", Path(a.output).resolve(), f"{t}/f.s"],
                            cwd=ROOT, capture_output=True, text=True)
         if r.returncode:
             sys.exit(r.stderr[-2000:])
