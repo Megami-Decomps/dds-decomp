@@ -17,11 +17,11 @@
 void effBlurSecondInitSlots(EffBlurScaleWork *work) {
     EffBlurScaleSlot *slot = work->slots;
     s32 count = work->params.count;
-    s32 i;
+    s32 slotIndex;
 
-    for (i = 0; i < count; i++, slot++) {
+    for (slotIndex = 0; slotIndex < count; slotIndex++, slot++) {
         effBlurResetScaleSlot(work, slot);
-        slot->phase = -(work->params.spacing * (f32)i);
+        slot->phase = -(work->params.spacing * (f32)slotIndex);
     }
 }
 

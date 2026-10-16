@@ -262,7 +262,7 @@ void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 ve
     SdfPacket *packet;
     f32 (*viewport)[4];
     u128 *cursor;
-    s32 i;
+    s32 firstVertexIndex;
     s32 emitted;
     s32 plane;
     u32 clipFlags;
@@ -276,12 +276,12 @@ void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 ve
     VU0_LOAD_VF_AT(vf14, 0x0, viewport);
     VU0_LOAD_VF_AT(vf15, 0x10, viewport);
     emitted = 0;
-    for (i = 0; i < vertexCount; i += 2) {
-        VU0_LOAD_VF(vf10, vertices[i]);
-        EE_MMI_RGBA_TO_VF(vf8, colors[i]);
+    for (firstVertexIndex = 0; firstVertexIndex < vertexCount; firstVertexIndex += 2) {
+        VU0_LOAD_VF(vf10, vertices[firstVertexIndex]);
+        EE_MMI_RGBA_TO_VF(vf8, colors[firstVertexIndex]);
         VU0_TRANSFORM_POINT(vf10, vf10);
-        VU0_LOAD_VF(vf11, vertices[i + 1]);
-        EE_MMI_RGBA_TO_VF(vf9, colors[i + 1]);
+        VU0_LOAD_VF(vf11, vertices[firstVertexIndex + 1]);
+        EE_MMI_RGBA_TO_VF(vf9, colors[firstVertexIndex + 1]);
         VU0_TRANSFORM_POINT(vf11, vf11);
         VU0_CLIPW_XYZ(vf10);
         VU0_CLIPW_XYZ(vf11);
