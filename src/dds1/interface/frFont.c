@@ -116,11 +116,11 @@ void frFontUploadImageBlocks(void) {
     s32 sourceWordOffset = 0;
     FrFontSystem *work = &frFontWork;
     u32 *imageBuffer = work->imageBuffers;
-    const u8 *sourceTable = frFontImageBlockData;
+    u8 *sourceTable = frFontImageBlockData;
 
     do {
         u32 *outputWord = imageWords;
-        const u8 *sourceBytes = sourceWordOffset * FR_FONT_IMAGE_WORD_BYTES + sourceTable;
+        u8 *sourceBytes = (u8 *)(sourceWordOffset * FR_FONT_IMAGE_WORD_BYTES + (u32)sourceTable);
         s32 wordCountdown = FR_FONT_IMAGE_LAST_WORD;
 
         do {
