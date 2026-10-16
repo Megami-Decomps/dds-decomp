@@ -746,10 +746,10 @@ void kwlnDebugGraphTaskDestroy(KwlnTask *task) {
 }
 
 /* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */
-void kwlnDebugGraphSetEnabled(s8 mode) {
-    if (mode == 1) {
+void kwlnDebugGraphSetEnabled(s8 enabled) {
+    if (enabled == 1) {
         kwlnDebugGraphTask = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, kwlnDebugGraphUpdate, kwlnDebugGraphTaskDestroy, NULL);
-    } else if (mode == 0) {
+    } else if (enabled == 0) {
         kwlnTaskDestroyWithHierarchy(kwlnDebugGraphTask, 0);
     }
 }
