@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
+#include "sdf_pad_mode_api.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "kwln.h"

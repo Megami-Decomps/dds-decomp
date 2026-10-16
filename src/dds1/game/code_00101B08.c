@@ -10,6 +10,7 @@
 #include "kwln.h"
 #include "kwln_task_flags.h"
 #include "sdf.h"
+#include "sdf_pad_mode_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 
@@ -64,7 +65,6 @@ extern void func_002F4190(u32);
 extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
 extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
-extern void sdfPadRequestMode(s32 padIndex, u8 mode);
 extern void sdfDevSetCurrentDirectory(const char *path);
 extern void sdfDevSetDefaultDeviceWorker(s32 worker);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
