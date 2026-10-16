@@ -21,7 +21,7 @@ extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 
 const char evtStageResourcePathFormat[0x10] = "%sf%03d_%03d";
 
-const char D_00421588[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
+const char evtScriptResourcePathFormat[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
 
 void evtDestroySecondaryWorldNode(void) {
     EffWorldNode *secondary;
@@ -124,7 +124,7 @@ extern void sdfDebugPrintf(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
 void evtCreateEventScriptProcess(s32 eventId) {
-    sprintf(evtScriptResourcePathBuffer, D_00421588, eventId - eventId % 10, eventId, eventId);
+    sprintf(evtScriptResourcePathBuffer, evtScriptResourcePathFormat, eventId - eventId % 10, eventId, eventId);
     scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 
