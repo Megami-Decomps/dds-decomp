@@ -674,11 +674,11 @@ void sdfCounterDecrease(void) {
     }
 }
 
-void sdfCounterSetMode(s32 mode) {
+void sdfCounterSetMode(s32 channelIndex) {
     SdfCounterTimer *timer;
 
     timer = sdfActiveCounterRuntime->state.timer;
-    timer->mode = mode;
+    timer->mode = channelIndex;
     timer->selectionPulseFramesRemaining = 8;
 }
 
