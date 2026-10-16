@@ -209,15 +209,15 @@ u16 billGetKind(BillObj *effect) {
 }
 
 /* Store the low halfword through the kind-specific variant field. */
-void billSetVariantValue(BillObj *effect, s32 value) {
-    s32 variantValue = value & BILL_VARIANT_MASK;
+void billSetVariantValue(BillObj *effect, s32 variantValue) {
+    s32 maskedValue = variantValue & BILL_VARIANT_MASK;
 
     switch (effect->kind) {
     case 0:
-        effect->child->variant = (u16)variantValue;
+        effect->child->variant = (u16)maskedValue;
         break;
     case 1:
-        effect->pair.cameraFacingMode = variantValue;
+        effect->pair.cameraFacingMode = maskedValue;
         break;
     }
 }
