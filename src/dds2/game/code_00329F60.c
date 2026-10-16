@@ -68,7 +68,7 @@ extern SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 
 extern SdfTextureQueue sdfTextureQueueWork;
 
-s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern s8 sdfBufferSlotIndices[2];
 
