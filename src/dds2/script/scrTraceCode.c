@@ -429,25 +429,25 @@ u32 scrOpCompareGreaterEqual(ScrData *scr) {
 
 u32 bfOpJumpIfFalse(ScrData *scr)
 {
-    s32 result;
+    s32 conditionIsTruthy;
 
     switch (scr->stackTypes[scr->sp - 1]) {
     case 0:
     case 2:
-        result = bfStackPopInt(scr);
+        conditionIsTruthy = bfStackPopInt(scr);
         break;
     case 1:
     case 3:
-        result = (bfStackPopFloat(scr) != 0.0f);
+        conditionIsTruthy = (bfStackPopFloat(scr) != 0.0f);
         break;
     case 4:
-        result = 0;
+        conditionIsTruthy = 0;
         break;
     default:
-        result = 0;
+        conditionIsTruthy = 0;
         break;
     }
-    if (result != 0)
+    if (conditionIsTruthy != 0)
         scr->pc++;
     else
         scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
