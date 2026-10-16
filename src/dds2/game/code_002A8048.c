@@ -198,16 +198,16 @@ s32 mnuMovieViewer(void) {
     }
 
     if (D_0037F510[0x28] < 0) {
-        mnuMovieViewerDrawDescriptor.drawX = 0x7000;
-        mnuMovieViewerDrawDescriptor.drawY = 0x7900;
-        mnuMovieViewerDrawDescriptor.drawWidth = 0x2000;
-        mnuMovieViewerDrawDescriptor.drawHeight = 0x0E00;
+        mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
+        mnuMovieViewerDrawDescriptor.unk02 = 0x7900;
+        mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
+        mnuMovieViewerDrawDescriptor.unk0A = 0x0E00;
     }
     if (D_0037F510[0x2A] < 0) {
-        mnuMovieViewerDrawDescriptor.drawX = 0x7000;
-        mnuMovieViewerDrawDescriptor.drawY = 0x7B00;
-        mnuMovieViewerDrawDescriptor.drawWidth = 0x2000;
-        mnuMovieViewerDrawDescriptor.drawHeight = 0x0A00;
+        mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
+        mnuMovieViewerDrawDescriptor.unk02 = 0x7B00;
+        mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
+        mnuMovieViewerDrawDescriptor.unk0A = 0x0A00;
     }
 
     if (mnuMovieList.playing != 0) {

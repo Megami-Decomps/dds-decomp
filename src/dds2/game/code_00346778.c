@@ -56,11 +56,11 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     }
     owner->isPac = isPac;
     owner->remainingBytes = 0x7FFFFFFF;
-    owner->drawX = descriptor->drawX;
+    owner->unk04 = descriptor->unk00;
     owner->unk08 = descriptor->unk04;
-    owner->drawY = descriptor->drawY;
-    owner->drawWidth = descriptor->drawWidth;
-    owner->drawHeight = descriptor->drawHeight;
+    owner->unk06 = descriptor->unk02;
+    owner->unk0C = descriptor->unk08;
+    owner->unk0E = descriptor->unk0A;
     soundFormat.hasAudio = descriptor->hasAudio;
     soundFormat.stereo = descriptor->stereo;
     soundFormat.loopMode = 0;
