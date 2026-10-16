@@ -108,7 +108,7 @@ extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
 extern s32 iWakeupThread(s32 threadId);
 extern s32 sceIpuSync(s32, s32);
-extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
+extern void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void sdfRemoveHandler(void *);
