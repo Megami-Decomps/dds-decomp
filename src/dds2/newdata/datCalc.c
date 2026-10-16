@@ -632,9 +632,9 @@ s8 ptyReadSignedRosterStatByte(s32 statIndex) {
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
-void ptyApplyEventPenalty(s32 mode) {
+void ptyApplyEventPenalty(s32 penaltyMode) {
     s32 nextHp, loss, slotIndex;
-    if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
+    if (penaltyMode == 1 || penaltyMode == 4 || penaltyMode == 5 || penaltyMode == 6) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
@@ -650,7 +650,7 @@ void ptyApplyEventPenalty(s32 mode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (mode == 2) {
+    if (penaltyMode == 2) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
@@ -666,7 +666,7 @@ void ptyApplyEventPenalty(s32 mode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (mode == 3) {
+    if (penaltyMode == 3) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
@@ -675,13 +675,13 @@ void ptyApplyEventPenalty(s32 mode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (mode >= 4 && mode <= 6) {
+    if (penaltyMode >= 4 && penaltyMode <= 6) {
         slotIndex = 0;
         do {
             if (datGameState->party[slotIndex].hp != 0) {
-                if (mode == 4) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x80);
-                if (mode == 5) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x40);
-                if (mode == 6) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x10);
+                if (penaltyMode == 4) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x80);
+                if (penaltyMode == 5) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x40);
+                if (penaltyMode == 6) sdfRaisePackedChannelValue(&datGameState->party[slotIndex], 0x10);
             }
             slotIndex++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
