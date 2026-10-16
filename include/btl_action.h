@@ -81,7 +81,8 @@ typedef struct BtlActionTableEntry {
         u8 enabled; /* 0x03: DDS1 rejects action rows whose byte is zero. */
 #endif
     };
-    u8 pad04[4];
+    u16 displayCode; /* 0x04: action-specific asset ID, formatted as a .BED filename. */
+    u8 pad06[2];
     f32 lightColorMode; /* 0x08 */
     f32 lightColor[3]; /* 0x0C */
     s32 defaultValue; /* 0x18 */
@@ -95,6 +96,8 @@ typedef char BtlActionTableEntry_kind_offset_must_be_0x00[
     ((u32)&((BtlActionTableEntry *)0)->kind == 0x00) ? 1 : -1];
 typedef char BtlActionTableEntry_resourceType_offset_must_be_0x03[
     ((u32)&((BtlActionTableEntry *)0)->resourceType == 0x03) ? 1 : -1];
+typedef char BtlActionTableEntry_displayCode_offset_must_be_0x04[
+    ((u32)&((BtlActionTableEntry *)0)->displayCode == 0x04) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char BtlActionTableEntry_enabled_offset_must_be_0x03[
     ((u32)&((BtlActionTableEntry *)0)->enabled == 0x03) ? 1 : -1];
