@@ -48,7 +48,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
     EffResourceWork *work = (void *)sdfResourceRetainAddress(allocation);
     EffResourceEntry *entry;
-    u32 i;
+    u32 entryIndex;
 
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
@@ -62,7 +62,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     work->drawAsset = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(work->drawAsset, 1.0f);
     entry = work->entries;
-    for (i = 0; i < count; i++, entry++) {
+    for (entryIndex = 0; entryIndex < count; entryIndex++, entry++) {
         entry->color = 0x80808080;
     }
     memset(&effResourceDrawParams, 0, sizeof(effResourceDrawParams));
@@ -81,7 +81,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
     EffResourceEntry *entry;
-    u32 i;
+    u32 entryIndex;
     u32 remaining;
     u32 triangleSize;
 
@@ -98,7 +98,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     VU0_STORE_MATRIX(matrix);
     effResourceDrawParams.parameters = NULL;
     entry = work->entries;
-    for (i = 0; i < work->entryCount; i++, entry++) {
+    for (entryIndex = 0; entryIndex < work->entryCount; entryIndex++, entry++) {
         triangleSize = 3;
         matrix[12] = entry->position[0];
         matrix[13] = entry->position[1];
@@ -149,7 +149,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     f32 (*positions)[4];
     f32 (*unitVectors)[4];
     u32 *colors;
-    u32 i;
+    u32 fanIndex;
     f32 angle;
     f32 step;
     f32 halfStep;
@@ -174,7 +174,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     work->normals = unitVectors;
     work->colors = colors;
     step = 6.2831852f / (f32)count;
-    for (i = 0; i < count; i++) {
+    for (fanIndex = 0; fanIndex < count; fanIndex++) {
         f32 sine;
 
         negativeHeight = -height;
