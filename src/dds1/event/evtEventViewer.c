@@ -683,7 +683,7 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node)
 
 /* Interpolates parameter keys at the viewer's current frame, accounting for
  * the track offset. A missing next key leaves the interpolation ratio at zero. */
-void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node, u16 *from, u16 *to) {
+void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *track, u16 *from, u16 *to) {
     u8 out[0x20];
     f32 ratio = 0.0f;
 
@@ -691,44 +691,44 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
         if (to != NULL) {
             s32 start = *from;
             f32 span = *to - start;
-            f32 elapsed = viewer->curFrame - (start + node->metadata.value);
+            f32 elapsed = viewer->curFrame - (start + track->metadata.value);
 
             if (span != 0.0f) {
                 ratio = elapsed / span;
             }
         }
         mnuBlendCampDisplayFields((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
-        mnuDrawCampScaledTexture(node->texture, (CampDisplayDefaults *)out);
+        mnuDrawCampScaledTexture(track->texture, (CampDisplayDefaults *)out);
     }
 }
 
 /* Applies kind-24 parameter tracks using bracketing keys, or the pending key
  * when keyMode is 1. Traversal uses the shared timeline-key record. */
 void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
-    EvtRuntimeGroup *node = viewer->groups;
+    EvtRuntimeGroup *track = viewer->groups;
     s32 position = viewer->curFrame;
 
-    while (node != NULL) {
-        if (node->type == 24) {
-            if (node->usePendingKey == 1) {
+    while (track != NULL) {
+        if (track->type == 24) {
+            if (track->usePendingKey == 1) {
                 u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
-                evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
+                evtViewerApplyInterpolatedNodeKey(viewer, track, key, NULL);
             } else {
-                EvtRuntimeChild *glyph = node->children;
+                EvtRuntimeChild *glyph = track->children;
                 EvtRuntimeChild *from;
 
-                while (glyph != NULL && position >= glyph->frame + node->metadata.value) {
+                while (glyph != NULL && position >= glyph->frame + track->metadata.value) {
                     glyph = glyph->next;
                 }
                 if (glyph != NULL) {
                     from = glyph->prev;
                 } else {
-                    from = node->lastChild;
+                    from = track->lastChild;
                 }
-                evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
+                evtViewerApplyInterpolatedNodeKey(viewer, track, (u16 *)from, (u16 *)glyph);
             }
         }
-        node = node->next;
+        track = track->next;
     }
 }
 
