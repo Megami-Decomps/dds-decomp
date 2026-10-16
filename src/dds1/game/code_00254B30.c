@@ -653,7 +653,46 @@ void itfDspDrawPair(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
 void func_00256E88(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00256E90);
+#include "eff.h"
+
+/* The common placement table entry's sprite, re-derived at each use as retail does. */
+#define MANTRA_COMMON_SPRITE(i)                                                                              \
+    (&mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[i].resourceIndex]                                 \
+          ->workEntries[mnuMantraCommonSpritePlacements[i].spriteIndex])
+
+extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
+void func_00256E90(s32 frame, s32 unused, s32 alpha, s32 context) {
+    f32 alphaValue;
+    f32 fade;
+    f32 scale;
+    f32 inset;
+    f32 halfWidth;
+    f32 angle;
+    s32 y;
+
+    if (frame < 5) {
+        fade = ((f32)frame) * 0.25f;
+    } else {
+        fade = 1.0f;
+    }
+    alphaValue = (f32)alpha;
+    scale = 2.0f - fade;
+    inset = fade * 16.0f;
+    halfWidth = ((f32)(MANTRA_COMMON_SPRITE(20)->geometry.bounds[2] >> 5)) * (scale - 1.0f);
+    y = ((f32)(-(MANTRA_COMMON_SPRITE(20)->geometry.bounds[3] >> 4))) * (scale - 1.0f);
+    {
+        s32 scaledAlpha = alphaValue * fade;
+        mnuDrawScaledPlacedSprite((inset + (-16.0f)) - halfWidth, y, 0, scaledAlpha, 20, context, scale,
+                                  scale);
+        mnuDrawScaledPlacedSprite((16.0f - inset) - halfWidth, y, 0, scaledAlpha, 21, context, scale, scale);
+    }
+    fade = ((f32)frame) / 5.0f;
+    angle = fade * 3.141592503f;
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSinPoly(angle), 20, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSinPoly(angle), 21, context);
+}
+
+#undef MANTRA_COMMON_SPRITE
 
 extern s32 mnuGetSelectedNodeValue(void);
 
