@@ -21,7 +21,8 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 object);
 
 void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
-void evtDrawSolarNoiseLayerAtConfiguredScale(s32, s32, s32, s32, s32, s32, s32, s32);
+void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+                                             s32 contextHandle, s32 color);
 extern s32 D_003C90DC[];
 extern s32 evtSolarNoiseLayerPlacements[][3];
 extern SolarOverlayShape evtSolarOverlayShapes[];

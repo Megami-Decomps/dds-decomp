@@ -14,7 +14,8 @@ typedef struct {
     s8 active;  /* 0x06 */
 } SolarLayerTimer;
 
-void evtDrawSolarNoiseLayerAtConfiguredScale(s32, s32, s32, s32, s32, s32, s32, s32);
+void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+                                             s32 contextHandle, s32 color);
 extern void sdfDrawColoredTriangleFan(s32, s32, s32 *, s32, s32, s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 D_0036832C[];
