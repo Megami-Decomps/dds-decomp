@@ -160,8 +160,8 @@ void mnuSelectMantraUnitByIndex(MnuStatusResource *resource, s8 targetIndex) {
 /* The selection allocator reserves 0x16C bytes for 176 inline flag entries. */
 
 /* Skip unavailable neighbors after retreating the node selection. */
-void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
-    MantraMenuWork *work = &object->menu;
+void mnuSelectAvailableMantraNeighbor(MnuStatusResource *resource) {
+    MantraMenuWork *work = &resource->menu;
     MantraNodePos *position;
     MantraNodePos *initialPosition;
     MantraNodePos *neighbor;
@@ -174,10 +174,10 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
     extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
     extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 
-    mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
-    mnuRetreatNodeCursorAndClearListFlags(object);
-    selectedValue = mnuGetSelectedNodeValue(object);
-    selectedIndex = mnuGetSelectedMantraUnitIndex(object);
+    mnuAdvanceMantraUnitPanelListState(resource->menu.selectionController);
+    mnuRetreatNodeCursorAndClearListFlags(resource);
+    selectedValue = mnuGetSelectedNodeValue(resource);
+    selectedIndex = mnuGetSelectedMantraUnitIndex(resource);
     initialPosition = (MantraNodePos *)work->defaultSelector;
     flags = ((MantraFlagResource *)work->slots[selectedIndex])->flags;
 
@@ -186,7 +186,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
         neighbors = position->neighbors;
         for (i = 0; i < 6; i++) {
             if (neighbors[i] != NULL) {
-                selectedIndex = mnuGetSelectedMantraUnitIndex(object);
+                selectedIndex = mnuGetSelectedMantraUnitIndex(resource);
                 neighbor = neighbors[i];
                 flags =
                     ((MantraFlagResource *)work->slots[selectedIndex])->flags;
@@ -201,7 +201,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
         mnuSpawnMantraVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->menu.selectionController);
+            resource->menu.selectionController);
     }
 
     {
@@ -211,14 +211,14 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
         mnuSpawnMantraShortLoopVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->menu.selectionController);
-        mnuUpdateSelectedMantraLimitLineState(object);
+            resource->menu.selectionController);
+        mnuUpdateSelectedMantraLimitLineState(resource);
     }
 }
 
 /* Skip unavailable neighbors before refreshing both transition icons. */
-void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
-    MantraMenuWork *work = &object->menu;
+void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *resource) {
+    MantraMenuWork *work = &resource->menu;
     MantraNodePos *position;
     MantraNodePos *initialPosition;
     MantraNodePos *neighbor;
@@ -231,10 +231,10 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
     extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
     extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 
-    mnuQueueNextUnitPanelSelection(object->menu.selectionController);
-    mnuAdvanceNodeCursorAndClearListFlags(object);
-    selectedValue = mnuGetSelectedNodeValue(object);
-    selectedIndex = mnuGetSelectedMantraUnitIndex(object);
+    mnuQueueNextUnitPanelSelection(resource->menu.selectionController);
+    mnuAdvanceNodeCursorAndClearListFlags(resource);
+    selectedValue = mnuGetSelectedNodeValue(resource);
+    selectedIndex = mnuGetSelectedMantraUnitIndex(resource);
     initialPosition = (MantraNodePos *)work->defaultSelector;
     flags = ((MantraFlagResource *)work->slots[selectedIndex])->flags;
 
@@ -243,7 +243,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
         neighbors = position->neighbors;
         for (i = 0; i < 6; i++) {
             if (neighbors[i] != NULL) {
-                selectedIndex = mnuGetSelectedMantraUnitIndex(object);
+                selectedIndex = mnuGetSelectedMantraUnitIndex(resource);
                 neighbor = neighbors[i];
                 flags =
                     ((MantraFlagResource *)work->slots[selectedIndex])->flags;
@@ -258,7 +258,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
         mnuSpawnMantraVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->menu.selectionController);
+            resource->menu.selectionController);
     }
 
     {
@@ -268,8 +268,8 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
         mnuSpawnMantraShortLoopVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->menu.selectionController);
-        mnuUpdateSelectedMantraLimitLineState(object);
+            resource->menu.selectionController);
+        mnuUpdateSelectedMantraLimitLineState(resource);
     }
 }
 
