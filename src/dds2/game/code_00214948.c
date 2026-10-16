@@ -1033,7 +1033,42 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00216B40);
+s32 func_00216B40(s32 actor) {
+    BtlIndexList *list = btlAllocateIndexList(13);
+    u8 mode = datCommandRecords[((ActionStateLink *)actor)->indexWork.skillId].targetType;
+    u32 count;
+    u16 picked[12];
+    u32 i;
+    s32 found;
+    s32 result;
+
+    btlBuildUnitIndexList((void *)actor, list, 2, 0, 0);
+    if (mode != 0) {
+        btlCopyIndexList(((ActionStateLink *)actor)->indexWork.indices, list);
+        btlFreeIndexList(list);
+        result = 1;
+        goto completed;
+    }
+    count = btlGetIndexListCount(list);
+    found = 0;
+    memset(picked, 0, sizeof(picked));
+    for (i = 0; i < count; i++) {
+        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+            picked[found] = 1;
+            found++;
+        }
+    }
+    if (found == 0) {
+        btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, ((ActionStateLink *)actor)->unit);
+        btlFreeIndexList(list);
+        return 1;
+    }
+    btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlSelectRandomUnitFromMask(list, picked, count));
+    btlFreeIndexList(list);
+    result = 1;
+completed:
+    return result;
+}
 
 u32 btlAppendSelfAfterTargetScan(s32 battle) {
     BtlIndexList *list = btlAllocateIndexList(13);
