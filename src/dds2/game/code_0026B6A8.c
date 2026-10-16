@@ -32,11 +32,11 @@ extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
 extern DspUnitName *D_00435E48;
 
-extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
+extern void evtCloseDisplayChannelAndEnsureMessageWindow(void *context);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
-s32 dspStartFlagEvent(s32 context) {
-    s32 kind = *(s32 *)(context + 0x84);
+s32 dspStartFlagEvent(void *context) {
+    s32 kind = *(s32 *)((u8 *)context + 0x84);
     s32 i;
     DatPartyRecord *slot;
 
@@ -100,7 +100,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
     }
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
-            if (dspStartFlagEvent(state) == 0) {
+            if (dspStartFlagEvent((void *)(u32)state) == 0) {
                 mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }
         }
