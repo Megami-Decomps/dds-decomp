@@ -3817,15 +3817,15 @@ void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s3
     itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, x, y, x, y);
 }
 
-MenuListNode *mnuWalkNodeList(s32 index, MenuList *list) {
+MenuListNode *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
     MenuListNode *node = list->first;
     s32 currentIndex = 0;
 
-    if (node != NULL && index != currentIndex) {
+    if (node != NULL && targetIndex != currentIndex) {
         do {
             node = node->next;
             currentIndex++;
-        } while (node != NULL && currentIndex != index);
+        } while (node != NULL && currentIndex != targetIndex);
     }
     return node;
 }
