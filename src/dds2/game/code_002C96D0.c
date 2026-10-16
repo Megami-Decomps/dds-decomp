@@ -4371,41 +4371,42 @@ void fileDrawConfigurationMenuBackground(void *unusedTask) {
     };
     f32 labelFade = fileConfigTaskWork->labelFade;
     f32 choiceFade = fileConfigTaskWork->choiceFade;
-    s32 index;
+    s32 spriteIndex;
+    s32 row;
 
-    index = 0;
-    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    spriteIndex = 0;
+    effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[index][FILE_CONFIG_SET]],
-                 sprites[index][FILE_CONFIG_FRAME], 0x53);
-    index++;
-    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    spriteIndex++;
+    effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[index][FILE_CONFIG_SET]],
-                 sprites[index][FILE_CONFIG_FRAME], 0x53);
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     if (fileConfigTaskWork->state == 1) {
         effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 256, 0,
                      fileConfigTaskWork->slots[4], 0, 0x53);
     }
-    index++;
-    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    spriteIndex++;
+    effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[index][FILE_CONFIG_SET]],
-                 sprites[index][FILE_CONFIG_FRAME], 0x53);
-    index++;
-    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    spriteIndex++;
+    effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(choiceFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[index][FILE_CONFIG_SET]],
-                 sprites[index][FILE_CONFIG_FRAME], 0x53);
-    index++;
-    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    spriteIndex++;
+    effDrawTextureSlotWithBlendedCornerColors(sprites[spriteIndex][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[spriteIndex][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[index][FILE_CONFIG_SET]],
-                 sprites[index][FILE_CONFIG_FRAME], 0x53);
-    for (index = 0; index < 5; index++) {
-        effDrawTextureSlotWithBlendedCornerColors(0, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    for (row = 0; row < 5; row++) {
+        effDrawTextureSlotWithBlendedCornerColors(0, (131 + row * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
                      fileConfigTaskWork->slots[2], 9, 0x53);
-        effDrawTextureSlotWithBlendedCornerColors(461 * 16, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+        effDrawTextureSlotWithBlendedCornerColors(461 * 16, (131 + row * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
                      fileConfigTaskWork->slots[2], 10, 0x53);
     }
     effDrawTextureSlotWithBlendedCornerColors(73 * 16, (326 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
