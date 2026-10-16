@@ -562,7 +562,7 @@ extern void SleepThread(void);
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)sdfRunStreamIopRpcServer, 0x1000, 0x4C);
+    s32 workerId = sdfCreateThreadWithAllocatedWorkspace(sdfRunStreamIopRpcServer, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
     D_003BDAC4 = GetThreadId();

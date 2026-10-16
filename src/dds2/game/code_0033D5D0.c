@@ -342,7 +342,7 @@ extern void _StartThread(s32, s32);
 void sdfStartDevRpcServerAndBindClient(void) {
     s32 waitStart;
 
-    _StartThread(sdfCreateThreadWithAllocatedWorkspace((void *)sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
+    _StartThread(sdfCreateThreadWithAllocatedWorkspace(sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
     while (sceSifMBindRpc(&sdfDevRpcClient.client, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
         if (sdfDevRpcClient.client.server != NULL) {
             D_00438AB8 = 1;
@@ -1764,7 +1764,7 @@ void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
             entry = sdfDevWorkerThread;
         }
         sdfDeviceWorkerPriority = 0x48;
-        thread = sdfCreateThreadWithAllocatedWorkspace((void *)entry, 0x4000, 0x48);
+        thread = sdfCreateThreadWithAllocatedWorkspace(entry, 0x4000, 0x48);
         worker->threadId = thread;
         _StartThread(thread, (s32)worker);
     }
