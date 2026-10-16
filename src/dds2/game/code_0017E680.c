@@ -3,6 +3,7 @@
 #include "sdf_asset_create.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_billboard_resource_work.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_append.h"
@@ -14,20 +15,6 @@
 #include "eff_matrix4.h"
 #include "eff_resource_render_state.h"
 
-
-/* Billboard set allocated by effCreateBillboardResourceWork. */
-typedef struct EffBillboardWork {
-    u8 pad00[0x10];
-    u32 mode;   /* 0x10 */
-    u32 color;  /* 0x14 */
-    f32 scale;  /* 0x18 */
-    struct BillObj *handle; /* 0x1C: owned billboard object */
-} EffBillboardWork;
-
-/* Creation parameters read by effCreateBillboardResourceWork. */
-typedef struct EffBillboardParams {
-    s32 mode; /* 0x00: billboard mode for the new set */
-} EffBillboardParams;
 
 extern EffResourceRenderState effResourceDrawParams;
 
