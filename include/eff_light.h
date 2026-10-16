@@ -3,6 +3,8 @@
 
 #include "dds3obj.h"
 
+struct SdfLightingPacketStorage;
+
 /* The first flag enables publishing this light's ambient and secondary
  * vectors; the second blends those vectors over the configured frame count. */
 enum EffLightFlags {
@@ -31,7 +33,7 @@ typedef struct EffLightData {
     u16 blendFrames;
     u16 unk72;
     ObjBase *resourceState;
-    void *buffer;
+    struct SdfLightingPacketStorage *buffer;
 } EffLightData;
 
 typedef char EffLightData_size_must_be_0x7C[(sizeof(EffLightData) == 0x7C) ? 1 : -1];
