@@ -1890,7 +1890,56 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesAdvanceEntryText);
+void itfMesAdvanceEntryText(ItfMesState *mes) {
+    ItfMesEntryBlock *entryBlock = &mes->entryBlock;
+    u32 flags;
+
+    if (entryBlock->textState != 1) {
+        return;
+    }
+    flags = mes->flags;
+    if ((flags & 7) == 4) {
+        mes->fade.unk08++;
+        if (mes->flags & 0x800000) {
+            entryBlock->textState = -1;
+            return;
+        }
+        if (!(mes->flags & 0x100000)) {
+            mes->fade.kind = 1;
+        }
+        if (!(D_0037F510.confirm < 0 || D_0037F510.unk23 < 0 ||
+              (D_0037F510.primaryTriangle != 0 && mes->fade.unk08 >= 5 && !(itfMessageFlags & 1))) &&
+            entryBlock->unk11 != 0) {
+            return;
+        }
+        if (entryBlock->unk11 != 0) {
+            sndSetSequenceVolumePan(9, 0x7F, 0x3F);
+        }
+        itfResetBattleFadeState(&mes->fade, 0);
+        entryBlock->itemIndex++;
+        if (entryBlock->itemIndex >= entryBlock->tableCount) {
+            entryBlock->textState = -1;
+            return;
+        }
+        itfMesInitCharTable((s32 *)mes->textSlots.addresses);
+        if (mes->temporaryFontEntry != 0) {
+            frFontLoadTemporaryEntry(mes->temporaryFontEntry);
+        }
+        itfMesBuildEntryGlyph(mes);
+        itfMesCreatePanelOriginFrameWhenVisible(mes);
+        mes->flags = (mes->flags & ~7) | 3;
+        return;
+    }
+    if ((D_0037F510.confirm < 0 || D_0037F510.unk23 < 0 || (D_0037F510.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
+        !(mes->flags & 0x1000000) && !(mes->flags & 0x400000)) {
+        frFontEnableNodeContextModes(entryBlock->glyphChain);
+        if (mes->blk14.glyphChain != NULL) {
+            frFontEnableContextMode(mes->blk14.glyphChain);
+        }
+        flags = mes->flags;
+    }
+    mes->flags = flags & ~0x1000000;
+}
 
 extern void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue);
 
