@@ -457,9 +457,9 @@ s32 scrCmdBeginTexturedBlurDeactivation(void)
 
 s32 scrCmdConfigureFilterBlur(void)
 {
-    s32 p2;
-    s32 p1;
-    s32 p0;
+    s32 delaySpread;
+    s32 size;
+    s32 count;
     s32 sel;
     s32 kind;
     f32 f4;
@@ -480,13 +480,13 @@ s32 scrCmdConfigureFilterBlur(void)
         kind = 0x44;
         break;
     }
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    p2 = scrReadIntParameter(2);
+    count = scrReadIntParameter(0);
+    size = scrReadIntParameter(1);
+    delaySpread = scrReadIntParameter(2);
     f3 = bfWaitReadArgFloat(3);
     f4 = bfWaitReadArgFloat(4);
     f5 = bfWaitReadArgFloat(5);
-    kwlnDrawSetCd0Clamped(p0, p1, p2, f3, f4, f5, kind);
+    kwlnDrawSetCd0Clamped(count, size, delaySpread, f3, f4, f5, kind);
     return 1;
 }
 
