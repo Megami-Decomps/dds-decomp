@@ -1109,8 +1109,8 @@ u8 *fldGetTransferChunkPayload(FldTransferChunk *chunk) {
     return (u8 *)chunk + sizeof(*chunk);
 }
 
-void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
-    u8 *p = data;
+void fldRelocatePackedWords(u32 *table, u32 base, const u8 *data, s32 size) {
+    const u8 *p = data;
     s32 code;
     s32 i;
 
