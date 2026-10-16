@@ -923,7 +923,112 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorIdsByClass);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorClassPairs);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AADF8);
+/* Command panel steps defined below; the refresh calls them before their definitions. */
+void btlPopulateCommandPanelGrid(void);
+void btlUpdateCommandPanelRowFades(void);
+void btlUpdateCommandPanelFades(void);
+void btlDrawCommandPanelClassLabel(void);
+
+void btlPopulateCommandPanelGrid(void);
+void btlUpdateCommandPanelRowFades(void);
+void btlUpdateCommandPanelFades(void);
+void btlDrawCommandPanelClassLabel(void);
+
+static inline s32 btlRefreshCommandRow(BattleSceneObject *object) {
+    btlLinkedSelectionTaskBuffer->selectedRow =
+        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+    return btlLinkedSelectionTaskBuffer->selectedRow != 0;
+}
+void func_001AADF8(BattleSceneObject *object) {
+    s32 changed = 0;
+
+    switch (fldGetSceneObjectState()) {
+    case 1:
+    case 2: {
+        if (D_00324510.confirm >= 0 && D_00324510.primaryCancel >= 0) {
+            if ((D_00324510.unk25 & 2) != 0) {
+                for (; changed == 0;) {
+                    if (btlCommandPanelWork->classIndex != 5 || D_00324510.unk25 < 0) {
+                        btlCommandPanelWork->classIndex++;
+                        btlCommandPanelWork->labelFade = 0xF0;
+                        btlLinkedSelectionTaskBuffer->backdropFade = 0;
+                        if (btlCommandPanelWork->classIndex >= 6) {
+                            btlCommandPanelWork->classIndex = 0;
+                        }
+                        btlLinkedSelectionTaskBuffer->selectedRow =
+                            btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+                        if (btlLinkedSelectionTaskBuffer->selectedRow != 0) {
+                            sndSetStationedSeVolume(0);
+                            changed = 1;
+                            break;
+                        }
+                    }
+                    btlLinkedSelectionTaskBuffer->selectedRow =
+                        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+                    if (btlLinkedSelectionTaskBuffer->selectedRow != 0) {
+                        changed = 1;
+                    }
+                }
+            } else if ((D_00324510.unk24 & 2) != 0) {
+                for (; changed == 0;) {
+                    if (btlCommandPanelWork->classIndex != 0 || D_00324510.unk24 < 0) {
+                        btlCommandPanelWork->classIndex--;
+                        btlCommandPanelWork->labelFade = 0xF0;
+                        btlLinkedSelectionTaskBuffer->backdropFade = 0;
+                        if (btlCommandPanelWork->classIndex < 0) {
+                            btlCommandPanelWork->classIndex = 5;
+                        }
+                        if (btlRefreshCommandRow(object)) {
+                            changed = 1;
+                            sndSetStationedSeVolume(0);
+                        }
+                    }
+                    if (btlRefreshCommandRow(object)) {
+                        changed = 1;
+                    }
+                }
+            }
+        }
+    } /* fall through */
+    case 3:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+        btlCommandPanelWork->labelEntry = btlGetActorIdForClass(btlCommandPanelWork->classIndex);
+        btlGetActorClassPair(btlCommandPanelWork->classIndex,
+                             &btlCommandPanelWork->classX, &btlCommandPanelWork->classY);
+        btlPopulateCommandPanelGrid();
+        btlUpdateCommandPanelRowFades();
+        btlUpdateCommandPanelFades();
+        btlDrawCommandPanelClassLabel();
+        break;
+    case 4:
+        break;
+    case 5:
+        btlReleaseAndClearChipBlock();
+        break;
+    }
+
+    if (changed != 0) {
+        s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
+        u16 entry = object->selections[kind].entry;
+
+        if (kind == 4) {
+            btlSetActionActorPanelPresentation(object->owner, 1, 0);
+            if (D_00359160.entries[entry].first != 0) {
+                btlResetActorSlotPresentationValue(D_00359160.entries[entry].first, object);
+            }
+            if (D_00359160.entries[entry].second != 0) {
+                btlResetActorSlotPresentationValue(D_00359160.entries[entry].second, object);
+            }
+        } else {
+            btlSetActionActorPanelPresentation(object->owner, 1, 0);
+        }
+    }
+}
 
 typedef struct BattleCmdPanelGridTable {
     u8 values[30];
