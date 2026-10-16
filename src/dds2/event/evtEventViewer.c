@@ -421,11 +421,9 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer) {
         (const u8 *)viewer->entryName[index]);
 }
 
-struct PolyMovieObject;
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
-extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *movie, s32 undo, s32 start, s32 end);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
@@ -1022,7 +1020,6 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 extern char evtViewerTaskName[]; /* "EventViewer" */
 
 
-struct PolyMovieObject;
 
 /* Each timeline parameter word's scalar format is selected by the track kind. */
 
@@ -1197,7 +1194,6 @@ void evtEventViewerUpdateUnitTransitions(s32 time, EvtRuntime *viewer) {
 
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
 extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
-extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
  * unit's byte and float parameters from the active kind-3/4 key to the next
