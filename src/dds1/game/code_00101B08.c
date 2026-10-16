@@ -61,7 +61,7 @@ extern void sceSifLoadFileReset(void);
 extern void sceFsReset(void);
 extern void func_002F3CB8(s32);
 extern void func_002F4190(u32);
-extern s32 sceSifLoadModule(const char *, s32, const char *);
+extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern void sdfLoadIopModulePair(const char *, s32);
 extern void sdfInitializeRuntimeServices(u32, u32, u32);
 extern void sdfPadRequestMode(s32, u8);
