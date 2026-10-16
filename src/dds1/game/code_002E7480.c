@@ -264,7 +264,7 @@ f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
  * The step is integer 1/sampleCount converted to f32, not a float reciprocal.
  * The caller must provide valid table bounds for the final sample index.
  */
-f32 sdfTableInterpolate(f32 value, const f32 *table, s32 sampleCount) {
+f32 sdfTableInterpolate(f32 lookupValue, const f32 *table, s32 sampleCount) {
     f32 positionStep = 1 / sampleCount;
     s32 lowerIndex = 0;
     s32 upperIndex = sampleCount;
@@ -276,7 +276,7 @@ f32 sdfTableInterpolate(f32 value, const f32 *table, s32 sampleCount) {
         sampleIndex = lowerIndex + upperIndex;
         sampleIndex >>= 1;
         upperValue = table[sampleIndex];
-        if (value < upperValue) {
+        if (lookupValue < upperValue) {
             upperIndex = sampleIndex;
         } else {
             sampleIndex++;
@@ -288,7 +288,7 @@ f32 sdfTableInterpolate(f32 value, const f32 *table, s32 sampleCount) {
     if (sampleIndex != 0) {
         lowerValue = table[sampleIndex - 1];
     }
-    return sampleIndex * positionStep + (value - lowerValue) * positionStep / (upperValue - lowerValue);
+    return sampleIndex * positionStep + (lookupValue - lowerValue) * positionStep / (upperValue - lowerValue);
 }
 
 /* Odd fifth-degree atan approximation; the ratio is not range-checked here. */
