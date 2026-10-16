@@ -546,13 +546,13 @@ s32 evtCommandRequestAlternateFieldSequence(void)
 
 s32 evtCommandDispatchFieldBE(void)
 {
-    s32 firstArg;
-    s32 secondArg;
+    s32 eventId;
+    s32 resourceId;
 
     sdfPrintFormattedDevMessage("FIELD_BE start\n");
-    firstArg = scrReadIntParameter(0);
-    secondArg = scrReadIntParameter(1);
-    evtTryCreateWorldObjectFromPackResourceSet(firstArg, secondArg);
+    eventId = scrReadIntParameter(0);
+    resourceId = scrReadIntParameter(1);
+    evtTryCreateWorldObjectFromPackResourceSet(eventId, resourceId);
     sdfPrintFormattedDevMessage("FIELD_BE end\n");
     return 1;
 }
