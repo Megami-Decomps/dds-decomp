@@ -244,7 +244,7 @@ typedef struct BtlUnit {
     struct SoundResourceLink *resourceLink; /* 0x31C: linked model-resource task. */
     struct SoundLink *link; /* 0x320: per-unit command effect. */
     struct ActiveSoundNode *listNode; /* 0x324: independently loaded sound node. */
-    struct SoundSlotOwner *unk328; /* Owner of the actor model's file slots and allocation handles. */
+    struct SoundSlotOwner *soundSlotOwner; /* 0x328: shared category/id motion-SE owner, as in DDS1. */
     void *gunResource;
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
     u8 linkedNumberCount; /* 0x338: active linked-number displays; selects modulo-12 offset. */
@@ -264,6 +264,8 @@ typedef struct BtlUnit {
 typedef char BtlUnitPartyRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
 typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2E4) ? 1 : -1];
 typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
+typedef char BtlUnitSoundSlotOwnerOffsetCheck[
+    ((u32)&((BtlUnit *)0)->soundSlotOwner == 0x328) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
