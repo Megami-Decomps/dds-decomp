@@ -119,7 +119,7 @@ u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 extern DatEnemyRecord *datEnemyRecords;
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 void btlRaisePartyRecordStatusValue();
 
@@ -1621,7 +1621,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             indexedTarget = (BtlUnit *)btlGetIndexListEntry(indices, groupIndex);
             if (group->reflected == 0) currentTarget = indexedTarget;
             if (group->reflected != 0 || group->kind == 0x40000)
-                mode = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skill].effectKind;
+                mode = datActionAnimationRecords[skill].effectKind;
             effectTarget = mode == 3 ? indexedTarget : currentTarget;
             if (group->inactiveOrStatusChanged != 0 && (state->battleFlags & 0x80) != 0) {
                 btlBossDebugPrintf(D_003A3670, currentTarget);
@@ -2481,7 +2481,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
         unit->displaySpecies = modelId;
         btlInitializeEffectVectorsFromSourceRecords(unit, 1, modelId);
         if (action->indexWork.skillId < 0x260 && action->indexWork.skillId != -1) {
-            if (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->indexWork.skillId].flags & 0x100) {
+            if (datActionAnimationRecords[action->indexWork.skillId].flags & 0x100) {
                 controlDelay = 2;
             }
         }
