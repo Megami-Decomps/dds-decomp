@@ -2172,7 +2172,7 @@ void evtViewerDispatchFlagMode(EvtRuntime *viewer) {
 /* Returns the address word of the nearest kind-2 key strictly after the current
  * frame, or zero. Equal-distance ties retain the first key visited. */
 s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
-    EvtRuntimeChild *result = NULL;
+    EvtRuntimeChild *selectedGlyph = NULL;
     s32 best = 99999;
     EvtRuntimeGroup *node = viewer->groups;
 
@@ -2189,7 +2189,7 @@ s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
 
                         if (distance < best) {
                             best = distance;
-                            result = glyph;
+                            selectedGlyph = glyph;
                         }
                     }
                     glyph = glyph->next;
@@ -2198,13 +2198,13 @@ s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
         }
         node = node->next;
     }
-    return (s32)result;
+    return (s32)selectedGlyph;
 }
 
 /* Returns the address word of the nearest kind-2 key strictly before the current
  * frame, or zero. Equal-distance ties retain the first key visited. */
 s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
-    EvtRuntimeChild *result = NULL;
+    EvtRuntimeChild *selectedGlyph = NULL;
     s32 best = 99999;
     EvtRuntimeGroup *node = viewer->groups;
 
@@ -2221,7 +2221,7 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
 
                         if (distance < best) {
                             best = distance;
-                            result = glyph;
+                            selectedGlyph = glyph;
                         }
                     }
                     glyph = glyph->next;
@@ -2230,7 +2230,7 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
         }
         node = node->next;
     }
-    return (s32)result;
+    return (s32)selectedGlyph;
 }
 
 void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer) {
