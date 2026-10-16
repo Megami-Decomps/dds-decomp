@@ -553,7 +553,9 @@ void evtDrawProjectCommandRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
 }
 
 extern void evtDrawEntrySelectionRow();
-extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
+extern s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
+                                 s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
+                                 s32 *secondaryCursor, s32 *primaryCursor);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
     SdfListHead *packets = sdfCreateResetPacketList();
