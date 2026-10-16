@@ -11,6 +11,7 @@
 struct KwlnTask;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
+struct SdfMemBlock;
 
 /* Three-byte scene scheduling slot; IDs move with their group/countdown. */
 typedef struct BtlSceneSlot {
@@ -254,9 +255,9 @@ typedef struct BtlState {
     u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
     u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
     u8 pad28C[4];
-    s32 fieldF1ResourceId; /* 0x290: retained field archive resource identifiers. */
-    s32 fieldF2ResourceId; /* 0x294 */
-    s32 fieldTBResourceId; /* 0x298 */
+    struct SdfMemBlock *fieldF1ResourceId; /* 0x290: retained field archive allocation. */
+    struct SdfMemBlock *fieldF2ResourceId; /* 0x294 */
+    struct SdfMemBlock *fieldTBResourceId; /* 0x298 */
     struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
@@ -498,9 +499,9 @@ typedef struct BtlState {
     s32 loadStep;
     u8 specialEncounterBlocked; /* 0x2B4: scene setup latch blocks special encounter rolls. */
     u8 pad2B5[3];
-    s32 fieldF1ResourceId; /* 0x2B8: retained field archive handle, released by btlFreeFieldBlocks. */
-    s32 fieldF2ResourceId; /* 0x2BC */
-    s32 fieldTBResourceId; /* 0x2C0 */
+    struct SdfMemBlock *fieldF1ResourceId; /* 0x2B8: retained field archive allocation. */
+    struct SdfMemBlock *fieldF2ResourceId; /* 0x2BC */
+    struct SdfMemBlock *fieldTBResourceId; /* 0x2C0 */
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
     s32 boundTask; /* 0x2CC */
