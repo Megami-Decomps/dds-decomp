@@ -3012,22 +3012,22 @@ void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
 EffTemplatePacketList *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x200);
-    s32 auxAllocationHandle;
+    struct SdfMemBlock *auxAllocationHandle;
     s32 tailBytes = 0xB0;
 
     memset(clone, 0, 0x200);
     memcpy(clone, source, source->head.templateSize);
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
-    auxAllocationHandle = (u32)sdfAllocGeneralBlock(clone->head.particleCount * 0x10);
+    auxAllocationHandle = sdfAllocGeneralBlock(clone->head.particleCount * 0x10);
     clone->auxiliaryAllocation = auxAllocationHandle;
-    clone->auxiliaryData = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(auxAllocationHandle));
+    clone->auxiliaryData = (void *)sdfResourceRetainAddress(auxAllocationHandle);
     effInitializeEmitterHead(&clone->head);
     effResetDiscAuxPacketAges(clone);
     return clone;
 }
 
 void effFreeDiscAuxTemplate(EffTemplatePacketList *effect) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->auxiliaryAllocation));
+    sdfReleaseResourceAllocation(effect->auxiliaryAllocation);
     effDestroyResources(&effect->head);
     sdfReleaseChipBlock(effect);
 }
@@ -3240,8 +3240,8 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         }
         listBytes = count * 12;
         ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
-        ((EffTemplatePacketList *)copy)->listAllocation = (u32)sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
-        addr = (s32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffTemplatePacketList *)copy)->listAllocation));
+        ((EffTemplatePacketList *)copy)->listAllocation = sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
+        addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
         i = 0;
         base = (s32)addr;
         ((EffTemplatePacketList *)copy)->recordList = base;

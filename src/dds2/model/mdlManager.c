@@ -456,7 +456,9 @@ extern s32 strcasecmp(const char *, const char *);
 extern const char D_00436FA8[];
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *, MdlLoadRequest *);
-extern s32 mdlRequestLoadWithCallback(s32, s32, s32, const char *, void (*)(u32), u32);
+extern s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg,
+                                     const char *requestPath,
+                                     void (*onComplete)(u32), u32 callbackArg);
 
 /* Return a ready group address or queue its resources. Pending and new
  * requests each perform their own optional blocking wait after unlocking. */

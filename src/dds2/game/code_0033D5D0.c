@@ -17,6 +17,7 @@
 #include "sdf_dev_path_prefix.h"
 #include "sdf_dev_worker.h"
 #include "sdf_dev_start_load_api.h"
+#include "sdf_disc_file_record.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 
@@ -507,13 +508,6 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
     sdfDiscReadPosition += size;
 }
 
-/* Disc file-table record: name offset, start offset and byte size. */
-typedef struct SdfDiscFileRecord {
-    u32 nameOffset; /* 0x00 */
-    u32 offset;     /* 0x04 */
-    s32 size;       /* 0x08 */
-} SdfDiscFileRecord;
-
 extern SdfDiscFileRecord D_00476940;
 extern s32 sceOpen();
 extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
@@ -597,7 +591,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     file = sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
-        D_004391AC = *(s32 *)(file + 8);
+        D_004391AC = ((SdfDiscFileRecord *)file)->size;
         sdfOpenDiscFileRecord = file;
         sdfDevReadSectorBytesAvailable = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
@@ -605,7 +599,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
         } else {
             sdfDevSeekDiscRequest(request[0]);
         }
-        result = *(s32 *)(file + 8);
+        result = ((SdfDiscFileRecord *)file)->size;
     }
     return result;
 }
@@ -711,7 +705,7 @@ s32 sdfDevGetFileSize(void) {
     if (sdfOpenDiscFileRecord == 0) {
         sdfPanicHaltPrintf("file didn't open.");
     }
-    return *(s32 *)(sdfOpenDiscFileRecord + 8);
+    return ((SdfDiscFileRecord *)sdfOpenDiscFileRecord)->size;
 }
 
 extern s32 sceOpen();

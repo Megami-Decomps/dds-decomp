@@ -529,7 +529,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
+extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
 
 extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 

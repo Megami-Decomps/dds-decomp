@@ -19,7 +19,7 @@ f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 
 extern s32 (*D_0040B368[])(void *a0, s32 a1);
 
-extern s32 (*D_0040B3F8[])(void *a0, s32 a1);
+extern s32 (*D_0040B3F8[])(void *handlerContext, s32 handlerIndex);
 
 
 extern SdfMotionBindingDispatch D_0040B420;
@@ -631,8 +631,8 @@ void sdfMotionCaptureScaleVector(void *work) {
     PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
 }
 
-s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
-    return D_0040B3F8[(u16)a1](a0, a1);
+s32 sdfDispatchMotionHandler(void *handlerContext, s32 handlerIndex) {
+    return D_0040B3F8[(u16)handlerIndex](handlerContext, handlerIndex);
 }
 
 void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
