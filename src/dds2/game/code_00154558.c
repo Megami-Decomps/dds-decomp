@@ -779,7 +779,7 @@ s32 fldCmdSetFadeAndSway(void) {
     return 1;
 }
 
-extern void fldSetRoomModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 
@@ -1337,7 +1337,7 @@ s32 fldCmdSetFloorFlag(void) {
     return 1;
 }
 
-extern void fldSetMapSlotAuxiliaryFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotAuxiliaryFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
