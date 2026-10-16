@@ -445,7 +445,7 @@ u8 mnuShouldExcludeTerminalMenuEntry(void) {
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Draw selected-row accents in eighth-pixel units, then the indexed panel. */
-void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct MenuList *list,
+void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 depth, struct MenuList *list,
                    struct MenuListNode *entry, s32 drawContext) {
     s32 value = list->scale;
     MenuTerminalWork *owner = (MenuTerminalWork *)list->context;
