@@ -57,12 +57,16 @@ extern EvtUnitVectorSlot evtUnitVectorSlots[10];
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
-    f32 unk10;          /* 0x10 */
+    f32 scaleFactor;    /* 0x10: uniform model scale, also used by stage tests. */
     u8 pad14[0x04];     /* 0x14 */
     f32 unk18;          /* 0x18 */
     f32 unk1C;          /* 0x1C */
     u8 pad20[0x250];    /* 0x20 */
 } Entry270;
+
+typedef char Entry270_scaleFactor_offset_check[
+    ((u32)&((Entry270 *)0)->scaleFactor == 0x10) ? 1 : -1];
+typedef char Entry270_size_check[(sizeof(Entry270) == 0x270) ? 1 : -1];
 
 extern Entry270 *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
@@ -1463,7 +1467,7 @@ u32 evtUnitCheckModelCut(void) {
 }
 
 f32 evtComputeClampedModelScale(s32 modelRecordIndex) {
-    f32 scale = (D_00435DF0[modelRecordIndex].unk18 + D_00435DF0[modelRecordIndex].unk1C * 0.5f) * 0.5f * D_00435DF0[modelRecordIndex].unk10 * (1.0f / 70.0f);
+    f32 scale = (D_00435DF0[modelRecordIndex].unk18 + D_00435DF0[modelRecordIndex].unk1C * 0.5f) * 0.5f * D_00435DF0[modelRecordIndex].scaleFactor * (1.0f / 70.0f);
 
     if (scale > 2.0f) {
         scale = 2.0f;
