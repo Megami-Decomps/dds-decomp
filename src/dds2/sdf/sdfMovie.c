@@ -248,17 +248,17 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
 }
 
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *data, s32 size) {
+s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
     MovLinearStream *stream = movie->stream.linear;
 
     switch (operation) {
     case SDF_STREAM_READ_QUERY:
         if (movie->stopRequested != 0) {
-            *(u8 *)data = 1;
+            *(u8 *)dataBuffer = 1;
             return 0;
         }
         if (movie->remainingBytes == 0) {
-            *(u8 *)data = 1;
+            *(u8 *)dataBuffer = 1;
         }
         return stream->bufferedBytes;
     case SDF_STREAM_READ_COPY:
@@ -268,20 +268,20 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, 
         {
             u8 *readCursor = stream->readCursor;
             u8 *bufferStart = stream->bufferStart;
-            s32 wrappedBytes = (readCursor - bufferStart) + size - 0x20000;
+            s32 wrappedBytes = (readCursor - bufferStart) + byteCount - 0x20000;
 
             if (wrappedBytes >= 0) {
-                s32 firstSpan = size - wrappedBytes;
-                memcpy(data, readCursor, firstSpan);
+                s32 firstSpan = byteCount - wrappedBytes;
+                memcpy(dataBuffer, readCursor, firstSpan);
                 if (wrappedBytes > 0) {
-                    memcpy((u8 *)data + firstSpan, bufferStart, wrappedBytes);
+                    memcpy((u8 *)dataBuffer + firstSpan, bufferStart, wrappedBytes);
                 }
                 stream->readCursor = bufferStart + wrappedBytes;
             } else {
-                memcpy(data, readCursor, size);
-                stream->readCursor = readCursor + size;
+                memcpy(dataBuffer, readCursor, byteCount);
+                stream->readCursor = readCursor + byteCount;
             }
-            stream->bufferedBytes -= size;
+            stream->bufferedBytes -= byteCount;
             return movie->remainingBytes;
         }
     case SDF_STREAM_READ_RESUME:
@@ -298,7 +298,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, 
 }
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *data, s32 size) {
+s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
     void sdfMovieCopyPacStreamSpan(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
@@ -307,11 +307,11 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32
     switch (operation) {
     case SDF_STREAM_READ_QUERY:
         if (movie->stopRequested != 0) {
-            *(u8 *)data = 1;
+            *(u8 *)dataBuffer = 1;
             return 0;
         }
         if (movie->remainingBytes == 0) {
-            *(u8 *)data = 1;
+            *(u8 *)dataBuffer = 1;
         }
         return stream->pacBufferedBytes;
     case SDF_STREAM_READ_COPY:
@@ -321,20 +321,20 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32
         {
             u8 *bufferStart = stream->pacBuffer;
             s32 readOffset = stream->pacReadOffset;
-            s32 wrappedBytes = readOffset + size - 0x10000;
+            s32 wrappedBytes = readOffset + byteCount - 0x10000;
 
             if (wrappedBytes >= 0) {
-                s32 firstSpan = size - wrappedBytes;
-                sdfMovieCopyPacStreamSpan(data, bufferStart + readOffset, firstSpan);
+                s32 firstSpan = byteCount - wrappedBytes;
+                sdfMovieCopyPacStreamSpan(dataBuffer, bufferStart + readOffset, firstSpan);
                 if (wrappedBytes > 0) {
-                    sdfMovieCopyPacStreamSpan((u8 *)data + firstSpan, bufferStart, wrappedBytes);
+                    sdfMovieCopyPacStreamSpan((u8 *)dataBuffer + firstSpan, bufferStart, wrappedBytes);
                 }
                 stream->pacReadOffset = wrappedBytes;
             } else {
-                sdfMovieCopyPacStreamSpan(data, bufferStart + readOffset, size);
-                stream->pacReadOffset = readOffset + size;
+                sdfMovieCopyPacStreamSpan(dataBuffer, bufferStart + readOffset, byteCount);
+                stream->pacReadOffset = readOffset + byteCount;
             }
-            stream->pacBufferedBytes -= size;
+            stream->pacBufferedBytes -= byteCount;
             return movie->remainingBytes;
         }
     case SDF_STREAM_READ_RESUME:
