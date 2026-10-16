@@ -3331,8 +3331,8 @@ f32 btlGetClampedBattleTableValue(BtlUnit *source) {
     return btlActiveGroupCountMultipliers[index];
 }
 
-s32 btlGetCommandAttributeName(s32 index) {
-    s8 resource = datCommandSelectors[index].stat;
+s32 btlGetCommandAttributeName(s32 commandIndex) {
+    s8 resource = datCommandSelectors[commandIndex].stat;
     if (resource < 0) {
         return 0;
     }
