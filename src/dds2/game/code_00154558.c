@@ -1060,7 +1060,7 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
     return 1;
 }
 
-s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
+s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode) {
     s32 i;
     s32 searchId;
     void *obj;
@@ -1071,16 +1071,16 @@ s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
     if (stage == 0) {
         stage = fldAreaState.floor + 1;
     }
-    if (name == NULL) {
+    if (roomName == NULL) {
         for (i = 0; i < 16; i++) {
             fldSetRoomObjectModeFlag(world, stage, i, 0);
         }
     } else {
-        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 0);
+        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(roomName), 0);
     }
     if (world == fldAreaState.area) {
         if (stage == fldAreaState.floor + 1) {
-            searchId = fldFindSearchId(name);
+            searchId = fldFindSearchId(roomName);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
                 switch (mode) {
@@ -1149,7 +1149,7 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
     return 1;
 }
 
-s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
+s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode) {
     s32 i;
     s32 searchId;
     void *obj;
@@ -1160,16 +1160,16 @@ s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
     if (stage == 0) {
         stage = fldAreaState.floor + 1;
     }
-    if (name == NULL) {
+    if (roomName == NULL) {
         for (i = 0; i < 16; i++) {
             fldSetRoomObjectModeFlag(world, stage, i, 1);
         }
     } else {
-        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 1);
+        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(roomName), 1);
     }
     if (world == fldAreaState.area) {
         if (stage == fldAreaState.floor + 1) {
-            searchId = fldFindSearchId(name);
+            searchId = fldFindSearchId(roomName);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
                 switch (mode) {
