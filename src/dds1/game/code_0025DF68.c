@@ -384,11 +384,11 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, MenuWind
     struct MenuList *inner = object->list;
     struct EffectSlotSet *texture = D_003BC520;
     s32 *delay = inner->context;
-    s32 mode = delay[1];
+    s32 fadeMode = delay[1];
     s32 flags = inner->flags;
     f32 alpha = 0.0f;
 
-    switch (mode) {
+    switch (fadeMode) {
     case 1:
         alpha = (f32)delay[0] / 15.0f;
         alpha = 1.0f - alpha;

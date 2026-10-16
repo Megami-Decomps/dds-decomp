@@ -400,11 +400,11 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
     struct MenuList *inner = object->list;
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuTerminalWindowState *state = inner->context;
-    s32 mode = state->command.mode;
+    s32 fadeMode = state->command.mode;
     s32 flags = inner->flags;
     f32 alpha = 0.0f;
 
-    switch (mode) {
+    switch (fadeMode) {
     case 1:
         alpha = (f32)state->command.value / 15.0f;
         alpha = 1.0f - alpha;
