@@ -372,7 +372,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 commandIndex, s32 format) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
@@ -494,7 +494,7 @@ void func_001969B8(f32 *position) {
     D_00380028.append(&D_00380028, list);
 }
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
