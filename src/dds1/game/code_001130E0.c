@@ -465,8 +465,8 @@ attach_transition:
     }
 }
 
-ObjBase *effObjGetDataHandle(EffWorldNode *object) {
-    EffectTransformData *data = object->data;
+ObjBase *effObjGetDataHandle(const EffWorldNode *object) {
+    const EffectTransformData *data = object->data;
 
     return data->resourceState;
 }
