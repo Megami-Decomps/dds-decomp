@@ -75,7 +75,7 @@ void func_00154F18(s32);
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
-s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
+s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
