@@ -141,7 +141,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     EvtPackLoadState *packState;
     EvtUnit *unit;
     u16 motionId;
-    s32 frame;
+    s32 motionFrame;
     s32 entryIndex;
     s32 cueIndex;
     EvtMotionSeCue *cues;
@@ -166,16 +166,16 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
         return -1;
     }
     motionId = mdlFindNodeById(unit->owner, 0)->motionIndex;
-    frame = unit->owner->first->currentFrame;
+    motionFrame = unit->owner->first->currentFrame;
     for (entryIndex = 0; entryIndex < packState->header->entryCount; entryIndex++) {
         if (packState->entries[entryIndex].kind == 6 &&
             packState->entries[entryIndex].resourceId == params->resourceId &&
             packState->entries[entryIndex].motionId == motionId) {
             cues = (EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
-                if (cues[cueIndex].frame == frame) {
+                if (cues[cueIndex].frame == motionFrame) {
                     evtSetBgmVolumePan(params->eventTaskId, cues[cueIndex].fade);
-                    sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, frame);
+                    sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
         }
