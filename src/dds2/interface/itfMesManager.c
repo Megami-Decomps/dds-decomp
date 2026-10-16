@@ -1052,19 +1052,19 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
-            } else if (D_0037F510.cancel < 0) {
+            } else if (D_0037F510.secondaryCancel < 0) {
                 return -1;
             }
             break;
         case 1:
             itfAdjustPanelBoundsWithPad(panel, debug->selectedItem);
-            if (D_0037F510.cancel < 0) {
+            if (D_0037F510.secondaryCancel < 0) {
                 debug->mode = 0;
             }
             break;
         case 2:
             sndStepIndexByPad((SndPadStepper *)panel);
-            if (D_0037F510.cancel < 0) {
+            if (D_0037F510.secondaryCancel < 0) {
                 D_003B4770.mode = 0;
             }
             break;

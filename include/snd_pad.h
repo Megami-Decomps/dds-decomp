@@ -20,7 +20,7 @@ typedef struct SndPad {
             u8 pad28[9];
             s8 secondaryCross;
             s8 secondaryTriangle;
-            s8 cancel;
+            s8 secondaryCancel;
             s8 coarseDown;
             s8 coarseUp;
             s8 secondaryUp;
@@ -39,7 +39,7 @@ typedef char SndPadConfirmOffsetCheck[((u32)&((SndPad *)0)->confirm == 0x21) ? 1
 typedef char SndPadPrimaryCancelOffsetCheck[((u32)&((SndPad *)0)->primaryCancel == 0x23) ? 1 : -1];
 typedef char SndPadPrevOffsetCheck[((u32)&((SndPad *)0)->prev == 0x26) ? 1 : -1];
 typedef char SndPadNextOffsetCheck[((u32)&((SndPad *)0)->next == 0x27) ? 1 : -1];
-typedef char SndPadCancelOffsetCheck[((u32)&((SndPad *)0)->cancel == 0x33) ? 1 : -1];
+typedef char SndPadSecondaryCancelOffsetCheck[((u32)&((SndPad *)0)->secondaryCancel == 0x33) ? 1 : -1];
 typedef char SndPadCoarseDownOffsetCheck[((u32)&((SndPad *)0)->coarseDown == 0x34) ? 1 : -1];
 typedef char SndPadCoarseUpOffsetCheck[((u32)&((SndPad *)0)->coarseUp == 0x35) ? 1 : -1];
 typedef char SndPadFineDownOffsetCheck[((u32)&((SndPad *)0)->fineDown == 0x38) ? 1 : -1];

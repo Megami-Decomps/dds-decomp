@@ -1063,7 +1063,7 @@ s32 btlEditCameraFieldOfView(void) {
                     (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
     D_00325708.append(&D_00325708, list);
-    if (D_00324510.cancel < 0) {
+    if (D_00324510.secondaryCancel < 0) {
         return -1;
     }
     D_003D73C0.degrees = sdfSceneProjectionParameters.camera.fov * radiansToDegrees;
@@ -1240,7 +1240,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }
-        if ((u8)D_00324510.cancel & 2) {
+        if ((u8)D_00324510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -1296,7 +1296,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
                 }
             }
         }
-        if (D_00324510.cancel < 0) {
+        if (D_00324510.secondaryCancel < 0) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }

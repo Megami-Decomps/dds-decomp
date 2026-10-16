@@ -468,7 +468,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
-        if ((u8)D_0037F510.cancel & 2) {
+        if ((u8)D_0037F510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -524,7 +524,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
                 }
             }
         }
-        if (D_0037F510.cancel < 0) {
+        if (D_0037F510.secondaryCancel < 0) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
@@ -624,7 +624,7 @@ s32 itfEditOverlayColor(void) {
             D_00452E90.editing ^= 1;
             D_00452E90.blink = 0;
         }
-        if ((u8)D_0037F510.cancel & 2) {
+        if ((u8)D_0037F510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -659,7 +659,7 @@ s32 itfEditOverlayColor(void) {
                 D_00438F3C = 0;
             }
         }
-        if (D_0037F510.cancel < 0) {
+        if (D_0037F510.secondaryCancel < 0) {
             D_00452E90.editing ^= 1;
             D_00452E90.blink = 0;
         }
