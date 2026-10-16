@@ -2566,3 +2566,8 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FD0);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FE0);
 
+/* Validate the packet where its native initialization is reconstructed. */
+typedef char FieldSequenceRecord_size_check[
+    (sizeof(FieldSequenceRecord) == 0xA0) ? 1 : -1];
+typedef char FieldSequenceRecord_enabled_offset_check[
+    ((u32)&((FieldSequenceRecord *)0)->enabled == 0x58) ? 1 : -1];

@@ -13906,3 +13906,9 @@ layout remain shared. Adding the same offset-expression typedef to the common
 header changes unrelated switch-table address selection in this compiler's
 full-unit context. Keeping the unchanged check with the concrete operation
 preserves the contract and the already matching switch dispatches.
+
+The `FieldSequenceRecord` constructors similarly check their `0xA0` packet
+size and `enabled` offset `0x58` after code and data. Keeping those assertions
+in the shared header changes three load-scheduling instructions in an unrelated
+DDS1 actor-transition consumer. Both constructor owners retain the unchanged
+checks; the record type and all runtime operations remain shared and exact.
