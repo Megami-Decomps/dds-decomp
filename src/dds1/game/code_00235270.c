@@ -3529,12 +3529,12 @@ s32 evtPollEffectFrameControl(s32 x, s32 y, EvtRuntime *runtime) {
 
 extern s32 (*D_00368B48[])(s32, s32, EvtRuntime *);
 
-s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, EvtRuntime *runtime) {
     s32 mode = runtime->actionMode;
-    if (mode == 11 && index != mode) {
+    if (mode == 11 && actionIndex != mode) {
         return 0;
     }
-    return D_00368B48[index](x, y, runtime);
+    return D_00368B48[actionIndex](x, y, runtime);
 }
 
 void evtWriteSerializedBytes(s32 output, void *data, s32 size) {

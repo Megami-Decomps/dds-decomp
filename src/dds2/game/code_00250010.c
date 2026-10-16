@@ -3653,12 +3653,12 @@ s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     return 1;
 }
 
-s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, EvtRuntime *runtime) {
     s32 mode = runtime->actionMode;
-    if (mode == 11 && index != mode) {
+    if (mode == 11 && actionIndex != mode) {
         return 0;
     }
-    return D_003C9928[index](x, y, runtime);
+    return D_003C9928[actionIndex](x, y, runtime);
 }
 
 void evtWriteOutputBytes(s32 output, s32 data, s32 size) {
