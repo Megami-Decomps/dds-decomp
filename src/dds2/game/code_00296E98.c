@@ -920,14 +920,14 @@ extern s32 mnuStaffRunPanel2(KwlnTask *task);
 extern void brsStaffTaskDestroy(KwlnTask *task);
 
 s32 mnuStaffCreateTasks(void) {
-    s32 result;
+    s32 secondaryPanelTaskHandle;
     BrsSkillPackageWork *work = brsCreateRewardTaskWork();
 
     kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
     kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
-    result = (s32)kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
+    secondaryPanelTaskHandle = (s32)kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
     brsTaskState = 1;
-    return result;
+    return secondaryPanelTaskHandle;
 }
 
 u32 mnuStaffDestroyTasks(void) {
