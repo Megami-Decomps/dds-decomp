@@ -377,18 +377,18 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
 /* Search the fixed-width (0x20-byte) event-name records. */
 s32 evtEventViewerFindNameIndex(const char *name, EvtRuntime *viewer) {
     const char *nameEntry;
-    s32 index;
+    s32 nameIndex;
 
-    index = 0;
+    nameIndex = 0;
     if (0 < viewer->entryTotal) {
         nameEntry = viewer->entryName[0];
         do {
             if (strcmp(name, nameEntry) == 0) {
-                return index;
+                return nameIndex;
             }
-            index = index + 1;
+            nameIndex = nameIndex + 1;
             nameEntry = nameEntry + 0x20;
-        } while (index < viewer->entryTotal);
+        } while (nameIndex < viewer->entryTotal);
     }
     return -1;
 }
