@@ -5570,10 +5570,10 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 
 
 extern s32 kwlnSetDrawColorTarget(s32, void *);
-extern s32 kwlnSetLightColorTarget(s32, s32, void *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
-extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
+extern s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetSwayMode(u32);
 extern u32 D_00436138, D_0043613C;
 extern f32 D_00436140;
