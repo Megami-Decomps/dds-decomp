@@ -4001,9 +4001,9 @@ void fldResetSparkTable(void) {
     }
 }
 
-s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
-    PCP_COPY_VECTOR(fldSparkSlots[index].position, pos);
-    PCP_COPY_VECTOR(fldSparkSlots[index].rotation, vel);
+s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation) {
+    PCP_COPY_VECTOR(fldSparkSlots[index].position, position);
+    PCP_COPY_VECTOR(fldSparkSlots[index].rotation, rotation);
     fldSparkSlots[index].hasVectors = 1;
     return 1;
 }
