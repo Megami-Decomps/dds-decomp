@@ -68,19 +68,19 @@ u32 scrStoreGlobalInteger(ScrData *scr) {
 }
 
 u32 scrStoreGlobalFloat(ScrData *scr) {
-    f32 value;
+    f32 floatValue;
 
-    value = bfStackPopFloat(scr);
-    datGameState->floats[scr->instructions[scr->pc].parts.sOperand] = value;
+    floatValue = bfStackPopFloat(scr);
+    datGameState->floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
     return 1;
 }
 
 u32 scrStoreLocalInteger(ScrData *scr) {
-    u32 value;
+    u32 integerValue;
 
-    value = bfStackPopInt(scr);
-    scr->localInt[scr->instructions[scr->pc].parts.sOperand] = value;
+    integerValue = bfStackPopInt(scr);
+    scr->localInt[scr->instructions[scr->pc].parts.sOperand] = integerValue;
     scr->pc++;
     return 1;
 }
