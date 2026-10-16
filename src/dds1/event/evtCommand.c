@@ -328,14 +328,15 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC700);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 
 s32 evtCommandWaitEffectResourceScale(void) {
-    void *object = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    s32 effectId = scrReadIntParameter(0);
+    void *effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
     s32 status;
 
-    if (object == NULL) {
+    if (effectObject == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
-    status = evtCheckWorldObjectResourceScale(object);
+    status = evtCheckWorldObjectResourceScale(effectObject);
     switch (status) {
     case 0:
         return 1;
