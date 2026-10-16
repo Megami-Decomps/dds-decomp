@@ -48,7 +48,7 @@ extern void effFlashTrianglePulseWriteCorners();
 extern void effDrawTriangleRecordPool(EffRecordPool *);
 
 
-extern void effFlashBillboardQuad(PcpFlashStreakWork *, s32, void *);
+extern void effFlashBillboardQuad(PcpFlashStreakWork *work, s32 index, void *view);
 
 extern void effDrawScaledRecordPool(EffRecordPool *);
 
