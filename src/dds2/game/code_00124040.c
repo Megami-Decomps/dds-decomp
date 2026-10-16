@@ -82,7 +82,7 @@ extern void fldInitializeAreaWork(void);
 
 extern void fldRebuildFieldScene(void);
 
-extern void fldApplySkyLightSet(u32, s32);
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 extern void fldResetSparkRewardProfileIndex(void);
 

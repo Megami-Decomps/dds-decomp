@@ -1035,7 +1035,7 @@ extern void fldApplySceneLightSet(s32 index, s32 mode);
 extern s32 fldUpdateCameraObjectPose(void);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
-extern void fldApplySkyLightSet(u32, s32);
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 extern void ddsReleaseUnitObject(EffWorldNode *);
 
