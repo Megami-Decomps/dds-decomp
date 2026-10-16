@@ -857,9 +857,9 @@ s32 scrCommandIsProcessControlFlagClear(void)
 
 s32 scrCommandAdjustItemQuantity(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    ptyAdjustItemQuantity(p0, scrReadIntParameter(1));
+    s32 itemId;
+    itemId = scrReadIntParameter(0);
+    ptyAdjustItemQuantity(itemId, scrReadIntParameter(1));
     return 1;
 }
 
