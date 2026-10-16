@@ -33,7 +33,7 @@ extern u32 kwlnDrawControlFlags;
 extern s32 D_004377D8;
 extern s32 sdfDebugPrintf(const char *, ...);
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
-extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 /* Keep the complete diagnostic records, including their native trailing zeros. */
 const char D_00424830[0x20] __attribute__((aligned(8))) = "unit decode rid:%d, size:%d\n";
