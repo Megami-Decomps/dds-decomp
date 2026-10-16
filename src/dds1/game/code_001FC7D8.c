@@ -21,7 +21,7 @@
 #include "dat_command.h"
 #include "eff.h"
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);

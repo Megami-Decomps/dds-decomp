@@ -72,7 +72,7 @@ extern u8 D_003E9130[];
 extern u8 D_003E9120[];
 
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
@@ -84,7 +84,7 @@ extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
