@@ -1191,13 +1191,7 @@ void evtResetDisplayProjectionAndVectorState(void) {
 
 
 /* One 0x1F40-byte draw bank of the held-texture render target. */
-typedef struct KwlnTextureBank {
-    SdfListHead list;
-    SdfSceneDrawPacket scene;
-    ConsMatrixPacket matrix;
-    SdfLightingPacketStorage lighting;
-    u8 pad[0x1F40 - 0x260 - sizeof(SdfLightingPacketStorage)];
-} KwlnTextureBank;
+#include "kwln_texture_bank.h"
 
 extern KwlnTextureBank kwlnHeldTexturePacketBanks[2];
 extern SdfGraphObj kwlnHeldTextureDrawTarget;
