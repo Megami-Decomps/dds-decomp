@@ -338,8 +338,8 @@ typedef struct MantraNeighborIds {
 } MantraNeighborIds;
 extern MantraNeighborIds mnuMantraAlternateNeighborRows[50];
 
-s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
-    MantraMenuWork *state = &object->menu;
+s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
+    MantraMenuWork *state = &resource->menu;
     MantraNodePos *node;
     MantraNodePos *neighbor;
     s32 selected;
@@ -349,12 +349,12 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
     u16 i;
     u16 id;
 
-    selected = (u16)mnuGetSelectedMantraUnitIndex((MnuStatusResource *)object);
+    selected = (u16)mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
     if (state->navigationState == 0 || state->navigationState == 7) {
         node = state->defaultSelector;
-        position = mnuGetMantraNeighborIndexForDirection(object, flags);
+        position = mnuGetMantraNeighborIndexForDirection(resource, directionFlags);
         for (;;) {
-            result = mnuClassifyMantraNeighborStatus(object, node, position);
+            result = mnuClassifyMantraNeighborStatus(resource, node, position);
             switch (result) {
                 case -1:
                     return 0;
@@ -365,7 +365,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
                     }
                     return 1;
                 case 1:
-                    if ((flags & 0xa) != 0 || attempts == 2) {
+                    if ((directionFlags & 0xa) != 0 || attempts == 2) {
                         for (i = 0; i < 50; i++) {
                             if (mnuMantraAlternateNeighborRows[i].id == node->selector.fields.index) {
                                 id = mnuMantraAlternateNeighborRows[i].neighbors[position];
@@ -402,7 +402,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
                     }
                     attempts++;
                     if (attempts == 2) {
-                        neighbor = mnuResolveSpecialMantraNeighbor(object, state->defaultSelector->selector.fields.index, position);
+                        neighbor = mnuResolveSpecialMantraNeighbor(resource, state->defaultSelector->selector.fields.index, position);
                         if (neighbor != NULL) {
                             state->defaultSelector = neighbor;
                             if (state->navigationState == 0) {
