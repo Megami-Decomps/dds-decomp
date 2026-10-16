@@ -531,7 +531,7 @@ extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
 extern s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
+extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
 
 extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
