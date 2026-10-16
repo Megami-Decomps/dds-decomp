@@ -36,15 +36,28 @@ typedef struct SdfResourceRecord {
     SdfResourceInfo *info;
 } SdfResourceRecord;
 
-/* Serialized 0x1C-byte header; its vector-pointer word is at byte 0x18. */
+/* Keep all packed bytes opaque while the clone copies the complete header. */
 typedef struct SdfResourceVectorRecord1C {
-    u8 data[0x1C];
+    u8 opaque00[0x1C];
 } SdfResourceVectorRecord1C;
 
+/* The packer and clone path establish a relocated vector pointer at +0x18. */
+typedef struct SdfResourceVectorView1C {
+    u8 opaque00[0x18];
+    SdfVec4 *vector;
+} SdfResourceVectorView1C;
+
+/* The extended record keeps its unknown 0x2C-byte prefix opaque. */
 typedef struct SdfResourceVectorRecord30 {
-    u8 data[0x2C];
+    u8 opaque00[0x2C];
     SdfVec4 *vector;
 } SdfResourceVectorRecord30;
+
+typedef char SdfResourceVectorRecord1CSizeCheck[(sizeof(SdfResourceVectorRecord1C) == 0x1C) ? 1 : -1];
+typedef char SdfResourceVectorView1CSizeCheck[(sizeof(SdfResourceVectorView1C) == 0x1C) ? 1 : -1];
+typedef char SdfResourceVectorView1CVectorOffsetCheck[((u32)&((SdfResourceVectorView1C *)0)->vector == 0x18) ? 1 : -1];
+typedef char SdfResourceVectorRecord30SizeCheck[(sizeof(SdfResourceVectorRecord30) == 0x30) ? 1 : -1];
+typedef char SdfResourceVectorRecord30VectorOffsetCheck[((u32)&((SdfResourceVectorRecord30 *)0)->vector == 0x2C) ? 1 : -1];
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -398,8 +411,8 @@ MnuCallbackListPair *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *sour
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
         *copy = *source;
         vector = (SdfVec4 *)(copy + 1);
-        *(SdfVec4 **)&copy->data[0x18] = vector;
-        *vector = **(SdfVec4 * const *)&source->data[0x18];
+        ((SdfResourceVectorView1C *)copy)->vector = vector;
+        *vector = *((SdfResourceVectorView1C *)source)->vector;
         dds3AppendFirstResourceListValue(owner, (u32)copy);
         source++;
         count--;
