@@ -253,9 +253,9 @@ void sndStartTrackAlternate(s32 trackId) {
     sndQueueCommandPacket(0x130, 0, &packet, 0x10);
 }
 
-void sndQueueSoundId(u32 value) {
+void sndQueueSoundId(u32 soundId) {
     u32 packet[4];
 
-    packet[0] = value;
+    packet[0] = soundId;
     sndQueueCommandPacket(0x30, 0, packet, 0x10);
 }
