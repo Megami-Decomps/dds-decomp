@@ -23,6 +23,12 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+mnuRuntimeHitTargetList = 0x0045C870;
+mnuRuntimeAnimationList = 0x0045C880;
+fldMapHaloRequest = 0x004390AC;
+fldMapPulseRequest = 0x004390B0;
+fldMapTargetPos = 0x0045C7A0;
+fldMapPrevTargetPos = 0x0045C7B0;
 btlBuildGroupSizeActionCameraPair = 0x001EE458; // type:func
 btlBuildProjectedActorPairBoundsVU = 0x001FF0F8; // type:func
 btlBuildMaskedGroupFramingCameraPose = 0x001EFA30; // type:func
