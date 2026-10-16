@@ -6498,7 +6498,55 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C6648);
+void func_001C6648(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
+    switch (work->activeEntries[slot].presentation.hpState) {
+    case 0x11:
+        work->activeEntries[slot].presentation.offset[0] = btlNextScaledRandom(8);
+        work->activeEntries[slot].presentation.offset[0] =
+            work->activeEntries[slot].presentation.offset[0] <= 0 ? 0 :
+            work->activeEntries[slot].presentation.offset[0] > 8 ? 8 : work->activeEntries[slot].presentation.offset[0];
+        work->activeEntries[slot].presentation.offset[1] = btlNextScaledRandom(8);
+        work->activeEntries[slot].presentation.offset[1] =
+            work->activeEntries[slot].presentation.offset[1] <= 0 ? 0 :
+            work->activeEntries[slot].presentation.offset[1] > 8 ? 8 : work->activeEntries[slot].presentation.offset[1];
+        work->activeEntries[slot].presentation.hpHighlightLevel -= 8;
+        work->activeEntries[slot].presentation.hpHighlightLevel =
+            work->activeEntries[slot].presentation.hpHighlightLevel <= 0 ? 0 :
+            work->activeEntries[slot].presentation.hpHighlightLevel > 0x7F ? 0x7F :
+            work->activeEntries[slot].presentation.hpHighlightLevel;
+        if (++work->activeEntries[slot].presentation.unk1C0 >= 0x14) {
+            work->activeEntries[slot].presentation.hpState = 0;
+            work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+            
+            work->activeEntries[slot].presentation.offset[0] = work->activeEntries[slot].presentation.unk1C0 = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+            work->activeEntries[slot].presentation.offset[1] = 0;
+            btlClearFinishedActorSlotChannels(work, 0);
+        }
+        break;
+    case 0x21:
+        work->activeEntries[slot].presentation.hpState = 0;
+        work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+        work->activeEntries[slot].presentation.unk1C0 = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+        work->activeEntries[slot].presentation.offset[0] = 0;
+        work->activeEntries[slot].presentation.offset[1] = 0;
+        break;
+    }
+    if (work->activeEntries[slot].presentation.mpState != 0x11 &&
+        work->activeEntries[slot].presentation.mpState != 0x21) {
+        goto finished;
+    }
+    work->activeEntries[slot].presentation.unk1C4++;
+    if (work->activeEntries[slot].presentation.unk1C4 < 20) {
+        goto finished;
+    }
+    work->activeEntries[slot].presentation.mpState = 0;
+    work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+    work->activeEntries[slot].presentation.mpHighlightLevel = 0;
+    work->activeEntries[slot].presentation.unk1C4 = 0;
+    btlClearFinishedActorSlotChannels(work, 0);
+finished:
+    return;
+}
 
 extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
