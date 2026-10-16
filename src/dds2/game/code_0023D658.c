@@ -1167,11 +1167,11 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
 }
 
 u32 evtUnitClearFlagBit(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit != NULL) {
         unit->owner->flags &= ~MDL_SKIP_TRANSFORMS;
     }
@@ -1179,11 +1179,11 @@ u32 evtUnitClearFlagBit(void) {
 }
 
 u32 evtUnitSetFlagBit(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit != NULL) {
         unit->owner->flags |= MDL_SKIP_TRANSFORMS;
     }
@@ -1191,34 +1191,34 @@ u32 evtUnitSetFlagBit(void) {
 }
 
 u32 evtCommandFlagSelectedUnitStatus(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     evtSetUnitStatusFlags(unit);
     return 1;
 }
 
 u32 evtCommandBeginSelectedUnitTransition(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     s32 param1;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     param1 = scrReadIntParameter(1);
     evtConfigureUnitTransition(unit, param1);
     return 1;
 }
 
 u8 evtUnitHasNoStatusFlags(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     u8 active;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     active = evtTestUnitStatusFlags(unit);
     return active == 0;
 }
