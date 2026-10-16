@@ -159,7 +159,7 @@ typedef struct BtlUnit {
     struct SoundLink *link; /* 0x300: per-unit command effect. */
     struct ActiveSoundNode *listNode; /* 0x304: independently loaded sound node. */
     struct SoundSlotOwner *soundSlotOwner; /* 0x308: shared category/id motion-SE owner. */
-    void *gunResource; /* 0x30C */
+    struct SoundMixer *gunResource; /* 0x30C: retained actor sound mixer. */
     BtlEffectLinkState effectLink; /* 0x310: effect flags and outstanding effect-task references. */
     u8 firstCountdown; /* 0x318: active linked-number displays; selects modulo-12 offset. */
     u8 counterDisplayCount; /* 0x319: active counter displays; selects modulo-12 offset. */
@@ -245,7 +245,7 @@ typedef struct BtlUnit {
     struct SoundLink *link; /* 0x320: per-unit command effect. */
     struct ActiveSoundNode *listNode; /* 0x324: independently loaded sound node. */
     struct SoundSlotOwner *soundSlotOwner; /* 0x328: shared category/id motion-SE owner, as in DDS1. */
-    void *gunResource;
+    struct SoundMixer *gunResource; /* retained actor sound mixer */
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
     u8 linkedNumberCount; /* 0x338: active linked-number displays; selects modulo-12 offset. */
     u8 counterDisplayCount; /* 0x339: active counter displays; selects modulo-12 offset. */
