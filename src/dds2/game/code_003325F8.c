@@ -491,7 +491,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
         return;
     }
     if (retained != 0) {
-        sdfPendingQueuePush(&sdfResourceReleaseQueue, (s32)resource);
+        sdfPendingQueuePush(&sdfResourceReleaseQueue, resource);
     } else {
         sdfDestroyDevRequest(resource);
     }
@@ -750,10 +750,8 @@ void sdfAssetRelease(SdfAsset *asset) {
 
 /* Queue the non-null asset address for deferred release. */
 void sdfQueueAssetRelease(SdfAsset *asset) {
-    s32 queuedAddress = (s32)asset;
-
-    if (queuedAddress != 0) {
-        sdfPendingQueuePush(&sdfAssetReleaseQueue, queuedAddress);
+    if (asset != NULL) {
+        sdfPendingQueuePush(&sdfAssetReleaseQueue, asset);
     }
 }
 

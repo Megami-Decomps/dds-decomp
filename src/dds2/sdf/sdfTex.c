@@ -158,7 +158,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->resourceKey = 0;
-            sdfPendingQueuePush(&sdfTextureReleaseQueue, (u32)texture);
+            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
         }
     }
 }
