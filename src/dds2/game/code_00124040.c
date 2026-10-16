@@ -199,7 +199,7 @@ void fldClearPrimarySceneFlag(void);
 
 extern char D_00412F30[];
 
-extern struct ScrData *scrFindNamedProcessNode(char *arg0);
+extern struct ScrData *scrFindNamedProcessNode(char *name);
 
 extern char D_00412F58[];
 

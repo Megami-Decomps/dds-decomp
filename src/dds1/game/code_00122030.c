@@ -96,7 +96,7 @@ extern char D_0039FCC8[];
 extern void fldDispatchSceneAction(u32 arg0);
 
 
-extern struct ScrData *scrFindNamedProcessNode(char *arg0);
+extern struct ScrData *scrFindNamedProcessNode(char *name);
 
 
 
