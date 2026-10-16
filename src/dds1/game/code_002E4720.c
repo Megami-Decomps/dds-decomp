@@ -130,7 +130,7 @@ extern void sdfDevRecycleCompletedState(DevState *arg0);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
 
-extern s32 sceClose(s32 arg0);
+extern s32 sceClose(s32 fd);
 
 extern s32 DIntr(DevState *arg0);
 
