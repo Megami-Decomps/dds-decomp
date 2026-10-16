@@ -156,8 +156,8 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     return result;
 }
 
-s32 mnuIsTitleEntryAvailable(DatPartyRecord *entry) {
-    if (mdlFlagTest(0x902) == 0 && entry->unitId == 4) {
+s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
+    if (mdlFlagTest(0x902) == 0 && unit->unitId == 4) {
         return 1;
     }
     return 0;
@@ -321,10 +321,10 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     return batch->count;
 }
 
-s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *entry) {
-    s32 step = ptyCalcLevelUps(entry);
-    entry->level += step;
-    ptyRecomputeMaxHpMp(entry);
+s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *unit) {
+    s32 step = ptyCalcLevelUps(unit);
+    unit->level += step;
+    ptyRecomputeMaxHpMp(unit);
     return step;
 }
 
