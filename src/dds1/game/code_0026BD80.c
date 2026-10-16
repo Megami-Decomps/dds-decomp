@@ -185,16 +185,16 @@ void mnuReleaseSpriteHandle(void) {
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 /* These entry points draw distinct movie-menu sprite table slots. */
-void mnuDrawMovieMenuSpriteSlot16(s32 parameter) {
-    mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
+void mnuDrawMovieMenuSpriteSlot16(s32 alpha) {
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0x16, 0x53);
 }
 
-void mnuDrawMovieMenuSpriteSlot17(s32 parameter) {
-    mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
+void mnuDrawMovieMenuSpriteSlot17(s32 alpha) {
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0x17, 0x53);
 }
 
-void mnuDrawMovieMenuSpriteSlot18(s32 parameter) {
-    mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
+void mnuDrawMovieMenuSpriteSlot18(s32 alpha) {
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0x18, 0x53);
 }
 
 void mnuDrawMovieMenuSpriteSlot1A(s32 parameter) {
