@@ -788,15 +788,15 @@ void sdfRebuildPoolChain(SdfPool *pool) {
     pool->tail = tail;
 }
 
-void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *node) {
+void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode) {
     switch (mode) {
     case SDF_POOL_REBUILD_CHAIN:
         sdfRebuildPoolChain(pool);
         break;
     case SDF_POOL_PUSH_FREE:
-        if (node->packetHeadAddress != 0) {
-            node->next = pool->freeHead;
-            pool->freeHead = node;
+        if (freeNode->packetHeadAddress != 0) {
+            freeNode->next = pool->freeHead;
+            pool->freeHead = freeNode;
         }
         break;
     }
