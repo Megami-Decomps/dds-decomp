@@ -55,7 +55,7 @@ extern void func_002FC0A8(void);
 extern void sceSifInitRpc(s32);
 extern s32 sceSifInitIopHeap(void);
 extern void sdfInitDeviceSemaphores(void);
-extern s32 sceSifRebootIop(const char *);
+extern s32 sceSifRebootIop(const char *iopImagePath);
 extern s32 func_00312AC0(void);
 extern void sceSifLoadFileReset(void);
 extern void sceFsReset(void);
