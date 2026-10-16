@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "fld_script_resource.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
 #include "fld_player_scene_state.h"
@@ -940,17 +941,6 @@ void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
         }
     }
 }
-
-typedef struct FldScriptResource {
-    u8 pad00[0x10];
-    SdfItemListRef itemList;
-    struct MotionTable *motionTable;
-} FldScriptResource;
-
-typedef char FldScriptResource_itemList_at_10[
-    ((u32)&((FldScriptResource *)0)->itemList == 0x10) ? 1 : -1];
-typedef char FldScriptResource_motionTable_at_20[
-    ((u32)&((FldScriptResource *)0)->motionTable == 0x20) ? 1 : -1];
 
 typedef struct FldResourceName {
     u32 unk00;
