@@ -375,8 +375,8 @@ typedef struct MenuSlotKind {
 extern MenuSlotKind D_0032EF18[];
 
 /* Same slot kind, or both kinds in the 30/31 pair. */
-s32 mnuSlotKindsInSameGroup(s32 index, s32 requestedKind) {
-    s16 current = D_0032EF18[index].kind;
+s32 mnuSlotKindsInSameGroup(s32 slotIndex, s32 requestedKind) {
+    s16 current = D_0032EF18[slotIndex].kind;
 
     if (requestedKind == current) {
         return 1;

@@ -520,13 +520,13 @@ typedef struct MenuSlotKind {
 extern MenuSlotKind D_0038A3B8[];
 
 /* Same slot kind, or both kinds in the 0xF/0x1D/0x1E group. */
-s32 mnuSlotKindsInSameGroup(s32 index, s32 kind) {
-    s16 current = D_0038A3B8[index].kind;
+s32 mnuSlotKindsInSameGroup(s32 slotIndex, s32 requestedKind) {
+    s16 current = D_0038A3B8[slotIndex].kind;
 
-    if (kind == current) {
+    if (requestedKind == current) {
         return 1;
     }
-    if (kind == 0xF || kind == 0x1D || kind == 0x1E) {
+    if (requestedKind == 0xF || requestedKind == 0x1D || requestedKind == 0x1E) {
         if (current == 0xF) {
             return 1;
         }
