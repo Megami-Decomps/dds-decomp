@@ -7530,7 +7530,7 @@ void sndClearList(void) {
     }
 }
 
-extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
+extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {

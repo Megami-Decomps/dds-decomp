@@ -1173,7 +1173,7 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
 }
 
 extern SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
-extern s32 btlSelectSideIndexedActorParameterTable(s32, s32);
+extern s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
 
 /* Finalize the existing kind/id entry: adopt or release its motion-SE packet
  * resources, retire the pack request, and mark the cache entry ready. */

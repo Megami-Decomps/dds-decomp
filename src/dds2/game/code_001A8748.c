@@ -1782,11 +1782,11 @@ BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 sid
     return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 side, s32 index) {
-    if (side == 0) {
-        return D_00435DE4 + index * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+    if (category == 0) {
+        return D_00435DE4 + actorId * 0x74;
     }
-    return D_00435DF8 + index * 0x74;
+    return D_00435DF8 + actorId * 0x74;
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
