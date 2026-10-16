@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
 #include "sdf_resource.h"
 #include "sdf_packed_resource.h"
@@ -74,10 +75,6 @@ extern s32 D_00438D18;
 extern s32 D_00438D1C;
 
 extern u32 D_00438D20;
-
-u32 sndQueueCommandPacket(u32, u32, void *, u32);
-
-u32 sndSendCommandPacket(u32, u32, void *, u32);
 
 typedef void *(*SdfSoundReadCallback)(s32);
 typedef union SdfSoundCommand {

@@ -28,10 +28,6 @@ extern SndTrackSlot sndTrackBalanceEntries[];
 
 extern SndMidiStateWords sndMidiTrackState;
 
-u32 sndSendCommandPacket();
-
-u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 size);
-
 void sndEnsureMidiBankResident(s32 trackId);
 
 /* Converts world coordinates to the sound engine's one-tenth scale. */

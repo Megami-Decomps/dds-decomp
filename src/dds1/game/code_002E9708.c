@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ee_mmi.h"
 #include "sdf_resource.h"
@@ -99,10 +100,6 @@ typedef union SdfSoundCommand {
 } SdfSoundCommand;
 
 extern SdfSoundCommand D_003BD494;
-
-u32 sndSendCommandPacket(u32 command, u32 value, void *data, u32 size);
-
-u32 sndQueueCommandPacket(u32 command, u32 value, void *data, u32 size);
 
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
