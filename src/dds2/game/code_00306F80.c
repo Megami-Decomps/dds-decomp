@@ -378,7 +378,7 @@ typedef struct GridFlushTable {
 } GridFlushTable;
 
 /* Shrink the grid bounds and apply the three-phase flush envelope to corner alpha. */
-s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridFlushTable *table;
     s32 phases[3];
     s32 deltas[2];
@@ -391,7 +391,7 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
     u32 *destColor;
     s32 i = 0;
 
-    table = (GridFlushTable *)owner->source->status;
+    table = (GridFlushTable *)timedState->source->status;
     totalDuration = table->inDuration;
     totalDuration += table->outDuration;
     totalDuration += table->waitDuration;
@@ -404,7 +404,7 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
         for (; i < 2; i++) {
             s32 delta = deltas[i];
             s32 magnitude = delta < 0 ? -delta : delta;
-            s32 product = magnitude * owner->value;
+            s32 product = magnitude * timedState->value;
             s32 negative = 0;
             s32 scaled;
 
@@ -425,10 +425,10 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
     phases[1] = (table->waitDuration << 16) / totalDuration;
     phases[2] = (table->outDuration << 16) / totalDuration;
 
-    if (phases[1] + phases[2] < owner->value) {
-        numerator = phases[0] - (owner->value - (phases[1] + phases[2]));
+    if (phases[1] + phases[2] < timedState->value) {
+        numerator = phases[0] - (timedState->value - (phases[1] + phases[2]));
         denominator = phases[0];
-    } else if (phases[2] < owner->value) {
+    } else if (phases[2] < timedState->value) {
         destColor = geometry->cornerColors;
         sourceColor = rectangle->savedColors;
         for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
@@ -436,7 +436,7 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
         }
         return 0x10000 / totalDuration;
     } else {
-        numerator = owner->value;
+        numerator = timedState->value;
         denominator = phases[2];
     }
 
