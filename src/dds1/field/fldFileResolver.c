@@ -20,6 +20,7 @@
 #include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -1386,7 +1387,6 @@ u8 fldHasAreaResourceNameChanged(void) {
 }
 
 
-extern void fldSetNpcPalette(void *source);
 extern void fldCopyActorWaypointTable(const void *source);
 extern void fldCopyInfoTable(const void *);
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
@@ -1411,7 +1411,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
-                fldSetNpcPalette(work->dataCursor);
+                fldSetNpcPalette((const FldNpcPalette *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;

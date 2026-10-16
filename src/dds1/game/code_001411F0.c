@@ -2,6 +2,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
+#include "fld_npc_palette.h"
 #include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "common.h"
@@ -3419,7 +3420,7 @@ void fldLoadNpcPalette(s32 field) {
     }
 }
 
-void fldSetNpcPalette(void *src) {
+void fldSetNpcPalette(const FldNpcPalette *src) {
     memcpy(D_003D44A0, src, 0x200);
 }
 
