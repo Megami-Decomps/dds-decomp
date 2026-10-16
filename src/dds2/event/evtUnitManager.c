@@ -656,20 +656,20 @@ void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColo
     u32 firstPackedColor;
     u32 secondPackedColor;
     union {
-        f32 value;
-        u32 bits;
-    } scale;
+        f32 scaleValue;
+        u32 scaleBits;
+    } packedScale;
 
     unit->unused1B0 = duration;
     unit->color08 = firstColor;
     unit->color58 = secondColor;
-    scale.value = 128.0f;
+    packedScale.scaleValue = 128.0f;
     evtLoadUnitFirstColorVectorVU(unit);
-    EE_MMI_RGBA_PACK_UNIT(firstPackedColor, scale.bits);
+    EE_MMI_RGBA_PACK_UNIT(firstPackedColor, packedScale.scaleBits);
     firstColorVector[0] = firstPackedColor;
     unit->firstCurrent = firstPackedColor;
     evtLoadUnitSecondColorVectorVU(unit);
-    EE_MMI_RGBA_PACK_UNIT(secondPackedColor, scale.bits);
+    EE_MMI_RGBA_PACK_UNIT(secondPackedColor, packedScale.scaleBits);
     secondColorVector[0] = secondPackedColor;
     unit->color54 = secondPackedColor;
     unit->flags = (unit->flags | 0x800) & ~0x1000;
