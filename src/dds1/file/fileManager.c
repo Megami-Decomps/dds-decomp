@@ -5,6 +5,7 @@
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
 #include "file_manager_views.h"
+#include "file_request_callback_work.h"
 
 /* Intrusive list node threaded through +0x4. */
 typedef struct FileNode {
@@ -166,17 +167,6 @@ struct FileRequest *fileQueuePlainDispatchRequest(const char *requestName) {
 void fileQueueFlaggedDispatchRequest(const char *requestName) {
     fileAllocateDispatchRequest(requestName, 1, 0, 0, 0);
 }
-
-typedef struct FileRequestCallbackWork {
-    u8 pad00[3];
-    u8 callbackMode;
-    u8 pad04[0x2C];
-} FileRequestCallbackWork;
-
-typedef char FileRequestCallbackWork_size_must_be_0x30[
-    (sizeof(FileRequestCallbackWork) == 0x30) ? 1 : -1];
-typedef char FileRequestCallbackWork_callbackMode_offset_check[
-    ((u32)&((FileRequestCallbackWork *)0)->callbackMode == 0x03) ? 1 : -1];
 
 /* Clear kind-zero request work and narrow callbackMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
