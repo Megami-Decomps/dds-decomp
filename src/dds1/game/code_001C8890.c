@@ -134,7 +134,7 @@ s32 btlBothSidesActive(BtlUnit *unit);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
-void btlClearSceneTaskActiveFlag(s32 arg0);
+void btlClearSceneTaskActiveFlag(s32 taskAddress);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
