@@ -1331,13 +1331,13 @@ u32 evtOpSpawnBoundEffectFromTaskResource(void) {
 u32 evtOpResolveAndFlagObjectFromName(void) {
     u8 buf1[16];
     u8 buf2[16];
-    char *param0;
+    char *resourceName;
     EvtUnit *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
-    param0 = scrReadStringParameter(0);
-    unit = effObjSpawnLoadedResourceEffect((const char *)param0, buf1, buf2);
+    resourceName = scrReadStringParameter(0);
+    unit = effObjSpawnLoadedResourceEffect((const char *)resourceName, buf1, buf2);
     if (unit == NULL) {
         sdfDebugPrintf(D_003AC520, 1);
         sdfDebugPrintf(D_003AC550, scrReadStringParameter(0));
