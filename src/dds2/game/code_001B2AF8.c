@@ -506,7 +506,7 @@ s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     }
     if (datBattleSceneRecords[battle->battleMode].maxEnemySpawns != 0) {
         spawnLimit = datBattleSceneRecords[battle->battleMode].maxEnemySpawns;
-        if (battle->unk27E >= spawnLimit) {
+        if (battle->spawnCount >= spawnLimit) {
             return 0;
         }
     }
