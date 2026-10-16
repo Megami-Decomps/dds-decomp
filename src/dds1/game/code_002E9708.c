@@ -1,5 +1,4 @@
 #include "common.h"
-#include "snd_iop_dma_api.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ee_mmi.h"
 #include "sdf_resource.h"
@@ -233,6 +232,7 @@ extern DevState *D_003BDA7C;
 extern SdfSoundResidentBuffer D_003FEA98;
 extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
+extern void sndCopyToIopAndWait(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
 u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {

@@ -2,7 +2,6 @@
 #include "common.h"
 #include "snd_track_playback_api.h"
 #include "snd_command_packet.h"
-#include "snd_iop_dma_api.h"
 #include "snd_work.h"
 #include "sdf_named_resource_request_api.h"
 #include "sce_io.h"
@@ -34,6 +33,7 @@ extern s8 sndSynchronousCommandMode;
 extern s32 D_003BDA8C;
 extern s32 sceSifInitIopHeap(void);
 extern s32 sndStartIopCommandAndRpcWorkers(void);
+extern void sndCopyToIopAndWait(s32, void *, s32);
 
 extern SndRingPacket sndCommandRing[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_003BD4A0;
@@ -103,7 +103,7 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
 extern SifDmaTransfer sndIopDmaTransfer;
 
 /* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
-void sndCopyToIopAndWait(s32 destination, const void *source, s32 size) {
+void sndCopyToIopAndWait(s32 destination, void *source, s32 size) {
     s32 dmaId;
     s32 delay;
 
