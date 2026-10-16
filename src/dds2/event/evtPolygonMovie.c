@@ -828,13 +828,13 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(u8 **out) {
 
 extern s32 sprintf(char *output, const char *format, ...);
 
-s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3) {
+s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3) {
     sprintf(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
-                  event / 10 * 10, event, event, id, event, id);
+                  eventId / 10 * 10, eventId, eventId, sceneId, eventId, sceneId);
     sprintf(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
-                  event / 10 * 10, event, event, id, event, id);
+                  eventId / 10 * 10, eventId, eventId, sceneId, eventId, sceneId);
     return sprintf(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
-                         event / 10 * 10, event, event, id, event, id);
+                         eventId / 10 * 10, eventId, eventId, sceneId, eventId, sceneId);
 }
 
 extern s32 sdfPathExists(char *path);
@@ -892,7 +892,7 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
 
 extern u32 D_00435CBC;
-extern s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3);
+extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3);
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
 extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
