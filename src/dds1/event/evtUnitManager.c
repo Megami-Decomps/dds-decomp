@@ -812,8 +812,8 @@ s32 evtGetUnitMotionState(EvtUnit *unit) {
 
 /* Callers pass the promoted full-width value (one reads a byte table field);
  * only the low halfword is stored. */
-void evtUnitSetStoredParameter(EvtUnit *unit, s32 value) {
-    unit->unkBC = value;
+void evtUnitSetStoredParameter(EvtUnit *unit, s32 storedParameter) {
+    unit->unkBC = storedParameter;
 }
 
 void evtSetTransitionMotionScale(EvtUnit *work, f32 transitionMotionScale) {
