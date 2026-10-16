@@ -585,7 +585,7 @@ extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
 extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
-extern u8 btlGetActorDisplayByteWithDefault(BtlUnit *, s32);
+extern u8 btlGetActorDisplayByteWithDefault(BtlUnit *object, s32 index);
 
 extern s32 btlSelectCounterSkill(BtlUnit *, BtlUnit *);
 

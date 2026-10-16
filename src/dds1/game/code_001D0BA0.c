@@ -587,7 +587,7 @@ extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
 
 extern s32 btlGetEnemyMoney(u8 *, u8 *);
 
-extern u8 btlGetActorDisplayByteWithDefault(s32, s32);
+extern u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index);
 
 extern s32 btlRollPassiveAbilityAction(BtlUnit *);
 
