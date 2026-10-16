@@ -181,7 +181,7 @@ typedef struct BattleWork {
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
-extern u32 btlCreateScriptResourceTask(BtlUnit *, u32);
+extern BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *, u32);
 
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
@@ -1605,7 +1605,7 @@ void btlQueueBossScriptResourceAndSound(ActionStateLink *action) {
             }
             if (unit != 0) {
                 if (unit->status.flags & 0xE0) {
-                    task = (BtlRuntimeTask *)btlCreateScriptResourceTask(unit, 0x64);
+                    task = btlCreateScriptResourceTask(unit, 0x64);
                     task->ownerId = action->unit->owner;
                     task->startDelay = 0xE;
                     btlStartTask(task);
@@ -2453,7 +2453,7 @@ void btlQueueGateComponentScriptAndSound(ActionStateLink *record) {
     default:
         return;
     }
-    task = (BtlRuntimeTask *)btlCreateScriptResourceTask(ctrl->prevUnit, resource);
+    task = btlCreateScriptResourceTask(ctrl->prevUnit, resource);
     task->startDelay = 0xE;
     btlStartTask(task);
     follow = sndCreateStationedSeTask(work->soundTaskBase + variant);
@@ -5437,7 +5437,7 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BtlRuntimeTask *sound;
 
     if (*slot != 0) {
-        task = (BtlRuntimeTask *)btlCreateScriptResourceTask(*slot, (*slot)->partyRecord.unitId == 0x10E ? 0x61 : 0x62);
+        task = btlCreateScriptResourceTask(*slot, (*slot)->partyRecord.unitId == 0x10E ? 0x61 : 0x62);
         task->ownerId = ((BtlUnit *)unit->parentUnit)->owner;
         task->startDelay = 0xE;
         btlStartTask(task);
@@ -6155,7 +6155,7 @@ void btlReplacePendingBossUnitAndQueueTasks(ActionStateLink *link) {
     savedFlags = link->unit->partyRecord.flags;
     btlInitializePartyRecordFromEnemy(&link->unit->partyRecord, replacementId);
     link->unit->partyRecord.flags = savedFlags;
-    script = (BtlRuntimeTask *)btlCreateScriptResourceTask(link->unit, scriptGroup);
+    script = btlCreateScriptResourceTask(link->unit, scriptGroup);
     script->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
     script->startCondition.value.handle = 0x2E;
     script->startDelay = 0xE;

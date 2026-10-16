@@ -888,8 +888,8 @@ u32 btlRunSceneActorEventTask(BattleScriptTaskData *record) {
     return 0;
 }
 
-/* Queue script-resource work for object/group; return its 32-bit task address. */
-u32 btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
+/* Queue script-resource work for object/group and return its scheduler task. */
+BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
     BattleTask *task = (BattleTask *)btlAllocTask(12);
     BattleScriptTaskData *data;
     task->enabled = 1;
@@ -900,7 +900,7 @@ u32 btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
     data->object = object;
     data->group = group;
     data->frames = 0;
-    return (u32)task;
+    return (BtlRuntimeTask *)task;
 }
 
 /* Start the event on frame zero, bind its actor, and return 1 on completion. */
