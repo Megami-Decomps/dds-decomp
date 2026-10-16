@@ -425,13 +425,13 @@ void mnuAdvanceRuntimeAnimationRecords(void) {
 
 
 /* Include the 0x10-byte header and both variable-length record blocks. */
-s32 dds3MeasureMenuRecord(DdsNestedGroup *group) {
+s32 dds3MeasureMenuRecord(const DdsNestedGroup *group) {
     s32 byteSize = dds3MeasureRecordBlock(group->first, group->firstCount) + 0x10;
     return byteSize + dds3MeasureRecordBlock(group->second, group->secondCount);
 }
 
 /* Each entry has an eight-byte header followed by its eight-byte subentries. */
-s32 dds3MeasureRecordBlock(DdsCountedPayload *records, s32 count) {
+s32 dds3MeasureRecordBlock(const DdsCountedPayload *records, s32 count) {
     s32 subentryCount;
     s32 byteSize;
 
