@@ -35,6 +35,6 @@ void fileWaitReady(struct FileRequest *request);
 void fileWaitForRequestReady(struct FileRequest *request);
 void fileReqStartCardDetection(u32 port);
 
-struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, void *data, s32 size);
+struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, const void *sourceData, s32 size);
 
 #endif /* FILE_REQUEST_API_H */
