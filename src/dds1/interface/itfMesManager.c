@@ -51,7 +51,7 @@ ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 entryIndex);
 
 ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 
-u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex);
+u8 *itfMesGetTableItem(ItfMesTable *table, s32 itemIndex);
 
 void itfMesRelocate(ItfMesRelocHeader *resource);
 
@@ -453,7 +453,7 @@ s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 itemIndex) {
     entryBlock->table = table;
     entryBlock->tableCount = table->count;
     if (table->count != 0) {
-        return itfInitTextDrawArgs((u8 *)itfMesGetTableItem(table, (s16)itemIndex), 0);
+        return itfInitTextDrawArgs(itfMesGetTableItem(table, (s16)itemIndex), 0);
     }
     return 0;
 }
@@ -860,7 +860,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
 }
 
 /* Look up an entry-table item; only the item index has a bounds check. */
-u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
+u8 *itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
@@ -919,7 +919,7 @@ s32 itfMesSetOptionValue(s32 window, s32 id, s32 value) {
 s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesTable *table;
-    u32 encodedText;
+    u8 *encodedText;
     FrFontGlyph *glyphChain;
     s32 textExtent;
 
@@ -935,7 +935,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     if (encodedText == 0) {
         return encodedText;
     }
-    glyphChain = itfDrawDefaultColorText(0, 0, (u8 *)encodedText, 0);
+    glyphChain = itfDrawDefaultColorText(0, 0, encodedText, 0);
     textExtent = itfMesMaxGroupedExtent(glyphChain);
     frFontQueueGlyphForCurrentDrawBuffer(glyphChain);
     return textExtent;
@@ -1200,14 +1200,14 @@ u32 itfMesGetEntryCount(s32 window) {
     return itfWindowSlots[window].mes->sub->entryCount;
 }
 
-/* Return an encoded item word, or zero for a negative/past-end item index. */
-u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex) {
+/* Return relocated encoded text, or NULL for a negative/past-end index. */
+u8 *itfMesGetTableItem(ItfMesTable *table, s32 itemIndex) {
     s32 itemCount = table->count;
 
     if (itemIndex < 0 || itemIndex >= itemCount) {
         return 0;
     }
-    return table->items[itemIndex];
+    return (u8 *)table->items[itemIndex];
 }
 
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
@@ -1226,7 +1226,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         entryBlock->glyphChain = NULL;
     }
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
-                          (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
+                          itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
     if (mes->panelMode == 3) {
         if (frFontCountGlyphChainNodes(glyph) == 1) {
             frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
