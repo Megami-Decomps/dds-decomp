@@ -349,7 +349,63 @@ void fldDrawLocalMapTransition(s32 opening) {
     fldDrawLocalMapFrame(slide, alpha1, alpha2, alpha3);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", fldDrawLocalMapTransitionFrame);
+extern void *memcpy(void *, const void *, unsigned int);
+extern void evtSetDrawSurfaceIndex(u32);
+typedef struct {
+    s16 row[6][5];
+} LocalMapRectsTable;
+extern LocalMapRectsTable D_003B3E00;
+typedef struct {
+    s16 row[10][8];
+} LocalMapQuadsTable;
+extern LocalMapQuadsTable D_003B3E40;
+/* Each gradient rect fades from its edge alpha (row[4] scaled by progress) to a
+ * zero-weighted corner; the quads are the map-name texture frame. */
+#define RECT(i) rectsTable->row[i][0], rectsTable->row[i][1], rectsTable->row[i][2], rectsTable->row[i][3]
+#define EDGE_ALPHA(i) (s32)(rectsTable->row[i][4] * progress) << 24
+#define FADED_CORNER(i) ((s32)((rectsTable->row[i][4] * progress) * 0.0f) << 24)
+#define QUAD(i)                                                                                              \
+    quadsTable->row[i][0], quadsTable->row[i][1], quadsTable->row[i][2], quadsTable->row[i][3],              \
+        quadsTable->row[i][4], quadsTable->row[i][5], quadsTable->row[i][6], quadsTable->row[i][7]
+#define NAME_TEXTURE fldLocalMapNameTextures[D_003BD97C].texture
+
+void fldDrawLocalMapTransitionFrame(f32 progress) {
+    LocalMapRectsTable rects = D_003B3E00;
+    LocalMapQuadsTable quads = D_003B3E40;
+    LocalMapRectsTable *rectsTable = &rects;
+    LocalMapQuadsTable *quadsTable = &quads;
+    u32 color, tint;
+
+    evtSetDrawSurfaceIndex(0x54);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 0, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    color = EDGE_ALPHA(0);
+    evtSubmitDefaultDepthGradientRect(RECT(0), color, color, color, color);
+    color = EDGE_ALPHA(1);
+    evtSubmitDefaultDepthGradientRect(RECT(1), color, FADED_CORNER(1), FADED_CORNER(1), FADED_CORNER(1));
+    color = EDGE_ALPHA(2);
+    evtSubmitDefaultDepthGradientRect(RECT(2), FADED_CORNER(2), FADED_CORNER(2), color, FADED_CORNER(2));
+    tint = ((s32)(progress * 128.0f) << 24) | 0x808080;
+    kwlnDrawTexturedColorQuad(QUAD(3), tint, tint, tint, tint, NAME_TEXTURE);
+    color = EDGE_ALPHA(3);
+    evtSubmitDefaultDepthGradientRect(RECT(3), color, FADED_CORNER(3), FADED_CORNER(3), FADED_CORNER(3));
+    color = EDGE_ALPHA(4);
+    evtSubmitDefaultDepthGradientRect(RECT(4), FADED_CORNER(4), FADED_CORNER(4), FADED_CORNER(4), color);
+    color = EDGE_ALPHA(5);
+    evtSubmitDefaultDepthGradientRect(RECT(5), FADED_CORNER(5), color, FADED_CORNER(5), FADED_CORNER(5));
+    kwlnDrawTexturedColorQuad(QUAD(0), tint, tint, tint, tint, NAME_TEXTURE);
+    kwlnDrawTexturedColorQuad(QUAD(8), tint, tint, tint, tint, NAME_TEXTURE);
+    kwlnDrawTexturedColorQuad(QUAD(9), tint, tint, tint, tint, NAME_TEXTURE);
+    kwlnDrawTexturedColorQuad(QUAD(1), tint, tint, tint, tint, NAME_TEXTURE);
+    kwlnDrawTexturedColorQuad(QUAD(2), tint, tint, tint, tint, NAME_TEXTURE);
+    kwlnDrawTexturedColorQuad(QUAD(4), tint, tint, tint, tint, NAME_TEXTURE);
+}
+
+#undef RECT
+#undef EDGE_ALPHA
+#undef FADED_CORNER
+#undef QUAD
+#undef NAME_TEXTURE
 
 extern void evtSetDrawSurfaceIndex(u32);
 
