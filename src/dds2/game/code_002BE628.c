@@ -839,12 +839,12 @@ const s32 D_0042B140[4] = {512, 56, 1088, 208};
 void mnuCalcListEntryOffset(s32 *out, MenuPageWindow *menu, s32 panelIndex) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
     s32 count = menu->records->frontlineCount;
-    s32 mode;
+    s32 group;
 
     if (!(menu->slots[panelIndex].flags & 0x40)) {
-        mode = panelIndex < count ? 1 : 2;
+        group = panelIndex < count ? 1 : 2;
     } else {
-        mode = 1;
+        group = 1;
     }
     if (menu->selected >= 0) {
         out[0] = 0xC80;
@@ -853,7 +853,7 @@ void mnuCalcListEntryOffset(s32 *out, MenuPageWindow *menu, s32 panelIndex) {
         out[0] = 0xF00;
         out[1] = 0x28;
     }
-    switch (mode) {
+    switch (group) {
     case 1:
         out[1] += panelIndex * spacing.step;
         break;
