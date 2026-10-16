@@ -74,14 +74,14 @@ u16 dds3GetWorldValueCount(const WorldValueIndices *object) {
     return value;
 }
 
-u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value) {
+u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 wordValue) {
     if (object->entryCount == 0) {
         return 0;
     }
     if (object->cursorIndex < 0) {
         return 0;
     }
-    ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].value = value;
+    ((WorldInfo *)dds3ActiveWorld->data)->entries[object->cursorIndex].value = wordValue;
     return 1;
 }
 
