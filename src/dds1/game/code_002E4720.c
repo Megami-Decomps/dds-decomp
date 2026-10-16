@@ -128,7 +128,7 @@ extern void sdfDevUnlinkAndFreeState(DevState *state);
 extern void sdfDevRecycleCompletedState(DevState *state);
 
 extern DevState *sdfDevCreateCallbackState(const char *path,
-                                void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
+                                void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
 extern s32 sceClose(s32 fd);
 
