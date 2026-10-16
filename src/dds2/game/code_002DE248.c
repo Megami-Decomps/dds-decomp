@@ -65,6 +65,7 @@
 #include "btl_resource_name.h"
 #include "btl_state.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "mdl.h"
 #include "eff.h"
 #include "eff_billboard_work.h"
@@ -9039,7 +9040,6 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 /* Apply timed actor light transitions, then fade back to the original colors/directions. */
 void effUpdateBattleActorLighting(EffActiveResource *work) {
