@@ -361,6 +361,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
 #include "field_stage.h"
 #include "sdf_pac_work.h"
 extern FldInfTable D_00332E30;

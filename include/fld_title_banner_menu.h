@@ -3,6 +3,11 @@
 
 #include "common.h"
 
+struct KwlnTask;
+
+/* Task initializer used by the field title-banner panel in both games. */
+s32 fldInitializeTitleBannerTask(struct KwlnTask *task);
+
 /* Title-banner consumer confirms these four halfwords and their offsets. */
 typedef struct FldTitleBannerMenu {
     u16 position; /* 0x00 */

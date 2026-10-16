@@ -9,8 +9,6 @@ extern u32 fldInputPanelTaskHandle;
 
 
 
-extern s32 fldInitializeTitleBannerTask(KwlnTask *task);
-
 void fldReleasePanelState(KwlnTask *task) {
     void *panelState;
 
