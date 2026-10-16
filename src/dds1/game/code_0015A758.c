@@ -1445,10 +1445,10 @@ void parSetCellDrawBucket(ParSystem *system, u16 bucket) {
     system->bucket = bucket;
 }
 
-void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
+void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB) {
     u16 id = *(u16 *)work;
 
-    D_0034E5E0[id * 3 + sub](work, a2, a3);
+    D_0034E5E0[id * 3 + sub](work, dispatchArgA, dispatchArgB);
 }
 
 extern const u32 D_0034E360[];
