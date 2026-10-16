@@ -4303,6 +4303,10 @@ The enabled `scrScriptProcess.c` definitions return `ScrData *` from
 these pointer contracts. Clients that only compare the lookup result with
 NULL can use the canonical incomplete `struct ScrData *` tag without adding
 a second script-data definition or importing the complete script header.
+`scrGetWorkTaskHandle` also returns the active work-task `ScrData *`, and
+`scrIsCurrentWorkTask` compares that pointer with a named-process node; callers
+should keep this identity check pointer-typed rather than round-tripping through
+`u32`.
 
 
 ## Reward-panel glyph pointer contracts

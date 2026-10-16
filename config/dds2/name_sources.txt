@@ -513,7 +513,7 @@
 0x00118008	sdfRestoreResetSnapshot	inferred	Restores saved runtime data after sdfResetGameRuntime clears the game state; restores flags, ticks, mantra/profile/template data, inventory/event bits, and world slot flags. Paired with DDS1 0x00117C48.
 0x00118598	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:290:func_00118598; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:24 [names_qp13.tsv]
 0x00118680	evtInitializeWorkScriptTask	inferred	Recreates the event work script task and clears its event context after sdfResetChannels reloads channel segments.
-0x001186C8	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]
+0x001186C8	scrIsCurrentWorkTask	inferred	Compares the current script work-task ScrData pointer against the expected process pointer. [names_reviewed10.tsv]
 0x001186F8	sdfLoadChannelFileSegment	inferred	Replaces a destination block with one length-prefixed channel-file payload and returns its 16-byte-aligned span for cursor advancement.
 0x001188F0	ptyComputeMaxHp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:391:func_001188F0; Returns enemy-record maximum HP or party level/stat growth plus HP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001189D0	ptyComputeMaxMp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:413:func_001189D0; Returns enemy-record maximum MP or party level/stat growth plus MP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
@@ -576,7 +576,7 @@
 0x0011D3B8	ptyAddClampedEntryValue	inferred	Adds an amount to the selected entry byte and clamps it to the zero-to-99 range. [names_reviewed16.tsv]
 0x0011D3E8	ptyAssignRosterItemAndMarkOwned	inferred	Assigns an item from the roster-index table and marks the resulting item as owned. [names_reviewed15.tsv]
 0x0011D438	ptyAssignPartyRosterItemsAndMarkOwned	inferred	Assigns roster-indexed items for each occupied party entry and marks the items as owned. [names_reviewed15.tsv]
-0x0011D588	scrGetWorkTaskHandle	inferred	Returns script work task handle stored in global. [names_reviewed7.tsv]
+0x0011D588	scrGetWorkTaskHandle	inferred	Returns the current script work-task ScrData pointer stored in the global. [names_reviewed7.tsv]
 0x0011D590	scrDestroyWorkTask	inferred	Destroys script task stored in global and clears its handle. [names_reviewed7.tsv]
 0x0011D5B8	evtPushFirstRosterLevel	inferred	First active roster entry field at position matching Entry1A4.level, identical first-game script level getter 0011B968. [names_reviewed18.tsv]
 0x0011D5E0	evtPushSecondRosterLevel	inferred	Second active roster entry field at position matching Entry1A4.level, identical first-game script level getter 0011B990. [names_reviewed18.tsv]

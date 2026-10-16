@@ -685,7 +685,7 @@
 0x00118020	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00117438.c:292:func_00118020; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:22 [names_qp13.tsv]
 0x001180F8	evtInitializeWorkScriptTask	inferred	Recreates the event work script task and clears its event context after sdfResetChannels reloads channel segments.
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
-0x00118140	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]
+0x00118140	scrIsCurrentWorkTask	inferred	Compares the current script work-task ScrData pointer against the expected process pointer. [names_reviewed10.tsv]
 0x00118170	sdfLoadChannelFileSegment	inferred	Replaces a destination block with one length-prefixed channel-file payload and returns its 16-byte-aligned span for cursor advancement.
 0x00118310	sdfResetChannels	inferred	resets the 8 channel entries
 0x00118368	ptyComputeMaxHp	inferred	enemy base max HP, or HP script result capped at 999 for party units
@@ -755,7 +755,7 @@
 0x0011B7F0	evtClearRandomStatusFlags	inferred	RNG-gated clearing of status mask 0x5D0 on qualified occupied roster entries.
 0x0011B878	evtRunContext	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011B908	dds3WorkInit	inferred	stores 0010BCA0 result to D_003BAAB4 then memsets 0x18 bytes at evtWorkScriptContext
-0x0011B938	scrGetWorkTaskHandle	inferred	Returns script work task handle stored in global. [names_reviewed7.tsv]
+0x0011B938	scrGetWorkTaskHandle	inferred	Returns the current script work-task ScrData pointer stored in the global. [names_reviewed7.tsv]
 0x0011B940	scrDestroyWorkTask	inferred	Destroys script task stored in global and clears its handle. [names_reviewed7.tsv]
 0x0011B968	evtPushFirstRosterLevel	inferred	Script handler writes the level of the first selected roster entry to the integer return slot. [names_reviewed18.tsv]
 0x0011B990	evtPushSecondRosterLevel	inferred	Script handler writes the level of the second selected roster entry to the integer return slot. [names_reviewed18.tsv]

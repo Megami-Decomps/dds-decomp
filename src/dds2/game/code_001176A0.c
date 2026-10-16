@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_work_task_api.h"
 #include "dat_save_words.h"
 #include "evt_scaled_value.h"
 #include "eff_random_mod.h"
@@ -23,7 +24,6 @@
 extern void *D_00435E80;
 
 
-extern u32 scrGetWorkTaskHandle(void);
 extern void dds3WorkInit(void *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
@@ -408,8 +408,8 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 scrIsCurrentWorkTask(u32 expected) {
-    u32 current;
+u8 scrIsCurrentWorkTask(struct ScrData *expected) {
+    struct ScrData *current;
 
     current = scrGetWorkTaskHandle();
     return current == expected;
