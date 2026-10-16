@@ -2540,7 +2540,7 @@ void func_001FB0A0(void) {
 void btlBossDebugPrintf(const char *format, ...) {
 }
 
-void btlBossDebugPrintfN(s32 arg0, s32 arg1, s32 arg2, s32 arg3, ...) {
+void btlBossDebugPrintfN(s32 x, s32 y, s32 color, s32 format, ...) {
 }
 
 /* Retail discards positioned debug text; name-editor callers retain this ABI. */
