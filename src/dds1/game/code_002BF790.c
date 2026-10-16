@@ -119,10 +119,10 @@ void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceInd
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
-void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
+void itfGridSetQuantizedBounds(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y,
                    s32 width, s32 height) {
-    EffectSlotDescription *entry = &object->descriptions[index];
-    u32 *destination = (u32 *)object->workEntries[index].bounds.grid.quantizedBounds;
+    EffectSlotDescription *entry = &resource->descriptions[resourceIndex];
+    u32 *destination = (u32 *)resource->workEntries[resourceIndex].bounds.grid.quantizedBounds;
     u32 *source;
     s32 remaining = 3;
     entry->bounds[0] = x >> 4;
