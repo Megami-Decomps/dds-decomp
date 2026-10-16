@@ -592,7 +592,7 @@ extern void fldUpdateSceneGroupTask(ActionStateLink *task);
 
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actor, u32 owner, s32 groupIndex);
 
-extern void btlClearSceneTaskActiveFlag(s32 task);
+extern void btlClearSceneTaskActiveFlag(ActionStateLink *task);
 
 void btlActionSeqStateSelect(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -3114,8 +3114,8 @@ void btlStartLinkedActorEffectTask(ActionStateLink *unit) {
 
 extern void btlResetUnitLinks(BtlUnit *);
 extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
-extern void btlBindActorTaskAndSelectActionNumber(s32, s32);
-extern void btlSetSceneTaskActiveFlag(s32);
+extern void btlBindActorTaskAndSelectActionNumber(ActionStateLink *, BtlUnit *);
+extern void btlSetSceneTaskActiveFlag(ActionStateLink *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *, u32, s16);
@@ -3231,10 +3231,10 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
     }
 
     summonedAction = btlCreateActionSeq();
-    btlBindActorTaskAndSelectActionNumber((s32)summonedAction, (s32)unit);
+    btlBindActorTaskAndSelectActionNumber(summonedAction, unit);
     fldAppendTaskToGroup(summonedAction);
     btlDispatchStateHandler(summonedAction, 2);
-    btlSetSceneTaskActiveFlag((s32)summonedAction);
+    btlSetSceneTaskActiveFlag(summonedAction);
     btlDispatchStateHandler(summonedAction, 0x1C);
     /* Read both actor inputs after dispatch before committing the new flags. */
     summonedFlags = summonedAction->pendingFlags;
@@ -3882,7 +3882,7 @@ void btlCommandTaskReleaseActor(ActionStateLink *task) {
             task->pendingFlags &= ~8;
         }
     }
-    btlClearSceneTaskActiveFlag((s32)task);
+    btlClearSceneTaskActiveFlag(task);
     task->pendingFlags |= 2;
 }
 

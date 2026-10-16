@@ -24,6 +24,10 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "fld_encounter_runtime_api.h"
 #include "evt_solar.h"
 
+void btlSetSceneTaskActiveFlag(BtlTask *task);
+void btlClearSceneTaskActiveFlag(BtlTask *task);
+void btlBindActorTaskAndSelectActionNumber(BtlTask *task, BtlUnit *actor);
+
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
 #define FLD_SCENE_GROUP_SECONDARY_ID 2
@@ -2174,27 +2178,26 @@ s32 *fldCreateActorAction(s32 counterAmount) {
 }
 
 /* Set the task's active bit without changing its other flags. */
-void btlSetSceneTaskActiveFlag(s32 taskAddress) {
-    *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) | FLD_SCENE_TASK_ACTIVE_BIT;
+void btlSetSceneTaskActiveFlag(BtlTask *task) {
+    task->flags |= FLD_SCENE_TASK_ACTIVE_BIT;
 }
 
 /* Clear only the task's active bit; retain the native unsigned clear mask. */
-void btlClearSceneTaskActiveFlag(s32 taskAddress) {
-    *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) & 0xfffffffe;
+void btlClearSceneTaskActiveFlag(BtlTask *task) {
+    task->flags &= 0xfffffffe;
 }
 
 /* Bind the actor, select a valid secondary-group action, and mark the task bound. */
-void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, BtlUnit *actorAddress) {
+void btlBindActorTaskAndSelectActionNumber(BtlTask *task, BtlUnit *actorAddress) {
     u32 flags;
 
     flags = (u32)actorAddress->status.flags;
-    ((BtlTask *)taskAddress)->unit = actorAddress;
+    task->unit = actorAddress;
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
-        *(u16 *)((u8 *)actorAddress + 0x124) <= 0x17F) {
-        *(u16 *)(taskAddress + 4) = datEnemyRecords[*(u16 *)((u8 *)actorAddress + 0x124)].summonCategory;
+        actorAddress->partyRecord.unitId <= 0x17F) {
+        task->actionNumber = datEnemyRecords[actorAddress->partyRecord.unitId].summonCategory;
     }
-    flags = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET);
-    *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = flags | FLD_SCENE_TASK_BOUND_BIT;
+    task->flags |= FLD_SCENE_TASK_BOUND_BIT;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);

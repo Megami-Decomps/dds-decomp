@@ -26,6 +26,10 @@
 #include "kwln_fade.h"
 #include "evt_solar.h"
 
+void btlSetSceneTaskActiveFlag(ActionStateLink *task);
+void btlClearSceneTaskActiveFlag(ActionStateLink *task);
+void btlBindActorTaskAndSelectActionNumber(ActionStateLink *task, BtlUnit *actor);
+
 /* Result-screen AP overlays BtlState's 0x2F8 defeat-EP accumulator. */
 typedef struct BattleResultApView {
     s32 totalAp;
@@ -2266,28 +2270,26 @@ u8 *fldCreateActorAction(s32 counterAmount) {
 }
 
 /* Set the task's active bit without changing its other flags. */
-void btlSetSceneTaskActiveFlag(s32 taskAddress) {
-    ((ActionStateLink *)taskAddress)->pendingFlags |= FLD_SCENE_TASK_ACTIVE_BIT;
+void btlSetSceneTaskActiveFlag(ActionStateLink *task) {
+    task->pendingFlags |= FLD_SCENE_TASK_ACTIVE_BIT;
 }
 
 /* Clear only the task's active bit; retain the signed native complement. */
-void btlClearSceneTaskActiveFlag(s32 taskAddress) {
-    ((ActionStateLink *)taskAddress)->pendingFlags &= ~FLD_SCENE_TASK_ACTIVE_BIT;
+void btlClearSceneTaskActiveFlag(ActionStateLink *task) {
+    task->pendingFlags &= ~FLD_SCENE_TASK_ACTIVE_BIT;
 }
 
 /* Bind the actor, select a valid secondary-group action, and mark the task bound. */
-void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
+void btlBindActorTaskAndSelectActionNumber(ActionStateLink *task, BtlUnit *actor) {
     u32 flags;
 
-    flags = ((BtlUnit *)actorAddress)->status.flags;
-    ((ActionStateLink *)taskAddress)->unit = (BtlUnit *)actorAddress;
+    flags = actor->status.flags;
+    task->unit = actor;
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
-        ((BtlUnit *)actorAddress)->partyRecord.unitId <= 0x17F) {
-        ((ActionStateLink *)taskAddress)->actionNumber =
-            datEnemyRecords[((BtlUnit *)actorAddress)->partyRecord.unitId].summonCategory;
+        actor->partyRecord.unitId <= 0x17F) {
+        task->actionNumber = datEnemyRecords[actor->partyRecord.unitId].summonCategory;
     }
-    flags = ((ActionStateLink *)taskAddress)->pendingFlags;
-    ((ActionStateLink *)taskAddress)->pendingFlags = flags | FLD_SCENE_TASK_BOUND_BIT;
+    task->pendingFlags |= FLD_SCENE_TASK_BOUND_BIT;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001CFEF8", D_00417278);
