@@ -767,7 +767,7 @@ void mnuDrawMantraCostIconOffset(u32 unusedX, u32 unusedY, u32 depth, u32 record
     mnuDrawMantraSprite(0, 0, depth, amount, markers[index] + 8, 0, drawArg);
 }
 
-extern s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 index, s32 drawArg);
+extern s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 nodeIndex, s32 drawArg);
 INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraSelectionTransitionNode);
 
 MantraDisplayNode *mnuAllocateDisplayListNode(void) {
@@ -893,7 +893,7 @@ void mnuReleaseDisplayListNodes(MantraListState *state) {
 }
 
 s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *state, s32 amount, s32 drawArg) {
-    s32 index = 0;
+    s32 nodeIndex = 0;
     u32 record;
     s32 offset;
     f32 fadeWeight = 0.0f;
@@ -922,13 +922,13 @@ s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *
         return 1;
     }
     do {
-        if (mnuDrawMantraSelectionTransitionNode(x, y, depth, node, index, drawArg) != 0) {
+        if (mnuDrawMantraSelectionTransitionNode(x, y, depth, node, nodeIndex, drawArg) != 0) {
             node = mnuReleaseDisplayListNodeAndGetNext(node);
             state->head = node;
         } else {
             node = node->next;
         }
-        index++;
+        nodeIndex++;
     } while (node != NULL);
     return 0;
 }
