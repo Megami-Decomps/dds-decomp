@@ -23,8 +23,8 @@ WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 slotIndex) {
 }
 #include "dds3_world_secondary.h"
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-WorldIndexNode *dds3CopyFilteredWorldSlot(EffWorldNode *object, s32 index, s32 (*filter)(u32)) {
-    WorldIndexNode *slot = dds3GetWorldSlotValue(object, index);
+WorldIndexNode *dds3CopyFilteredWorldSlot(EffWorldNode *object, s32 slotIndex, s32 (*filter)(u32)) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(object, slotIndex);
     WorldIndexNode *result;
     u32 word;
 
