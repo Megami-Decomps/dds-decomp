@@ -42,11 +42,11 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 sdfPacFeedInput(PacState *state, u8 *input, s32 available) {
+s32 sdfPacFeedInput(PacState *state, u8 *input, s32 inputByteCount) {
     s32 consumeBytes;
 
     state->inputCursor = input;
-    state->inputAvailable = available;
+    state->inputAvailable = inputByteCount;
     while (state->inputAvailable > 0) {
         switch (state->phase) {
         case -1:
