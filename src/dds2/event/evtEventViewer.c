@@ -731,7 +731,6 @@ extern void fldSetTitleDrawMode(s32 enabled);
 extern void fldBeginTitleAnimation(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
-extern u32 itfMesGetWindowEntryItems(s32 window, s32 entry);
 extern s32 itfMesSelectTableItemText(s32 window, s32 entry, s32 unused);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void itfMesBuildOptionList(s32 window, s32 entry);
@@ -868,7 +867,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (key->frame != currentFrame) {
             break;
         }
-        if (itfMesGetWindowEntryItems(viewer->windowContext->handle, nibbles[0]) == 0) {
+        if (itfMesGetWindowEntryItems(viewer->windowContext->handle, nibbles[0]) == NULL) {
             if (evtViewerTestIndexedCondition((u32)(s32)key->p08.sh[1]) == 0) {
                 break;
             }
@@ -1826,7 +1825,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *view
                 if (glyph->frame - 30 == timelinePosition) {
                     mnuUnpackNibbleFields(glyph, &entryIndex, &mode);
                     if (itfMesGetWindowEntryItems(
-                            viewer->windowContext->handle, entryIndex) == 1) {
+                            viewer->windowContext->handle, entryIndex) == (u32 *)1) {
                         evtViewerMarkWindowActive(viewer);
                         break;
                     }
