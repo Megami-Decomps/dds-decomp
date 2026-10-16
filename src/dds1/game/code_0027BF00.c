@@ -1575,9 +1575,9 @@ void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuS
     }
 }
 
-void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource, s32 option) {
-    mnuSelectPage(window, index);
-    window->slots[index].windowSprites =
+void mnuSetWindowResource(s32 pageIndex, MenuPageWindow *window, s32 resource, s32 option) {
+    mnuSelectPage(window, pageIndex);
+    window->slots[pageIndex].windowSprites =
         mnuCreatePageSpriteSet(0, (EffectSlotSet *)resource, (EffectSlotSet *)option);
     window->flags |= 0x100;
 }
