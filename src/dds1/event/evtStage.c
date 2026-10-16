@@ -27,7 +27,7 @@ extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
-extern void dds3DrawSetLightSourcePointer(u32 value, s32 index);
+extern void dds3DrawSetLightSourcePointer(void *lightSource, s32 index);
 extern void kwlnDrawCopyWords20(void *source);
 extern void kwlnDrawCopyRow128(void *source);
 extern const char evtStageResourcePathFormat[0x10];
@@ -84,9 +84,9 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     } else {
         sdfSetViewFieldOfView(0.75398216f);
     }
-    dds3DrawSetLightSourcePointer((u32)D_00367DF0, 0);
-    dds3DrawSetLightSourcePointer((u32)(D_00367DF0 + 0x40), 1);
-    dds3DrawSetLightSourcePointer((u32)(D_00367DF0 + 0x80), 2);
+    dds3DrawSetLightSourcePointer(D_00367DF0, 0);
+    dds3DrawSetLightSourcePointer(D_00367DF0 + 0x40, 1);
+    dds3DrawSetLightSourcePointer(D_00367DF0 + 0x80, 2);
     kwlnDrawCopyWords20(D_00367EB0);
     kwlnDrawCopyRow128(D_00367ED0);
     return 1;
@@ -108,9 +108,9 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
     dds3AttachConstructedResourceToWorldObject(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
     mdlSpawnViewerWorldObject();
     sdfSetViewFieldOfView(0.75398216f);
-    dds3DrawSetLightSourcePointer((u32)D_00367DF0, 0);
-    dds3DrawSetLightSourcePointer((u32)(D_00367DF0 + 0x40), 1);
-    dds3DrawSetLightSourcePointer((u32)(D_00367DF0 + 0x80), 2);
+    dds3DrawSetLightSourcePointer(D_00367DF0, 0);
+    dds3DrawSetLightSourcePointer(D_00367DF0 + 0x40, 1);
+    dds3DrawSetLightSourcePointer(D_00367DF0 + 0x80, 2);
     kwlnDrawCopyWords20(D_00367EB0);
     kwlnDrawCopyRow128(D_00367ED0);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
