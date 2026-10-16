@@ -12,6 +12,7 @@ extern void func_0013DF60(const char *name);
 #include "dds3obj.h"
 #include "dds3_object_mode.h"
 #include "eff_object.h"
+#include "fld_player_scene_state.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 #include "fld_activation_entry.h"
@@ -427,7 +428,7 @@ s32 fldCmdSetLookAtHeading(void) {
     return 1;
 }
 
-extern u32 fldGetPlayerSceneState(void);
+
 
 
 extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
@@ -451,7 +452,7 @@ s32 fldCmdCaptureObjectPose(void) {
     EffWorldNode *world;
 
     if (scrReadIntParameter(0) == -1) {
-        target = (EffWorldNode *)fldGetPlayerSceneState();
+        target = fldGetPlayerSceneState();
         if (target == NULL) {
             return 1;
         }

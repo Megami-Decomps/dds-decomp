@@ -41,6 +41,9 @@
 #include "fld_resource_wait_api.h"
 #include "fld_sequence_controller.h"
 #include "file_selection_api.h"
+#include "fld_player_scene_state.h"
+
+extern EffWorldNode *dds3CreateConfiguredCameraObject(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -54,7 +57,7 @@ extern FldSequenceController fldSceneLifecycleFlags;
 
 extern s32 D_003BABF0;
 
-extern u32 D_003BABD0;
+extern EffWorldNode *D_003BABD0;
 
 
 
@@ -174,7 +177,6 @@ void fldLoadPlayerModel(void);
 
 u8 fldTestSceneControlFlags(u32 mask);
 
-u32 *fldGetPlayerSceneStateAddress(void);
 
 /* Mode 14 copies a table index and packed group/entry/scene selection. */
 #include "fld_encounter_request.h"
@@ -1161,11 +1163,11 @@ void fldCleanupFieldScene(void) {
     fldReleaseCampSceneTasks();
 }
 
-u32 * fldGetPlayerSceneStateAddress(void) {
+EffWorldNode **fldGetPlayerSceneStateAddress(void) {
     return &D_003BABD0;
 }
 
-u32 fldGetPlayerSceneState(void) {
+EffWorldNode *fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
@@ -1351,8 +1353,6 @@ extern FieldVec4 D_0039FC90;
 
 extern char D_003BABC0[];
 
-extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
-
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 
 
@@ -1362,17 +1362,17 @@ void fldCreateSecondaryWorldCamera(void) {
     FieldVec4 localUp = D_0039FC80;
     FieldVec4 targetPosition;
     FieldVec4 worldEye;
-    u32 *cameraObjectSlot = &D_003BABD0;
-    u32 cameraObject;
+    EffWorldNode **cameraObjectSlot = &D_003BABD0;
+    EffWorldNode *cameraObject;
     memset(&targetPosition, 0, sizeof(targetPosition));
     targetPosition.w = 1.0f;
     worldEye = D_0039FC90;
     cameraObject = dds3CreateConfiguredCameraObject(dds3AdvanceWorldCounter(), &targetPosition, &worldEye, &localUp);
     *cameraObjectSlot = cameraObject;
-    dds3SetWorldNodeValue((struct EffWorldNode *)cameraObject, (u32)D_003BABC0);
-    dds3SetCameraVector((struct EffWorldNode *)*cameraObjectSlot, (u128 *)&worldEye);
-    effObjSetInnerFloat((EffWorldNode *)*cameraObjectSlot, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
+    dds3SetWorldNodeValue(cameraObject, (u32)D_003BABC0);
+    dds3SetCameraVector(*cameraObjectSlot, (u128 *)&worldEye);
+    effObjSetInnerFloat(*cameraObjectSlot, 2.0f);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), *cameraObjectSlot);
 }
 
 s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target) {
