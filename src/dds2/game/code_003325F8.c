@@ -122,7 +122,7 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     buffer = (s8)sdfCurrentBufferIndex;
     destination->lighting = source->lighting;
     destination->scalarOverrideFirst = source->scalarOverrideFirst;
-    destination->unk84 = source->unk84;
+    destination->secondaryLighting = source->secondaryLighting;
     destination->scalarOverrideSecond = source->scalarOverrideSecond;
     count = destination->list->usedCount;
     destinationNodes = destination->list->buffer;
