@@ -30,7 +30,7 @@ extern BillDispatch D_003AA998[];
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
-extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
+extern u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 billChildFacingReferenceAxis[4];
@@ -47,6 +47,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     BillPacketWork *work;
     s32 selected;
     u32 packet;
+    u32 *vertexPacket;
     u8 *geometry;
     s32 index;
     f32 x, y, halfWidth, halfHeight;
@@ -57,9 +58,9 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     if (selected != obj->requestedPacketListIndex) {
         work = child->work;
         if (work->count > 0) {
-            packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+            vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
                 work->uv, work->offsets, work->count, 0);
-            sdfAppendPacket(child->pendingLists[selected], packet);
+            sdfAppendPacket(child->pendingLists[selected], (u32)vertexPacket);
             work->count = 0;
         }
         selected = obj->requestedPacketListIndex;
@@ -138,9 +139,9 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     }
     work->count++;
     if (work->count == 15) {
-        packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+        vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
             work->uv, work->offsets, 15, 0);
-        sdfAppendPacket(child->pendingLists[selected], packet);
+        sdfAppendPacket(child->pendingLists[selected], (u32)vertexPacket);
         work->count = 0;
     }
 }
@@ -163,9 +164,9 @@ void billFlushPendingChildPackets(void) {
             s32 i;
 
             if (count > 0) {
-                u32 packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors, work->uv,
+                u32 *vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors, work->uv,
                                            work->offsets, count, 0);
-                sdfAppendPacket(node->pendingLists[node->packetListIndex], packet);
+                sdfAppendPacket(node->pendingLists[node->packetListIndex], (u32)vertexPacket);
                 work->count = 0;
             }
 

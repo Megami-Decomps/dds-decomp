@@ -1631,7 +1631,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
 struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
-extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,
+extern u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,
     const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32));
 extern SdfPoolNode D_003252A8;
 
@@ -1844,12 +1844,12 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             secondary.count++;
             }
             if (primary.count == 15) {
-                sdfAppendPacket(primaryList, sdfBuildCompactVertexVifPacket(primary.positions,
+                sdfAppendPacket(primaryList, (u32)sdfBuildCompactVertexVifPacket(primary.positions,
                     primary.colors, primary.uv, primary.corners, 15, 0));
                 primary.count = 0;
             }
             if (secondary.count == 15) {
-                sdfAppendPacket(secondaryList, sdfBuildCompactVertexVifPacket(secondary.positions,
+                sdfAppendPacket(secondaryList, (u32)sdfBuildCompactVertexVifPacket(secondary.positions,
                     secondary.colors, secondary.uv, secondary.corners, 15, 0));
                 secondary.count = 0;
             }
@@ -1861,11 +1861,11 @@ void effEventDrawBillSet(EffEventBillSet *work) {
         else particle->age++;
     }
     if (primary.count > 0) {
-        sdfAppendPacket(primaryList, sdfBuildCompactVertexVifPacket(primary.positions,
+        sdfAppendPacket(primaryList, (u32)sdfBuildCompactVertexVifPacket(primary.positions,
             primary.colors, primary.uv, primary.corners, primary.count, 0));
     }
     if (secondary.count > 0) {
-        sdfAppendPacket(secondaryList, sdfBuildCompactVertexVifPacket(secondary.positions,
+        sdfAppendPacket(secondaryList, (u32)sdfBuildCompactVertexVifPacket(secondary.positions,
             secondary.colors, secondary.uv, secondary.corners, secondary.count, 0));
     }
     stateList = (SdfListHead *)sdfAllocPacketAligned(0x20);

@@ -866,7 +866,7 @@ s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
 /* Build XYZ and attribute VIF streams; return the packet address.
  * vertexCount must be positive; n retains its native count/byte-size reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -924,7 +924,7 @@ u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttrib
     while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
-    return (u32)packet;
+    return packet;
 }
 
 /* Build a one-vertex VIF packet for a two-texture quad: the position, both
