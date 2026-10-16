@@ -2489,10 +2489,64 @@ void effFreePacketRecordScaleTemplate(u32 effect) {
     sdfReleaseChipBlock(effect);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EE70);
+/* vu0 routine: seed radial placement, normalized velocity and activation age. */
+void func_0015EE70(EffTemplatePacketList *effect, s32 index) {
+    f32 direction[4];
+    EffectBufferRecord *packet = effect->head.buffer->records;
+    f32 radius;
+    f32 value;
+
+    packet += index;
+    if (effect->randomSphere) {
+        radius = effect->recordScale;
+        direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        VU0_LOAD_VF(vf10, direction);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, direction);
+        packet->position[0] = radius * effMiscRandUnitFloat(effDefaultRandomState) * direction[0];
+        packet->position[1] = radius * effMiscRandUnitFloat(effDefaultRandomState) * direction[1];
+        packet->position[2] = radius * effMiscRandUnitFloat(effDefaultRandomState) * direction[2];
+        VU0_LOAD_MATRIX(effect->head.matrix);
+        VU0_LOAD_VF(vf10, packet->position);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, packet->position);
+        packet->position[0] += effect->head.origin[0];
+        packet->position[1] += effect->head.origin[1];
+        packet->position[2] += effect->head.origin[2];
+        direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        VU0_LOAD_VF(vf10, direction);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, packet->velocity);
+        packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
+    } else {
+        PCP_COPY_VECTOR(packet->position, effect->head.origin);
+        value = (3.14159265f * 2.0f) / effect->head.particleCount * index;
+        direction[0] = sdfEvaluateCosineViaSinePhaseShift(value);
+        direction[1] = sdfSinPoly(value);
+        direction[2] = 0;
+        VU0_LOAD_VF(vf10, direction);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, packet->velocity);
+        packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
+    }
+    packet->f30 = effect->motionMagnitude;
+    packet->color = 0;
+    value = effect->head.speedJitter;
+    packet->scale = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * value + (1.0f - value));
+    value = effect->head.spinJitter;
+    if (value != 0) {
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * value + (1.0f - value)) * (3.14159265f * 2.0f);
+    } else {
+        packet->spin = 0;
+    }
+    parDispatchKindInit(&effect->head.sub, index);
+}
 
 extern f32 D_003AAAB0[4];
-void func_0015EE70(EffTemplatePacketList *, s32);
 
 /* Reflect moving packets at the frame's entry radius. The first record's
  * updated radius becomes the boundary on the following frame. */
