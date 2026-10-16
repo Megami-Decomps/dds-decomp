@@ -262,12 +262,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
 
-typedef struct FldTitleBannerMenu {
-    u16 position; /* 0x00 */
-    u16 choice;   /* 0x02 */
-    u16 pending;  /* 0x04 */
-    u16 reserved; /* 0x06 */
-} FldTitleBannerMenu;
+#include "fld_title_banner_menu.h"
 
 extern KwlnTask *fldInputPanelTaskHandle;
 extern u32 D_0032E570[];

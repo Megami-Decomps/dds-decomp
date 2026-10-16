@@ -532,12 +532,7 @@ extern u32 D_00389988[];
 extern u8 D_0037F510[2][2][16];
 extern s32 D_004361D0;
 
-typedef struct FldTitleBannerMenu {
-    u16 position;
-    u16 choice;
-    u16 pending;
-    u16 reserved;
-} FldTitleBannerMenu; /* 8-byte allocation from fldInitializeTitleBannerTask. */
+#include "fld_title_banner_menu.h"
 
 extern SdfPoolNode *D_00380838[4];
 
