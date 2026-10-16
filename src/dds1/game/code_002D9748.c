@@ -197,7 +197,7 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
     return NULL;
 }
 
-SdfChunkHeader *sdfChunkFindByTag(SdfModel *model, s32 tag) {
+SdfChunkHeader *sdfChunkFindByTag(const SdfModel *model, s32 tag) {
     return sdfChunkFindById(model->chunkTable, tag);
 }
 
