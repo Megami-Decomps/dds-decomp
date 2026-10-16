@@ -50,7 +50,7 @@ extern void fldUpdateCameraHeadingTransition(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 
 extern f32 D_0038A6F0[4];
-extern void evtAdvanceSolarClockAndExpireControls(f32);
+extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32, s32);
