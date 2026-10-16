@@ -196,8 +196,8 @@ struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
 }
 
 /* Return the stored resource handle without changing ownership. work is required. */
-u32 fileGetResourceHandle(struct FileRequest *request) {
-    FileWork *work = (FileWork *)request;
+u32 fileGetResourceHandle(const struct FileRequest *request) {
+    const FileWork *work = (const FileWork *)request;
     return work->resourceHandle;
 }
 
