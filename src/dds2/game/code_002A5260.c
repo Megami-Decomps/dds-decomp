@@ -1034,7 +1034,7 @@ typedef struct StaffImageTiming {
 } StaffImageTiming;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-s32 mnuStaffImageProc(KwlnTask *task) {
+s32 mnuStaffImageProc(void) {
     StaffImageTiming timing[2] = {
         {60, 0, 1, 150, 2},
         {0, 240, 2, 240, 4}
