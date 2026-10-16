@@ -148,7 +148,7 @@ extern f32 btlUnitGetTopY(BtlUnit *);
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
-extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
+extern f32 btlTriangleNormalDotEdge(const f32 *, const f32 *, const f32 *);
 
 typedef union BtlVec4 {
     f32 f[4];
@@ -1138,7 +1138,7 @@ s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 ang
 /* vu0 routine: vf10.xyz = normalize(e x (e x f)),
  * e = vertexB - vertexA, f = vertexC - vertexA.
  * The double cross lies in the triangle plane, despite the legacy normal name. */
-void btlTriangleNormalVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+void btlTriangleNormalVU(const f32 *vertexA, const f32 *vertexB, const f32 *vertexC) {
     VU0_LOAD_VF(vf10, vertexB);
     VU0_LOAD_VF(vf11, vertexA);
     VU0_SUB(vf10, vf10, vf11);
@@ -1156,7 +1156,7 @@ void btlTriangleNormalVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
 
 
 /* Dot the normalized double-cross direction with vertexA - vertexC. */
-f32 btlTriangleNormalDotEdge(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+f32 btlTriangleNormalDotEdge(const f32 *vertexA, const f32 *vertexB, const f32 *vertexC) {
     f32 direction[4];
     f32 projection;
     btlTriangleNormalVU(vertexA, vertexB, vertexC);
@@ -1186,7 +1186,7 @@ void btlPointOffPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC, f32 *point) {
 
 /* vu0 routine: vf10 = vertexC + direction * dot(direction, vertexA - vertexC).
  * Direction is the normalized in-plane double cross, not a triangle normal. */
-f32 btlProjectOnPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC) {
+f32 btlProjectOnPlaneVU(const f32 *vertexA, const f32 *vertexB, const f32 *vertexC) {
     f32 direction[4];
     f32 projection;
     btlTriangleNormalVU(vertexA, vertexB, vertexC);
