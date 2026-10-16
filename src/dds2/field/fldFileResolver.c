@@ -735,7 +735,8 @@ extern EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name);
 extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
-extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
+extern void func_0014D380(s32 mode, u32 pointId, f32 *rotation,
+                            f32 x, f32 y, f32 z);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);
 extern void func_0014C9B0(u32, f32 *, f32, f32, f32);
 extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation);
