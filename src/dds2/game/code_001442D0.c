@@ -311,7 +311,7 @@ extern s32 fldCurrentBgmId[];
 
 extern void sndQueueSoundId(u32);
 
-extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
+extern void fldRelocatePackedTransferChunk(u32 buffer, s32 chunk);
 
 extern s32 fldGetTransferChunkPayload(s32 record);
 
