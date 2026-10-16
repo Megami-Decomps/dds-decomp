@@ -849,7 +849,7 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
 
 extern void datClearUnitStatusBits(void *item, s32 mask);
 /* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
-void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value);
+void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
 
 s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;
@@ -898,12 +898,12 @@ void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 value) {
     item->status = (item->status & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
 
-/* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
-void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value) {
+/* Raise the packed value to `minimumValue` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
+void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue) {
     s32 channel;
 
-    if ((item->status & SDF_PACKED_VALUE_MASK) < value) {
-        item->status = (item->status & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
+    if ((item->status & SDF_PACKED_VALUE_MASK) < minimumValue) {
+        item->status = (item->status & SDF_PACKED_FLAG) | (minimumValue & SDF_PACKED_VALUE_MASK);
         channel = item->status & SDF_PACKED_VALUE_MASK;
         switch (channel) {
         case 0x40:
