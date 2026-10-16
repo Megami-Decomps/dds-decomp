@@ -769,11 +769,11 @@ u32 fldGetCurrentBgmHandle(void) {
     return fldCurrentBgmHandle;
 }
 
-extern s32 fldFindMapLabelIndexByCoordinate(s32, s32);
+extern s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 
-extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32, s32);
+extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 
-extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 
 extern s32 strlen(const char *);
 
@@ -787,17 +787,17 @@ extern s16 D_003BD7D0;
 
 #include "fld_label_cache_api.h"
 
-void fldCacheMapLabelLengths(s32 map) {
+void fldCacheMapLabelLengths(s32 mapId) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_003D43B0[i] = strlen(D_0033F06C[fldFindMapLabelIndexByCoordinate(map, i)]);
+        D_003D43B0[i] = strlen(D_0033F06C[fldFindMapLabelIndexByCoordinate(mapId, i)]);
     }
     for (i = 0; i < 24; i++) {
-        D_003D4460[i] = strlen(D_0034286C[fldFindSecondaryMapLabelIndexByCoordinate(map, i)]);
+        D_003D4460[i] = strlen(D_0034286C[fldFindSecondaryMapLabelIndexByCoordinate(mapId, i)]);
     }
     for (i = 0; i < 41; i++) {
-        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(map, i)]);
+        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(mapId, i)]);
     }
     i = 0;
     if (D_0032E3C0[0] < 100) {
@@ -1117,7 +1117,7 @@ extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
-extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
