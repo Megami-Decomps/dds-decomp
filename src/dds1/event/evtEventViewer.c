@@ -1749,10 +1749,10 @@ extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *hi
 void evtViewerMarkWindowActive(EvtRuntime *viewer);
 
 /* Activates the message window thirty frames before a kind-4 key when its
- * unpacked entry is ready. id is the current timeline position, not a glyph ID. */
-void evtViewerActivateWindowForGlyphEntry(s32 id, EvtRuntime *viewer) {
-    s32 low;
-    s32 high;
+ * unpacked entry is ready. */
+void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *viewer) {
+    s32 entryIndex;
+    s32 entryMode;
     EvtRuntimeGroup *node;
     EvtRuntimeChild *glyph;
 
@@ -1763,12 +1763,12 @@ void evtViewerActivateWindowForGlyphEntry(s32 id, EvtRuntime *viewer) {
                     continue;
                 }
                 for (glyph = node->children; glyph != NULL; glyph = glyph->next) {
-                    if (glyph->frame - 30 != id) {
+                    if (glyph->frame - 30 != timelinePosition) {
                         continue;
                     }
-                    mnuUnpackNibbleFields(glyph, &low, &high);
+                    mnuUnpackNibbleFields(glyph, &entryIndex, &entryMode);
                     if (itfMesGetWindowEntryItems(
-                            viewer->windowContext->handle, low) != 1) {
+                            viewer->windowContext->handle, entryIndex) != 1) {
                         continue;
                     }
                     evtViewerMarkWindowActive(viewer);

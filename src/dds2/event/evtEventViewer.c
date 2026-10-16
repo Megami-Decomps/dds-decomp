@@ -1808,10 +1808,10 @@ void evtViewerMarkWindowActive(EvtRuntime *);
 
 /* Activates the message window thirty frames before a kind-4 key when its
  * unpacked entry is ready. Only the first kind-4 track is considered. */
-void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer) {
+void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *viewer) {
     EvtRuntimeGroup *group;
     EvtRuntimeChild *glyph;
-    s32 entry;
+    s32 entryIndex;
     s32 mode;
 
     if (viewer->windowContext == 0) {
@@ -1823,10 +1823,10 @@ void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer) {
     for (group = viewer->groups; group != NULL; group = group->next) {
         if (group->type == 4) {
             for (glyph = group->children; glyph != NULL; glyph = glyph->next) {
-                if (glyph->frame - 30 == position) {
-                    mnuUnpackNibbleFields(glyph, &entry, &mode);
+                if (glyph->frame - 30 == timelinePosition) {
+                    mnuUnpackNibbleFields(glyph, &entryIndex, &mode);
                     if (itfMesGetWindowEntryItems(
-                            viewer->windowContext->handle, entry) == 1) {
+                            viewer->windowContext->handle, entryIndex) == 1) {
                         evtViewerMarkWindowActive(viewer);
                         break;
                     }
