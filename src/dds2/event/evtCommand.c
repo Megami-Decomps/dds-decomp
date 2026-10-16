@@ -318,16 +318,16 @@ s32 evtCommandWaitEffectResourceScale(void) {
 
 /* Return the named world-chain node's key to the script VM. */
 s32 evtCommandReadSecondaryWorldIdValue(void) {
-    EffWorldNode *node;
+    EffWorldNode *worldNode;
 
-    node = dds3FindObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(),
-                                         (const u8 *)scrReadStringParameter(0));
-    if (node == NULL) {
+    worldNode = dds3FindObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(),
+                                              (const u8 *)scrReadStringParameter(0));
+    if (worldNode == NULL) {
         sdfDebugPrintf("ID : id not found!! <%s>\n", scrReadStringParameter(0));
         evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
-        scrSetIntegerReturnValue(node->key);
+        scrSetIntegerReturnValue(worldNode->key);
     }
     return 1;
 }
