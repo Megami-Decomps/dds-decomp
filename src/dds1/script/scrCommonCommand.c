@@ -427,11 +427,13 @@ s32 scrCmdSetPackedDrawComponentBytes(void)
 
 s32 scrCmdSetTexturedBlurIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetC70Triple(p0, p1, scrReadIntParameter(2));
+    s32 extent;
+    s32 centerX;
+    s32 centerY;
+    extent = scrReadIntParameter(0);
+    centerX = scrReadIntParameter(1);
+    centerY = scrReadIntParameter(2);
+    kwlnDrawSetC70Triple(extent, centerX, centerY);
     return 1;
 }
 
