@@ -820,7 +820,7 @@ s32 evtCommandAttachObjectPath(void) {
         dds3EnsureSlotData(unit);
         slot = objectData->slots[1];
     }
-    resource = slot->objectData;
+    resource = slot->data;
     if (resource->sourceObject == NULL) {
         dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
@@ -854,7 +854,7 @@ extern char D_00421E98[]; /* "re attach...!\n" */
 s32 evtCommandReattachObjectPath(void) {
     void *unit;
     EffWorldNode *target;
-    ObjBase *data;
+    ObjBase *objectData;
     EffWorldNode *slot;
     Dds3PathCurveWork *path;
     Dds3SlotResource *resource;
@@ -876,11 +876,11 @@ s32 evtCommandReattachObjectPath(void) {
     if (target == NULL) {
         return 1;
     }
-    data = effObjGetDataHandle(unit);
-    slot = data->slots[1];
+    objectData = effObjGetDataHandle(unit);
+    slot = objectData->slots[1];
     if (slot == NULL) {
         dds3EnsureSlotData(unit);
-        slot = data->slots[1];
+        slot = objectData->slots[1];
     }
     resource = slot->data;
     if (resource->sourceObject == NULL) {
