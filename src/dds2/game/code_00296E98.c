@@ -223,7 +223,99 @@ s32 mnuTickCommandPhase(MenuTerminalContext *owner) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", mnuDrawCommandPhaseTransition);
+/* Command-list reveal, close, and category icon transitions. */
+s32 mnuDrawCommandPhaseTransition(MenuTerminalContext *scene) {
+    s32 frames;
+    f32 progress;
+    f32 opacity;
+    f32 position;
+    mnuDrawShopPanelWithTypeGraphic(0, 0, 0, scene, 0x100, 0x53);
+    switch (scene->phase) {
+    case 0:
+        if ((f32)scene->commandFrames > 0.0f) {
+            frames = (s32)((f32)scene->commandFrames - 0.0f);
+            if (frames < 0) frames = 0;
+            progress = (f32)frames / 10.0f;
+            opacity = 0.0f;
+            if (!(progress < 0.5f)) opacity = (progress - 0.5f) * 2.0f;
+        } else {
+            progress = 0.0f;
+            opacity = progress;
+        }
+        position = progress;
+        if (progress > 1.0f) progress = 1.0f;
+        if (opacity > 1.0f) opacity = 1.0f;
+        if (position > 1.0f) position = 1.0f;
+        mnuDrawTerminalPanelListRows(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
+                      (s32)(opacity * 256.0f), 0x53);
+        mnuDrawShopCurrencyBalance(scene, 0xA09DC300 | (s32)(opacity * 128.0f));
+        mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        break;
+    case 2:
+        if ((f32)scene->commandFrames > 0.0f) {
+            progress = ((f32)scene->commandFrames - 0.0f) / 10.0f;
+            if (progress > 1.0f) progress = 1.0f;
+            position = progress;
+        } else {
+            progress = 0.0f;
+            position = progress;
+        }
+        if (progress > 1.0f) progress = 1.0f;
+        if (position > 1.0f) position = 1.0f;
+        mnuDrawTerminalPanelListRows(0, (s32)(position * 64.0f) << 3, 0, scene,
+                      (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawListChildrenWithCountdown(0, 0, 0, (u8 *)scene->ownedWindows[0]->list, 0x53);
+        mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
+        brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
+        break;
+    case 1:
+    case 3:
+        mnuDrawTerminalPanelListRows(0,0,0,scene,0x100,0x53);
+        mnuDrawListChildrenWithCountdown(0,0,0,(u8 *)scene->ownedWindows[0]->list,0x53);
+        mnuDrawShopCurrencyBalance(scene,0xA09DC380);
+        brsDrawResultIconPairWithAlpha((s32)scene,0x100,4,0x53);
+        break;
+    case 14:
+        if ((f32)scene->commandFrames > 0.0f) {
+            frames = (s32)((f32)scene->commandFrames - 0.0f);
+            if (frames < 0) frames = 0;
+            progress = (f32)frames / 10.0f;
+            opacity = 0.0f;
+            if (!(progress < 0.5f)) opacity = (progress - 0.5f) * 2.0f;
+        } else {
+            progress = 0.0f;
+            opacity = progress;
+        }
+        position = progress;
+        if (progress > 1.0f) progress = 1.0f;
+        if (opacity > 1.0f) opacity = 1.0f;
+        if (position > 1.0f) position = 1.0f;
+        mnuDrawTerminalPanelListRows(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
+                      (s32)(opacity * 256.0f), 0x53);
+        mnuDrawListChildrenWithCountdown(0,0,0,(u8 *)scene->ownedWindows[0]->list,0x53);
+        mnuDrawShopCurrencyBalance(scene,0xA09DC380);
+        mnuDrawCommandCategoryWithCompanion((s32)scene,0x100,4,0x53);
+        break;
+    case 15:
+        if ((f32)scene->commandFrames > 0.0f) {
+            progress = ((f32)scene->commandFrames - 0.0f) / 10.0f;
+            if (progress > 1.0f) progress = 1.0f;
+            position = progress;
+        } else {
+            progress = 0.0f;
+            position = progress;
+        }
+        if (progress > 1.0f) progress = 1.0f;
+        if (position > 1.0f) position = 1.0f;
+        mnuDrawTerminalPanelListRows(0, (s32)(position * 64.0f) << 3, 0, scene,
+                      (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawListChildrenWithCountdown(0,0,0,(u8 *)scene->ownedWindows[0]->list,0x53);
+        mnuDrawShopCurrencyBalance(scene,0xA09DC380);
+        brsDrawResultIconPairWithAlpha((s32)scene,0x100,4,0x53);
+        break;
+    }
+    return 0;
+}
 
 /* Phase machine of the menu command: phases 4, 5 and 8 wait for the frame
  * counter to pass 10.0f before reporting themselves, 6 and 7 report at once.
