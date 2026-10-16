@@ -2930,8 +2930,8 @@ extern MenuPoint D_00437C10[];
 extern MenuPoint D_00437C18[];
 extern const char *mnuComboGunRequirementTexts[16];
 extern u8 (*D_00435E68)[33];
-extern s32 ptyGetAffinityKind(s32, s32);
-extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+extern s32 ptyGetAffinityKind(s32 affinityId, s32 index);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index);
 
 /* Draw each of the command's three partner requirements. */
 void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
@@ -3017,8 +3017,8 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
-extern u16 mnuPickPairedTableValue(s32, s32);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
+extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
 extern void ptySkillMenuDrawEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Construct the linkage-skill list, retaining blank rows for available commands
