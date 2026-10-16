@@ -371,9 +371,11 @@ void fldDrawScaledGrayTintMapTexture(s32 x, s32 y, s8 grey, s8 alpha, struct Sdf
 }
 
 
-extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
+                                 f32 progress);
 
-extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
+                                  f32 progress);
 
 
 /* Allocate the two map request queues and install their dispatch callbacks. */
