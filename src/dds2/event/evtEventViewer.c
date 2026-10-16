@@ -229,8 +229,8 @@ void evtEventViewerUnlinkEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer) {
     viewer->entryCount--;
 }
 
-/* Allocate a zeroed 0x84-byte entry for an id and queue it in the viewer. */
-EvtRuntimeGroup *evtEventViewerCreateEntry(s32 id, EvtRuntime *viewer) {
+/* Allocate a zeroed 0x84-byte entry for a type and queue it in the viewer. */
+EvtRuntimeGroup *evtEventViewerCreateEntry(s32 entryType, EvtRuntime *viewer) {
     EvtRuntimeGroup *entry;
 
     entry = sdfAllocSizeClassBlock(0x84);
@@ -238,7 +238,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 id, EvtRuntime *viewer) {
         return NULL;
     }
     memset(entry, 0, 0x84);
-    entry->type = id;
+    entry->type = entryType;
     entry->entryHeader = -1;
     entry->argument0C = -1;
     evtEventViewerInsertEntry(entry, viewer);
