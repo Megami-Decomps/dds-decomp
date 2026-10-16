@@ -175,7 +175,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     MdlCtx *model;
     if (effComputeLightDirectionVU(work->model, work->ownedBuffer)) {
         model = work->model;
-        model->inner->lighting = (struct SdfDmaTagHeader *)work->ownedBuffer;
+        model->inner->lighting = &work->ownedBuffer->dmaTag;
     } else {
         model = work->model;
     }
@@ -321,7 +321,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
-        owner->model->inner->lighting = (struct SdfDmaTagHeader *)owner->ownedBuffer;
+        owner->model->inner->lighting = &owner->ownedBuffer->dmaTag;
     }
 
     mdlProcessContextNodesAndTransforms(owner->model, D_00380788[1]);

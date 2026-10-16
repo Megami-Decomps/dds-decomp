@@ -2,9 +2,9 @@
 #define SDF_DRAW_H
 
 #include "common.h"
+#include "sdf_dma_tag.h"
 
 struct SdfChunkHeader;
-struct SdfDmaTagHeader;
 
 /* Three optional SDK light sources; each points to color and direction vec4.
  * The callee advances through three pointer words, not scalar slot metadata. */
@@ -12,13 +12,19 @@ typedef f32 (*SdfLightSources[3])[4];
 
 typedef char SdfLightSources_size_must_be_0xC[(sizeof(SdfLightSources) == 0xC) ? 1 : -1];
 
-/* DMA/VIF lighting payload: DDS1 002E195C..002E1964 writes the halfword
- * count and two command words; vectors occupy 0x10..0xDF in both games. */
+/* DMA/VIF lighting payload: its first 0x10 bytes also serve as an attached
+ * SdfDmaTagHeader; DDS1 002E195C..002E1964 writes the count and two VIF words.
+ * The lighting vectors occupy 0x10..0xDF in both games. */
 typedef struct SdfLightingPacketStorage {
-    u16 quadwordCount; /* 0x00 */
-    u8 pad02[6];
-    u32 flushCode; /* 0x08 */
-    u32 unpackCode; /* 0x0C */
+    union {
+        SdfDmaTagHeader dmaTag; /* 0x00: borrowed by SdfModelInner.lighting */
+        struct {
+            u16 quadwordCount; /* 0x00 */
+            u8 pad02[6];
+            u32 flushCode; /* 0x08 */
+            u32 unpackCode; /* 0x0C */
+        };
+    };
     f32 normal[4][4]; /* 0x10 */
     f32 color[3][4]; /* 0x50 */
     f32 ambient[4]; /* 0x80 */
@@ -28,6 +34,8 @@ typedef struct SdfLightingPacketStorage {
 
 typedef char SdfLightingPacketStorage_size_must_be_0xE0[
     (sizeof(SdfLightingPacketStorage) == 0xE0) ? 1 : -1];
+typedef char SdfLightingPacketStorage_dmaTag_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->dmaTag == 0x00) ? 1 : -1];
 typedef char SdfLightingPacketStorage_quadwordCount_offset_check[
     ((u32)&((SdfLightingPacketStorage *)0)->quadwordCount == 0x00) ? 1 : -1];
 typedef char SdfLightingPacketStorage_flushCode_offset_check[
