@@ -2299,7 +2299,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(0, work->alpha);
                         break;
                     }
@@ -2340,7 +2340,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(1, work->alpha);
                         break;
                     }
@@ -2361,7 +2361,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(2, work->alpha);
                         break;
                     }
@@ -2386,7 +2386,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(3, work->alpha);
                         break;
                     }
@@ -2414,7 +2414,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(4, work->alpha);
                         break;
                     }

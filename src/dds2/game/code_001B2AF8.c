@@ -3242,7 +3242,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     btlDrawCompositePanelSprites(work, work->x, work->y, work->fade);
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(0, work->fade);
                     } else {
                         sprintf((char *)text, D_00436818, work->unit->partyRecord.level);
@@ -3270,7 +3270,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                 case 3:
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(1, work->fade);
                     } else {
                         sprintf((char *)text, D_00436820,
@@ -3285,7 +3285,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                 case 4:
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(2, work->fade);
                     } else {
                         sprintf((char *)text, D_00436820,
@@ -3301,7 +3301,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     yOffset = 93;
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(3, work->fade);
                     } else {
                         skills = btlGatherEnemyCommands(work->unit, &skillCount);
@@ -3323,7 +3323,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     yOffset = 206;
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(4, work->fade);
                     } else {
                         position = 0;
