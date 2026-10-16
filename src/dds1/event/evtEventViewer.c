@@ -1511,7 +1511,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 }
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
-extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *, s32, s32);
+extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel);
 
 /* Synchronize four motion channels, retaining their last applied timeline key. */
 void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
