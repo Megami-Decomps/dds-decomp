@@ -2531,9 +2531,9 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
     if (selected == 0) {
         total = 0;
         for (index = 0; index < 2; index++) {
-            if (enemy->unk3E[index] != 0) {
-                if (btlIsEventThresholdSatisfiedForEntry(enemy->unk3E[index])) {
-                    btlBossDebugPrintf("btl:event item check[%X]\n", enemy->unk3E[index]);
+            if (enemy->additionalDropItemIds[index] != 0) {
+                if (btlIsEventThresholdSatisfiedForEntry(enemy->additionalDropItemIds[index])) {
+                    btlBossDebugPrintf("btl:event item check[%X]\n", enemy->additionalDropItemIds[index]);
                 } else {
                     total += enemy->actionChances[index];
                 }
@@ -2543,13 +2543,13 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
             roll = effMiscRandMod(0, total);
             total = 0;
             for (index = 0; index < 2; index++) {
-                if (enemy->unk3E[index] != 0) {
-                    if (btlIsEventThresholdSatisfiedForEntry(enemy->unk3E[index])) {
-                        btlBossDebugPrintf("btl:event item check[%X]\n", enemy->unk3E[index]);
+                if (enemy->additionalDropItemIds[index] != 0) {
+                    if (btlIsEventThresholdSatisfiedForEntry(enemy->additionalDropItemIds[index])) {
+                        btlBossDebugPrintf("btl:event item check[%X]\n", enemy->additionalDropItemIds[index]);
                     } else {
                         total += enemy->actionChances[index];
                         if (roll < total) {
-                            selected = enemy->unk3E[index];
+                            selected = enemy->additionalDropItemIds[index];
                             break;
                         }
                     }

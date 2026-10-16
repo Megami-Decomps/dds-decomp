@@ -329,8 +329,8 @@ typedef struct DatEnemyRecord {
     u16 huntPenaltyFlags; /* 0x36: hunt's adverse-outcome mask. */
     u16 huntPenaltyChance; /* 0x38: base percentage before status modifiers. */
     u8 pad3A[4];
-    u8 unk3E[2];          /* The battle status accessor tests both adjacent bytes. */
-    u8 actionChances[2];  /* 0x40: bucket thresholds for the two unk3E actions. */
+    u8 additionalDropItemIds[2]; /* 0x3E: optional item IDs selected with actionChances. */
+    u8 actionChances[2];  /* 0x40: bucket thresholds for the additional drop item IDs. */
     u16 overrideFlag;     /* 0x42: model flag gating the override action. */
     u8 overrideAction;    /* 0x44: action selected before the ordinary slots. */
     u8 overrideChance;    /* 0x45: bucket threshold for the override action. */
@@ -347,6 +347,8 @@ typedef char DatEnemyActionChancesOffsetCheck[((u32)&((DatEnemyRecord *)0)->acti
 typedef char DatEnemyOverrideFlagOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideFlag == 0x42) ? 1 : -1];
 typedef char DatEnemyOverrideActionOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideAction == 0x44) ? 1 : -1];
 typedef char DatEnemyOverrideChanceOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideChance == 0x45) ? 1 : -1];
+typedef char DatEnemyRecordAdditionalDropItemIdsOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->additionalDropItemIds == 0x3E) ? 1 : -1];
 
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {

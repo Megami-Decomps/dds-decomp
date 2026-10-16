@@ -1199,8 +1199,8 @@ s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
         }
     }
     for (i = 0; i < 2 && item == 0; i++) {
-        if (enemy->unk3E[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
-            item = enemy->unk3E[i];
+        if (enemy->additionalDropItemIds[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
+            item = enemy->additionalDropItemIds[i];
         }
     }
     return item;
