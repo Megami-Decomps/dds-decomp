@@ -1107,9 +1107,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = (s32)(u32)sdfReadNamedResource(D_003A21C8, params, 0);
-        btlResourceBlock->nameB = (s32)(u32)sdfReadNamedResource(D_003A21E8, params, 0);
-        btlResourceBlock->nameC = (s32)(u32)sdfReadNamedResource(D_003A2208, params, 0);
+        btlResourceBlock->resourceAllocationA = sdfReadNamedResource(D_003A21C8, params, 0);
+        btlResourceBlock->resourceAllocationB = sdfReadNamedResource(D_003A21E8, params, 0);
+        btlResourceBlock->resourceAllocationC = sdfReadNamedResource(D_003A2208, params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_003BB3E4 = 1;
@@ -1119,11 +1119,11 @@ void btlLoadResourceBlock(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
         btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+            btlResourceBlock->resourceAllocationA, 0);
         btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+            btlResourceBlock->resourceAllocationB, 0);
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
+            btlResourceBlock->resourceAllocationC, 0);
         work->resA = btlResourceBlock->resA;
         work->numberGlyphSlots = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
