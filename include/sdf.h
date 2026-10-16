@@ -274,11 +274,11 @@ void sdfAdvanceStreamPlayback(s32 cadence);
 void sdfSetStreamFrameDrawMode(u32 mode);
 
 typedef struct SdfMovieDescriptor {
-    u16 unk00;
-    u16 unk02;
+    u16 drawX;
+    u16 drawY;
     u32 unk04;
-    u16 unk08;
-    u16 unk0A;
+    u16 drawWidth;
+    u16 drawHeight;
     s32 source;
     u8 hasAudio;
     u8 stereo;
@@ -288,6 +288,14 @@ typedef struct SdfMovieDescriptor {
 
 typedef char SdfMovieDescriptor_size_must_be_0x14[
     (sizeof(SdfMovieDescriptor) == 0x14) ? 1 : -1];
+typedef char SdfMovieDescriptor_drawX_offset_must_be_0x00[
+    ((u32)&((SdfMovieDescriptor *)0)->drawX == 0x00) ? 1 : -1];
+typedef char SdfMovieDescriptor_drawY_offset_must_be_0x02[
+    ((u32)&((SdfMovieDescriptor *)0)->drawY == 0x02) ? 1 : -1];
+typedef char SdfMovieDescriptor_drawWidth_offset_must_be_0x08[
+    ((u32)&((SdfMovieDescriptor *)0)->drawWidth == 0x08) ? 1 : -1];
+typedef char SdfMovieDescriptor_drawHeight_offset_must_be_0x0A[
+    ((u32)&((SdfMovieDescriptor *)0)->drawHeight == 0x0A) ? 1 : -1];
 typedef char SdfMovieDescriptor_hasAudio_offset_must_be_0x10[
     ((u32)&((SdfMovieDescriptor *)0)->hasAudio == 0x10) ? 1 : -1];
 typedef char SdfMovieDescriptor_stereo_offset_must_be_0x11[
@@ -311,11 +319,11 @@ typedef struct MovObj {
     u8 state;
     u8 stopRequested;
     u8 isPac;
-    u16 unk04;
-    u16 unk06;
+    u16 drawX;
+    u16 drawY;
     u32 unk08;
-    u16 unk0C;
-    u16 unk0E;
+    u16 drawWidth;
+    u16 drawHeight;
     struct DevState *deviceState;
     s32 totalBytes;
     s32 remainingBytes;
@@ -331,6 +339,14 @@ typedef char MovObj_size_must_be_0xB0[
     (sizeof(MovObj) == 0xB0) ? 1 : -1];
 typedef char MovObj_stream_offset_must_be_0x1C[
     ((u32)&((MovObj *)0)->stream == 0x1C) ? 1 : -1];
+typedef char MovObj_drawX_offset_must_be_0x04[
+    ((u32)&((MovObj *)0)->drawX == 0x04) ? 1 : -1];
+typedef char MovObj_drawY_offset_must_be_0x06[
+    ((u32)&((MovObj *)0)->drawY == 0x06) ? 1 : -1];
+typedef char MovObj_drawWidth_offset_must_be_0x0C[
+    ((u32)&((MovObj *)0)->drawWidth == 0x0C) ? 1 : -1];
+typedef char MovObj_drawHeight_offset_must_be_0x0E[
+    ((u32)&((MovObj *)0)->drawHeight == 0x0E) ? 1 : -1];
 
 void sdfMovieInitializeStreamWork(MovObj *, SdfMovieDescriptor *, const char *);
 void sdfCancelAndReleaseMovieStreamWork(MovObj *);
