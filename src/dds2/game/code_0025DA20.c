@@ -4066,10 +4066,10 @@ s32 evtIsLastSlot(s32 slotIndex) {
 }
 
 /* Set the model flag owned by the given slot. */
-void mnuSetFlagForMenuEntry(s32 index) {
+void mnuSetFlagForMenuEntry(s32 slotIndex) {
     s32 flag;
 
-    flag = D_003CE1A8[index].flag;
+    flag = D_003CE1A8[slotIndex].flag;
     if (flag != 0) {
         mdlFlagSet(flag);
     }
