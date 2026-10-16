@@ -551,10 +551,10 @@ u32 evtCommandSetWorldNodeBaseMode(void) {
 }
 
 u32 evtCommandSetWorldNodeUpperMode(void) {
-    u64 baseMode;
+    u64 upperMode;
 
-    baseMode = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(1, baseMode);
+    upperMode = scrReadIntParameter(0);
+    evtApplyIndexValueToWorldNodes(1, upperMode);
     return 1;
 }
 
