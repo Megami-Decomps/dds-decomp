@@ -2949,7 +2949,10 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
 s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     FieldSequenceRecord record;
     s32 warp;
-    s32 stage;
+    union {
+        s32 value;
+        u8 bytes[sizeof(s32)]; /* The field mode request copies this word. */
+    } stagePayload;
     s32 room;
     u32 floorFlags;
     u32 flags;
@@ -2981,12 +2984,16 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            stage = entry->explorationArea != 0 ? entry->explorationArea : fldAreaState.area;
+            if (entry->explorationArea == 0) {
+                stagePayload.value = fldAreaState.area;
+            } else {
+                stagePayload.value = entry->explorationArea;
+            }
             room = floorFlags >> 2;
             if (room == 0) {
                 room = fldAreaState.floor + 1;
             }
-            fldSetFloorFlag(stage, room, entry->floorFlagBit);
+            fldSetFloorFlag(stagePayload.value, room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
@@ -2995,16 +3002,17 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
-            stage = fldAreaState.area;
-            dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0);
+            stagePayload.value = fldAreaState.area;
+            dds3AdminSubmitModeRequest(0x1C, stagePayload.bytes, sizeof(stagePayload.bytes), 0);
             return 0;
         }
-        stage = command;
-        if (entry->variant != 0) {
-            stage = entry->variant;
+        if (entry->variant == 0) {
+            stagePayload.value = command;
+        } else {
+            stagePayload.value = entry->variant;
         }
         room = entry->warpEntry;
-        if (fldAreaState.area != stage) {
+        if (fldAreaState.area != stagePayload.value) {
             fldReleaseCurrentBgm();
         }
         fldApplySceneRoomSelection(entry);
@@ -3014,7 +3022,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             strcpy((char *)D_00387D60, taskName);
             D_00435F28 = i + 1;
         }
-        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
+        fldInitializeFieldSequenceRecord(&record, stagePayload.value, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         record.mode = 6;
         dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
         return 0;
