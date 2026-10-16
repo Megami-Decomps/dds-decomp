@@ -90,7 +90,7 @@ extern DatEnemyRecord *datEnemyRecords;
 extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern s8 effSharedRandomState[];
 
@@ -170,7 +170,7 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
         return 0;
     }
     category = actor->actionCode;
-    if (category != 0 && (*(u16 *)(datActionAnimationRecords + category * 32 + 0x1C) & 1)) {
+    if (category != 0 && (datActionAnimationRecords[category].flags & 1)) {
         return 0;
     }
     return 1;
@@ -288,7 +288,7 @@ s32 btlHasActorCategoryFlag100(BtlLinkedCommand *action) {
     if (index == 0) {
         return 0;
     }
-    if ((((BtlActionAnimationRecord *)datActionAnimationRecords)[index].flags & 0x100) == 0) {
+    if ((datActionAnimationRecords[index].flags & 0x100) == 0) {
         return 0;
     }
     return 1;
@@ -316,7 +316,7 @@ u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
     if (index == 0) {
         return 0;
     }
-    if ((*(u16 *)(datActionAnimationRecords + index * 0x20 + 0x1C) & 2) != 0) {
+    if ((datActionAnimationRecords[index].flags & 2) != 0) {
         return 1;
     }
     return 0;
@@ -339,7 +339,7 @@ u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
     if (index == 0) {
         return 0;
     }
-    if ((*(u16 *)(datActionAnimationRecords + index * 0x20 + 0x1C) & 4) != 0) {
+    if ((datActionAnimationRecords[index].flags & 4) != 0) {
         return 1;
     }
     return 0;
@@ -358,7 +358,7 @@ s32 btlHasActorCategoryFlag40(BtlLinkedCommand *action) {
     if (index == 0) {
         return 0;
     }
-    if ((((BtlActionAnimationRecord *)datActionAnimationRecords)[index].flags & 0x40) == 0) {
+    if ((datActionAnimationRecords[index].flags & 0x40) == 0) {
         return 0;
     }
     return 1;
@@ -628,7 +628,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                     btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
                 }
             } else if (btlHasLinkedEffectNodeTrigger(action) != 0) {
-                switch (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].cameraKind) {
+                switch (datActionAnimationRecords[action->actionCode].cameraKind) {
                 case 6:
                     action->stepKind = 7;
                     btlPrepareCameraMode6Participants(action, &action->camera);
@@ -654,7 +654,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 }
                 switch (action->stepKind) {
                 case 1:
-                    switch (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].cameraKind) {
+                    switch (datActionAnimationRecords[action->actionCode].cameraKind) {
                     case 6:
                     case 7:
                         btlSetupCameraPoseAimUnit(action, &action->frontCamera, &action->backCamera);
@@ -1171,7 +1171,7 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *action) {
     }
     btlAdvancePlayerCursorAnimation(action, &action->camera);
 }
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlInitializeActionCamera(BtlLinkedCommand *);
@@ -1200,7 +1200,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
             }
         } while (index < count);
     }
-    policy = ((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].flags & 0xC00;
+    policy = datActionAnimationRecords[action->actionCode].flags & 0xC00;
     if (policy != 0) {
         if (policy == 0xC00) {
             index = effMiscRandMod(NULL, 2);
