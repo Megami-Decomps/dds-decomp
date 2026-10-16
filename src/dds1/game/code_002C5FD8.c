@@ -579,7 +579,7 @@ void fldDrawCounterMapMarker(void) {
 
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
-MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
+MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
     MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
@@ -604,7 +604,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     first = state->first;
     node->next = first;
     first->prev = node;
-    state->arg = arg;
+    state->arg = limit;
     state->count = count;
     state->interval = 0;
     return state;
