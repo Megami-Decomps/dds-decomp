@@ -621,7 +621,46 @@ void fldTestDrawDestroy(void) {
     kwlnTaskDestroyWithHierarchyByName(D_0039FA00, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E6C0);
+extern void frFontSetSharedRenderFlags(u32);
+extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 first, const u8 *second);
+extern char *strcat(char *, const char *);
+extern char D_0032C840[13][4];
+
+static inline char *fldNumberGlyphText(s32 index) {
+    char *table = (char *)D_0032C840;
+
+    return table + index * 4;
+}
+
+void func_0011E6C0(s32 x, s32 y, s32 value) {
+    char text[32];
+    s32 digit;
+
+    frFontSetSharedRenderFlags(0x54);
+    if (value > 1000) {
+        s32 halfY = y / 2;
+        fldDrawConvertedTextGlyph(x, halfY, 0xA09DC380, (const u8 *)fldNumberGlyphText(12));
+        return;
+    }
+    text[0] = 0;
+    if (value < 0) {
+        strcat(text, fldNumberGlyphText(10));
+        value = -value;
+    }
+    do {
+        digit = value / 10;
+    } while (0);
+    if (digit > 0 && digit < 10) {
+        strcat(text, fldNumberGlyphText(digit));
+    }
+    digit = value % 10;
+    if (digit < 10) {
+        strcat(text, fldNumberGlyphText(digit));
+    }
+    x += 0x10;
+    strcat(text, fldNumberGlyphText(11));
+    fldDrawConvertedTextGlyph(x, y / 2, 0xA09DC380, (const u8 *)text);
+}
 
 void fldConfigureCameraMoveTracking(s32 start, s32 end) {
     s32 first;
