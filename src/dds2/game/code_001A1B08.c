@@ -831,18 +831,18 @@ s32 itfCommandSelectOptionWithFade(void) {
 }
 
 /* Return the option-block signed status word, not the separate entry status byte. */
-s16 itfPanelGetPairFirst(s32 index) {
-    return itfWindowSlots[index].ptr->options.status;
+s16 itfPanelGetPairFirst(s32 windowIndex) {
+    return itfWindowSlots[windowIndex].ptr->options.status;
 }
 
 /* Store the option-block signed status word without validating the slot. */
-void itfPanelSetPairFirst(s32 index, s16 status) {
-    itfWindowSlots[index].ptr->options.status = status;
+void itfPanelSetPairFirst(s32 windowIndex, s16 status) {
+    itfWindowSlots[windowIndex].ptr->options.status = status;
 }
 
 /* Return the same signed word forwarded as the script result when an option completes. */
-s16 itfPanelGetPairSecond(s32 index) {
-    return itfWindowSlots[index].ptr->options.clearBitCount;
+s16 itfPanelGetPairSecond(s32 windowIndex) {
+    return itfWindowSlots[windowIndex].ptr->options.clearBitCount;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);

@@ -234,7 +234,7 @@ s32 evtSetMessageWindowPageValue(s32 pageValue) {
 
 extern void itfMesStartEntry(s32, s32, s32);
 
-extern void itfPanelSetPairFirst(s32, s32);
+extern void itfPanelSetPairFirst(s32 windowIndex, s32 status);
 
 /* Start an entry, mark the first panel value pending, and enable control state one. */
 s32 dspStartEntry(s32 entry) {
