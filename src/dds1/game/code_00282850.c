@@ -135,7 +135,7 @@ extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];
 
 
-extern void evtStageTestApplyInitialMotion(s32 arg0);
+extern void evtStageTestApplyInitialMotion(s32 initialMotionIndex);
 
 extern s32 D_003BC7B4;
 
