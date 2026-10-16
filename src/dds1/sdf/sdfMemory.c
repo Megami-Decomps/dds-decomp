@@ -26,12 +26,14 @@ SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {
 }
 
 /* Derive the byte count from adjacent addresses while preserving the interrupt state. */
-s32 sdfMemoryGetBlockSize(SdfMemBlock *block) {
+s32 sdfMemoryGetBlockSize(const SdfMemBlock *block) {
+    const SdfMemBlock *nextBlock;
     s32 blockBytes;
     s32 interruptsWereEnabled;
 
     interruptsWereEnabled = DIntr();
-    blockBytes = block->next->address - block->address;
+    nextBlock = block->next;
+    blockBytes = nextBlock->address - block->address;
     if (interruptsWereEnabled) {
         EIntr();
     }
@@ -39,7 +41,7 @@ s32 sdfMemoryGetBlockSize(SdfMemBlock *block) {
 }
 
 /* Return the represented address, not the allocation descriptor's address. */
-u32 sdfMemoryGetBlockAddress(SdfMemBlock *block) {
+u32 sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
     return block->address;
 }
 
