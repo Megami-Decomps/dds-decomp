@@ -4931,10 +4931,10 @@ void fldSetCameraNodeModeWithZero(void) {
 
 
 
-void fldAddCameraModelEntry(s32 value) {
+void fldAddCameraModelEntry(s32 motionIndex) {
     MdlCtx *model = fldPlayerModelContext;
     model->first->frameStep = 1.0f;
-    mdlAddEntryPlainEx(model, 0, value, 2.0f, 5.0f);
+    mdlAddEntryPlainEx(model, 0, motionIndex, 2.0f, 5.0f);
 }
 
 void fldAddCameraModelPair(s32 first, s32 second) {
