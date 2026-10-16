@@ -652,7 +652,7 @@ s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *context) {
 }
 
 
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     u32 i;
