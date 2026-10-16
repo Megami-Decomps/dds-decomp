@@ -26,7 +26,8 @@ void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32
 extern s32 D_003C90DC[];
 extern s32 evtSolarNoiseLayerPlacements[][3];
 extern SolarOverlayShape evtSolarOverlayShapes[];
-extern void sdfDrawColoredTriangleFan(s32 *, u32, u32 *, s32, s32, s32);
+extern void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
+                                      s32 useFirstColor, s32 surfaceIndex);
 extern void evtPrepareSolarOverlayTestState(s32 renderHandle);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
                                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
