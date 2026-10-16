@@ -1648,12 +1648,12 @@ s32 evtClearRandomStatusFlags(void) {
     return clearedAny;
 }
 
-s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot) {
-    s32 index = id - 0xC0;
-    if (index <= 0) {
+s32 ptyGetCombinedRecordAndSlotValue(s32 itemId, s32 statIndex) {
+    s32 itemStatIndex = itemId - 0xC0;
+    if (itemStatIndex <= 0) {
         return 0;
     }
-    return D_00435E3C[index][slot] + datGameState->itemStatBonuses[index][slot];
+    return D_00435E3C[itemStatIndex][statIndex] + datGameState->itemStatBonuses[itemStatIndex][statIndex];
 }
 
 void ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount) {
