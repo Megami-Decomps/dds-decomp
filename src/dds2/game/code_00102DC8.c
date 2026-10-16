@@ -1379,16 +1379,16 @@ void kwlnAdvanceShakeOffsets(void) {
 
 /* Store tenths in the 16-bit duration before deriving its forty-percent mark.
  * Zero frames only disables the configuration; mode zero stores the -1 sentinel. */
-void kwlnFadeSetupFrames(s32 mode, s32 frames) {
+void kwlnFadeSetupFrames(s32 fadeMode, s32 frames) {
     if (frames == 0) {
         D_00435CE8 = 0;
         return;
     }
     D_00435CE8 = 1;
-    if (mode == 0) {
+    if (fadeMode == 0) {
         D_00435CEA = -1;
     } else {
-        D_00435CEA = mode;
+        D_00435CEA = fadeMode;
     }
     D_00435CEE = frames * KWLN_FADE_TICKS_PER_FRAME;
     D_00435CEC = D_00435CEE * KWLN_FADE_MARK_NUMERATOR / KWLN_FADE_TICKS_PER_FRAME;
