@@ -3377,7 +3377,7 @@ s32 fldEncProc(KwlnTask *task) {
     return 0;
 }
 
-void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
+void fldRequestEncounterWithFade(u32 encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
@@ -3385,11 +3385,11 @@ void fldRequestEncounterWithFade(u32 mode, s32 recordIndex) {
         return;
     }
     sndSetSequenceVolumePan(0xf, 0x7f, 0x3f);
-    fldSetEncounterMode(mode);
+    fldSetEncounterMode(encounterMode);
 }
 
-s32 fldSetEncounterMode(s32 mode) {
-    fldEncounterRuntimeState = mode;
+s32 fldSetEncounterMode(s32 encounterMode) {
+    fldEncounterRuntimeState = encounterMode;
     D_0043608C = 0;
     if (fldGetEncounterRuntimeResult() == 0) {
         if (fldEncounterRuntimeState < 3) {

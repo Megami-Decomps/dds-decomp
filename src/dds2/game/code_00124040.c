@@ -141,7 +141,7 @@ extern void fldPrepareSceneBgmArchive(void);
 
 extern s32 fldRestartSceneResourceTask(void);
 
-extern s32 fldSetEncounterMode(s32);
+extern s32 fldSetEncounterMode(s32 encounterMode);
 
 extern void fldStartDeferredFieldExit(void);
 
