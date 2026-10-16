@@ -38,14 +38,14 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, void *, s32, s32);
 
 
-void mnuDrawType2PanelEffects(MenuTerminalContext *w, s32 a1, s32 a2) {
+void mnuDrawType2PanelEffects(MenuTerminalContext *w, s32 blend, s32 layer) {
     BdWork *work;
 
     if (w->type != 2) {
         return;
     }
-    effDrawTextureSlotWithBlendedCornerColors(0xE30, 0x610, 0, a1, 0, w->effectSlots[2], 1, a2);
+    effDrawTextureSlotWithBlendedCornerColors(0xE30, 0x610, 0, blend, 0, w->effectSlots[2], 1, layer);
     work = w->effectSlots[3]->workEntries;
     work[1].geometry.angleDegrees = 90.0f;
-    effDrawTextureSlotWithBlendedCornerColors(0x9F0, 0x610, 0, a1, 2, w->effectSlots[3], 1, a2);
+    effDrawTextureSlotWithBlendedCornerColors(0x9F0, 0x610, 0, blend, 2, w->effectSlots[3], 1, layer);
 }
