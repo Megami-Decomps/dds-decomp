@@ -405,15 +405,15 @@ void fldResetPendingSounds(void) {
     fldPendingSoundCount = 0;
 }
 
-void fldAppendClearEntry(s32 id, f32 x, f32 y, f32 z, f32 w) {
+void fldAppendClearEntry(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
     s32 i = fldPendingSoundCount;
 
     fldPendingSounds[i].flags = 0;
-    fldPendingSounds[i].soundId = id;
-    fldPendingSounds[i].x = x;
-    fldPendingSounds[i].y = y;
-    fldPendingSounds[i].z = z;
-    fldPendingSounds[i].w = w;
+    fldPendingSounds[i].soundId = soundId;
+    fldPendingSounds[i].x = radius;
+    fldPendingSounds[i].y = sourceX;
+    fldPendingSounds[i].z = sourceY;
+    fldPendingSounds[i].w = sourceZ;
     fldPendingSoundCount = i + 1;
 }
 

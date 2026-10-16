@@ -674,7 +674,7 @@ extern void func_00148FF0(s32, u32, f32 *, f32, f32, f32);
 extern void func_001480D0(u32, f32 *, f32, f32, f32, s32, const char *, s32);
 extern void func_001486D0(u32, f32 *, f32, f32, f32);
 extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation);
-extern void fldAppendClearEntry(s32 id, f32 x, f32 y, f32 z, f32 w);
+extern void fldAppendClearEntry(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 
 /* Serialized transforms leave the position W component zero. */

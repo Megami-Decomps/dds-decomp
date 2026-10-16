@@ -666,7 +666,7 @@ void fldResetPendingSounds(void) {
     fldPendingSoundCount = 0;
 }
 
-void fldAppendPendingSoundForScene(s32 id, f32 radius, f32 x, f32 y, f32 z) {
+void fldAppendPendingSoundForScene(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
     if (fldAreaState.area == 0x1A && mdlFlagTest(0x1F) != 0) {
         return;
     }
@@ -674,11 +674,11 @@ void fldAppendPendingSoundForScene(s32 id, f32 radius, f32 x, f32 y, f32 z) {
         return;
     }
     fldPendingSounds[fldPendingSoundCount].flags = 0;
-    fldPendingSounds[fldPendingSoundCount].soundId = id;
+    fldPendingSounds[fldPendingSoundCount].soundId = soundId;
     fldPendingSounds[fldPendingSoundCount].radius = radius;
-    fldPendingSounds[fldPendingSoundCount].x = x;
-    fldPendingSounds[fldPendingSoundCount].y = y;
-    fldPendingSounds[fldPendingSoundCount].z = z;
+    fldPendingSounds[fldPendingSoundCount].x = sourceX;
+    fldPendingSounds[fldPendingSoundCount].y = sourceY;
+    fldPendingSounds[fldPendingSoundCount].z = sourceZ;
     fldPendingSoundCount++;
 }
 
