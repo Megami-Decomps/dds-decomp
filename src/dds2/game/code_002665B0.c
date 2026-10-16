@@ -601,14 +601,14 @@ void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuList *list, Menu
 }
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, void *owner) {
+MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEntryIndex, void *owner) {
     MenuList *list = mnuCreateListState(0, count, 0x16, owner);
     s32 entryIndex;
     list->context = owner;
     list->drawCallback = mnuThresholdNodeDrawCallback;
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
-        if (entryIndex != excluded) {
+        if (entryIndex != excludedEntryIndex) {
             MenuListNode *node = mnuListAppendNode(list, D_00437870);
             node->camp.value = items[entryIndex];
         }
