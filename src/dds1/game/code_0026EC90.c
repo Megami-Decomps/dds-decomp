@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
+#include "sdf_trig.h"
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "sdf.h"
@@ -52,7 +53,6 @@ typedef char StaffImageCornersSizeCheck[(sizeof(StaffImageCorners) == 12) ? 1 : 
 extern StaffImageCorners mnuStaffRollImageFadeControlPoints[];
 extern MnuStaffImageRecord mnuStaffRollImageRecords[];
 extern s32 D_003BC614;
-extern f32 sdfSinPoly(f32);
 extern s32 mnuCheckMovieDecoderStatus(void);
 extern s32 mnuGetMoviePlaybackMode(void);
 extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha,
