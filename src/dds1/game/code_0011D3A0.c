@@ -509,7 +509,10 @@ extern void fldSetGsAlphaBlendEquation(s32);
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
+                                f32 x0, f32 y0, f32 z0,
+                                f32 x1, f32 y1, f32 z1,
+                                f32 x2, f32 y2, f32 z2);
 
 /* Filled disc in the field; radius shrinks in the close-up areas. */
 void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
