@@ -69,7 +69,7 @@ extern char D_00428368[];
 
 
 
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern char brsStaffInputTaskName[];
 
