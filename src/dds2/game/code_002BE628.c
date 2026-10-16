@@ -831,10 +831,10 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
 }
 
 void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
-                                    s32 index) {
+                                    s32 resourceIndex) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
-    itfGridStorePosition(&panel->backgroundSlot, resource, index);
+    itfGridStorePosition(&panel->backgroundSlot, resource, resourceIndex);
 }
 
 void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, EffectSlotSet *resource, s32 centerIndex, s32 cornerIndex) {
@@ -857,10 +857,10 @@ void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 materia
 }
 
 void mnuSetPanelSecondGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
-                                    s32 index) {
+                                    s32 resourceIndex) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
-    itfGridStorePosition(&panel->rowSlot, resource, index);
+    itfGridStorePosition(&panel->rowSlot, resource, resourceIndex);
 }
 
 void mnuSetPanelThirdGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
