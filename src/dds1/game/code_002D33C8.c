@@ -1962,7 +1962,7 @@ void sdfLinkRouteNode(SdfDrawNode *node, SdfDrawNode *owner) {
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPendingQueueSemaphore);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "game/code_002D33C8", sdfDoubleBufferAllocation);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDoubleBufferAllocation);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBufferSize);
 

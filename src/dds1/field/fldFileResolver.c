@@ -9758,17 +9758,17 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAreaLoadRequest);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC40);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldAreaCachedResource);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAreaCachedResource);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", D_003BAC4C);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC4C);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceAllocation);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomF1ResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF1ResourceAllocation);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomF2ResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF2ResourceAllocation);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceData);
 
