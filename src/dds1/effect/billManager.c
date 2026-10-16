@@ -482,7 +482,7 @@ BillObj *billAllocList(void *resourceData) {
     return newobj;
 }
 
-BillObj *billCloneList(BillObj *obj) {
+BillObj *billCloneList(const BillObj *obj) {
     BillData *data;
     s32 n;
     BillObj *newobj;
@@ -846,7 +846,7 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
 }
 
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
-BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
+BillObj *billCloneObjectRetainingSharedData(const BillObj *source) {
     BillObj *copy;
     BillChildPayload *data;
     u16 sourceKind;

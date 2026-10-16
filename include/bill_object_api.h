@@ -17,7 +17,7 @@ struct BillObj *effCreateBillboardSharingIndexedResource(s32 index);
 
 /* The selected kind interprets the opaque payload word. */
 struct BillObj *billCreateIndexed(s32 kind, u32 data);
-struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
+struct BillObj *billCloneObjectRetainingSharedData(const struct BillObj *source);
 void billInitializeCommonDrawState(struct BillObj *billboard);
 struct BillChildPayload *billCreateChildPayloadFromTextureResource(
     struct SdfTextureFileHeader *resource);
