@@ -758,7 +758,114 @@ INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF780);
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", mnuUpdateResourceTaskState);
+/* Snapshot is one native DatPartyRecord: 0x1A4 bytes with word alignment. */
+typedef struct ResourcePartySnapshot { u32 words[0x1A4/4]; } ResourcePartySnapshot;
+extern s8 D_00324510[];
+extern SdfTaskItemDesc D_0036C65C;
+extern s32 mnuTickInitState(MenuProgressHost *);
+extern void mnuCommitTitleStreamReadyState(void);
+/* The native party snapshot occupies scene metadata +0x28..+0x1CB. */
+static inline ResourcePartySnapshot *resourceTaskPartySnapshot(MenuSceneMetadata *metadata) {
+    return (ResourcePartySnapshot *)((u8 *)metadata + 0x28);
+}
+s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
+    s32 action=0;
+    struct MenuList *list=task->menuList;
+    u32 state;
+    MenuSceneMetadata *metadata=(MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext,-1);
+    s32 frame;
+    ResourcePartySnapshot **selectedParty;
+    ResourcePartySnapshot *snapshot;
+    state=task->unk04[0];
+    switch (state) {
+    case 0:
+        if (mnuTickInitState(metadata->attachedEffect)==0 && ((s32 (*)())mnuAreResourceSlotsOccupied)(metadata)==1) task->unk04[0]=6;
+        return 0;
+    case 6:
+        selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
+        task->unk04[0]=1;
+        snapshot=resourceTaskPartySnapshot(metadata);
+        *snapshot=**selectedParty;
+        mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+        return 0;
+    case 7:
+        selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
+        task->unk04[0]=5;
+        snapshot=resourceTaskPartySnapshot(metadata);
+        *snapshot=**selectedParty;
+        mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+        return 0;
+    case 1:
+    case 5:
+        frame=(s32)task->unk04[1]+1;
+        task->unk04[1]=frame;
+        if ((f32)frame>=10.0f) {task->unk04[1]=0;task->unk04[0]=4;}
+        return 0;
+    case 2:
+        frame=(s32)task->unk04[1]+1;
+        task->unk04[1]=frame;
+        if ((f32)frame>=10.0f) {
+            sdfAttachTaskItem(mnuSceneResourceContext,&D_0036C65C);
+            sdfSetTaskItemMode(mnuSceneResourceContext,key,2);
+            task->unk04[0]=7;task->unk04[1]=0;
+            mnuReleaseMenuVisualWorkResources(metadata->attachedEffect);
+        }
+        return 0;
+    case 3: {
+        s32 frames=(s32)task->unk04[1]+1;
+        task->unk04[1]=frames;
+        if(frames>=10) {task->unk04[0]=8;return 0;}
+        break;
+    }
+    case 8:
+        frame=(s32)task->unk04[1]+1;
+        task->unk04[1]=frame;
+        if (frame>=5) {mnuMarkTitleStreamResetPending();mnuResetTitleStreamLocked();return -1;}
+        return 0;
+    default:
+        if (D_00324510[0x26]&2) {
+            if (mnuRetreatListCursorDefault(list)!=NULL) {
+                action=1;
+                ((s32 (*)())mnuReleaseMenuVisualWorkResources)(metadata->attachedEffect);
+                selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
+                snapshot=resourceTaskPartySnapshot(metadata);
+                *snapshot=**selectedParty;
+                mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+            }
+        } else if (D_00324510[0x27]&2) {
+            if (mnuAdvanceListCursorDefault(list)!=NULL) {
+                action=1;
+                ((s32 (*)())mnuReleaseMenuVisualWorkResources)(metadata->attachedEffect);
+                selectedParty=(ResourcePartySnapshot **)(u32)list->cursor->userValue;
+                snapshot=resourceTaskPartySnapshot(metadata);
+                *snapshot=**selectedParty;
+                mnuSetupStaffMenuProfilePage((struct DatPartyRecord *)snapshot,metadata->attachedEffect);
+            }
+        } else if (D_00324510[0x21]<0) {
+            action=2; task->unk04[1]=0; task->unk04[0]=2;
+        } else if (D_00324510[0x23]<0) {
+            mnuCommitTitleStreamReadyState();
+            task->unk04[0]=3; task->unk04[1]=0;
+            action=3;
+        }
+        if ((D_00324510[0x26]==0) & (D_00324510[0x27]==0)) mnuClearListFlagsOneAndTwo(list);
+        if (action != 0) {
+            switch (action) {
+            case 1:
+                sndSetSequenceVolumePan(0,0x7F,0x3F);
+                break;
+            case 2:
+                sndSetSequenceVolumePan(8,0x7F,0x3F);
+                break;
+            case 3:
+                sndSetSequenceVolumePan(10,0x7F,0x3F);
+                break;
+            }
+        }
+        return 0;
+    }
+    return 0;
+}
 
 extern void mnuDrawDisplaySpriteAndPanelMarks(s32, s32, s32);
 extern void mnuDrawMantraSceneSpriteSequence(s32, s32);
