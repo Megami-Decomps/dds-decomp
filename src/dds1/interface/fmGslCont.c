@@ -15,13 +15,13 @@ s32 fmGslReleaseActiveResourceBuffers(void) {
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
 FntNode *frFontDetachFirstResourceNode(void) {
-    FntNode *node = frFontResourceList.head->next;
+    FntNode *resourceNode = frFontResourceList.head->next;
 
-    if (node->nodeIndex == 0) {
+    if (resourceNode->nodeIndex == 0) {
         return NULL;
     }
-    node->prev->next = node->next;
+    resourceNode->prev->next = resourceNode->next;
     frFontResourceList.count -= 1;
-    node->next->prev = node->prev;
-    return node;
+    resourceNode->next->prev = resourceNode->prev;
+    return resourceNode;
 }
