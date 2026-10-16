@@ -5,7 +5,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
-extern u32 fldInputPanelTaskHandle;
+extern KwlnTask *fldInputPanelTaskHandle;
 
 
 
@@ -24,14 +24,14 @@ void fldCreateInputPanelTask(void) {
 
 void fldDestroyPanelTaskIfPresent(void) {
     if (fldInputPanelTaskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)fldInputPanelTaskHandle, 1);
+        kwlnTaskDestroyWithHierarchy(fldInputPanelTaskHandle, 1);
     }
 }
 
 void *fldSetTitleBannerPending(s32 pending) {
     FldTitleBannerMenu *menu;
 
-    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
     menu->pending = pending;
     return menu;
 }
@@ -39,7 +39,7 @@ void *fldSetTitleBannerPending(s32 pending) {
 void *fldSetTitleBannerChoice(s32 choice) {
     FldTitleBannerMenu *menu;
 
-    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
     menu->choice = choice;
     return menu;
 }

@@ -525,7 +525,7 @@ extern u8 fldHasKiretaLabelProcess(void);
 extern u8 fldHasHirakenaiLabelProcess(void);
 extern u8 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern u32 fldInputPanelTaskHandle;
+extern KwlnTask *fldInputPanelTaskHandle;
 extern void fldUpdateCameraHeadingFromXY(void);
 extern u32 D_00389988[];
 extern u8 D_0037F510[2][2][16];
@@ -571,7 +571,7 @@ s32 fldResolvePendingTitleBanner(void) {
         return 0;
     }
 
-    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
     if (menu->pending == 0) {
         return -1;
     }
