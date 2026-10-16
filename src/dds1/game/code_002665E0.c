@@ -129,7 +129,7 @@ extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
 void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *entry, s32 context, s32 rowIndex) {
+                   BrsProgressRow *progressRow, s32 context, s32 rowIndex) {
     s32 level = work->levelAnimation[rowIndex].level;
     s32 fade = 0x100 - work->fadeProgress;
     s32 nextLevel = level + 1;
@@ -154,14 +154,14 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
     case 2:
     case 3:
     case 4:
-        if (level < 99 && entry->unit->hp != 0 && (entry->unit->status & 0x4000) == 0) {
+        if (level < 99 && progressRow->unit->hp != 0 && (progressRow->unit->status & 0x4000) == 0) {
             if (work->levelAnimation[rowIndex].state == 3) {
                 goto flash;
             }
-            work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(work, entry, rowIndex, 0);
+            work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(work, progressRow, rowIndex, 0);
             currentExp = work->levelAnimation[rowIndex].currentProgress + work->levelAnimation[rowIndex].applied;
             work->levelAnimation[rowIndex].currentProgress = currentExp;
-            if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[rowIndex].state == 2) {
+            if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level) && work->levelAnimation[rowIndex].state == 2) {
                 work->levelAnimation[rowIndex].level++;
                 work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
                 if (work->skipProgressAnimation != 0) {
@@ -169,7 +169,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
                     while (work->levelAnimation[rowIndex].level < 99) {
                         nextLevel = work->levelAnimation[rowIndex].level + 1;
                         nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
-                        if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level)) {
+                        if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level)) {
                             work->levelAnimation[rowIndex].level++;
                             work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
                         } else {
