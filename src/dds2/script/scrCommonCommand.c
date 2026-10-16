@@ -31,7 +31,7 @@ s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 
 s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
 
-s32 kwlnSetDrawColorTarget(s32 blendFrames, void *color);
+void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color);
 
 s32 evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget);
 s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
@@ -362,7 +362,7 @@ s32 scrCmdSetPackedRgbFromFloatArgs(void)
     v.y = bfWaitReadArgFloat(2);
     v.z = bfWaitReadArgFloat(3);
     v.w = 0;
-    kwlnSetDrawColorTarget(scrReadIntParameter(0), &v);
+    kwlnSetDrawColorTarget(scrReadIntParameter(0), &v.x);
     return 1;
 }
 
