@@ -33,7 +33,7 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 
-void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
+void sdfRelocatePackedResourceWords(int *words, int relocationBase, u8 *table, int tableBytes);
 
 extern u32 itfMessageFlags;
 
