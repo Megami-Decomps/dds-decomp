@@ -3216,7 +3216,7 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
     work->fade[2][3] = 0;
 }
 
-extern void fldScaleSceneCoordinateRecord(EffectSlotSet *, s32);
+extern void btlScaleEffectSlotSourceBounds(EffectSlotSet *, s32);
 
 extern void func_001B19F8(BattlePhasePanelWork *);
 
@@ -6528,7 +6528,7 @@ void btlRequestCommandPanelClose(void) {
     }
 }
 
-void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
+void btlGetTargetRowAnimationOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     s32 offsets[3][8][2] = {
         {{-7, 3}, {-6, 4}, {-5, 4}, {-4, 5}, {-3, 5}, {-2, 6}, {0, 0}, {0, 0}},
         {{0x22, 3}, {0x21, 4}, {0x20, 4}, {0x1F, 5}, {0x1E, 5}, {0x1D, 6}, {0, 0}, {0, 0}},
@@ -6548,7 +6548,7 @@ void btlAdvanceTargetRowAnimation(SceneAiWork *work, s32 mode) {
             work->rowFade[i] = 128;
             work->rowScale[i] = 80.0f;
             work->rowPhase[i] = 0;
-            fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, 0);
+            btlGetTargetRowAnimationOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, 0);
         }
         break;
     case 4:
@@ -6559,7 +6559,7 @@ void btlAdvanceTargetRowAnimation(SceneAiWork *work, s32 mode) {
             case 0:
                 work->rowStep[i]++;
                 work->rowStep[i] = work->rowStep[i] <= 0 ? 0 : work->rowStep[i] > 5 ? 5 : work->rowStep[i];
-                fldGetSceneDirectionStepOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, work->rowStep[i]);
+                btlGetTargetRowAnimationOffset(&work->rowPosition[i][0], &work->rowPosition[i][1], i, work->rowStep[i]);
                 if (work->rowStep[i] >= 5) work->rowPhase[i]++;
                 break;
             case 1:
@@ -7414,7 +7414,7 @@ void btlDrawActorSlotOrder(void) {
                           coordinates[index][2], 0x53);
             btlResourceBlock->resC->workEntries[coordinates[index][2]]
                 .geometry.angleDegrees = 0.0f;
-            fldScaleSceneCoordinateRecord(btlResourceBlock->resC,
+            btlScaleEffectSlotSourceBounds(btlResourceBlock->resC,
                                          coordinates[index][2]);
 
             if (D_003BD840[bank]->rotationAngleDegrees[index] > 0.0f) {
@@ -7494,7 +7494,7 @@ void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x,
         effDrawSpriteWithCornerColors((x + drawX) << 4, (y + drawY) << 3,
                       0, colors, 0, work, entry, 0x53);
     }
-    fldScaleSceneCoordinateRecord(work, entry);
+    btlScaleEffectSlotSourceBounds(work, entry);
 }
 
 /* Advance one slot-order secondary state and its four corner-color adjustments. */
@@ -7563,7 +7563,7 @@ void btlUpdateActorSlotOrderColors(s32 bank, s32 index) {
     }
 }
 
-void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
+void btlScaleEffectSlotSourceBounds(EffectSlotSet *work, s32 index) {
     work->workEntries[index].geometry.bounds[2] = work->workEntries[index].sourceWidth << 4;
     work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }

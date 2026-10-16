@@ -36,8 +36,8 @@ typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 D_003BD824;
-extern UiQuadColor D_00358390;
+extern s32 itfTestOverlayPhase;
+extern UiQuadColor itfTestOverlayColor;
 extern u64 *itfCreateVerticalGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -66,11 +66,11 @@ typedef struct ItfColorPanelWork {
 
 typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
 
-extern ItfColorPanelWork D_003D73E0;
-extern ItfColorPanelRow D_00358360[6];
+extern ItfColorPanelWork itfOverlayColorEditorWork;
+extern ItfColorPanelRow itfOverlayColorEditorRows[6];
 extern SndPad D_00324510;
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern s32 D_003BD828;
+extern s32 itfTestOverlayPhaseStep;
 extern u8 D_003BB2B4;
 extern char D_003BB2B8[]; /* "FILTER:" */
 extern char D_003BB2C0[]; /* ">" */
@@ -96,96 +96,96 @@ s32 itfEditOverlayColor(void) {
         sdfCreateBorderedRectanglePacket(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB2B8));
-    if (D_003D73E0.editing == 0) {
-        sdfPktInit(&packet, 0x8980, D_003D73E0.selection * 0x60 + 0x7A20, 0xFF0000, 0);
-        D_003D73E0.blink++;
-        if (D_003D73E0.blink < 32 || (D_003D73E0.blink & 31) < 18) {
+    if (itfOverlayColorEditorWork.editing == 0) {
+        sdfPktInit(&packet, 0x8980, itfOverlayColorEditorWork.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        itfOverlayColorEditorWork.blink++;
+        if (itfOverlayColorEditorWork.blink < 32 || (itfOverlayColorEditorWork.blink & 31) < 18) {
             sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB2C0));
         }
     }
     for (row = 0; row != 4; row++) {
-        sdfPktInit(&packet, 0x8980, y, 0xFF0000, D_00358360[row].highlight);
+        sdfPktInit(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
         sdfAppendPacket(list,
-            (u32)sdfFormatSifPacket(&packet, D_003BB2C8, D_00358360[row].title));
+            (u32)sdfFormatSifPacket(&packet, D_003BB2C8, itfOverlayColorEditorRows[row].title));
         highlight = 0;
-        if (D_003D73E0.editing != 0 && row == D_003D73E0.selection) {
+        if (itfOverlayColorEditorWork.editing != 0 && row == itfOverlayColorEditorWork.selection) {
             highlight = 6;
         }
         sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
         if (row < 4) {
             sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB2D0, D_00358390.channels[row]));
+                (u32)sdfFormatSifPacket(&packet, D_003BB2D0, itfTestOverlayColor.channels[row]));
         } else {
             sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB2D8, D_003BD828));
+                (u32)sdfFormatSifPacket(&packet, D_003BB2D8, itfTestOverlayPhaseStep));
         }
         y += 0x60;
     }
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
-    D_003BD824 += D_003BD828;
+    itfTestOverlayPhase += itfTestOverlayPhaseStep;
     itfDrawPulsingTestOverlay(0x52);
     if ((s8)D_00324510.secondaryTriangle < 0) {
         D_003BB2B4 ^= 1;
     }
-    if (D_003D73E0.editing == 0) {
-        previousSelection = D_003D73E0.selection;
+    if (itfOverlayColorEditorWork.editing == 0) {
+        previousSelection = itfOverlayColorEditorWork.selection;
         if ((u8)D_00324510.secondaryUp & 2) {
-            D_003D73E0.selection--;
-            if (D_003D73E0.selection < 0) {
-                D_003D73E0.selection = 3;
+            itfOverlayColorEditorWork.selection--;
+            if (itfOverlayColorEditorWork.selection < 0) {
+                itfOverlayColorEditorWork.selection = 3;
             }
         }
         if ((u8)D_00324510.secondaryDown & 2) {
-            D_003D73E0.selection++;
-            if (D_003D73E0.selection >= 4) {
-                D_003D73E0.selection = 0;
+            itfOverlayColorEditorWork.selection++;
+            if (itfOverlayColorEditorWork.selection >= 4) {
+                itfOverlayColorEditorWork.selection = 0;
             }
         }
-        if (previousSelection != D_003D73E0.selection) {
-            D_003D73E0.blink = 0;
+        if (previousSelection != itfOverlayColorEditorWork.selection) {
+            itfOverlayColorEditorWork.blink = 0;
         }
         if (D_00324510.secondaryCross < 0) {
-            D_003D73E0.editing ^= 1;
-            D_003D73E0.blink = 0;
+            itfOverlayColorEditorWork.editing ^= 1;
+            itfOverlayColorEditorWork.blink = 0;
         }
         if ((u8)D_00324510.secondaryCancel & 2) {
             return -1;
         }
     } else {
-        if (D_003D73E0.selection < 4) {
+        if (itfOverlayColorEditorWork.selection < 4) {
             if ((u8)D_00324510.coarseDown & 2) {
-                D_00358390.channels[D_003D73E0.selection] -= 10;
-                if (D_00358390.channels[D_003D73E0.selection] < 0) {
-                    D_00358390.channels[D_003D73E0.selection] = 0;
+                itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] -= 10;
+                if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] < 0) {
+                    itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 0;
                 }
             }
             if ((u8)D_00324510.coarseUp & 2) {
-                D_00358390.channels[D_003D73E0.selection] += 10;
-                if (D_00358390.channels[D_003D73E0.selection] > 255) {
-                    D_00358390.channels[D_003D73E0.selection] = 255;
+                itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] += 10;
+                if (itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] > 255) {
+                    itfTestOverlayColor.channels[itfOverlayColorEditorWork.selection] = 255;
                 }
             }
         } else {
-            previousRate = D_003BD828;
+            previousRate = itfTestOverlayPhaseStep;
             if ((u8)D_00324510.coarseDown & 2) {
-                D_003BD828 -= 0x100;
-                if (D_003BD828 < 0) {
-                    D_003BD828 = 0;
+                itfTestOverlayPhaseStep -= 0x100;
+                if (itfTestOverlayPhaseStep < 0) {
+                    itfTestOverlayPhaseStep = 0;
                 }
             }
             if ((u8)D_00324510.coarseUp & 2) {
-                D_003BD828 += 0x100;
-                if (D_003BD828 > 0x800) {
-                    D_003BD828 = 0x800;
+                itfTestOverlayPhaseStep += 0x100;
+                if (itfTestOverlayPhaseStep > 0x800) {
+                    itfTestOverlayPhaseStep = 0x800;
                 }
             }
-            if (previousRate != D_003BD828) {
-                D_003BD824 = 0;
+            if (previousRate != itfTestOverlayPhaseStep) {
+                itfTestOverlayPhase = 0;
             }
         }
         if (D_00324510.secondaryCancel < 0) {
-            D_003D73E0.editing ^= 1;
-            D_003D73E0.blink = 0;
+            itfOverlayColorEditorWork.editing ^= 1;
+            itfOverlayColorEditorWork.blink = 0;
         }
     }
     return 0;
@@ -235,10 +235,10 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     SdfPoolNode *surface;
     f32 phase;
 
-    phase = (f32)(D_003BD824 % 4096) * (1.0f / 4096.0f);
+    phase = (f32)(itfTestOverlayPhase % 4096) * (1.0f / 4096.0f);
     phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
-    alpha = (s32)((sdfSinPoly(phase) + 1.0f) * 0.5f * D_00358390.alpha);
-    component = (u8 *)&D_00358390;
+    alpha = (s32)((sdfSinPoly(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
+    component = (u8 *)&itfTestOverlayColor;
     for (i = 0; i != 3; i++, component += 4) {
         color |= *component << (i * 8);
     }
