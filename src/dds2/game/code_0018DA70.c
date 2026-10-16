@@ -24,7 +24,7 @@ typedef struct {
 } BlurVectorRecord;
 extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
-extern void effSetResourceBlendColor(s32 handle, u32 color);
+extern void effSetResourceBlendColor(void *resource, u32 color);
 extern void *effGetPairedBlurResourceVectorRecordAddress(void *vectorRecord);
 
 void effFreePairedResources(PairedEffectResources *pair) {
@@ -72,7 +72,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 VU0_LERP_VF10(0.66f);
                 VU0_STORE_VF(vf10, record->twoThirds);
                 VU0_STORE_VF(vf11, record->end);
-                effSetResourceBlendColor((s32)work->resource[resourceIndex], blendColor);
+                effSetResourceBlendColor(work->resource[resourceIndex], blendColor);
                 effThunderUpdateChainSegments(work->resource[resourceIndex]);
                 resourceIndex++;
             } while (resourceIndex < 2);
