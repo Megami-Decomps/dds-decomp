@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
@@ -21,7 +22,6 @@
 #include "dat_command.h"
 #include "eff.h"
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);

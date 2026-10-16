@@ -3,6 +3,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
 #include "btl_effect_active_api.h"
@@ -187,7 +188,6 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
 
@@ -1637,7 +1637,7 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
 
 s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index) {
     s32 (*predicate)(s32, s32, s32);
-    s32 table;
+    u8 *table;
     predicate = *(s32 (**)(s32, s32, s32))((u8 *)btlGetRuntime() + 0x6cc);
     if (predicate != 0 && !predicate(object, other, index)) {
         return 0;

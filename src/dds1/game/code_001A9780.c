@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "dsp_channel.h"
 #include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
@@ -156,7 +157,6 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command);
 
 /* The label resource index is the copied party record's unit ID. */ void *btlGetIndexedUiResource(BtlUnit *unit);
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 

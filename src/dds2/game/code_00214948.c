@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
@@ -116,7 +117,6 @@ extern void *btlCreateActionTask(void *, s32);
 
 extern s32 btlFindScriptResource(char *);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
 
@@ -1654,7 +1654,7 @@ s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x5F || user->partyRecord.unitId == 0x101) {
-        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -2210,7 +2210,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x108) {
-        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -7889,7 +7889,6 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
     }
 }
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 /* Move the Kali target +400 on Z for status-table kinds 2/7 without a trigger. */
 s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
@@ -7902,7 +7901,7 @@ s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (unit->partyRecord.unitId == 0x113) {
-        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(
+        table = (u8 *)btlGetSideIndexedActorStatusTable(
             unit->resourceKind, unit->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             s32 slot = command->link->indexWork.slot;

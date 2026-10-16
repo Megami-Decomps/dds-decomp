@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "itf_debug_panel_work.h"
 #include "itf_color_panel_row.h"
 #include "btl_boss_data_api.h"
@@ -1768,11 +1769,11 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 element) {
     return datGetEffectiveAffinity(record, element);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
     if (side == 0) {
-        return D_00435DE0 + index * 0x270;
+        return (void *)(u32)(D_00435DE0 + index * 0x270);
     }
-    return D_00435DF0 + index * 0x270;
+    return (void *)(u32)(D_00435DF0 + index * 0x270);
 }
 
 BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {

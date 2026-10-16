@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -95,7 +96,6 @@ extern s8 effSharedRandomState[];
 
 extern s8 effSharedRandomState[];
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern void btlUnitGetBodyPosVU(u8 *);
 
 extern char D_003BB5F8[];

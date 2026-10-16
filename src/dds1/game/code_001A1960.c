@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_animation_mode_entry.h"
@@ -533,11 +534,11 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 value) {
     return datGetEffectiveAffinity(record, value);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
     if (side == 0) {
-        return D_003BAA10 + index * 0x270;
+        return (void *)(u32)(D_003BAA10 + index * 0x270);
     }
-    return D_003BAA20 + index * 0x270;
+    return (void *)(u32)(D_003BAA20 + index * 0x270);
 }
 
 BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {

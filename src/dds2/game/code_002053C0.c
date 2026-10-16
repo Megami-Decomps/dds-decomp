@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_trig.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -72,7 +73,6 @@ extern u8 D_003E9130[];
 extern u8 D_003E9120[];
 
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
@@ -84,7 +84,6 @@ extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
@@ -1093,7 +1092,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     f32 newPosition[4] __attribute__((aligned(16)));
     BtlUnit *target;
     const BtlFormationSpacingCell *spacing;
-    s32 actorStatusAddress;
+    u8 *actorStatusAddress;
     s32 actionCode;
     s32 selector;
     u32 i;
@@ -1129,7 +1128,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
             continue;
         }
         actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
-        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + actorStatusAddress + 0x38);
+        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
         btlUnitGetMuzzlePosVU(participants[i]);

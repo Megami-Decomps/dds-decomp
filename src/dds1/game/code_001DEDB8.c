@@ -5,6 +5,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "kwln_fade.h"
@@ -295,7 +296,6 @@ extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
@@ -9585,7 +9585,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     f32 newPosition[4] __attribute__((aligned(16)));
     BtlUnit *target;
     const BtlFormationSpacingCell *spacing;
-    s32 actorStatusAddress;
+    u8 *actorStatusAddress;
     s32 actionCode;
     s32 selector;
     u32 i;
@@ -9621,7 +9621,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
             continue;
         }
         actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
-        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + actorStatusAddress + 0x38);
+        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
         btlUnitGetMuzzlePosVU(participants[i]);
