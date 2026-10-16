@@ -15,7 +15,7 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern EffBillResourceInit effBillResourceInitTable[];
 
-EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
+EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
     EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
     u32 argument = (u32)source->instance;
 
