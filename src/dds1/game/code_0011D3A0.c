@@ -158,48 +158,48 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D6B0);
 
 /* Wrap input cycles past the bounds; clamp input saturates there.
  * Coarse controls take priority over fine controls. */
-void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep) {
+void fldStepValueByPad(f32 *value, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
     f32 adjustedValue = *value;
 
     if ((s8)padState[5] & FIELD_EDIT_WRAP_INPUT) {
         adjustedValue += bigStep;
-        if (max < adjustedValue) {
-            adjustedValue = min;
+        if (maximum < adjustedValue) {
+            adjustedValue = minimum;
         }
     } else if (padState[5] & FIELD_EDIT_CLAMP_INPUT) {
         adjustedValue += bigStep;
-        if (max < adjustedValue) {
-            adjustedValue = max;
+        if (maximum < adjustedValue) {
+            adjustedValue = maximum;
         }
     } else if ((s8)padState[4] & FIELD_EDIT_WRAP_INPUT) {
         adjustedValue -= bigStep;
-        if (adjustedValue < min) {
-            adjustedValue = max;
+        if (adjustedValue < minimum) {
+            adjustedValue = maximum;
         }
     } else if (padState[4] & FIELD_EDIT_CLAMP_INPUT) {
         adjustedValue -= bigStep;
-        if (adjustedValue < min) {
-            adjustedValue = min;
+        if (adjustedValue < minimum) {
+            adjustedValue = minimum;
         }
     } else if ((s8)padState[7] & FIELD_EDIT_WRAP_INPUT) {
         adjustedValue += step;
-        if (max < adjustedValue) {
-            adjustedValue = min;
+        if (maximum < adjustedValue) {
+            adjustedValue = minimum;
         }
     } else if (padState[7] & FIELD_EDIT_CLAMP_INPUT) {
         adjustedValue += step;
-        if (max < adjustedValue) {
-            adjustedValue = max;
+        if (maximum < adjustedValue) {
+            adjustedValue = maximum;
         }
     } else if ((s8)padState[6] & FIELD_EDIT_WRAP_INPUT) {
         adjustedValue -= step;
-        if (adjustedValue < min) {
-            adjustedValue = max;
+        if (adjustedValue < minimum) {
+            adjustedValue = maximum;
         }
     } else if (padState[6] & FIELD_EDIT_CLAMP_INPUT) {
         adjustedValue -= step;
-        if (adjustedValue < min) {
-            adjustedValue = min;
+        if (adjustedValue < minimum) {
+            adjustedValue = minimum;
         }
     } else {
         return;
