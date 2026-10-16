@@ -171,7 +171,7 @@ void effBlurDrawFramebufferQuad(const EffBlurQuad *source)
     SdfListHead *list;
     void *tag;
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
-    void *drawPacket;
+    SdfDrawPacket *drawPacket;
 
     if (fldIsUpdateInhibited() == 0) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
