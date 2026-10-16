@@ -54,11 +54,11 @@ void itfAdvancePanelLayoutAndNotify(UiSprite *panel, s32 leftDelta, s32 topDelta
 
 /* Store the RGBA words in packet order, then notify with context.
  * The panel renderers consume these channels directly. */
-void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondValue, s32 thirdValue, s32 fourthValue) {
-    panel->red = firstValue;
-    panel->green = secondValue;
-    panel->blue = thirdValue;
-    panel->alpha = fourthValue;
+void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue) {
+    panel->red = redValue;
+    panel->green = greenValue;
+    panel->blue = blueValue;
+    panel->alpha = alphaValue;
     if (itfPanelColorCallbacks[panel->kind] != 0) {
         itfPanelColorCallbacks[panel->kind](panel->payload);
     }
