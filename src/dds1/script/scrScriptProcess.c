@@ -115,24 +115,24 @@ extern s32 strcmp(const char *a, const char *b);
 /* Walk the script-name table, releasing each node's task or process. */
 void scrDestroyAllNamedProcesses(void)
 {
-    ScrData *node;
-    ScrData *next;
+    ScrData *processNode;
+    ScrData *nextProcessNode;
 
-    node = scrNamedProcessHead;
-    if (node == NULL) {
+    processNode = scrNamedProcessHead;
+    if (processNode == NULL) {
         return;
     }
     while (1) {
-        next = node->next;
-        if (scrIsCurrentWorkTask(node) == 0) {
-            if (node->task != NULL) {
-                kwlnTaskDestroyWithHierarchy(node->task, 0);
+        nextProcessNode = processNode->next;
+        if (scrIsCurrentWorkTask(processNode) == 0) {
+            if (processNode->task != NULL) {
+                kwlnTaskDestroyWithHierarchy(processNode->task, 0);
             } else {
-                scrProcDestroyTask(node);
+                scrProcDestroyTask(processNode);
             }
         }
-        node = next;
-        if (node == NULL) {
+        processNode = nextProcessNode;
+        if (processNode == NULL) {
             break;
         }
     }
@@ -167,13 +167,13 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
 ScrData *scrFindNamedProcessNode(char *name) {
-    ScrData *node = scrNamedProcessHead;
+    ScrData *processNode = scrNamedProcessHead;
 
-    while (node != NULL) {
-        if (strcmp(name, node->name) == 0) {
-            return node;
+    while (processNode != NULL) {
+        if (strcmp(name, processNode->name) == 0) {
+            return processNode;
         }
-        node = node->next;
+        processNode = processNode->next;
     }
     return NULL;
 }
