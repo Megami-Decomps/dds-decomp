@@ -429,7 +429,7 @@ void evtAdvanceSolarClockAndExpireControls(f32 delta) {
                     datGameState->world.secondaryPhase = 0;
                 }
             }
-            datGameState->world.unkA48 = 0;
+            datGameState->world.specialEncounterAttemptCount = 0;
         }
     }
 }

@@ -57,7 +57,7 @@ typedef struct DatWorldState {
     u8 secondaryPhase;
     u8 overlayFlag;
     f32 phaseTimer;
-    u32 unkA48;
+    u32 specialEncounterAttemptCount; /* +0x08: attempts in the current solar cycle. */
     u32 fieldTransitionCycleCount; /* 0xA4C: solar cycles while a field transition is pending. */
     s32 score;
     u32 slotFlags;
@@ -66,6 +66,8 @@ typedef struct DatWorldState {
 } DatWorldState;
 typedef char DatWorldState_fieldTransitionCycleCount_offset[
     ((u32)&((DatWorldState *)0)->fieldTransitionCycleCount == 0x0C) ? 1 : -1];
+typedef char DatWorldState_specialEncounterAttemptCount_offset[
+    ((u32)&((DatWorldState *)0)->specialEncounterAttemptCount == 0x08) ? 1 : -1];
 
 /* Occupied records participate in roster lookup; frontline records occupy
  * the active battle formation. Other record flag bits remain unresolved. */

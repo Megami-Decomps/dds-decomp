@@ -1006,7 +1006,7 @@ s32 btlRollMajinEncounter(void) {
     }
     rate = datBattleParameters->specialEncounterChance[evtGetMirroredSolarPhase()];
     threshold = rate;
-    if (datGameState->world.unkA48 != 0) {
+    if (datGameState->world.specialEncounterAttemptCount != 0) {
         threshold = rate * datBattleParameters->specialEncounterScale;
         btlBossDebugPrintf("btl:majin=%d%%[%f]\n", threshold,
                            datBattleParameters->specialEncounterScale);
@@ -1019,7 +1019,7 @@ s32 btlRollMajinEncounter(void) {
             return 1;
         }
     }
-    datGameState->world.unkA48++;
+    datGameState->world.specialEncounterAttemptCount++;
     return btlRollAiBucket() < threshold;
 }
 
