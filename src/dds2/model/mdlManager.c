@@ -1,6 +1,7 @@
 #include "mdl_dev_slot_color.h"
 #include "ee_mmi.h"
 #include "common.h"
+#include "btl_group_id_api.h"
 #include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -256,9 +257,6 @@ Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId) {
 
 extern u32 mdlGroupJobSemaphore;
 
-extern s32 btlGroupContainsId(s32 group, s32 id);
-
-
 void mdlClearSlotAndRelease(MdlCtx *ctx, Motion *node) {
     if (ctx->slots[node->slotIndex] == node) {
         ctx->slots[node->slotIndex] = NULL;
@@ -447,8 +445,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern s32 btlGroupContainsId(s32 groupIndex, s32 wantedId);
-extern void btlAddGroupId(s32 groupIndex, s32 newId);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id);
 extern char *strrchr(const char *, s32);
 extern s32 strcasecmp(const char *, const char *);
@@ -1428,7 +1424,6 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern void btlRemoveGroupId(s32 groupIndex, s32 wantedId);
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */
