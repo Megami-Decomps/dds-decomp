@@ -114,7 +114,7 @@ extern s32 D_003BDAA0;
 extern void sdfRemoveHandler(void *);
 extern s32 sdfDisableDmacChannel(s32);
 
-extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32);
+extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32 capacity);
 
 
 extern SdfStreamFrameNode *sdfStreamNodeListHead;
