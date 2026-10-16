@@ -65,10 +65,10 @@ void sdfInvokeMotionObjectCallback(SdfMotionBindingHead *binding) {
     binding->dispatch->releaseStorage(binding);
 }
 
-/* Install the binding's dispatch table and source without touching its payload. */
-void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, SdfMotionBindingDispatch *dispatch) {
+/* Install the binding's dispatch table and motion without touching its payload. */
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, Motion *motion, SdfMotionBindingDispatch *dispatch) {
     binding->dispatch = dispatch;
-    binding->source = source;
+    binding->motion = motion;
 }
 
 
