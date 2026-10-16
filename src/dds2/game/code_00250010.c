@@ -4478,7 +4478,7 @@ extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Dat
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 extern EvtUnit *evtGetWorldUnitNestedValue(s32);
-extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
+extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
