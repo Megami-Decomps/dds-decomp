@@ -398,7 +398,9 @@ void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 he
 extern SdfStreamState D_003FF340;
 extern u8 D_003FF4C0[];
 extern s32 D_003FF480[];
-extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32, s32, s32, s32), s32);
+extern DevState *sdfDevCreateCallbackState(const char *path,
+                                          s32 (*callback)(DevState *, s32, s32, s32, s32),
+                                          s32 callbackContext);
 extern s32 sdfDevQueueControlRequest();
 extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
