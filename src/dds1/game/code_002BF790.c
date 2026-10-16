@@ -489,7 +489,7 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     return 0x10000 / table->cycleDivisor;
 }
 
-s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -499,13 +499,13 @@ s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTim
     s32 factor;
     s32 i = 0;
 
-    table = (GridAngleTable *)owner->source->status;
+    table = (GridAngleTable *)timedState->source->status;
     deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
     deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
     for (; i < 2; i++) {
         s32 delta = deltas[i];
         s32 magnitude = delta < 0 ? -delta : delta;
-        s32 amount = magnitude * owner->value / 0x10000;
+        s32 amount = magnitude * timedState->value / 0x10000;
         if (delta > 0) {
             dimensions[i] = delta - amount;
         } else {
@@ -513,9 +513,9 @@ s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTim
         }
     }
     if (table->mirrored != 0) {
-        factor = 0x10000 - owner->value;
+        factor = 0x10000 - timedState->value;
     } else {
-        factor = owner->value;
+        factor = timedState->value;
     }
     sourceColor = rectangle->savedColors;
     destColor = geometry->cornerColors;
