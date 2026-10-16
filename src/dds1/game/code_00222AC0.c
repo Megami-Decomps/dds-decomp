@@ -249,7 +249,7 @@ s32 evtStartUnitModeWithValue(EvtUnit *work, s32 (*callback)(EvtUnit *, s32)) {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222ED8);
 
-extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 
 void evtResetUnitVectorSlots(void) {
     s32 i;
