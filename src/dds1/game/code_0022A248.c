@@ -153,7 +153,7 @@ void func_0022AB58(void) {
 }
 
 /* After launching a test script, keep the test task idle and return 0. */
-u32 evtUpdateIdleTestTask(void) {
+s32 evtUpdateIdleTestTask(KwlnTask *task) {
     func_0022AB58();
     return 0;
 }
