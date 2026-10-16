@@ -1515,7 +1515,7 @@ void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 
 }
 
 
-extern void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *, s32);
+extern void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 fragmentIndex);
 
 /* One countdown/fade/restart state drives both systems; write the same tinted color to each.
    Secondary initialization/submission precedes primary; submission also occurs for count <= 0. */
