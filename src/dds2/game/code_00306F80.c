@@ -183,9 +183,9 @@ void itfGridCopyEntryQuad(s32 object, s32 index) {
 }
 
 /* Bind one real resource-set/index pair. */
-void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 index) {
+void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 resourceIndex) {
     slot->set = resource;
-    slot->index = index;
+    slot->index = resourceIndex;
 }
 
 void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, s32 width, s32 height, u8 *data,
