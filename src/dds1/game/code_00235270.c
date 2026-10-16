@@ -3470,7 +3470,7 @@ extern void *D_003BB0C0;
 extern void *D_003BB14C;
 extern void *D_003BB130;
 
-s32 evtPollEffectFrameControl(s32 arg0, s32 arg1, EvtRuntime *runtime) {
+s32 evtPollEffectFrameControl(s32 x, s32 y, EvtRuntime *runtime) {
     s32 status = 1;
 
     switch (runtime->frameGroup->type) {
