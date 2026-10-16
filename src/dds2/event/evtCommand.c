@@ -543,18 +543,18 @@ s32 evtCommandHandleChangedSecondaryWorldKey(void)
 }
 
 u32 evtCommandSetWorldNodeBaseMode(void) {
-    u64 value;
+    u64 baseMode;
 
-    value = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(0, value);
+    baseMode = scrReadIntParameter(0);
+    evtApplyIndexValueToWorldNodes(0, baseMode);
     return 1;
 }
 
 u32 evtCommandSetWorldNodeUpperMode(void) {
-    u64 value;
+    u64 baseMode;
 
-    value = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(1, value);
+    baseMode = scrReadIntParameter(0);
+    evtApplyIndexValueToWorldNodes(1, baseMode);
     return 1;
 }
 
