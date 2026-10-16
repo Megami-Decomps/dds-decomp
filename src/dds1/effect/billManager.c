@@ -701,9 +701,9 @@ void billResolveEntry(BillData *animationData, s32 entryIndex, BillOut *resolved
 extern s32 sdfDebugPrintf(const char *, ...);
 
 /* Select an animation and initialize the plural records' signed start delays. */
-void billSetAnimationEntry(BillObj *obj, s32 index) {
+void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
     BillData *data = obj->animationData;
-    BillAnimationEntry *entry = data->entries + index;
+    BillAnimationEntry *entry = data->entries + animationEntryIndex;
 
     if (entry->frameCount == 0) {
         obj->animationActive = 0;
@@ -715,7 +715,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 
         sdfDebugPrintf("billAnim..PLURAL SET\n");
         obj->modeFlags = 0x10000000;
-        obj->animationEntryIndex = index;
+        obj->animationEntryIndex = animationEntryIndex;
         obj->entryCount = entry->frameCount;
         records = (BillPluralRecord *)(data->base + entry->offset);
         for (; i < entry->frameCount; i++) {
@@ -725,15 +725,15 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
     } else if (entry->entryModeFlags & 0xC0) {
         sdfDebugPrintf("billAnim..(A)MTEX SET\n");
         obj->modeFlags = entry->entryModeFlags;
-        obj->animationEntryIndex = index;
+        obj->animationEntryIndex = animationEntryIndex;
         obj->entryCount = 2;
-        billResolveEntry(data, index, obj->resolvedEntries);
-        billResolveEntry(data, index + 1, obj->resolvedEntries + 1);
+        billResolveEntry(data, animationEntryIndex, obj->resolvedEntries);
+        billResolveEntry(data, animationEntryIndex + 1, obj->resolvedEntries + 1);
     } else {
         obj->modeFlags = 0;
         obj->entryCount = 1;
-        obj->animationEntryIndex = index;
-        billResolveEntry(data, index, obj->resolvedEntries);
+        obj->animationEntryIndex = animationEntryIndex;
+        billResolveEntry(data, animationEntryIndex, obj->resolvedEntries);
     }
     if (entry->entryModeFlags & 0x100) {
         sdfDebugPrintf("billAnim..P2A POLYGON\n");
