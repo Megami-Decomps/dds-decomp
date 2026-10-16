@@ -572,12 +572,12 @@ void brsStepAnimDecay(BrsSkillPackageWork *work) {
 }
 
 
-u32 mnuGetTitleState(BrsSkillPackageWork *work) {
-    return work->fadeProgress;
+u32 mnuGetTitleState(BrsSkillPackageWork *skillPackage) {
+    return skillPackage->fadeProgress;
 }
 
-void mnuClearTitleState(BrsSkillPackageWork *work) {
-    work->fadeProgress = 0;
+void mnuClearTitleState(BrsSkillPackageWork *skillPackage) {
+    skillPackage->fadeProgress = 0;
 }
 
 void brsNoOpMessageInputCallback(void *work) {
