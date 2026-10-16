@@ -7206,9 +7206,9 @@ void effFillRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
     }
 }
 
-u32 *effCreateRingFadeTable(EffBillVortexConfig *p, u32 a1) {
+u32 *effCreateRingFadeTable(EffBillVortexConfig *p, u32 resource) {
     u32 *buf = (u32 *)effAllocateRingFadeEntries(p);
-    buf[1] = (u32)effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, (struct SdfTextureFileHeader *)(u32)a1);
+    buf[1] = (u32)effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillRingFadeGradient(buf, &p->common);
     return buf;
 }
@@ -7364,9 +7364,9 @@ void effFillBillFadeGradient(u8 *node, EffBillEmitterCommon *config) {
     }
 }
 
-u32 *effCreateBillFadeTable(EffBillColumnConfig *p, u32 a1) {
+u32 *effCreateBillFadeTable(EffBillColumnConfig *p, u32 resource) {
     u32 *buf = (u32 *)effAllocateBillFadeFrameEntries(p);
-    buf[1] = (u32)effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, (struct SdfTextureFileHeader *)(u32)a1);
+    buf[1] = (u32)effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillBillFadeGradient(buf, &p->common);
     return buf;
 }
@@ -7766,9 +7766,9 @@ void effFillCompactRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
     }
 }
 
-u32 *effCreateCompactRingFadeTable(EffBillSpiralConfig *p, u32 a1) {
+u32 *effCreateCompactRingFadeTable(EffBillSpiralConfig *p, u32 resource) {
     u32 *buf = (u32 *)effAllocateCompactRingFadeEntries(p);
-    buf[1] = (u32)effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, (struct SdfTextureFileHeader *)(u32)a1);
+    buf[1] = (u32)effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillCompactRingFadeGradient(buf, &p->common);
     return buf;
 }
