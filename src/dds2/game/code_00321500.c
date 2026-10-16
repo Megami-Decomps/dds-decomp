@@ -96,9 +96,9 @@ void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord
 
 void mnuUpdateLinkedTimedStateList(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
-void mnuUpdateTimedSpawns(MnuCallbackList *left, MenuRuntimeList *right,
-                   u32 value, u32 count, f32 angle) {
-    mnuUpdateLinkedTimedStateList(left, right, value, count, 1, angle);
+void mnuUpdateTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeList *runtimeList,
+                   u32 x, u32 y, f32 angle) {
+    mnuUpdateLinkedTimedStateList(callbackList, runtimeList, x, y, 1, angle);
 }
 
 
@@ -125,9 +125,9 @@ void mnuUpdateLinkedTimedStateList(MnuCallbackList *list, MenuRuntimeList *runti
     }
 }
 
-void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *list, MenuRuntimeList *runtimeList,
+void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeList *runtimeList,
                    s32 kindMask, s32 x, s32 y, s32 enabled, f32 angle) {
-    SdfListNode *node = list->head;
+    SdfListNode *node = callbackList->head;
     MenuStateRecord *record;
 
     if (node != NULL) {
