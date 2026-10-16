@@ -1611,8 +1611,8 @@ float sdfGetFlagListSpeed(SdfFlagListWork *work) {
 }
 
 /* Replace the drop list's movement speed without validation. */
-void sdfSetFlagListSpeed(SdfFlagListWork *work, float value) {
-    work->params.speed = value;
+void sdfSetFlagListSpeed(SdfFlagListWork *work, float speed) {
+    work->params.speed = speed;
 }
 
 /* Sample color/alpha at frame zero with duration zero; discard the return value. */
