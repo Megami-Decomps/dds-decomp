@@ -1283,9 +1283,9 @@ s32 evtCommandClearUnitScaledValueFlag(void)
 }
 
 s32 evtCommandMoveLightAlongPathOrWarn(void) {
-    void *path = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0));
+    void *pathOwner = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0));
 
-    if (evtStageRelinkOwnedNodeResource(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), path) != 0) {
+    if (evtStageRelinkOwnedNodeResource(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), pathOwner) != 0) {
         return 1;
     }
     sdfDebugPrintf(D_003ACA40);
