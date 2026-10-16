@@ -350,11 +350,11 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesPoolNode *node = itfAcquirePoolNode(&itfMesWork.pool);
     s32 window = node->index;
     ItfMesState *mes;
-    u32 handle;
+    struct SdfMemBlock *handle;
 
-    handle = (u32)sdfAllocGeneralBlock(0x1E0);
+    handle = sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfResourceRetainAddress((struct SdfMemBlock *)handle);
+    mes = (ItfMesState *)sdfResourceRetainAddress(handle);
     node->stateAddress = (s32)mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
@@ -990,8 +990,12 @@ u16 itfMesGetGlobalFlags(void) {
 struct ItfMesWindowRec {
     u8 pad00[0xC];
     ItfMesState *mes;
-    s32 handle;
+    struct SdfMemBlock *handle;
 };
+typedef char ItfMesWindowRec_size_must_be_0x14[
+    (sizeof(ItfMesWindowRec) == 0x14) ? 1 : -1];
+typedef char ItfMesWindowRec_handle_offset_must_be_0x10[
+    ((u32)&((ItfMesWindowRec *)0)->handle == 0x10) ? 1 : -1];
 
 extern s8 D_00324510[];
 extern char *D_00357FA0[];
@@ -1147,7 +1151,7 @@ void itfMesDestroyWindow(s32 window) {
         btlReleaseEffectResourceHandles(mes);
         itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)windowRecord->handle);
+        sdfReleaseResourceAllocation(windowRecord->handle);
         windowRecord->mes = NULL;
         itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_003D6EC0 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_003D6EC0 - 0x20))->activeWindowCount -= 1;
