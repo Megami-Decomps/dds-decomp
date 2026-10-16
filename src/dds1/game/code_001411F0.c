@@ -821,7 +821,7 @@ void fldLoadSceneRecordTable(void) {
     s32 area;
     s32 room;
     FldSceneRecordTableHeader *header;
-    s32 rows;
+    FldSceneRecord *rows;
     s32 count;
 
     fldFormatAreaDirectory(directory, fldAreaState.area, 1);
@@ -887,7 +887,7 @@ void fldLoadSceneRecordTable(void) {
     rows = header->rows;
     count = header->count;
     fldSceneRecordCount = count;
-    fldSceneRecords = (FldSceneRecord *)(u32)rows;
+    fldSceneRecords = rows;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
@@ -898,11 +898,11 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldRelocatePackedTransferChunk((u32)chunk, (FldTransferChunk *)transferStart);
         {
             s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
-            s32 rows = ((FldSceneRecordTableHeader *)header)->rows;
+            FldSceneRecord *rows = ((FldSceneRecordTableHeader *)header)->rows;
             s32 count = ((FldSceneRecordTableHeader *)header)->count;
 
             fldSceneRecordCount = count;
-            fldSceneRecords = (FldSceneRecord *)(u32)rows;
+            fldSceneRecords = rows;
         }
     }
 }
