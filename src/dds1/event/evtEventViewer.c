@@ -783,20 +783,20 @@ void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
 }
 
 void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
-    s32 entry;
-    s32 selected;
+    s32 selectedEntry;
+    s32 activeEntry;
 
-    selected = viewer->activeEntryIndex;
-    if (selected != 0) {
-        entry = selected;
+    activeEntry = viewer->activeEntryIndex;
+    if (activeEntry != 0) {
+        selectedEntry = activeEntry;
     } else {
-        entry = viewer->fallbackEntry;
+        selectedEntry = viewer->fallbackEntry;
     }
-    if (entry == 0) {
+    if (selectedEntry == 0) {
         return;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)entry);
-    sdfSetViewFieldOfView(dds3GetCameraFieldOfView((EffWorldNode *)entry));
+    dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)selectedEntry);
+    sdfSetViewFieldOfView(dds3GetCameraFieldOfView((EffWorldNode *)selectedEntry));
 }
 
 extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);

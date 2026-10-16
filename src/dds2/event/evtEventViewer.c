@@ -698,17 +698,17 @@ void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
 
 /* Select the active entry (or fallback) and sync world selection and camera. */
 void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
-    EffWorldNode *unit;
-    EffWorldNode *first = viewer->activeEntryIndex;
+    EffWorldNode *selectedEntry;
+    EffWorldNode *activeEntry = viewer->activeEntryIndex;
 
-    if (first != 0) {
-        unit = first;
+    if (activeEntry != 0) {
+        selectedEntry = activeEntry;
     } else {
-        unit = (EffWorldNode *)viewer->fallbackEntry;
+        selectedEntry = (EffWorldNode *)viewer->fallbackEntry;
     }
-    if (unit != 0) {
-        dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
-        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(unit));
+    if (selectedEntry != 0) {
+        dds3SetWorldCameraObject(dds3GetWorldObject(), selectedEntry);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(selectedEntry));
     }
 }
 
