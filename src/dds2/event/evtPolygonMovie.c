@@ -481,20 +481,20 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits) {
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
 s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, s32 end) {
     PolyMovieClip *clip;
-    s32 frame;
+    s32 elapsedFrames;
     s32 duration;
 
-    frame = end - start;
-    if (frame < 0) {
-        frame = 0;
+    elapsedFrames = end - start;
+    if (elapsedFrames < 0) {
+        elapsedFrames = 0;
     }
     clip = movie->state->clip;
     if (clip != NULL) {
         duration = (s32)clip->duration;
-        if (duration <= frame) {
-            frame = duration;
+        if (duration <= elapsedFrames) {
+            elapsedFrames = duration;
         }
-        evtScaleValueByMultiplier((EvtScaledValue *)clip, (f32)frame / (f32)duration);
+        evtScaleValueByMultiplier((EvtScaledValue *)clip, (f32)elapsedFrames / (f32)duration);
         if (undo == 0) {
             sdfFreezeFloatCounter((EvtScaledValue *)clip);
         } else {
