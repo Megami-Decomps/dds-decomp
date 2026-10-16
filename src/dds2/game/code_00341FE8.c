@@ -8,7 +8,7 @@ void sndEnsureMidiBankResident(s32 trackId);
 
 extern SndTrackSlot sndTrackBalanceEntries[];
 
-extern s32 sndFindPackedTrackLoadStatus(s32 packedTrackId);
+extern s32 sndFindPackedTrackLoadStatus(s32 packedTrack);
 
 extern s32 sndRequestedMidiBankId;
 
@@ -55,42 +55,42 @@ void sndUpdateScaledListenerState(f32 firstPointX, f32 firstPointY, f32 firstPoi
     }
 }
 
-/* Returns 1 when the high-half MIDI bank ID in `packedTrackId` is in the slot table,
-   2 when it is the current track, else 0. */
-s32 sndFindPackedTrackLoadStatus(s32 packedTrackId) {
+/* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
+   current track, else 0. */
+s32 sndFindPackedTrackLoadStatus(s32 packed) {
     SndMixerBlockSlots *work = (SndMixerBlockSlots *)&sndMidiTrackState;
-    s32 midiBankId = packedTrackId >> 16;
+    s32 id = packed >> 16;
     SndTrackSlot *slot;
     s32 i;
 
     func_003666D8(work, (u8 *)work + 0x8D0);
     slot = work->slots;
     for (i = 0; i < 13; i++) {
-        if (slot->id == midiBankId) {
+        if (slot->id == id) {
             return 1;
         }
         slot++;
     }
-    return sndRequestedMidiBankId == midiBankId ? 2 : 0;
+    return sndRequestedMidiBankId == id ? 2 : 0;
 }
 
 extern s32 sprintf();
 extern void (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
-void sndEnsureMidiBankResident(s32 packedTrackId) {
+void sndEnsureMidiBankResident(s32 packed) {
     char name[0x10];
     char path[0x100];
-    s32 status = sndFindPackedTrackLoadStatus(packedTrackId);
-    s32 midiBankId;
+    s32 status = sndFindPackedTrackLoadStatus(packed);
+    s32 id;
 
     switch (status) {
     case 0:
-        midiBankId = packedTrackId >> 16;
-        sprintf(name, "MIDI%04X.SMG", midiBankId);
+        id = packed >> 16;
+        sprintf(name, "MIDI%04X.SMG", id);
         mnuBuildSoundResourcePath(path, name);
         sndSendCommandPacket(0xA0, 0, path, strlen(path) + 1);
-        sndRequestedMidiBankId = midiBankId;
+        sndRequestedMidiBankId = id;
         break;
     case 1:
         break;
@@ -100,7 +100,7 @@ void sndEnsureMidiBankResident(s32 packedTrackId) {
             if (fileIdleUpdateCallback != NULL) {
                 fileIdleUpdateCallback();
             }
-        } while (sndFindPackedTrackLoadStatus(packedTrackId) != 1);
+        } while (sndFindPackedTrackLoadStatus(packed) != 1);
         break;
     }
 }
@@ -125,15 +125,13 @@ void sndSendChannelGroupCommand150(u8 channel) {
     sndSendCommandPacket(((channel >> 3) & 0xF) | 0x150, 0, 0, 0);
 }
 
-void sndReleaseMidiTrack(s32 packedTrackId) {
+void sndReleaseMidiTrack(s32 id) {
     u32 packet[4];
-    s32 midiBankId;
-
-    if (sndFindPackedTrackLoadStatus(packedTrackId) != 0) {
-        packet[0] = packedTrackId;
+    if (sndFindPackedTrackLoadStatus(id) != 0) {
+        packet[0] = id;
         sndSendCommandPacket(0xB0, 0, packet, 0x10);
-        midiBankId = packedTrackId >> 16;
-        if (sndRequestedMidiBankId == midiBankId) {
+        id >>= 16;
+        if (sndRequestedMidiBankId == id) {
             sndRequestedMidiBankId = -1;
         }
     }
