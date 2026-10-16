@@ -106,9 +106,9 @@ extern s32 scrGetWindow(void);
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
 extern void *effObjCreateKindFromResource(s32 kind, void *resource);
 extern void effObjSetFlags(void *object, s32 flags);
-extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
+extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector);
 extern u8 D_003AC520[];
-extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
+extern void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *secondVector);
 
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 duration);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
