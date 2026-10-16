@@ -865,8 +865,8 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return 1;
 }
 
-void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 value) {
-    item->status = (item->status & SDF_PACKED_STATUS_BIT) | (value & SDF_PACKED_CHANNEL_MASK);
+void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 channelValue) {
+    item->status = (item->status & SDF_PACKED_STATUS_BIT) | (channelValue & SDF_PACKED_CHANNEL_MASK);
 }
 
 /* Raise the packed value to `minimumValue` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
