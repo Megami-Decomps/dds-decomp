@@ -1032,6 +1032,7 @@ typedef struct EffBlurVectorRecord {
 } EffBlurVectorRecord;
 
 EffBlurVectorRecord *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource);
+void effSetResourceBlendColor(EffThunderGroup *resource, u32 color);
 
 typedef struct PairedEffectParams {
     f32 startVec[4];

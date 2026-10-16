@@ -17,7 +17,6 @@
 
 extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
-extern void effSetResourceBlendColor(void *resource, u32 color);
 
 void effFreePairedResources(PairedEffectResources *pair) {
 

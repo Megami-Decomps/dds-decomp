@@ -1805,6 +1805,8 @@ struct EffThunderGroup {
 };
 typedef char EffThunderGroupHeadOffsetCheck[
     ((u32)&((EffThunderGroup *)0)->head == 0x00) ? 1 : -1];
+typedef char EffThunderGroupColorOffsetCheck[
+    ((u32)&((EffThunderGroup *)0)->color == 0x120) ? 1 : -1];
 
 extern void *memset(void *, s32, u32);
 
@@ -1846,8 +1848,8 @@ EffBlurVectorRecord *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup
     return (EffBlurVectorRecord *)resource;
 }
 
-void effSetResourceBlendColor(void *resource, u32 color) {
-    *(u32 *)((u8 *)resource + 0x120) = color;
+void effSetResourceBlendColor(EffThunderGroup *resource, u32 color) {
+    resource->color = color;
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
