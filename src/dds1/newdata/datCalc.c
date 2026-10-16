@@ -1806,57 +1806,57 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
 }
 
 
-u8 btlSelectConditionalEncounterGroup(s32 index) {
+u8 btlSelectConditionalEncounterGroup(s32 encounterIndex) {
     s8 enabled[3];
     s32 i;
     u8 code;
 
     for (i = 0; i < 3; i++) {
-        enabled[i] = evtTestSolarPhaseOrModelFlag(D_003BAA3C[index].conditions[i]);
+        enabled[i] = evtTestSolarPhaseOrModelFlag(D_003BAA3C[encounterIndex].conditions[i]);
     }
-    code = D_003BAA3C[index].variantCodes[0];
+    code = D_003BAA3C[encounterIndex].variantCodes[0];
     if (enabled[0] && enabled[1] && enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[1];
+    code = D_003BAA3C[encounterIndex].variantCodes[1];
     if (enabled[0] && enabled[1]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[2];
+    code = D_003BAA3C[encounterIndex].variantCodes[2];
     if (enabled[0] && enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[3];
+    code = D_003BAA3C[encounterIndex].variantCodes[3];
     if (enabled[1] && enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[4];
+    code = D_003BAA3C[encounterIndex].variantCodes[4];
     if (enabled[0]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[5];
+    code = D_003BAA3C[encounterIndex].variantCodes[5];
     if (enabled[1]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[6];
+    code = D_003BAA3C[encounterIndex].variantCodes[6];
     if (enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[index].variantCodes[7];
+    code = D_003BAA3C[encounterIndex].variantCodes[7];
     return code == 8 ? 0 : code;
 }
 
@@ -1929,18 +1929,18 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
 }
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
-s32 btlGetConditionalEncounterInterval(s32 index) {
+s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
     s32 variant;
     s32 total;
     s32 i;
     s32 interval;
-    if (index == 0) {
+    if (encounterIndex == 0) {
         return 0;
     }
-    variant = btlSelectConditionalEncounterGroup(index);
+    variant = btlSelectConditionalEncounterGroup(encounterIndex);
     total = 0;
     for (i = 0; i < 20; i++) {
-        total += D_003BAA3C[index].groups[variant].entries[i].weight;
+        total += D_003BAA3C[encounterIndex].groups[variant].entries[i].weight;
     }
     if (total == 0) {
         return 0;
@@ -1948,7 +1948,7 @@ s32 btlGetConditionalEncounterInterval(s32 index) {
     if (D_003BAAB8 > 0) {
         return D_003BAAB8;
     }
-    interval = D_003BAA3C[index].groups[variant].interval;
+    interval = D_003BAA3C[encounterIndex].groups[variant].interval;
     if (interval <= 0) {
         return 0;
     }
@@ -1961,7 +1961,7 @@ extern s32 D_003BAAC0;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
-s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
+s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     s32 group;
     s32 interval;
     s32 count;
@@ -1972,11 +1972,11 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
     s32 packed;
     f32 counter;
 
-    if (index == 0 || step == 0.0f) {
+    if (encounterIndex == 0 || step == 0.0f) {
         return 0;
     }
-    group = btlSelectConditionalEncounterGroup(index);
-    interval = btlGetConditionalEncounterInterval(index);
+    group = btlSelectConditionalEncounterGroup(encounterIndex);
+    interval = btlGetConditionalEncounterInterval(encounterIndex);
     if (interval == 0) {
         return interval;
     }
@@ -2002,19 +2002,19 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
     }
     total = 0;
     for (i = 0; i < 20; i++) {
-        if (D_003BAA3C[index].groups[group].entries[i].sceneIndex != 0) {
-            total += D_003BAA3C[index].groups[group].entries[i].weight;
+        if (D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
+            total += D_003BAA3C[encounterIndex].groups[group].entries[i].weight;
         }
     }
     count = 0;
     roll = effMiscRandMod(0, total);
     for (i = 0; i < 20; i++) {
-        if (D_003BAA3C[index].groups[group].entries[i].sceneIndex != 0) {
-            if (roll < count + D_003BAA3C[index].groups[group].entries[i].weight) {
-                scene = D_003BAA3C[index].groups[group].entries[i].sceneIndex;
+        if (D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
+            if (roll < count + D_003BAA3C[encounterIndex].groups[group].entries[i].weight) {
+                scene = D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex;
                 if ((datGameState->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
-                    D_003BAABC = index;
+                    D_003BAABC = encounterIndex;
                     D_003BAAB8 = 0;
                     D_003BAAC0 = packed;
                     return packed;
@@ -2022,7 +2022,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
                 dds3WorkClear();
                 return 0;
             }
-            count += D_003BAA3C[index].groups[group].entries[i].weight;
+            count += D_003BAA3C[encounterIndex].groups[group].entries[i].weight;
         }
     }
     return 0;

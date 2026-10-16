@@ -2994,8 +2994,8 @@ extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(u32);
 extern void btlDebugMenuAfterRecordNoOp(void);
-extern s32 btlGetConditionalEncounterInterval(s32);
-extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
+extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
+extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
 /* Preview/select a debug encounter or pack; return one when it can launch. */

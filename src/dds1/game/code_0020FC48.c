@@ -2718,8 +2718,8 @@ extern void btlDebugMenuSetupNoOp(void *);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *);
 extern void btlDebugMenuAfterRecordNoOp(void);
-extern s32 btlGetConditionalEncounterInterval(s32);
-extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
+extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
+extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
