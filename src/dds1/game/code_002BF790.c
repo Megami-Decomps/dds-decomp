@@ -135,8 +135,8 @@ void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
     } while (--remaining >= 0);
 }
 
-void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(object, index);
+void itfGridSetBounds(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height) {
+    BdWork *widget = (BdWork *)effGetSlotWorkOrOverride(resource, resourceIndex);
     widget->parameters[0] = x;
     widget->parameters[1] = y;
     widget->parameters[2] = width;
