@@ -185,7 +185,7 @@ extern u32 *fileWritePendingRequestSlot;
 
 extern u32 D_003BC824;
 
-extern s32 fileBeginRequest(const char *, u32 *, u32 *, void *, u32 *);
+extern s32 fileBeginRequest(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, u32 *pendingRequestStatus);
 
 extern s32 fileWriteWaitOpen(void);
 
@@ -2064,12 +2064,12 @@ s32 mcChooseLoadPath(void) {
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
-s32 fileBeginRequest(const char *name, u32 *first, u32 *second, void *callback, u32 *status) {
-    fileWriteDataAddressSlot = first;
-    fileWriteDataSizeSlot = second;
-    fileWriteContinuation = callback;
-    fileWritePendingRequestSlot = status;
-    mcOpenFilePath(fileMemoryCardRequestIndex, name, 0x203);
+s32 fileBeginRequest(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, u32 *pendingRequestStatus) {
+    fileWriteDataAddressSlot = dataAddressSlot;
+    fileWriteDataSizeSlot = dataSizeSlot;
+    fileWriteContinuation = continuation;
+    fileWritePendingRequestSlot = pendingRequestStatus;
+    mcOpenFilePath(fileMemoryCardRequestIndex, fileName, 0x203);
     return (s32)fileWriteWaitOpen;
 }
 

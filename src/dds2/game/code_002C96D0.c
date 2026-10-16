@@ -1853,7 +1853,7 @@ s32 fileBeginLabeledSlotWrite(void) {
     return fileBeginRequest(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
 }
 
-extern s32 fileBeginRequest(char *, void *, void *, void *, void *);
+extern s32 fileBeginRequest(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1943,12 +1943,12 @@ extern u32 fileWriteContinuation;
 extern u32 fileWritePendingRequestSlot;
 extern s32 fileWriteWaitOpen(void);
 
-s32 fileBeginRequest(char *name, void *a1, void *a2, void *a3, void *a4) {
-    fileWriteDataAddressSlot = (u32 *)a1;
-    fileWriteDataSizeSlot = (u32 *)a2;
-    fileWriteContinuation = (u32)a3;
-    fileWritePendingRequestSlot = (u32)a4;
-    mcOpenFilePath(fileMemoryCardRequestIndex, name, 0x203);
+s32 fileBeginRequest(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus) {
+    fileWriteDataAddressSlot = (u32 *)dataAddressSlot;
+    fileWriteDataSizeSlot = (u32 *)dataSizeSlot;
+    fileWriteContinuation = (u32)continuation;
+    fileWritePendingRequestSlot = (u32)pendingRequestStatus;
+    mcOpenFilePath(fileMemoryCardRequestIndex, fileName, 0x203);
     return (s32)fileWriteWaitOpen;
 }
 
