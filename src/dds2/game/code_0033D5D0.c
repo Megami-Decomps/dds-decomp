@@ -138,7 +138,7 @@ extern s32 func_0034D100(void);
 extern s32 sceCdSearchFile(void *, s32);
 
 extern DevState *sdfDevCreateCallbackState(const char *path,
-                                void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
+                                void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
 extern s32 sdfDevResolvePathForWorker(const char *, void **);
 
