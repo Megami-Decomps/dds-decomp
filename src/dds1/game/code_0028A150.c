@@ -2872,7 +2872,163 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", fileUpdatePromptDialog);
+extern void *D_003BD908, *D_003BD90C;
+/* Yes/no cursor input while the card request is idle. */
+static inline void filePollPromptChoice(void) {
+    if (D_003BC838 == 0 && fileIsLoadStepComplete() != 0) {
+        if (fileIsLoadedAndConditionTrue(D_00324510[0x27] < 0) != 0) {
+            if (D_003BC830 != 1) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_003BC830 = 1;
+        } else if (fileIsLoadedAndConditionTrue(D_00324510[0x26] < 0) != 0) {
+            if (D_003BC830 != 0) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_003BC830 = 0;
+        } else if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) != 0) {
+            if (D_003BC830 == 0 && (D_003BC834 == 1 || D_003BC834 == 3)) {
+                sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
+            } else {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            }
+            if (D_003BC830 != 0) {
+                D_003BC838 = 2;
+            } else {
+                D_003BC838 = 1;
+            }
+        } else if (fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0) != 0) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            D_003BC838 = 2;
+        }
+    }
+}
+
+s32 fileUpdatePromptDialog(void) {
+    s32 status;
+    s32 decision;
+
+    if (D_003BC834 - 5 < 2) {
+        s32 requestStatus;
+        filePollPromptChoice();
+        if (fileReqPoll() == 0) {
+            goto idle;
+        }
+        requestStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
+        switch (requestStatus) {
+        case 1:
+            decision = (s32)D_003BC838;
+            if (decision == 1) {
+                goto yes;
+            }
+            if (decision >= 2) {
+                goto checkNo;
+            }
+            if (decision != 0) {
+                goto idle;
+            }
+            if (D_003BC834 == 5) {
+                D_003BC834 = 0;
+                D_003BC830 = -1;
+                return fileRestartSlotSelection();
+            }
+            goto begin;
+        case 2:
+            goto yes;
+        }
+        requestStatus = (s32)D_003BC838;
+        D_003BC834 = 5;
+        switch (requestStatus) {
+        case 0:
+            goto begin;
+        case 1:
+            goto yes;
+        case 2:
+            goto no;
+        }
+        return 0;
+    }
+    if (D_003BC834 == 4 || D_003BC834 == 8) {
+        if (D_00324510[0x27] < 0) {
+            if (D_003BC830 != 1) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_003BC830 = 1;
+        } else if (D_00324510[0x26] < 0) {
+            if (D_003BC830 != 0) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_003BC830 = 0;
+        } else if (D_00324510[0x21] < 0) {
+            if (D_003BC830 == 0 && (D_003BC834 == 1 || D_003BC834 == 3 || D_003BC834 == 9)) {
+                sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
+            } else {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            }
+            if (D_003BC830 == 0) {
+                goto yes;
+            }
+            goto no;
+        } else if (D_00324510[0x23] < 0) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            D_003BC830 = -1;
+            D_003BC834 = 0;
+            return ((s32 (*)(void))D_003BD90C)();
+        }
+        goto idle;
+    }
+    filePollPromptChoice();
+    if (fileReqPoll() == 0) {
+        goto idle;
+    }
+    status = fileReqGetStatus(fileMemoryCardRequestIndex);
+    switch (status) {
+    case 1:
+    case 2:
+        decision = (s32)D_003BC838;
+        if (decision == 1) {
+            goto yes;
+        }
+        if (decision >= 2) {
+            goto checkNo;
+        }
+        if (decision == 0) {
+            goto begin;
+        }
+        return 0;
+    default:
+        goto restartRequest;
+    }
+checkNo:
+    switch (decision) {
+    case 2:
+        goto no;
+    default:
+        return 0;
+    }
+begin:
+    fileReqBegin(fileMemoryCardRequestIndex);
+    goto idle;
+yes:
+    D_003BC834 = 0;
+    D_003BC830 = -1;
+    return ((s32 (*)(void))D_003BD908)();
+no:
+    D_003BC834 = 0;
+    D_003BC830 = -1;
+    return ((s32 (*)(void))D_003BD90C)();
+restartRequest:
+    D_003BC834 = 0;
+    D_003BC830 = -1;
+    fileClearAllSlotFlags();
+    fileSetMenuFlowState(0);
+    D_003BC854 = 1;
+    D_003BC858 = 0;
+    fileReqBegin(fileMemoryCardRequestIndex);
+    return (s32)filePollSlotDetectionAndBranch;
+idle:
+    return 0;
+}
 
 extern void *D_003BD908;
 extern void *D_003BD90C;
