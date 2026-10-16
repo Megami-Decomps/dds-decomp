@@ -21,6 +21,11 @@ typedef union FldPlacementPayloadRef {
     FldPendingSoundParams *pendingSound;
 } FldPlacementPayloadRef;
 
+typedef struct FldSpecialPoint {
+    u32 kind;
+    u32 id;
+} FldSpecialPoint;
+
 /* Type-10 placement records contain a four-word serialized header. */
 typedef struct FldPlacementData {
     u32 kind;            /* 0x00 */
@@ -42,5 +47,10 @@ typedef char FldPlacementPayloadWordsOffsetCheck[
     ((u32)&((FldPlacementPayloadRef *)0)->words == 0) ? 1 : -1];
 typedef char FldPendingSoundValueOffsetCheck[
     ((u32)&((FldPendingSoundParams *)0)->value == 4) ? 1 : -1];
+typedef char FldSpecialPointSizeCheck[(sizeof(FldSpecialPoint) == 8) ? 1 : -1];
+typedef char FldSpecialPointKindOffsetCheck[
+    ((u32)&((FldSpecialPoint *)0)->kind == 0) ? 1 : -1];
+typedef char FldSpecialPointIdOffsetCheck[
+    ((u32)&((FldSpecialPoint *)0)->id == 4) ? 1 : -1];
 
 #endif

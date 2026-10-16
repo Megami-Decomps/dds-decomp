@@ -715,11 +715,6 @@ extern void fldProbeCameraSupportSurface(void);
 
 #include "fld_placement_data.h"
 
-typedef struct FldSpecialPoint {
-    u32 kind;
-    u32 id;
-} FldSpecialPoint;
-
 /* A relocated batch consists of a kind, count, and complete resource rows. */
 
 extern FldFileResource *D_00438EC0;
