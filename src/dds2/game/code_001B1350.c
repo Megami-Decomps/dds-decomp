@@ -376,16 +376,16 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta) {
     return unit->partyRecord.hp + delta < 1;
 }
 
-s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
-    return object->partyRecord.hp * 100 / object->partyRecord.maxHp < 26;
+s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit) {
+    return unit->partyRecord.hp * 100 / unit->partyRecord.maxHp < 26;
 }
 
-s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
-    s32 value = object->partyRecord.hp + delta;
-    if (value <= 0) {
+s32 btlWouldUiValueFallBelowQuarter(BtlUnit *unit, s32 delta) {
+    s32 adjustedHp = unit->partyRecord.hp + delta;
+    if (adjustedHp <= 0) {
         return 1;
     }
-    return value * 100 / object->partyRecord.maxHp < 26;
+    return adjustedHp * 100 / unit->partyRecord.maxHp < 26;
 }
 
 s32 btlBothSidesActive(BtlUnit *unit) {
