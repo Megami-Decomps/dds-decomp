@@ -1026,7 +1026,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     f32 delta[4];
     f32 savedA[4];
     f32 savedB[4];
-    s32 count = 0;
+    s32 simulatedStepCount = 0;
     s32 i;
     for (i = 0; i < 4; i++) {
         savedA[i] = unit->effObj->inner->position[i];
@@ -1034,14 +1034,14 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     }
     copy = *unit;
     while (evtUnitHasReachedMotionEndpoint(&copy) == 0) {
-        count++;
+        simulatedStepCount++;
         evtApplyUnitDirectionOffset(&copy);
     }
     for (i = 0; i < 4; i++) {
         unit->effObj->inner->position[i] = savedA[i];
         unit->effObj->inner->rotation[i] = savedB[i];
     }
-    if (count == 0) {
+    if (simulatedStepCount == 0) {
         sdfDebugPrintf("ymove frameno = 0\n");
         unit->stepCount = 0;
         unit->speedY = 0;
@@ -1051,10 +1051,10 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
-    unit->stepCount = count;
-    unit->speedY = delta[1] / (f32)count;
-    sdfDebugPrintf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", count, unit->speedY, delta[1]);
-    return count;
+    unit->stepCount = simulatedStepCount;
+    unit->speedY = delta[1] / (f32)simulatedStepCount;
+    sdfDebugPrintf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", simulatedStepCount, unit->speedY, delta[1]);
+    return simulatedStepCount;
 }
 
 s32 evtUnitApplyPathVectors(EvtUnit *unit) {
