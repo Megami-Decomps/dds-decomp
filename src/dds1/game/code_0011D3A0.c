@@ -773,7 +773,142 @@ void fldResetFieldMapState(void) {
     memset(datGameState->pad159D0, 0, sizeof(datGameState->pad159D0));
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldResetFieldRuntimeState);
+/* The reset includes the first word of the following render region. */
+typedef struct { s16 previewX, previewY; u8 pad04[4]; u32 words[15]; } FldVrResetView;
+extern u32 D_0032E570[];
+void fldResetFieldRuntimeState(s32 mode) {
+    FldAreaWork *area = &fldAreaState;
+    s32 i;
+
+    area->attritionDistance = 100.0f;
+    area->unk2C = 0x10;
+    area->area = 0;
+    area->floor = 0;
+    area->unk18 = 0;
+    area->cachedArea = 0;
+    area->reuseAreaResources = 0;
+    area->consumedFlags = 0;
+    area->mode = 0;
+    area->unk54 = 0;
+    area->cameraTargetGraceTicks = 0;
+    area->sceneMode = 0;
+    area->sceneState = 0;
+    area->unk88 = 0;
+    area->unk8C = 0;
+    area->unk90 = -1;
+    area->unk94 = -1;
+    area->unk98 = -1;
+    area->unkC4 = -1;
+    area->unkC8 = -1;
+    area->overlayMode = 1;
+    area->overlayCounter = 0;
+    area->unkD4 = 1;
+    area->unkD8 = -1;
+    area->rowIdx = 0;
+    area->sequenceCode = 1;
+    area->unk5C = 0.0f;
+    area->unk60 = 0.0f;
+    area->negatedAngle = 0.0f;
+    area->cameraTargetAngle = 0.0f;
+    area->dist = 0.0f;
+    memset(area->pad124, 0, sizeof(area->pad124));
+    area->unk11C = 0;
+    area->sceneCommand = 0;
+    area->colorEffectSuppressed = 0;
+    area->defaultEncounterId = 0;
+    area->unkE0 = 0;
+    area->encounterMode = 0;
+    area->transitionCount = 0;
+    area->frameTravelDistance = 0.0f;
+    area->titleFade = 0;
+    area->unk118 = 0;
+    area->cameraTiltActive = 0;
+    area->unkB4 = 0;
+    area->cameraTilt = 0.0f;
+    area->unk100 = 0;
+    area->transitionMode = 0;
+    area->collectedCount = 0;
+    area->score = 0;
+    memset(area->pad10C, 0, sizeof(area->pad10C));
+    area->pendingSceneRequest = 0;
+    area->deferredExit = 0;
+    area->nextFloor = area->nextArea = -1;
+    area->commandEnabled = 0;
+    area->sceneBgmSuppressed = 0;
+    area->skipFade = 0;
+    area->unk138 = 0;
+    area->playerModelVariant = 0;
+    area->x = 0.0f;
+    area->y = 0.0f;
+    area->z = 0.0f;
+    area->previousX = 0.0f;
+    area->previousY = 0.0f;
+    area->previousZ = 0.0f;
+    area->targetX = 0.0f;
+    area->targetY = 0.0f;
+    area->targetZ = 0.0f;
+    area->positionPending = 0;
+    area->positionMode = 0;
+    area->unk17C = 0;
+    area->verticalStepDirection = 0;
+    area->angle = 0.0f;
+    area->previousCameraModelFrame = 0.0f;
+    area->unk170 = 0.0f;
+    area->unk174 = 0.0f;
+    area->targetAngle = 180.0f;
+    area->unk184 = 0;
+    D_0032E570[0] = 0;
+    D_0032E570[1] = 0;
+    D_0032E570[2] = 0;
+    D_0032E570[3] = 0;
+    D_0032E570[4] = 0;
+    D_0032E570[5] = 0;
+    D_0032E570[6] = 0;
+    D_0032E570[7] = 0;
+    D_0032E570[8] = 0;
+    D_0032E570[9] = 1;
+    D_0032E570[10] = 1;
+    D_0032E570[11] = 0;
+    D_0032E570[12] = 0;
+    D_0032E570[13] = 0;
+    D_0032E570[14] = 0;
+    D_0032E570[15] = 0;
+    D_0032E570[16] = 0;
+    D_0032E570[18] = 0;
+    D_0032E570[19] = 1;
+    D_0032E570[20] = 0;
+    D_0032E570[21] = 0;
+    if (mode == 0) {
+        fldResetFieldMapState();
+        datGameState->vr.previewX = 0;
+        datGameState->vr.previewY = 0;
+        {
+            u32 *word = ((FldVrResetView *)&datGameState->vr)->words;
+            for (i = 14; i >= 0; i--) {
+                *word++ = 0;
+            }
+        }
+        datGameState->header.magic[0] = 'V';
+        datGameState->header.magic[1] = 'E';
+        datGameState->header.magic[2] = 'R';
+        datGameState->header.version = 1;
+        datGameState->header.mapGroup = 0;
+        datGameState->header.mapIndex = 0;
+        datGameState->header.pad06[0] = 0;
+        datGameState->header.pad06[1] = 0;
+        datGameState->header.playTicks = 0;
+        for (i = 0; i < 8; i++) {
+            datGameState->header.partyIds[i] = 0;
+            datGameState->header.partyLevels[i] = 0;
+        }
+        datGameState->header.savedMoney = 0;
+        datGameState->header.saveFlags = 0;
+        datGameState->header.saveFlags1 = 0;
+        datGameState->header.saveFlags2 = 0;
+        datGameState->header.status = 0;
+        datGameState->header.transition = 0;
+    }
+}
 
 extern u32 D_0032E570[];
 
