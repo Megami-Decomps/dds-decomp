@@ -168,7 +168,7 @@ extern void evtStageTestAdvanceMotionQueue(void);
 
 
 
-extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
+extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot);
 
 extern char D_00437CB0[];
 
