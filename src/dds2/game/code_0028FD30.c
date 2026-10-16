@@ -773,7 +773,7 @@ static inline s32 mnuPanelFlagsWithStatus(s32 flags, s32 status) {
     return (flags & ~15) | status;
 }
 
-extern MenuPanelPositionRecord D_003CFEB8[][37];
+extern MenuPanelPositionRecord mnuMantraPanelEntryRows[][37];
 
 /* Reset all tutorial entries; mark the two tutorial-specific mantra ids.
  * cc1 keeps the consumed mask and shared status/group value across both
@@ -786,14 +786,14 @@ void mnuPrepareMantraPanelEntriesForTutorial(void) {
 
     for (; group < 3; group++) {
         for (entry = 0; entry < 37; entry++) {
-            D_003CFEB8[group][entry].stateFlags = defaultStatus;
-            if (group == 1 && D_003CFEB8[1][entry].id == 0x4B) {
-                D_003CFEB8[1][entry].stateFlags =
-                    (D_003CFEB8[1][entry].stateFlags & statusMask) | 1;
+            mnuMantraPanelEntryRows[group][entry].stateFlags = defaultStatus;
+            if (group == 1 && mnuMantraPanelEntryRows[1][entry].id == 0x4B) {
+                mnuMantraPanelEntryRows[1][entry].stateFlags =
+                    (mnuMantraPanelEntryRows[1][entry].stateFlags & statusMask) | 1;
             }
-            if (group == defaultStatus && D_003CFEB8[2][entry].id == 0x45) {
-                D_003CFEB8[2][entry].stateFlags =
-                    (D_003CFEB8[2][entry].stateFlags & statusMask) | 1;
+            if (group == defaultStatus && mnuMantraPanelEntryRows[2][entry].id == 0x45) {
+                mnuMantraPanelEntryRows[2][entry].stateFlags =
+                    (mnuMantraPanelEntryRows[2][entry].stateFlags & statusMask) | 1;
             }
         }
     }
@@ -804,7 +804,7 @@ void mnuPrepareMantraPanelEntriesForTutorial(void) {
 MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 id) {
     s32 offset = (selector << 7) + ((selector * 5) << 2);
     MenuPanelPositionRecord *entry =
-        (MenuPanelPositionRecord *)((u8 *)D_003CFEB8 + offset);
+        (MenuPanelPositionRecord *)((u8 *)mnuMantraPanelEntryRows + offset);
     u32 i = 0;
 
     for (i = 0; i < 37; i++, entry++) {

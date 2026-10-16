@@ -202,7 +202,7 @@ typedef struct MenuList MenuList;
 
 
 
-extern u8 D_003CE944[];
+extern u8 mnuTerminalPreparationPopupEntry[];
 
 
 extern void mnuReleaseCampTextureHandlesAndClearOutput(u32 *);
@@ -1089,7 +1089,7 @@ s32 fldPollSceneState(void) {
 s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    mnuSetPopupEntry((s32 *)(context + 0x54), D_003CE944);
+    mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPreparationPopupEntry);
     return menuSetHandler((void *)context, 0, (void *)request);
 }
 
@@ -1738,7 +1738,7 @@ extern const MenuGridPositions D_00424FF8;
 
 
 
-extern u8 D_003CE97C[];
+extern u8 mnuTerminalFollowupFadePopupEntry[];
 
 
 /* Slide the threshold list out while closing, or in after its grid entry completes. */
@@ -2206,7 +2206,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (fldClassifyRemainingFrames((void *)state) == 0) {
-                mnuSetPopupEntry(panel, D_003CE97C);
+                mnuSetPopupEntry(panel, mnuTerminalFollowupFadePopupEntry);
             }
         }
     }
@@ -2559,7 +2559,7 @@ u32 mnuTerminalExitPopupLeaveNoOp(void) {
 
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern char D_00425008[];
-extern char D_003CE960[];
+extern char mnuTerminalPanelPopupEntry[];
 
 /* Wait for the mode's load/fade barrier before binding the terminal exit popup. */
 s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
@@ -2603,7 +2603,7 @@ s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
             }
         }
         if (ready != 0) {
-            mnuSetPopupEntryFlagged(dispatch, D_003CE960);
+            mnuSetPopupEntryFlagged(dispatch, mnuTerminalPanelPopupEntry);
         }
     }
     return 0;

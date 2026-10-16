@@ -1441,12 +1441,12 @@ s32 mnuPollTaskState(void) {
     return 0;
 }
 
-extern u8 D_0036AB48[];
+extern u8 mnuShopMessageSequencePopupEntry[];
 
 s32 mnuCampRunPanel0(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     s32 *panel = (s32 *)(state + 0x54);
-    mnuSetPopupEntry(panel, D_0036AB48);
+    mnuSetPopupEntry(panel, mnuShopMessageSequencePopupEntry);
     return menuRunPanel((void *)state, 0, request);
 }
 
@@ -1934,7 +1934,7 @@ s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
 }
 extern char (*D_003BAA84)[25];
 
-extern u32 D_0036A260[][16];
+extern u32 mnuShopSolarPhaseSalePrices[][16];
 extern void mnuDrawCampItemListRow();
 
 s32 mnuBuildCampItemList(ShopScene *scene) {
@@ -1964,7 +1964,7 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
             } else if ((u32)(i - 0x60) < 0x20) {
                 parameters = &mnuAppendWindowListNode(scene->window, D_003BAA84[i])->camp;
                 phase = evtGetSolarPhase();
-                value = D_0036A260[i - 0x60][phase];
+                value = mnuShopSolarPhaseSalePrices[i - 0x60][phase];
                 parameters->id = i;
                 parameters->value = value;
                 parameters->price = value;
@@ -2123,7 +2123,7 @@ s32 evtAdvancePhaseOne(KwlnTask *task) {
 
 extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickCommandPhase(ShopScene *);
-extern MenuPopupEntry D_0036AAD8[];
+extern MenuPopupEntry mnuShopReturnDelayPopupEntry[];
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
@@ -2161,7 +2161,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
         }
         return 0;
     case 2:
-        mnuSetPopupEntryFlagged(&state->dispatchState, D_0036AAD8);
+        mnuSetPopupEntryFlagged(&state->dispatchState, mnuShopReturnDelayPopupEntry);
         return 0;
     case 3:
         evtInstallStateTable(state);
@@ -2631,7 +2631,7 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
 
 extern s32 mnuTickCommandWaitPhase(ShopScene *);
 extern void mnuSetQuantityListTransition(struct MenuList *, u32);
-extern u8 D_0036AB10[];
+extern u8 mnuShopTransactionPopupEntry[];
 
 s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
@@ -2655,7 +2655,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         break;
     }
     case 12:
-        mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AB10);
+        mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopTransactionPopupEntry);
         break;
     case 11:
     default:

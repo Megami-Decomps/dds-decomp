@@ -995,7 +995,7 @@ s32 fldPollSceneState(void) {
     return 0;
 }
 
-extern char D_0036ADF4[];
+extern char mnuTerminalPreparationPopupEntry[];
 
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
 s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
@@ -1003,7 +1003,7 @@ s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
     s32 *state = &work->popupState;
 
-    mnuSetPopupEntry(state, D_0036ADF4);
+    mnuSetPopupEntry(state, mnuTerminalPreparationPopupEntry);
     return menuRunPanel((void *)context, 0, (void *)value);
 }
 
@@ -2054,7 +2054,7 @@ u32 evtSelectFinalVisualNode(KwlnTask *task) {
 }
 
 /* Terminal panel poll: once the message window is idle and the field frames are drained, open the follow-up popup. */
-extern u8 D_0036AE2C[];
+extern u8 mnuTerminalFollowupFadePopupEntry[];
 s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     MenuTerminalWork *work = (MenuTerminalWork *)state;
@@ -2066,7 +2066,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (fldClassifyRemainingFrames(state) == 0) {
-                mnuSetPopupEntry(panel, (void *)D_0036AE2C);
+                mnuSetPopupEntry(panel, (void *)mnuTerminalFollowupFadePopupEntry);
             }
         }
     }
@@ -2454,7 +2454,7 @@ u32 mnuTerminalExitPopupLeaveNoOp(void) {
 }
 
 extern const char D_003AF710[];
-extern u8 D_0036AE10[];
+extern u8 mnuTerminalPanelPopupEntry[];
 
 s32 evtOpenTerminalActionPopupWhenReady(KwlnTask *input) {
     MenuTerminalWork *context = (MenuTerminalWork *)kwlnTaskGetUserValue(input);
@@ -2481,7 +2481,7 @@ s32 evtOpenTerminalActionPopupWhenReady(KwlnTask *input) {
                 }
             }
             if (canOpen != 0) {
-                mnuSetPopupEntryFlagged(state, D_0036AE10);
+                mnuSetPopupEntryFlagged(state, mnuTerminalPanelPopupEntry);
             }
         }
         return 0;
