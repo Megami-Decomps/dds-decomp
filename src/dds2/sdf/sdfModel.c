@@ -70,8 +70,8 @@ SdfModelPacket *sdfModelWriteFixedPacket(SdfModelPacket *packet) {
 
 /* Select an asset packet from the root model's parsed resource table. */
 SdfDmaTagHeader *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, SdfDmaTagHeader *packet, s32 frame) {
-    return (SdfDmaTagHeader *)sdfInitAssetDrawEntryReferenceNode(
-        ((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
+    return sdfInitAssetDrawEntryReferenceNode(((struct SdfAsset **)model->resources->buffer)[index], packet,
+                                              frame);
 }
 
 /* Walk a read-only command list and report its total packet byte size, the
