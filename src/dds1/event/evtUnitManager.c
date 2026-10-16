@@ -32,7 +32,7 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
     f32 length = 0.0f;
     f32 step = 0.05f;
     f32 t = step;
-    f32 segment;
+    f32 segmentLength;
 
     savedScaleFactor = evtGetValueScaleFactor((EvtScaledValue *)path);
     evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
@@ -43,8 +43,8 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
         dds3InterpolatePathVectorVU(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_LENGTH_VF10(segment);
-        length += segment;
+        VU0_LENGTH_VF10(segmentLength);
+        length += segmentLength;
         VU0_MOVE_VF(vf10, vf12);
         t += step;
     } while (t <= 1.0f);
