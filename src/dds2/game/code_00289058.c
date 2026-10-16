@@ -452,13 +452,13 @@ s32 mnuSetSelectedMantraOptionFlag(DatPartyRecord *party) {
 
 s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
-    s32 index = 0;
+    s32 listIndex = 0;
     while (node != 0) {
         if (mtrChkMantraCompleteMaster((DatPartyRecord *)node->userValue) != 0) {
-            return index;
+            return listIndex;
         }
         node = node->next;
-        index++;
+        listIndex++;
     }
     return -1;
 }
