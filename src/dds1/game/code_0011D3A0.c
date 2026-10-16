@@ -68,7 +68,7 @@ extern u8 D_00324530[];
 
 extern char D_0039FA00[];
 
-extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
+extern void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
 extern s32 fldTestDrawUpdate(KwlnTask *task);
 
@@ -159,8 +159,8 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D6B0);
 
 /* Wrap input cycles past the bounds; clamp input saturates there.
  * Coarse controls take priority over fine controls. */
-void fldStepValueByPad(f32 *value, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
-    f32 adjustedValue = *value;
+void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
+    f32 adjustedValue = *controlledValue;
 
     if ((s8)padState[5] & FIELD_EDIT_WRAP_INPUT) {
         adjustedValue += bigStep;
@@ -205,7 +205,7 @@ void fldStepValueByPad(f32 *value, u8 *padState, f32 minimum, f32 maximum, f32 s
     } else {
         return;
     }
-    *value = adjustedValue;
+    *controlledValue = adjustedValue;
 }
 
 void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
