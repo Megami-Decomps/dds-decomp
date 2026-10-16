@@ -8185,7 +8185,7 @@ extern char D_00330770[];
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 
 extern char D_00330780[];
-void func_0013BF48(s32 roomValue, f32 x, f32 y, f32 z, f32 radius) {
+void func_0013BF48(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     s32 index = D_003BAE34;
     FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
@@ -8223,7 +8223,7 @@ void func_0013BF48(s32 roomValue, f32 x, f32 y, f32 z, f32 radius) {
                                  (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
                                  (s32)D_00330770);
     taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
-    fldRoomRecords[taskIndex].roomId = roomValue;
+    fldRoomRecords[taskIndex].roomId = roomId;
     fldRoomRecords[taskIndex].mode = 2;
     D_003BAE34++;
     fldRoomRecords[taskIndex].entryIndex = -1;
