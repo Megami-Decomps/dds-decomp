@@ -70,13 +70,13 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
     return matter;
 }
 
-EffWorldNode *fldResolveWorldObjectByResourceId(u32 id) {
+EffWorldNode *fldResolveWorldObjectByResourceId(u32 resourceId) {
     u32 i = 0;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
 
     for (; i < D_00438EC4; i++, resource++) {
-        if (id == resource->id) {
+        if (resourceId == resource->id) {
             if (resource->names != NULL) {
                 FldFileNameEntry *nameEntry = resource->names->entries;
                 u32 j = 0;
