@@ -1543,7 +1543,7 @@ extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
 const char D_00413128[] = "%sk%03d_%03d.f2";
 
-u32 fldLoadAreaRoomResources(const char *name) {
+u32 fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
     void *roomOffsets;
@@ -1642,7 +1642,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     if (isField == 0) {
         fldCachedRoomResourceAllocation = fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
-            sprintf(path, D_00436028, name);
+            sprintf(path, D_00436028, resourceName);
             D_00435FA4 = sndLoadNamedOffsetResourceList(path);
         } else {
             D_00435FA4 = sndBuildResourceHandleListFromOffsets(roomOffsets);
@@ -1651,7 +1651,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         }
     }
     if (isField == 0) {
-        sprintf(path, D_00436030, name);
+        sprintf(path, D_00436030, resourceName);
         fldCachedRoomF2ResourceAllocation = fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF2ResourceAllocation == NULL) {
             fldCachedRoomF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
@@ -1676,7 +1676,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
     if (isField == 0) {
-        sprintf(path, D_00436038, name);
+        sprintf(path, D_00436038, resourceName);
         fldCachedRoomF1ResourceAllocation = fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF1ResourceAllocation == NULL) {
             fldCachedRoomF1ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
