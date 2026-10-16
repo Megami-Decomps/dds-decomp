@@ -476,10 +476,10 @@ void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct Menu
 
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback) {
-    struct MenuList *list = mnuCreateListState(0, count, 0x15, callback);
+struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 ownerAddress) {
+    struct MenuList *list = mnuCreateListState(0, count, 0x15, ownerAddress);
     s32 entryIndex;
-    list->context = (void *)callback;
+    list->context = (void *)ownerAddress;
     list->drawCallback = mnuDrawThresholdNodeWithSelectedAccents;
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
