@@ -6,8 +6,7 @@
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
 #include "sdf_dev_state.h"
-
-typedef struct SoundFormat SoundFormat;
+#include "mdl_object_stream.h"
 
 enum {
     PAC_HEADER_BYTES = 0x10,
@@ -40,7 +39,7 @@ extern u8 D_00438D28[];
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
 void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
-    u8 soundFormat[4];
+    SoundFormat soundFormat;
     struct SdfMemBlock *allocation;
     u8 *resource;
     MovLinearStream *stream;
@@ -62,10 +61,10 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     owner->unk06 = descriptor->unk02;
     owner->unk0C = descriptor->unk08;
     owner->unk0E = descriptor->unk0A;
-    soundFormat[0] = descriptor->hasAudio;
-    soundFormat[1] = descriptor->stereo;
-    soundFormat[2] = 0;
-    soundFormat[3] = descriptor->playbackCadenceStep;
+    soundFormat.hasAudio = descriptor->hasAudio;
+    soundFormat.stereo = descriptor->stereo;
+    soundFormat.loopMode = 0;
+    soundFormat.playbackCadenceStep = descriptor->playbackCadenceStep;
 
     if (!isPac) {
         stream = sdfAllocAndClearQuadwords(0x14);
@@ -81,7 +80,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfDevCreateCallbackState(name,
                                                         (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
-        sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
+        sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
                                             sdfMovieLinearStreamReadCallback, owner, descriptor->source);
         return;
     }
@@ -105,7 +104,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
                                                     (void *)sdfMovieHandlePacDeviceEvent, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
-    sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
+    sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
                                         sdfMoviePacStreamReadCallback, owner, descriptor->source);
 }
 
