@@ -2196,18 +2196,18 @@ void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRunti
 }
 
 u16 evtViewerPopHistory(EvtRuntime *viewer) {
-    u16 id;
-    s32 index;
+    u16 historyId;
+    s32 historyIndex;
 
-    index = viewer->historyCount - 1;
+    historyIndex = viewer->historyCount - 1;
     if (viewer->historyCount == 0) {
         viewer->actionMode = 0;
         return 0;
     }
-    viewer->historyCount = index;
-    id = viewer->history[index].id;
-    viewer->actionMode = (u32)id;
-    return id;
+    viewer->historyCount = historyIndex;
+    historyId = viewer->history[historyIndex].id;
+    viewer->actionMode = (u32)historyId;
+    return historyId;
 }
 
 extern s16 itfPanelGetPairFirst(s32 windowIndex);
