@@ -2325,7 +2325,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     }
 }
 
-extern void prfCopyMantraNamePart(u32 textId, s32 arg1, char *out);
+extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
