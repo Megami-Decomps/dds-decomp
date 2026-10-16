@@ -1592,11 +1592,11 @@ u32 evtOpCreateMagatuhiEffect2FromTaskResource(void) {
 }
 
 u32 evtOpRunWorldEffectReadyAction(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *obj;
 
-    id = scrReadIntParameter(0);
-    obj = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    obj = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (obj != NULL) {
         effObjDispatchReadyState((EffWorldNode *)obj);
     }
@@ -1604,11 +1604,11 @@ u32 evtOpRunWorldEffectReadyAction(void) {
 }
 
 u32 evtOpRunWorldEffectReadyActionDuplicate(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *obj;
 
-    id = scrReadIntParameter(0);
-    obj = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    obj = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (obj != NULL) {
         effObjDispatchReadyState((EffWorldNode *)obj);
     }
@@ -1616,11 +1616,11 @@ u32 evtOpRunWorldEffectReadyActionDuplicate(void) {
 }
 
 u32 evtScriptDestroyWorldEffectObject(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *obj;
 
-    id = scrReadIntParameter(0);
-    obj = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    obj = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (obj != NULL) {
         dds3RemoveWorldObjectNode(obj);
     }
