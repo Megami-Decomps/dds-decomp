@@ -5442,13 +5442,13 @@ u32 fldGetSkyAlpha(void) {
     return D_0032E5A8[0];
 }
 
-void fldBeginSelectedValueTransition(u32 value) {
-    u32 previousValue = D_0032E59C[0];
+void fldBeginSelectedValueTransition(u32 transitionMode) {
+    u32 selectedValue = D_0032E59C[0];
 
-    D_003BAD9C = value;
+    D_003BAD9C = transitionMode;
     D_003BADA0 = 0;
-    D_003BADA4 = previousValue;
-    fldApplySkyLightSet(previousValue, 1);
+    D_003BADA4 = selectedValue;
+    fldApplySkyLightSet(selectedValue, 1);
 }
 
 extern char D_003A0138[];
