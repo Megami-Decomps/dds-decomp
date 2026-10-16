@@ -39,7 +39,7 @@ extern s8 D_00324510[];
 
 extern void mnuReleaseMenuResourceSlots(void);
 
-extern struct MenuList *mnuCreateListState(s32, s32, s32);
+extern struct MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing);
 extern void mnuSelectFirstListNode(struct MenuList *);
 
 
