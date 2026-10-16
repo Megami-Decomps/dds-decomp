@@ -358,7 +358,7 @@ extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
 void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *handle, s32 packet);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
-extern void mnuDrawMantraUnitPanel();
+extern s32 mnuDrawMantraUnitPanel();
 extern u32 mnuInitMantraUnitPanelDraw();
 extern void mnuReleaseMantraUnitPanelDraw();
 void mnuStorePanelEntry(u32, u32);
