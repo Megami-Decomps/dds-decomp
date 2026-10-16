@@ -235,13 +235,13 @@ s32 bfWaitCbCreateTask(void)
 
 s32 scrCommandDestroyRegisteredTask(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    if (kwlnTaskIsRegistered((KwlnTask *)p0) == 0)
+    s32 taskHandle;
+    taskHandle = scrReadIntParameter(0);
+    if (kwlnTaskIsRegistered((KwlnTask *)taskHandle) == 0)
     {
         return 1;
     }
-    kwlnTaskDestroyWithHierarchy((KwlnTask *)p0, 1);
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)taskHandle, 1);
     return 1;
 }
 
