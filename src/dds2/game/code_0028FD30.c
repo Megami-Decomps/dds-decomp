@@ -436,7 +436,7 @@ extern const u16 mnuMantraBridgeNodesForDirections2And3[3][5];
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
 
-MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id, s8 direction) {
+MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *unused, u16 nodeId, s8 neighborDirection) {
     s32 i;
     s8 activeFlags = 0;
     u16 bridgeIds[4] = {0x61, 0x62, 0x63, 0x64};
@@ -459,13 +459,13 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
         }
     }
     for (i = 0; i < sizeof(bridgeIds) / sizeof(bridgeIds[0]); i++) {
-        if (bridgeIds[i] == id) {
+        if (bridgeIds[i] == nodeId) {
             if (i >= 2) {
-                if (direction == 5 || direction == 0) {
+                if (neighborDirection == 5 || neighborDirection == 0) {
                     return mnuGetMantraNodePositionRecord(destinations[i][state]);
                 }
             } else {
-                if (direction == 2 || direction == 3) {
+                if (neighborDirection == 2 || neighborDirection == 3) {
                     return mnuGetMantraNodePositionRecord(destinations[i][state]);
                 }
             }
@@ -473,8 +473,8 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
         }
     }
     for (i = 0; i < 5; i++) {
-        if (horizontalNodes[state][i] == id &&
-            (direction == 5 || direction == 0)) {
+        if (horizontalNodes[state][i] == nodeId &&
+            (neighborDirection == 5 || neighborDirection == 0)) {
             if (i < 2) {
                 if (activeFlags & 1) {
                     return mnuGetMantraNodePositionRecord(bridgeIds[0]);
@@ -493,8 +493,8 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
         }
     }
     for (i = 0; i < 5; i++) {
-        if (verticalNodes[state][i] == id &&
-            (direction == 2 || direction == 3)) {
+        if (verticalNodes[state][i] == nodeId &&
+            (neighborDirection == 2 || neighborDirection == 3)) {
             if (i < 2) {
                 if (activeFlags & 4) {
                     return mnuGetMantraNodePositionRecord(bridgeIds[2]);
