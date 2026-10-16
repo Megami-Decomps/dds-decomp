@@ -99,7 +99,99 @@ extern s32 func_001FFE30(BtlTask *, s32, u16 *, s32 *);
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
-INCLUDE_ASM(const s32, "game/code_001FF0C8", func_001FF0C8);
+extern AiSpecies D_00360640[];
+extern s32 btlSelectConditionalAiRoute(s32, s32, u32 *, u32);
+extern u32 btlRollAiBucket(void);
+extern s32 btlHasAdjacentActorRecordStatus(s32);
+extern u32 btlIsActorHighStateFlagClear(s32);
+extern s32 btlRunAiAction(BtlTask *, s32, u32);
+extern s32 btlSyncEligibleActorPanelHpMp(BtlTask *);
+extern void *memcpy(void *, const void *, u32);
+void func_001FF0C8(BtlTask *task, u32 mode) {
+    BtlAiScratchWork *work;
+    BtlUnit *unit;
+    s32 table;
+    s32 row;
+    s32 variant;
+    s32 index;
+    s32 species = 0;
+    AiSlot slots[BTL_AI_SLOT_COUNT];
+    u16 actionId;
+    s16 bucket;
+    s16 count;
+    s16 i;
+    /* One weight local: the share moved to each other slot, then the running
+     * total. With a separate share local, the first scan's cursor and count
+     * swap $5/$6 against retail (cc1probe --alloc). */
+    s16 weight;
+
+    switch (mode) {
+    case 0:
+        variant = (task->unit->status.flags & 0x200) ? 2 : 1;
+        table = 0;
+        break;
+    case 1:
+        variant = (task->unit->status.flags & 0x200) ? 2 : 1;
+        table = 1;
+        break;
+    case 2:
+        variant = 1;
+        table = 2;
+        break;
+    case 3:
+        variant = 1;
+        table = 3;
+        break;
+    case 4:
+    default:
+        variant = 1;
+        table = 4;
+        break;
+    }
+    datEnemyAiRecords[0] = D_00360640[table];
+    work = sdfAllocAndClearQuadwords(0x10);
+    unit = task->unit;
+    btlActionScratchWork = work;
+    work->actor = task;
+    work->speciesId = unit->partyRecord.unitId;
+    btlSelectConditionalAiRoute((s32)unit, species, (u32 *)&row, variant);
+    index = btlPickWeightedAiSlot((s32)unit, species, row);
+    actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
+    if (mode == 3 && actionId == 0x8008) {
+        if (!btlHasAdjacentActorRecordStatus((s32)unit) || !btlIsActorHighStateFlagClear((s32)unit)) {
+            memcpy(slots, &datEnemyAiRecords[species].slot[row * 5], sizeof(slots));
+            bucket = btlRollAiBucket();
+            count = 0;
+            for (i = 0; i < BTL_AI_SLOT_COUNT; i++) {
+                if (slots[i].weight != 0 && i != index) {
+                    count++;
+                }
+            }
+            weight = slots[index].weight / count + 1;
+            for (i = 0; i < BTL_AI_SLOT_COUNT; i++) {
+                if (slots[i].weight != 0 && i != index) {
+                    slots[i].weight += weight;
+                }
+            }
+            weight = 0;
+            for (i = 0; i < BTL_AI_SLOT_COUNT; i++) {
+                if (slots[i].weight != 0 && i != index) {
+                    weight += slots[i].weight;
+                    if (weight >= bucket) {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
+        }
+    }
+    btlRunAiAction(task, actionId, datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
+    if (mode == 2) {
+        btlSyncEligibleActorPanelHpMp(task);
+    }
+    sdfReleaseChipBlock(btlActionScratchWork);
+}
 
 u32 func_001FF558(void) {
     return 1;
