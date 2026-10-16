@@ -437,6 +437,10 @@ typedef struct {
     char name[0x10];
 } FldTblEnt50; /* 0x50 bytes */
 
+typedef char FldTblEnt50_size_check[(sizeof(FldTblEnt50) == 0x50) ? 1 : -1];
+typedef char FldTblEnt50_object_offset_check[
+    ((u32)&((FldTblEnt50 *)0)->object == 0x20) ? 1 : -1];
+
 extern FldTblEnt50 fldRoomEffectEntries[];
 
 typedef struct {
