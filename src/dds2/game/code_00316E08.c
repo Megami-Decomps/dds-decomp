@@ -1280,7 +1280,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
 }
 
 extern u8 *mnuAcquireUnusedModelNode(u32 *group);
-extern s32 itfClaimFreeModelInstance(ModelInstanceList *list);
+extern ModelInstance *itfClaimFreeModelInstance(ModelInstanceList *list);
 extern MnuModelNode *D_00438928;
 
 void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
@@ -1330,7 +1330,7 @@ create:
             }
         }
     } else {
-        ModelInstance *instance = (ModelInstance *)itfClaimFreeModelInstance(
+        ModelInstance *instance = itfClaimFreeModelInstance(
             &instances[parameterIndex]);
         entry->object.modelInstance = instance;
         if (instance != NULL) {
