@@ -11,6 +11,7 @@
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
+#include "fld_player_scene_state.h"
 #include "eff_inner_float_api.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -103,7 +104,7 @@ void effObjSetFlags(void *unit, s32 flag);
 
 
 
-u32 fldGetPlayerSceneState(void);
+
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 
 extern char D_00421F08[];
@@ -608,7 +609,7 @@ s32 evtCommandAddEffectUnitToWorld(void) {
     EffWorldNode *cameraOwner;
 
     if (scrReadIntParameter(0) < 0) {
-        cameraOwner = (EffWorldNode *)fldGetPlayerSceneState();
+        cameraOwner = fldGetPlayerSceneState();
     } else {
         cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -624,7 +625,7 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     CameraData *cameraData;
 
     if (scrReadIntParameter(0) < 0) {
-        cameraOwner = (EffWorldNode *)fldGetPlayerSceneState();
+        cameraOwner = fldGetPlayerSceneState();
     } else {
         cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
         cameraData = cameraOwner->data;
@@ -643,7 +644,7 @@ s32 evtCommandRelinkCameraOwnerToPath(void) {
     void *path;
 
     if (scrReadIntParameter(0) < 0) {
-        owner = (void *)fldGetPlayerSceneState();
+        owner = fldGetPlayerSceneState();
     } else {
         owner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -669,7 +670,7 @@ s32 evtCommandWaitCameraOwnerResourceScale(void) {
     s32 scaleStatus;
 
     if (scrReadIntParameter(0) < 0) {
-        cameraOwner = (void *)fldGetPlayerSceneState();
+        cameraOwner = fldGetPlayerSceneState();
     } else {
         cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -727,7 +728,7 @@ s32 evtCommandSetEffectUnitPosition(void) {
 
     memset(position, 0, sizeof(position));
     if (scrReadIntParameter(0) < 0) {
-        effectUnit = (void *)fldGetPlayerSceneState();
+        effectUnit = fldGetPlayerSceneState();
     } else {
         effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -749,7 +750,7 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     f32 pitch;
 
     if (scrReadIntParameter(0) < 0) {
-        effectUnit = (void *)fldGetPlayerSceneState();
+        effectUnit = fldGetPlayerSceneState();
     } else {
         effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -772,7 +773,7 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
     f32 quaternion[4];
 
     if (scrReadIntParameter(0) < 0) {
-        effectUnit = (void *)fldGetPlayerSceneState();
+        effectUnit = fldGetPlayerSceneState();
     } else {
         effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }

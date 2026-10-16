@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
+#include "fld_player_scene_state.h"
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
@@ -434,7 +435,7 @@ extern u32 D_00436088;
 #include "dds3_world_primary.h"
 
 
-extern s64 fldGetPlayerSceneState(void);
+
 
 extern u32 D_004360AC;
 
@@ -701,9 +702,9 @@ extern f32 D_0038BAF0[];
 extern f32 D_0038BB00[];
 
 
-extern u32 *fldGetPlayerSceneStateAddress(void);
 
-extern void dds3SetCameraFieldOfView(s32, f32);
+
+extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 
 extern void fldToggleWorldNodeState(s32);
 
@@ -3490,7 +3491,7 @@ void fldInitializeCameraViewFromPlayer(void) {
     FldLookAtVector collisionPoint;
     FldLookAtVector playerPosition;
     EffWorldNode *node;
-    u32 *sceneSlot = fldGetPlayerSceneStateAddress();
+    EffWorldNode **sceneSlot = fldGetPlayerSceneStateAddress();
     f32 angle;
     f32 phase;
     f32 radiansPerHalfTurn;
@@ -3560,7 +3561,7 @@ void fldInitializeCameraViewFromPlayer(void) {
     dy = collisionPoint.f[1] - referencePoint.f[1];
     dz = collisionPoint.f[2] - referencePoint.f[2];
     distance = fsqrtf(dx * dx + dy * dy + dz * dz);
-    node = (EffWorldNode *)(u32)*sceneSlot;
+    node = *sceneSlot;
     scale = distance * ratio;
     D_004360A4 = scale;
 
@@ -3574,7 +3575,7 @@ void fldInitializeCameraViewFromPlayer(void) {
     effObjSetInnerPosition(node, &farPoint.q);
     PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
     PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
-    node = (EffWorldNode *)(u32)*sceneSlot;
+    node = *sceneSlot;
     node->ops->update(node);
     fldUpdateLookAtSegmentDistance();
 }
@@ -3607,7 +3608,7 @@ void fldInterpolateCameraEndpoints(void) {
         u128 q;
         f32 f[4];
     } nearPoint, farPoint;
-    u32 *world = fldGetPlayerSceneStateAddress();
+    EffWorldNode **world = fldGetPlayerSceneStateAddress();
     f32 ratio = (f32)D_004360B4 / (f32)D_004360B8;
     f32 remaining = 1.0f - ratio;
     EffWorldNode *node;
@@ -3620,8 +3621,8 @@ void fldInterpolateCameraEndpoints(void) {
     farPoint.f[2] = D_0038BB00[2] * ratio + D_0038BB00[2] * remaining;
     PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
     PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
-    effObjSetInnerPosition((EffWorldNode *)(u32)*world, &farPoint.q);
-    node = (EffWorldNode *)(u32)*world;
+    effObjSetInnerPosition(*world, &farPoint.q);
+    node = *world;
     node->ops->update(node);
     D_004360B4++;
     if (D_004360B8 < D_004360B4) {
@@ -3639,7 +3640,7 @@ extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 void fldUpdateCameraViewFromPlayer(void) {
     f32 nearPoint[4];
     f32 farPoint[4];
-    u32 *world = fldGetPlayerSceneStateAddress();
+    EffWorldNode **world = fldGetPlayerSceneStateAddress();
     EffWorldNode *node;
     f32 angle;
 
@@ -3650,20 +3651,20 @@ void fldUpdateCameraViewFromPlayer(void) {
     nearPoint[2] = fldLookAtNearPoint[2] + (fldAreaState.z - fldLookAtNearPoint[2]);
     fldAreaState.angle = angle;
     fldAreaState.targetAngle = angle;
-    dds3SetCameraVector((EffWorldNode *)(u32)*world, (u128 *)nearPoint);
+    dds3SetCameraVector(*world, (u128 *)nearPoint);
     dds3LoadOrBuildObjectMatrix((EffWorldNode *)fldPlayerObject);
     farPoint[3] = 1.0f;
     farPoint[0] = fldAreaState.focusPos[0];
     farPoint[1] = fldAreaState.focusPos[1];
     farPoint[2] = fldAreaState.focusPos[2];
-    effObjSetInnerPosition((EffWorldNode *)(u32)*world, (u128 *)farPoint);
+    effObjSetInnerPosition(*world, (u128 *)farPoint);
     farPoint[0] = fldLookAtFarPoint[0] + (farPoint[0] - fldLookAtFarPoint[0]);
     farPoint[1] = fldLookAtFarPoint[1] + (farPoint[1] - fldLookAtFarPoint[1]);
     farPoint[2] = fldLookAtFarPoint[2] + (farPoint[2] - fldLookAtFarPoint[2]);
-    effObjSetInnerPosition((EffWorldNode *)(u32)*world, (u128 *)farPoint);
+    effObjSetInnerPosition(*world, (u128 *)farPoint);
     PCP_COPY_VECTOR(fldLookAtNearPoint, nearPoint);
     PCP_COPY_VECTOR(fldLookAtFarPoint, farPoint);
-    node = (EffWorldNode *)(u32)*world;
+    node = *world;
     node->ops->update(node);
     fldAreaState.dist = fsqrtf((nearPoint[0] - farPoint[0]) * (nearPoint[0] - farPoint[0]) +
                                (nearPoint[1] - farPoint[1]) * (nearPoint[1] - farPoint[1]) +
@@ -3673,16 +3674,12 @@ void fldUpdateCameraViewFromPlayer(void) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_001302A0);
 
-s64 fldGetUnselectedWorldEntry(void) {
-    s32 worldObject;
-    s64 object;
-    s64 currentObject;
+EffWorldNode *fldGetUnselectedWorldEntry(void) {
+    EffWorldNode *worldObject = dds3GetWorldObject();
+    EffWorldNode *object = dds3GetWorldCameraObject(worldObject);
 
-    worldObject = (s32)dds3GetWorldObject();
-    object = (s32)dds3GetWorldCameraObject((EffWorldNode *)worldObject);
-    currentObject = fldGetPlayerSceneState();
-    if (currentObject == object) {
-        object = 0;
+    if (fldGetPlayerSceneState() == object) {
+        object = NULL;
     }
     return object;
 }
@@ -3809,7 +3806,7 @@ extern void fldInterpolateCameraEndpoints(void);
 
 s32 fldUpdateCameraFollow(void) {
     FldAreaWork *cam;
-    u32 *world = fldGetPlayerSceneStateAddress();
+    EffWorldNode **world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && fldPlayerObject != 0) {
         fldRestoreSceneModelColors();
         if (fldGetUnselectedWorldEntry() != 0) {
