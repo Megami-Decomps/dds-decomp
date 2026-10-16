@@ -110,11 +110,11 @@ extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
 extern char D_00421A78[];
 
-extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
+extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector);
 
 extern u8 D_00421A90[];
 
-extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
+extern void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *secondVector);
 
 extern u8 D_00421B20[];
 
