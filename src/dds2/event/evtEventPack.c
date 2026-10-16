@@ -45,7 +45,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     EvtPackEntry *entry;
     s32 entryIndex;
     s32 entrySize;
-    u8 *payload;
+    u8 *modelPayload;
     s32 unitKey;
 
     data = evtGetEventPackLoadState(eventId);
@@ -57,17 +57,17 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 switch (entry->kind) {
                 case 5:
                     entrySize = entry->dataSize;
-                    payload = data->data + entry->dataOffset;
+                    modelPayload = data->data + entry->dataOffset;
                     sdfDebugPrintf(D_00424830, resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
                     case 0x2AC:
                     case 0x2AE:
                     case 0x2B0:
-                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x101, (s32)payload, entrySize);
+                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x101, (s32)modelPayload, entrySize);
                         break;
                     default:
-                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x103, (s32)payload, entrySize);
+                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x103, (s32)modelPayload, entrySize);
                         break;
                     }
                     unitKey = mdlSpawnCameraSlotViewerObject(3, evtNextCameraSlotViewerKey);
