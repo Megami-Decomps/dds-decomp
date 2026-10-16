@@ -112,7 +112,7 @@ extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *
 
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 duration);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
-extern void evtActivateStoredUnitMotionSlot(u32 arg0);
+extern void evtActivateStoredUnitMotionSlot(u32 unitAddress);
 
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern const char D_003AC508[];
