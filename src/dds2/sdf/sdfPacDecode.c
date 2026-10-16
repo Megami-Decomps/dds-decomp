@@ -95,7 +95,7 @@ s32 sdfPacFeedInput(PacState *state, const u8 *input, s32 inputByteCount) {
 }
 
 /* Queue a private copy of the packet header and any extension bytes. */
-PacWork *sdfPacEnqueuePacket(PacState *state, SdfPacStreamPacketHeader *packet) {
+PacWork *sdfPacEnqueuePacket(PacState *state, const SdfPacStreamPacketHeader *packet) {
     s32 extensionBytes = packet->flags & PAC_EXTENSION_BYTES_MASK;
     PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + PAC_WORK_BASE_BYTES);
     node->owner = state;

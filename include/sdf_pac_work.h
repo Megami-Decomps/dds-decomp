@@ -26,7 +26,7 @@ typedef char PacWork_packet_must_be_at_0x10[
     ((u32)&((PacWork *)0)->packet == 0x10) ? 1 : -1];
 
 PacWork *sdfPacEnqueuePacket(struct PacState *state,
-                             struct SdfPacStreamPacketHeader *packet);
+                             const struct SdfPacStreamPacketHeader *packet);
 PacWork *sdfPacRemovePacket(PacWork *work);
 
 #endif /* SDF_PAC_WORK_H */
