@@ -16,7 +16,7 @@
 #include "sdf_texture_offset_list.h"
 
 #include "dds3_world_primary.h"
-extern Motion *mdlFindNodeById(MdlCtx *, s32);
+extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
 extern s32 evtSetBgmVolumePan(s32, s32);
 
 /* The selected script entry and the terminal value of the native load state. */
