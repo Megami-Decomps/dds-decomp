@@ -934,13 +934,18 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId) {
     return NULL;
 }
 
+static inline const Motion *mdlFindNodeByIdReadOnly(const MdlCtx *ctx, s32 searchId) {
+    /* The mutable lookup remains available to writers; this path only reads. */
+    return mdlFindNodeById((MdlCtx *)ctx, searchId);
+}
+
 #define MDL_NODE_FIELD_MISSING (-1)
 #define MDL_NODE_MOTION_STATUS_MISSING 2
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+s32 mdlGetNodeMotionIndex(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_FIELD_MISSING;
     }
@@ -948,8 +953,8 @@ s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Read the selected motion's frame count; return zero for a missing node. */
-u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+u16 mdlGetNodeFrameCount(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
@@ -958,8 +963,8 @@ u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
-s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+s32 mdlGetNodeFrameAsInt(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
@@ -967,8 +972,8 @@ s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Report whether a node is terminal, using 2 to distinguish a missing node. */
-s32 mdlGetNodeMotionTerminalStatus(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+s32 mdlGetNodeMotionTerminalStatus(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_MOTION_STATUS_MISSING;
     }
