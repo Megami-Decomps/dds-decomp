@@ -203,14 +203,14 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
     if ((flags & 2) && work->activeMode >= 0) {
         previous = (work->historyIndex + 7) & 7;
         if (work->signedHistory[previous] >= 0 && (work->unsignedHistory[previous] & 1)) {
-            void *data = work->requestData;
+            void *requestData = work->requestData;
 
             work->flags |= 0x10001;
             work->requestedMode = work->signedHistory[previous];
             work->modeTransitionDelay = 2;
             work->flags &= ~4;
-            if (data != NULL) {
-                sdfReleaseChipBlock(data);
+            if (requestData != NULL) {
+                sdfReleaseChipBlock(requestData);
                 work->requestData = NULL;
                 work->requestSizeLowByte = 0;
             }

@@ -979,8 +979,8 @@ extern s8 D_003C9520[];
 extern char D_00437518[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *data) {
-    EvtRuntime *ctx = (EvtRuntime *)data;
+s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *runtimeContext) {
+    EvtRuntime *ctx = (EvtRuntime *)runtimeContext;
     s32 type = ctx->frameGroup->type;
     s32 i;
     s32 kind;
