@@ -289,37 +289,37 @@ extern void effInitCh75Id(void);
  * File I/O is waited on even when the user-value handle is zero. */
 void evtReleaseEventPackResources(KwlnTask *task) {
     s32 stateHandle = kwlnTaskGetUserValue(task);
-    EvtPackLoadState *state = (EvtPackLoadState *)stateHandle;
+    EvtPackLoadState *packState = (EvtPackLoadState *)stateHandle;
 
     fileWaitIdle();
     if (stateHandle != 0) {
-        if (state->effect72 != 0) {
+        if (packState->effect72 != 0) {
             effInitCh72Id();
-            sdfTexReleaseReferenceViaHandler(state->effect72);
+            sdfTexReleaseReferenceViaHandler(packState->effect72);
         }
-        if (state->effect71 != 0) {
+        if (packState->effect71 != 0) {
             effInitCh71Id();
-            sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect71);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)packState->effect71);
         }
-        if (state->effect76 != 0) {
+        if (packState->effect76 != 0) {
             effInitCh76Id();
-            sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect76);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)packState->effect76);
         }
-        if (state->effect75 != 0) {
+        if (packState->effect75 != 0) {
             effInitCh75Id();
-            sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect75);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)packState->effect75);
         }
-        if (state->pendingRequest != NULL) {
-            filePollEntryCleanup(state->pendingRequest);
+        if (packState->pendingRequest != NULL) {
+            filePollEntryCleanup(packState->pendingRequest);
         }
-        if (state->resourceAllocation != NULL) {
-            sdfQueueGeneralAllocationRelease(state->resourceAllocation);
+        if (packState->resourceAllocation != NULL) {
+            sdfQueueGeneralAllocationRelease(packState->resourceAllocation);
         }
-        if (state->sceneAllocation1 != 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(state->sceneAllocation1));
+        if (packState->sceneAllocation1 != 0) {
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(packState->sceneAllocation1));
         }
-        if (state->sceneAllocation2 != 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(state->sceneAllocation2));
+        if (packState->sceneAllocation2 != 0) {
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(packState->sceneAllocation2));
         }
     }
     sdfReleaseChipBlock(stateHandle);
