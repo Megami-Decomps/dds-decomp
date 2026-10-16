@@ -40,7 +40,7 @@ extern char D_004379B8[];
 s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
     s32 *tableValues = table->statGains;
     s8 *byteValues = bytes->baseStats;
-    s32 index = 0;
+    s32 statIndex = 0;
 
     do {
         s32 total = *byteValues + *tableValues;
@@ -50,8 +50,8 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
         if (total < MENU_SUM_MINIMUM) {
             return 0;
         }
-        index++;
-    } while (index < MENU_SUM_COUNT);
+        statIndex++;
+    } while (statIndex < MENU_SUM_COUNT);
     return 1;
 }
 
