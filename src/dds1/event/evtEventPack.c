@@ -90,13 +90,13 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     EvtPackEntry *entry;
     s32 entryCount;
     s32 remainingEntryCount;
-    s32 *areaRoomData;
+    s32 *areaRoomIds;
     s32 *resource0Data;
     s32 *resource1Data;
     const SdfTextureOffsetListHeader *textureOffsets;
 
     packState = evtGetEventPackLoadState(eventId);
-    areaRoomData = NULL;
+    areaRoomIds = NULL;
     resource1Data = NULL;
     resource0Data = NULL;
     textureOffsets = NULL;
@@ -119,14 +119,14 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
                 }
             }
             if (entry->secondaryResourceId == resourceId && entry->kind == 1) {
-                areaRoomData = (s32 *)(packState->data + entry->dataOffset);
+                areaRoomIds = (s32 *)(packState->data + entry->dataOffset);
             }
             entry++;
         } while (--remainingEntryCount != 0);
     }
 
-    if (areaRoomData != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
-        evtCreateWorldObjectFromResource(areaRoomData[0], areaRoomData[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
+    if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
+        evtCreateWorldObjectFromResource(areaRoomIds[0], areaRoomIds[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
         fldSetRelocateOnRelease(1);
         kwlnDrawControlFlags |= 0x02000000;
         return 1;
