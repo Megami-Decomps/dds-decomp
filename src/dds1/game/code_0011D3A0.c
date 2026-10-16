@@ -623,7 +623,47 @@ void fldTestDrawDestroy(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E6C0);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldConfigureCameraMoveTracking);
+void fldConfigureCameraMoveTracking(s32 start, s32 end) {
+    s32 first;
+    s32 endEntry;
+
+    first = fldFindTableEntry(start);
+    D_003BAB20 = 0;
+    D_003BAB0C = first;
+    if (first > 1000) {
+        D_003BAB08 = first % 1000;
+    } else {
+        D_003BAB08 = first;
+    }
+    if (first > 1000) {
+        D_003BAB10 = first;
+        D_003BAB0C = first % 1000;
+    } else {
+        D_003BAB10 = -999;
+    }
+
+    endEntry = fldFindTableEntry(end);
+    D_003BAB14 = endEntry;
+    if (endEntry > 1000) {
+        D_003BAB18 = endEntry;
+        D_003BAB14 = endEntry % 1000;
+    } else {
+        D_003BAB18 = -999;
+    }
+    if (start == end) {
+        D_003BAB1C = -999;
+    } else {
+        D_003BAB1C = 0;
+    }
+    if (D_003BAB08 != -999 && D_003BAB1C != -999) {
+        D_003BAB1C++;
+        if (D_003BAB0C < D_003BAB14) {
+            fldSetCameraMoveMode(1);
+        } else {
+            fldSetCameraMoveMode(-1);
+        }
+    }
+}
 
 enum {
     FIELD_CAMERA_TRACKING_UNSET = -999
