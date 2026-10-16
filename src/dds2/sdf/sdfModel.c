@@ -411,7 +411,210 @@ s32 sdfModelTestTransformedClipVectors(const f32 *bounds) {
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildNodeResourcePackets);
+#include "sdf.h"
+extern u8 D_00438A34;
+extern void *D_00438A64;
+extern void *D_00438A68;
+extern f32 D_00438A48, D_00438A4C;
+extern f32 D_0040B620[16];
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfVuSetGlobalScale(f32);
+extern u32 func_003396D0(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
+typedef struct {
+    SdfModelPacket address;
+    u64 firstHeader;
+    u64 secondHeader;
+    u32 lightingCommand;
+    s32 color;
+    u32 command;
+    u32 modelScalar;
+    f32 firstScalar;
+    f32 secondScalar;
+    u32 finalCommand;
+    u32 finalAddress;
+} SdfModelLightingCallPacket;
+typedef char SdfModelLightingCallPacket_size[(sizeof(SdfModelLightingCallPacket) == 0x40) ? 1 : -1];
+
+/* Build one per-frame packet list for each visible node resource variant. */
+void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
+    s32 frame;
+    s32 nodeIndex;
+    u32 modelColor;
+    u32 nodeMask;
+    s32 nodeFlags;
+    void *lighting;
+    s32 appended;
+    u32 globalModeBits;
+    u64 secondHeader;
+    s32 negativeColor;
+    void *secondaryLighting;
+    s32 skipCommands;
+    u32 globalByte;
+    f32 firstScalar;
+    f32 secondScalar;
+
+    model->flags &= (u8)~0x10;
+    if (model->flags & SDF_MODEL_ALTERNATE_ITEM_SETUP) {
+        sdfModelBuildVisibleNodePackets(surfaces, model);
+    }
+
+    frame = (s8)sdfCurrentBufferIndex;
+    if (model->flags & 0x20) {
+        sdfSetForcedAssetTextureMode(1);
+        sdfApplyResourceListEntriesWithForcedTexture(model->resources, frame);
+        sdfSetForcedAssetTextureMode(0);
+    } else if (model->flags & 0x40) {
+        sdfSetForcedAssetTextureMode(2);
+        sdfApplyResourceListEntriesWithForcedTexture(model->resources, frame);
+        sdfSetForcedAssetTextureMode(0);
+    } else {
+        sdfResourceListApplyEntryChanges(model->resources, frame);
+    }
+
+    lighting = model->lighting;
+    if (lighting == NULL) {
+        lighting = D_00438A64;
+    }
+    secondaryLighting = model->unk84;
+    if (secondaryLighting == NULL) {
+        secondaryLighting = D_00438A68;
+    }
+    globalByte = D_00438A34;
+    modelColor = model->color;
+    nodeMask = model->drawFlags;
+    if (model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) {
+        firstScalar = model->scalarOverrideFirst;
+        secondScalar = model->scalarOverrideSecond;
+    } else {
+        firstScalar = D_00438A48;
+        secondScalar = D_00438A4C;
+    }
+    skipCommands = 0;
+    if (model->flags & 0x08) {
+        skipCommands = 1;
+    }
+
+    appended = 0;
+    for (nodeIndex = 0; nodeIndex < model->list->usedCount; nodeIndex++) {
+        SdfDrawNode *node;
+        SdfCommandNode *entry;
+        struct SdfListHead *packets;
+        struct SdfListHead *variantLists[4];
+        s32 color;
+        s32 variant;
+        f32 depth;
+
+        globalModeBits = globalByte;
+        globalModeBits <<= 16;
+        node = ((SdfDrawNode **)model->list->buffer)[nodeIndex];
+        entry = node->lists[frame];
+        if (entry == NULL || (node->flags & 0x11) != 0) {
+            continue;
+        }
+
+        VU0_LOAD_MATRIX(node->worldMatrix);
+        sdfPostmultiplyVuMatrixFromMemory(D_0040B620);
+        if (node->boundsCorners != NULL &&
+            sdfModelTestTransformedClipVectors(node->boundsCorners) != 0) {
+            continue;
+        }
+        VU0_MOVE_VF(vf10, vf31);
+        VU0_GET_VF10_W(depth);
+
+        color = modelColor;
+        if (node->flags & SDF_DRAW_NODE_FLAG_USE_NODE_COLOR) {
+            color = node->color;
+        }
+        nodeFlags = nodeMask & (u16)node->unk16;
+        for (variant = 0; variant != 4; variant++) {
+            variantLists[variant] = NULL;
+        }
+        sdfVuSetGlobalScale(model->unk94);
+
+        negativeColor = 0;
+        if (color < 0) {
+            negativeColor = 1;
+        }
+        secondHeader = ((u64)(nodeFlags | globalModeBits) << 32) | 0x6102C000;
+        do {
+            SdfModelLightingCallPacket *lightingPacket;
+
+            variant = (u8)entry->packetSelector;
+            if ((variant >> 4) != model->lodIndex) {
+                continue;
+            }
+            variant &= 0x0F;
+            variant = variant == 0 ? negativeColor == 0 : variant;
+            packets = variantLists[variant];
+            if (packets == NULL) {
+                packets = sdfAllocatePacketList(NULL);
+                variantLists[variant] = packets;
+                *(f32 *)&packets->unkC = depth;
+                packets->firstReferenceSource = (u32)lighting;
+                packets->secondReferenceSource = (u32)secondaryLighting;
+                lightingPacket = (SdfModelLightingCallPacket *)sdfAllocPacketAligned(0x40);
+                sdfModelWriteAddressPacket(node, &lightingPacket->address, frame);
+                lightingPacket->firstHeader = 0x20000002;
+                lightingPacket->secondHeader = secondHeader;
+                lightingPacket->lightingCommand = 0x6E01C002;
+                lightingPacket->color = color;
+                lightingPacket->command = 0x6003C003;
+                lightingPacket->modelScalar = (*(u32 *)&model->unk94);
+                lightingPacket->firstScalar = firstScalar;
+                lightingPacket->secondScalar = secondScalar;
+                lightingPacket->finalCommand = 0x04000004;
+                lightingPacket->finalAddress = 0x14000000;
+                sdfAppendReferencePacket(packets, (u32)lightingPacket);
+            }
+
+            switch (entry->kind) {
+            case 1: {
+                if (!skipCommands) {
+                    u8 *referencePacket = sdfAllocPacketAligned(0x20);
+                    *(u16 *)referencePacket = 0;
+                    *(u32 *)(referencePacket + 4) = ((u32)entry + 0x10) & 0x0FFFFFFF;
+                    *(u64 *)(referencePacket + 8) = 0;
+                    *(u128 *)(referencePacket + 16) = 0;
+                    sdfAppendCallPacket(packets, (u32)referencePacket);
+                }
+                break;
+            }
+            case 2:
+                if (!skipCommands) {
+                    sdfModelBuildClippedCommandPackets(node, entry->payload, packets, frame);
+                }
+                break;
+            case 3: {
+                u32 packet;
+                sdfVuSelectTransformMatrix((u32)lighting);
+                sdfVuCacheObjectVector((u8 *)secondaryLighting);
+                packet = func_003396D0(node, entry->payload, nodeFlags, color,
+                                       firstScalar, secondScalar,
+                                       frame, skipCommands);
+                if (packet != 0) {
+                    sdfAppendPacket(packets, packet);
+                }
+                break;
+            }
+            }
+        } while ((entry = entry->next) != NULL);
+
+        variant = 0;
+        do {
+            packets = variantLists[variant];
+            if (packets != NULL) {
+                SdfPoolNode **slot = surfaces + variant;
+                (*slot)->append(*slot, packets);
+                appended = 1;
+            }
+            variantLists[variant] = NULL;
+            variant++;
+        } while (variant != 4);
+    }
+    if (appended) {
+        model->flags |= SDF_MODEL_HAS_ANCHOR_RECORDS;
+    }
+}
 
 /* Copy the destination's declared number of 16-byte object entries. */
 void sdfModelCopyData(DevRequest *destination, DevRequest *source) {
