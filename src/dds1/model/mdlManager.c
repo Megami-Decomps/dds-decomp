@@ -1160,8 +1160,8 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
 extern void sdfUpdateActiveResourceListScalars(DevRequest *, s32, f32);
 
 /* Forward the packed scalar word and blend value to each active inner asset. */
-void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 value, f32 scalar) {
-    sdfUpdateActiveResourceListScalars(ctx->inner->assetData, value, scalar);
+void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {
+    sdfUpdateActiveResourceListScalars(ctx->inner->assetData, tint, amount);
 }
 
 /* Copy a resource path's basename without its extension into destination. */
