@@ -293,15 +293,15 @@ s32 evtCommandAttachLightToUnitPath(void) {
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
 s32 evtCommandWaitEffectResourceScale(void) {
-    s32 id = scrReadIntParameter(0);
-    void *object = evtFindWorldObjectByIdAndKind(7, id);
+    s32 effectId = scrReadIntParameter(0);
+    void *effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
     s32 status;
 
-    if (object == NULL) {
+    if (effectObject == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
-    status = evtCheckWorldObjectResourceScale(object);
+    status = evtCheckWorldObjectResourceScale(effectObject);
     switch (status) {
     case 0:
         return 1;
