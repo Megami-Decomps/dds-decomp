@@ -543,7 +543,7 @@ s32 mnuStaffListInput(KwlnTask *task) {
 /* Handle staff-item selection, confirmation and popup input. */
 s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
-    extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
+    extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue);
     extern char mnuCampItemCategoryPopupEntry[];
     extern char mnuCampAmmoPartySelectionPopupEntry[];
 
