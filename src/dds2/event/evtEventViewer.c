@@ -1312,7 +1312,8 @@ extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
 extern s32 evtViewerTestIndexedCondition(u32 encodedId);
-extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position,
+                                           s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                                         s32 interval, EvtRuntime *viewer);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
