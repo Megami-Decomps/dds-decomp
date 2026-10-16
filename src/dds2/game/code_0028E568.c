@@ -24,13 +24,13 @@ typedef struct MantraProfileRequirement {
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
-extern const MantraProfileRequirement D_003D0078[16];
-extern const MantraProfileRequirement D_003D00B8[12];
-extern const MantraProfileRequirement D_003D00E8[18];
-extern const char D_00427390[];
-extern const char D_004273C0[];
-extern const char D_004273E0[];
-extern const char D_004273F0[];
+extern const MantraProfileRequirement mnuMantraState0ProfileRequirements[16];
+extern const MantraProfileRequirement mnuMantraState1ProfileRequirements[12];
+extern const MantraProfileRequirement mnuMantraOtherStateProfileRequirements[18];
+extern const char mnuMantraActiveStateDebugFormat[];
+extern const char mnuMantraMemberEventDebugFormat[];
+extern const char mnuMantraNoNeighborCandidateDebugText[];
+extern const char mnuMantraProfileCandidateDebugFormat[];
 
 extern DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *, s32);
 
@@ -126,7 +126,7 @@ INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E858);
 
 INCLUDE_ASM(const s32, "game/code_0028E568", mnuAdvanceMantraSelectionCursor);
 
-extern MenuMantraRecord *D_0043792C;
+extern MenuMantraRecord *mnuMantraPublishedSourceRecords;
 
 /* Build the mantra source list after the status work: a header record whose
  * level comes from event flags 0x920-0x922, then one record per kind-2/4 node
@@ -190,15 +190,15 @@ void mnuBuildMantraSourceList(MnuStatusResource *status) {
         }
     }
     evtPrintDeveloperConsoleMessage("Used EventFlag [0x%x] - [0x%x]\n", 0x920, 0x923 + used);
-    D_0043792C = (MenuMantraRecord *)((u8 *)status + 0x824);
+    mnuMantraPublishedSourceRecords = (MenuMantraRecord *)((u8 *)status + 0x824);
 }
 
 extern void *memcpy(void *, const void *, u32);
-extern const u16 D_004272F8[14][2];
-extern const u16 D_00427330[4][2];
-extern const u16 D_00427340[8][2];
-extern const u16 D_00427360[8][2];
-extern const s8 D_00427380[9];
+extern const u16 mnuMantraMemberFlagBasePairs[14][2];
+extern const u16 mnuMantraNode97To100FlagPairs[4][2];
+extern const u16 mnuMantraNode113To120FlagPairs[8][2];
+extern const u16 mnuMantraNode145To152FlagPairs[8][2];
+extern const s8 mnuMantraMemberFlagOffsets[9];
 
 s32 mnuIsMantraNodeModelFlagSetForMember(u16 nodeId, s8 member) {
     u16 memberFlags[14][2];
@@ -208,11 +208,11 @@ s32 mnuIsMantraNodeModelFlagSetForMember(u16 nodeId, s8 member) {
     s8 memberOffsets[9];
     u32 i;
 
-    memcpy(memberFlags, D_004272F8, sizeof(memberFlags));
-    memcpy(flagsA, D_00427330, sizeof(flagsA));
-    memcpy(flagsB, D_00427340, sizeof(flagsB));
-    memcpy(flagsC, D_00427360, sizeof(flagsC));
-    memcpy(memberOffsets, D_00427380, sizeof(memberOffsets));
+    memcpy(memberFlags, mnuMantraMemberFlagBasePairs, sizeof(memberFlags));
+    memcpy(flagsA, mnuMantraNode97To100FlagPairs, sizeof(flagsA));
+    memcpy(flagsB, mnuMantraNode113To120FlagPairs, sizeof(flagsB));
+    memcpy(flagsC, mnuMantraNode145To152FlagPairs, sizeof(flagsC));
+    memcpy(memberOffsets, mnuMantraMemberFlagOffsets, sizeof(memberOffsets));
     for (i = 0; i < 14; i++) {
         if (memberFlags[i][0] == nodeId) {
             return mdlFlagTest(memberFlags[i][1] + memberOffsets[member]);
@@ -255,7 +255,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
     slotIndex = 0;
     slot = &object->menu.unitEntries[0];
     modelFlagState = mnuGetActiveMantraModelFlagState();
-    evtPrintDeveloperConsoleMessage(D_00427390, modelFlagState);
+    evtPrintDeveloperConsoleMessage(mnuMantraActiveStateDebugFormat, modelFlagState);
 
     for (; slotIndex < 5; slotIndex++, slot++) {
         if (slot->nodeId != 0) {
@@ -264,7 +264,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
             for (; entryIndex < 6; entryIndex++) {
                 entry = record->neighbors[entryIndex];
                 if (entry != 0 && modelFlagState < entry->modelFlagState) {
-                    evtPrintDeveloperConsoleMessage(D_004273C0, slotIndex);
+                    evtPrintDeveloperConsoleMessage(mnuMantraMemberEventDebugFormat, slotIndex);
                     state->fields.unitIndex = record->id;
                     state->selectedIndex = slotIndex;
                     return 1;
@@ -273,15 +273,15 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
         }
     }
 
-    evtPrintDeveloperConsoleMessage(D_004273E0);
+    evtPrintDeveloperConsoleMessage(mnuMantraNoNeighborCandidateDebugText);
     if (modelFlagState == 0) {
-        requirements = D_003D0078;
+        requirements = mnuMantraState0ProfileRequirements;
         requirementCount = 16;
     } else if (modelFlagState == 1) {
-        requirements = D_003D00B8;
+        requirements = mnuMantraState1ProfileRequirements;
         requirementCount = 12;
     } else {
-        requirements = D_003D00E8;
+        requirements = mnuMantraOtherStateProfileRequirements;
         requirementCount = 18;
     }
 
@@ -296,7 +296,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
                 value = ptyGetProfileRecordValue(party, id);
                 cap = ptyGetProfileRecordCap(id);
                 if (value == cap) {
-                    evtPrintDeveloperConsoleMessage(D_004273F0, slotIndex,
+                    evtPrintDeveloperConsoleMessage(mnuMantraProfileCandidateDebugFormat, slotIndex,
                                                     party->unitId, id);
                     state->fields.unitIndex = id;
                     state->selectedIndex = slotIndex;
@@ -380,36 +380,36 @@ s32 mnuSelectMatchingNode(MnuStatusResource *object, MantraMenuSrc *state) {
     return 0;
 }
 
-const u16 D_004272F8[14][2] __attribute__((aligned(8))) = {
+const u16 mnuMantraMemberFlagBasePairs[14][2] __attribute__((aligned(8))) = {
     { 7, 0x923 }, { 14, 0x929 }, { 21, 0x92F }, { 28, 0x935 },
     { 35, 0x93B }, { 59, 0x941 }, { 64, 0x947 }, { 68, 0x94B },
     { 83, 0x953 }, { 84, 0x959 }, { 90, 0x95F }, { 91, 0x965 },
     { 92, 0x96B }, { 94, 0x971 }
 };
 
-const u16 D_00427330[4][2] __attribute__((aligned(8))) = {
+const u16 mnuMantraNode97To100FlagPairs[4][2] __attribute__((aligned(8))) = {
     { 97, 0x977 }, { 98, 0x978 }, { 99, 0x979 }, { 100, 0x97A }
 };
 
-const u16 D_00427340[8][2] __attribute__((aligned(8))) = {
+const u16 mnuMantraNode113To120FlagPairs[8][2] __attribute__((aligned(8))) = {
     { 113, 0x97B }, { 114, 0x97C }, { 115, 0x97D }, { 116, 0x97E },
     { 117, 0x97F }, { 118, 0x980 }, { 119, 0x981 }, { 120, 0x982 }
 };
 
-const u16 D_00427360[8][2] __attribute__((aligned(8))) = {
+const u16 mnuMantraNode145To152FlagPairs[8][2] __attribute__((aligned(8))) = {
     { 145, 0x983 }, { 146, 0x984 }, { 147, 0x985 }, { 148, 0x986 },
     { 149, 0x987 }, { 150, 0x988 }, { 151, 0x989 }, { 152, 0x98A }
 };
 
-const s8 D_00427380[9] __attribute__((aligned(8))) = { 0, 0, 1, 5, 2, 3, 4, 5, 1 };
+const s8 mnuMantraMemberFlagOffsets[9] __attribute__((aligned(8))) = { 0, 0, 1, 5, 2, 3, 4, 5, 1 };
 
-const char D_00427390[] __attribute__((aligned(8))) = "mtrChkMantraEventTarget_DrawRankUp!![%d]\n";
+const char mnuMantraActiveStateDebugFormat[] __attribute__((aligned(8))) = "mtrChkMantraEventTarget_DrawRankUp!![%d]\n";
 
-const char D_004273C0[] __attribute__((aligned(8))) = "EventFlag PlayerIndex[%d]\n";
+const char mnuMantraMemberEventDebugFormat[] __attribute__((aligned(8))) = "EventFlag PlayerIndex[%d]\n";
 
-const char D_004273E0[] __attribute__((aligned(8))) = "None...\n\n";
+const char mnuMantraNoNeighborCandidateDebugText[] __attribute__((aligned(8))) = "None...\n\n";
 
-const char D_004273F0[] __attribute__((aligned(8))) = "EventFlag PlayerIndex[%d:0x%02x] MantraID[0x%02x]\n";
+const char mnuMantraProfileCandidateDebugFormat[] __attribute__((aligned(8))) = "EventFlag PlayerIndex[%d:0x%02x] MantraID[0x%02x]\n";
 
 void mnuSelectMantraLimitLine(MnuStatusResource *object, u16 id) {
     u32 flags = 0;

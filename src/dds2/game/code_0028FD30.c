@@ -174,7 +174,7 @@ typedef struct MantraAcquisitionDialogues {
 
 extern DspUnitName *D_00435E48;
 extern DspMantraName *D_00435E50;
-extern const MantraAttributeNameTable D_004275B0;
+extern const MantraAttributeNameTable mnuMantraAttributeNames;
 extern const MantraAcquisitionDialogues D_004275E8;
 extern const char D_00437940[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -186,7 +186,7 @@ extern void ptyAdjustAllActiveRosterStats(s32, s32);
 s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *object) {
     u16 *sourceBits;
     s32 attributeSummary[2];
-    MantraAttributeNameTable attributeNames = D_004275B0;
+    MantraAttributeNameTable attributeNames = mnuMantraAttributeNames;
     char formatted[16];
     MantraAcquisitionDialogues messageEntries = D_004275E8;
     char *text = attributeNames.text[0];
@@ -266,7 +266,7 @@ complete:
 }
 
 /* The dialog copies all six fixed-width attribute names before selecting one. */
-const MantraAttributeNameTable D_004275B0 __attribute__((aligned(8))) = {
+const MantraAttributeNameTable mnuMantraAttributeNames __attribute__((aligned(8))) = {
     {"Strength", "Vitality", "Magic", "Agility", "Luck", "ALL"}
 };
 
@@ -336,7 +336,7 @@ typedef struct MantraNeighborIds {
     u16 id;
     u16 neighbors[6];
 } MantraNeighborIds;
-extern MantraNeighborIds D_003D0130[50];
+extern MantraNeighborIds mnuMantraAlternateNeighborRows[50];
 
 s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
     MantraMenuWork *state = &object->menu;
@@ -367,8 +367,8 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
                 case 1:
                     if ((flags & 0xa) != 0 || attempts == 2) {
                         for (i = 0; i < 50; i++) {
-                            if (D_003D0130[i].id == node->selector.fields.index) {
-                                id = D_003D0130[i].neighbors[position];
+                            if (mnuMantraAlternateNeighborRows[i].id == node->selector.fields.index) {
+                                id = mnuMantraAlternateNeighborRows[i].neighbors[position];
                                 if (id != 0) {
                                     neighbor = mnuGetMantraNodePositionRecord(id);
                                     if ((state->slots[selected]->flags[neighbor->selector.fields.index] & 15) != 3) {
@@ -430,9 +430,9 @@ extern s32 mnuGetActiveMantraModelFlagState(void);
 extern s32 mdlFlagTest(s32);
 
 extern void *memcpy(void *, const void *, u32);
-extern const s16 D_00427668[4][3];
-extern const u16 D_00427680[3][5];
-extern const u16 D_004276A0[3][5];
+extern const s16 mnuMantraBridgeDestinationIds[4][3];
+extern const u16 mnuMantraBridgeNodesForDirections0And5[3][5];
+extern const u16 mnuMantraBridgeNodesForDirections2And3[3][5];
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
 
@@ -445,9 +445,9 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
     u16 verticalNodes[3][5];
     s8 state;
 
-    memcpy(destinations, D_00427668, sizeof(destinations));
-    memcpy(horizontalNodes, D_00427680, sizeof(horizontalNodes));
-    memcpy(verticalNodes, D_004276A0, sizeof(verticalNodes));
+    memcpy(destinations, mnuMantraBridgeDestinationIds, sizeof(destinations));
+    memcpy(horizontalNodes, mnuMantraBridgeNodesForDirections0And5, sizeof(horizontalNodes));
+    memcpy(verticalNodes, mnuMantraBridgeNodesForDirections2And3, sizeof(verticalNodes));
     state = mnuGetActiveMantraModelFlagState();
 
     if (state == 3) {
@@ -686,20 +686,20 @@ void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
 extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-const s16 D_00427668[4][3] __attribute__((section(".rodata"), aligned(8))) = {
+const s16 mnuMantraBridgeDestinationIds[4][3] __attribute__((section(".rodata"), aligned(8))) = {
     { 0x36, 0x93, 0x34 },
     { 0x28, 0x94, 0x2A },
     { 0x4C, 0x73, 0x51 },
     { 0x01, 0x74, 0x03 }
 };
 
-const u16 D_00427680[3][5] __attribute__((section(".rodata"), aligned(8))) = {
+const u16 mnuMantraBridgeNodesForDirections0And5[3][5] __attribute__((section(".rodata"), aligned(8))) = {
     { 0x36, 0, 0x72, 0x28, 0 },
     { 0x93, 0x37, 0x33, 0x94, 0 },
     { 0x38, 0x34, 0x98, 0x2A, 0x2B }
 };
 
-const u16 D_004276A0[3][5] __attribute__((section(".rodata"), aligned(8))) = {
+const u16 mnuMantraBridgeNodesForDirections2And3[3][5] __attribute__((section(".rodata"), aligned(8))) = {
     { 0x4C, 0, 0x71, 0x01, 0 },
     { 0x73, 0x4D, 0x02, 0x74, 0 },
     { 0x4E, 0x51, 0x97, 0x03, 0x04 }

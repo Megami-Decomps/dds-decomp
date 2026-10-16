@@ -677,7 +677,7 @@ s32 mtrMantraEquipDraw(void) {
     return 0;
 }
 
-extern const char D_00437928[];
+extern const char mnuMantraUnitLevelTextFormat[];
 extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
 
@@ -699,7 +699,7 @@ void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *l
                         icons[record->unitId] + selected, 0, depth);
     mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
                         selected + 0x20, 0, depth);
-    sprintf(text, D_00437928, record->level);
+    sprintf(text, mnuMantraUnitLevelTextFormat, record->level);
     frFontDrawTextVariantBAndMeasure(0xBB, node->index * 22 + 0x81, drawPool,
                                     (highlightAlpha & 0xFF) | 0xA09DC300,
                                     selected * 4, text, 0, depth);
@@ -1018,10 +1018,10 @@ s32 mtrDrawSelectedMantraEntry(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource
 
 TaskWork *mnuMantraSelectionResource __attribute__((section(".sdata"))) = NULL;
 
-const char D_00437928[] __attribute__((section(".sdata"))) = "%2d";
+const char mnuMantraUnitLevelTextFormat[] __attribute__((section(".sdata"))) = "%2d";
 
 /* The source-list builder publishes its status object's eight-byte entries here. */
-MenuMantraRecord *D_0043792C __attribute__((section(".sdata"))) = NULL;
+MenuMantraRecord *mnuMantraPublishedSourceRecords __attribute__((section(".sdata"))) = NULL;
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
 
