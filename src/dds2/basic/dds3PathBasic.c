@@ -5,10 +5,6 @@
 #include "pcp_vu0.h"
 #include "eff_quaternion_nlerp.h"
 
-typedef f32 PathPositionKey[3];
-typedef f32 PathQuaternionKey[4];
-
-
 void *memset(void *s, s32 c, u32 n);
 void effFreeBuffers(struct EffPrimitiveCurve *primitive);
 
@@ -22,12 +18,12 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
-    PathPositionKey *entries;
+    Dds3PathPositionSample *entries;
 
     if (path->flags & DDS3_PATH_POSITION_CHANNEL) {
         keyframes = path->positionKeys;
         dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->time);
-        entries = (PathPositionKey *)keyframes->data;
+        entries = keyframes->data.position;
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1][1]);
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1][2]);
@@ -48,13 +44,13 @@ void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
-    PathQuaternionKey *entries;
-    PathQuaternionKey *firstKey;
-    PathQuaternionKey *secondKey;
+    Dds3PathRotationSample *entries;
+    Dds3PathRotationSample *firstKey;
+    Dds3PathRotationSample *secondKey;
     if (path->flags & DDS3_PATH_ROTATION_CHANNEL) {
         keyframes = path->rotationKeys;
         dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->time);
-        entries = (PathQuaternionKey *)keyframes->data;
+        entries = keyframes->data.rotation;
         firstKey = &entries[segmentIndex];
         VU0_LOAD_VF_MEMORY(vf10, firstKey);
         secondKey = &entries[segmentIndex] + 1;
@@ -70,12 +66,12 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *ou
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
-    WorldTransformParams *entries;
+    struct WorldTransformParams *entries;
 
     if (path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
         keyframes = path->transformKeys;
         dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->time);
-        entries = (WorldTransformParams *)keyframes->data;
+        entries = keyframes->data.worldTransform;
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].rotation[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].rotation[1]);
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].rotation[2]);

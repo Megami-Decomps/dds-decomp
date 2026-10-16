@@ -20,10 +20,23 @@ enum Dds3PathChannelFlags {
     DDS3_PATH_WORLD_TRANSFORM_CHANNEL = 0x10
 };
 
-/* A channel descriptor stores payload samples and their frame numbers. */
+typedef f32 Dds3PathPositionSample[3];
+typedef f32 Dds3PathRotationSample[4];
+
+struct WorldTransformParams;
+
+/* Each channel's sample stride is selected by its enclosing curve kind. */
+typedef union Dds3PathSampleData {
+    Dds3PathPositionSample *position;
+    Dds3PathRotationSample *rotation;
+    f32 *scalar;
+    struct WorldTransformParams *worldTransform;
+} Dds3PathSampleData;
+
+/* A channel descriptor stores kind-specific samples and their frame numbers. */
 typedef struct Dds3PathKeyframes {
     u32 count;
-    void *data; /* XYZ, quaternion, scalar, or composite samples by channel kind. */
+    Dds3PathSampleData data; /* Selected by the enclosing Dds3PathCurveEntry.kind. */
     u32 *frames;
 } Dds3PathKeyframes;
 
@@ -53,6 +66,10 @@ typedef struct Dds3PathCurveWork {
 
 typedef char Dds3PathKeyframes_size_must_be_0x0C[
     (sizeof(Dds3PathKeyframes) == 0x0C) ? 1 : -1];
+typedef char Dds3PathSampleData_size_must_be_4[
+    (sizeof(Dds3PathSampleData) == 0x04) ? 1 : -1];
+typedef char Dds3PathKeyframes_data_at_0x04[
+    ((u32)&((Dds3PathKeyframes *)0)->data == 0x04) ? 1 : -1];
 typedef char Dds3PathCurveEntry_size_must_be_8[
     (sizeof(Dds3PathCurveEntry) == 0x08) ? 1 : -1];
 typedef char Dds3PathCurveKind_size_must_be_4[
