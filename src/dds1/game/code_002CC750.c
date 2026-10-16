@@ -631,13 +631,13 @@ u32 mnuShopCommitMode1PurchaseNoOp(u32 itemId) {
 
 /* Decode the low 16 bits: eight four-bit flag slots per word.
  * The unused first argument remains part of the existing calling convention. */
-void scrDecodePackedFlagIndex(DatPartyRecord *unused, u32 value, u32 *wordIndex, u32 *bitShift) {
+void scrDecodePackedFlagIndex(DatPartyRecord *unused, u32 flagId, u32 *wordIndex, u32 *bitShift) {
     u32 slotIndex;
 
-    value &= SCR_FLAG_ID_MASK;
-    slotIndex = value & SCR_FLAG_SLOT_INDEX_MASK;
-    value >>= SCR_FLAG_WORD_INDEX_SHIFT;
-    *wordIndex = value;
+    flagId &= SCR_FLAG_ID_MASK;
+    slotIndex = flagId & SCR_FLAG_SLOT_INDEX_MASK;
+    flagId >>= SCR_FLAG_WORD_INDEX_SHIFT;
+    *wordIndex = flagId;
     *bitShift = slotIndex << SCR_FLAG_SLOT_BIT_SHIFT;
 }
 
