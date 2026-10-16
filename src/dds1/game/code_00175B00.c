@@ -34,8 +34,8 @@ void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 value) {
 }
 
 /* Set the instance color used by the particle fade pass. */
-void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 value) {
-    work->color = value;
+void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 color) {
+    work->color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
