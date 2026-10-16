@@ -2230,18 +2230,18 @@ s32 evtPushRosterOrGlobalCounterValue(void) {
     return 1;
 }
 
-s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
-    u32 type = flags >> 16;
-    switch (type) {
+s32 evtTestSolarPhaseOrModelFlag(u32 condition) {
+    u32 conditionType = condition >> 16;
+    switch (conditionType) {
     case 0:
         break;
     case 1:
-        if (flags & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
+        if (condition & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
             return 1;
         }
         break;
     case 2:
-        if (mdlFlagTest(flags & 0xFFFF)) {
+        if (mdlFlagTest(condition & 0xFFFF)) {
             return 1;
         }
         break;

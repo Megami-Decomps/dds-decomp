@@ -5,7 +5,8 @@
 
 u32 itfMesGetWindowFlags(s32 window);
 s16 itfMesGetWindowClearBitCount(s32 window);
-u32 itfMesGetWindowEntryItems(s32 window, s32 entryIndex);
+/* Return an entry's relocated item-address table; address 1 marks a branch. */
+u32 *itfMesGetWindowEntryItems(s32 window, s32 entryIndex);
 u32 itfMesGetEntryCount(s32 window);
 /* Return the replacement text stored in a window slot. */
 u8 *itfMesGetWindowTableValue(s32 window, s32 slotIndex);

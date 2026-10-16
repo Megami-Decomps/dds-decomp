@@ -25,9 +25,14 @@ typedef struct ItfMesTable {
 } ItfMesTable;
 
 typedef struct ItfMesEntry {
-    u32 itemList;
+    /* Relocated item-address table; address 1 marks a branch entry. */
+    u32 *itemList;
     ItfMesTable *table;
 } ItfMesEntry;
+typedef char ItfMesEntry_size_must_be_0x8[
+    sizeof(ItfMesEntry) == 0x8 ? 1 : -1];
+typedef char ItfMesEntry_table_offset_must_be_0x4[
+    ((u32)&((ItfMesEntry *)0)->table == 0x4) ? 1 : -1];
 
 typedef struct ItfMesSub {
     u8 unk0[8];
