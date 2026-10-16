@@ -511,7 +511,7 @@ s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
     if (index == 0 && (unit->status.flags & 0x400) != 0) {
-        return datEnemyRecords[unit->partyRecord.unitId].unk46;
+        return datEnemyRecords[unit->partyRecord.unitId].indexedValueOverride;
     }
     return datCommandSelectors[index].stat;
 }
