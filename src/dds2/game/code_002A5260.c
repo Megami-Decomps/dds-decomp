@@ -1697,10 +1697,10 @@ void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *
 
 extern MnuMovieResourceEntry mnuMovieResourceEntries[];
 
-void mnuRequestIndexedMovieResource(index)
-s32 index;
+void mnuRequestIndexedMovieResource(movieIndex)
+s32 movieIndex;
 {
-    MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[index];
+    MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[movieIndex];
     mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
