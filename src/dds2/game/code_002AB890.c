@@ -634,7 +634,8 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
     return 0;
 }
 
-extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTable, s32 context,
+                                           s32 drawOption, s32 layer);
 extern u8 mnuCampItemCommandHelpTextBank[];
 
 s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
@@ -781,7 +782,8 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
 }
 
 extern s32 D_00435E70;
-extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
+                                    s32 drawOption, s32 textOption, s32 layer);
 
 /* Refresh a staff window's description from the selected item's label. */
 void mnuRefreshStaffWindowDescription(MenuStaffContext *context, s32 windowIndex) {
