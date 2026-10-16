@@ -97,7 +97,7 @@ extern void *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
 
-extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
+extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 typedef struct BattleController {
     u8 pad_000[0x214];
