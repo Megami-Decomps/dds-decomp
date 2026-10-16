@@ -6128,7 +6128,7 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
         if (btlAreLinkedSceneCountersAtThreshold()) {
             object->commandData->phase = 9;
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3B0));
-            object->commandData->unk18 = panel->partyRecordIndex;
+            BTL_COMMAND_PARTY_RECORD_INDEX(object->commandData) = panel->partyRecordIndex;
             object->state = 3;
             ((SceneAiWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3A0)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
