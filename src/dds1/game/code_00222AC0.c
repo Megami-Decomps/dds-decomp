@@ -153,11 +153,11 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector
     work->motionTicks = 0;
 }
 
-void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 motionSubmode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
+void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     EffWorldNode *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
-    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
+    worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), worldObjectKey, 0x11);
     if (worldUnit != NULL) {
         source = worldUnit->data;
         evtBeginUnitVectorTransition(work, motionSubmode, (s128 *)&source->position, unused, frames, valueB6, callback, unusedLast);
@@ -862,10 +862,10 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     unit->motionTicks = 0;
     {
         s32 motionSubmode = scrReadIntParameter(2);
-        s32 objectId = scrReadIntParameter(1);
+        s32 worldObjectKey = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(3);
         s32 valueB6 = scrReadIntParameter(4);
-        evtBeginUnitTransitionTowardWorldObject(unit, motionSubmode, objectId, -1, frames, valueB6, 0, 0);
+        evtBeginUnitTransitionTowardWorldObject(unit, motionSubmode, worldObjectKey, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         evtUnitPrepareVerticalMoveSteps(unit);
