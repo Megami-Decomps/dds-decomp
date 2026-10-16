@@ -807,23 +807,23 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     return work;
 }
 
-s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
+s32 evtReleaseUnitTransitionWork(EvtUnit *transitionWork) {
     struct SdfLightingPacketStorage *endpointWork;
 
-    if (work == NULL) {
+    if (transitionWork == NULL) {
         return 1;
     }
-    endpointWork = work->endpointWork;
-    work->owner->inner->lighting = 0;
+    endpointWork = transitionWork->endpointWork;
+    transitionWork->owner->inner->lighting = 0;
     if (endpointWork != NULL) {
         sdfReleaseChipBlock(endpointWork);
-        work->endpointWork = NULL;
+        transitionWork->endpointWork = NULL;
     }
-    if (work->pathHandle != 0) {
-        dds3FreePathObject((Dds3PathCurveWork *)work->pathHandle);
-        work->pathHandle = 0;
+    if (transitionWork->pathHandle != 0) {
+        dds3FreePathObject((Dds3PathCurveWork *)transitionWork->pathHandle);
+        transitionWork->pathHandle = 0;
     }
-    sdfReleaseChipBlock(work);
+    sdfReleaseChipBlock(transitionWork);
     return 1;
 }
 
