@@ -30,7 +30,7 @@ extern void sdfVuLoadRotationMatrixZ(f32 angle);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern f32 func_001F6970(u32 mask, s32 a, s32 b);
+extern f32 btlMeasureEffectTargetGroupBounds(u32 mask, s32 a, s32 b);
 /* The selected position provider leaves its vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out) {
     effBattlePositionCallbacks[request->kind](owner, request);
@@ -151,7 +151,7 @@ void effBattleMiscQueryMaskedTargetPosition(u32 actorFlagsMask, EffectVectorRequ
     u32 anchorKind = request->count;
     u32 directionMode = request->directionMode;
 
-    func_001F6970(actorFlagsMask, 0, 0);
+    btlMeasureEffectTargetGroupBounds(actorFlagsMask, 0, 0);
     VU0_STORE_VF(vf10, position);
     height = -btlGetMaxUnitTop(actorFlagsMask);
     extremeY = btlGetExtremeUnitY(actorFlagsMask);
@@ -298,14 +298,14 @@ f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request) {
         break;
     case 1:
         other = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
-        result = func_001F6970(other->status.flags & 0x600, 0, 0);
+        result = btlMeasureEffectTargetGroupBounds(other->status.flags & 0x600, 0, 0);
         break;
     case 2:
         other = (BtlUnit *)effBTLFieldColorGetVariantSelector();
-        result = func_001F6970(other->status.flags & 0x600, 0, 0);
+        result = btlMeasureEffectTargetGroupBounds(other->status.flags & 0x600, 0, 0);
         break;
     case 3:
-        result = func_001F6970(0x600, 0, 0);
+        result = btlMeasureEffectTargetGroupBounds(0x600, 0, 0);
         break;
     case 6:
         other = (BtlUnit *)effBTLFieldColorGetOverrideSelector();

@@ -1283,7 +1283,7 @@
 0x00169C58	effBattleMiscQueryOriginalTargetPosition	inferred	Uses the original selector's 0xE00 battle flags as the mask for the target-position query; registered as request kind 1.
 0x00169C88	effBattleMiscQueryVariantTargetPosition	inferred	Uses the variant selector's 0xE00 battle flags as the mask for the target-position query; registered as request kind 2.
 0x00169CB8	effBattleMiscBuildUnitPartOffsetVU	inferred	Uses unit part kind and subpart to build target offset direction in VU register. [names_reviewed6.tsv]
-0x00169EA0	effBattleMiscQueryScalar	inferred	switch on param type -> unit height scale / func_001F6970 [names_M61_EffVu.tsv]
+0x00169EA0	effBattleMiscQueryScalar	inferred	switch on param type -> unit height scale / btlMeasureEffectTargetGroupBounds [names_M61_EffVu.tsv]
 0x00169F68	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
 0x00169FF0	effBattleMiscBuildBasis	inferred	4x4 basis: look-at or table-driven rotation [names_M61_EffVu.tsv]
 0x0016A438	effBattleApplyUnitRgbKeyframe	inferred	Byte-identical DDS1 twin; applies and restores the command RGB transition at its two keyframes
