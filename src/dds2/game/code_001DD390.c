@@ -706,7 +706,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
         } else {
             btlBossDebugPrintf("btl:cost error[%d][hp=%d,mp=%d]\n", costError,
                               source->partyRecord.hp, source->partyRecord.mp);
-            work->unk2D = 1;
+            work->costValidationFailed = 1;
             switch (costError) {
             case 1:
                 work->stage = 3;
@@ -1228,7 +1228,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
         if ((u32)(command - 0x1AB) < 0x75) {
             points *= btlGetSlotValueAdjustedForSpecialAbility(action->unit, command);
         }
-        if (!work->unk2D) {
+        if (!work->costValidationFailed) {
             work->adjustedValue = btlAdjustPointsForCombatFlags((s32)source, combinedKinds, combinedPress, (u32)points, command);
             work->resultKind = btlGetCommandResultKindFromFlags(combinedKinds, combinedPress, command);
         } else {
@@ -1262,7 +1262,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->parameter = 0;
     work->wait = -1;
     work->unk3C = 0;
-    work->unk2D = 0;
+    work->costValidationFailed = 0;
     work->unk2E = 0;
     work->unk50 = 0;
     work->battleExperienceReward = 0;

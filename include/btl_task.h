@@ -144,7 +144,7 @@ typedef struct BattleIndexWork {
     s32 adjustedValue;
     s8 resultKind;
 #endif
-    u8 unk2D;
+    u8 costValidationFailed; /* +0x2D: cost check failed; suppress normal command follow-up. */
     u8 unk2E;
     u8 pad2F;
     u16 stage;
@@ -171,6 +171,8 @@ typedef struct BattleIndexWork {
     BtlOperandGroup *groups;
     struct SdfMemBlock *allocationHandle;
 } BattleIndexWork;
+typedef char BattleIndexWork_costValidationFailed_offset_must_be_0x2D[
+    ((u32)&((BattleIndexWork *)0)->costValidationFailed == 0x2D) ? 1 : -1];
 #define BTL_COMMAND_PARTY_RECORD_INDEX(work) ((work)->summonId)
 
 void btlInitBattleIndexWork(BattleIndexWork *work);

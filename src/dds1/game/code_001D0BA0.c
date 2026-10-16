@@ -701,7 +701,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         } else {
             btlBossDebugPrintf("btl:cost error[%d][hp=%d,mp=%d]\n", costError,
                               source->partyRecord.hp, source->partyRecord.mp);
-            work->unk2D = 1;
+            work->costValidationFailed = 1;
             switch (costError) {
             case 1:
                 work->stage = 3;
@@ -1160,7 +1160,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         if ((u32)(command - 0x1AB) < 0x55) {
             points *= datAffinityRecords[command - 0x1AB].slotCost;
         }
-        if (!work->unk2D && (!allEmpty || (combinedKinds & 0x60000))) {
+        if (!work->costValidationFailed && (!allEmpty || (combinedKinds & 0x60000))) {
             work->adjustedValue = btlAdjustPointsForCombatFlags(combinedKinds, combinedPress, points, command);
             work->resultKind = btlGetCommandResultKindFromFlags(combinedKinds, combinedPress);
         } else {
@@ -1190,7 +1190,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->parameter = 0;
     work->wait = -1;
     work->unk3C = 0;
-    work->unk2D = 0;
+    work->costValidationFailed = 0;
     work->unk2E = 0;
     work->unk50 = 0;
     work->battleExperienceReward = 0;
