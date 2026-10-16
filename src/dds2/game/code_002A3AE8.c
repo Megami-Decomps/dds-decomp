@@ -210,7 +210,8 @@ void mnuSlideBarSetState(u32 *work, s32 state) {
     work[0] = state;
 }
 
-extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
+                          s32 drawContext);
 
 void mnuDrawAndAdvanceMovieMenuBar(SlideBar *bar, s32 value) {
     s32 offset;

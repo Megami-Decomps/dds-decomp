@@ -6,7 +6,8 @@
 
 extern void mnuRequestIndexedMovieResource(s32);
 
-extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
+                          s32 drawContext);
 
 void mnuDrawFixedSpriteLayerGroup(void) {
     fldDrawCameraColorLayerPass();
