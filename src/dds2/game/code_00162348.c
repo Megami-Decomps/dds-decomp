@@ -1453,8 +1453,8 @@ void parRiseFallSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middle
     }
 }
 
-void parSetCellDrawBucket(ParSystem *system, u16 value) {
-    system->bucket = value;
+void parSetCellDrawBucket(ParSystem *system, u16 bucket) {
+    system->bucket = bucket;
 }
 
 void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
