@@ -87,8 +87,8 @@ typedef union {
 } PolyRing;
 
 void polyUpdateBasicRingCells(PolyNode *node);
-void polyBuildBasicRadialFan(PolyNode *node, s32 index);
-void polyStripPushPairsApart(PolyNode *node, s32 index);
+void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex);
+void polyStripPushPairsApart(PolyNode *node, s32 cellIndex);
 extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
@@ -191,9 +191,9 @@ void polyFinishAndReleaseNodeHandle(PolyNode *node) {
     parPrependCellNode(node->strip);
 }
 
-void polyBuildBasicRadialFan(PolyNode *node, s32 index) {
+void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex) {
     ParSystem *strip = node->strip;
-    ParCell *cell = &strip->cells[index];
+    ParCell *cell = &strip->cells[cellIndex];
     f32 radius = node->radius;
     f32 origin[4];
     f32 offset[4];
@@ -236,9 +236,9 @@ void polyBuildBasicRadialFan(PolyNode *node, s32 index) {
 }
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
-void polyStripPushPairsApart(PolyNode *node, s32 index) {
+void polyStripPushPairsApart(PolyNode *node, s32 cellIndex) {
     ParSystem *strip = node->strip;
-    ParCell *entry = &strip->cells[index];
+    ParCell *entry = &strip->cells[cellIndex];
     f32 scale[4];
     f32 *p;
     s32 pairs;
