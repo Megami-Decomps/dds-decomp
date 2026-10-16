@@ -41,23 +41,23 @@ s32 brsMessageInputStep(KwlnTask *input) {
 }
 
 
-s32 mnuStaffRunPanel1(KwlnTask *input) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
+s32 mnuStaffRunPanel1(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         mnuRefreshPanelLayer(context);
-        return menuRunPanel(context, 1, (void *)input);
+        return menuRunPanel(context, 1, (void *)task);
     }
 }
 
 extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
 
-s32 mnuStaffRunPanel2(KwlnTask *input) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
+s32 mnuStaffRunPanel2(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         brsDecaySharedAnimCounter(context);
-        return menuRunPanel(context, 2, (void *)input);
+        return menuRunPanel(context, 2, (void *)task);
     }
 }
 
@@ -71,16 +71,16 @@ u32 mnuResultMessageLeaveNoOp(void) {
     return 1;
 }
 
-s32 mnuStaffRunPanel0(KwlnTask *input) {
-    s32 context = kwlnTaskGetUserValue(input);
+s32 mnuStaffRunPanel0(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     mnuMapPadMaskToFlags(0x33);
-    return menuRunPanel((void *)context, 0, (void *)input);
+    return menuRunPanel((void *)context, 0, (void *)task);
 }
 
-s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *input) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
+s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     mnuRefreshPanelLayer(context);
-    return menuRunPanel(context, 1, (void *)input);
+    return menuRunPanel(context, 1, (void *)task);
 }
 
 s32 mnuRunResultPanelMode2(KwlnTask *input) {
