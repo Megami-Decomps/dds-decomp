@@ -12,8 +12,8 @@ typedef struct BtlFieldLoadArgs {
     s32 variant;                       /* 0x04: field variant used in the path */
     struct FilePacRequest *request; /* 0x08: pending PAC archive request */
     u8 pad0C[0xC];                     /* 0x0C: opaque state retained by the task */
-    void *fieldF1;                     /* 0x18: loaded F1 resource */
-    void *fieldF2;                     /* 0x1C: loaded F2 resource */
+    u8 *fieldF1;                       /* 0x18: loaded F1 resource bytes */
+    u8 *fieldF2;                       /* 0x1C: loaded F2 resource bytes */
     const SdfTextureOffsetListHeader *fieldTB; /* 0x20: loaded texture-offset resource */
     s32 frame;                         /* 0x24: callback phase/frame */
 } BtlFieldLoadArgs;
