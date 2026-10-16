@@ -106,7 +106,7 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
 
 #include "dds3_world_primary.h"
 
-s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
+s32 evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 baseMode) {
     EffWorldNode *world = dds3GetWorldObject();
     EffWorldNode *node;
     s32 value;
@@ -114,7 +114,7 @@ s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
     if (world == NULL) {
         return 0;
     }
-    value = index * 3 + base;
+    value = modeSelector * 3 + baseMode;
     for (node = ((EvtWorldTable *)world->data)->slots[6].head; node != NULL; node = node->next) {
         dds3SetObjectModeAndDefaultWeight(node, value);
     }
