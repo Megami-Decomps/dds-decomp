@@ -32,14 +32,14 @@ extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32 f
 extern void brsDrawMaccaRewardTotal(s32, s32, s32, s32, const BrsRewardSummary *, s32 flags);
 extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
 
-void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
-    BrsRewardSummary *res = &work->rewards;
+void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *skillPackage) {
+    BrsRewardSummary *res = &skillPackage->rewards;
     s32 rowOffset = 0x80;
-    u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - work->fadeProgress);
+    u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - skillPackage->fadeProgress);
 
     itfDrawCountText(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1] + rowOffset, 0, color, res, 0x53);
     brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3] + rowOffset, 0, color, res, 0x53);
-    brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5] + rowOffset, 0, color, res, 0x53, work);
+    brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5] + rowOffset, 0, color, res, 0x53, skillPackage);
 }
 
 

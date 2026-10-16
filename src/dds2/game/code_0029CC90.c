@@ -38,13 +38,13 @@ extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, s32, 
 
 extern void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context);
 
-void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
-    BrsRewardSummary *res = &work->rewards;
-    u32 color = uiBlendColors(0xFFF06480, 0xFFF06400, 0x100 - work->fadeProgress);
+void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *skillPackage) {
+    BrsRewardSummary *res = &skillPackage->rewards;
+    u32 color = uiBlendColors(0xFFF06480, 0xFFF06400, 0x100 - skillPackage->fadeProgress);
 
-    mnuCampDrawMenuIconLayer(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1], 0, color, res, 0x53, work);
-    brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3], 0, color, res, 0x53, work);
-    brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5], 0, color, res, 0x53, work);
+    mnuCampDrawMenuIconLayer(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1], 0, color, res, 0x53, skillPackage);
+    brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3], 0, color, res, 0x53, skillPackage);
+    brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5], 0, color, res, 0x53, skillPackage);
 }
 
 void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
