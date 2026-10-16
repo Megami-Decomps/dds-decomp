@@ -284,7 +284,7 @@ typedef struct ItfMesTextSlots {
 typedef struct ItfMesState {
     u32 flags;
     ItfMesSub *sub;
-    s32 temporaryFontEntry;
+    u8 *temporaryFontEntry; /* 0x08: relocated font resource bytes from the MSG1 trailing entry. */
     s32 renderValue;
     s16 drawSurfaceIndex;
     s16 panelMode;
@@ -297,6 +297,9 @@ typedef struct ItfMesState {
     BtlFade fade;
     u32 callbackAddress;
 } ItfMesState;
+
+typedef char ItfMesState_temporaryFontEntry_offset_must_be_0x08[
+    ((u32)&((ItfMesState *)0)->temporaryFontEntry == 0x08) ? 1 : -1];
 
 typedef struct ItfMesSlot {
     ItfMesState *mes;

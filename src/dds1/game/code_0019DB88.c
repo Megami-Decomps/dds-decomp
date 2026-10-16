@@ -9,6 +9,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
 #include "pcp_vu0.h"
 #include "scr.h"
