@@ -713,7 +713,7 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 }
 
 extern u16 D_004372B0;
-extern s32 evtViewerTestIndexedCondition(u32 encodedId);
+extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
 extern s32 evtPlayBgm(s32 id, s32 fade);
@@ -960,7 +960,7 @@ extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
-extern s32 evtViewerTestIndexedCondition(u32 encodedId);
+extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void effInitCh71Id(void);
 extern void effInitCh72Id(void);
 extern void effInitCh75Id(void);
@@ -1311,7 +1311,7 @@ extern void evtViewerCountFlaggedUpdates(EvtRuntime *viewer);
 extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
-extern s32 evtViewerTestIndexedCondition(u32 encodedId);
+extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position,
                                            s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
