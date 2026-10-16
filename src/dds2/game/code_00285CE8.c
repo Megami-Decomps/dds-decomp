@@ -192,8 +192,8 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     }
 }
 
-void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4, s32 arg5, s32 arg6) {
-    uiDrawUniformColorRect(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
+void mnuDrawCellScaledGrid(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
+    uiDrawUniformColorRect(x << 4, y << 3, z, grid->unk1C << 4, grid->unk1E << 3, alpha | 0x80808000, context);
 }
 
 void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
