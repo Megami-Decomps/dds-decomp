@@ -29,7 +29,7 @@ typedef struct EffResourceDescriptor {
     u32 word10;
     s32 selectedIndex;
     s32 visibleIndex;
-    s32 previewActive;
+    u32 previewActive; /* 0x1C: set when a drawable preview is active */
     u32 repeatDelay;
     u32 drawSurface;
     u32 borderColor;
