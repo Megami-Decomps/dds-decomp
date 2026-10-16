@@ -26,6 +26,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
+#include "eff_pcp_long_fade_timer.h"
 #include "eff_pcp_shared_trail.h"
 #include "eff.h"
 #include "eff_resource_rect_api.h"
@@ -2198,20 +2199,6 @@ void effPcpFadeTimerUpdate(EffPCPFadeTimer *work) {
 void effPcpFadeTimerSetSourceColor(EffPCPFadeTimer *work, u32 val) {
     work->colorFrom = val;
 }
-
-typedef struct EffPCPFadeTimerLongParams {
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    EffBlurQuad source;
-} EffPCPFadeTimerLongParams;
-
-typedef struct EffPCPFadeTimerLong {
-    EffPCPFadeTimerLongParams params;
-    u32 colorFrom;
-    u32 colorTo;
-    s32 frame;
-} EffPCPFadeTimerLong;
 
 void *effPcpCopyWorkLong(src)
     EffPCPFadeTimerLongParams *src;
