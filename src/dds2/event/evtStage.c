@@ -15,7 +15,7 @@
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *object);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 
