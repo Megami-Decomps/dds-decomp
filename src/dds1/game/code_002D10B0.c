@@ -876,7 +876,7 @@ s32 sdfTexGetSecondaryBufferSize(const SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-u8 sdfTexGetPaletteCount(const SdfTex *texture) {
+u8 sdfTexGetPaletteCount(SdfTex *texture) {
     return texture->paletteCount;
 }
 
