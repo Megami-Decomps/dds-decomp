@@ -1992,10 +1992,10 @@ void btlFindSoundTaskByWorkValue(u32 kind, s32 press) {
 }
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */
-BtlRuntimeTask *btlFindTaskByHandle(u64 value) {
+BtlRuntimeTask *btlFindTaskByHandle(u64 handle) {
     BtlRuntimeTask *task;
     for (task = ((BtlState *)btlGetRuntime())->taskHead; task != 0; task = task->next) {
-        if (task->handle == value) {
+        if (task->handle == handle) {
             return task;
         }
     }
