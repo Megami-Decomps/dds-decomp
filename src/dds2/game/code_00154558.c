@@ -252,9 +252,9 @@ extern s32 D_0043633C;
 
 extern s32 D_00389784[];
 
-extern s32 fldSetMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern s32 fldSetAlternateMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetAlternateMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
