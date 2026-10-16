@@ -5257,11 +5257,25 @@ void fldMapGridToScreenPosition(s16 x, s16 y, f32 *outX, f32 *outY) {
 }
 
 typedef struct FieldCoordinateRecord {
-    u8 x, y, z, w;
-    u32 flags;  /* 0x04 */
-    u32 offset; /* 0x08: route points, relative to the coordinate resource */
-    s32 count;  /* 0x0C: route point count */
+    u8 sourceGridX;      /* 0x00: route lookup key */
+    u8 sourceGridY;      /* 0x01: route lookup key */
+    u8 destinationGridX; /* 0x02: route lookup key */
+    u8 destinationGridY; /* 0x03: route lookup key */
+    u32 flags;           /* 0x04: bit 0 is checked when a route finishes */
+    u32 routePointOffset; /* 0x08: points relative to the coordinate resource */
+    s32 routePointCount; /* 0x0C: signed count used to form the final point index */
 } FieldCoordinateRecord;
+
+typedef char FieldCoordinateRecordLayoutCheck[
+    (sizeof(FieldCoordinateRecord) == 0x10 &&
+     (u32)&((FieldCoordinateRecord *)0)->sourceGridX == 0x00 &&
+     (u32)&((FieldCoordinateRecord *)0)->sourceGridY == 0x01 &&
+     (u32)&((FieldCoordinateRecord *)0)->destinationGridX == 0x02 &&
+     (u32)&((FieldCoordinateRecord *)0)->destinationGridY == 0x03 &&
+     (u32)&((FieldCoordinateRecord *)0)->flags == 0x04 &&
+     (u32)&((FieldCoordinateRecord *)0)->routePointOffset == 0x08 &&
+     (u32)&((FieldCoordinateRecord *)0)->routePointCount == 0x0C)
+        ? 1 : -1];
 
 typedef struct {
     s32 unk00;
@@ -5273,8 +5287,8 @@ FieldCoordinateRecord *fldFindCoordinateRecord(s16 x, s16 y, s16 z, s16 w) {
     FieldCoordinateRecord *record = (FieldCoordinateRecord *)D_004363CC;
     u32 index;
     for (index = 0; index < list->count; index++, record++) {
-        if (record->x == (u8)x && record->y == (u8)y &&
-            record->z == (u8)z && record->w == (u8)w) {
+        if (record->sourceGridX == (u8)x && record->sourceGridY == (u8)y &&
+            record->destinationGridX == (u8)z && record->destinationGridY == (u8)w) {
             return record;
         }
     }
@@ -5336,11 +5350,11 @@ static inline void fldSetTargetGuideUpdateMode(s32 value) {
         (state)->targetGridX = (toX);                                                     \
         (state)->targetGridY = (toY);                                                     \
         if (record != NULL) {                                                             \
-            FieldGuidePoint *route = (FieldGuidePoint *)(D_004363C8 + record->offset);    \
+            FieldGuidePoint *route = (FieldGuidePoint *)(D_004363C8 + record->routePointOffset); \
                                                                                           \
             (state)->routeIndex = 0;                                                      \
             (state)->stepDistance = (step);                                               \
-            (state)->routeEnd = record->count - 1;                                        \
+            (state)->routeEnd = record->routePointCount - 1;                              \
             (state)->moveTimer = (timer);                                                 \
             (state)->route = route;                                                       \
             (state)->targetYaw = (f32)route->bearing;                                     \
