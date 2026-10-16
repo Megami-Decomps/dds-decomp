@@ -32,6 +32,7 @@
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "fld_scene_record.h"
+#include "fld_transfer_chunk.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -312,8 +313,6 @@ extern s32 fldCurrentBgmId[];
 extern void sndQueueSoundId(u32);
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, s32 chunk);
-
-extern s32 fldGetTransferChunkPayload(s32 record);
 
 extern s32 D_00389780[];
 
@@ -1101,16 +1100,16 @@ void fldLoadSceneRecordTable(void) {
     char directory[0x40];
     s32 resourceHandle;
     s32 transferStart;
-    s32 header;
+    FldSceneRecordTableHeader *header;
 
     fldFormatAreaDirectory(directory, fldAreaState.area, 1);
     sprintf(path, (const char *)D_00413700, directory, fldAreaState.area);
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
-    header = fldGetTransferChunkPayload(transferStart);
-    fldSceneRecords = ((FldSceneRecordTableHeader *)header)->rows;
-    fldSceneRecordCount = ((FldSceneRecordTableHeader *)header)->count;
+    header = (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
+    fldSceneRecords = header->rows;
+    fldSceneRecordCount = header->count;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
@@ -1120,9 +1119,10 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
         fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
-            s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
-            FldSceneRecord *rows = ((FldSceneRecordTableHeader *)header)->rows;
-            s32 count = ((FldSceneRecordTableHeader *)header)->count;
+            FldSceneRecordTableHeader *header =
+                (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
+            FldSceneRecord *rows = header->rows;
+            s32 count = header->count;
 
             fldSceneRecordCount = count;
             fldSceneRecords = rows;

@@ -140,8 +140,6 @@ extern void sndReleaseTrackHandle(s32 trackHandle);
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
-extern s32 fldGetTransferChunkPayload(s32 record);
-
 extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void fldReleaseCameraModel(u32 enabled);
@@ -883,7 +881,7 @@ void fldLoadSceneRecordTable(void) {
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceAddress, 0);
     transferStart = resourceAddress + 8;
     fldRelocatePackedTransferChunk(resourceAddress, (FldTransferChunk *)transferStart);
-    header = (FldSceneRecordTableHeader *)fldGetTransferChunkPayload(transferStart);
+    header = (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
     rows = header->rows;
     count = header->count;
     fldSceneRecordCount = count;
@@ -897,9 +895,10 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
         fldRelocatePackedTransferChunk((u32)chunk, (FldTransferChunk *)transferStart);
         {
-            s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
-            FldSceneRecord *rows = ((FldSceneRecordTableHeader *)header)->rows;
-            s32 count = ((FldSceneRecordTableHeader *)header)->count;
+            FldSceneRecordTableHeader *header =
+                (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
+            FldSceneRecord *rows = header->rows;
+            s32 count = header->count;
 
             fldSceneRecordCount = count;
             fldSceneRecords = rows;
