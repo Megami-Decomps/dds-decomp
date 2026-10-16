@@ -55,17 +55,17 @@ s32 scrCmdHasEnoughOwnedMantras(void) {
 }
 
 s32 scrCmdSetEntryFlagsInBothStores(void) {
-    s32 a = scrReadIntParameter(0);
-    u16 b = scrReadIntParameter(1);
-    s32 index = dds3FindEntryIndex(a);
+    s32 rosterIndex = scrReadIntParameter(0);
+    u16 flagId = scrReadIntParameter(1);
+    s32 index = dds3FindEntryIndex(rosterIndex);
     s32 result = 0;
 
     if (index >= 0) {
         DatPartyRecord *entry = &datGameState->party[index];
 
-        scrSetFlag(entry, b);
+        scrSetFlag(entry, flagId);
         scrClearAllSecondaryScriptFlags(entry);
-        scrSetSecondaryScriptFlag(entry, b);
+        scrSetSecondaryScriptFlag(entry, flagId);
         result = 1;
     }
     scrSetIntegerReturnValue(result);
