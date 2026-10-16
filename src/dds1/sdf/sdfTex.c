@@ -213,7 +213,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
     }
 }
 
-SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
+SdfTex *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode) {
     SdfTex *texture;
     u8 *pixels;
     s32 format;
@@ -264,12 +264,12 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
 }
 
 /* Build the texture and its packet with variant zero. */
-SdfTex *sdfTexAcquireResourceTexture(SdfTextureFileHeader *header) {
+SdfTex *sdfTexAcquireResourceTexture(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 0);
 }
 
 /* Build the texture and its packet with variant one. */
-SdfTex *sdfTexAcquireAlternateResourceTexture(SdfTextureFileHeader *header) {
+SdfTex *sdfTexAcquireAlternateResourceTexture(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 1);
 }
 
