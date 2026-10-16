@@ -389,8 +389,8 @@ void sdfMotionBlendFiveKeyValues(SdfMotionKeyInterval *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 sdfDispatchMotionBySelector(void *a0, s32 a1) {
-    return D_003981B8[(u16)a1](a0, a1);
+s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
+    return D_003981B8[(u16)selector](object, selector);
 }
 
 void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
