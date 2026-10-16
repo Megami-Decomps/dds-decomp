@@ -1231,7 +1231,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     itfMesCopyGlyphShade(glyph, entryBlock);
     interfaceMask = itfTestTextInterfaceMask(3);
-    entryBlock->unk11 = interfaceMask;
+    entryBlock->textInterfaceMask = interfaceMask;
     /* Copy interface-mask bit 0x2 into window flag 0x10000. */
     if (interfaceMask & 2) {
         mes->flags |= 0x10000;
@@ -1659,7 +1659,7 @@ void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
     }
     cur->glyphChain = NULL;
     cur->textState = 0;
-    cur->unk11 = 0;
+    cur->textInterfaceMask = 0;
     cur->lineCount = 0;
     cur->itemIndex = 0;
     cur->tableCount = 0;
@@ -1909,10 +1909,10 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         }
         if (!(D_0037F510.confirm < 0 || D_0037F510.unk23 < 0 ||
               (D_0037F510.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
-            entryBlock->unk11 != 0) {
+              entryBlock->textInterfaceMask != 0) {
             return;
         }
-        if (entryBlock->unk11 != 0) {
+        if (entryBlock->textInterfaceMask != 0) {
             sndSetSequenceVolumePan(9, 0x7F, 0x3F);
         }
         itfResetBattleFadeState(&mes->fade, 0);

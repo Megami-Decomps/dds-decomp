@@ -120,7 +120,7 @@ void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
     }
     cur->glyphChain = NULL;
     cur->textState = 0;
-    cur->unk11 = 0;
+    cur->textInterfaceMask = 0;
     cur->lineCount = 0;
     cur->itemIndex = 0;
     cur->tableCount = 0;
@@ -368,10 +368,10 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         }
         if (!(D_00324510.confirm < 0 || D_00324510.unk23 < 0 ||
               (D_00324510.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
-            entryBlock->unk11 != 0) {
+              entryBlock->textInterfaceMask != 0) {
             return;
         }
-        if (entryBlock->unk11 != 0) {
+        if (entryBlock->textInterfaceMask != 0) {
             sndSetSequenceVolumePan(9, 0x7F, 0x3F);
         }
         itfResetBattleFadeState(&mes->fade, 0);

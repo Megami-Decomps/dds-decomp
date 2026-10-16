@@ -1239,7 +1239,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     itfMesCopyGlyphShade(glyph, entryBlock);
     interfaceMask = itfTestTextInterfaceMask(3);
-    entryBlock->unk11 = interfaceMask;
+    entryBlock->textInterfaceMask = interfaceMask;
     /* Copy interface-mask bit 0x2 into window flag 0x10000. */
     if (interfaceMask & 2) {
         mes->flags |= 0x10000;
