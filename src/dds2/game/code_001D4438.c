@@ -50,7 +50,7 @@ extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern s32 btlHasRegisteredAphNamePanelTask(void);
-extern s32 btlCreateTargetSelectionWork(s32);
+extern SceneAiWork *btlCreateTargetSelectionWork(s32);
 extern void btlBossDebugPrintf(const char *, ...);
 extern SceneAiWork *btlGetTargetSelectionWork(void);
 extern char *D_004367B8;
