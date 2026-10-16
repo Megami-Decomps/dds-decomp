@@ -1615,7 +1615,7 @@ extern u8 fldTestSceneLifecycleFlags(u32);
 extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
-extern s32 ptyAnyUnitFlagMatch(u32,s32);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
 extern void ptyApplyFieldHpAttrition(s32 attritionMode);
 extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void dds3WorkClear(void);
