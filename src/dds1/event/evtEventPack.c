@@ -88,7 +88,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
 s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     EvtPackLoadState *data;
     EvtPackEntry *entry;
-    s32 count;
+    s32 entryCount;
     s32 remaining;
     s32 *baseData;
     s32 *type2Data;
@@ -100,10 +100,10 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     type3Data = NULL;
     type2Data = NULL;
     type4Data = NULL;
-    count = data->header->entryCount;
-    if (count > 0) {
+    entryCount = data->header->entryCount;
+    if (entryCount > 0) {
         entry = data->entries;
-        remaining = count;
+        remaining = entryCount;
         do {
             if (entry->resourceId == resourceId) {
                 switch (entry->kind) {
