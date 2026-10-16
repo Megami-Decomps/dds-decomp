@@ -217,7 +217,7 @@ u32 func_002C8120(FileWork *work) {
 
 /* Kind one additionally requires readinessEnabled; other kinds only require
  * state six. The enable word is a gate, not the expected state value. */
-s32 fileIsRequestReadyInCurrentMode(FileRequest *request) {
+s32 fileIsRequestReadyInCurrentMode(const FileRequest *request) {
     s32 result;
 
     if (request->kind == FILE_REQUEST_KIND_PAC) {
@@ -231,7 +231,7 @@ s32 fileIsRequestReadyInCurrentMode(FileRequest *request) {
 }
 
 /* Always require the enable gate and state six, irrespective of request kind. */
-s32 fileRequestIsReady(FileRequest *request) {
+s32 fileRequestIsReady(const FileRequest *request) {
     s32 result = 0;
     if (request->readinessEnabled != 0) {
         result = request->state == FILE_REQUEST_COMPLETE;
