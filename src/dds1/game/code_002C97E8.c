@@ -776,12 +776,12 @@ s32 sdfGetTaskValueByKey(TaskWork *work, s32 key) {
 }
 
 
-void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
+void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
     SdfTaskEntry *item = sdfFindTaskItemValueByKey(work, key);
     if (item == NULL) {
         return;
     }
-    switch (mode) {
+    switch (taskItemMode) {
     case SDF_TASK_ITEM_MODE_CALLBACK_ONLY:
         item->flags = (*(u16 *)&item->flags & ~SDF_TASK_ENTRY_UPDATE_ENABLED) |
                       SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_CALLBACK_ENABLED;
