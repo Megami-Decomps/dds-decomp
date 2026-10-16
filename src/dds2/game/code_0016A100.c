@@ -17,10 +17,6 @@
 
 #define EFF_PARAM_WORK_BYTES 8
 #define EFF_PARAM_EXTENDED_WORK_BYTES 0xC
-#define EFF_PARAM_RECORD_BYTES 16
-#define EFF_PARAM_TABLE_HEADER_BYTES 0x10
-#define EFF_PARAM_BLOCK_OFFSET 0x14
-#define EFF_PARAM_KIND_WORD_OFFSET 0x18
 #define EFF_VIEWER_RESOURCE_GROUP 7
 #define EFF_VIEWER_LOAD_FLAGS 0x101
 
@@ -508,31 +504,32 @@ u32 effParamDescriptorGetTableIndex(const u32 *descriptor) {
 /* Records follow a 16-byte header and have a 16-byte stride. Block offsets
  * are signed and relative to the whole table, not to individual records.
  * Neither the index nor the resulting target address is validated here. */
-void *effParamTableGetBlock(void *table, s32 recordIndex) {
-    u8 *base = (u8 *)table;
-    u8 *indexedBase = base + recordIndex * EFF_PARAM_RECORD_BYTES;
+void *effParamTableGetBlock(const EffParamTable *table, s32 recordIndex) {
+    const EffParamTableRecord *record = &table->records[recordIndex];
 
-    return base + *(s32 *)(indexedBase + EFF_PARAM_BLOCK_OFFSET);
+    return (u8 *)table + record->blockOffset;
 }
 
 /* Return the record's first word without interpreting its meaning. */
-u32 effParamTableGetWord(void *table, s32 recordIndex) {
-    u8 *bytes = (u8 *)table;
+u32 effParamTableGetWord(const EffParamTable *table, s32 recordIndex) {
+    const u8 *bytes = (const u8 *)table;
 
-    bytes += recordIndex * EFF_PARAM_RECORD_BYTES;
-    return *(u32 *)(bytes + EFF_PARAM_TABLE_HEADER_BYTES);
+    bytes += recordIndex * sizeof(EffParamTableRecord);
+    return *(const u32 *)(bytes + sizeof(table->header));
 }
 
 /* Return the full record word whose low halfword selects a compact-work factory. */
-u32 effParamTableGetWord2(void *table, s32 recordIndex) {
-    u8 *bytes = (u8 *)table;
+u32 effParamTableGetWord2(const EffParamTable *table, s32 recordIndex) {
+    const u8 *bytes = (const u8 *)table;
 
-    bytes += recordIndex * EFF_PARAM_RECORD_BYTES;
-    return *(u32 *)(bytes + EFF_PARAM_KIND_WORD_OFFSET);
+    bytes += recordIndex * sizeof(EffParamTableRecord);
+    return *(const u32 *)(bytes + sizeof(table->header) +
+                          sizeof(table->records[0].word0) +
+                          sizeof(table->records[0].blockOffset));
 }
 
 /* Create compact work from a serialized table record. */
-EffParamWork *effParamCreateFromTable(void *table, s32 recordIndex) {
+EffParamWork *effParamCreateFromTable(const EffParamTable *table, s32 recordIndex) {
     u16 kind;
     void *source;
 

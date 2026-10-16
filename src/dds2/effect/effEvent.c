@@ -1921,8 +1921,6 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
     return work;
 }
 
-extern u32 effParamTableGetWord2(void *data, s32 recordIndex);
-
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
 void effEventParticleSetCreateFromTable(void *data) {
     void *block0 = effParamTableGetBlock(data, 0);
