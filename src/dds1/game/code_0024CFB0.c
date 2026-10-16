@@ -594,7 +594,7 @@ s32 dspCaptureWindowSecondPanelValue(void) {
 }
 
 extern s8 itfPanelGetStatus(s32 windowIndex);
-extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
+extern s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
