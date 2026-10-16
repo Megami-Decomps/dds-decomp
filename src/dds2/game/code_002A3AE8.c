@@ -182,16 +182,16 @@ void mnuReleaseSpriteHandle(void) {
     }
 }
 
-void mnuDrawMovieMenuSpriteSlot1F(s32 work) {
-    mnuDrawSprite(0, 0, 0, work, 0, 0x1F, 0x53);
+void mnuDrawMovieMenuSpriteSlot1F(s32 alpha) {
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0x1F, 0x53);
 }
 
-void mnuDrawMovieMenuSpriteSlot20(u32 work) {
-    mnuDrawSprite(0, 0, 0, work, 0, 0x20, 0x53);
+void mnuDrawMovieMenuSpriteSlot20(u32 alpha) {
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0x20, 0x53);
 }
 
-void mnuDrawMovieMenuSpriteSlot21(u32 work) {
-    mnuDrawSprite(0, 0, 0, work, 0, 0x21, 0x53);
+void mnuDrawMovieMenuSpriteSlot21(u32 alpha) {
+    mnuDrawSprite(0, 0, 0, alpha, 0, 0x21, 0x53);
 }
 
 void mnuSlideBarSetState(u32 *work, s32 state) {
