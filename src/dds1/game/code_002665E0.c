@@ -54,7 +54,7 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowOverlays);
 
 
-extern void mnuSetTitleSequenceVolumePan(u32);
+extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
 extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
@@ -621,7 +621,7 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 prfGetCapValue(u16);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
-extern void mnuSetTitleSequenceVolumePan(u32);
+extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
 
 
 void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
