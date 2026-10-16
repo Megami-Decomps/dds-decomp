@@ -552,31 +552,31 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeC
 void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 
 /* Use defaults before the first key; otherwise blend the bounding keys. */
-void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
-    EvtRuntimeChild *lo;
-    EvtRuntimeChild *hi;
+void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 frame, CampDisplayDefaults *display) {
+    EvtRuntimeChild *lowerKey;
+    EvtRuntimeChild *upperKey;
     s32 startFrame;
     s32 endFrame;
     f32 ratio;
 
-    mnuFindCampKeyTrackNeighbors(track, value, &lo, &hi);
-    if (lo != 0) {
-        startFrame = lo->frame;
+    mnuFindCampKeyTrackNeighbors(track, frame, &lowerKey, &upperKey);
+    if (lowerKey != 0) {
+        startFrame = lowerKey->frame;
     } else {
         mnuCampInitializeDisplayDefaults(display);
         return;
     }
-    if (hi != 0) {
-        endFrame = hi->frame;
+    if (upperKey != 0) {
+        endFrame = upperKey->frame;
     } else {
-        endFrame = lo->frame;
+        endFrame = lowerKey->frame;
     }
     if (endFrame != startFrame) {
-        ratio = (f32)(value - startFrame) / (f32)(endFrame - startFrame);
+        ratio = (f32)(frame - startFrame) / (f32)(endFrame - startFrame);
     } else {
         ratio = 0.0f;
     }
-    mnuBlendCampDisplayFields(lo, hi, display, ratio);
+    mnuBlendCampDisplayFields(lowerKey, upperKey, display, ratio);
 }
 
 
