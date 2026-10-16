@@ -1011,13 +1011,14 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
 }
 
 /* Search records 1..511 of the 28-byte coordinate table; return zero on miss. */
-s32 fldFindMapLabelIndexByCoordinate(s32 x, s32 y) {
+s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
     u8 *records = D_0033F068;
     u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
     do {
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
+        if (mapId == *(s16 *)(offset + (s32)records) &&
+            floorIndex == *(s16 *)(offset + (s32)yColumn)) {
             return index;
         }
         index++;
@@ -1027,13 +1028,14 @@ s32 fldFindMapLabelIndexByCoordinate(s32 x, s32 y) {
 }
 
 /* Search the second 28-byte coordinate table, also reserving index zero. */
-s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 x, s32 y) {
+s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
     u8 *records = D_00342868;
     u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
     do {
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
+        if (mapId == *(s16 *)(offset + (s32)records) &&
+            floorIndex == *(s16 *)(offset + (s32)yColumn)) {
             return index;
         }
         index++;
@@ -1043,13 +1045,14 @@ s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 x, s32 y) {
 }
 
 /* Search the 28-byte map records, skipping row zero; zero denotes a miss. */
-s32 fldFindMapCoordinateIndex(s32 x, s32 y) {
+s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex) {
     u8 *records = D_00346068;
     u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
     do {
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
+        if (mapId == *(s16 *)(offset + (s32)records) &&
+            floorIndex == *(s16 *)(offset + (s32)yColumn)) {
             return index;
         }
         index++;
