@@ -795,7 +795,7 @@ extern char D_00421E58[], D_00421E68[], D_00421E78[];
 s32 evtCommandAttachObjectPath(void) {
     void *unit;
     EffWorldNode *target;
-    ObjBase *data;
+    ObjBase *objectData;
     EffWorldNode *slot;
     Dds3PathCurveWork *path;
     Dds3SlotResource *resource;
@@ -814,13 +814,13 @@ s32 evtCommandAttachObjectPath(void) {
     target = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
     if (target == NULL)
         return 1;
-    data = effObjGetDataHandle(unit);
-    slot = data->slots[1];
+    objectData = effObjGetDataHandle(unit);
+    slot = objectData->slots[1];
     if (slot == NULL) {
         dds3EnsureSlotData(unit);
-        slot = data->slots[1];
+        slot = objectData->slots[1];
     }
-    resource = slot->data;
+    resource = slot->objectData;
     if (resource->sourceObject == NULL) {
         dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
