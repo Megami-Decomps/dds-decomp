@@ -960,19 +960,19 @@ void mnuResetNodeLinks(MenuList *list, s32 restoreCursor) {
 
 /* Relink and reindex the pointer array. Native endpoint writes require at
  * least two entries; zero/one-entry calls are not guarded here. */
-void mnuLinkItemList(MenuListNode **items, s32 count) {
+void mnuLinkItemList(MenuListNode **nodeArray, s32 count) {
     s32 itemIndex;
 
-    items[0]->prev = NULL;
-    items[0]->next = items[1];
+    nodeArray[0]->prev = NULL;
+    nodeArray[0]->next = nodeArray[1];
     for (itemIndex = 1; itemIndex < count - 1; itemIndex++) {
-        items[itemIndex]->prev = items[itemIndex - 1];
-        items[itemIndex]->next = items[itemIndex + 1];
+        nodeArray[itemIndex]->prev = nodeArray[itemIndex - 1];
+        nodeArray[itemIndex]->next = nodeArray[itemIndex + 1];
     }
-    items[count - 1]->prev = items[count - 2];
-    items[count - 1]->next = NULL;
+    nodeArray[count - 1]->prev = nodeArray[count - 2];
+    nodeArray[count - 1]->next = NULL;
     for (itemIndex = 0; itemIndex < count; itemIndex++) {
-        items[itemIndex]->index = itemIndex;
+        nodeArray[itemIndex]->index = itemIndex;
     }
 }
 
