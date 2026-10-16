@@ -64,6 +64,7 @@ ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 index);
 ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 
 u8 *itfMesGetTableItem(ItfMesTable *table, s32 index);
+u8 *itfMesGetNextEntrySelectedItem(ItfMesState *mes);
 
 void itfMesRelocate(ItfMesRelocHeader *resource);
 
@@ -424,7 +425,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
                     itfMesGetWindowTableValue(window, selected & 0x7FFF), NULL);
             } else {
                 captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
-                    (u8 *)itfMesGetNextEntrySelectedItem(mes), NULL);
+                    itfMesGetNextEntrySelectedItem(mes), NULL);
             }
             if (frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
                 frFontSetGlyphPosition(captionBlock->glyphChain, captionBlock->x, captionBlock->y);
@@ -1294,11 +1295,11 @@ void itfMesInitCharTable(s32 *table) {
 }
 
 /* Read the selected item from the window's trailing entry, without validation. */
-u32 itfMesGetNextEntrySelectedItem(ItfMesState *mes) {
+u8 *itfMesGetNextEntrySelectedItem(ItfMesState *mes) {
     u32 *items;
 
     items = (u32 *)itfMesGetNextEntry(mes->sub)->itemList;
-    return items[mes->blk14.selectedIndex];
+    return (u8 *)items[mes->blk14.selectedIndex];
 }
 
 /* Count clear low bits by consuming one bit per iteration. Nonpositive counts
