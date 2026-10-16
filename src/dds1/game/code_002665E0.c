@@ -16,15 +16,15 @@
 
 
 void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                                  BrsProgressRow *row, s32 context, s32 index) {
+                                  BrsProgressRow *row, s32 context, s32 rowIndex) {
     s32 remaining = 0x100 - work->fadeProgress;
 
-    if (work->fadeAnimation[index].backgroundState == 0) {
+    if (work->fadeAnimation[rowIndex].backgroundState == 0) {
         u32 opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
 
-        work->fadeAnimation[index].backgroundOpacity = opacity;
-        if (work->fadeAnimation[index].backgroundOpacity >= 0x80) {
-            work->fadeAnimation[index].backgroundState = 1;
+        work->fadeAnimation[rowIndex].backgroundOpacity = opacity;
+        if (work->fadeAnimation[rowIndex].backgroundOpacity >= 0x80) {
+            work->fadeAnimation[rowIndex].backgroundState = 1;
         }
     }
 }
@@ -37,17 +37,17 @@ INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowEntries);
 INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowUnitInfo);
 
 void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                                 BrsProgressRow *row, s32 context, s32 index) {
+                                 BrsProgressRow *row, s32 context, s32 rowIndex) {
     s32 remaining = 0x100 - work->fadeProgress;
 
-    if (work->fadeAnimation[index].portraitReady == 0) {
+    if (work->fadeAnimation[rowIndex].portraitReady == 0) {
         u32 opacity = uiBlendColors(0x80808060, 0x80808000, remaining) & 0xFF;
 
-        work->fadeAnimation[index].portraitOpacity = opacity;
-        work->fadeAnimation[index].portraitPosition[0] = 0;
-        work->fadeAnimation[index].portraitPosition[1] = 0;
-        if (work->fadeAnimation[index].portraitOpacity >= 0x60) {
-            work->fadeAnimation[index].portraitReady = 1;
+        work->fadeAnimation[rowIndex].portraitOpacity = opacity;
+        work->fadeAnimation[rowIndex].portraitPosition[0] = 0;
+        work->fadeAnimation[rowIndex].portraitPosition[1] = 0;
+        if (work->fadeAnimation[rowIndex].portraitOpacity >= 0x60) {
+            work->fadeAnimation[rowIndex].portraitReady = 1;
         }
     }
 }
