@@ -211,7 +211,7 @@ s32 btlSelectSerialEncounter(void) {
     }
 
     entries = D_003BAA3C[encounterPack].groups[groupIndex].entries;
-    chance = entries[selectionIndex].unk05;
+    chance = entries[selectionIndex].serialEncounterChanceAdjustment;
     if ((datGameState->world.fieldFlags & 2) != 0) {
         chance *= 5;
     }
