@@ -8457,7 +8457,7 @@ extern u32 effBTLFieldColorGetOverrideSelector(void);
 
 extern u32 effBTLFieldColorGetFinalSelector(void);
 
-extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
+extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
 
 void effGetWorldVector(u32 which) {
     EffectVectorRequest request;

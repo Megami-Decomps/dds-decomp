@@ -222,7 +222,7 @@ typedef struct EffectBlock128 {
     u32 word[32];
 } EffectBlock128;
 
-extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
+extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
