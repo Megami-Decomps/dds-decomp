@@ -131,14 +131,14 @@ void evtCreateEventScriptProcess(s32 eventId) {
 const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n";
 
 void evtKillFieldScriptTasks(void) {
-    s32 state;
+    s32 taskState;
     s32 taskIndex;
     KwlnTask *task;
 
-    for (state = KWLN_TASK_DELAYED_START; state < KWLN_TASK_DESTROY_PENDING; state++) {
+    for (taskState = KWLN_TASK_DELAYED_START; taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {
     restartStateScan:
-        for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
-            task = kwlnTaskGetByStateAndIndex(state, taskIndex);
+        for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(taskState); taskIndex++) {
+            task = kwlnTaskGetByStateAndIndex(taskState, taskIndex);
             if (task->priority == 0x3EA) {
                 sdfDebugPrintf(evtFieldScriptTerminationFormat, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);
