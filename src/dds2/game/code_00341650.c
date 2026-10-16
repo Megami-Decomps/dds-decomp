@@ -237,10 +237,10 @@ void sndStartTrackDefault(s32 trackId) {
 
 /* Sends a single-word command payload in a 16-byte packet. */
 
-void sndSendSingleWordControlPacket(u32 value) {
+void sndSendSingleWordControlPacket(u32 controlWord) {
     u32 packet[4];
 
-    packet[0] = value;
+    packet[0] = controlWord;
     sndQueueCommandPacket(0x30, 0, packet, 0x10);
 }
 
