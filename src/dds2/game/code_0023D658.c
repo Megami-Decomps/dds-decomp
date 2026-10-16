@@ -124,11 +124,11 @@ extern u8 D_00421B70[];
 
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource);
 
-extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
+extern void evtConfigureUnitTransition(EvtUnit *unit, s32 duration);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
-extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
@@ -1203,12 +1203,12 @@ u32 evtCommandFlagSelectedUnitStatus(void) {
 u32 evtCommandBeginSelectedUnitTransition(void) {
     s32 worldObjectKey;
     EvtUnit *unit;
-    s32 param1;
+    s32 duration;
 
     worldObjectKey = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(worldObjectKey);
-    param1 = scrReadIntParameter(1);
-    evtConfigureUnitTransition(unit, param1);
+    duration = scrReadIntParameter(1);
+    evtConfigureUnitTransition(unit, duration);
     return 1;
 }
 
@@ -1318,12 +1318,12 @@ u32 evtOpSetUnitValueTransitionTarget(void) {
 u32 evtOpEndUnitValueTransition(void) {
     s32 worldObjectKey;
     EvtUnit *unit;
-    s32 param1;
+    s32 duration;
 
     worldObjectKey = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(worldObjectKey);
-    param1 = scrReadIntParameter(1);
-    evtEndUnitValueTransition(unit, param1);
+    duration = scrReadIntParameter(1);
+    evtEndUnitValueTransition(unit, duration);
     return 1;
 }
 
