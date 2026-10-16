@@ -1138,23 +1138,23 @@ void fldActivateRoomFlagObjects(void) {
 void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     char directory[32];
     char path[64];
-    s32 i;
+    s32 resourceSlotIndex;
 
     fldSetDisplayState(request->record->displayState);
     D_00444920[0] = (u32)request->record->resourceA;
     D_00444920[1] = (u32)request->record->resourceB;
     D_00444920[2] = (u32)request->record->resourceC;
     D_00444920[3] = (u32)request->record->resourceD;
-    for (i = 0; i < 4; i++) {
-        D_00444930[i] = 0;
-        D_00444940[i] = 0;
+    for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
+        D_00444930[resourceSlotIndex] = 0;
+        D_00444940[resourceSlotIndex] = 0;
     }
     if (fldAreaState.area < 500) {
-        for (i = 0; i < 4; i++) {
-            if (D_00444920[i] != 0) {
+        for (resourceSlotIndex = 0; resourceSlotIndex < 4; resourceSlotIndex++) {
+            if (D_00444920[resourceSlotIndex] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor + 1);
-                sprintf(path, D_00435FD0, directory, D_00444920[i]);
-                D_00444930[i] = (u32)sdfReadNamedResource(path, &D_00444940[i], 0);
+                sprintf(path, D_00435FD0, directory, D_00444920[resourceSlotIndex]);
+                D_00444930[resourceSlotIndex] = (u32)sdfReadNamedResource(path, &D_00444940[resourceSlotIndex], 0);
             }
         }
     }
