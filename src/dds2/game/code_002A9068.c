@@ -550,7 +550,41 @@ s32 movAreTitleEffectsReady(struct EffectList *resourceList, StaffSlots *resourc
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", mnuBuildCampTitleEffectResourceList);
+const char D_0042A9B0[] = "/camp/spr/";
+const char D_0042A9C0[] = "/camp/spr/n_pty/";
+const char D_0042A9D8[] = "/camp/spr/n_con/";
+extern u32 mnuStaffItemResourceNamePairs[][2];
+extern u32 mnuStaffSkillResourceNamePairs[][2];
+extern u32 mnuStaffPartyResourceNamePairs[][2];
+extern u32 mnuStaffCategory5ResourceNamePairs[][2];
+/* Queue the category, party and context title resources after the base banks. */
+/* Entries in each camp title resource-name table. */
+#define MNU_CAMP_ITEM_TITLE_COUNT 1
+#define MNU_CAMP_SKILL_TITLE_COUNT 1
+#define MNU_CAMP_PARTY_TITLE_COUNT 9
+#define MNU_CAMP_CONTEXT_TITLE_COUNT 1
+
+void mnuBuildCampTitleEffectResourceList(u8 *menuBytes) {
+    MenuStaffContext *work = (MenuStaffContext *)menuBytes;
+    struct EffectList *list = work->menuResource;
+    s32 index;
+    s32 column;
+
+    mnuAppendCampSpriteRequests(list, &work->resources);
+    column = mnuGetValueRecordOwner(list) == 1;
+    for (index = 0; index < MNU_CAMP_ITEM_TITLE_COUNT; index++) {
+        effAppendListEntry(list, (u32)D_0042A9B0, mnuStaffItemResourceNamePairs[index][column], 1, (u32)&work->titleFrames[index]);
+    }
+    for (index = 0; index < MNU_CAMP_SKILL_TITLE_COUNT; index++) {
+        effAppendListEntry(list, (u32)D_0042A9B0, mnuStaffSkillResourceNamePairs[index][column], 1, (u32)&work->titleFrames[1 + index]);
+    }
+    for (index = 0; index < MNU_CAMP_PARTY_TITLE_COUNT; index++) {
+        effAppendListEntry(list, (u32)D_0042A9C0, mnuStaffPartyResourceNamePairs[index][column], 1, (u32)&work->partyTitles[index]);
+    }
+    for (index = 0; index < MNU_CAMP_CONTEXT_TITLE_COUNT; index++) {
+        effAppendListEntry(list, (u32)D_0042A9D8, mnuStaffCategory5ResourceNamePairs[index][column], 1, (u32)&work->contextTitle);
+    }
+}
 
 
 
