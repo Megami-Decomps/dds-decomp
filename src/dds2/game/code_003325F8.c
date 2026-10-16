@@ -257,8 +257,8 @@ const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId) {
     } while (1);
 }
 
-u32 sdfCountMapPositionRecords(SdfModel *model) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+u32 sdfCountMapPositionRecords(const SdfModel *model) {
+    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
