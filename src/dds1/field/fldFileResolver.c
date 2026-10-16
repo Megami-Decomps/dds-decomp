@@ -458,7 +458,7 @@ extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector);
 extern s32 fldUpdateFieldPlayerMovement(void);
 extern void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames);
-extern s32 *fldGetPlayerSceneStateAddress();
+extern u32 *fldGetPlayerSceneStateAddress(void);
 extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
 extern void fldProbeCameraSupportSurface(void);
@@ -3541,7 +3541,7 @@ void fldInterpolateCameraEndpoints(void) {
         u128 q;
         f32 f[4];
     } nearPoint, farPoint;
-    s32 *world = fldGetPlayerSceneStateAddress();
+    u32 *world = fldGetPlayerSceneStateAddress();
     f32 ratio = (f32)D_003BAD24 / (f32)D_003BAD28;
     f32 remaining = 1.0f - ratio;
     EffWorldNode *node;
@@ -3573,7 +3573,7 @@ extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 void fldUpdateCameraViewFromPlayer(void) {
     f32 nearPoint[4];
     f32 farPoint[4];
-    s32 *world = fldGetPlayerSceneStateAddress();
+    u32 *world = fldGetPlayerSceneStateAddress();
     EffWorldNode *node;
     f32 angle;
 
@@ -3730,7 +3730,7 @@ void fldUpdateCameraProximity(void) {
 
 s32 fldUpdateCameraFollow(void) {
     FldAreaWork *cam;
-    s32 *world = fldGetPlayerSceneStateAddress();
+    u32 *world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && fldPlayerObject != 0) {
         fldRestoreCameraModelColor();
         if (fldGetUnselectedWorldEntry() != 0) {
