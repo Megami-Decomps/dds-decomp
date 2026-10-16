@@ -330,14 +330,14 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 s32 evtCommandWaitEffectResourceScale(void) {
     s32 effectId = scrReadIntParameter(0);
     void *effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
-    s32 status;
+    s32 scaleStatus;
 
     if (effectObject == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
-    status = evtCheckWorldObjectResourceScale(effectObject);
-    switch (status) {
+    scaleStatus = evtCheckWorldObjectResourceScale(effectObject);
+    switch (scaleStatus) {
     case 0:
         return 1;
     case 1:
@@ -699,7 +699,7 @@ s32 evtCommandRelinkCameraOwnerToPath(void) {
 
 s32 evtCommandWaitCameraOwnerResourceScale(void) {
     void *cameraOwner;
-    s32 status;
+    s32 scaleStatus;
 
     if (scrReadIntParameter(0) < 0) {
         cameraOwner = (void *)fldGetPlayerSceneState();
@@ -709,8 +709,8 @@ s32 evtCommandWaitCameraOwnerResourceScale(void) {
     if (cameraOwner == NULL) {
         return 1;
     }
-    status = evtCheckWorldObjectResourceScale(cameraOwner);
-    switch (status) {
+    scaleStatus = evtCheckWorldObjectResourceScale(cameraOwner);
+    switch (scaleStatus) {
     case 0:
         return 1;
     case 1:
@@ -948,7 +948,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC928);
 
 s32 evtCommandWaitObjectResourceScale(void) {
     void *worldObject = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
-    s32 status;
+    s32 scaleStatus;
 
     if (worldObject == NULL) {
         worldObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
@@ -959,8 +959,8 @@ s32 evtCommandWaitObjectResourceScale(void) {
             return 1;
         }
     }
-    status = evtCheckWorldObjectResourceScale(worldObject);
-    switch (status) {
+    scaleStatus = evtCheckWorldObjectResourceScale(worldObject);
+    switch (scaleStatus) {
     case 0:
         return 1;
     case 1:
