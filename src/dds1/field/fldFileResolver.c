@@ -603,7 +603,7 @@ extern s32 D_003BADF8;
 extern s32 D_003BADEC;
 extern u8 D_003BA734;
 extern ScrData *scrFindNamedProcessNode(char *name);
-extern u32 fldAreaCachedResource;
+extern struct SdfMemBlock *fldAreaCachedResource;
 extern struct FileRequest *fldAreaPackedArchive;
 extern u8 D_003BAC90[];
 extern s32 D_0032E4C8[];
@@ -1431,9 +1431,9 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_RETAINED_COPY:
-                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
+                fldAreaCachedResource = sdfAllocGeneralBlock(
                     sdfMemoryGetBlockSize((struct SdfMemBlock *)work->resourceHandle));
-                memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
+                memcpy((void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
                        (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)work->resourceHandle),
                        sdfMemoryGetBlockSize((struct SdfMemBlock *)work->resourceHandle));
                 sdfQueueGeneralAllocationRelease(
@@ -1449,16 +1449,15 @@ void fldLoadAreaPackedResources(void) {
 }
 
 void fldReleaseAreaResourceCache(void) {
-    u32 resourceHandle = fldAreaCachedResource;
+    struct SdfMemBlock *cachedResource = fldAreaCachedResource;
 
-    if (resourceHandle != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceHandle);
-        fldAreaCachedResource = 0;
+    if (cachedResource != NULL) {
+        sdfQueueGeneralAllocationRelease(cachedResource);
+        fldAreaCachedResource = NULL;
     }
-    resourceHandle = (u32)fldAreaPackedArchive;
-    if (resourceHandle != 0) {
-        btlStageTaskCleanupCallback((void *)resourceHandle);
-        fldAreaPackedArchive = 0;
+    if (fldAreaPackedArchive != NULL) {
+        btlStageTaskCleanupCallback(fldAreaPackedArchive);
+        fldAreaPackedArchive = NULL;
     }
     D_003C9200[0] = D_003BAC90[0];
 }
@@ -1478,7 +1477,7 @@ extern u32 fldCachedRoomResourceAllocation;
 extern u32 fldCachedRoomF1ResourceAllocation;
 extern u32 fldCachedRoomF2ResourceAllocation;
 extern u32 fldCachedRoomKF2ResourceAllocation;
-extern u32 fldAreaCachedResource;
+extern struct SdfMemBlock *fldAreaCachedResource;
 extern void fldSetSceneLocation(s32 area, s32 floor, s32 stage);
 extern void fldLoadPlayerModel(void);
 extern void fldInitSparkTable(void);
@@ -1648,11 +1647,11 @@ u32 fldLoadAreaRoomResources(const char *name) {
     }
     fldCreateResourceScriptObjects();
     fldActivateRoomFlagObjects();
-    if (sceneWork->retainCachedAreaResource != 0 && area < 200 && fldAreaCachedResource != 0) {
-        D_003BAC4C = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
+    if (sceneWork->retainCachedAreaResource != 0 && area < 200 && fldAreaCachedResource != NULL) {
+        D_003BAC4C = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize(fldAreaCachedResource));
         memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_003BAC4C),
-               (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)fldAreaCachedResource),
-               sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
+               (void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
+               sdfMemoryGetBlockSize(fldAreaCachedResource));
         evtRetainSceneResource(dds3GetWorldSecondaryObject(), (void *)D_003BAC4C);
     }
     fldInitializeActorMotionSlots();
@@ -9759,7 +9758,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAreaLoadRequest);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC40);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAreaCachedResource);
+INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldAreaCachedResource);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC4C);
 
