@@ -16,15 +16,15 @@ typedef struct FieldSequenceRecord {
     u8 unk_00[0x30];
     u32 unk_30;
     u32 unk_34;
-    u32 unk_38;
-    u32 unk_3c;
+    u32 sequenceWord38;
+    u32 sequenceWord3C;
     char name[16];
     s32 stage;
     s32 kind;
     s32 enabled;
     s32 mode;
     u16 code;
-    u16 unk_62;
+    u16 sequenceMode;
     s32 link;
     u8 unk_68[8];
     char detail[16];
