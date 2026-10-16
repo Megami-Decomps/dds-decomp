@@ -30,7 +30,7 @@ extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Dat
 extern void fldSetRelocateOnRelease(u32 relocateOnRelease);
 extern u32 kwlnDrawControlFlags;
 
-extern s32 D_004377D8;
+extern s32 evtNextCameraSlotViewerKey;
 extern s32 sdfDebugPrintf(const char *, ...);
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
@@ -64,18 +64,18 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                     case 0x2AC:
                     case 0x2AE:
                     case 0x2B0:
-                        mdlLoadViewerPackage(3, D_004377D8, 0x101, (s32)payload, entrySize);
+                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x101, (s32)payload, entrySize);
                         break;
                     default:
-                        mdlLoadViewerPackage(3, D_004377D8, 0x103, (s32)payload, entrySize);
+                        mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x103, (s32)payload, entrySize);
                         break;
                     }
-                    unitKey = mdlSpawnCameraSlotViewerObject(3, D_004377D8);
-                    D_004377D8++;
-                    if (D_004377D8 >= 0x7D0) {
-                        D_004377D8 = 0x3E8;
+                    unitKey = mdlSpawnCameraSlotViewerObject(3, evtNextCameraSlotViewerKey);
+                    evtNextCameraSlotViewerKey++;
+                    if (evtNextCameraSlotViewerKey >= 0x7D0) {
+                        evtNextCameraSlotViewerKey = 0x3E8;
                     }
-                    sdfDebugPrintf(D_00424850, D_004377D8, entrySize);
+                    sdfDebugPrintf(D_00424850, evtNextCameraSlotViewerKey, entrySize);
                     return unitKey;
                 }
             }
@@ -325,7 +325,7 @@ void evtReleaseEventPackResources(KwlnTask *task) {
     sdfReleaseChipBlock(stateHandle);
 }
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377D8);
+INCLUDE_SDATA(const s32, "event/evtEventPack", evtNextCameraSlotViewerKey);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377E0);
 
