@@ -11,6 +11,7 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_matrix4.h"
 #include "eff_resource_render_state.h"
 
 
@@ -246,7 +247,7 @@ void effSetResourceEntryValue(EffResourceWork *effect, s32 index, u32 color) {
 }
 
 /* vu0 routine: copy a 0x40-byte matrix from src to dst through vf28-vf31 */
-void effCopyMatrixVU(void *dst, void *src) {
+void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(dst);
 }

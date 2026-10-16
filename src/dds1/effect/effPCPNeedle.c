@@ -9,6 +9,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "eff.h"
+#include "eff_matrix4.h"
 #include "eff_math.h"
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
@@ -19,7 +20,7 @@ extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_00354C00[4];
 
-extern void effCopyMatrixVU(void *dst, void *src);
+extern void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src);
 
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
@@ -217,5 +218,5 @@ void effPCPNeedleCopyVector(void *dst, void *src) {
 
 /* Copy the supplied transform into the needle's resource matrix. */
 void effNeedleSetResourceMatrix(EffPCPNeedleWork *work, void *matrix) {
-    effCopyMatrixVU(work->resource->matrix, matrix);
+    effCopyMatrixVU((Matrix4 *)work->resource->matrix, matrix);
 }
