@@ -2714,6 +2714,12 @@ s32 evtStageTestHasModelEffect(void) {
     return evtStageTestState.effect != 0;
 }
 
+extern s32 D_003BC7BC;
+extern const char *D_003BC7B8;
+extern char D_003BC7C0[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
+
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2520);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2530);
@@ -2723,12 +2729,6 @@ INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2540);
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2550);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2560);
-
-extern s32 D_003BC7BC;
-extern const char *D_003BC7B8;
-extern char D_003BC7C0[];
-extern SdfPoolNode kwlnDrawSurfaces[];
-extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 
 void func_002881F0(void) {
     EffWorldNode *world = (EffWorldNode *)dds3GetWorldObject();

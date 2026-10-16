@@ -2487,12 +2487,13 @@ s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
-
-INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD40);
-
 /* Validate the packet where its native initialization is reconstructed. */
 typedef char FieldSequenceRecord_size_check[
     (sizeof(FieldSequenceRecord) == 0xA0) ? 1 : -1];
 typedef char FieldSequenceRecord_enabled_offset_check[
     ((u32)&((FieldSequenceRecord *)0)->enabled == 0x58) ? 1 : -1];
+
+INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
+
+INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD40);
+

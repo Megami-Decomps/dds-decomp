@@ -3370,6 +3370,12 @@ s32 evtStageTestHasModelEffect(void) {
     return evtStageTestState.effect != 0;
 }
 
+extern s32 D_00437CA4;
+extern const char *D_00437CA0;
+extern char D_00437CA8[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
+
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B528);
@@ -3379,12 +3385,6 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B538);
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
-
-extern s32 D_00437CA4;
-extern const char *D_00437CA0;
-extern char D_00437CA8[];
-extern SdfPoolNode kwlnDrawSurfaces[];
-extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 
 void evtStageTestDrawCameraTransformDebug(void) {
     EffWorldNode *world = (EffWorldNode *)dds3GetWorldObject();

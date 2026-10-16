@@ -4481,16 +4481,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BF978);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165E0);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165F0);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416600);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416610);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
-
 /* btlCreateMessageWindow allocates0x40 bytes; native fade halfword+0x14, coordinates+0x38/+0x3C. */
 typedef struct BtlCommandHintWork {u8 pad00[0x10];s32 unk10;s16 fade;u8 pad16[2];u32 colors[4];u8 pad28[0x10];s32 x;s32 y;} BtlCommandHintWork;
 extern const BattlePanelColors D_00416620;
@@ -4503,6 +4493,16 @@ extern BattleRosterTable *btlGetActorLinkageSkillList(s32,u16 *);
 extern void btlReleaseRegisteredTaskBuffer(s32);
 extern void func_001BF978(s32,s32,u32,u32,u16,s16);
 extern u8 D_003B5B10[];
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165E0);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165F0);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416600);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416610);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
+
 s32 func_001BFB58(KwlnTask *task) {
     BattlePanelColors colors = D_00416620;
     BattleSceneObject *object = NULL;
