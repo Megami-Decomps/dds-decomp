@@ -188,7 +188,7 @@ extern struct MenuList *mnuCreateListState();
 extern u8 D_00437870[];
 
 
-extern s32 mnuPercentOrHundred(u16, u16);
+extern s32 mnuPercentOrHundred(s32 value, s32 total);
 
 extern void mnuDrawPanelSequenceByRow(MenuPageBar *, s32, s32 *, s32, s32, EffectSlotSet *);
 
