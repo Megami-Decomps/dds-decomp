@@ -1125,7 +1125,7 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateTimelineGroupState);
 
 
-extern void evtEndUnitValueTransition(EvtUnit *, s32);
+extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
 
 /* At time, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
