@@ -43,7 +43,7 @@ extern void sdfVec3ScaleInPlace(f32, f32 *);
 
 extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
-extern f32 sdfQuatDot(f32 *, f32 *);
+extern f32 sdfQuatDot(f32 *left, f32 *right);
 
 extern f32 sinf(f32);
 
