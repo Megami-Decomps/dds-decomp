@@ -834,7 +834,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
 void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame, s32 unused, EvtRuntime *viewer) {
     s32 nibbles[2];
     struct EffectObj *object;
-    s32 result;
+    s32 selectedText;
 
     nibbles[0] = 0;
     nibbles[1] = 0;
@@ -929,11 +929,11 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
                 break;
             }
             if (mnuQueryTitleSoundBusy()) {
-                result = itfMesSelectTableItemText(viewer->windowContext->handle, nibbles[0], 0);
-                if (result == 1) {
+                selectedText = itfMesSelectTableItemText(viewer->windowContext->handle, nibbles[0], 0);
+                if (selectedText == 1) {
                     evtPrintDeveloperConsoleMessage(D_003ACFE8, nibbles[0]);
                     mnuStopTitleVoicePlayback();
-                    viewer->voicePending = result;
+                    viewer->voicePending = selectedText;
                     viewer->voiceMessage = nibbles[0];
                     viewer->voiceFrame = viewer->curFrame;
                     break;
