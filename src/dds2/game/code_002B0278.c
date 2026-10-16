@@ -3336,7 +3336,7 @@ void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuCopyCampEffectRowData(&mnuCampBackdropEffectRows, resources);
     effRequestResourceByMode("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0,
                              (u32 *)&resources->packet.sheets[0]);
-    effRequestMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0], (u32 *)&resources->animationHandle);
+    effRequestMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0], &resources->animationHandle);
 }
 
 u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {

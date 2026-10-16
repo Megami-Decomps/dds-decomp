@@ -236,7 +236,8 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 }
 
 /* Publish mapped records before releasing their source allocation and completing the file job. */
-void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResource) {
+void effCompleteMappedResourceJob(struct FileRequest *job,
+                                  EffMappedResource **outMappedResource) {
     struct SdfMemBlock *allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;
@@ -244,13 +245,14 @@ void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResourc
     allocation = fileGetResourceHandle(job);
     sourceAddress = sdfResourceRetainAddress(allocation);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
-    *outMappedResource = (u32)mappedResource;
+    *outMappedResource = mappedResource;
     sdfReleaseResourceAllocation(allocation);
     filePollEntryCleanup(job);
 }
 
 /* Initialize the output to zero and schedule mapped-record completion. */
-void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource) {
+void effRequestMappedResource(const char *base, const char *name,
+                              EffMappedResource **outMappedResource) {
     char path[EFF_RESOURCE_PATH_BYTES];
 
     sprintf(path, D_003BD198, base, name);
