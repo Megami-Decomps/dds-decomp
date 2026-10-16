@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
+#include "sdf_word_array_record.h"
 #include "sdf_resource.h"
 
 typedef struct SdfVec4 {
@@ -24,17 +25,6 @@ extern f64 cos(f64);
 extern f64 sin(f64);
 
 extern f64 sqrt(f64);
-
-typedef struct SdfResourceInfo {
-    u32 word[4];
-} SdfResourceInfo;
-
-typedef struct SdfResourceRecord {
-    u8 unk00[0xE];
-    u16 count;
-    u32 *items;
-    SdfResourceInfo *info;
-} SdfResourceRecord;
 
 /* Keep all packed bytes opaque while the clone copies the complete header. */
 typedef struct SdfResourceVectorRecord1C {
@@ -290,17 +280,17 @@ SdfFilteredRecords *sdfCloneEnabledFilterRecords(MnuCallbackListPair *owner, Sdf
     return result;
 }
 
-MnuCallbackListPair *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
+MnuCallbackListPair *sdfCloneOwnedResourceRecords(const SdfWordArrayRecord *source, s32 count) {
     MnuCallbackListPair *owner = mnuCreateCallbackPair();
 
     if (count != 0) {
         do {
-            SdfResourceRecord *copy = (SdfResourceRecord *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy));
+            SdfWordArrayRecord *copy = (SdfWordArrayRecord *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy));
 
             *copy = *source;
-            copy->items = (u32 *)sdfAllocateOwnedResourceBuffer(owner, copy->count * sizeof(*copy->items));
-            memcpy(copy->items, source->items, copy->count * sizeof(*copy->items));
-            copy->info = (SdfResourceInfo *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy->info));
+            copy->items = (u32 *)sdfAllocateOwnedResourceBuffer(owner, copy->itemCount * sizeof(*copy->items));
+            memcpy(copy->items, source->items, copy->itemCount * sizeof(*copy->items));
+            copy->info = (SdfWordArrayInfo *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy->info));
             *copy->info = *source->info;
             dds3AppendFirstResourceListValue(owner, (u32)copy);
             source++;

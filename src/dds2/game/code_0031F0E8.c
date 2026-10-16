@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
+#include "sdf_word_array_record.h"
 
 typedef struct DdsSpriteFileHeader {
     u32 version;
@@ -64,17 +65,6 @@ typedef struct DdsPackedObject {
 } DdsPackedObject;
 
 extern DdsPackedObject *dds3CreatePackedObject(void);
-
-typedef struct DdsArrayRecord {
-    u32 unk_00;
-    u32 unk_04;
-    s16 unk_08;
-    u16 unk_0A;
-    u8 pad0C[2];
-    u16 wordCount;
-    u32 *words;
-    void *data;
-} DdsArrayRecord;
 
 typedef struct DdsSpriteRecord {
     u32 unk_00;
@@ -385,7 +375,7 @@ void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size
 u32 *dds3PackWordArrayRecords(u32 **source) {
     DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
-    DdsArrayRecord *record;
+    SdfWordArrayRecord *record;
     char name[16];
 
     for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
@@ -395,27 +385,27 @@ u32 *dds3PackWordArrayRecords(u32 **source) {
         dds3WritePackedValue((u32)object, record->unk_08, 2);
         dds3WritePackedValue((u32)object, record->unk_0A, 2);
         dds3WritePackedValue((u32)object, 0, 2); /* Reserved packed header field. */
-        dds3WritePackedValue((u32)object, record->wordCount, 2);
+        dds3WritePackedValue((u32)object, record->itemCount, 2);
         memset(name, 0, sizeof(name));
-        sprintf(name, D_00438978, (void *)record->words);
+        sprintf(name, D_00438978, (void *)record->items);
         dds3RecordNamedReference((u32)object, name);
         memset(name, 0, sizeof(name));
-        sprintf(name, D_00438978, record->data);
+        sprintf(name, D_00438978, record->info);
         dds3RecordNamedReference((u32)object, name);
     }
     for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
         record = node->record;
         memset(name, 0, sizeof(name));
-        sprintf(name, D_00438978, (void *)record->words);
+        sprintf(name, D_00438978, (void *)record->items);
         dds3RegisterNamedPackedOffset(object, name);
-        dds3AppendPackedBytes(object, record->words, record->wordCount * sizeof(*record->words));
+        dds3AppendPackedBytes(object, record->items, record->itemCount * sizeof(*record->items));
     }
     for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
         record = node->record;
         memset(name, 0, sizeof(name));
-        sprintf(name, D_00438978, record->data);
+        sprintf(name, D_00438978, record->info);
         dds3RegisterNamedPackedOffset(object, name);
-        dds3AppendPackedBytes(object, record->data, 16);
+        dds3AppendPackedBytes(object, record->info, sizeof(*record->info));
     }
     return (u32 *)object;
 }
