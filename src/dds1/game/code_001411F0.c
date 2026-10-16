@@ -1896,7 +1896,7 @@ extern SdfModel *D_00348F30[];
 
 extern FldSlot D_003D40B0[];
 
-extern void sdfReleaseDevSlot(SdfModel *, s32, s32);
+extern void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release);
 
 void fldReleaseMenuSlots(void) {
     s32 i;
