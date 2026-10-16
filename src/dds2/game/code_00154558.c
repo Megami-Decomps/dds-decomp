@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_activation_entry.h"
 #include "scr_integer_return_value_api.h"
 #include "fld_scene_record.h"
 #include "common.h"
@@ -186,15 +187,7 @@ extern const char *fldGetTaskRecordValue(u32 key);
 extern void fldSelectCameraByActorName(const char *entry);
 
 
-typedef struct FldSceneParamRow {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-    s32 unk8;
-    s32 unkC;
-} FldSceneParamRow; /* 0x10 bytes */
-
-extern FldSceneParamRow D_003A8EB0[];
+extern FldActivationEntry D_003A8EB0[];
 
 extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
 
@@ -1467,19 +1460,19 @@ s32 fldCmdPushSceneParam(void) {
     room = fldFindRoomByTask((u32)scrGetCurrentContext()->task);
     switch (scrReadIntParameter(0)) {
     case 0:
-        scrSetIntegerReturnValue(D_003A8EB0[room].unk0);
+        scrSetIntegerReturnValue(D_003A8EB0[room].selectedValue0);
         break;
     case 1:
-        scrSetIntegerReturnValue(D_003A8EB0[room].unk4);
+        scrSetIntegerReturnValue(D_003A8EB0[room].selectedValue1);
         break;
     case 2:
-        scrSetIntegerReturnValue(D_003A8EB0[room].unk6);
+        scrSetIntegerReturnValue(D_003A8EB0[room].selectedValue2);
         break;
     case 3:
-        scrSetIntegerReturnValue(D_003A8EB0[room].unk8);
+        scrSetIntegerReturnValue(D_003A8EB0[room].selectedValue3);
         break;
     case 4:
-        scrSetIntegerReturnValue(D_003A8EB0[room].unkC);
+        scrSetIntegerReturnValue(D_003A8EB0[room].selectedValue4);
         break;
     }
     return 1;
