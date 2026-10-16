@@ -6000,7 +6000,94 @@ s32 fldCalcDistanceVolume(f32 x, f32 y, f32 z) {
     return volume;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00153068);
+#include "kwln_fade_timing.h"
+extern s32 D_004363D8;
+extern char D_00413F78[];
+void func_00153068(void) {
+    f32 previousFrame;
+    f32 currentFrame;
+    s32 playStep;
+    s32 percent;
+    s32 volume;
+    s32 skipFade;
+
+    playStep = 0;
+    percent = 0;
+    skipFade = 0;
+    if (fldTargetGuideState.guideMode == 0xE) {
+        volume = 0x6F;
+        previousFrame = fldTargetGuideState.currentModelFrame;
+        currentFrame = D_00435F20->first->currentFrame;
+        fldTargetGuideState.guideMotionIndex = D_00435F20->current.h.motionIndex;
+        fldTargetGuideState.currentModelFrame = currentFrame;
+        fldTargetGuideState.previousModelFrame = previousFrame;
+        fldTargetGuideState.targetDistance = 1300.0f;
+    } else {
+        volume = fldCalcDistanceVolume(fldTargetGuideState.position[0], fldTargetGuideState.position[1], fldTargetGuideState.position[2]);
+    }
+    currentFrame = fldTargetGuideState.currentModelFrame;
+    previousFrame = fldTargetGuideState.previousModelFrame;
+    switch (fldTargetGuideState.guideMotionIndex) {
+    case 17:
+        if (previousFrame < 2.0f && currentFrame >= 2.0f) {
+            playStep = 1;
+        }
+        if (previousFrame < 12.0f && currentFrame >= 12.0f) {
+            playStep = 1;
+        }
+        percent = 80;
+        break;
+    case 16:
+        if (previousFrame < 23.0f && currentFrame >= 23.0f) {
+            playStep = 1;
+        }
+        if (previousFrame < 49.0f && currentFrame >= 49.0f) {
+            playStep = 1;
+        }
+        if (previousFrame < 72.0f && currentFrame >= 72.0f) {
+            playStep = 1;
+        }
+        if (previousFrame < 98.0f && currentFrame >= 98.0f) {
+            playStep = 1;
+        }
+        percent = 40;
+        break;
+    case 18:
+        if (previousFrame < 1.0f && currentFrame >= 1.0f) {
+            playStep = 1;
+            skipFade = 1;
+        }
+        if (previousFrame < 23.0f && currentFrame >= 23.0f) {
+            playStep = 1;
+        }
+        break;
+    }
+    if (playStep != 0) {
+        sndSetSequenceVolumePan(D_004363D8 + 0x690010, volume, 0x3F);
+        D_004363D8 = (D_004363D8 + (s32)((effMiscRand(NULL) >> 4) & 1) + 1) % 4;
+        if ((skipFade == 0) && !(fldTargetGuideState.targetDistance > 2000.0f)) {
+            if (fldTargetGuideState.targetDistance > 1600.0f) {
+                kwlnFadeSetupFrames(4, 0x14);
+            } else if (fldTargetGuideState.targetDistance > 1200.0f) {
+                kwlnFadeSetupFrames(5, 0x28);
+            } else if (fldTargetGuideState.targetDistance > 800.0f) {
+                kwlnFadeSetupFrames(6, 0x3C);
+            } else {
+                kwlnFadeSetupFrames(7, 0x46);
+            }
+        }
+    }
+    if (fldTargetGuideState.updateFlags & 0x80) {
+        sndSetSequenceVolumePan(0x690060, volume, 0x3F);
+    }
+    /* The scaled volume is never used; retail keeps only the divide-by-zero check. */
+    if (percent > 0) {
+        volume = (volume * percent) / 100;
+        sdfDebugPrintf(D_00413F78);
+    } else {
+        sdfDebugPrintf(D_00413F78);
+    }
+}
 
 extern char D_00413F78[];
 
