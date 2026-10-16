@@ -57,10 +57,10 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     EvtLoadedRecordHeader header;
     u32 offset;
     u8 *source;
-    u32 handle;
+    struct SdfMemBlock *handle;
     EvtLoadedRecord *record;
     u8 *records;
-    u32 relocationHandle;
+    struct SdfMemBlock *relocationHandle;
     u32 *relocations;
 
     memcpy(fileHeader, (void *)sourceAddress, sizeof(fileHeader));
@@ -72,7 +72,7 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     record = sdfMemoryGetBlockAddress(handle);
     record->recordCount = header.recordCount;
     records = (u8 *)record + sizeof(EvtLoadedRecord);
-    record->handle = handle;
+    record->handle = (u32)handle;
     record->recordsAddress = (s32)records;
     memset(records, 0, header.dataBytes);
     offset = sizeof(EvtLoadedRecord);

@@ -293,10 +293,10 @@ void mnuInitializeTitleAudioStreams(void) {
     mnuInitTitleSoundRemoteRequest(0x400);
 
     mnuTitleStreamDecoderState[1] = (u32)mnuTitleStreamDecodedSamples;
-    mnuTitleStreamDecoderState[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    mnuTitleStreamDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
     mnuTitleStreamDecoderState[4] = 0;
     mnuTitleSoundBufferDecoderState[1] = (u32)mnuTitleSoundBufferDecodedSamples;
-    mnuTitleSoundBufferDecoderState[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    mnuTitleSoundBufferDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
     mnuTitleSoundBufferDecoderState[4] = 2;
 
     mnuCreateTitleStreamThread();
@@ -534,7 +534,7 @@ void mnuInitializeTitleSoundBuffer(void) {
     TitleAudioStreamState *streamState = &mnuTitleSoundBufferState;
     u32 *decoder = mnuTitleSoundBufferDecoderState;
     struct SdfMemBlock *allocation;
-    s32 bufferAddress;
+    u8 *bufferAddress;
 
     WaitSema(mnuTitleStreamSemaphore);
     streamState->decoder = decoder;
@@ -543,7 +543,7 @@ void mnuInitializeTitleSoundBuffer(void) {
     streamState->allocation = allocation;
     streamState->control = 2;
     streamState->decoder[2] = 2;
-    streamState->compressedData = (u8 *)bufferAddress;
+    streamState->compressedData = bufferAddress;
     streamState->samples = (s16 *)mnuTitleAudioSilenceBuffer;
     streamState->frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
     mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", streamState);
@@ -557,7 +557,7 @@ extern char D_00428650[];
 /* Each format reserves 600 compressed frames before loading its named stream. */
 void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     struct SdfMemBlock *allocation = NULL;
-    s32 bufferAddress;
+    u8 *bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -589,7 +589,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     }
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
     mnuTitleSoundBufferState.allocation = allocation;
-    mnuTitleSoundBufferState.compressedData = (u8 *)bufferAddress;
+    mnuTitleSoundBufferState.compressedData = bufferAddress;
     sprintf(soundPath, D_00428650, D_003E0F60[soundEntryIndex].filename);
     mnuLoadTitleStreamFrameData(soundPath, &mnuTitleSoundBufferState);
     func_003504A8(mnuTitleSoundBufferDecoderState);
@@ -601,7 +601,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
  * has no default-format guard or buffer-capacity check. */
 void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32 format) {
     struct SdfMemBlock *allocation = NULL;
-    s32 bufferAddress;
+    u8 *bufferAddress;
     s32 frameCount;
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -633,8 +633,8 @@ void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32
     }
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
     mnuTitleSoundBufferState.allocation = allocation;
-    mnuTitleSoundBufferState.compressedData = (u8 *)bufferAddress;
-    memcpy((void *)bufferAddress, compressedData, dataBytes);
+    mnuTitleSoundBufferState.compressedData = bufferAddress;
+    memcpy(bufferAddress, compressedData, dataBytes);
     frameCount = dataBytes / mnuTitleSoundBufferState.frameBytes;
     mnuTitleSoundBufferState.frameIndex = 0;
     mnuTitleSoundBufferState.frameCount = frameCount;
