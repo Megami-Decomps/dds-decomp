@@ -20,7 +20,8 @@ extern s32 fileMenuTaskExists(void);
 extern s32 fldIsUpdateInhibited(void);
 extern void fldSelectDisplayBuffer(u32 row);
 extern void fldSetGsAlphaBlendEquation(s32 arg);
-extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+extern void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12,
+                               s32 bit14, s32 bit15, s32 unused, s32 bit17);
 extern u32 kwlnDrawControlFlags;
 extern s32 scrGetCommandTimer(void);
 s32 evtPreloadBgm(s32 id);
