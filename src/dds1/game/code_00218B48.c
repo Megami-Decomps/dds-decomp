@@ -2797,7 +2797,7 @@ void mdlLoadViewerPresentationConfig(void) {
     fileRequest = (s32)fileQueueDefaultCallbackRequest(D_00367AF8);
     fileWaitReady((struct FileRequest *)(u32)fileRequest);
     resourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
-    fileData = (char *)(u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
+    fileData = (char *)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
     fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
     filePollEntryCleanup((struct FileRequest *)(u32)fileRequest);
     lineOffset = 0;

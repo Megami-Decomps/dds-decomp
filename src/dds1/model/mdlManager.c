@@ -381,11 +381,11 @@ void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
 }
 
 void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRequest *destination) {
-    u32 handle;
+    const SdfTextureOffsetListHeader *loadedData;
     DevRequest *resourceList;
 
-    handle = fileGetLoadedDataAddress(resource);
-    resourceList = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)handle);
+    loadedData = fileGetLoadedDataAddress(resource);
+    resourceList = sndBuildResourceHandleListFromOffsets(loadedData);
     destination->payload.resourceList = resourceList;
     sdfReleaseResourceAllocation(fileGetResourceHandle(resource));
     filePollEntryCleanup(resource);
@@ -397,7 +397,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
 void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestAllocation = fileGetResourceHandle(resource);
     request->payload.itemList = sdfRelocatePackedResourcePayload(
-        (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
+        (SdfPackedRelocationHeader *)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     if (request->deferred == 0) {
         mdlExecuteAndFreeJob(request);
@@ -409,7 +409,7 @@ void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
 void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.motionResource = fileGetResourceHandle(resource);
     request->payload.motionTable = sdfRelocatePackedResourceWordsFromHeader(
-        (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
+        (SdfPackedRelocationHeader *)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
 }

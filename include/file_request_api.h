@@ -8,7 +8,7 @@ struct SdfMemBlock;
 
 /* Return the request's allocation descriptor without changing ownership. */
 struct SdfMemBlock *fileGetResourceHandle(const struct FileRequest *request);
-u32 fileGetLoadedDataAddress(const struct FileRequest *request);
+void *fileGetLoadedDataAddress(const struct FileRequest *request);
 u32 fileGetResourceSize(const struct FileRequest *request);
 s32 filePollEntryCleanup(struct FileRequest *request);
 

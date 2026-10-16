@@ -208,10 +208,10 @@ struct SdfMemBlock *fileGetResourceHandle(const struct FileRequest *request) {
     return requestWork->resourceHandle;
 }
 
-/* Return the stored loaded-data address as its existing u32 representation. */
-u32 fileGetLoadedDataAddress(const struct FileRequest *request) {
+/* Return the loaded payload address represented by the stored address word. */
+void *fileGetLoadedDataAddress(const struct FileRequest *request) {
     const FileWork *requestWork = (const FileWork *)request;
-    return requestWork->loadedDataAddress;
+    return (void *)(u32)requestWork->loadedDataAddress;
 }
 
 /* Return the recorded resource size; work is required. */
