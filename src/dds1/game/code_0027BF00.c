@@ -1113,20 +1113,20 @@ void mnuAppendFadingWindowEntry(s32 activeValue, s32 windowAddress, s32 *list) {
 
 /* Native removal only accepts indices at least five. Propagate the tail
  * record backward to the target, clearing each source's window pointer. */
-void mnuRemoveFadingWindowEntry(s32 *list, u32 index) {
+void mnuRemoveFadingWindowEntry(s32 *list, u32 slotIndex) {
     s32 *entries;
     s32 *slot;
     u32 tailIndex;
 
-    if (index >= MNU_FADING_MUTATION_THRESHOLD) {
+    if (slotIndex >= MNU_FADING_MUTATION_THRESHOLD) {
         entries = list + 1;
-        slot = entries + index;
+        slot = entries + slotIndex;
         if (((MenuFadeEntry *)*slot)->active != 0) {
             mnuDestroyWindowContainer(((MenuFadeEntry *)*slot)->window);
         }
         tailIndex = list[0] - 1;
         ((MenuFadeEntry *)*slot)->window = 0;
-        for (; index < tailIndex; tailIndex--) {
+        for (; slotIndex < tailIndex; tailIndex--) {
             *(MenuFadeEntry *)entries[tailIndex - 1] = *(MenuFadeEntry *)entries[tailIndex];
             ((MenuFadeEntry *)entries[tailIndex])->window = 0;
         }
