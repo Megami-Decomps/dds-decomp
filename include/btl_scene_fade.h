@@ -46,7 +46,7 @@ typedef struct ActorSlotOrder {
     s32 slotFade[8]; /* Per-slot fade, decremented and clamped to 0..128. */
     s32 phaseFrames[8]; /* Per-slot phase-4 counter, clamped to 0..10. */
     f32 rotationAngleDegrees[8]; /* Per-slot sprite angle, decremented and clamped to 0. */
-    s32 unk8C[8]; /* Corresponding per-slot values initially set to 130. */
+    s32 drawOffsetScalePercent[8]; /* 0x8C: input to the rotated slot's XY-offset calculation; 130 to 100. */
     s8 secondaryState[8]; /* Independent color cycle, states 0 through 8. */
     s32 colorAdjustments[8][4]; /* Signed values clamped to 0..127. */
     s32 drawOffsets[8][2][2]; /* +0x134: signed row/variant XY outputs; DDS1 001C2880..001C28A8. */
@@ -61,6 +61,8 @@ typedef char ActorSlotOrder_flags_offset[((unsigned long)&((ActorSlotOrder *)0)-
 typedef char ActorSlotOrder_slotFade_offset[((unsigned long)&((ActorSlotOrder *)0)->slotFade == 0x2C) ? 1 : -1];
 typedef char ActorSlotOrder_rotationAngleDegrees_offset[
     ((unsigned long)&((ActorSlotOrder *)0)->rotationAngleDegrees == 0x6C) ? 1 : -1];
+typedef char ActorSlotOrder_drawOffsetScalePercent_offset[
+    ((unsigned long)&((ActorSlotOrder *)0)->drawOffsetScalePercent == 0x8C) ? 1 : -1];
 typedef char ActorSlotOrder_drawOffsets_offset[((unsigned long)&((ActorSlotOrder *)0)->drawOffsets == 0x134) ? 1 : -1];
 typedef char ActorSlotOrder_slotValues_offset[((unsigned long)&((ActorSlotOrder *)0)->slotValues == 0x1F4) ? 1 : -1];
 typedef char ActorSlotOrder_scalePercent_offset[((unsigned long)&((ActorSlotOrder *)0)->scalePercent == 0x234) ? 1 : -1];

@@ -2128,7 +2128,7 @@ s32 btlResetSceneSlotFades(void) {
     state->completed = 0;
     for (i = 0; i < count; i++) {
         (*bank)->rotationAngleDegrees[i] = 30.0f;
-        (*bank)->unk8C[i] = 130;
+        (*bank)->drawOffsetScalePercent[i] = 130;
     }
     btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
@@ -8447,9 +8447,9 @@ void btlUpdateActorSlotOrderAnimation(void) {
                 if (D_00438F58[side]->rotationAngleDegrees[i] <= 0.0f) {
                     D_00438F58[side]->rotationAngleDegrees[i] = 0.0f;
                 }
-                D_00438F58[side]->unk8C[i] = D_00438F58[side]->unk8C[i] - 5.0f;
-                if (D_00438F58[side]->unk8C[i] <= 100.0f) {
-                    D_00438F58[side]->unk8C[i] = 100;
+                D_00438F58[side]->drawOffsetScalePercent[i] = D_00438F58[side]->drawOffsetScalePercent[i] - 5.0f;
+                if (D_00438F58[side]->drawOffsetScalePercent[i] <= 100.0f) {
+                    D_00438F58[side]->drawOffsetScalePercent[i] = 100;
                 }
                 if (D_00438F58[side]->slotFade[i] >= 0x80) {
                     if (D_00438F58[side]->state[i + 1] < 3) {
@@ -8476,9 +8476,9 @@ void btlUpdateActorSlotOrderAnimation(void) {
             if (D_00438F58[side]->rotationAngleDegrees[i] <= 0.0f) {
                 D_00438F58[side]->rotationAngleDegrees[i] = 0.0f;
             }
-            D_00438F58[side]->unk8C[i] = D_00438F58[side]->unk8C[i] - 5.0f;
-            if (D_00438F58[side]->unk8C[i] <= 100.0f) {
-                D_00438F58[side]->unk8C[i] = 100;
+            D_00438F58[side]->drawOffsetScalePercent[i] = D_00438F58[side]->drawOffsetScalePercent[i] - 5.0f;
+            if (D_00438F58[side]->drawOffsetScalePercent[i] <= 100.0f) {
+                D_00438F58[side]->drawOffsetScalePercent[i] = 100;
             }
             btlUpdateActorSlotOrderColors(side, i);
             break;
@@ -8493,7 +8493,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
             D_00438F58[side]->slotValues[i][1] = 0x80;
             D_00438F58[side]->rotationAngleDegrees[i] = 0.0f;
             D_00438F58[side]->unk1B4[i][1] = 0;
-            D_00438F58[side]->unk8C[i] = 100;
+            D_00438F58[side]->drawOffsetScalePercent[i] = 100;
             break;
         case 4:
             D_00438F58[side]->scalePercent[i][0] -= 1.0f;
@@ -8621,7 +8621,7 @@ void btlDrawActorSlotOrder(void) {
                 .geometry.angleDegrees = D_00438F58[bank]->rotationAngleDegrees[index];
             func_001CE418(btlResourceBlock->resC, coordinates[index][2],
                           &xOffset, &yOffset,
-                          (f32)D_00438F58[bank]->unk8C[index]);
+                          (f32)D_00438F58[bank]->drawOffsetScalePercent[index]);
             effDrawSpriteWithCornerColors((coordinates[index][0] + xOffset) << 4,
                           (coordinates[index][1] + yOffset) << 3,
                           0, colors, 0, btlResourceBlock->resC,
