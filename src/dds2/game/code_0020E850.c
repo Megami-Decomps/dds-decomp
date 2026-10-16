@@ -688,7 +688,124 @@ BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
 }
 
 /* Counter display shares the same vector prefix, with the shorter counter payload. */
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FA98);
+s32 func_0020FA98(BtlLinkedEffectArgs *args) {
+    u64 status;
+    BtlState *battle;
+    EffectSlotSet *set;
+    s32 kind;
+    s32 slot;
+    s32 mode;
+    s32 width;
+    s32 height;
+    u32 ticks;
+    s32 animationOffset;
+    f32 phase;
+    f32 displacement;
+    u32 packedColor;
+    s32 screen[4] __attribute__((aligned(16)));
+    u32 colors[4];
+
+    if (!(args->unit->status.flags & 2)) {
+        return 1;
+    }
+
+    slot = 3;
+    battle = (BtlState *)btlGetRuntime();
+    kind = args->payload.counter.kind;
+    mode = 0;
+    if (kind != 2) {
+        if (kind < 3) {
+            slot = 2;
+            if (kind != 1) {
+                slot = 0;
+            }
+        } else {
+            slot = 0;
+            mode = 1;
+            if (kind != 3) {
+                if (kind == 4) {
+                    slot = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+        }
+    }
+
+    set = battle->resB;
+    width = set->workEntries[slot].geometry.bounds[2];
+    height = set->workEntries[slot].geometry.bounds[3];
+
+    if (args->payload.counter.elapsedTicks == 0) {
+        args->payload.counter.offsetIndex = args->unit->counterDisplayCount % 12;
+        args->unit->counterDisplayCount++;
+
+        btlSelectHpMpDisplayPositionVU(args->unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+        btlUnitGetMuzzlePosVU(args->unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, args->referencePosition);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, args->anchorOffset);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+    }
+
+    ticks = (u32)args->payload.counter.elapsedTicks;
+    animationOffset = 0;
+    packedColor = 0x80808080;
+    if (mode == 0) {
+        if (ticks < 7) {
+            phase = 1.0f - (f32)ticks / 7.0f;
+            phase *= phase;
+            displacement = phase * 40.0f;
+            animationOffset = -(s32)(displacement * 8.0f);
+        } else if (ticks >= 22) {
+            phase = (f32)(u32)(ticks - 21);
+            phase *= 0.125f;
+            phase *= phase;
+            displacement = phase * 36.0f;
+            animationOffset = (s32)(displacement * 8.0f);
+            packedColor = (packedColor & 0xFFFFFF00) | ((u32)((1.0f - phase) * 128.0f) & 0xFF);
+        }
+    } else {
+        phase = 0.0f;
+        if (ticks >= 22) {
+            phase = (f32)(u32)(ticks - 21);
+            phase *= 0.125f;
+        }
+        packedColor = (packedColor & 0xFFFFFF00) | ((u32)((1.0f - phase) * 128.0f) & 0xFF);
+        animationOffset = (s32)(ticks << 3);
+        animationOffset -= 0x120;
+    }
+    animationOffset += 0x120;
+    status = btlUnitStatusPair(args->unit);
+    if (status & 0x08000004) {
+        if ((status & 0x21) == 1) {
+            btlUnitGetMuzzlePosVU(args->unit);
+        } else {
+            VU0_LOAD_VF(vf10, args->referencePosition);
+        }
+        VU0_LOAD_VF(vf11, args->anchorOffset);
+        VU0_ADD(vf10, vf10, vf11);
+
+        if (btlProjectForwardPositionToPackedScreen(screen)) {
+            screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][0] * 40.0f) << 4;
+            screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][1] * 40.0f) << 3) + 320;
+
+            colors[0] = packedColor;
+            colors[1] = packedColor;
+            colors[2] = packedColor;
+            colors[3] = packedColor;
+            set = battle->resB;
+            effDrawSpriteWithCornerColors(screen[0] - (width >> 1),
+                          screen[1] - (height >> 1) - animationOffset,
+                          -0x10, colors, 0, set, slot, 0x5E);
+        }
+    }
+
+    args->payload.counter.elapsedTicks++;
+    return args->payload.counter.elapsedTicks >= 0x1E;
+}
 
 /* Decrement the counter-display task's unit counter without underflowing zero. */
 void effDecrementSecondCountdown(u32 *arguments) {
