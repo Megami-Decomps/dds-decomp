@@ -189,7 +189,7 @@ void billFlushPendingChildPackets(void) {
 }
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
-extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern f32 billPairFacingReferenceAxis[4];
 extern f32 billPairFacingScale[4];
 extern BillRenderPair *billPendingRenderPairList;
@@ -217,7 +217,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         node->packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(node->packetList);
         framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-        sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), framePacket, 0);
+        sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, framePacket, 0);
         sdfAppendDmaTagToList(node->packetList, (u32)framePacket);
         state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
         state->dmaTag = 3;
@@ -390,7 +390,7 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
 }
 
 extern SdfPoolNode D_00380228;
-extern void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = billPendingRenderPairList;
@@ -412,7 +412,7 @@ void billFlushPendingRenderPairs(void) {
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;

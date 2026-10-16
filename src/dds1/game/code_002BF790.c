@@ -867,16 +867,16 @@ void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
-extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
-extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
@@ -889,7 +889,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];

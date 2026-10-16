@@ -1030,21 +1030,21 @@ void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *lin
 }
 
 /* Reference the masked FRAME write (FBMSK 0x00FFFFFF); zero selects GS context one, otherwise two. */
-void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
     if (gsContext == 0) {
-        sdfBuildDmaReferenceChain(packet, source + 0x180, 1);
+        sdfBuildDmaReferenceChain(packet, (u32)(source + 0x180), 1);
         return;
     }
-    sdfBuildDmaReferenceChain(packet, source + 400, 1);
+    sdfBuildDmaReferenceChain(packet, (u32)(source + 400), 1);
 }
 
 /* Reference the unmasked FRAME write; zero selects GS context one, otherwise two. */
-void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
     if (gsContext == 0) {
-        sdfBuildDmaReferenceChain(packet, source + 0x70, 1);
+        sdfBuildDmaReferenceChain(packet, (u32)(source + 0x70), 1);
         return;
     }
-    sdfBuildDmaReferenceChain(packet, source + 0xb0, 1);
+    sdfBuildDmaReferenceChain(packet, (u32)(source + 0xb0), 1);
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
