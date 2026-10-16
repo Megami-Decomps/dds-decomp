@@ -10815,7 +10815,160 @@ void effCopyCameraSnapshotSelection(void) {
     D_003BD10A = D_003DF840[0x8A];
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B8108);
+extern f32 atan2f(f32, f32);
+#include "sdf_vu_matrix.h"
+extern u8 D_003BD10B;
+extern f32 acosf(f32);
+extern f32 atan2f(f32, f32);
+s32 func_002B8108(void) {
+    f32 center[4];
+    f32 point[4];
+    f32 selected[4];
+    f32 direction[4];
+    f32 radius;
+    f32 angle;
+    f32 length;
+    f32 pitch;
+    s32 flags = 1;
+    s32 i;
+
+    btlBossDebugPrintfN(8, 8, 0, D_003B3A90);
+    btlBossDebugPrintfN(8, 20, 0, D_003B3AA8);
+    btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : ROLL");
+    if (sdfPadButtonStates[6] & 2) {
+        if ((s8)D_003BD108 == 8) {
+            D_003BD10B = -1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        } else if ((s8)D_003BD108 == -8) {
+            D_003BD10B = 1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        }
+        D_003BD108 += D_003BD10B;
+        flags = 3;
+    } else if (sdfPadButtonStates[7] & 2) {
+        if ((s8)D_003BD108 == 8) {
+            D_003BD10B = 1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        } else if ((s8)D_003BD108 == -8) {
+            D_003BD10B = -1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        }
+        D_003BD108 -= D_003BD10B;
+        flags = 3;
+    }
+    /* At either pole, directional input changes roll instead of azimuth.
+     * It consumes this tick's roll input as well. */
+    if (sdfPadButtonStates[5] & 2) {
+        if ((s8)D_003BD108 == 8 || (s8)D_003BD108 == -8) {
+            goto increaseRoll;
+        }
+        if ((s8)D_003BD109 == 15) {
+            D_003BD109 = 0;
+        } else {
+            D_003BD109++;
+        }
+        flags |= 2;
+    } else if (sdfPadButtonStates[4] & 2) {
+        if ((s8)D_003BD108 == 8 || (s8)D_003BD108 == -8) {
+            goto decreaseRoll;
+        }
+        {
+            s32 heading = (s8)D_003BD109;
+            s32 encoded = D_003BD109;
+            if (heading == 0) {
+                D_003BD109 = 15;
+            } else {
+                D_003BD109 = encoded - 1;
+            }
+        }
+        flags |= 2;
+    }
+    if (sdfPadButtonStates[11] & 2) {
+increaseRoll:
+        if ((s8)D_003BD10A == 15) {
+            D_003BD10A = 0;
+        } else {
+            D_003BD10A++;
+        }
+        flags |= 2;
+    } else if (sdfPadButtonStates[9] & 2) {
+decreaseRoll:
+        {
+            s32 roll = (s8)D_003BD10A;
+            s32 encoded = D_003BD10A;
+            if (roll == 0) {
+                D_003BD10A = 15;
+            } else {
+                D_003BD10A = encoded - 1;
+            }
+        }
+        flags |= 2;
+    }
+    VU0_LOAD_VF(vf10, D_003DFA20);
+    VU0_LOAD_VF(vf11, D_003DF910);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, center);
+    VU0_STORE_VF(vf10, point);
+    radius = 0.0f;
+    for (i = -8; i < 9; i++) {
+        f32 sampleRadius;
+        angle = (f32)i * 0.19634954f;
+        point[1] = sdfSinPoly(angle) * -200.0f + center[1];
+        sampleRadius = sdfEvaluateCosineViaSinePhaseShift(angle) * 200.0f;
+        if ((s8)D_003BD108 == i) {
+            radius = sampleRadius;
+            PCP_COPY_VECTOR(selected, point);
+            btlDebugDrawRadiusGuide(point, sampleRadius, 0x80004040, 0);
+        } else {
+            btlDebugDrawRadiusGuide(point, sampleRadius, 0x80404040, 0);
+        }
+    }
+    btlDebugDrawSegment(selected, center, 0x80006060);
+    angle = (f32)(s8)D_003BD109 * 0.39269908f;
+    point[0] = selected[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    point[1] = selected[1];
+    point[2] = selected[2] + sdfSinPoly(angle) * radius;
+    btlDebugDrawSegment(point, selected, 0x80006060);
+    VU0_LOAD_VF(vf10, point);
+    VU0_LOAD_VF(vf11, center);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    if (flags & 2) {
+        pitch = -acosf(-direction[1]);
+        sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(direction[0], direction[2]), 0.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, (f32)(s8)D_003BD10A * 0.39269908f, 0.0f);
+        VU0_LOAD_VF(vf11, direction);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF(vf10, D_003DFA30);
+    }
+    btlBossDebugPrintfN(8, 48, 0, "H:%2d,D:%2d,R:%2d",
+                       (s32)(s8)D_003BD108 + 8,
+                       (s32)(s8)D_003BD109, (s32)(s8)D_003BD10A);
+    D_003DF840[0x88] = D_003BD108;
+    D_003DF840[0x89] = D_003BD109;
+    D_003DF840[0x8A] = D_003BD10A;
+    if (sdfPadButtonStates[3] < 0) {
+        flags &= ~1;
+    } else {
+        flags |= 0x200000;
+    }
+    return flags;
+}
 
 s32 effResetCameraSnapshotSelection(void) {
     D_003DF840[0x88] = 8;
