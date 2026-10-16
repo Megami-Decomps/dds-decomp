@@ -2500,7 +2500,121 @@ void fldClearAllAreaFloorFlags(void) {
     } while (index < 0xd);
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00147188);
+extern f32 D_003BAEE8;
+extern s32 frFontMeasureTextAdvance(const u8 *, u8, u8);
+extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+void func_00147188(s32 unused) {
+    FldAreaWork *work;
+    s32 mode;
+    s32 map;
+    s32 record;
+    s32 lookupIndex;
+    s32 textWidth;
+    s32 x;
+    s32 y;
+    f32 alpha;
+    f32 positionX, positionY;
+    s32 xOffset;
+    s32 yOffset;
+
+    if (fldAreaState.unk118 == 1) {
+        return;
+    }
+    if (fldAreaState.area >= 200) {
+        return;
+    }
+
+    mode = fldAreaState.unkD4;
+    switch (mode) {
+    case 0:
+        alpha = 0.0f;
+        D_003BAEE8 = alpha;
+        break;
+    case 2:
+        alpha = D_003BAEE8;
+        if (alpha > 0.0f) {
+            alpha -= 0.1f;
+            if (alpha < 0.0f) {
+                alpha = 0.0f;
+                goto storeClampedAlpha;
+            }
+            D_003BAEE8 = alpha;
+        }
+        break;
+    case 3:
+        alpha = D_003BAEE8;
+        if (!(alpha < 1.0f)) {
+            break;
+        }
+        alpha += 0.1f;
+        if (!(1.0f < alpha)) {
+            D_003BAEE8 = alpha;
+            break;
+        }
+        /* A completed fade-in uses the fully visible state. */
+    case 1:
+        alpha = 1.0f;
+        D_003BAEE8 = alpha;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    default:
+        alpha = D_003BAEE8;
+        break;
+    }
+
+    goto interpolate;
+storeClampedAlpha:
+    D_003BAEE8 = alpha;
+interpolate:
+    positionX = alpha * 0.0f + (1.0f - alpha) * 250.0f;
+    positionY = alpha * 0.0f + (1.0f - alpha) * 0.0f;
+    xOffset = (s32)positionX;
+    yOffset = (s32)positionY;
+
+    work = &fldAreaState;
+    map = work->unkC8;
+    if (map != -1) {
+        if (D_003D4460[map] < 2) {
+            return;
+        }
+        {
+            s32 queryY = map;
+            s32 queryX = work->area % 100;
+            record = fldFindSecondaryMapLabelIndexByCoordinate(queryX, queryY);
+        }
+        textWidth = frFontMeasureTextAdvance((const u8 *)D_0034286C[record], 1, 0);
+        fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
+        if (textWidth >= 0x9E) {
+            x = 0x155;
+        } else {
+            x = 0x1A3 - textWidth / 2;
+        }
+        y = (yOffset + 0x12) / 2;
+        fldDrawConvertedTextGlyph(xOffset + x, y, 0xF0DC6480, (const u8 *)D_0034286C[record]);
+    } else {
+        lookupIndex = work->unkC4;
+        if (lookupIndex == map || D_003D43B0[lookupIndex] < 2) {
+            return;
+        }
+        {
+            s32 queryY = lookupIndex;
+            s32 queryX = work->area % 100;
+            record = fldFindMapLabelIndexByCoordinate(queryX, queryY);
+        }
+        textWidth = frFontMeasureTextAdvance((const u8 *)D_0033F06C[record], 1, 0);
+        fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
+        if (textWidth >= 0x9E) {
+            x = 0x155;
+        } else {
+            x = 0x1A3 - textWidth / 2;
+        }
+        y = (yOffset + 0x12) / 2;
+        fldDrawConvertedTextGlyph(xOffset + x, y, 0xA09DC380, (const u8 *)D_0033F06C[record]);
+    }
+}
 
 extern s32 fldEffectTextureLoadHandles[];
 
