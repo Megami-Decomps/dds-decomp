@@ -194,20 +194,20 @@ struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
 
 /* Return the stored allocation descriptor without changing ownership; work is required. */
 struct SdfMemBlock *fileGetResourceHandle(const struct FileRequest *request) {
-    const FileWork *work = (const FileWork *)request;
-    return work->resourceHandle;
+    const FileWork *requestWork = (const FileWork *)request;
+    return requestWork->resourceHandle;
 }
 
 /* Return the stored loaded-data address as its existing u32 representation. */
 u32 fileGetLoadedDataAddress(const struct FileRequest *request) {
-    const FileWork *work = (const FileWork *)request;
-    return work->loadedDataAddress;
+    const FileWork *requestWork = (const FileWork *)request;
+    return requestWork->loadedDataAddress;
 }
 
 /* Return the recorded resource size; work is required. */
 u32 fileGetResourceSize(const struct FileRequest *request) {
-    const FileWork *work = (const FileWork *)request;
-    return work->size;
+    const FileWork *requestWork = (const FileWork *)request;
+    return requestWork->size;
 }
 
 /* Return the still-unidentified work word at +0x10; do not infer its role. */
