@@ -7056,7 +7056,139 @@ s32 sndLookupResourceType(s32 sound, s32 index) {
     return *(u8 *)(datActionAnimationRecords + index * 0x20 + 3);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001F0CA0);
+void func_001F0CA0(BtlTask *task, BattleIndexWork *work) {
+    u32 targetCount = btlGetIndexListCount(work->indices);
+    BtlOperandGroup *group = work->groups;
+    BtlUnit *target;
+    s32 skillId;
+    u32 targetIndex;
+    u32 entryIndex;
+    u32 entryCount;
+    u32 commandByteOffset;
+    s32 groupKind;
+    u16 entryFlags;
+    u8 reflected;
+    u8 inactive;
+
+    if (work->phase == 4) {
+        skillId = btlGetLoggedIndexedCommandItem(work->reference);
+    } else {
+        skillId = work->skillId;
+    }
+
+    {
+        BtlUnit *actor = task->unit;
+        BtlUnit *companion = work->companionA;
+        actor->effectLink.flags = 0;
+        if (companion != NULL) {
+            companion->effectLink.flags = 0;
+        }
+    }
+    if (work->companionB != NULL) {
+        work->companionB->effectLink.flags = 0;
+    }
+    for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
+        target = (BtlUnit *)btlGetIndexListEntry(work->indices, targetIndex);
+        target->effectLink.flags = 0;
+    }
+
+    targetIndex = 0;
+    if (targetCount != 0) {
+        commandByteOffset = (u32)skillId * sizeof(DatCommandRecord);
+        do {
+            target = (BtlUnit *)btlGetIndexListEntry(work->indices, targetIndex);
+            groupKind = group->kind;
+            if (groupKind == 2) {
+                target->effectLink.flags |= 0x10;
+            }
+            if (groupKind == 0x10000) {
+                target->effectLink.flags |= 0x10;
+            }
+
+            reflected = group->reflected;
+            if (reflected != 0 || groupKind == 0x40000) {
+                BtlUnit *actor;
+                if ((u32)skillId < 0x260) {
+                    s32 animationKind = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skillId].effectKind;
+                    switch (animationKind) {
+                    case 3:
+                        actor = task->unit;
+                        target->effectLink.flags |= 0x10;
+                        break;
+                    case 4:
+                        target->effectLink.flags |= 0x10;
+                    case 0:
+                    case 1:
+                    case 2:
+                    default:
+                        actor = task->unit;
+                        target->effectLink.flags |= 0x20;
+                        actor->effectLink.flags |= 0x20;
+                        break;
+                    }
+                } else {
+                    actor = task->unit;
+                }
+                target = actor;
+            }
+
+            if (skillId >= 0) {
+                DatCommandRecord *record = (DatCommandRecord *)(commandByteOffset + (u32)datCommandRecords);
+                if (record->effectType == 2 || (record->flags & 0x20) != 0) {
+                    BtlUnit *actor = task->unit;
+                    target->effectLink.flags |= 8;
+                    actor->effectLink.flags |= 8;
+                }
+            }
+            inactive = group->inactive;
+            if (inactive != 0) {
+                target->effectLink.flags |= 1;
+            }
+
+            entryCount = group->count;
+            entryIndex = 0;
+            if (entryCount != 0) {
+                goto entry_dispatch;
+            entry_loop:
+                groupKind = group->kind;
+            entry_dispatch:
+                do {
+                    switch ((u32)groupKind) {
+                    case 2:
+                    case 4:
+                    case 0x10000:
+                    case 0x40000:
+                        break;
+                    default:
+                        if (btlActionEntryIsEmpty(skillId, group, &group->entries[entryIndex]) == 0) {
+                            target->effectLink.flags |= 4;
+                        }
+                        break;
+                    }
+                } while (0);
+
+                entryFlags = group->entries[entryIndex].flags;
+                if ((entryFlags & 1) != 0) {
+                    {
+                        BtlUnit *actor = task->unit;
+                        target->effectLink.flags |= 2;
+                        actor->effectLink.flags |= 2;
+                    }
+                    entryFlags = group->entries[entryIndex].flags;
+                }
+                if ((entryFlags & 2) != 0) {
+                    target->effectLink.flags |= 1;
+                }
+                entryIndex++;
+                if (entryIndex < entryCount) {
+                    goto entry_loop;
+                }
+            }
+            targetIndex++;
+            group++;
+        } while (targetIndex < targetCount);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B40);
 
