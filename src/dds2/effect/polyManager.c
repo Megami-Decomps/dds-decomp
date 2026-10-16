@@ -33,9 +33,9 @@ typedef struct {
     f32 targetRadiusJitter;
     f32 liftStep;
     u8 padE0[4];
-    void *unkE4;
+    void *dispatchArgB;
     u8 padE8[4];
-    void *unkEC;
+    void *dispatchArgA;
     ParSystem *strip;              /* 0xF0 */
     PolyBandRecord *records;       /* 0xF4 */
     struct SdfMemBlock *allocation; /* 0xF8 */
@@ -308,7 +308,7 @@ PolyBand *polyCreateBandNode(PolyRingHead *templateHead) {
         ((PolyRing *)band)->band.segments = 3;
     }
     band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
-    parDispatchSub(band->strip, 0, band->unkEC, band->unkE4);
+    parDispatchSub(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
     polyInitializeBandRecordAges(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
