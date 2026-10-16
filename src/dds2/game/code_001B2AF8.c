@@ -2969,7 +2969,7 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
     }
 }
 
-extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
+extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern char D_00436810[];
 extern s32 sprintf(char *, const char *, ...);
