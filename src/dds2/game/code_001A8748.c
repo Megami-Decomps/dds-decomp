@@ -153,7 +153,7 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
-extern s32 evtCheckValueThreshold(s32, s32);
+extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
 extern s32 sndUpdateTestMsgTask(KwlnTask *task);
