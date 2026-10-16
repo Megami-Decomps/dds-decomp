@@ -58,8 +58,8 @@ typedef struct FileWindowSlot {
     s32 secondValueCopy;
     s32 secondValue;
     u8 pad18[0xC];
-    s32 firstValue;
-    s32 firstValueCopy;
+    const void *sourceData;     /* 0x24: borrowed caller buffer address */
+    const void *sourceDataCopy; /* 0x28: duplicate value word */
     u8 pad2C[4];
 } FileWindowSlot;
 
@@ -99,9 +99,9 @@ typedef char FileWindowSlot_size_must_be_0x30[
     (sizeof(FileWindowSlot) == 0x30) ? 1 : -1];
 typedef char FileWindowSlot_secondValue_offset_check[
     ((u32)&((FileWindowSlot *)0)->secondValue == 0x14) ? 1 : -1];
-typedef char FileWindowSlot_firstValue_offset_check[
-    ((u32)&((FileWindowSlot *)0)->firstValue == 0x24) ? 1 : -1];
-typedef char FileWindowSlot_firstValueCopy_offset_check[
-    ((u32)&((FileWindowSlot *)0)->firstValueCopy == 0x28) ? 1 : -1];
+typedef char FileWindowSlot_sourceData_offset_check[
+    ((u32)&((FileWindowSlot *)0)->sourceData == 0x24) ? 1 : -1];
+typedef char FileWindowSlot_sourceDataCopy_offset_check[
+    ((u32)&((FileWindowSlot *)0)->sourceDataCopy == 0x28) ? 1 : -1];
 
 #endif /* FILE_MANAGER_VIEWS_H */

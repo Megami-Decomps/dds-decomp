@@ -271,8 +271,8 @@ void fileWaitIdle(void) {
 FileWindowSlot *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 size, s32 callbackAddress, s32 userDataAddress) {
     FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
 
-    requestSlot->firstValue = (s32)sourceData;
-    requestSlot->firstValueCopy = (s32)sourceData;
+    requestSlot->sourceData = sourceData;
+    requestSlot->sourceDataCopy = sourceData;
     requestSlot->secondValue = size;
     requestSlot->secondValueCopy = size;
     fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callbackAddress, userDataAddress);
