@@ -522,8 +522,7 @@ s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
     return 0;
 }
 
-u8 evtGetFlaggedRosterValue(s32 entryAddress) {
-    DatPartyRecord *entry = (DatPartyRecord *)entryAddress;
+u8 evtGetFlaggedRosterValue(DatPartyRecord *entry) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
