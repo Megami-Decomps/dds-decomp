@@ -45,7 +45,8 @@ extern void mnuSelectFirstListNode(struct MenuList *);
 
 extern void mnuDrawMovieMenuListItem();
 extern void sndStartTrackExtended(s32);
-extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 extern f32 fldVectorLength(f32 *);
 extern void sdfVec3SubtractInPlace(f32 *, f32 *);
 extern void fldRotateVectorAroundY(f32 *, f32);
