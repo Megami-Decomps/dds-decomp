@@ -1579,7 +1579,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 
 extern s32 frFontMeasureLineWidth(s32 row, FrFontGlyph *glyph);
 
-extern UiSprite *itfCreateUiSpriteByKind(s32, u32);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
