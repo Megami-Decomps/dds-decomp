@@ -8491,7 +8491,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         key >>= 16;
         btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
     } else {
-        if (work->unk264 >= 0xB) {
+        if (work->motionSeLoadFrame >= 0xB) {
             if (mnuGetSoundBufferStateLocked() != 0) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
@@ -8501,10 +8501,10 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             sdfDebugPrintf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
-            work->unk264 = 0;
+            work->motionSeLoadFrame = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
         } else {
-            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->unk264);
+            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->motionSeLoadFrame);
         }
         return 1;
     }
@@ -8540,7 +8540,7 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
 void btlResetMotionSoundFrameCounters(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
-    work->unk264 = -1;
+    work->motionSeLoadFrame = -1;
     work->unk268 = -1;
 }
 

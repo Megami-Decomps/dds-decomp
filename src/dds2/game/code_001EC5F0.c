@@ -7513,7 +7513,7 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
         key >>= 16;
         btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
     } else {
-        if (work->unk288 >= 0xB) {
+        if (work->motionSeLoadFrame >= 0xB) {
             if (mnuGetSoundBufferStateLocked() != 0) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
@@ -7522,10 +7522,10 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
             size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
-            work->unk288 = 0;
+            work->motionSeLoadFrame = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
         } else {
-            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->unk288);
+            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->motionSeLoadFrame);
         }
         return 1;
     }
@@ -7567,7 +7567,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
 /* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
 void btlResetMotionSoundFrameCounters(void) {
     s32 context = (s32)(u32)btlGetRuntime();
-    ((BtlState *)context)->unk288 = -1;
+    ((BtlState *)context)->motionSeLoadFrame = -1;
     ((BtlState *)context)->unk28C = -1;
 }
 
@@ -7623,8 +7623,8 @@ void btlUpdateMotionSoundLoading(void) {
         }
     }
 
-    if ((s32)state->unk288 >= 0) {
-        state->unk288++;
+    if ((s32)state->motionSeLoadFrame >= 0) {
+        state->motionSeLoadFrame++;
     }
     if ((s32)state->unk28C >= 0) {
         state->unk28C++;

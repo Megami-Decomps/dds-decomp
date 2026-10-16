@@ -475,7 +475,7 @@ typedef struct BtlState {
     u8 pad283;
     u16 earringPlaybackCount;
     u8 pad286[2];
-    u32 unk288;
+    u32 motionSeLoadFrame; /* 0x288: -1 disables the motion-SE ATRAC3 buffer delay. */
     u32 unk28C;
     u16 unk290;
     u16 unk292;
@@ -644,6 +644,8 @@ typedef struct BtlState {
     s16 debugMotionCountdown; /* 0xFD2: frames until preview motion; -1 when idle. */
 } BtlState;
 typedef char BtlEscapeAttemptCountDds2Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x278) ? 1 : -1];
+typedef char BtlMotionSeLoadFrameDds2Offset[
+    ((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x288) ? 1 : -1];
 typedef char BtlSceneLightOffset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightOffset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
 typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];
