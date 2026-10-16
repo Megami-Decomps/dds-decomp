@@ -40,13 +40,13 @@ struct PcpScatterWork4 {
 
 /* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
 f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
-    f32 saved;
+    f32 savedScaleFactor;
     f32 length = 0.0f;
     f32 step = 0.05f;
     f32 t = step;
     f32 segment;
 
-    saved = evtGetValueScaleFactor((EvtScaledValue *)path);
+    savedScaleFactor = evtGetValueScaleFactor((EvtScaledValue *)path);
     evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
     dds3InterpolatePathVectorVU(path);
     do {
@@ -60,7 +60,7 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
         VU0_MOVE_VF(vf10, vf12);
         t += step;
     } while (t <= 1.0f);
-    evtScaleValueByMultiplier((EvtScaledValue *)path, saved);
+    evtScaleValueByMultiplier((EvtScaledValue *)path, savedScaleFactor);
     return length;
 }
 
