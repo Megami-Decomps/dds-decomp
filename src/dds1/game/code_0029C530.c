@@ -4743,7 +4743,7 @@ typedef struct EffectSurfaceNode {
     u32 kind;
     EffSurfaceParams params; /* 0x10: copied source header */
     u32 index;
-    u32 handleBuffer;   // 0x30
+    struct SdfMemBlock *handleBuffer; // 0x30
     BillObj *resource;
     FileJobPayload **jobs;          // 0x38
     struct SdfMemBlock *jobAllocation;      // 0x3C
@@ -4751,6 +4751,8 @@ typedef struct EffectSurfaceNode {
     FileSlotTable *record; // 0x44: retained grid record table
     u16 count;          // 0x48: initialized to 1; remaining role unknown
 } EffectSurfaceNode;
+typedef char EffectSurfaceNode_handleBuffer_offset_check[
+    ((u32)&((EffectSurfaceNode *)0)->handleBuffer == 0x30) ? 1 : -1];
 
 /* Create an empty surface node for handleCount grid cells; no handles are allocated yet. */
 EffectSurfaceNode *effCreateSurfaceNode(u32 handleCount) {
@@ -4838,7 +4840,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         for (i = 0; i < node->handleCount; i++) {
             effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
+        sdfReleaseResourceAllocation(node->handleBuffer);
     }
     if (node->resourceHolder != 0) {
         effReleaseReferenceHolder(node->resourceHolder);
@@ -4940,10 +4942,10 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
         for (i = 0; i < node->handleCount; i++) {
             effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
+        sdfReleaseResourceAllocation(node->handleBuffer);
     }
-    node->handleBuffer = (u32)sdfAllocGeneralBlock(size);
-    node->index = sdfResourceRetainAddress((struct SdfMemBlock *)(node->handleBuffer));
+    node->handleBuffer = sdfAllocGeneralBlock(size);
+    node->index = sdfResourceRetainAddress(node->handleBuffer);
     for (i = 0; i < node->handleCount; i++) {
         handle = effCreateSurfaceGridNode(params[0], params[1]);
         ((u32 *)node->index)[i] = (u32)handle;
