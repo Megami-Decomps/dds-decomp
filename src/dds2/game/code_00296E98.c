@@ -149,42 +149,42 @@ void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 progress256, s32 entryI
                          mnuCommonIconPlacements[8][BRS_ICON_ID], drawArg);
 }
 
-void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
+void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 countdown) {
     MenuTerminalWindowState *window;
 
     window = list->context;
     if (window != NULL) {
-        window->command.value = value;
+        window->command.value = countdown;
         window->command.mode = 1;
     }
 }
 
-void mnuSetSelectionListTransition(struct MenuList *list, u32 value) {
+void mnuSetSelectionListTransition(struct MenuList *list, u32 countdown) {
     MenuTerminalWindowState *window;
 
     window = list->context;
     if (window != NULL) {
-        window->command.value = value;
+        window->command.value = countdown;
         window->command.mode = 2;
     }
 }
 
-void mnuSetValueListTransition(struct MenuList *list, u32 value) {
+void mnuSetValueListTransition(struct MenuList *list, u32 countdown) {
     MenuTerminalWindowState *window;
 
     window = list->context;
     if (window != NULL) {
-        window->command.value = value;
+        window->command.value = countdown;
         window->command.mode = 1;
     }
 }
 
-void mnuSetQuantityListTransition(struct MenuList *list, u32 value) {
+void mnuSetQuantityListTransition(struct MenuList *list, u32 countdown) {
     MenuTerminalWindowState *window;
 
     window = list->context;
     if (window != NULL) {
-        window->command.value = value;
+        window->command.value = countdown;
         window->command.mode = 2;
     }
 }
