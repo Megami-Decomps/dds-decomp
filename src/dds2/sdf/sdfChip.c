@@ -73,7 +73,7 @@ void sdfReleaseChipBlock(void *memory) {
 }
 
 void sdfQueuePendingChipRelease(void *memory) {
-    sdfPendingQueuePush(&sdfChipReleaseRequest, (u32)memory);
+    sdfPendingQueuePush(&sdfChipReleaseRequest, memory);
 }
 
 s32 sdfChipIsInRange(s32 address) {

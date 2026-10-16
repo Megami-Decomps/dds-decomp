@@ -7,10 +7,10 @@
 #define SDF_PENDING_BUFFER_BYTES 0x100
 #define SDF_PENDING_BUFFER_CAPACITY 0x3F
 
-/* A queued batch links its next chunk before 63 stored entry words. */
+/* A queued batch links its next chunk before 63 deferred owner addresses. */
 typedef struct SdfPendingBuffer {
     struct SdfPendingBuffer *next;
-    u32 entry[SDF_PENDING_BUFFER_CAPACITY];
+    void *entry[SDF_PENDING_BUFFER_CAPACITY];
 } SdfPendingBuffer;
 
 /* One pending callback owner's node: global-chain link, owner, data chunk,
@@ -24,9 +24,11 @@ struct SdfPendingNode {
 
 typedef char SdfPendingNode_size_must_be_0x10[(sizeof(SdfPendingNode) == 0x10) ? 1 : -1];
 typedef char SdfPendingBuffer_size_must_be_0x100[(sizeof(SdfPendingBuffer) == 0x100) ? 1 : -1];
+typedef char SdfPendingBuffer_entry_offset_must_be_0x04[
+    ((u32)&((SdfPendingBuffer *)0)->entry == 0x04) ? 1 : -1];
 
 void sdfInitializeSynchronizedRequest(SdfPendingRequest *request, SdfPendingCallback callback);
-void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry);
+void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry);
 SdfPendingNode *sdfDetachQueue(void);
 
 #endif

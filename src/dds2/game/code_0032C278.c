@@ -396,12 +396,12 @@ void sdfInitializeSynchronizedRequest(SdfPendingRequest *request, SdfPendingCall
 }
 
 /* Queue an entry on the owner's pending node, adding a node or buffer chunk as needed. */
-void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry) {
+void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry) {
     SdfPendingNode *pendingNode;
     SdfPendingBuffer *entryBuffer;
     s32 freeEntries;
 
-    if (entry != 0) {
+    if (entry != NULL) {
         WaitSema(sdfPendingQueueSemaphore);
         pendingNode = owner->pending;
         if (pendingNode == NULL) {
@@ -1856,7 +1856,7 @@ void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
         sdfDestroyDevRequest(slot->slotPairs);
     }
     if (recycle != 0) {
-        sdfPendingQueuePush(&sdfObjectListReleaseQueue, (u32)slot);
+        sdfPendingQueuePush(&sdfObjectListReleaseQueue, slot);
     } else {
         sdfDestroyDevRequest(slot->list);
         sdfReleaseChipBlock(slot);

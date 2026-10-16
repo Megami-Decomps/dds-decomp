@@ -147,7 +147,7 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
 /* Zero is a sentinel and is never submitted to the pending queue. */
 void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *allocation) {
     if (allocation != NULL) {
-        sdfPendingQueuePush(&sdfGeneralReleaseRequest, (u32)allocation);
+        sdfPendingQueuePush(&sdfGeneralReleaseRequest, allocation);
     }
 }
 
