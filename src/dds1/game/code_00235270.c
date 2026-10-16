@@ -3556,17 +3556,17 @@ s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
 }
 
 s32 evtIndexGroupTypeElevenChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xB) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->duration = index++;
+                child->duration = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeThirteenChildren(EvtRuntime *runtime) {
