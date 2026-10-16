@@ -129,24 +129,24 @@ extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
 void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *entry, s32 context, s32 index) {
-    s32 level = work->levelAnimation[index].level;
+                   BrsProgressRow *entry, s32 context, s32 rowIndex) {
+    s32 level = work->levelAnimation[rowIndex].level;
     s32 fade = 0x100 - work->fadeProgress;
     s32 nextLevel = level + 1;
     s32 currentExp;
     s32 finished;
 
     nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
-    switch (work->levelAnimation[index].state) {
+    switch (work->levelAnimation[rowIndex].state) {
     case 0:
-        work->levelAnimation[index].alpha = uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
-        if (work->levelAnimation[index].alpha >= 0x80) {
-            work->levelAnimation[index].state = 1;
+        work->levelAnimation[rowIndex].alpha = uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
+        if (work->levelAnimation[rowIndex].alpha >= 0x80) {
+            work->levelAnimation[rowIndex].state = 1;
         }
         break;
     case 1:
-        work->levelAnimation[index].state++;
-        if (work->levelAnimation[index].remaining > 0 && work->resultPhase == 0) {
+        work->levelAnimation[rowIndex].state++;
+        if (work->levelAnimation[rowIndex].remaining > 0 && work->resultPhase == 0) {
             mnuSetTitleSequenceVolumePan(0x14);
             work->resultPhase = 1;
         }
@@ -155,27 +155,27 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
     case 3:
     case 4:
         if (level < 99 && entry->unit->hp != 0 && (entry->unit->status & 0x4000) == 0) {
-            if (work->levelAnimation[index].state == 3) {
+            if (work->levelAnimation[rowIndex].state == 3) {
                 goto flash;
             }
-            work->levelAnimation[index].applied = brsCalcProgressAnimationStep(work, entry, index, 0);
-            currentExp = work->levelAnimation[index].currentProgress + work->levelAnimation[index].applied;
-            work->levelAnimation[index].currentProgress = currentExp;
-            if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[index].state == 2) {
-                work->levelAnimation[index].level++;
-                work->levelAnimation[index].level = work->levelAnimation[index].level < 2 ? 1 : (work->levelAnimation[index].level > 99 ? 99 : work->levelAnimation[index].level);
+            work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(work, entry, rowIndex, 0);
+            currentExp = work->levelAnimation[rowIndex].currentProgress + work->levelAnimation[rowIndex].applied;
+            work->levelAnimation[rowIndex].currentProgress = currentExp;
+            if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[rowIndex].state == 2) {
+                work->levelAnimation[rowIndex].level++;
+                work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
                 if (work->skipProgressAnimation != 0) {
                     finished = 0;
-                    while (work->levelAnimation[index].level < 99) {
-                        nextLevel = work->levelAnimation[index].level + 1;
+                    while (work->levelAnimation[rowIndex].level < 99) {
+                        nextLevel = work->levelAnimation[rowIndex].level + 1;
                         nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
                         if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level)) {
-                            work->levelAnimation[index].level++;
-                            work->levelAnimation[index].level = work->levelAnimation[index].level < 2 ? 1 : (work->levelAnimation[index].level > 99 ? 99 : work->levelAnimation[index].level);
+                            work->levelAnimation[rowIndex].level++;
+                            work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
                         } else {
                             finished = 1;
                         }
-                        if (work->levelAnimation[index].level >= 99) {
+                        if (work->levelAnimation[rowIndex].level >= 99) {
                             finished = 1;
                         }
                         if (finished != 0) {
@@ -183,36 +183,36 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
                         }
                     }
                 }
-                work->levelAnimation[index].iconState = 1;
-                work->levelAnimation[index].completionState = 1;
-                work->levelAnimation[index].completionFlashActive = 1;
-                work->levelAnimation[index].iconOpacity = 0x80;
-                work->levelAnimation[index].iconFrame = 0;
-                work->levelAnimation[index].alpha = 0;
-                work->levelAnimation[index].state++;
+                work->levelAnimation[rowIndex].iconState = 1;
+                work->levelAnimation[rowIndex].completionState = 1;
+                work->levelAnimation[rowIndex].completionFlashActive = 1;
+                work->levelAnimation[rowIndex].iconOpacity = 0x80;
+                work->levelAnimation[rowIndex].iconFrame = 0;
+                work->levelAnimation[rowIndex].alpha = 0;
+                work->levelAnimation[rowIndex].state++;
                 mnuSetTitleSequenceVolumePan(0x12);
             }
         } else {
-            work->levelAnimation[index].remaining = 0;
+            work->levelAnimation[rowIndex].remaining = 0;
         }
-        if (work->levelAnimation[index].state == 3) {
+        if (work->levelAnimation[rowIndex].state == 3) {
 flash:
-            work->levelAnimation[index].iconFrame++;
-            work->levelAnimation[index].iconFrame = work->levelAnimation[index].iconFrame <= 0 ? 0 : (work->levelAnimation[index].iconFrame > 15 ? 15 : work->levelAnimation[index].iconFrame);
-            if (work->levelAnimation[index].iconFrame >= 15) {
-                work->levelAnimation[index].state++;
+            work->levelAnimation[rowIndex].iconFrame++;
+            work->levelAnimation[rowIndex].iconFrame = work->levelAnimation[rowIndex].iconFrame <= 0 ? 0 : (work->levelAnimation[rowIndex].iconFrame > 15 ? 15 : work->levelAnimation[rowIndex].iconFrame);
+            if (work->levelAnimation[rowIndex].iconFrame >= 15) {
+                work->levelAnimation[rowIndex].state++;
             }
-        } else if (work->levelAnimation[index].state == 4) {
-            work->levelAnimation[index].iconOpacity -= 16;
-            work->levelAnimation[index].iconOpacity = work->levelAnimation[index].iconOpacity <= 0 ? 0 : (work->levelAnimation[index].iconOpacity > 128 ? 128 : work->levelAnimation[index].iconOpacity);
-            if (work->levelAnimation[index].iconOpacity <= 0) {
-                work->levelAnimation[index].completionFlashActive = 0;
+        } else if (work->levelAnimation[rowIndex].state == 4) {
+            work->levelAnimation[rowIndex].iconOpacity -= 16;
+            work->levelAnimation[rowIndex].iconOpacity = work->levelAnimation[rowIndex].iconOpacity <= 0 ? 0 : (work->levelAnimation[rowIndex].iconOpacity > 128 ? 128 : work->levelAnimation[rowIndex].iconOpacity);
+            if (work->levelAnimation[rowIndex].iconOpacity <= 0) {
+                work->levelAnimation[rowIndex].completionFlashActive = 0;
             }
-            work->levelAnimation[index].alpha += 8;
-            work->levelAnimation[index].alpha = work->levelAnimation[index].alpha <= 0 ? 0 : (work->levelAnimation[index].alpha > 128 ? 128 : work->levelAnimation[index].alpha);
-            if (work->levelAnimation[index].alpha >= 128) {
-                work->levelAnimation[index].state = 2;
-                if (work->levelAnimation[index].remaining > 0 && work->resultPhase == 0) {
+            work->levelAnimation[rowIndex].alpha += 8;
+            work->levelAnimation[rowIndex].alpha = work->levelAnimation[rowIndex].alpha <= 0 ? 0 : (work->levelAnimation[rowIndex].alpha > 128 ? 128 : work->levelAnimation[rowIndex].alpha);
+            if (work->levelAnimation[rowIndex].alpha >= 128) {
+                work->levelAnimation[rowIndex].state = 2;
+                if (work->levelAnimation[rowIndex].remaining > 0 && work->resultPhase == 0) {
                     mnuSetTitleSequenceVolumePan(0x14);
                     work->resultPhase = 1;
                 }
