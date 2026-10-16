@@ -5677,7 +5677,7 @@ extern WorldTransformSetup D_00452F50;
 
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
 
-extern void evtBeginUnitValueColorTransition(EffWorldNode *, s32);
+extern void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 blendFrames);
 
 /* Stage light/ambient RGB on the scene node and start its frames-long blend. */
 void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames) {
