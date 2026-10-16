@@ -151,16 +151,16 @@ extern void EIntr(void);
 
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
 void *sdfAllocSizeClassBlock(s32 size) {
-    s32 index = 0;
+    s32 sizeClassIndex = 0;
     SdfChipClass *sizeClass;
     SdfChipCell *result;
     s32 interruptsDisabled;
 
     if (size > 16) {
-        EE_MMI_PLZCW(index, size - 1);
-        index = 27 - (index & 0xFF);
+        EE_MMI_PLZCW(sizeClassIndex, size - 1);
+        sizeClassIndex = 27 - (sizeClassIndex & 0xFF);
     }
-    sizeClass = &sdfChipClassTable.classes[index];
+    sizeClass = &sdfChipClassTable.classes[sizeClassIndex];
     interruptsDisabled = DIntr();
     if (sizeClass->currentPage == NULL) {
         result = sdfAllocFromNewChipPage(sizeClass);
