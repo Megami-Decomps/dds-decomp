@@ -24,15 +24,15 @@ extern ItfMesGlobals itfMesWork;
 
 
 
-extern void itfMesShiftPanelVertically(ItfMesState *, s32);
-extern void itfMesSetChildChainFlags(FrFontGlyph *, u8);
-extern s32 itfMesNthClearBit(s32, u32);
+extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
+extern void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue);
+extern s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask);
 extern s32 sndSeqSelectPoll(ItfMesState *);
 extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
 extern s32 frFontMeasureGlyphStripWidth();
 
-extern UiSprite *itfCreateUiSpriteByKind(s32, u32);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
