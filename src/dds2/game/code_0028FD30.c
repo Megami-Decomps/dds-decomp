@@ -272,8 +272,8 @@ const MantraAttributeNameTable mnuMantraAttributeNames __attribute__((aligned(8)
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
-s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *object, s8 direction) {
-    MantraNodePos *position = object->menu.defaultSelector;
+s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *resource, s8 direction) {
+    MantraNodePos *position = resource->menu.defaultSelector;
     s32 grid[2];
     s32 neighbor;
 
