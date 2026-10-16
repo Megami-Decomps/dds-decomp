@@ -153,11 +153,11 @@ void mnuReleaseMenuResourceSlots(void) {
     }
 }
 
-void mnuEnsureMovieMenuSpriteHandle(s32 mode) {
+void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
     u32 *handle = (u32 *)&((SpriteMenuState *)mnuMovieMenuState)->spriteHandle;
 
     if (*handle == 0) {
-        if (mode != 0) {
+        if (loadImmediately != 0) {
             const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle =
