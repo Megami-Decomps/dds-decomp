@@ -125,7 +125,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
 extern void effFlashTrianglePulseWriteCorners();
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
-extern void effFlashBillboardQuad(PcpFlashStreakWork *, s32, void *);
+extern void effFlashBillboardQuad(PcpFlashStreakWork *work, s32 index, void *view);
 extern void effDrawTriangleRecordPool(EffRecordPool *pool);
 
 
