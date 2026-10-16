@@ -618,13 +618,13 @@ u32 evtOpModelLodChg(void) {
 u32 evtSetWorldUnitPosition(void) {
     f32 vector[4];
     void *world;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
 
     memset(vector, 0, 0x10);
     world = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(world, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(world, worldObjectKey, 5);
     if (unit == NULL) {
         return 1;
     }
@@ -638,7 +638,7 @@ u32 evtSetWorldUnitPosition(void) {
 u32 evtOpSetWorldUnitRotationFromAngles(void) {
     f32 v[4];
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     f32 toRad;
     f32 x;
@@ -647,8 +647,8 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     memset(v, 0, 0x10);
     v[3] = 1.0f;
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return 1;
     }
@@ -667,14 +667,14 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
 u32 evtSetWorldUnitScale(void) {
     f32 vector[4];
     void *world;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
 
     memset(vector, 0, 0x10);
     vector[3] = 1.0f;
     world = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(world, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(world, worldObjectKey, 5);
     if (unit == NULL) {
         return 1;
     }
