@@ -3,10 +3,12 @@
 
 #include "common.h"
 
+struct FileRequest;
+
 /* Complete 0x14-byte payload allocated by the paired floor-load task creators. */
 typedef struct BtlFloorLoadArgs {
-    s32 frontHandle; /* 0x00: pending front-floor file request */
-    s32 sideHandle;  /* 0x04: pending side-floor file request */
+    struct FileRequest *frontHandle; /* 0x00: pending front-floor file request */
+    struct FileRequest *sideHandle;  /* 0x04: pending side-floor file request */
     s32 stage;       /* 0x08: stage used to form both resource paths */
     s32 variant;     /* 0x0C: floor variant used to form both paths */
     s32 state;       /* 0x10: callback phase */
