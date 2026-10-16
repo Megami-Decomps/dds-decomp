@@ -86,7 +86,7 @@ extern void evtResetObjectPendingValue(EffWorldNode *object);
 extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
-extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 extern s32 sdfDebugPrintf();
 extern u8 D_003AC480[];
 
@@ -669,11 +669,11 @@ u32 evtOpSetUnitParams5(void) {
         return 1;
     }
     {
-        s32 scriptParam1 = scrReadIntParameter(1);
-        s32 scriptParam2 = scrReadIntParameter(2);
-        s32 scriptParam3 = scrReadIntParameter(3);
-        s32 scriptParam4 = scrReadIntParameter(4);
-        evtPrepareUnitMotionState(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4);
+        s32 motionId = scrReadIntParameter(1);
+        s32 startFrame = scrReadIntParameter(2);
+        s32 endFrame = scrReadIntParameter(3);
+        s32 mode = scrReadIntParameter(4);
+        evtPrepareUnitMotionState(unit, motionId, startFrame, endFrame, mode);
     }
     return 1;
 }
