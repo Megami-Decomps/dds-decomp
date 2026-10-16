@@ -111,7 +111,7 @@ extern void fldResetActorSlots(void);
 
 extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
-extern void kwlnFadeSetRGB(s32, s32, s32);
+extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 extern void fldApplyPendingCameraHeading(void);
 extern void fldApplyRoomObjectModeZero(s32, s32, void *, s32);
 extern void fldBeginNpcInteractionById(s32);
