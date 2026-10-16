@@ -809,7 +809,7 @@ extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
 
 
 void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *row, s32 context, s32 index) {
+                   BrsProgressRow *row, s32 context, s32 rowIndex) {
     s32 fade = 0x100 - work->fadeProgress;
     s32 profileId;
     s32 cap;
@@ -822,20 +822,20 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
         cap = prfGetCapValue((u16)profileId);
     } else {
         cap = 0;
-        work->profileAnimation[index].remaining = 0;
+        work->profileAnimation[rowIndex].remaining = 0;
     }
-    currentProgress = work->profileAnimation[index].currentProgress;
-    switch (work->profileAnimation[index].state) {
+    currentProgress = work->profileAnimation[rowIndex].currentProgress;
+    switch (work->profileAnimation[rowIndex].state) {
     case 0:
-        work->profileAnimation[index].alpha =
+        work->profileAnimation[rowIndex].alpha =
             uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
-        if (work->profileAnimation[index].alpha >= 0x80) {
-            work->profileAnimation[index].state = 1;
+        if (work->profileAnimation[rowIndex].alpha >= 0x80) {
+            work->profileAnimation[rowIndex].state = 1;
         }
         break;
     case 1:
-        work->profileAnimation[index].state++;
-        if (work->profileAnimation[index].remaining > 0 && work->resultPhase == 0) {
+        work->profileAnimation[rowIndex].state++;
+        if (work->profileAnimation[rowIndex].remaining > 0 && work->resultPhase == 0) {
             mnuSetTitleSequenceVolumePan(0x14);
             work->resultPhase = 1;
         }
@@ -843,23 +843,23 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
     case 2:
     case 3:
     case 4:
-        if (work->profileAnimation[index].state == 2) {
+        if (work->profileAnimation[rowIndex].state == 2) {
             if (cap != 0) {
                 if (currentProgress < cap) {
-                    increment = brsCalcProgressAnimationStep(work, row, index, 1);
-                    work->profileAnimation[index].applied = increment;
-                    work->profileAnimation[index].currentProgress += increment;
-                    if (work->profileAnimation[index].currentProgress >= cap) {
-                        work->profileAnimation[index].iconState = 1;
-                        work->profileAnimation[index].completionState = 1;
-                        work->profileAnimation[index].completionFlashActive = 1;
-                        work->profileAnimation[index].iconOpacity = 0x80;
-                        work->profileAnimation[index].iconFrame = 0;
-                        work->profileAnimation[index].state++;
+                    increment = brsCalcProgressAnimationStep(work, row, rowIndex, 1);
+                    work->profileAnimation[rowIndex].applied = increment;
+                    work->profileAnimation[rowIndex].currentProgress += increment;
+                    if (work->profileAnimation[rowIndex].currentProgress >= cap) {
+                        work->profileAnimation[rowIndex].iconState = 1;
+                        work->profileAnimation[rowIndex].completionState = 1;
+                        work->profileAnimation[rowIndex].completionFlashActive = 1;
+                        work->profileAnimation[rowIndex].iconOpacity = 0x80;
+                        work->profileAnimation[rowIndex].iconFrame = 0;
+                        work->profileAnimation[rowIndex].state++;
                         mnuSetTitleSequenceVolumePan(0x12);
                     }
                 } else {
-                    work->profileAnimation[index].remaining = 0;
+                    work->profileAnimation[rowIndex].remaining = 0;
                 }
             }
         }
