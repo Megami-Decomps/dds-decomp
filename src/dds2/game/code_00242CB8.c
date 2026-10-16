@@ -14,8 +14,8 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
-extern void fldSetFadeTarget(s32, s32, s32);
-extern void evtBeginSkyParameterTransition(s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void evtBeginSkyParameterTransition(s32 duration, s32 target);
 
 extern s32 scrReadIntParameter(s32 idx);
 
