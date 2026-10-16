@@ -3453,14 +3453,14 @@ s32 evtViewerStoreMenuValueInPendingKey(s32 unused, s32 command, EvtRuntime *vie
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
-    s32 value = viewer->value;
+    s32 commandValue = viewer->value;
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
 
     if (entry == NULL) {
         return 0;
     }
-    entry->p08.h[0] = value;
-    if (((u32)(value << 16) >> 28) != 0) {
+    entry->p08.h[0] = commandValue;
+    if (((u32)(commandValue << 16) >> 28) != 0) {
         entry->p08.h[1] = 0;
     }
     evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
@@ -3471,33 +3471,33 @@ s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
 /* Store the command value in the selected halfword of a viewer entry. */
 u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *entry;
-    u32 value;
+    u32 commandValue;
     s32 slot;
-    value = viewer->value;
+    commandValue = viewer->value;
     entry = evtEventViewerGetPendingNode(viewer);
     if (entry != 0) {
         slot = viewer->frameGroup->type - 1;
         if ((u32)slot < 0x13u) {
             switch (slot) {
             case 0:
-                entry->p10.h[0] = value;
+                entry->p10.h[0] = commandValue;
                 break;
             case 11:
             case 15:
             case 16:
-                entry->p14.h[0] = value;
+                entry->p14.h[0] = commandValue;
                 break;
             case 3:
-                entry->p08.h[1] = value;
+                entry->p08.h[1] = commandValue;
                 break;
             case 4:
-                entry->p08.h[1] = value;
+                entry->p08.h[1] = commandValue;
                 break;
             case 1:
-                entry->p0C.h[0] = value;
+                entry->p0C.h[0] = commandValue;
                 break;
             case 18:
-                entry->p0C.h[0] = value;
+                entry->p0C.h[0] = commandValue;
                 break;
             }
         }
