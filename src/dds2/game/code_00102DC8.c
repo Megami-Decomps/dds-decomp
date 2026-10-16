@@ -1242,7 +1242,7 @@ extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
-s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
+s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 aspect) {
     SdfTex *texture;
 
     if (kwlnHeldTextureReference != 0) {
@@ -1262,7 +1262,7 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     kwlnHeldTextureReference = texture;
     sdfTexSetClampMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
     sdfTexCreateFirstPacket(texture);
-    D_0037F7B0.camera.aspect = value;
+    D_0037F7B0.camera.aspect = aspect;
     D_0037F7B0.camera.width = width;
     D_0037F7B0.camera.height = height;
     kwlnInitHeldTextureScenePackets();
