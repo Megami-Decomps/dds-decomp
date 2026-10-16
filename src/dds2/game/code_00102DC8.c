@@ -80,7 +80,7 @@ extern s32 sprintf();
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 extern s32 kwlnDebugGraphUpdate(KwlnTask *task);
 
