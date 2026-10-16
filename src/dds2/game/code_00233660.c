@@ -2715,7 +2715,80 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlViewerEnd);
+extern SdfPoolNode D_003805A8;
+extern SdfPoolNode *D_00380788[];
+s32 mdlViewerEnd(KwlnTask *task)
+{
+  f32 step = mdlViewerState.viewerScale;
+  s32 i;
+  if (mdlViewerState.unitStepMode != 0)
+  {
+    i = 0;
+    do
+    {
+      Motion *motion;
+      if (mdlViewerState.resources[i] != 0)
+      {
+        motion = mdlViewerState.resources[i]->first;
+        if (motion != 0)
+        {
+          memset(&motion->frameStep, 0, sizeof(motion->frameStep));
+          switch (mdlViewerState.unitStepSign)
+          {
+            case 1:
+              motion->frameStep = step;
+              break;
+            case -1:
+            {
+              f32 frame = motion->currentFrame;
+              frame -= step;
+              if (frame < 0.0f)
+              {
+                do
+                {
+                  frame += motion->frameCount;
+                }
+                while (frame < motion->frameStep);
+              }
+              sdfMotionSampleAtFrame(motion, frame);
+              break;
+            }
+          }
+        }
+        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], D_00380788);
+        if (((s8) mdlViewerState.unk0E) != 0)
+        {
+          mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
+        }
+      }
+      i++;
+    }
+    while (i != MDL_VIEWER_RESOURCE_SLOTS);
+  }
+  else
+  {
+    i = 0;
+    do
+    {
+      if (mdlViewerState.resources[i] != 0)
+      {
+        if (mdlViewerState.resources[i]->first != 0)
+        {
+          mdlViewerState.resources[i]->first->frameStep = step;
+        }
+        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], D_00380788);
+        if (((s8) mdlViewerState.unk0E) != 0)
+        {
+          mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
+        }
+      }
+      i++;
+    }
+    while (i != MDL_VIEWER_RESOURCE_SLOTS);
+  }
+  D_003805A8.append(&D_003805A8, mdlViewerState.packetList);
+  return 0;
+}
 
 
 extern char D_003C88A8[];
