@@ -385,7 +385,7 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
 
 extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the

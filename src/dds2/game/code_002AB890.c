@@ -655,7 +655,7 @@ s32 mnuFinishStaffReturnPopup(KwlnTask *callback) {
 }
 
 extern s32 evtGetIndexedEventRecordId(s32);
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 
 s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context) {
