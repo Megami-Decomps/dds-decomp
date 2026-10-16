@@ -609,7 +609,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
 }
 
 /* Consume up to size disc-file bytes, retaining a partial sector; return the byte count. */
-s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
+s32 sdfDevReadDiscFileBytes(void *buffer, s32 byteCount) {
     s32 available = D_003BDA4C;
     u8 *destination = buffer;
     s32 bytes;
@@ -619,18 +619,18 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
     if (available <= 0) {
         return 0;
     }
-    if (size > available) {
-        size = available;
+    if (byteCount > available) {
+        byteCount = available;
     }
-    if (size == 0) {
+    if (byteCount == 0) {
         return 0;
     }
 
-    bytes = size;
+    bytes = byteCount;
     transferBytes = sdfDevReadSectorBytesAvailable;
     if (transferBytes > 0) {
-        if (transferBytes > size) {
-            transferBytes = size;
+        if (transferBytes > byteCount) {
+            transferBytes = byteCount;
         }
         memcpy(destination, sdfDevReadSectorCursor, transferBytes);
         destination += transferBytes;
@@ -668,11 +668,11 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
             }
         }
     }
-    D_003BDA4C = available - size;
+    D_003BDA4C = available - byteCount;
     if (D_003BDA4C == 0) {
         sdfServicePendingOperationUnderSemaphore();
     }
-    return size;
+    return byteCount;
 }
 
 void sdfServicePendingOperationUnderSemaphore(void) {
