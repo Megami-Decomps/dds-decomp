@@ -256,9 +256,9 @@ extern s32 fldSetMapTargetFlag(s32, s32, s32, s32);
 
 extern s32 fldSetAlternateMapTargetFlag(s32, s32, s32, s32);
 
-extern void fldClearFloorFlag(s32, s32, s32);
+extern void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
-extern void fldSetFloorFlag(s32, s32, s32);
+extern void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 extern s32 scrReadIntParameter(s32);
@@ -1315,25 +1315,25 @@ s32 fldCmdSetMapSlotByte(void) {
 
 s32 fldCmdClearFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_00389780[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldSetFloorFlag(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldSetFloorFlag(area, floor, flagNumber);
     return 1;
 }
 
 s32 fldCmdSetFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_00389780[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldClearFloorFlag(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldClearFloorFlag(area, floor, flagNumber);
     return 1;
 }
 

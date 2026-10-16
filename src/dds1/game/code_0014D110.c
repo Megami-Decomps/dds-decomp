@@ -948,31 +948,31 @@ s32 fldCmdSetMapSlotByte(void) {
     return 1;
 }
 
-extern void fldSetFlagBit(s32, s32, s32);
+extern void fldSetFlagBit(s32 area, s32 floor, s32 flagNumber);
 
 s32 fldCmdSetFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_0032E3C0[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_0032E3C4[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldSetFlagBit(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldSetFlagBit(area, floor, flagNumber);
     return 1;
 }
 
-extern void fldClearFloorFlag(s32, s32, s32);
+extern void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 s32 fldCmdClearFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_0032E3C0[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_0032E3C4[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldClearFloorFlag(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldClearFloorFlag(area, floor, flagNumber);
     return 1;
 }
 
