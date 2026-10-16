@@ -227,7 +227,7 @@ extern SdfSoundRpcRequest *D_003BDA74;
 extern s32 D_003BDA78;
 extern DevState *D_003BDA7C;
 extern SdfSoundResidentBuffer D_003FEA98;
-extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
+extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
