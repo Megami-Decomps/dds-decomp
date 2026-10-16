@@ -489,17 +489,17 @@ s32 evtEventViewerFindNameIndex(const char *name, EvtRuntime *viewer)
 /* Return the index of a name in the table, appending it when missing. */
 s32 evtEventViewerAddName(const char *name, EvtRuntime *viewer)
 {
-    s32 found;
-    s32 index;
+    s32 existingNameIndex;
+    s32 newNameIndex;
 
-    found = evtEventViewerFindNameIndex(name, viewer);
-    if (found >= 0) {
-        return found;
+    existingNameIndex = evtEventViewerFindNameIndex(name, viewer);
+    if (existingNameIndex >= 0) {
+        return existingNameIndex;
     }
-    index = viewer->entryTotal;
-    strcpy(viewer->entryName[index], name);
+    newNameIndex = viewer->entryTotal;
+    strcpy(viewer->entryName[newNameIndex], name);
     viewer->entryTotal++;
-    return index;
+    return newNameIndex;
 }
 
 struct EffectObj;
