@@ -131,7 +131,7 @@ ObjBase *dds3CreateSlotResourceState(void *owner) {
     WorldIndexNode *node;
 
     memset(state, 0, sizeof(ObjBase));
-    state->resourceState = DDS3_OBJECT_RESOURCE_RELEASED;
+    state->resourceState = 3;
     node = dds3AppendWorldIndexNode(0);
     state->worldIndexNode = node;
     state->slots[0] = owner;

@@ -8,20 +8,12 @@
  * Object resources, indexed slots and motion control share the same record. */
 #define DDS3_OBJECT_RESOURCE_SLOT_COUNT 24
 
-typedef enum ObjBaseResourceState {
-    DDS3_OBJECT_RESOURCE_MODEL_CONTEXT = 0,
-    DDS3_OBJECT_RESOURCE_DEV_MOTION = 1,
-    /* Observed on effect object handles; its lifecycle meaning is unknown. */
-    DDS3_OBJECT_RESOURCE_STATE_2 = 2,
-    DDS3_OBJECT_RESOURCE_RELEASED = 3
-} ObjBaseResourceState;
-
 struct Motion;
 
 typedef struct ObjBase {
     u32 flags;
     struct WorldIndexNode *worldIndexNode;
-    ObjBaseResourceState resourceState;
+    u32 resourceState;
     void *resourceHandle; /* MdlCtx or SdfModel pointer according to resourceState. */
     void *slots[8];
     void *extData;
@@ -37,10 +29,6 @@ typedef struct ObjBase {
 } ObjBase;
 
 typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
-typedef char ObjBase_resourceState_size_must_be_0x04[
-    (sizeof(((ObjBase *)0)->resourceState) == 0x04) ? 1 : -1];
-typedef char ObjBase_resourceState_offset_must_be_0x08[
-    ((u32)&((ObjBase *)0)->resourceState == 0x08) ? 1 : -1];
 typedef char ObjBase_resourceSlotFamily_offset_must_be_0xAC[
     ((u32)&((ObjBase *)0)->resourceSlotFamily == 0xAC) ? 1 : -1];
 
