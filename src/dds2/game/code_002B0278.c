@@ -3830,16 +3830,16 @@ MenuListNode *mnuWalkNodeList(s32 index, MenuList *list) {
     return node;
 }
 
-s32 mnuSeekListNode(s32 index, MenuList *list) {
+s32 mnuSeekListNode(s32 targetIndex, MenuList *list) {
     s32 size = list->count;
 
-    if (index >= size) {
+    if (targetIndex >= size) {
         return 0;
     }
     list->windowOffset = 0;
     list->head = list->first;
     list->cursor = list->first;
-    if (index > 0) {
+    if (targetIndex > 0) {
         do {
             if (size - list->head->index <= list->visibleCount) {
                 list->windowOffset += 1;
@@ -3847,8 +3847,8 @@ s32 mnuSeekListNode(s32 index, MenuList *list) {
                 list->head = list->head->next;
             }
             list->cursor = list->cursor->next;
-            index--;
-        } while (index != 0);
+            targetIndex--;
+        } while (targetIndex != 0);
     }
     return 1;
 }
