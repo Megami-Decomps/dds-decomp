@@ -1462,8 +1462,8 @@ u32 evtUnitCheckModelCut(void) {
     return 1;
 }
 
-f32 evtComputeClampedModelScale(s32 index) {
-    f32 scale = (D_00435DF0[index].unk18 + D_00435DF0[index].unk1C * 0.5f) * 0.5f * D_00435DF0[index].unk10 * (1.0f / 70.0f);
+f32 evtComputeClampedModelScale(s32 modelRecordIndex) {
+    f32 scale = (D_00435DF0[modelRecordIndex].unk18 + D_00435DF0[modelRecordIndex].unk1C * 0.5f) * 0.5f * D_00435DF0[modelRecordIndex].unk10 * (1.0f / 70.0f);
 
     if (scale > 2.0f) {
         scale = 2.0f;
@@ -1479,15 +1479,15 @@ u32 evtOpSetModelCutAndScale(void) {
     unit = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (unit != NULL) {
         s32 mode = scrReadIntParameter(1);
-        s32 index;
+        s32 modelRecordIndex;
         if ((u32)mode >= 3) {
             evtPrintDeveloperConsoleMessage(D_00421AF8, mode);
             return 1;
         }
         effObjReplaceActiveEventNode(unit, mode);
-        index = scrReadIntParameter(2);
-        if (index >= 0) {
-            f32 value = evtComputeClampedModelScale(index);
+        modelRecordIndex = scrReadIntParameter(2);
+        if (modelRecordIndex >= 0) {
+            f32 value = evtComputeClampedModelScale(modelRecordIndex);
             void *target = ((EvtModelHeader *)unit->data)->target2C;
             if (target != NULL) {
                 effEventSetScale(target, value);
