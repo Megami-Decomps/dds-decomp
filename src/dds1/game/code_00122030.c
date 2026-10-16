@@ -1030,7 +1030,7 @@ extern FieldVec4 D_0039FC40;
 extern char D_0039FC50[];
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern s32 D_0032E4C8[];
-extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
+extern void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId);
 extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
 extern s32 fldUpdateCameraObjectPose(void);
 
