@@ -10,7 +10,7 @@ extern u8 evtPictureQuadColor[];
 extern SdfPoolNode D_003255A8;
 #include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 index, s32 flag);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorData, s32 tail, SdfTex *texture, s32 flag, SdfListHead *command);
 
 void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
     SdfListHead *packet;
