@@ -1011,10 +1011,10 @@ void fldActivateRoomFlagObjects(void) {
     char collisionName[16];
     char pathName[16];
     void *world = dds3GetWorldSecondaryObject();
-    s32 index;
+    s32 roomFlagIndex;
 
-    for (index = 1; index < 16; index++) {
-        if (fldTestMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, index)) {
+    for (roomFlagIndex = 1; roomFlagIndex < 16; roomFlagIndex++) {
+        if (fldTestMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomFlagIndex)) {
             s32 modelKey, collisionKey;
             EffWorldNode *object;
             EffWorldNode *path;
@@ -1022,9 +1022,9 @@ void fldActivateRoomFlagObjects(void) {
             EffWorldNode *slot;
             Dds3SlotResource *resource;
 
-            sprintf(modelName, D_0039FE08, index);
-            sprintf(collisionName, D_0039FE18, index);
-            sprintf(pathName, D_0039FE28, index);
+            sprintf(modelName, D_0039FE08, roomFlagIndex);
+            sprintf(collisionName, D_0039FE18, roomFlagIndex);
+            sprintf(pathName, D_0039FE28, roomFlagIndex);
             modelKey = fldFindSearchId(modelName);
             collisionKey = fldFindSearchId(collisionName);
             if (modelKey == -1) {
@@ -1051,11 +1051,11 @@ void fldActivateRoomFlagObjects(void) {
             evtScaleSlotByClampedMultiplier(object, 1.0f);
             dds3InvokeMoverUpdate(slot);
         }
-        if (fldTestRoomModeFlag(fldAreaState.area, fldAreaState.floor + 1, index)) {
+        if (fldTestRoomModeFlag(fldAreaState.area, fldAreaState.floor + 1, roomFlagIndex)) {
             s32 key;
             EffWorldNode *object;
 
-            sprintf(modelName, D_0039FE08, index);
+            sprintf(modelName, D_0039FE08, roomFlagIndex);
             key = fldFindSearchId(modelName);
             object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, key, 6);
             dds3SetObjectPayloadWord8(object, 2);
