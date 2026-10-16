@@ -375,7 +375,7 @@ s32 dds3RegisterObjectInHandlerIndex(void *object) {
 }
 
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
-extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
