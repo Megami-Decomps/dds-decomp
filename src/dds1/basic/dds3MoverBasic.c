@@ -16,58 +16,58 @@ extern void effObjInnerVecInit(ObjectTransform *transform);
 /* Apply enabled absolute path channels and step the path counter once, or apply
  * a callback-built relative transform when its return value is exactly 1.
  * Always return 1, even when no channel or callback transform was applied. */
-s32 dds3UpdateMoverTransform(EffWorldNode *object)
+s32 dds3UpdateMoverTransform(EffWorldNode *moverNode)
 {
     f32 pathVector[4];
     WorldTransformParams transformParams;
     ObjectTransform relativeTransform;
-    Dds3SlotResource *work = object->data;
-    EffWorldNode *target = work->target;
-    ObjectTransform *inner = target->inner;
+    Dds3SlotResource *slotResource = moverNode->data;
+    EffWorldNode *targetObject = slotResource->target;
+    ObjectTransform *inner = targetObject->inner;
     s32 (*updateCallback)(ObjectTransform *, EffWorldNode *);
     CameraData *cameraData;
     f32 fieldOfView;
 
-    if (work->path != NULL) {
-        if (work->path->flags & DDS3_PATH_POSITION_CHANNEL) {
-            dds3InterpolatePathVectorVU(work->path);
+    if (slotResource->path != NULL) {
+        if (slotResource->path->flags & DDS3_PATH_POSITION_CHANNEL) {
+            dds3InterpolatePathVectorVU(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
-            effObjSetInnerPosition(target, (u128 *)pathVector);
-            if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
-                PCP_COPY_VECTOR(&((EffectTransformData *)target->data)->position, pathVector);
+            effObjSetInnerPosition(targetObject, (u128 *)pathVector);
+            if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
+                PCP_COPY_VECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
             }
         }
-        if (work->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
-            dds3InterpolatePathQuaternionVU(work->path);
+        if (slotResource->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
+            dds3InterpolatePathQuaternionVU(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
-            effObjSetInnerRotation(target, (u128 *)pathVector);
+            effObjSetInnerRotation(targetObject, (u128 *)pathVector);
         }
-        if (work->path->flags & DDS3_PATH_SCALAR_CHANNEL) {
-            if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
-                fieldOfView = sdfSampleActiveLinearCurve(work->path);
-                cameraData = target->data;
+        if (slotResource->path->flags & DDS3_PATH_SCALAR_CHANNEL) {
+            if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
+                fieldOfView = sdfSampleActiveLinearCurve(slotResource->path);
+                cameraData = targetObject->data;
                 cameraData->fieldOfView = fieldOfView;
                 cameraData->fovUpdatePending |= DDS3_MOVER_FOV_UPDATE_BIT;
             }
         }
-        if (work->path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
-            if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
-                dds3InterpolatePathOutput(work->path, &transformParams);
-                dds3LoadWorldTransformParams(target, &transformParams);
+        if (slotResource->path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
+            if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
+                dds3InterpolatePathOutput(slotResource->path, &transformParams);
+                dds3LoadWorldTransformParams(targetObject, &transformParams);
             }
         }
         /* Advance even when no applicable channel was enabled for this target. */
-        sdfStepWrappingFloatCounter(work->path);
+        sdfStepWrappingFloatCounter(slotResource->path);
     } else {
-        updateCallback = work->update;
+        updateCallback = slotResource->update;
         /* This unidentified word is cleared even when no callback exists. */
         inner->unkC8 = 0;
         if (updateCallback != NULL) {
             effObjInnerVecInit(&relativeTransform);
-            if (updateCallback(&relativeTransform, target) == 1) {
-                effObjMultiplyInnerScale(target, (u128 *)relativeTransform.scale);
-                effObjMultiplyInnerRotation(target, (u128 *)&relativeTransform.rotation);
-                effObjAddInnerPosition(target, (u128 *)relativeTransform.position);
+            if (updateCallback(&relativeTransform, targetObject) == 1) {
+                effObjMultiplyInnerScale(targetObject, (u128 *)relativeTransform.scale);
+                effObjMultiplyInnerRotation(targetObject, (u128 *)&relativeTransform.rotation);
+                effObjAddInnerPosition(targetObject, (u128 *)relativeTransform.position);
             }
         }
     }
