@@ -12853,7 +12853,159 @@ void effCopyCameraSnapshotSelection(void) {
     D_0043875A = D_0045C110[0x8A];
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FF360);
+#include "sdf_vu_matrix.h"
+extern u8 D_0043875B;
+extern f32 acosf(f32);
+extern f32 atan2f(f32, f32);
+s32 func_002FF360(void) {
+    f32 center[4];
+    f32 point[4];
+    f32 selected[4];
+    f32 direction[4];
+    f32 radius;
+    f32 angle;
+    f32 length;
+    f32 pitch;
+    s32 flags = 1;
+    s32 i;
+
+    btlBossDebugPrintfN(8, 8, 0, D_0042D030);
+    btlBossDebugPrintfN(8, 20, 0, D_0042D048);
+    btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : ROLL");
+    if (sdfPadButtonStates[6] & 2) {
+        if ((s8)D_00438758 == 8) {
+            D_0043875B = -1;
+            D_00438759 += 8;
+            if ((s8)D_00438759 >= 16) {
+                D_00438759 = (s8)D_00438759 - 16;
+            }
+        } else if ((s8)D_00438758 == -8) {
+            D_0043875B = 1;
+            D_00438759 += 8;
+            if ((s8)D_00438759 >= 16) {
+                D_00438759 = (s8)D_00438759 - 16;
+            }
+        }
+        D_00438758 += D_0043875B;
+        flags = 3;
+    } else if (sdfPadButtonStates[7] & 2) {
+        if ((s8)D_00438758 == 8) {
+            D_0043875B = 1;
+            D_00438759 += 8;
+            if ((s8)D_00438759 >= 16) {
+                D_00438759 = (s8)D_00438759 - 16;
+            }
+        } else if ((s8)D_00438758 == -8) {
+            D_0043875B = -1;
+            D_00438759 += 8;
+            if ((s8)D_00438759 >= 16) {
+                D_00438759 = (s8)D_00438759 - 16;
+            }
+        }
+        D_00438758 -= D_0043875B;
+        flags = 3;
+    }
+    /* At either pole, directional input changes roll instead of azimuth.
+     * It consumes this tick's roll input as well. */
+    if (sdfPadButtonStates[5] & 2) {
+        if ((s8)D_00438758 == 8 || (s8)D_00438758 == -8) {
+            goto increaseRoll;
+        }
+        if ((s8)D_00438759 == 15) {
+            D_00438759 = 0;
+        } else {
+            D_00438759++;
+        }
+        flags |= 2;
+    } else if (sdfPadButtonStates[4] & 2) {
+        if ((s8)D_00438758 == 8 || (s8)D_00438758 == -8) {
+            goto decreaseRoll;
+        }
+        {
+            s32 heading = (s8)D_00438759;
+            s32 encoded = D_00438759;
+            if (heading == 0) {
+                D_00438759 = 15;
+            } else {
+                D_00438759 = encoded - 1;
+            }
+        }
+        flags |= 2;
+    }
+    if (sdfPadButtonStates[11] & 2) {
+increaseRoll:
+        if ((s8)D_0043875A == 15) {
+            D_0043875A = 0;
+        } else {
+            D_0043875A++;
+        }
+        flags |= 2;
+    } else if (sdfPadButtonStates[9] & 2) {
+decreaseRoll:
+        {
+            s32 roll = (s8)D_0043875A;
+            s32 encoded = D_0043875A;
+            if (roll == 0) {
+                D_0043875A = 15;
+            } else {
+                D_0043875A = encoded - 1;
+            }
+        }
+        flags |= 2;
+    }
+    VU0_LOAD_VF(vf10, D_0045C2F0);
+    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, center);
+    VU0_STORE_VF(vf10, point);
+    radius = 0.0f;
+    for (i = -8; i < 9; i++) {
+        f32 sampleRadius;
+        angle = (f32)i * 0.19634954f;
+        point[1] = sdfSinPoly(angle) * -200.0f + center[1];
+        sampleRadius = sdfEvaluateCosineViaSinePhaseShift(angle) * 200.0f;
+        if ((s8)D_00438758 == i) {
+            radius = sampleRadius;
+            PCP_COPY_VECTOR(selected, point);
+            btlDebugDrawRadiusGuide(point, sampleRadius, 0x80004040, 0);
+        } else {
+            btlDebugDrawRadiusGuide(point, sampleRadius, 0x80404040, 0);
+        }
+    }
+    btlDebugDrawSegment(selected, center, 0x80006060);
+    angle = (f32)(s8)D_00438759 * 0.39269908f;
+    point[0] = selected[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    point[1] = selected[1];
+    point[2] = selected[2] + sdfSinPoly(angle) * radius;
+    btlDebugDrawSegment(point, selected, 0x80006060);
+    VU0_LOAD_VF(vf10, point);
+    VU0_LOAD_VF(vf11, center);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    if (flags & 2) {
+        pitch = -acosf(-direction[1]);
+        sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(direction[0], direction[2]), 0.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, (f32)(s8)D_0043875A * 0.39269908f, 0.0f);
+        VU0_LOAD_VF(vf11, direction);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF(vf10, D_0045C300);
+    }
+    btlBossDebugPrintfN(8, 48, 0, "H:%2d,D:%2d,R:%2d",
+                       (s32)(s8)D_00438758 + 8,
+                       (s32)(s8)D_00438759, (s32)(s8)D_0043875A);
+    D_0045C110[0x88] = D_00438758;
+    D_0045C110[0x89] = D_00438759;
+    D_0045C110[0x8A] = D_0043875A;
+    if (sdfPadButtonStates[3] < 0) {
+        flags &= ~1;
+    } else {
+        flags |= 0x200000;
+    }
+    return flags;
+}
 
 s32 effResetCameraSnapshotSelection(void) {
     D_0045C110[0x88] = 8;
@@ -14253,32 +14405,32 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
     EffectSlotSet *instance;
     sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
-    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, keepAllocation);
+    instance = effCreateResourceSlotSetFromAllocation(allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+        sdfReleaseResourceAllocation(allocation);
     }
     return instance;
 }
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
 void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle(job);
-    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_TRANSIENT);
+    instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+    sdfReleaseResourceAllocation(allocation);
     filePollEntryCleanup(job);
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
 void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle(job);
-    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_KEEP_ALLOCATION);
+    instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
     filePollEntryCleanup(job);
 }
@@ -14304,21 +14456,21 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+    sdfReleaseResourceAllocation(allocation);
     return mappedResource;
 }
 
 /* Publish mapped records before releasing their source allocation and completing the file job. */
 void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResource) {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;
 
     allocation = fileGetResourceHandle(job);
-    sourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    sourceAddress = sdfResourceRetainAddress(allocation);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = (u32)mappedResource;
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+    sdfReleaseResourceAllocation(allocation);
     filePollEntryCleanup(job);
 }
 

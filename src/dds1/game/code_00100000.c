@@ -197,7 +197,7 @@ extern s8 D_003BA734;
 extern u16 D_003BD32E;
 extern u16 D_003BD334;
 extern u16 mnuMovieTaskState;
-extern void sdfSleepThreadCount(s32);
+extern void sdfSleepThreadCount(s32 count);
 extern void sdfSetNonnegativePacketIndex(s32);
 extern void sdfPadBuildButtonStates(void);
 extern void sdfRaiseDeviceThreadPriority(void);

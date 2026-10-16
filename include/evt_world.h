@@ -57,6 +57,7 @@ enum {
 };
 
 struct SdfMemBlock;
+struct BfFlw0Header;
 
 /* The object's 18 per-kind intrusive lists. */
 typedef struct EvtWorldSlot {
@@ -73,10 +74,15 @@ typedef struct EvtWorldTable {
     EffWorldNode *playerObject; /* 0x10 */
     u32 indexedHandle; /* 0x14 */
     u32 sceneResourceHandle; /* 0x18: retained allocation handle; released at teardown. */
-    u32 sceneResourceAddress; /* 0x1C: resolved base address used for scene script lookup. */
+    struct BfFlw0Header *sceneScript; /* 0x1C: resolved FLW0 header used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
 } EvtWorldTable;
+
+typedef char EvtWorldTable_sceneScript_at_0x1C[
+    ((u32)&((EvtWorldTable *)0)->sceneScript == 0x1C) ? 1 : -1];
+typedef char EvtWorldTable_size_must_be_0x40[
+    sizeof(EvtWorldTable) == 0x40 ? 1 : -1];
 
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */

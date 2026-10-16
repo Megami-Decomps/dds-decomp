@@ -586,7 +586,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         }
         evtPrintDeveloperConsoleMessage(D_0042D2A8, files[load->entry].name);
         if (load->file != NULL) {
-            sdfReleaseResourceAllocation((SdfMemBlock *)fileGetResourceHandle(load->file));
+            sdfReleaseResourceAllocation(fileGetResourceHandle(load->file));
             filePollEntryCleanup(load->file);
             evtPrintDeveloperConsoleMessage(D_0042D2B8);
         }

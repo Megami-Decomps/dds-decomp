@@ -16,7 +16,7 @@
 #include "eff_pcp_scatter_rings.h"
 
 
-extern PcpScatterRes *effPcpScatterResCreate(u32);
+extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *);
 extern void effPcpScatterResRelease(PcpScatterRes *);
 

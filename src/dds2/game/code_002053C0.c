@@ -202,7 +202,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+        resource = fileGetResourceHandle(args->request);
         data = sdfResourceRetainAddress(resource);
         size = (s32)fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
@@ -266,7 +266,7 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
     if (args->resourceAllocation == 0) {
         if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
             args->resourceAllocation =
-                (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+                fileGetResourceHandle(args->request);
             data = sdfResourceRetainAddress(args->resourceAllocation);
             size = (s32)fileGetResourceSize(args->request);
             filePollEntryCleanup(args->request);

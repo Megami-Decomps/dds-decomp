@@ -1187,7 +1187,7 @@ s32 fileResolveAbortSlotFlow(void) {
     return fileBeginWait(&fileAbortSlotFlow);
 }
 
-extern u32 fileSaveIconResourceHandle;
+extern struct SdfMemBlock *fileSaveIconResourceHandle;
 extern u32 fileSaveIconRequest;
 extern char D_0042B6A8[];
 
@@ -2889,7 +2889,163 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", fileUpdatePromptDialog);
+extern u32 D_00439024, D_00439028;
+/* Yes/no cursor input while the card request is idle. */
+static inline void filePollPromptChoice(void) {
+    if (D_00437D20 == 0 && fileIsLoadStepComplete() != 0) {
+        if (fileIsLoadedAndConditionTrue(D_0037F510[0x27] < 0) != 0) {
+            if (D_00437D18 != 1) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_00437D18 = 1;
+        } else if (fileIsLoadedAndConditionTrue(D_0037F510[0x26] < 0) != 0) {
+            if (D_00437D18 != 0) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_00437D18 = 0;
+        } else if (fileIsLoadedAndConditionTrue(D_0037F510[0x21] < 0) != 0) {
+            if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3)) {
+                sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
+            } else {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            }
+            if (D_00437D18 != 0) {
+                D_00437D20 = 2;
+            } else {
+                D_00437D20 = 1;
+            }
+        } else if (fileIsLoadedAndConditionTrue(D_0037F510[0x23] < 0) != 0) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            D_00437D20 = 2;
+        }
+    }
+}
+
+s32 fileUpdatePromptDialog(void) {
+    s32 status;
+    s32 decision;
+
+    if (D_00437D1C - 5 < 2) {
+        s32 requestStatus;
+        filePollPromptChoice();
+        if (fileReqPoll() == 0) {
+            goto idle;
+        }
+        requestStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
+        switch (requestStatus) {
+        case 1:
+            decision = (s32)D_00437D20;
+            if (decision == 1) {
+                goto yes;
+            }
+            if (decision >= 2) {
+                goto checkNo;
+            }
+            if (decision != 0) {
+                goto idle;
+            }
+            if (D_00437D1C == 5) {
+                D_00437D1C = 0;
+                D_00437D18 = -1;
+                return fileRestartSlotSelection();
+            }
+            goto begin;
+        case 2:
+            goto yes;
+        }
+        requestStatus = (s32)D_00437D20;
+        D_00437D1C = 5;
+        switch (requestStatus) {
+        case 0:
+            goto begin;
+        case 1:
+            goto yes;
+        case 2:
+            goto no;
+        }
+        return 0;
+    }
+    if (D_00437D1C == 4 || D_00437D1C == 8) {
+        if (D_0037F510[0x27] < 0) {
+            if (D_00437D18 != 1) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_00437D18 = 1;
+        } else if (D_0037F510[0x26] < 0) {
+            if (D_00437D18 != 0) {
+                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+            }
+            D_00437D18 = 0;
+        } else if (D_0037F510[0x21] < 0) {
+            if (D_00437D18 == 0 && (D_00437D1C == 1 || D_00437D1C == 3 || D_00437D1C == 9)) {
+                sndSetSequenceVolumePan(0x11, 0x7F, 0x3F);
+            } else {
+                sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            }
+            if (D_00437D18 == 0) {
+                goto yes;
+            }
+            goto no;
+        } else if (D_0037F510[0x23] < 0) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            D_00437D18 = -1;
+            D_00437D1C = 0;
+            return ((s32 (*)(void))D_00439028)();
+        }
+        goto idle;
+    }
+    filePollPromptChoice();
+    if (fileReqPoll() == 0) {
+        goto idle;
+    }
+    status = fileReqGetStatus(fileMemoryCardRequestIndex);
+    switch (status) {
+    case 1:
+    case 2:
+        decision = (s32)D_00437D20;
+        if (decision == 1) {
+            goto yes;
+        }
+        if (decision >= 2) {
+            goto checkNo;
+        }
+        if (decision == 0) {
+            goto begin;
+        }
+        return 0;
+    default:
+        goto restartRequest;
+    }
+checkNo:
+    switch (decision) {
+    case 2:
+        goto no;
+    default:
+        return 0;
+    }
+begin:
+    fileReqBegin(fileMemoryCardRequestIndex);
+    goto idle;
+yes:
+    D_00437D1C = 0;
+    D_00437D18 = -1;
+    return ((s32 (*)(void))D_00439024)();
+no:
+    D_00437D1C = 0;
+    D_00437D18 = -1;
+    return ((s32 (*)(void))D_00439028)();
+restartRequest:
+    D_00437D1C = 0;
+    D_00437D18 = -1;
+    fileClearAllSlotFlags();
+    fileSetMenuFlowState(0);
+    D_00437D3C = 1;
+    D_00437D40 = 0;
+    fileReqBegin(fileMemoryCardRequestIndex);
+    return (s32)filePollSlotDetectionAndBranch;
+idle:
+    return 0;
+}
 
 extern u32 D_00439024;
 extern u32 D_00439028;
@@ -8068,7 +8224,8 @@ void effSetCurveEmitterEndPosition(FileSlotTable *record, const f32 *value) {
 }
 
 /* cubic Bezier point at t through four control points; result is left in vf10 */
-void vu0CubicBezierPoint(f32 *p0, f32 *p1, f32 *p2, f32 *p3, f32 t) {
+void vu0CubicBezierPoint(f32 *controlPoint0, f32 *controlPoint1,
+                         f32 *controlPoint2, f32 *controlPoint3, f32 t) {
     f32 weight[4];
     f32 point[4];
     f32 t2 = t * t;
@@ -8080,9 +8237,9 @@ void vu0CubicBezierPoint(f32 *p0, f32 *p1, f32 *p2, f32 *p3, f32 t) {
     weight[1] = t * u2 * 3.0f;
     weight[2] = t2 * u * 3.0f;
     weight[3] = t3;
-    point[0] = p0[0] * weight[0] + p1[0] * weight[1] + p2[0] * weight[2] + p3[0] * weight[3];
-    point[1] = p0[1] * weight[0] + p1[1] * weight[1] + p2[1] * weight[2] + p3[1] * weight[3];
-    point[2] = p0[2] * weight[0] + p1[2] * weight[1] + p2[2] * weight[2] + p3[2] * weight[3];
+    point[0] = controlPoint0[0] * weight[0] + controlPoint1[0] * weight[1] + controlPoint2[0] * weight[2] + controlPoint3[0] * weight[3];
+    point[1] = controlPoint0[1] * weight[0] + controlPoint1[1] * weight[1] + controlPoint2[1] * weight[2] + controlPoint3[1] * weight[3];
+    point[2] = controlPoint0[2] * weight[0] + controlPoint1[2] * weight[1] + controlPoint2[2] * weight[2] + controlPoint3[2] * weight[3];
     VU0_LOAD_VF(vf10, point);
 }
 

@@ -8354,7 +8354,68 @@ s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
     return slotCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C4278);
+extern const char *D_003BB3B0;
+void func_001C4278(void)
+{
+  BtlState *scene = (BtlState *) btlGetRuntime();
+  BtlSceneFadingRecord *records;
+  BtlSceneFadingRecord *fade;
+  BtlSceneFadingRecord *record;
+  BattleActorPanelWork *panel;
+  s32 lastIndex = 0;
+  s32 i;
+  s32 count;
+  u32 state;
+  s32 fading;
+  fldCountSceneFadeKinds(scene, &lastIndex);
+  fading = btlFadeStaleSceneSlots(lastIndex);
+  if (fading == 0)
+  {
+    fade = scene->fading;
+    fldInitSceneFadeRecords();
+    lastIndex = 0;
+    if (fade[0].slot.group != 0)
+    {
+      do
+      {
+        lastIndex++;
+      }
+      while ((u32) lastIndex < 8 && fade[lastIndex].slot.group != 0);
+    }
+    lastIndex--;
+    if (scene->currentScene == 7)
+    {
+      panel = (BattleActorPanelWork *) kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3B0));
+      btlRetireActorSlotPresentationChannels(panel, 0);
+      btlAdvancePendingSceneSlotStates((u8 *) panel);
+      btlUpdateActorSlotStates((u8 *) panel, 0);
+    }
+  }
+  records = scene->fading;
+  fldSetSceneSlotRange(lastIndex + 1);
+  btlUpdateBankedSlotFadeSequence();
+  btlDrawSceneSlotFades();
+  btlDrawSceneSlotGlyphGrid();
+  count = lastIndex;
+  for (i = 0; i <= count; i++)
+  {
+    record = &records[count - i];
+    state = record->alpha;
+    if (state == 128)
+    {
+      if (record->slot.remaining != 100)
+      {
+        btlRequestActorSlotOrderTransition(i, 0);
+      }
+    }
+    if (record->alpha < 64)
+    {
+      btlRequestActorSlotOrderTransition(i, 1);
+    }
+  }
+  btlUpdateActorSlotOrderAnimation();
+  btlDrawActorSlotOrder();
+}
 
 s32 btlUpdateScenePanelTask(KwlnTask *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();

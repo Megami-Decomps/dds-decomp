@@ -276,8 +276,8 @@ void sdfMotionResume(Motion *state) {
     }
 }
 
-void sdfMotionReleaseBindingStorage(void *a0) {
-    sdfReleaseChipBlock(a0);
+void sdfMotionReleaseBindingStorage(void *storage) {
+    sdfReleaseChipBlock(storage);
 }
 
 void sdfMotionBindKeyTrack(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track) {

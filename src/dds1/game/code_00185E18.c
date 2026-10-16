@@ -29,8 +29,8 @@ typedef struct {
 } BlurVectorRecord;
 extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
-extern void effSetResourceBlendColor(u32 handle, u32 color);
-extern u32 effGetPairedBlurResourceVectorRecordAddress(u32 address);
+extern void effSetResourceBlendColor(void *resource, u32 color);
+extern void *effGetPairedBlurResourceVectorRecordAddress(void *vectorRecord);
 
 void effFreePairedResources(PairedEffectResources *pair) {
 
@@ -70,7 +70,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                     btlSetActorEffectParameterOrMuzzlePosition((struct BtlUnit *)actor, 0xB);
                 }
                 VU0_STORE_VF(vf10, actorPosition);
-                record = (BlurVectorRecord *)effGetPairedBlurResourceVectorRecordAddress((u32)work->resource[resourceIndex]);
+                record = effGetPairedBlurResourceVectorRecordAddress(work->resource[resourceIndex]);
                 VU0_LOAD_VF(vf10, actorPosition);
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_STORE_VF(vf10, record->start);
@@ -81,7 +81,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 VU0_LERP_VF10(0.66f);
                 VU0_STORE_VF(vf10, record->twoThirds);
                 VU0_STORE_VF(vf11, record->end);
-                effSetResourceBlendColor((u32)work->resource[resourceIndex], blendColor);
+                effSetResourceBlendColor(work->resource[resourceIndex], blendColor);
                 effThunderUpdateChainSegments(work->resource[resourceIndex]);
                 resourceIndex++;
             } while (resourceIndex < 2);
@@ -110,7 +110,7 @@ struct SdfDmaNode;
 extern SdfPoolNode D_003253E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 extern s32 fldIsUpdateInhibited();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);

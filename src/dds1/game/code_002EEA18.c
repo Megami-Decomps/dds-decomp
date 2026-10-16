@@ -443,7 +443,7 @@ s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAdd
 
         FlushCache(0);
         transfer.source = sourceAddress;
-        transfer.destination = stream->destinationAddress;
+        transfer.destination = (s32)stream->destination;
         transfer.size = byteCount;
         transfer.attributes = 0;
         dmaId = sceSifSetDma(&transfer, 1);
@@ -455,7 +455,7 @@ s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAdd
         timer = sdfReadTimerCount();
         while ((s32)sdfGetElapsedTimerTicks(timer) < 0x64) {
         }
-        stream->destinationAddress += byteCount;
+        stream->destination += byteCount;
         stream->transferredBytes += byteCount;
         stream->remainingBytes -= byteCount;
         if (stream->remainingBytes > 0) {
@@ -507,7 +507,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     case SDF_STREAM_COMMAND_READ:
         state->remainingBytes = ((SdfStreamReadRequest *)request)->byteCount;
         state->transferredBytes = 0;
-        state->destinationAddress = ((SdfStreamReadRequest *)request)->destinationAddress;
+        state->destination = (u8 *)((SdfStreamReadRequest *)request)->destinationAddress;
         sdfStreamSendChunk();
         WaitSema(state->semaphore);
         D_003FF480[0] = state->transferredBytes;
