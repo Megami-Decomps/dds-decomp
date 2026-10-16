@@ -523,14 +523,14 @@ extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
 extern void mnuMergePartyMantraProfileCapStates(void *);
 
-s32 mnuRefreshMantraSelectionResources(MnuStatusResource *object) {
+s32 mnuRefreshMantraSelectionResources(MnuStatusResource *resource) {
     MantraMenuWork *menu;
     struct MenuListNode *node;
     MantraFlagResource **slot;
     s32 source;
 
-    menu = &object->menu;
-    node = object->list->first;
+    menu = &resource->menu;
+    node = resource->list->first;
     if (node != 0) {
         slot = menu->slots;
         while (node != 0) {
@@ -553,16 +553,16 @@ s32 mnuRefreshMantraSelectionResources(MnuStatusResource *object) {
     return 1;
 }
 
-s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
+s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *resource) {
     s32 index;
     s32 source;
 
-    index = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)object);
-    source = object->list->cursor->userValue;
-    if (object->menu.slots[index] != 0) {
-        mnuUpdateMantraRecordFlags(object->menu.slots[index], source, 0);
+    index = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
+    source = resource->list->cursor->userValue;
+    if (resource->menu.slots[index] != 0) {
+        mnuUpdateMantraRecordFlags(resource->menu.slots[index], source, 0);
     } else {
-        object->menu.slots[index] = evtAllocateMantraSelectionWork(source, 0);
+        resource->menu.slots[index] = evtAllocateMantraSelectionWork(source, 0);
     }
     return 1;
 }
