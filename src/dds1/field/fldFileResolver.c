@@ -3962,7 +3962,7 @@ void fldUpdateCameraTarget(void) {
 }
 
 extern const PcpVectorCopyF32 D_003A0048;
-extern f32 fldAngleDifference(f32 current, f32 target);
+extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void fldRefreshAreaStateFromPosition(f32 *);
 
