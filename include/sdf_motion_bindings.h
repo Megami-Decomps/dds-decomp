@@ -16,13 +16,13 @@ typedef struct SdfMotionBindingDispatch {
     u32 unk14;
 } SdfMotionBindingDispatch;
 
-/* Common dispatch/source prefix used by motion-owned bindings. */
+/* Common dispatch/motion prefix used by motion-owned bindings. */
 typedef struct SdfMotionBindingHead {
     SdfMotionBindingDispatch *dispatch;
-    void *source;
+    Motion *motion;
 } SdfMotionBindingHead;
 
-void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source,
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, Motion *motion,
                              SdfMotionBindingDispatch *dispatch);
 
 typedef struct SdfMotionKeyInterval {
@@ -139,6 +139,8 @@ typedef char SdfMotionBindingDispatch_tail_at_14[
     ((u32)&((SdfMotionBindingDispatch *)0)->unk14 == 0x14) ? 1 : -1];
 
 typedef char SdfMotionBindingHead_size[(sizeof(SdfMotionBindingHead) == 0x08) ? 1 : -1];
+typedef char SdfMotionBindingHead_motion_at_04[
+    ((u32)&((SdfMotionBindingHead *)0)->motion == 0x04) ? 1 : -1];
 typedef char SdfMotionKeyInterval_size[(sizeof(SdfMotionKeyInterval) == 0x0C) ? 1 : -1];
 typedef char SdfMotionKeyBinding_size[(sizeof(SdfMotionKeyBinding) == 0x0C) ? 1 : -1];
 typedef char SdfMotionSlotPairBinding_size[
