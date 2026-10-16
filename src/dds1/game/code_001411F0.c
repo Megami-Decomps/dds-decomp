@@ -3040,7 +3040,7 @@ typedef struct {
     s32 *object; /* 0x20: room effect object/record. */
     s16 kind, kindId;
     f32 size;
-    s32 unk2C, unk30, unk34, unk38;
+    s32 unk2C, unk30, unk34, room;
     s16 unk3C, unk3E;
     char name[0x10];
 } FldTblEnt50; /* 0x50 bytes */
@@ -3048,6 +3048,8 @@ typedef struct {
 typedef char FldTblEnt50_size_check[(sizeof(FldTblEnt50) == 0x50) ? 1 : -1];
 typedef char FldTblEnt50_object_offset_check[
     ((u32)&((FldTblEnt50 *)0)->object == 0x20) ? 1 : -1];
+typedef char FldTblEnt50_room_offset_check[
+    ((u32)&((FldTblEnt50 *)0)->room == 0x38) ? 1 : -1];
 
 extern FldTblEnt50 fldRoomEffectEntries[];
 
@@ -3065,7 +3067,7 @@ void fldClearMenuEntries(void) {
         fldRoomEffectEntries[i].unk2C = 0;
         fldRoomEffectEntries[i].unk30 = 0;
         fldRoomEffectEntries[i].unk34 = 0;
-        fldRoomEffectEntries[i].unk38 = 0;
+        fldRoomEffectEntries[i].room = 0;
         fldRoomEffectEntries[i].unk3C = 0;
         fldRoomEffectEntries[i].unk3E = 0;
     }
@@ -3386,7 +3388,7 @@ void fldFireRoomEffects(void) {
     s32 i;
 
     for (i = 0; i < fldRoomEffectEntryCount; i++) {
-        s32 room = fldRoomEffectEntries[i].unk38;
+        s32 room = fldRoomEffectEntries[i].room;
         if (room != 0 && fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1, room) != 0) {
             if (fldRoomEffectEntries[i].object != 0) {
                 dds3SetObjectFlags(fldRoomEffectEntries[i].object, 1);
