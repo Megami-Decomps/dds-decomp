@@ -3487,7 +3487,7 @@ void fldInitializeActorMotionSlots(void) {
                     if (D_0038BC50[slotIndex]->name != NULL &&
                         strcmp(D_0038BC50[slotIndex]->name, actor->name) == 0) {
                         FldFileResource *resource = D_0038BC50[slotIndex];
-                        f32 *transform = resource->transform;
+                        const f32 *transform = resource->transform;
                         row->actorId = resource->id;
                         rotation[0] = transform[4];
                         rotation[1] = transform[5];
@@ -3526,7 +3526,7 @@ void fldInitializeActorMotionSlots(void) {
                         if (D_0038BC50[slotIndex]->name != NULL &&
                             strcmp(D_0038BC50[slotIndex]->name, actor->name) == 0) {
                             FldFileResource *resource = D_0038BC50[slotIndex];
-                            f32 *transform = resource->transform;
+                            const f32 *transform = resource->transform;
                             row->actorId = resource->id;
                             rotation[0] = transform[4];
                             rotation[1] = transform[5];
@@ -3562,7 +3562,7 @@ void fldInitializeActorMotionSlots(void) {
                         if (D_0038BC50[slotIndex]->name != NULL &&
                             strcmp(D_0038BC50[slotIndex]->name, actor->name) == 0) {
                             FldFileResource *resource = D_0038BC50[slotIndex];
-                            f32 *transform = resource->transform;
+                            const f32 *transform = resource->transform;
                             row->actorId = resource->id;
                             rotation[0] = transform[4];
                             rotation[1] = transform[5];
