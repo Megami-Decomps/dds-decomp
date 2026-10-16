@@ -610,9 +610,9 @@ void effFreeWork(EffResourceDescriptor *work) {
 }
 
 /* Set the browser screen coordinates. */
-void effSetMsgHeader(EffResourceDescriptor *message, s32 first, s32 second) {
-    message->x = first;
-    message->y = second;
+void effSetMsgHeader(EffResourceDescriptor *message, s32 x, s32 y) {
+    message->x = x;
+    message->y = y;
 }
 
 /* Return the selected resource index as its native word. */
@@ -643,9 +643,9 @@ void effSetWorkSecond(EffResourceDescriptor *work, u32 value) {
 }
 
 /* Set the browser border and fill colors. */
-void effSetMsgPair(EffResourceDescriptor *message, u32 first, u32 second) {
-    message->borderColor = first;
-    message->fillColor = second;
+void effSetMsgPair(EffResourceDescriptor *message, u32 borderColor, u32 fillColor) {
+    message->borderColor = borderColor;
+    message->fillColor = fillColor;
 }
 
 /* Release the previous texture reference before loading/acquiring its replacement.
