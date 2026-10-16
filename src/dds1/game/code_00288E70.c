@@ -36,7 +36,6 @@ void func_002F6E90(u32 arg0, s32 arg1);
 s32 fileMan(KwlnTask *task);
 void fileReqInit(s32 arg0);
 extern s32 sdfDevQueueControlRequest(DevState *);
-extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);

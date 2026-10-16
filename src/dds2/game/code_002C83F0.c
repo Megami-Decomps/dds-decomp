@@ -47,7 +47,6 @@ s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 
 extern s32 sdfDevQueueControlRequest(DevState *);
-extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);
