@@ -11,6 +11,7 @@
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "eff_random_mod.h"
+#include "eff_random.h"
 #include "mdl_flag_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
@@ -1573,7 +1574,47 @@ void btlInitLightParams(void) {
     kwlnOverlayAmbientColor.b = 1.15f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022D040);
+extern EffRandState effSharedRandomState;
+
+/* Native 0022D15C..0022D17C: SDK VU0 normalization. */
+void func_0022D040(void) {
+    f32 direction[4];
+    s32 row;
+    s32 column;
+
+    btlRuntimeState.unk20 = (s32)(cosf(0.5235987306f) * 15.0f);
+    btlRuntimeState.unk24 = 11;
+    btlRuntimeState.particlesPerRow = 512 / (btlRuntimeState.unk20 * 2) + 1;
+    btlRuntimeState.particleRowCount = 448 / (btlRuntimeState.unk24 * 2) + 1;
+    btlRuntimeState.ownedData = sdfAllocateBlockBySizeThreshold(
+        btlRuntimeState.particlesPerRow * btlRuntimeState.particleRowCount * sizeof(BtlFadeParticle));
+    btlRuntimeState.unk28 = 0.0f;
+    btlRuntimeState.unk2C = 128.0f;
+    btlRuntimeState.unk30 = -128.0f;
+    btlRuntimeState.unk34 = 128.0f;
+    for (row = 0; row < btlRuntimeState.particleRowCount; row++) {
+        for (column = 0; column < btlRuntimeState.particlesPerRow; column++) {
+            direction[0] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+            direction[1] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+            direction[2] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0] = direction[0];
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1] = direction[1];
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2] = direction[2];
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle = 0.0f;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed =
+                (effMiscRandUnitFloat(&effSharedRandomState) * 0.5f + 0.5f) * 0.3141592443f;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement = 0.0f;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed =
+                (effMiscRandUnitFloat(&effSharedRandomState) * 0.5f + 0.5f) * 9.999998093f;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha = 128;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = 0;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay = effMiscRandMod(NULL, 8);
+        }
+    }
+}
 
 void btlReleaseOwnedData(void) {
     void *data = btlRuntimeState.ownedData;
