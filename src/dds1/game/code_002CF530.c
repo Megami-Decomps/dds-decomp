@@ -24,37 +24,37 @@ void *sdfAllocateBlockBySizeThreshold(s32 size) {
     return sdfAllocSizeClassBlock(size);
 }
 
-void sdfFreeMemoryFromEitherHeap(void *data) {
-    if (data != NULL) {
-        if (sdfChipIsInRange((s32)data)) {
-            sdfReleaseChipBlock(data);
+void sdfFreeMemoryFromEitherHeap(void *allocation) {
+    if (allocation != NULL) {
+        if (sdfChipIsInRange((s32)allocation)) {
+            sdfReleaseChipBlock(allocation);
             return;
         }
-        sdfReleaseCurrentResourceHandle(data);
+        sdfReleaseCurrentResourceHandle(allocation);
     }
 }
 
 
-void sdfReleaseChipOrRetainedResource(void *data) {
-    if (data != NULL) {
-        if (sdfChipIsInRange((s32)data)) {
-            sdfQueuePendingChipRelease(data);
+void sdfReleaseChipOrRetainedResource(void *allocation) {
+    if (allocation != NULL) {
+        if (sdfChipIsInRange((s32)allocation)) {
+            sdfQueuePendingChipRelease(allocation);
             return;
         }
-        sdfQueueGeneralAllocationRelease(sdfFindGeneralBlockByAddress(data));
+        sdfQueueGeneralAllocationRelease(sdfFindGeneralBlockByAddress(allocation));
     }
 }
 
 
 void sdfFreeMemorySlotFromEitherHeap(void **slot) {
-    void *data = *slot;
-    if (data != NULL) {
+    void *allocation = *slot;
+    if (allocation != NULL) {
         *slot = NULL;
-        if (sdfChipIsInRange((s32)data)) {
-            sdfReleaseChipBlock(data);
+        if (sdfChipIsInRange((s32)allocation)) {
+            sdfReleaseChipBlock(allocation);
             return;
         }
-        sdfReleaseCurrentResourceHandle(data);
+        sdfReleaseCurrentResourceHandle(allocation);
     }
 }
 
