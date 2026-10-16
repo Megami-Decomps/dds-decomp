@@ -84,7 +84,7 @@ typedef struct EvtNodeOwner {
 } EvtNodeOwner;
 
 
-void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
+void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 nodeFlag) {
     EvtNodeInner *inner = owner->inner;
     void *node;
 
@@ -97,8 +97,8 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
         return;
     }
     node = inner->node;
-    if (flag == 0) {
-        effDispatchOptionalNodeFlag(node, flag);
+    if (nodeFlag == 0) {
+        effDispatchOptionalNodeFlag(node, nodeFlag);
     }
 }
 
