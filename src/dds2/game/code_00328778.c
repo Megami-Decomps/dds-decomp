@@ -112,17 +112,17 @@ void sdfStartTrackedThread(SdfThreadNode *node, void (*entry)(void), void *stack
 }
 
 /* A previously queued wakeup counts toward the requested sleep count. */
-void sdfSleepThreadCount(s32 count) {
+void sdfSleepThreadCount(s32 requestedSleepCount) {
     s32 threadId;
     s32 cancelledWakeup;
 
     threadId = GetThreadId();
     cancelledWakeup = CancelWakeupThread(threadId);
-    count = count - cancelledWakeup;
+    requestedSleepCount = requestedSleepCount - cancelledWakeup;
     do {
-        count = count - 1;
+        requestedSleepCount = requestedSleepCount - 1;
         SleepThread();
-    } while (0 < count);
+    } while (0 < requestedSleepCount);
 }
 
 extern void ExitDeleteThread(void);
