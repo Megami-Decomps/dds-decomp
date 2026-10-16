@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
+#include "eff_battle_color_keyframe.h"
 #include "ee_mmi.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
@@ -32,15 +33,6 @@ extern u8 effModelDefaultScale[];
 
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
-typedef struct EffBattleUnitRgbCommand {
-    u32 color;
-    u32 startFrame;
-    s32 startDurationIndex;
-    u32 endFrame;
-    s32 endDurationIndex;
-} EffBattleUnitRgbCommand;
-
-
 extern struct SdfPoolNode *D_00380828[4];
 
 
@@ -50,16 +42,6 @@ extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 
 
-
-typedef struct EffBattleUnitColorCommand {
-    EffectVectorRequest request;
-    u32 firstColor;
-    u32 secondColor;
-    u32 startFrame;
-    s32 startDurationIndex;
-    u32 endFrame;
-    s32 endDurationIndex;
-} EffBattleUnitColorCommand;
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);

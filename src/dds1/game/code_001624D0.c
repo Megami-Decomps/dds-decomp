@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
+#include "eff_battle_color_keyframe.h"
 #include "ee_mmi.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
@@ -41,24 +42,6 @@ extern u16 D_003BB044;
 extern void mdlLoadViewerPackage(s32 resourceGroup, u16 resourceId, s32 flags, void *packageData, u32 packageSize);
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
-typedef struct EffBattleUnitRgbCommand {
-    u32 color;
-    u32 startFrame;
-    s32 startDurationIndex;
-    u32 endFrame;
-    s32 endDurationIndex;
-} EffBattleUnitRgbCommand;
-
-typedef struct EffBattleUnitColorCommand {
-    EffectVectorRequest request;
-    u32 firstColor;
-    u32 secondColor;
-    u32 startFrame;
-    s32 startDurationIndex;
-    u32 endFrame;
-    s32 endDurationIndex;
-} EffBattleUnitColorCommand;
-
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 

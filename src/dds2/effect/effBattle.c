@@ -137,13 +137,7 @@ u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
 #include "eff.h"
 #include "mdl.h"
 #include "evt_unit.h"
-typedef struct EffBattleUnitRgbCommand {
-    u32 color; u32 startFrame; s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
-} EffBattleUnitRgbCommand;
-typedef struct EffBattleUnitColorCommand {
-    EffectVectorRequest request; u32 firstColor; u32 secondColor; u32 startFrame;
-    s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
-} EffBattleUnitColorCommand;
+#include "eff_battle_color_keyframe.h"
 extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern s32 btlClassifySpecialEntryObject(BtlUnit *entry);
 extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU(void);
