@@ -123,9 +123,9 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
-extern void sdfDevUnlinkAndFreeState(DevState *arg0);
+extern void sdfDevUnlinkAndFreeState(DevState *state);
 
-extern void sdfDevRecycleCompletedState(DevState *arg0);
+extern void sdfDevRecycleCompletedState(DevState *state);
 
 extern DevState *sdfDevCreateCallbackState(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
