@@ -48,9 +48,9 @@ void scrPushInteger(ScrData *script, s32 value) {
     script->sp = script->sp + 1;
 }
 
-void bfStackPushFloat(ScrData *script, f32 value) {
+void bfStackPushFloat(ScrData *script, f32 floatValue) {
     script->stackTypes[script->sp] = 1;
-    script->stackValues[script->sp].f = value;
+    script->stackValues[script->sp].f = floatValue;
     script->sp = script->sp + 1;
 }
 
