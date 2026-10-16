@@ -126,7 +126,7 @@ typedef struct MdlViewState {
     s16 labelIndexB; /* 0x36: indexes D_003C88C8 */
     s16 scrollPage;  /* 0x38: page stepped by mdlUpdateViewerCursorWithPageStep */
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
-    s16 unk3C;
+    s16 settingsCursor; /* 0x3C: selected row among the ten viewer settings. */
     s16 unk3E;
     s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
     s16 selectedRecordIndex; /* 0x42: index across the shared and active-entry record lists */
@@ -157,6 +157,8 @@ typedef char MdlViewState_assetDisplayMode_offset_check[
     ((u32)&((MdlViewState *)0)->assetDisplayMode == 0x0F) ? 1 : -1];
 typedef char MdlViewState_selectionCursor_offset_check[
     ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
+typedef char MdlViewState_settingsCursor_offset_check[
+    ((u32)&((MdlViewState *)0)->settingsCursor == 0x3C) ? 1 : -1];
 
 extern MdlViewState mdlViewerState;
 
@@ -2147,13 +2149,13 @@ s32 mdlIsDebugTimeGraph(void) {
 void mdlUpdateViewerSettingsInput(void) {
     switch (mdlViewerState.unk3E) {
     case 0:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk3C, 10, 1) != 0) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.settingsCursor, 10, 1) != 0) {
             return;
         }
         if (sdfPadButtonStates[1] >= 0) {
             return;
         }
-        switch (mdlViewerState.unk3C) {
+        switch (mdlViewerState.settingsCursor) {
         case 0:
             mdlViewerState.unk0E ^= 1;
             break;
@@ -2171,7 +2173,7 @@ void mdlUpdateViewerSettingsInput(void) {
         case 6:
         case 7:
         case 8:
-            mdlViewerState.unk3E = mdlViewerState.unk3C - 4;
+            mdlViewerState.unk3E = mdlViewerState.settingsCursor - 4;
             break;
         case 9:
             PCP_COPY_VECTOR(&D_003C87C0, &D_00453620);
@@ -2181,7 +2183,7 @@ void mdlUpdateViewerSettingsInput(void) {
         }
         break;
     case 1:
-        fldStepColorChannelByPad(&D_00435CBC, mdlViewerState.unk3C - 3, sdfPadButtonStates);
+        fldStepColorChannelByPad(&D_00435CBC, mdlViewerState.settingsCursor - 3, sdfPadButtonStates);
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         }
@@ -2253,10 +2255,10 @@ void mdlDrawViewerSettings(void) {
     }
     if (mdlViewerState.unk09 < 20) {
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
-            0x7240, D_003C88E8[mdlViewerState.unk3C], 0xFF0080, 0, D_004370E0));
+            0x7240, D_003C88E8[mdlViewerState.settingsCursor], 0xFF0080, 0, D_004370E0));
     }
     fldDrawPackedRgbEditor(packetList, 0x7300, D_003C88E8[3],
-                           mdlViewerState.unk3E == 1 ? mdlViewerState.unk3C - 3 : -1,
+                           mdlViewerState.unk3E == 1 ? mdlViewerState.settingsCursor - 3 : -1,
                            D_00435CBC, 0);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
         0x7B40, 0x7C60, 0xFF0080, 0, "BACK COLOR"));
@@ -2270,7 +2272,7 @@ void mdlDrawViewerSettings(void) {
         }
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
             0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_003C8920[i], value));
-        style = i == mdlViewerState.unk3C - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
+        style = i == mdlViewerState.settingsCursor - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
             0x7F00, 0x7D80 + i * 0x60, 0xFF0080, style, D_004370E8, value));
     }
