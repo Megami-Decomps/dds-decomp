@@ -348,7 +348,7 @@ u32 itfGetTextLipsMotionId(void) {
     return itfTextLipsMotionId;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196BE8);
+INCLUDE_ASM(const s32, "game/code_00196478", frFontSubmitAtlasSetupPackets);
 
 s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
