@@ -451,7 +451,7 @@ extern void fldClearCameraObjectHighlightFlag(void);
 extern void fldSetCameraObjectHighlightFlag(void);
 extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
-extern void fldDispatchCameraModelFrameEvents(s32, s32);
+extern void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector);
 extern s32 fldUpdateFieldPlayerMovement(void);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
