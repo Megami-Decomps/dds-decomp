@@ -3274,7 +3274,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 
 extern s32 fldRoomEffectEntryCount;
 
-extern s32 fldTestMapSlotAuxiliaryFlag();
+extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern void dds3SetObjectFlags();
 
