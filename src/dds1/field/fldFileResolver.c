@@ -427,8 +427,8 @@ extern FldActorRow fldActorSlots[];
 extern s32 D_0032E530[];
 
 extern FldNpcMotion D_00336A60[];
-extern void *D_003BAE44;
-extern void *D_003BAE48;
+extern char *D_003BAE44;
+extern char *D_003BAE48;
 
 static inline s32 fldTestBits(u32 flags, u32 mask) {
     return (flags & mask) != 0;
@@ -8901,10 +8901,10 @@ s32 fldGetActorMotionEntry(u32 attribute) {
             return objectNode->key;
         }
     case 3:
-        D_003BAE44 = D_00336A60[motionIndex].unk24;
+        D_003BAE44 = D_00336A60[motionIndex].roomModeGroupOneName;
         return 0;
     case 4:
-        D_003BAE48 = D_00336A60[motionIndex].unk34;
+        D_003BAE48 = D_00336A60[motionIndex].sceneBitsBarrierRoomName;
         return 0;
     case 5:
         return D_00336A60[motionIndex].unk44;
