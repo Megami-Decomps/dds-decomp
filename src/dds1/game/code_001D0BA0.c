@@ -553,7 +553,7 @@ extern s32 btlQueryUnitChannelFlags(s32, s32, s32, s32, s32);
 
 extern s32 btlSelectActorAction(s32);
 
-extern s32 btlCalculateHuntEpReward(u8 *, u8 *);
+extern s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy);
 
 /* Native hunt interface passes actor and target; HP recovery is zero in this title. */
 extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target);
@@ -561,7 +561,7 @@ extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 /* Native caller supplies actor,target; concrete provider consumes only actor. */
 extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 
-extern u32 btlGetHuntPenaltyFlags(BtlUnit *, BtlUnit *);
+extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 /* ASM-only definition; align the current pinned declaration in code_001A9780.c. */
 extern u32 func_001A5C40(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);

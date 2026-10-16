@@ -555,13 +555,13 @@ extern s32 btlSelectActorAction(s32);
 
 extern s32 btlCalculateMoneyDropAmount(BtlUnit *);
 
-extern s32 btlCalculateHuntEpReward(BtlUnit *, BtlUnit *);
+extern s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy);
 
 extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *, BtlUnit *);
 
 extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
 
-extern u32 btlGetHuntPenaltyFlags(BtlUnit *, BtlUnit *);
+extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
