@@ -928,14 +928,14 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_00435CB0;
 
-void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
+void kwlnDrawTextureViewerFrame(void *surfaceContext, s32 handle) {
     SdfPoolNode *surface;
     SdfTex *image;
     SdfListHead *packetList;
     s32 counter;
     s32 mode;
 
-    surface = (SdfPoolNode *)data;
+    surface = (SdfPoolNode *)surfaceContext;
     image = (SdfTex *)handle;
     if (handle == 0) {
         return;
