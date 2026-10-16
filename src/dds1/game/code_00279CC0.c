@@ -8,6 +8,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "eff.h"
 #include "eff_resource_records.h"
 #include "itf.h"
@@ -310,7 +311,6 @@ s32 mnuHasAvailableSlotResource(s32 id) {
 
 extern void ptyDrawLinkageSkillEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
-extern s32 ptyMatchAffinityPermutation(s32 *, s32);
 extern u16 mnuPickPairedTableValue(s32, s32);
 extern const u8 D_003BC708[];
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
@@ -360,7 +360,7 @@ void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
                 node = mnuAppendWindowListNode(windows[0], D_003BAA8C + skill * 17);
                 node->sortKeyPrimary = skill;
                 {
-                    s32 unavailable = ptyMatchAffinityPermutation((s32 *)party, skill);
+                    s32 unavailable = ptyMatchAffinityPermutation((const s32 *)party, skill);
                     /* The matcher returns 0/1. The consumed local preserves
                      * the inverted Boolean as XOR rather than a comparison. */
                     unavailable ^= 1;
