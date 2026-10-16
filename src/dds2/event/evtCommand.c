@@ -799,7 +799,7 @@ s32 evtCommandAttachObjectPath(void) {
     EffWorldNode *slotNode;
     Dds3PathCurveWork *path;
     Dds3SlotResource *resource;
-    s32 room;
+    s32 roomNumber;
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
@@ -832,17 +832,17 @@ s32 evtCommandAttachObjectPath(void) {
     case 0:
         sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
         if (target->value != 0) {
-            room = fldParseRoomNumberFromName((char *)target->value);
-            if (room > 0)
-                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 1);
+            roomNumber = fldParseRoomNumberFromName((char *)target->value);
+            if (roomNumber > 0)
+                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         }
         break;
     case 1:
         sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
         if (target->value != 0) {
-            room = fldParseRoomNumberFromName((char *)target->value);
-            if (room > 0)
-                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 0);
+            roomNumber = fldParseRoomNumberFromName((char *)target->value);
+            if (roomNumber > 0)
+                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
         }
         break;
     }
