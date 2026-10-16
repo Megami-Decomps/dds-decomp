@@ -57,7 +57,7 @@ extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 scrReadIntParameter(s32);
-extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];

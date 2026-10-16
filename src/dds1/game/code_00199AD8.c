@@ -53,7 +53,7 @@ extern u8 D_003BB1E0[8];
 extern s32 itfPanelGradientColorTemplate[];
 extern s32 itfPanelGradientColorPair[];
 extern s32 scrReadIntParameter(s32);
-extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
 extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
 extern u8 D_003BB1A8[8], D_003BB1B0[8];

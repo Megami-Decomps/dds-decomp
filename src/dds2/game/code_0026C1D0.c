@@ -232,7 +232,7 @@ s32 evtSetMessageWindowPageValue(s32 pageValue) {
     return 1;
 }
 
-extern void itfMesStartEntry(s32, s32, s32);
+extern void itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 
 extern void itfPanelSetPairFirst(s32 windowIndex, s32 status);
 

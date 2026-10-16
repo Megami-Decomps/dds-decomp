@@ -735,7 +735,7 @@ extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern u32 itfMesGetWindowEntryItems(s32 window, s32 entry);
 extern s32 itfMesSelectTableItemText(s32 window, s32 entry, s32 unused);
-extern s32 itfMesStartEntry(s32 window, s32 entry, s32 unused);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void itfMesBuildOptionList(s32 window, s32 entry);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
