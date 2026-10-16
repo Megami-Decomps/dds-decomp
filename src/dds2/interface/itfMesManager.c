@@ -1715,7 +1715,7 @@ void itfResetBattleFadeState(BtlFade *fade, s32 preserveKind) {
     fade->phase = 0;
     fade->timer = 0;
     fade->alpha = 0x40;
-    fade->unk08 = 0;
+    fade->textAdvanceFrameCount = 0;
 }
 
 void btlSetFadePhaseAlphaTimer(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
@@ -1899,7 +1899,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
     }
     flags = mes->flags;
     if ((flags & 7) == 4) {
-        mes->fade.unk08++;
+        mes->fade.textAdvanceFrameCount++;
         if (mes->flags & 0x800000) {
             entryBlock->textState = -1;
             return;
@@ -1908,7 +1908,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
             mes->fade.kind = 1;
         }
         if (!(D_0037F510.confirm < 0 || D_0037F510.unk23 < 0 ||
-              (D_0037F510.primaryTriangle != 0 && mes->fade.unk08 >= 5 && !(itfMessageFlags & 1))) &&
+              (D_0037F510.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
             entryBlock->unk11 != 0) {
             return;
         }
@@ -2169,7 +2169,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     if (!(flags & 0x20000) && (flags & 7) >= 3) {
         if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
             if ((panel->flags & 7) != 4) {
-                panel->fade.unk08 = 0;
+                panel->fade.textAdvanceFrameCount = 0;
                 panel->flags = (panel->flags & ~7) | 4;
             }
         }
