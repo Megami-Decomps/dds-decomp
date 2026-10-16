@@ -54,7 +54,7 @@ extern void (*D_003BD2F8)(void *);
 extern s32 DIntr(void);
 extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
-s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
