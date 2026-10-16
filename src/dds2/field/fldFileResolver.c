@@ -493,7 +493,7 @@ extern u32 D_003899C0[];
 
 extern void fldCreatePlayerObject(void);
 
-extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batches, u32 batchCount, s32 appended);
+extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatches, u32 batchCount, s32 isAppended);
 
 extern u32 D_00436064;
 
@@ -762,31 +762,31 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCount, s32 isAppended) {
     f32 position[4];
     f32 rotation[4];
     const f32 *transform;
-    FldFileResource *resource;
-    u32 count;
-    u32 i;
+    FldFileResource *spawnResource;
+    u32 entryCount;
+    u32 resourceIndex;
     u32 batchIndex;
     u32 pathState;
     FldSpawnEvent *event;
     u32 *parameters;
     FldSpecialPoint *point;
     FldPendingSoundParams *pendingSound;
-    EffWorldNode *object;
+    EffWorldNode *spawnedObject;
     s32 room;
     u32 id;
 
-    if (appended == 0) {
+    if (isAppended == 0) {
         D_00438EC0 = NULL;
         D_00438EC4 = 0;
     }
-    for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
-        resource = batch->entries;
-        count = batch->count;
-        switch (batch->kind) {
+    for (batchIndex = 0; batchIndex < batchCount; batchIndex++, spawnBatch++) {
+        spawnResource = spawnBatch->entries;
+        entryCount = spawnBatch->count;
+        switch (spawnBatch->kind) {
         case 0:
         case 1:
         case 2:
@@ -795,65 +795,65 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
         case 11:
             break;
         case 3:
-            if (appended != 0) {
+            if (isAppended != 0) {
                 break;
             }
-            D_00438EC0 = resource;
-            D_00438EC4 = count;
+            D_00438EC0 = spawnResource;
+            D_00438EC4 = entryCount;
             pathState = 1;
-            for (i = 0; i < count; i++, resource++, pathState++) {
-                resource->id |= 0x10000;
-                fldCopySpawnTransform(position, rotation, resource->transform);
-                if (((FldSpawnCollision *)resource->data)->kind == 0) {
-                    room = fldParseRoomNumberFromName((char *)resource->name);
-                    fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)resource->data)->header,
-                                 position, resource->id, room, -1);
-                    object = evtSpawnActionObjB(resource->id, (s32)resource->data,
-                                              (s32)position, (s32)resource->name);
-                    dds3SetPathStateValue(object, pathState);
+            for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++, pathState++) {
+                spawnResource->id |= 0x10000;
+                fldCopySpawnTransform(position, rotation, spawnResource->transform);
+                if (((FldSpawnCollision *)spawnResource->data)->kind == 0) {
+                    room = fldParseRoomNumberFromName((char *)spawnResource->name);
+                    fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)spawnResource->data)->header,
+                                 position, spawnResource->id, room, -1);
+                    spawnedObject = evtSpawnActionObjB(spawnResource->id, (s32)spawnResource->data,
+                                              (s32)position, (s32)spawnResource->name);
+                    dds3SetPathStateValue(spawnedObject, pathState);
                 }
             }
             break;
         case 6:
-            for (i = 0; i < count; i++, resource++) {
-                if (appended != 0) {
-                    resource->id |= 0x800000;
+            for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
+                if (isAppended != 0) {
+                    spawnResource->id |= 0x800000;
                 } else {
                     D_00435FA0++;
                 }
-                event = resource->data;
-                object = evtSpawnActionObjD(resource->id, (void *)event->label, (s32)resource->name);
-                fldPushDisplayValue((u32)resource, object);
+                event = spawnResource->data;
+                spawnedObject = evtSpawnActionObjD(spawnResource->id, (void *)event->label, (s32)spawnResource->name);
+                fldPushDisplayValue((u32)spawnResource, spawnedObject);
             }
             break;
         case 9:
-            for (i = 0; i < count; i++, resource++) {
-                if (appended != 0) {
-                    resource->id |= 0x800000;
+            for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
+                if (isAppended != 0) {
+                    spawnResource->id |= 0x800000;
                 }
-                evtSpawnActionObj10(resource->id, resource->data, resource->name);
+                evtSpawnActionObj10(spawnResource->id, spawnResource->data, spawnResource->name);
             }
             break;
         case 10:
-            for (i = 0; i < count; i++, resource++) {
-                if (appended != 0) {
-                    resource->id |= 0x800000;
+            for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
+                if (isAppended != 0) {
+                    spawnResource->id |= 0x800000;
                 }
-                transform = resource->transform;
+                transform = spawnResource->transform;
                 fldCopySpawnTransform(position, rotation, transform);
-                switch (((FldPlacementData *)resource->data)->kind) {
+                switch (((FldPlacementData *)spawnResource->data)->kind) {
                 case 8:
-                    point = ((FldPlacementData *)resource->data)->payload.specialPoint;
+                    point = ((FldPlacementData *)spawnResource->data)->payload.specialPoint;
                     switch (point->kind) {
                     case 1:
                         func_0014D380(0, point->id, rotation, position[0], position[1], position[2]);
-                        if (appended == 0) {
+                        if (isAppended == 0) {
                             D_00435FA0++;
                         }
                         break;
                     case 2:
                         func_0014D380(1, point->id, rotation, position[0], position[1], position[2]);
-                        if (appended == 0) {
+                        if (isAppended == 0) {
                             D_00435FA0++;
                         }
                         break;
@@ -863,38 +863,38 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
                     }
                     break;
                 case 0:
-                    evtSpawnActionObj11(resource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)resource->name);
+                    evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)spawnResource->name);
                     break;
                 case 1:
-                    object = evtSpawnActionObj11(resource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)resource->name);
-                    func_0013BAB8(resource, object);
+                    spawnedObject = evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)spawnResource->name);
+                    func_0013BAB8(spawnResource, spawnedObject);
                     break;
                 case 2:
                     if (D_00389874[0] != 0) {
                         break;
                     }
-                    parameters = ((FldPlacementData *)resource->data)->payload.words;
+                    parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     id = parameters[0];
-                    room = fldParseRoomNumberFromName((char *)resource->name);
-                    if (appended != 0) {
-                        FldPlacementData *placement = resource->data;
+                    room = fldParseRoomNumberFromName((char *)spawnResource->name);
+                    if (isAppended != 0) {
+                        FldPlacementData *placement = spawnResource->data;
                         func_0014C2B8(id, rotation, position[0], position[1], position[2],
-                                      room, resource->name, placement->event + D_00435FA0);
+                                      room, spawnResource->name, placement->event + D_00435FA0);
                     } else {
-                        FldPlacementData *placement = resource->data;
+                        FldPlacementData *placement = spawnResource->data;
                         func_0014C2B8(id, rotation, position[0], position[1], position[2],
-                                      room, resource->name, placement->event);
+                                      room, spawnResource->name, placement->event);
                     }
                     break;
                 case 3:
-                    parameters = ((FldPlacementData *)resource->data)->payload.words;
+                    parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     func_0014C9B0(parameters[0], rotation, position[0], position[1], position[2]);
-                    if (appended == 0) {
+                    if (isAppended == 0) {
                         D_00435FA0++;
                     }
                     break;
                 case 7:
-                    pendingSound = ((FldPlacementData *)resource->data)->payload.pendingSound;
+                    pendingSound = ((FldPlacementData *)spawnResource->data)->payload.pendingSound;
                     fldAppendPendingSoundForScene(pendingSound->value, pendingSound->scalar,
                                                   position[0], position[1], position[2]);
                     break;
@@ -902,14 +902,14 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             }
             break;
         case 4:
-            for (i = 0; i < count; i++, resource++) {
-                if (appended != 0) {
-                    resource->id |= 0x800000;
+            for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
+                if (isAppended != 0) {
+                    spawnResource->id |= 0x800000;
                 }
-                fldCopySpawnTransform(position, rotation, resource->transform);
-                object = dds3CreateCameraObject(resource->id, position, rotation);
-                ((CameraData *)object->data)->fieldOfView = *(f32 *)resource->data;
-                dds3SetWorldNodeValue(object, (u32)resource->name);
+                fldCopySpawnTransform(position, rotation, spawnResource->transform);
+                spawnedObject = dds3CreateCameraObject(spawnResource->id, position, rotation);
+                ((CameraData *)spawnedObject->data)->fieldOfView = *(f32 *)spawnResource->data;
+                dds3SetWorldNodeValue(spawnedObject, (u32)spawnResource->name);
             }
             break;
         case 7:
