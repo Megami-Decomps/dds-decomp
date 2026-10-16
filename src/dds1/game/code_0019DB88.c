@@ -32,7 +32,7 @@ extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
 extern s32 frFontMeasureGlyphStripWidth();
 
-extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
