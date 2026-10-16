@@ -17,7 +17,7 @@
 
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 
-extern s32 (*D_0040B368[])(void *a0, s32 a1);
+extern s32 (*D_0040B368[])(void *object, s32 selector);
 
 extern s32 (*D_0040B3F8[])(void *handlerContext, s32 handlerIndex);
 
