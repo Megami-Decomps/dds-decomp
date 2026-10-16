@@ -180,13 +180,13 @@ s32 mnuDispatchByFlag(s32 previousColor, MenuListNode *entry) {
 
 
 /* Apply the same entry-state blend to all four packed colors in one slot. */
-void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) {
+void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *entry) {
     s32 colorIndex;
 
     for (colorIndex = 0; colorIndex < MNU_ENTRY_COLOR_COUNT; colorIndex++) {
-        s32 previousColor = menu->workEntries[index].geometry.cornerColors[colorIndex];
+        s32 previousColor = menu->workEntries[entryIndex].geometry.cornerColors[colorIndex];
 
-        menu->workEntries[index].geometry.cornerColors[colorIndex] = mnuDispatchByFlag(previousColor, entry);
+        menu->workEntries[entryIndex].geometry.cornerColors[colorIndex] = mnuDispatchByFlag(previousColor, entry);
     }
 }
 
