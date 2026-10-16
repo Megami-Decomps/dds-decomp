@@ -1595,7 +1595,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, (u32)packet);
 }
 
-extern u32 sdfConsFinalizePacketHeader(u32, s32);
+extern u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes);
 
 /* The packet builder returns a 0x30-byte command with two trailing qwords. */
 typedef struct TextPacketTail {

@@ -55,7 +55,7 @@ extern u8 D_004365E0[8];
 extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail, s32 borderWidth, SdfListHead *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
-extern u32 sdfConsFinalizePacketHeader(u32, s32);
+extern u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes);
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
