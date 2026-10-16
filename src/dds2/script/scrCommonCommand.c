@@ -523,11 +523,11 @@ s32 scrCmdSetFilterBlurPackedColor(void)
 
 s32 scrCmdSetFilterBlurIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetCd0Triple(p0, p1, scrReadIntParameter(2));
+    s32 positionSpread;
+    s32 x;
+    positionSpread = scrReadIntParameter(0);
+    x = scrReadIntParameter(1);
+    kwlnDrawSetCd0Triple(positionSpread, x, scrReadIntParameter(2));
     return 1;
 }
 
@@ -602,11 +602,11 @@ s32 scrCmdSetStaggeredBlurPackedColor(void)
 
 s32 scrCmdSetStaggeredBlurIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetD30Triple(p0, p1, scrReadIntParameter(2));
+    s32 size;
+    s32 x;
+    size = scrReadIntParameter(0);
+    x = scrReadIntParameter(1);
+    kwlnDrawSetD30Triple(size, x, scrReadIntParameter(2));
     return 1;
 }
 
@@ -676,9 +676,9 @@ s32 scrCmdSetRectangleBlurPackedColor(void)
 
 s32 scrCmdSetRectangleBlurIntegerPair(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    kwlnDrawSetD88Pair(p0, scrReadIntParameter(1));
+    s32 centerX;
+    centerX = scrReadIntParameter(0);
+    kwlnDrawSetD88Pair(centerX, scrReadIntParameter(1));
     return 1;
 }
 
@@ -702,10 +702,10 @@ s32 scrCmdBeginRectangleBlurDeactivation(void)
 
 s32 scrCmdSetIndexedDrawMode(void)
 {
-    s32 p0;
+    s32 mode;
     s32 blendControl;
-    p0 = scrReadIntParameter(0);
-    switch (p0)
+    mode = scrReadIntParameter(0);
+    switch (mode)
     {
     case 1:
         blendControl = 0x48;
