@@ -15,7 +15,7 @@ extern s32 fldResolveEventSelectorTarget(s32 index);
 
 extern s32 func_0013CEB0(s32 param0, s32 param1);
 
-extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
+extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
 
 extern void fldStartSelectedActorTask(void);
 
