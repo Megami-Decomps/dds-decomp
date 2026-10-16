@@ -115,7 +115,7 @@ u32 effBattleReadOpaqueWord(BattleEffect *work) {
 u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
 {
     f32 ratio;
-    u32 color[4];
+    u32 packedColor[4];
 
     if (duration == 0 || elapsed >= duration) {
         return 0x808080;
@@ -133,8 +133,8 @@ u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
     VU0_SCALAR_OP(1.0f - ratio, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALAR_OP_R3(ratio, "vmulx.xyzw vf11, vf11, vf2x");
     VU0_ADD(vf10, vf10, vf11);
-    EE_MMI_RGBA_PACK(color[0]);
-    return color[0];
+    EE_MMI_RGBA_PACK(packedColor[0]);
+    return packedColor[0];
 }
 
 extern void sdfDebugPrintf(const char *, ...);
