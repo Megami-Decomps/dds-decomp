@@ -15,10 +15,10 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 extern s32 D_0032E4E4[];
 
 u32 fldCmdGetCurrentSceneSelectionResource(void) {
-    s32 value;
+    s32 selectionResource;
 
-    value = fldGetCurrentSceneSelectionResource();
-    scrSetIntegerReturnValue(value);
+    selectionResource = fldGetCurrentSceneSelectionResource();
+    scrSetIntegerReturnValue(selectionResource);
     return 1;
 }
 
