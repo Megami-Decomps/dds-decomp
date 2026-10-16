@@ -56,9 +56,9 @@ void bfStackPushFloat(ScrData *script, f32 floatValue) {
     script->sp = script->sp + 1;
 }
 
-void scrPushString(ScrData *script, char *value) {
+void scrPushString(ScrData *script, char *string) {
     script->stackTypes[script->sp] = 5;
-    script->stackValues[script->sp].s = value;
+    script->stackValues[script->sp].s = string;
     script->sp = script->sp + 1;
 }
 
