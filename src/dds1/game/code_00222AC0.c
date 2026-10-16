@@ -806,12 +806,12 @@ u32 evtOpActivateUnitMotionOnWindowEvent(void) {
 }
 
 u32 evtOpIsUnitMotionIdleOrTimed(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     u32 ret = 1;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return ret;
     }
