@@ -74,9 +74,9 @@ typedef struct GridAngleTable {
 
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
-void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, EffectSlotSet *object, u32 index, u32 surfaceIndex) {
-    void *renderEntry = effGetSlotWorkOrOverride(object, index);
-    effDrawSpriteWithWorkCornerColors(offsetX, offsetY, z, drawFlags, object, index, renderEntry, surfaceIndex);
+void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, EffectSlotSet *resource, u32 resourceIndex, u32 surfaceIndex) {
+    void *renderEntry = effGetSlotWorkOrOverride(resource, resourceIndex);
+    effDrawSpriteWithWorkCornerColors(offsetX, offsetY, z, drawFlags, resource, resourceIndex, renderEntry, surfaceIndex);
 }
 
 /* Update the indexed slot's description countdown and carry its active state forward. */

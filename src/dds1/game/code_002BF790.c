@@ -50,9 +50,9 @@ extern s32 sdfConsMeasurePacketWithHeader(s32 address);
 #include "sdf_packet_alloc.h"
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
-void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *object, s32 index, s32 surfaceIndex) {
-    void *renderEntry = effGetSlotWorkOrOverride(object, index);
-    effDrawSpriteWithWorkCornerColors(offsetX, offsetY, z, drawFlags, object, index, (BdWork *)renderEntry,
+void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *resource, s32 resourceIndex, s32 surfaceIndex) {
+    void *renderEntry = effGetSlotWorkOrOverride(resource, resourceIndex);
+    effDrawSpriteWithWorkCornerColors(offsetX, offsetY, z, drawFlags, resource, resourceIndex, (BdWork *)renderEntry,
                   surfaceIndex);
 }
 
