@@ -448,9 +448,9 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern s32 btlGroupContainsId(s32, s32);
-extern void btlAddGroupId(s32, s32);
-extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
+extern s32 btlGroupContainsId(s32 groupIndex, s32 wantedId);
+extern void btlAddGroupId(s32 groupIndex, s32 newId);
+extern BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id);
 extern char *strrchr(const char *, s32);
 extern s32 strcasecmp(const char *, const char *);
 extern const char D_00436FA8[];
@@ -1427,7 +1427,7 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern void btlRemoveGroupId(s32, s32);
+extern void btlRemoveGroupId(s32 groupIndex, s32 wantedId);
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */
