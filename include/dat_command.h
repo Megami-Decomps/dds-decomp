@@ -62,7 +62,7 @@ typedef struct DatCommandRecord {
     u16 effectPercent;             /* 0x22 */
     DatCommandAttribute attribute; /* 0x24 */
     s32 requirementBits;           /* 0x28 */
-    u8 entryChange; /* Interpreted as a signed actor-entry delta. */
+    s8 entryChange; /* Signed actor-entry delta at 0x2c. */
     u8 stat2D;
     u16 commandEffectId;
     u32 unk30;                    /* 0x30: unsigned selector; DDS2 001B14EC, DDS1 001D1004. */
