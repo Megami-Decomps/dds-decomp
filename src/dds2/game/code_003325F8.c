@@ -112,7 +112,7 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     sdfCopyAssetListParameterState(destination->resources, source->resources);
     sdfModelCopyData(destination->slotPairs, source->slotPairs);
     destination->flags = source->flags;
-    destination->unk1A = source->unk1A;
+    destination->drawFlags = source->drawFlags;
     destination->color = source->color;
     VU0_LOAD_MATRIX(source->matrix);
     VU0_STORE_MATRIX(destination->matrix);
