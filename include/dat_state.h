@@ -322,7 +322,7 @@ typedef struct DatEnemyRecord {
     u8 pad0E[2];
 #endif
     u8 baseStats[DAT_BASE_STAT_COUNT]; /* 0x10 */
-    u8 unk15;            /* Copied to the command actor's actionNumber on model change. */
+    u8 actionNumber;     /* 0x15: copied to the command actor; its consumer repeats this many scene actions. */
     u8 pad16[2];
     u16 skills[8];        /* 0x18 */
     s32 money;            /* 0x28 */
@@ -345,6 +345,8 @@ typedef struct DatEnemyRecord {
 } DatEnemyRecord;
 
 typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];
+typedef char DatEnemyRecordActionNumberOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->actionNumber == 0x15) ? 1 : -1];
 typedef char DatEnemyRecordBattleExperienceRewardOffsetCheck[
     ((u32)&((DatEnemyRecord *)0)->battleExperienceReward == 0x2C) ? 1 : -1];
 typedef char DatEnemyActionChancesOffsetCheck[((u32)&((DatEnemyRecord *)0)->actionChances == 0x40) ? 1 : -1];
