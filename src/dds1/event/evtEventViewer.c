@@ -519,8 +519,8 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
 struct PolyMovieObject;
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
-extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
-extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
+extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
+extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *movie, s32 undo, s32 start, s32 end);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
