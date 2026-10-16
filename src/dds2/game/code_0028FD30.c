@@ -515,8 +515,8 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
     return NULL;
 }
 
-MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
-    return object->menu.defaultSelector;
+MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *resource) {
+    return resource->menu.defaultSelector;
 }
 
 extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
