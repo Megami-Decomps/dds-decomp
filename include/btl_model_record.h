@@ -25,7 +25,7 @@ typedef struct BtlActorStatusRecord {
     f32 z;
     f32 reach;               /* 0x18: copied into BtlActorTransformParameters. */
     f32 height;              /* 0x1C: copied into BtlActorTransformParameters. */
-    f32 unk20;
+    f32 shotRadius;         /* 0x20: model-editor label is "1 shot radius". */
     f32 positionGuideScale; /* 0x24: scales the selected position debug guide. */
     u16 shadowKind;
     u16 model;
@@ -37,6 +37,8 @@ typedef char BtlActorMotionSlot_muzzleGuideScale_offset_must_be_0x0C[
     ((u32)&((BtlActorMotionSlot *)0)->muzzleGuideScale == 0x0C) ? 1 : -1];
 typedef char BtlActorStatusRecord_positionGuideScale_offset_check[
     ((u32)&((BtlActorStatusRecord *)0)->positionGuideScale == 0x24) ? 1 : -1];
+typedef char BtlActorStatusRecord_shotRadius_offset_check[
+    ((u32)&((BtlActorStatusRecord *)0)->shotRadius == 0x20) ? 1 : -1];
 typedef char BtlActorStatusRecordSizeCheck[sizeof(BtlActorStatusRecord) == 0x270 ? 1 : -1];
 
 #endif

@@ -2513,7 +2513,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.x,
             btlDebugPartyRecordEditor.y + btlDebugPartyRecordEditor.rowCount * 10 + 4, btlDebugModelMotionNames[D_003BBA08]);
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.unk20) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.shotRadius) {
             state->battleFlags |= 0x800000;
         } else {
             state->battleFlags &= ~0x800000;
@@ -2642,7 +2642,7 @@ void btlWriteActorModelTableFile(void) {
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[4], (double)btlDebugEditorActorStatus.z);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[5], (double)btlDebugEditorActorStatus.reach);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[6], (double)btlDebugEditorActorStatus.height);
-    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[7], (double)btlDebugEditorActorStatus.unk20);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[7], (double)btlDebugEditorActorStatus.shotRadius);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.positionGuideScale);
     cursor += sprintf(cursor, D_003BBAC0, btlDebugModelTableLabels[9]);
     switch (btlDebugEditorActorStatus.shadowKind) {
