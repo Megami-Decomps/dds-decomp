@@ -1994,14 +1994,14 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
     }
 }
 
-void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+void mnuSetWindowResource(s32 pageIndex, MenuPageWindow *menu,
                           EffectSlotSet *mainResource,
                           EffectSlotSet *itemResource,
                           EffectSlotSet *iconResource,
                           EffectSlotSet *cursorResource,
                           EffectSlotSet *alternateResource) {
-    mnuSelectPage(menu, index);
-    menu->slots[index].windowSprites = mnuCreatePageSpriteSet(
+    mnuSelectPage(menu, pageIndex);
+    menu->slots[pageIndex].windowSprites = mnuCreatePageSpriteSet(
         0, mainResource, itemResource, iconResource, cursorResource,
         alternateResource);
     menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
