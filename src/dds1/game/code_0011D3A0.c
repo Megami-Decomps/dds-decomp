@@ -372,22 +372,22 @@ void fldStepColorChannelByCurrentPad(u32 *color, s32 channel) {
 
 /* Emit one whole-value character and two fractional digits after rounding.
  * At whole >= 10 only the fractional digits become 9; whole is not clamped. */
-void fldFormatSecondsText(char *text, f32 value) {
+void fldFormatSecondsText(char *text, f32 displayValue) {
     s32 whole;
     s32 tenths;
     s32 hundredths;
 
-    value += 0.005f;
-    whole = (s32)value;
+    displayValue += 0.005f;
+    whole = (s32)displayValue;
     if (whole >= 10) {
         tenths = 9;
         hundredths = 9;
     } else {
-        value -= (f32)whole;
-        value *= 10.0f;
-        tenths = (s32)value;
-        value -= (f32)tenths;
-        hundredths = (s32)(value * 10.0f);
+        displayValue -= (f32)whole;
+        displayValue *= 10.0f;
+        tenths = (s32)displayValue;
+        displayValue -= (f32)tenths;
+        hundredths = (s32)(displayValue * 10.0f);
     }
     text[0] = whole + '0';
     text[1] = '.';
