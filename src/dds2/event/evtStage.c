@@ -198,7 +198,7 @@ void evtSetWorldSlotValue(void *object, u32 direction) {
 /* Attach object to the node referenced by owner's owned handle. */
 s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
     ObjBase *ref;
-    void *node;
+    void *slotNode;
 
     if (object == NULL) {
         return 0;
@@ -207,11 +207,11 @@ s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
     if (ref == NULL) {
         return 0;
     }
-    node = ref->slots[1];
-    if (node == NULL) {
+    slotNode = ref->slots[1];
+    if (slotNode == NULL) {
         return 0;
     }
-    dds3SetSlotKey(node, object);
-    dds3ReplaceObjectResource(node);
+    dds3SetSlotKey(slotNode, object);
+    dds3ReplaceObjectResource(slotNode);
     return 1;
 }
