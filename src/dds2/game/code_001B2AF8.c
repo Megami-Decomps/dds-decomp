@@ -5234,7 +5234,86 @@ void btlInitializeStaffActorPanels(void) {
     btlSetTrackedTaskHandle(3, (s32)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C16B0);
+s32 func_001C16B0(s8 mode) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_004367CC);
+    BtlState *battle;
+    BattleActorPanelWork *work;
+    BtlUnit *actor;
+    s32 eligibleCount;
+    s32 state;
+    u32 slot;
+    s32 i;
+
+    if (task == NULL) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    eligibleCount = btlCountEligibleLinkedActors(battle);
+    actor = battle->units;
+
+    if (mode == 0) {
+        BattleCmdPanel *panel;
+        state = mdlFlagTest(0xC0E) != 0 ? 1 : 2;
+        panel = btlCommandPanelWork;
+        if (panel == NULL || panel->state == 0) {
+            state = 1;
+        } else if (panel->state == 3) {
+            state = 1;
+        }
+    } else {
+        state = (s32)mode + 2;
+    }
+
+    /* i is never advanced: the count only gates the walk on any eligible actor. */
+    switch (state) {
+    case 1:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] += 6;
+                work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
+                work->activeEntries[slot].position[1] += 1;
+                work->activeEntries[slot].position[1] = work->activeEntries[slot].position[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].position[1] > 0x159 ? 0x159 : work->activeEntries[slot].position[1];
+            }
+        }
+        break;
+    case 2:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] -= 6;
+                work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
+                work->activeEntries[slot].position[1] -= 1;
+                work->activeEntries[slot].position[1] = work->activeEntries[slot].position[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].position[1] > 0x159 ? 0x159 : work->activeEntries[slot].position[1];
+            }
+        }
+        break;
+    case 3:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] = 0x159;
+                work->activeEntries[slot].position[1] = 0x159;
+            }
+        }
+        break;
+    case 4:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] = 0x143;
+                work->activeEntries[slot].position[1] = 0x143;
+            }
+        }
+        break;
+    }
+    return 1;
+}
 
 typedef struct BattleActorPanelPositions {
     BattleSelectionPosition entries[3];
