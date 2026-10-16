@@ -114,7 +114,8 @@ void fldCreateMapRequestQueues(void) {
     D_004390A4 = 0;
 }
 
-extern void sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f32);
+extern void sdfDrawUniformlyScaledSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                            s32 flags, s32 context, f32 scale);
 
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
