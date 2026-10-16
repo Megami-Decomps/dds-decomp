@@ -2173,7 +2173,7 @@ void evtViewerDispatchFlagMode(EvtRuntime *viewer) {
  * frame, or zero. Equal-distance ties retain the first key visited. */
 s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
     EvtRuntimeChild *selectedGlyph = NULL;
-    s32 best = 99999;
+    s32 bestFrameDistance = 99999;
     EvtRuntimeGroup *node = viewer->groups;
 
     while (node != NULL) {
@@ -2182,13 +2182,13 @@ s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
 
             if (glyph != NULL) {
                 do {
-                    s32 frame = glyph->frame;
+                    s32 glyphFrame = glyph->frame;
 
-                    if (viewer->curFrame < frame) {
-                        s32 distance = frame - viewer->curFrame;
+                    if (viewer->curFrame < glyphFrame) {
+                        s32 frameDistance = glyphFrame - viewer->curFrame;
 
-                        if (distance < best) {
-                            best = distance;
+                        if (frameDistance < bestFrameDistance) {
+                            bestFrameDistance = frameDistance;
                             selectedGlyph = glyph;
                         }
                     }
@@ -2205,7 +2205,7 @@ s32 evtViewFindNextGlyph(EvtRuntime *viewer) {
  * frame, or zero. Equal-distance ties retain the first key visited. */
 s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
     EvtRuntimeChild *selectedGlyph = NULL;
-    s32 best = 99999;
+    s32 bestFrameDistance = 99999;
     EvtRuntimeGroup *node = viewer->groups;
 
     while (node != NULL) {
@@ -2214,13 +2214,13 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
 
             if (glyph != NULL) {
                 do {
-                    s32 frame = glyph->frame;
+                    s32 glyphFrame = glyph->frame;
 
-                    if (frame < viewer->curFrame) {
-                        s32 distance = viewer->curFrame - frame;
+                    if (glyphFrame < viewer->curFrame) {
+                        s32 frameDistance = viewer->curFrame - glyphFrame;
 
-                        if (distance < best) {
-                            best = distance;
+                        if (frameDistance < bestFrameDistance) {
+                            bestFrameDistance = frameDistance;
                             selectedGlyph = glyph;
                         }
                     }
