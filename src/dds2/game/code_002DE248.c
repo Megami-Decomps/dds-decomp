@@ -8006,7 +8006,131 @@ EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F1888);
+extern SdfPoolNode *D_003E9E48[];
+static inline void unpackNormalizedColor(u32 color) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, 1.0f / 128.0f);
+}
+static inline u32 packNormalizedColor(void) {
+    u32 rgba[4];
+    EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
+    return rgba[0];
+}
+void func_002F1888(EffRibbonWork *work, Matrix4 *matrix) {
+    SdfPoolNode *surface;
+    void *list;
+    EffGsPacket *packet;
+    u32 segment;
+    u32 count;
+    s32 rowStride;
+    s32 remaining;
+    u32 *colors;
+    u8 *positions;
+    u8 *uvs;
+    u8 *extra;
+    u32 color;
+    u32 segmentColor;
+    f32 baseVector[4];
+    SdfTex *texture;
+
+    count = work->count;
+    if (count == 0) {
+        return;
+    }
+    color = work->color;
+    if ((color & 0xFF000000) == 0) {
+        return;
+    }
+    surface = D_003E9E48[work->surfaceIndex];
+    eeUnpackRGBAWordFloat(color, 1.0f / 128.0f);
+    VU0_STORE_VF(vf10, baseVector);
+    list = (void *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    if (matrix == NULL) {
+        VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    } else {
+        VU0_LOAD_MATRIX(matrix);
+    }
+    sdfConsAppendVuPacket(list, 0);
+    if (work->resource == NULL) {
+        texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)D_00437E78);
+    } else {
+        texture = sdfGetOrCreateTextureForReference(surface, work->resource);
+    }
+    sdfSetAssetPrimaryTextureAddress(work->handle, texture);
+    sdfConsAppendAssetPacket(list, work->handle, 0);
+    if (work->drawMode == 0) {
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x31801;
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+    }
+    positions = work->positions;
+    uvs = work->uvs;
+    extra = work->extra;
+    colors = work->colors;
+    rowStride = work->rowStride;
+    segment = 0;
+    if (count != 0) {
+        s32 extraStep;
+        s32 uvStep;
+        s32 positionStep;
+
+        positionStep = rowStride * 16;
+        uvStep = rowStride * 8;
+        extraStep = rowStride * 4;
+
+        do {
+            segmentColor = *colors;
+            if (segmentColor & 0xFF000000) {
+                remaining = rowStride;
+                D_004583D0.colors = (u32 *)extra;
+                D_004583D0.positions = (u128 *)positions;
+                D_004583D0.texcoords = (u32 *)uvs;
+                unpackNormalizedColor(segmentColor);
+                VU0_LOAD_VF(vf11, baseVector);
+                VU0_MUL(vf10, vf10, vf11);
+                D_004583D0.color = packNormalizedColor();
+                D_004583D0.parameterCount = 12;
+                D_004583D0.vertexCount = 12;
+                D_004583D0.parameters = D_003E9BE0;
+                while (remaining >= 12) {
+                    remaining -= 8;
+                    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_004583D0));
+                    D_004583D0.positions += 8;
+                    D_004583D0.colors += 8;
+                    D_004583D0.texcoords += 16;
+                }
+                if (remaining >= 8) {
+                    D_004583D0.parameterCount = 6;
+                    D_004583D0.vertexCount = remaining;
+                    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_004583D0));
+                }
+            }
+            positions += positionStep;
+            colors++;
+            segment++;
+            uvs += uvStep;
+            extra += extraStep;
+        } while (segment < count);
+    }
+    if (work->drawMode == 0) {
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x51801;
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+    }
+    surface->append(surface, (SdfListHead *)list);
+}
 
 void effLoadWindTexture(void) {
     D_00437E6C = (u32)sdfReadNamedResource("/effect/wind00.tmx", &effWindTextureHandle, 0);
