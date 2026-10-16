@@ -17,7 +17,7 @@ u32 btlGetIndexListCount(BtlIndexList *list);
 void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 void btlCopyIndexList(BtlIndexList *destination, BtlIndexList *source);
 void btlSwapIndexListEntries(BtlIndexList *list, s32 first, s32 second);
-u32 btlFindListIndex(BtlIndexList *list, void *entry);
+s32 btlFindListIndex(BtlIndexList *list, void *entry);
 
 /* The battle AI task's 0xA4-byte user-data allocation in both games. */
 typedef struct SceneAiWork {
