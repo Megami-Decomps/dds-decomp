@@ -1643,16 +1643,16 @@ s32 mnuCampResolveProgressTierValue(void) {
 void mnuCampClearListedItemCounts(void) {
     u16 entryId;
     s8 *entry;
-    u32 index;
+    u32 listedItemIndex;
 
-    index = 0;
+    listedItemIndex = 0;
     entry = mnuCampListedItems;
     do {
         entryId = *(u16 *)entry;
         entry = (s8 *)((s32)entry + 8);
-        index = index + 1;
+        listedItemIndex = listedItemIndex + 1;
         datGameState->inventory.counts[(u32)entryId] = 0;
-    } while (index < 3);
+    } while (listedItemIndex < 3);
 }
 
 MenuTerminalContext *mnuTerminalCreateContext(void) {
