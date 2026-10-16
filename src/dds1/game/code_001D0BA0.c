@@ -155,7 +155,7 @@ extern SoundTask *btlDeferredTaskHead;
 extern DatEnemyRecord *datEnemyRecords;
 
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern s8 effSharedRandomState[];
 
@@ -408,7 +408,7 @@ u32 btlClassifyActionOperand(BtlUnit *actor, BattleIndexWork *work) {
     case 3:
     case 7:
     case 8:
-        return ((BtlActionAnimationRecord *)datActionAnimationRecords)[work->skillId].cameraKind;
+        return datActionAnimationRecords[work->skillId].cameraKind;
     default:
         return 0;
     }
@@ -720,7 +720,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             }
         }
     }
-    helperResult = btlGetUnitMotionDurationFrames(action->unit, ((BtlActionAnimationRecord *)datActionAnimationRecords)[command].cameraKind);
+    helperResult = btlGetUnitMotionDurationFrames(action->unit, datActionAnimationRecords[command].cameraKind);
     if (datCommandRecords[command].commandEffectId != 0) {
         counterCommand = command;
         btlBossDebugPrintf("btl:counter=%d\n", command);
