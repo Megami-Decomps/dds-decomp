@@ -744,7 +744,7 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011EA10);
 
 
-extern u8 dds3TestObjectFlags(void *object, s32 mask);
+extern u8 dds3TestObjectFlags(void *object, u32 mask);
 
 
 extern void fldSelectDisplayBuffer(u32);

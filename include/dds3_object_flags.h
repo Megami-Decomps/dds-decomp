@@ -4,6 +4,6 @@
 #include "common.h"
 
 /* Test whether any requested object flag bit is set. */
-u8 dds3TestObjectFlags(void *object, s32 mask);
+u8 dds3TestObjectFlags(void *object, u32 mask);
 
 #endif
