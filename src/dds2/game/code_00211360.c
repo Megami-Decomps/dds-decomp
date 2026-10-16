@@ -157,7 +157,7 @@ extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
 extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
-extern s32 btlUnitHasNegativeActionQueryResult(void *, s32);
+extern s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask);
 
 extern s8 D_00419C30[];
 
