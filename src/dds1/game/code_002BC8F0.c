@@ -59,9 +59,9 @@ extern s32 effSharedRibbonReferenceCount;
 
 extern u32 D_003BC990;
 
-extern u32 effFlashTextureHandles;
+extern struct SdfTextureFileHeader *effFlashTextureHandles;
 
-extern u32 D_003BC96C;
+extern struct SdfTextureFileHeader *D_003BC96C;
 
 extern u32 D_003BC950;
 
