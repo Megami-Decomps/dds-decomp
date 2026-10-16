@@ -69,24 +69,22 @@ typedef struct {
 
 extern void sdfVuEmitSelectedNodePacket(VuWork *work);
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(u32 workAddress);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(VuWork *work);
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */ void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition);
 
 /* Emit selected geometry, then apply flag callbacks; the first may change flags. */
-void sdfVuApplySelectedWorkFlags(u32 workAddress) {
+void sdfVuApplySelectedWorkFlags(VuWork *work) {
     u32 selectedFlags;
-    s32 signedWorkAddress;
 
-    signedWorkAddress = (s32)workAddress;
-    sdfVuEmitSelectedNodePacket((VuWork *)signedWorkAddress);
-    selectedFlags = *(u32 *)(signedWorkAddress + 0x44);
+    sdfVuEmitSelectedNodePacket(work);
+    selectedFlags = work->selectedFlags;
     if ((selectedFlags & 0x1000) != 0) {
-        sdfVuUpdateSelectedNodeGeometry(workAddress);
-        selectedFlags = *(u32 *)(signedWorkAddress + 0x44);
+        sdfVuUpdateSelectedNodeGeometry(work);
+        selectedFlags = work->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {
-        func_00339270(workAddress);
+        func_00339270((u32)work);
         return;
     }
 }
@@ -111,17 +109,17 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
         sdfVuBuildRingTriangleRefs(work);
-        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuApplySelectedWorkFlags(work);
         sdfVuConfigureWorkRingDma(work, work->param1);
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
         func_00337688(work->ringSrc, work->param1);
         sdfVuBuildIndexedTriangleRefs(work);
-        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuApplySelectedWorkFlags(work);
     } else {
         sdfVuBuildRingTriangleRefs(work);
-        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuApplySelectedWorkFlags(work);
     }
 }
 
