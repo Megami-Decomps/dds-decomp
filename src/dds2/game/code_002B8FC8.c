@@ -1860,8 +1860,8 @@ void mnuSetMenuPageFlags(MenuSprites *page, u32 flags) {
     page->flags = flags;
 }
 
-void mnuSetPageParams(MenuSprites *page, s32 mode) {
-    switch (mode) {
+void mnuSetPageParams(MenuSprites *page, s32 pageTransitionMode) {
+    switch (pageTransitionMode) {
     case 0:
         page->fadeOut = 0;
         page->drawAlpha = 0;
