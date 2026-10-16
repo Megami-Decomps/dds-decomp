@@ -4049,7 +4049,7 @@ u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
     return 1;
 }
 
-u8 *btlCreateUnitTask0F(u8 *unit, s32 arg1, s32 arg2, s32 arg3) {
+u8 *btlCreateUnitTask0F(u8 *unit, s32 firstColor, s32 secondColor, s32 duration) {
     u8 *task = btlAllocTask(16);
     u32 *args;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4060,9 +4060,9 @@ u8 *btlCreateUnitTask0F(u8 *unit, s32 arg1, s32 arg2, s32 arg3) {
     *(void **)(task + 0x4C) = btlApplyUnitFxWhenLoaded;
     args = btlGetTaskArguments(task);
     args[3] = (u32)unit;
-    args[0] = arg1;
-    args[1] = arg2;
-    args[2] = arg3;
+    args[0] = firstColor;
+    args[1] = secondColor;
+    args[2] = duration;
     return task;
 }
 
