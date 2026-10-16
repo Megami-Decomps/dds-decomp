@@ -286,10 +286,10 @@ s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 pri
     return CreateThread(&param);
 }
 
-s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority) {
+s32 sdfCreateThreadWithAllocatedWorkspace(void (*entryAddress)(), s32 stackBytes, s32 priority) {
     void *workspace;
 
     workspace = sdfAllocateBlockBySizeThreshold(stackBytes);
-    return sdfCreateThread(entryAddress, workspace, stackBytes, priority);
+    return sdfCreateThread((void *)entryAddress, workspace, stackBytes, priority);
 }
 
