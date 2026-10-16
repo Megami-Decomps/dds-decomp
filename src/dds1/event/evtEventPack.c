@@ -45,7 +45,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     s32 entryIndex;
     s32 entrySize;
     u8 *modelPayload;
-    s32 unitKey;
+    s32 viewerObjectKey;
 
     packState = evtGetEventPackLoadState(eventId);
     entryIndex = 0;
@@ -69,13 +69,13 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                         mdlLoadViewerPackage(3, evtNextCameraSlotViewerKey, 0x103, modelPayload, entrySize);
                         break;
                     }
-                    unitKey = mdlSpawnCameraSlotViewerObject(3, evtNextCameraSlotViewerKey);
+                    viewerObjectKey = mdlSpawnCameraSlotViewerObject(3, evtNextCameraSlotViewerKey);
                     evtNextCameraSlotViewerKey++;
                     if (evtNextCameraSlotViewerKey >= 0x7D0) {
                         evtNextCameraSlotViewerKey = 0x3E8;
                     }
                     sdfDebugPrintf("BE regist unit %d < %d >\n", evtNextCameraSlotViewerKey, entrySize);
-                    return unitKey;
+                    return viewerObjectKey;
                 }
             }
             entry++;
