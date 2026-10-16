@@ -3,10 +3,12 @@
 
 #include "common.h"
 
+struct FldCollisionDescriptor;
+
 typedef struct FldSpawnCollision {
     u32 kind;             /* 0x00 */
     u32 opaque04;
-    u32 *header;          /* 0x08: passed to the geometry collision builder */
+    struct FldCollisionDescriptor *header; /* 0x08: geometry collision input */
     u32 opaque0C;
     u8 opaque10[0x20];
 } FldSpawnCollision;

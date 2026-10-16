@@ -451,7 +451,7 @@ void fldResetRecordState(void) {
     }
 }
 
-void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
+void fldBuildCollisionRecordsFromGeometry(FldCollisionDescriptor *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
@@ -482,19 +482,17 @@ void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
     f32 runningMinimum;
     s32 i;
     s32 component;
-    FldCollisionDescriptor *source = geometry;
-
     if (fldValueRecords == 0) {
         fldAllocateRecordStorage();
     }
     for (pass = 0; pass < 5; pass++) {
         s32 faceCount;
         FldCollisionFace *firstFace;
-        sourceVertices = source->vertices;
-        faceCount = source->faceCount;
-        firstFace = source->faces;
-        stopData = source->stopData;
-        trianglesRemaining = source->triangleCount;
+        sourceVertices = geometry->vertices;
+        faceCount = geometry->faceCount;
+        firstFace = geometry->faces;
+        stopData = geometry->stopData;
+        trianglesRemaining = geometry->triangleCount;
         if (faceCount > 0) {
             face = firstFace;
             remaining = faceCount;
