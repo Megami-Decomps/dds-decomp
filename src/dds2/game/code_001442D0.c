@@ -5111,8 +5111,8 @@ typedef struct FieldTargetGuideState {
     s32 disabled;
     f32 position[3];
     f32 yaw;
-    f32 unk18; /* 0x18: previous model frame, synchronized when update bit 2 is set. */
-    f32 unk1C; /* 0x1C: current model frame. */
+    f32 previousModelFrame; /* 0x18 */
+    f32 currentModelFrame; /* 0x1C */
     s16 gridX;
     s16 gridY;
     s16 targetGridX;
@@ -5965,12 +5965,12 @@ apply_animation:
         }
     }
 
-    previousFrame = fldTargetGuideState.unk1C;
+    previousFrame = fldTargetGuideState.currentModelFrame;
     currentFrame = model->first->currentFrame;
-    fldTargetGuideState.unk1C = currentFrame;
-    fldTargetGuideState.unk18 = previousFrame;
+    fldTargetGuideState.currentModelFrame = currentFrame;
+    fldTargetGuideState.previousModelFrame = previousFrame;
     if (fldTargetGuideState.updateFlags & 2) {
-        fldTargetGuideState.unk18 = currentFrame;
+        fldTargetGuideState.previousModelFrame = currentFrame;
     }
 }
 
