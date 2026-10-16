@@ -1815,7 +1815,7 @@ SdfModel *sdfCreateBufferedTransformSlot(void) {
     VU0_STORE_VF(vf0, slot->rotationQuaternion);
     VU0_SET_ONES_XYZ(vf10);
     VU0_STORE_VF(vf10, slot->scaleVector);
-    slot->unk1A = -1;
+    slot->drawFlags = -1;
     slot->color = 0x80808080;
     return slot;
 }
