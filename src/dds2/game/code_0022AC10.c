@@ -2792,10 +2792,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else {
             battle->battleFlags &= ~0x800000;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.unk24) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.positionGuideScale) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->positionGuideScale * unit->scale);
         }
         selectedAddress = btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress;
         if (((u32)selectedAddress >= (u32)&btlDebugEditorActorStatus.position[0] &&
@@ -2918,7 +2918,7 @@ void btlWriteActorModelTableFile(void) {
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[5], (double)btlDebugEditorActorStatus.reach);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[6], (double)btlDebugEditorActorStatus.height);
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[7], (double)btlDebugEditorActorStatus.unk20);
-    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.unk24);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.positionGuideScale);
     cursor += sprintf(cursor, D_00436F10, btlDebugModelTableLabels[9]);
     switch (btlDebugEditorActorStatus.shadowKind) {
     case 0: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_NON"); break;
