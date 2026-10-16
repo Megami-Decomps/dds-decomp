@@ -1004,7 +1004,7 @@ extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
-extern void evtScaleSlotByClampedMultiplier(void *, f32);
+extern void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
 extern s32 sprintf(char *, const char *, ...);
