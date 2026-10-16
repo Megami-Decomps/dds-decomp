@@ -2497,6 +2497,7 @@
 0x001C0DD0	btlReleaseDialogTaskAndMarkBattleState	inferred	Frees dialog task data, sets battle state and clears dialog selection flags. [names_reviewed14.tsv]
 0x001C0E40	btlInitializeSelectionWork	inferred	R_Structs55
 0x001C14E8	btlReleaseSelectionTaskBuffer	inferred	Frees the selection buffer when its task exists and clears registration. [names_reviewed8.tsv]
+0x001C16B0	btlSetActorPanelYForMode	inferred	Locates the named actor-panel task, then shifts active entries by mode and scene state or snaps both Y coordinates to the 0x143/0x159 baselines. Direct callers are actor-panel presentation update (mode 0/1) and panel initialization (mode 1).
 0x001C2390	btlReleaseStwrPanelResource	inferred	confidence=medium; src/dds2/game/code_001A5BB8.c:func_001C2390; Releases the resource handle stored in task user data and clears tracked slot three, labeled bpnl_stwr_nm in retail. The native task tag is retained without expanding its uncertain abbreviation. [names_qp9.tsv]
 0x001C23C0	btlAreLinkedSceneCountersAtThreshold	inferred	Checks linked scene tasks and several bounded counter thresholds. [names_reviewed17.tsv]
 0x001C2A50	btlSlotBankPromoteStates	inferred	for each of bank->count slots (stride 0x290, state at +0x4 of slot at bank+0x7D0) turns state 1/2 into 4

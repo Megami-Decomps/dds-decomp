@@ -219,7 +219,7 @@ extern char *D_004368B0;
 extern void btlLoadResourceBlock(void);
 extern void btlStartRegisteredChildTask(void);
 extern void btlInitializeStaffActorPanels(void);
-extern void func_001C16B0(s32);
+extern void btlSetActorPanelYForMode(s32);
 
 extern void itfMesClearFlags();
 extern void brsTaskAllowUpdate();
