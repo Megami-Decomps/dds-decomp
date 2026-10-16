@@ -69,11 +69,11 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
     SndMixerBlockSlots *work = (SndMixerBlockSlots *)&sndMidiTrackState;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
-    s32 i;
+    s32 slotIndex;
 
     func_0030B458(work, (u8 *)work + 0x8D0);
     slot = work->slots;
-    for (i = 0; i < 13; i++) {
+    for (slotIndex = 0; slotIndex < 13; slotIndex++) {
         if (slot->id == id) {
             return 1;
         }
@@ -194,10 +194,10 @@ void sndCopyGroupedMidiStateBytes(u8 *out) {
     }
     state = (u8 *)&sndMidiTrackState;
     for (group = 0; group < 2; group++) {
-        s32 i;
+        s32 byteIndex;
 
-        for (i = 0; i < 24; i++) {
-            *out++ = state[0x890 + group * 0x20 + i];
+        for (byteIndex = 0; byteIndex < 24; byteIndex++) {
+            *out++ = state[0x890 + group * 0x20 + byteIndex];
         }
     }
 }
