@@ -867,10 +867,7 @@ void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
     }
 }
 
-typedef struct FldResourceName {
-    u32 unk00;
-    const char *name;
-} FldResourceName;
+#include "fld_resource_name.h"
 
 extern FldFileResource *D_003BD7B0;
 extern u32 D_003BD7B4;
