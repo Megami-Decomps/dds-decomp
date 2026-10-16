@@ -2,6 +2,7 @@
 #define BTL_FIELD_LOAD_TASK_ARGS_H
 
 #include "common.h"
+#include "sdf_texture_offset_list.h"
 
 struct FilePacRequest;
 
@@ -13,7 +14,7 @@ typedef struct BtlFieldLoadArgs {
     u8 pad0C[0xC];                     /* 0x0C: opaque state retained by the task */
     void *fieldF1;                     /* 0x18: loaded F1 resource */
     void *fieldF2;                     /* 0x1C: loaded F2 resource */
-    void *fieldTB;                     /* 0x20: loaded texture-offset resource */
+    const SdfTextureOffsetListHeader *fieldTB; /* 0x20: loaded texture-offset resource */
     s32 frame;                         /* 0x24: callback phase/frame */
 } BtlFieldLoadArgs;
 
