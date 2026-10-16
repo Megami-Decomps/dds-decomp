@@ -469,7 +469,7 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->variant = 0;
 }
 
-void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
+void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **lowerKey, EvtRuntimeChild **upperKey);
 void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 
 void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
@@ -585,30 +585,30 @@ void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
 
 extern s32 evtViewerTestIndexedCondition(u32);
 
-void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2) {
-    s32 base;
+void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **lowerKey, EvtRuntimeChild **upperKey) {
+    s32 frameOffset;
 
-    *out1 = 0;
-    *out2 = 0;
+    *lowerKey = 0;
+    *upperKey = 0;
     if (track == 0) {
         return;
     }
-    base = track->metadata.value;
-    *out2 = track->children;
-    while (*out2 != 0) {
-        if (value < (*out2)->frame + base) {
+    frameOffset = track->metadata.value;
+    *upperKey = track->children;
+    while (*upperKey != 0) {
+        if (frame < (*upperKey)->frame + frameOffset) {
             break;
         }
-        *out2 = (*out2)->next;
+        *upperKey = (*upperKey)->next;
     }
-    if (*out2 != 0) {
-        *out1 = (*out2)->prev;
+    if (*upperKey != 0) {
+        *lowerKey = (*upperKey)->prev;
     } else {
-        *out1 = track->lastChild;
+        *lowerKey = track->lastChild;
     }
     if (track->type == 2) {
-        while (*out1 != 0 && evtViewerTestIndexedCondition((*out1)->p0C.sh[0]) != 1) {
-            *out1 = (*out1)->prev;
+        while (*lowerKey != 0 && evtViewerTestIndexedCondition((*lowerKey)->p0C.sh[0]) != 1) {
+            *lowerKey = (*lowerKey)->prev;
         }
     }
 }
