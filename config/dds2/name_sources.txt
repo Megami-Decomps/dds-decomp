@@ -9694,3 +9694,12 @@
 0x001EF030	btlBuildTargetGroupFramingCameraPose	inferred	Frames the actor against the extreme endpoints of the selected target side.
 0x001FF0F8	btlBuildProjectedActorPairBoundsVU	inferred	Projects the eligible actor pair onto the supplied line, returns its bounding radius and VF10 center, and optionally publishes vertical extrema.
 0x001EE458	btlBuildGroupSizeActionCameraPair	inferred	Builds both action cameras from active target-group count and acting-unit side, using the selected-preset pair for one eligible actor.
+0x003B2428	effTexturedBlurSetupParameters	inferred	confidence=high; EffBlurTemplateBody setup parameters read by effEventGetBlurTemplateSetupParams and written by effEventSetBlurTemplateParameters. Identifier-only; twin 0x00355AF8 in DDS1. [PurC data b14; matched-C evidence]
+0x003B25A0	effScatterBlurSetupParameters	inferred	confidence=high; EffBlurScatterParams setup parameters read by effEventGetScatterBlurSetupParams. Identifier-only; twin 0x00355C70 in DDS1. [PurC data b14; matched-C evidence]
+0x003B29B8	effResourceRectangleSetupParameters	inferred	confidence=high; EffResourceRectParams setup body read by effEventGetResourceTemplateSetupParams. Identifier-only; twin 0x00356088 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2AF8	effStaggeredBlurSetupParameters	inferred	confidence=high; EffBlurScaleParams setup parameters read by effEventGetScaleBlurSetupParams. Identifier-only; twin 0x003561C8 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2560	effTexturedBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord whose callback consumes effTexturedBlurSetupParameters. Identifier-only; twin 0x00355C30 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2738	effScatterBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord whose callback consumes effScatterBlurSetupParameters. Identifier-only; twin 0x00355E08 in DDS1. [PurC data b14; matched-C evidence]
+0x003B23E8	effRectangleBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the rectangle blur setup pass. Identifier-only; twin 0x00355AB8 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2878	effFramebufferQuadSetupRecord	inferred	confidence=high; EffEventSetupRecord for the framebuffer-quad setup pass. Identifier-only; twin 0x00355F48 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2978	effSolidRectangleSetupRecord	inferred	confidence=high; EffEventSetupRecord for the solid-rectangle setup pass. Identifier-only; twin 0x00356048 in DDS1. [PurC data b14; matched-C evidence]
