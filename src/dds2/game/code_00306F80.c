@@ -115,16 +115,16 @@ void itfUpdateGridSlotDescription(EffectSlotSet *resource, s32 resourceIndex) {
     }
 }
 
-s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
-    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride(object, key);
+s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex) {
+    BdWork *entry = (BdWork *)effGetSlotWorkOrOverride(resource, resourceIndex);
     s32 result;
 
     if (entry->states[0].delay == 0) {
-        itfUpdateGridSlotDescription(object, key);
+        itfUpdateGridSlotDescription(resource, resourceIndex);
     }
-    result = (s32)effUpdateTimedStates(object, (u32)key, entry);
+    result = (s32)effUpdateTimedStates(resource, (u32)resourceIndex, entry);
     if (result == 0) {
-        result = object->defaultValue;
+        result = resource->defaultValue;
     }
     return result;
 }
