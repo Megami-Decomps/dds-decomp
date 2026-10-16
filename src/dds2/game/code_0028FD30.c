@@ -71,7 +71,7 @@ extern u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *, u32, s16);
 extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
 extern void mnuSpawnAlternateMantraSpecialNodeIcon(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconWithShortLoop(struct MantraDrawPool *pool);
-extern void mnuStorePanelEntry(s32, s32);
+extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
 
 extern MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *, s32, s8, s16, s16, u32);
 
