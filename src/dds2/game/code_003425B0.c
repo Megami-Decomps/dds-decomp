@@ -801,7 +801,7 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
     return result;
 }
 
-extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32);
+extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32 capacity);
 
 DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;
