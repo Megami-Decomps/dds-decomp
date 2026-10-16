@@ -145,13 +145,13 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
 
     switch (movie->state) {
     case SDF_MOVIE_STATE_INITIAL:
-        if (operation == 2) {
+        if (operation == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfDevQueueControlRequest(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (operation == 4) {
+        if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             movie->state = SDF_MOVIE_STATE_PAC_HEADER_READ;
@@ -159,7 +159,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
         }
         break;
     case SDF_MOVIE_STATE_PAC_HEADER_READ:
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             s32 payloadBytes = stream->packetBytes - 0x40;
             stream->payloadAllocation = sdfAllocGeneralBlock(payloadBytes);
             stream->blockMask = (u8 *)sdfResourceRetainAddress(stream->payloadAllocation);
@@ -169,12 +169,12 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
         }
         break;
     case SDF_MOVIE_STATE_PAC_MASK_READ:
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             sdfMovieProcessPendingData(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ: {
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             u8 *source = data;
             s32 blockBytes = stream->blockBytes;
             s32 blocksRemaining = bytesRead / blockBytes;
@@ -236,7 +236,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
         break;
     }
     case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (operation == 7) {
+        if (operation == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfDevQueueReleaseState(deviceState);
