@@ -35,7 +35,7 @@ extern void (*itfPanelHandlers[])(UiSprite *, SdfListHead *);
 extern u32 scrGetWindow(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesResetWindow(s32 window);
-extern void itfMesCleanupWindow(s32 window, s32 arg1);
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 extern s32 itfPanelColorTemplates[];
 extern s32 D_00357B50[];

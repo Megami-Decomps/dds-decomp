@@ -36,7 +36,7 @@ extern PanelHold itfHeldPanelCursor;
 
 extern PanelEntry itfWindowSlots[];
 
-extern void itfMesCleanupWindow(s32 window, s32 arg1);
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 extern u32 scrGetWindow(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesResetWindow(s32 window);
