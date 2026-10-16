@@ -199,7 +199,7 @@ s32 mdlAdvanceViewerPackageTask(KwlnTask *task) {
 
 extern char D_0042D4E0[];
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
-extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void scrDestroyAllNamedProcesses(void);
 
 s32 evtCallShooting(void) {
