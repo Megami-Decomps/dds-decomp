@@ -247,7 +247,7 @@ extern s32 func_0023DA70(ObjectTransform *, EffWorldNode *);
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effObjInnerVecBackup(ObjectTransform *);
+extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void effUpdateValueTransitionProximity(EffWorldNode *);
 extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
 extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
