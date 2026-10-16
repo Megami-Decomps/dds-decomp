@@ -592,7 +592,6 @@ extern void evtCreateEventScriptProcess(s32);
 
 extern void evtClearActiveFlag(s32);
 
-extern s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value);
 
 /* Close via a black fade for modes one/two, otherwise request process 0x322.
  * All paths clear active flag zero and set display slot one. No sound call occurs here. */
