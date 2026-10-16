@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_stage_test_api.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "brs_primary_panel_update_api.h"
@@ -1104,7 +1105,6 @@ extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
-extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void sndQueueSoundId(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
