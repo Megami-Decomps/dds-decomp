@@ -10856,8 +10856,8 @@ share their established DDS1 twin names. Their resource selectors, status gates
 and number-display animation remain game-specific.
 
 `sdfInitChipHeap` initializes the page records, free pages, size classes and
-release callback. `sdfGetFirstGeneralHeapBlock` exposes the existing general-heap
-head link as `u32`; naming it does not change that representation.
+release callback. `sdfGetFirstGeneralHeapBlock` returns the first general-heap
+allocation descriptor (`SdfMemBlock *`) from the shared resource API.
 `sdfResizeResourceAllocation` retains descriptor identity while resizing its
 backing storage. `sdfDeleteTrackedThread` unlinks the tracked node and selects
 self deletion versus terminating/deleting another thread; it does not imply

@@ -8271,7 +8271,7 @@
 0x003287E0	sdfReadTimerCount	inferred	confidence=high; volatile u32 read of EE timer0 count at 0x10000000, used for elapsed waits; DDS1 twin 0x002CF930. [Namer1 naming batch 43]
 0x003289C8	sdfDeleteTrackedThread	inferred	confidence=high; unlinks the thread node under semaphore and deletes self or terminates/deletes another thread; DDS1 twin 0x002CFB18. [Namer1 naming batch 43]
 0x00328FA8	sdfInitChipHeap	inferred	confidence=high; initializes chip-heap page records, free list, size classes and synchronized release callback; DDS1 twin 0x002D00F8. [Namer1 naming batch 43]
-0x00329230	sdfGetFirstGeneralHeapBlock	inferred	confidence=high; returns sdfGeneralHeap.head.next as the existing u32 representation; DDS1 twin 0x002D0380. [Namer1 naming batch 43]
+0x00329230	sdfGetFirstGeneralHeapBlock	inferred	confidence=high; returns sdfGeneralHeap.head.next as SdfMemBlock *; DDS1 twin 0x002D0380. [Namer1 naming batch 43]
 0x00329600	sdfResizeResourceAllocation	inferred	confidence=high; grows/shrinks backing storage while preserving the allocation descriptor and repairing neighbor links; DDS1 twin 0x002D0750. [Namer1 naming batch 43]
 0x00329C20	sdfLoadModulesAndBindNamedResourceRpc	inferred	confidence=high; loads optional then required IOP modules and retries named-resource RPC binding with timer waits; DDS1 twin 0x002D0D70. [Namer1 naming batch 43]
 0x003394C8	sdfVuFinalizeWorkPacket	inferred	confidence=high; handles inactive/empty work, padding, cursor updates and packet header stores, returning the header pointer; DDS1 twin 0x002E0618; preserves the u32 descriptor store. [Namer1 naming batch 43]
