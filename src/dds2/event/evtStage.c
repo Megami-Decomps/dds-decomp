@@ -55,8 +55,8 @@ extern EffWorldNode *dds3AppendWorldNode(void);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern void dds3DrawSetIndexedWord(u32 value, s32 index);
-extern void kwlnDrawCopyWords20(void *);
-extern void kwlnDrawCopyRow128(void *);
+extern void kwlnDrawCopyWords20(void *source);
+extern void kwlnDrawCopyRow128(void *source);
 extern void sprintf(char *, const char *, ...);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
