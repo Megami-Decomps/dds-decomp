@@ -1717,7 +1717,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 extern char D_00435D50[];
 extern char D_00435D58[];
 extern void sprintf(char *buffer, const char *format, ...);
-extern void sdfDrawHeapMapOverlay(void *, s32, s32);
+extern void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.
    Keep the native heap-ratio coordinate calculation and title-specific initial packet. */
