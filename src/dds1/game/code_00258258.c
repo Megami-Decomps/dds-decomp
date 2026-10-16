@@ -12,7 +12,69 @@ extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 
 extern u32 D_003E274C[];
 
-INCLUDE_ASM(const s32, "game/code_00258258", mnuDrawMantraPrerequisiteLink);
+typedef s16 MnuVariantSpritePlacement[6];
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
+
+/* Connect prerequisite cells with a straight stroke or a three-stroke bend. */
+void mnuDrawMantraPrerequisiteLink(s32 x, s32 y, s32 z, s32 cellWidth,
+                                 s32 cellHeight, u32 color, s32 direction,
+                                 MnuMantraGridEntry *scene,
+                                 MnuMantraNodeState *states, s32 surface) {
+    MantraPrerequisiteRecord *record;
+    s32 targetId;
+    s16 startX;
+    s16 startY;
+    s16 endX;
+    s16 endY;
+    s32 startOffset = 0;
+    s8 bendInset = 0;
+    s8 targetOffset = 0;
+
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
+    targetId = record->ids[direction];
+    startX = x + 0x10;
+    startY = y + 0xA;
+    endX = x + (mnuMantraVariantSpritePlacements[targetId][2] - mnuMantraVariantSpritePlacements[scene->sceneId][2]);
+    endY = y + (mnuMantraVariantSpritePlacements[targetId][3] - mnuMantraVariantSpritePlacements[scene->sceneId][3]);
+    endX -= 4;
+    endY += 0xA;
+
+    if (record->flags[direction] & 4) {
+        u8 sourceRow = states[scene->sceneId].y;
+        u8 targetRow = states[targetId].y;
+
+        targetOffset = (sourceRow - targetRow) * 4;
+        bendInset = ((f32)(endY - startY) / (f32)cellHeight) * 4.0f;
+        if (bendInset < 0) {
+            bendInset = -bendInset;
+        }
+    }
+    if (record->flags[direction] & 2) {
+        startOffset = endY - startY >= 0 ? 4 : -4;
+    }
+    if (startY != endY) {
+        s32 turnX;
+        s32 startPixelY;
+        s32 endPixelY;
+
+        turnX = (endX - (cellWidth >> 3) * 3 + bendInset) << 4;
+        startPixelY = (startY + startOffset) << 3;
+        uiDrawUniformColorLine(startX << 4, startPixelY, z,
+                               turnX, startPixelY, z, color, surface);
+        endPixelY = (endY + targetOffset) << 3;
+        uiDrawUniformColorLine(turnX, startPixelY, z,
+                               turnX, endPixelY, z, color, surface);
+        uiDrawUniformColorLine(turnX, endPixelY, z,
+                               endX << 4, endPixelY, z, color, surface);
+    } else {
+        uiDrawUniformColorLine(startX << 4, (endY + startOffset) << 3, z,
+                               endX << 4, endY << 3, z, color, surface);
+        /* Native flat stroke uses jal before attachment cleanup. Qualified trace:
+         * sandbox_MatchA/deep_link_F2_trace, rtl.01.sibling call545/reset549;
+         * reset549 is gone by rtl.13.life, after the sibling-call decision. */
+        startOffset = 0;
+    }
+}
 
 u32 mnuGetMantraPrerequisiteFlags(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
     MantraPrerequisiteRecord *record = &mnuMantraPrerequisiteRecords[scene->sceneId];
@@ -46,7 +108,6 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern void mnuDrawMantraPrerequisiteLink(s32, s32, s32, s32, s32, u32, s32, MnuMantraGridEntry *, MnuMantraNodeState *, s32);
 
 void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
     u32 prerequisiteFlags[4];
