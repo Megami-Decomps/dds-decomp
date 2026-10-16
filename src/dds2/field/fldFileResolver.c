@@ -3359,8 +3359,8 @@ s32 fldGetEncounterRuntimeResult(void) {
     return result;
 }
 
-void fldSetEncounterPendingValue(u32 value) {
-    D_00436088 = value;
+void fldSetEncounterPendingValue(u32 pendingValue) {
+    D_00436088 = pendingValue;
 }
 
 s32 fldEncProc(KwlnTask *task) {
