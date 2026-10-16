@@ -677,8 +677,8 @@ void itfInitDoubleBufferedScenePackets(void) {
     }
 }
 
-void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
-    u32 normalized = value != 0;
+void itfGridDrawBooleanDescriptor(u8 enabled, s32 alternate, s32 kind) {
+    u32 normalized = enabled != 0;
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
