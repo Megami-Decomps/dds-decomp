@@ -4860,7 +4860,7 @@ clear_highlight:
 
 extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
-extern void fldDispatchCameraModelFrameEvents(s32, s32);
+extern void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector);
 extern s32 fldUpdateFieldPlayerMovement(void);
 extern u32 D_00389988[];
 extern s32 D_003897C0[];
