@@ -27,7 +27,6 @@ s32 dds3SelectSlotForObjectKind(u32 kind);
 
 extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 
-void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 
 void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);

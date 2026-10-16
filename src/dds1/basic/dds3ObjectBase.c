@@ -22,7 +22,6 @@ extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 s32 dds3SelectSlotForObjectKind(u32 kind);
 void *dds3GetExtData(void *obj);
 void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
-void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
 void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *slot, EffWorldNode *owner);
