@@ -67,24 +67,6 @@ typedef struct DdsPackedObject {
 
 extern DdsPackedObject *dds3CreatePackedObject(void);
 
-typedef struct DdsSpriteExtendedRecord {
-    u32 unk_00;
-    s16 unk_04;
-    s16 unk_06;
-    s16 unk_08;
-    s16 unk_0A;
-    s16 unk_0C;
-    s16 unk_0E;
-    s16 unk_10;
-    s16 unk_12;
-    u32 unk_14;
-    u32 unk_18;
-    u32 unk_1C;
-    u32 unk_20;
-    u8 inlineData[8];
-    void *data;
-} DdsSpriteExtendedRecord;
-
 typedef struct DdsNestedRecord {
     u32 unk_00;
     u32 unk_04;
@@ -544,7 +526,7 @@ u32 *dds3PackSpriteRecords(u32 **source) {
 u32 *dds3PackExtendedSpriteRecords(u32 **source) {
     DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
-    DdsSpriteExtendedRecord *record;
+    SdfSpriteExtendedRecord *record;
     char name[16];
 
     for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
@@ -564,15 +546,15 @@ u32 *dds3PackExtendedSpriteRecords(u32 **source) {
         dds3WritePackedValue((u32)object, record->unk_20, 4);
         dds3AppendPackedBytes(object, record->inlineData, sizeof(record->inlineData));
         memset(name, 0, sizeof(name));
-        sprintf(name, D_00438978, record->data);
+        sprintf(name, D_00438978, record->vector);
         dds3RecordNamedReference((u32)object, name);
     }
     for (node = ((DdsNamedList *)*source)->first; node; node = node->next) {
         record = node->record;
         memset(name, 0, sizeof(name));
-        sprintf(name, D_00438978, record->data);
+        sprintf(name, D_00438978, record->vector);
         dds3RegisterNamedPackedOffset(object, name);
-        dds3AppendPackedBytes(object, record->data, 16);
+        dds3AppendPackedBytes(object, record->vector, sizeof(*record->vector));
     }
     return (u32 *)object;
 }

@@ -25,7 +25,7 @@ typedef struct SdfResourceVectorRecord1C {
     u8 opaque00[0x1C];
 } SdfResourceVectorRecord1C;
 
-/* The extended record keeps its unknown 0x2C-byte prefix opaque. */
+/* Keep the extended header opaque for the existing whole-record copy. */
 typedef struct SdfResourceVectorRecord30 {
     u8 opaque00[0x2C];
     SdfVec4 *vector;
@@ -410,7 +410,7 @@ MnuCallbackListPair *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord
         *copy = *source;
         vector = (SdfVec4 *)(copy + 1);
         copy->vector = vector;
-        *vector = *source->vector;
+        *vector = *((SdfSpriteExtendedRecord *)source)->vector;
         dds3AppendFirstResourceListValue(owner, (u32)copy);
         source++;
         count--;
