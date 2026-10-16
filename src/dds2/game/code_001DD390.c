@@ -3327,12 +3327,12 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    savedFlags = model->inner->unk1A;
+    savedFlags = model->inner->drawFlags;
     model->flags |= MDL_SKIP_ANCHORS;
-    model->inner->unk1A = 0x2000;
+    model->inner->drawFlags = 0x2000;
     mdlProcessContextNodesAndTransforms(model, surfaces);
     model->flags &= ~MDL_SKIP_ANCHORS;
-    model->inner->unk1A = savedFlags;
+    model->inner->drawFlags = savedFlags;
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
