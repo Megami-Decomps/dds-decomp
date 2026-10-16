@@ -12,4 +12,7 @@ typedef struct FldTransferChunk {
 
 typedef char FldTransferChunkSizeCheck[(sizeof(FldTransferChunk) == 0x0C) ? 1 : -1];
 
+/* Return the byte payload immediately following the 0x0C-byte descriptor. */
+u8 *fldGetTransferChunkPayload(FldTransferChunk *chunk);
+
 #endif

@@ -1177,8 +1177,8 @@ void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
     fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 1);
 }
 
-s32 fldGetTransferChunkPayload(s32 record) {
-    return record + 0xc;
+u8 *fldGetTransferChunkPayload(FldTransferChunk *chunk) {
+    return (u8 *)chunk + sizeof(*chunk);
 }
 
 void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
@@ -1630,7 +1630,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
                 D_00435FB4 = (u32)roomData;
                 D_00435FB0 = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
-                fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
+                fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
                 break;
             case 2:
                 fldCachedRoomF1ResourceAllocation = 0;
@@ -1639,7 +1639,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
                 D_00435FAC = (u32)roomData;
                 D_00435FA8 = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
-                fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload((s32)chunk));
+                fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
                 break;
             }
             index++;
@@ -1666,7 +1666,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         D_00435FB4 = (u32)roomData;
         D_00435FB0 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
+        fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldFormatAreaDirectory(directory, area, 1);
@@ -1679,7 +1679,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         D_00435FBC = (u32)roomData;
         D_00435FB8 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
+        fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
     if (isField == 0) {
         sprintf(path, D_00436038, name);
@@ -1691,7 +1691,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         D_00435FAC = (u32)roomData;
         D_00435FA8 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload((s32)chunk));
+        fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
     }
     fldCreateResourceScriptObjects();
     fldActivateRoomFlagObjects();
