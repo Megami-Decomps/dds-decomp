@@ -39,7 +39,55 @@ typedef struct EvtMantraNodePositionRecord {
     struct EvtMantraNodePositionRecord *neighbors[6];
 } EvtMantraNodePositionRecord; /* 0x20 */
 
-INCLUDE_ASM(const s32, "game/code_0026CD50", evtCreateLoadedRecord);
+/* Packed resource header in front of the record data and its relocation list. */
+typedef struct EvtLoadedRecordHeader {
+    u32 dataBytes;       /* 0x10 */
+    u32 recordCount;     /* 0x14 */
+    u32 unk18;
+    u32 relocationBytes; /* 0x1C */
+    u32 unk20;
+} EvtLoadedRecordHeader;
+
+extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size);
+
+/* Copy a loaded resource's records into a new block behind the handle header
+ * and relocate them in place; the relocation list lives in a temporary block. */
+EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
+    u8 fileHeader[0x10];
+    EvtLoadedRecordHeader header;
+    u32 offset;
+    u8 *source;
+    u32 handle;
+    EvtLoadedRecord *record;
+    u8 *records;
+    u32 relocationHandle;
+    u32 *relocations;
+
+    memcpy(fileHeader, (void *)sourceAddress, sizeof(fileHeader));
+    offset = sizeof(fileHeader);
+    memcpy(&header, (u8 *)sourceAddress + offset, sizeof(header));
+    offset += sizeof(header);
+    source = (u8 *)sourceAddress + offset;
+    handle = sdfAllocGeneralBlock(header.dataBytes + sizeof(EvtLoadedRecord));
+    record = sdfMemoryGetBlockAddress(handle);
+    record->recordCount = header.recordCount;
+    records = (u8 *)record + sizeof(EvtLoadedRecord);
+    record->handle = handle;
+    record->recordsAddress = (s32)records;
+    memset(records, 0, header.dataBytes);
+    offset = sizeof(EvtLoadedRecord);
+    do {
+        memcpy((u8 *)record + offset, source, header.dataBytes);
+        source += header.dataBytes;
+        relocationHandle = sdfAllocGeneralBlock(header.relocationBytes);
+        relocations = sdfMemoryGetBlockAddress(relocationHandle);
+        memset(relocations, 0, header.relocationBytes);
+        memcpy(relocations, source, header.relocationBytes);
+        dds3ApplyRelocationOffsets(records, (u32)records, relocations, header.relocationBytes);
+        sdfReleaseResourceAllocation(relocationHandle);
+    } while (0);
+    return record;
+}
 
 extern void mnuRebuildMantraCategoryAvailability(void);
 void mnuLoadMantraNodePositionTable(u32 resourceId);
