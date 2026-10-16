@@ -774,7 +774,7 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     }
 }
 
-extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key);
 
 /* Draw the paired effect at its current rate and initialize its alternate on demand. */
 void mnuDrawAlternatingRatioBarEffects(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,

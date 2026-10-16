@@ -91,7 +91,7 @@ typedef struct MenuIconState MenuIconState;
 
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
-extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key);
 
 extern s32 D_00435E5C;
 
