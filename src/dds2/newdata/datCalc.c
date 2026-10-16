@@ -806,12 +806,12 @@ void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
 }
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
-void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId) {
+void ptyApplySkillRecovery(DatPartyRecord *unit, u32 skillId) {
     f32 recoveryRate;
     s32 hpRecovery;
     s32 mpRecovery;
 
-    if (datUnitHasSkill(entry, skillId) == 0) {
+    if (datUnitHasSkill(unit, skillId) == 0) {
         return;
     }
     hpRecovery = 0;
@@ -820,23 +820,23 @@ void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId) {
     switch (skillId) {
     case 0x24B:
         if (recoveryRate > 0.0f) {
-            hpRecovery = (s32)((f32)entry->maxHp * recoveryRate);
-            mpRecovery = (s32)((f32)entry->maxMp * recoveryRate);
+            hpRecovery = (s32)((f32)unit->maxHp * recoveryRate);
+            mpRecovery = (s32)((f32)unit->maxMp * recoveryRate);
         }
         break;
     case 0x24A:
     case 0x24C:
     case 0x270:
         if (recoveryRate > 0.0f) {
-            mpRecovery = (s32)((f32)entry->maxMp * recoveryRate);
+            mpRecovery = (s32)((f32)unit->maxMp * recoveryRate);
         }
         break;
     }
     if (hpRecovery > 0) {
-        datAdjustCurrentHp(entry, hpRecovery);
+        datAdjustCurrentHp(unit, hpRecovery);
     }
     if (mpRecovery > 0) {
-        datAdjustCurrentMp(entry, mpRecovery);
+        datAdjustCurrentMp(unit, mpRecovery);
     }
 }
 
