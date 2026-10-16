@@ -12,6 +12,7 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
 #include "sdf_model_command_views.h"
+#include "sdf_packet_alloc.h"
 
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
@@ -417,7 +418,6 @@ extern void *D_003BD374;
 extern void *D_003BD378;
 extern f32 D_003BD358, D_003BD35C;
 extern f32 D_00398470[16];
-extern void *sdfAllocPacketAligned(s32);
 extern void sdfVuSetGlobalScale(f32);
 extern u32 sdfModelBuildKind3CommandPacket(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
 typedef struct {
@@ -570,7 +570,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
             switch (entry->kind) {
             case 1: {
                 if (!skipCommands) {
-                    u8 *referencePacket = sdfAllocPacketAligned(0x20);
+                    u8 *referencePacket = (u8 *)sdfAllocPacketAligned(0x20);
                     *(u16 *)referencePacket = 0;
                     *(u32 *)(referencePacket + 4) = ((u32)entry + 0x10) & 0x0FFFFFFF;
                     *(u64 *)(referencePacket + 8) = 0;
