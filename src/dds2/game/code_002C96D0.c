@@ -122,7 +122,7 @@ extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 
 struct SdfMemBlock;
 
@@ -2672,7 +2672,7 @@ struct SdfMemBlock;
 extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
 extern void fileDestroyMemoryCardMenuTask(KwlnTask *task);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 
 void fileStartMemoryCardMenuForMode(s32 mode) {
     FilePacRequest *request;
