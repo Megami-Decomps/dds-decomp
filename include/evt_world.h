@@ -73,7 +73,7 @@ typedef struct EvtWorldTable {
     EffWorldNode *cameraObject; /* 0x0C: retained camera world node */
     EffWorldNode *playerObject; /* 0x10 */
     u32 indexedHandle; /* 0x14 */
-    u32 sceneResourceHandle; /* 0x18: retained allocation handle; released at teardown. */
+    struct SdfMemBlock *sceneResourceHandle; /* 0x18: retained allocation descriptor; released at teardown. */
     struct BfFlw0Header *sceneScript; /* 0x1C: resolved FLW0 header used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
@@ -81,6 +81,8 @@ typedef struct EvtWorldTable {
 
 typedef char EvtWorldTable_sceneScript_at_0x1C[
     ((u32)&((EvtWorldTable *)0)->sceneScript == 0x1C) ? 1 : -1];
+typedef char EvtWorldTable_sceneResourceHandle_at_0x18[
+    ((u32)&((EvtWorldTable *)0)->sceneResourceHandle == 0x18) ? 1 : -1];
 typedef char EvtWorldTable_size_must_be_0x40[
     sizeof(EvtWorldTable) == 0x40 ? 1 : -1];
 
