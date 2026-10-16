@@ -90,7 +90,7 @@ extern char D_003B4900[];
 extern char *D_00398968[];
 
 extern s32 DIntr(void);
-extern void sdfDispatchNextStreamNode(s32);
+extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
 typedef void *(*SdfSoundReadCallback)(s32);
