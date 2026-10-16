@@ -449,8 +449,8 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 typedef struct FldActionSpawn {
     s32 unk0;
-    s32 secondValue;
-    s32 firstValue;
+    s32 objectName; /* 0x04: evtSpawnActionObj2's name/value argument. */
+    s32 key;         /* 0x08: evtSpawnActionObj2's world-node key. */
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
 extern s32 D_0032E400[];
@@ -859,7 +859,7 @@ void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
 
     dds3GetWorldSecondaryObject();
     for (spawnIndex = 0; spawnIndex < spawnCount; spawnIndex++) {
-        struct EffWorldNode *spawnedObject = evtSpawnActionObj2(spawnList->firstValue, spawnList->secondValue);
+        struct EffWorldNode *spawnedObject = evtSpawnActionObj2(spawnList->key, spawnList->objectName);
         spawnList++;
         if (spawnIndex == 0) {
             fldAreaState.taskHandle = (s32)spawnedObject;
