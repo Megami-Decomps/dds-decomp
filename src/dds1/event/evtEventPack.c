@@ -89,7 +89,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
     EvtPackEntry *entry;
     s32 entryCount;
-    s32 remaining;
+    s32 remainingEntryCount;
     s32 *areaRoomData;
     s32 *resource0Data;
     s32 *resource1Data;
@@ -103,7 +103,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     entryCount = packState->header->entryCount;
     if (entryCount > 0) {
         entry = packState->entries;
-        remaining = entryCount;
+        remainingEntryCount = entryCount;
         do {
             if (entry->resourceId == resourceId) {
                 switch (entry->kind) {
@@ -122,7 +122,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
                 areaRoomData = (s32 *)(packState->data + entry->dataOffset);
             }
             entry++;
-        } while (--remaining != 0);
+        } while (--remainingEntryCount != 0);
     }
 
     if (areaRoomData != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
