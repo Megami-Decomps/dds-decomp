@@ -72,7 +72,7 @@ void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, SdfMot
 }
 
 
-void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
+void *sdfDispatchAssetCommandWord(void *motion, s32 packedCommand, s32 unusedTargetIndex);
 
 Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
     Motion *motion;
