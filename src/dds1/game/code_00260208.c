@@ -90,42 +90,42 @@ void brsDrawResultIconPairWithSlidingCompanion(s32 unused, u32 value, s32 iconIn
                          mnuCommonIconPlacements[8][BRS_ICON_ID], option);
 }
 
-void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
+void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 countdown) {
     MnuShopListContext *command;
 
     command = list->context;
     if (command != (MnuShopListContext *)0x0) {
-        command->countdown = value;
+        command->countdown = countdown;
         command->mode = 1;
     }
 }
 
-void mnuSetSelectionListTransition(struct MenuList *list, u32 value) {
+void mnuSetSelectionListTransition(struct MenuList *list, u32 countdown) {
     MnuShopListContext *command;
 
     command = list->context;
     if (command != (MnuShopListContext *)0x0) {
-        command->countdown = value;
+        command->countdown = countdown;
         command->mode = 2;
     }
 }
 
-void mnuSetValueListTransition(struct MenuList *list, u32 value) {
+void mnuSetValueListTransition(struct MenuList *list, u32 countdown) {
     MnuShopListContext *command;
 
     command = list->context;
     if (command != (MnuShopListContext *)0x0) {
-        command->countdown = value;
+        command->countdown = countdown;
         command->mode = 1;
     }
 }
 
-void mnuSetQuantityListTransition(struct MenuList *list, u32 value) {
+void mnuSetQuantityListTransition(struct MenuList *list, u32 countdown) {
     MnuShopListContext *command;
 
     command = list->context;
     if (command != (MnuShopListContext *)0x0) {
-        command->countdown = value;
+        command->countdown = countdown;
         command->mode = 2;
     }
 }
