@@ -48,7 +48,7 @@ extern s32 sceDread(s32 directory, EffDirEnt *entry);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 sceDclose(s32 directory);
 extern s32 sprintf(char *destination, const char *format, ...);
-extern s32 sceDopen(void *arg0);
+extern s32 sceDopen(void *path);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 extern void *sdfConsAllocateColumnPacket(s32 loopCount);
 
