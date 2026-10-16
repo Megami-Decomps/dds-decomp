@@ -359,9 +359,11 @@ typedef struct CampDisplayDefaults {
 
 
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
-extern void mnuSampleCampPanelVisualTrack(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
-extern void mnuSampleCampDisplayTrack(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
-extern void mnuSampleCampListLayoutTrack(EvtRuntime *, EvtRuntimeGroup *, EvtBlendKey *);
+extern void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
+                                          f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB);
+extern void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value,
+                                      CampDisplayDefaults *display);
+extern void mnuSampleCampListLayoutTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
 extern KwlnDrawVectorParams kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
