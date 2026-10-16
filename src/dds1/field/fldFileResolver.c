@@ -397,7 +397,7 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 /* Packet addresses are 32-bit handles; GS and GIF payload words remain 64-bit. */
 
 extern void fldPlayFieldSeVolumePan(s32);
-extern void kwlnFadeSetRGB(s32, s32, s32);
+extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 extern void fldReleaseActorTasksById(s32);
 /* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
    scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. Three transition keys, signed frame
