@@ -1612,7 +1612,7 @@ extern f32 D_0032F250[4];
 #include "dds3_world_primary.h"
 extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
-extern void evtAdvanceSolarClockAndExpireControls(f32);
+extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32,s32);

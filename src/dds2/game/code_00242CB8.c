@@ -397,9 +397,9 @@ extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
-void evtAdvanceSolarClockAndExpireControls(f32 delta) {
+void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
     if (datGameState->world.flags & 1) {
-        datGameState->world.phaseTimer += delta;
+        datGameState->world.phaseTimer += travelDistance;
         if (datGameState->world.phaseTimer > 4500.0f) {
             datGameState->world.phaseTimer = 0;
             evtSetSolarPhase((datGameState->world.phase + 1) & 0xF);
