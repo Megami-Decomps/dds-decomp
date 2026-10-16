@@ -1346,7 +1346,7 @@ extern s32 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z);
 extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_00145A08(s32, f32, f32, f32);
-extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
+extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);

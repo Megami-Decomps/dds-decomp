@@ -1115,7 +1115,7 @@ extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f3
 extern s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z);
 extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
-extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
+extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
