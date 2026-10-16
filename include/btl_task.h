@@ -132,7 +132,7 @@ typedef struct BattleIndexWork {
     BtlUnit *companionA;
     BtlUnit *companionB;
     BtlUnit *linkedUnit;
-    s32 unk18;
+    s32 summonId; /* +0x18: summon actor ID shared with party/model setup. */
     s32 stageValue;
     s32 unk20;
 #ifdef VERSION_DDS1
@@ -171,6 +171,8 @@ typedef struct BattleIndexWork {
     BtlOperandGroup *groups;
     struct SdfMemBlock *allocationHandle;
 } BattleIndexWork;
+typedef char BattleIndexWork_summonId_offset_check[
+    ((u32)&((BattleIndexWork *)0)->summonId == 0x18) ? 1 : -1];
 typedef char BattleIndexWork_battleExperienceReward_offset_check[
     ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
 typedef char BattleIndexWork_moneyReward_offset_check[

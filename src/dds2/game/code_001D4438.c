@@ -2928,7 +2928,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     spawned->startCondition.value.handle = sound->handle;
     spawned->ownerId = unit->owner;
     btlStartTask(spawned);
-    change = btlCreateModelChangeTask(unit, 1, action->indexWork.unk18, delay, 0x12, 1);
+    change = btlCreateModelChangeTask(unit, 1, action->indexWork.summonId, delay, 0x12, 1);
     change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     change->startCondition.value.handle = sound->handle;
     btlStartTask(change);
@@ -2939,7 +2939,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     btlStartTask(sndCreateStationedSeTask(0x1000F));
     flags = unit->partyRecord.flags;
     party = &unit->partyRecord;
-    btlInitializePartyRecordFromEnemy(party, action->indexWork.unk18);
+    btlInitializePartyRecordFromEnemy(party, action->indexWork.summonId);
     party->flags = flags;
     if ((unit->status.flags & 0x400) && unit->partyRecord.unitId < 0x180) {
         action->actionNumber = datEnemyRecords[unit->partyRecord.unitId].unk15;
@@ -3157,9 +3157,9 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
     unit = btlGetIndexListEntry(action->indexWork.indices, 0);
     btlResetUnitLinks(unit);
     if (action->unit->status.flags & 0x200) {
-        btlBossDebugPrintf("btl:summon[player=%X]\n", action->indexWork.unk18);
+        btlBossDebugPrintf("btl:summon[player=%X]\n", action->indexWork.summonId);
         unit->status.flags |= 0x301;
-        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.unk18, unit->lookupId);
+        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.summonId, unit->lookupId);
         if (unit->partyRecord.flags & 0x1000) {
             unit->status.flags |= 0x1000;
         }
@@ -3207,13 +3207,13 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         btlStartTask(btlCreateEffObjA(action->unit, action->indexWork.phase));
     } else {
         s32 controlDelay = 0;
-        btlBossDebugPrintf("btl:summon[enemy=%X]\n", action->indexWork.unk18);
+        btlBossDebugPrintf("btl:summon[enemy=%X]\n", action->indexWork.summonId);
         resourceKind = 1;
-        btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.unk18);
+        btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.summonId);
         unit->status.flags |= 0x501;
         unit->modelResourceKind = resourceKind;
         unit->partyRecord.flags |= 0x23;
-        modelId = action->indexWork.unk18;
+        modelId = action->indexWork.summonId;
         unit->combatantKind = modelId;
         btlInitializeEffectVectorsFromSourceRecords(unit, 1, modelId);
         if (action->indexWork.skillId < 0x2A0 && action->indexWork.skillId != -1) {
@@ -3428,7 +3428,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     hasAbility = btlCheckSpecialAbility(&task->unit->partyRecord, 0x280) != 0;
     btlReleaseUnitResources(unit);
     btlResetUnitLinks(unit);
-    btlSynchronizePartyActorRecords(unit, (u8)task->indexWork.unk18);
+    btlSynchronizePartyActorRecords(unit, (u8)task->indexWork.summonId);
     flags = unit->status.flags;
     unit->status.flags = flags | 0x301;
     if (record->flags & 0x1000) {

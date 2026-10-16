@@ -3702,7 +3702,7 @@ void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *action, BtlCamState
     action->motionProgress = 1;
     action->flags = (action->flags & ~0x14) | 0x41;
     unit = action->link->unit;
-    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(1, action->link->indexWork.unk18);
+    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(1, action->link->indexWork.summonId);
     scaledReach = resource->reach * resource->actorScale;
     scaledHeight = resource->height * resource->actorScale;
     if (scaledReach > 100.0f || scaledHeight > 400.0f) {
