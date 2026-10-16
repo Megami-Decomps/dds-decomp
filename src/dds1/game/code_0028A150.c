@@ -4396,7 +4396,7 @@ extern char D_003BC938[];
 extern char *sdfDevGetPathBuffer(void);
 extern s32 sceOpen(const char *path, s32 flags, ...);
 extern s32 sceClose(s32 fd);
-extern s32 sdfPfsSendPathRequest(const char *path, s32 mode);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];

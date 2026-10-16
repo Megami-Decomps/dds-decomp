@@ -518,7 +518,7 @@ extern s32 sceOpen(const char *path, s32 flags, ...);
 
 extern s32 sceClose(s32 fd);
 
-extern s32 sdfPfsSendPathRequest(const char *path, s32 arg1);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {

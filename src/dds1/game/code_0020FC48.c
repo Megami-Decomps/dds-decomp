@@ -2610,7 +2610,7 @@ extern s32 sceWrite(s32, const void *, s32);
 
 extern s32 sceClose(s32);
 
-extern s32 sdfPfsSendPathRequest(const char *, s32);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
 void btlWriteActorModelTableFile(void) {
