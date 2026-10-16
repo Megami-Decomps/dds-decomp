@@ -1659,14 +1659,14 @@ extern void btlQueueLinkedPairModelSwapTasks(ActionStateLink *, s32, u64, u64, u
 }
 
 /* Install mode-specific boss callbacks/state, then invoke their setup hook. */
-void btlInitializeBossCallbacks(s32 mode) {
+void btlInitializeBossCallbacks(s32 battleSceneId) {
     BtlState *battle;
     void *allocation;
     void (*setup)(void);
 
     battle = (BtlState *)btlGetRuntime();
     battle->effect = NULL;
-    switch (mode) {
+    switch (battleSceneId) {
     case 0x300: {
         BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartUnitActionIfPairedSelected);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueBossScriptResourceAndSound);
@@ -1682,7 +1682,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x31E:
     case 0x32A:
     case 0x32B: {
-        if (mode == 0x302) {
+        if (battleSceneId == 0x302) {
             mdlFlagClear(0x804);
             battle->commandRestrictFlags |= 0x84000;
             BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlFindReadyScriptResource);
@@ -1699,7 +1699,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = battle->commandRestrictFlags;
         preparedFlags = commandFlags | 0x800;
         battle->commandRestrictFlags = preparedFlags;
-        if (mode == 0x303) {
+        if (battleSceneId == 0x303) {
             battle->commandRestrictFlags = preparedFlags | 0x100000;
         } else {
             battle->commandRestrictFlags = commandFlags | 0x804;
