@@ -632,7 +632,49 @@ void fldTestDrawDestroy(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00412B90, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00120528);
+extern void frFontSetSharedRenderFlags(u32);
+extern u8 D_00387C20[][4];
+extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+static inline void fldDrawPercentGlyph(s32 x, s32 y, u32 color, s32 glyph) {
+    fldDrawConvertedTextGlyph(x, y / 2, color, D_00387C20[glyph]);
+}
+
+void func_00120528(s32 x, s32 y, s32 value) {
+    s32 negative = 0;
+    s32 digit;
+
+    frFontSetSharedRenderFlags(0x54);
+
+    if (value >= 1001) {
+        fldDrawPercentGlyph(x, y, 0xA09DC380, 12);
+        return;
+    }
+
+    if (value < 0) {
+        x += 16;
+        fldDrawPercentGlyph(x, y, 0xA09DC380, 10);
+        value = -value;
+        negative = 1;
+    }
+
+    do {
+        x += 13;
+        digit = value / 10;
+    } while (0);
+    if (digit > 0 && digit < 10) {
+        fldDrawPercentGlyph(x, y, 0xA09DC380, digit);
+        x += 11;
+    }
+
+    digit = value % 10;
+    if (digit < 10) {
+        fldDrawPercentGlyph(x, y, 0xA09DC380, digit);
+    }
+
+    if (negative == 0) {
+        fldDrawPercentGlyph(x + 11, y, 0xA09DC380, 11);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldConfigureCameraMoveTracking);
 
