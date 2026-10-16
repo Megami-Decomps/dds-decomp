@@ -36,8 +36,12 @@ bytes, and it has to reach that the way the original developers would have.
   pass, property) in a comment or the landing notes. The trace shows what the
   compiler needed, not which line the original had, so any ordinary form that
   meets it will do. Dead stores, dummy variables and the levers above remain
-  forbidden. `tools/cc1probe.sh` produces such traces; see
+  forbidden, apart from the narrow exceptions below. `tools/cc1probe.sh` produces such traces; see
   [cc1probe](cc1probe.md) for usage and the citation template.
+- **Still not allowed, whatever the evidence:** self-cancelling statements
+  (`x++; x--;`), `^ 0` / `* 1` / full-width masks, chained assignments that
+  only share a register, and reading a typed struct through a flat word array
+  or cursor.
 - **Unused locals that explain a frame gap.** ee-gcc 2.96 still reserves
   stack space for a local array or aggregate that is never read or written,
   so a leftover buffer in the original can leave a frame larger than the
@@ -56,7 +60,27 @@ bytes, and it has to reach that the way the original developers would have.
   statement updates the function's own state plausibly (for example,
   resetting a phase or counter local). Use at most one per tail, and cite the
   evidence in a comment.
-- These two are the only exceptions to the dead-variable and dead-store ban.
+- **Dead code that retail still shows.** gcc can delete a computation and
+  keep a trace of it: a divide-by-zero check with no division left, a branch
+  or compare that a deleted clamp leaves behind, a CSE choice that a dropped
+  value still drives. Such dead code is allowed only when all of these hold:
+  retail contains that trace and no live form produces it; the dead code has
+  the shape of live code beside it or in the twin (a copied case, the same
+  macro body); and a comment names the trace. DDS2 `func_00153068` (a
+  division's zero check survives) and `mnuDrawCommandPhaseTransition` (case 14
+  repeats case 0's clamp) are examples.
+- These three are the only exceptions to the dead-variable and dead-store ban.
+- **One temporary for two values.** A local may hold two successive values of
+  the same kind (two lengths, two scale factors, two loop counters) when its
+  name fits both uses and a `cc1probe` trace shows the allocation depends on
+  the values sharing one pseudo. Two unrelated values in one variable, or a
+  value kept only to tie registers, are still dummy variables.
+- **A one-pass block inside a function.** A one-pass `do { ... } while (0)` or
+  a forward `goto` around a few statements is allowed when a `cc1probe` trace
+  or a matched sibling in the same TU or the twin shows the block shape the
+  compiler needs (loop notes, block boundaries), at most one per site, with a
+  comment citing it. Wrapping a whole function body to block a tail call is
+  still a lever (see `docs/idioms.md`, "Tail call kept as `jal` + epilogue").
 - **Plausible source.** Use structs for recurring layouts, real types
   (no `u64` unless the value is 64-bit), meaningful parameter and local
   names, and natural loops and switches.

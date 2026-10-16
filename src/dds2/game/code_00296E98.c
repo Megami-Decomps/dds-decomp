@@ -287,6 +287,7 @@ s32 mnuDrawCommandPhaseTransition(MenuTerminalContext *scene) {
             opacity = progress;
         }
         position = progress;
+        /* Copied from case 0; progress is not read again here, but retail keeps its clamp. */
         if (progress > 1.0f) progress = 1.0f;
         if (opacity > 1.0f) opacity = 1.0f;
         if (position > 1.0f) position = 1.0f;
