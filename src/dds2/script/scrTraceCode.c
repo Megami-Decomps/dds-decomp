@@ -152,14 +152,14 @@ extern f32 scrBinaryFloatResult;
 extern s32 scrBinaryLeftOperandType;
 extern s32 scrBinaryRightOperandType;
 
-void bfOpBinaryEval(ScrData *scr, s32 op)
+void bfOpBinaryEval(ScrData *scr, s32 operatorCode)
 {
     scrBinaryLeftOperandType = scr->stackTypes[scr->sp - 1];
     scrBinaryRightOperandType = scr->stackTypes[scr->sp - 2];
     if ((scrBinaryLeftOperandType == 0 || scrBinaryLeftOperandType == 2) && (scrBinaryRightOperandType == 0 || scrBinaryRightOperandType == 2)) {
         scrBinaryIntegerLeftOperand = bfStackPopInt(scr);
         scrBinaryIntegerRightOperand = bfStackPopInt(scr);
-        switch (op) {
+        switch (operatorCode) {
         case 0:
             scrBinaryIntegerResult = scrBinaryIntegerLeftOperand + scrBinaryIntegerRightOperand;
             break;
@@ -233,7 +233,7 @@ void bfOpBinaryEval(ScrData *scr, s32 op)
     } else {
         scrBinaryFloatLeftOperand = bfStackPopFloat(scr);
         scrBinaryFloatRightOperand = bfStackPopFloat(scr);
-        switch (op) {
+        switch (operatorCode) {
         case 0:
             scrBinaryFloatResult = scrBinaryFloatLeftOperand + scrBinaryFloatRightOperand;
             break;
