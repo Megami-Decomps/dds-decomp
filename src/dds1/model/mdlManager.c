@@ -2,6 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_group_id_api.h"
 #include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -367,8 +368,6 @@ void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
         entity->partList = setup->partList;
     }
 }
-
-extern s32 btlGroupContainsId(s32 group, s32 id);
 
 BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     while (btlGroupContainsId(group, id)) {
