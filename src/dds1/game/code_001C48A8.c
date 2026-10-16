@@ -1015,7 +1015,145 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C6888);
+extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+extern void btlDestroyUnit(u8 *);
+extern void fldUnloadPlayerModel(void);
+const char D_003A3470[] __attribute__((aligned(8))) = "btl:wait ADPCM(Phase_END)\n";
+const char D_003A3490[] __attribute__((aligned(8))) = "btl:wait ExpMoneyItemPieceApGet\n";
+const char D_003A34B8[] __attribute__((aligned(8))) = "btl:wait packet[END]\n";
+const char D_003A34D0[] __attribute__((aligned(8))) = "btl:end [BTL_END_WIN]\n";
+const char D_003A34E8[] __attribute__((aligned(8))) = "btl:end [BTL_END_LOSE or ALL STONE]\n";
+const char D_003A3510[] __attribute__((aligned(8))) = "btl:end [BTL_END_ESCAPE]\n";
+const char D_003A3530[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\n";
+const char D_003A3550[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
+extern s8 D_00324510[];
+s32 func_001C6888(BtlState *scene) {
+    s32 state;
+    s32 request;
+    s32 nextMode, nextEntry;
+    BtlTask *task;
+    s32 event;
+    u32 flags;
+
+    if (scene->eventReady == 1 && !(scene->endFlags & 1) &&
+        scene->scriptState != 0xF000003 && scene->scenePhaseFrame + 30 >= scene->sceneState) {
+        btlAdvanceTitleState();
+        sndLoadAndPlayStationedSe(0x1C);
+        scene->endFlags |= 1;
+    } else if (scene->eventReady == 2 && !(scene->endFlags & 4) && scene->scenePhaseFrame >= 75) {
+        if (scene->scenePhaseFrame == 75) {
+            if (mnuPollTitleStreamStateLocked()) mnuResetTitleStreamLocked();
+            mnuQueueTitleSoundStreamEntry(0x15);
+        } else if (sndIsStreamStatusTwoOrThree()) {
+            btlResetTitleStreamOnBattleFlag();
+            scene->endFlags |= 4;
+        }
+    }
+    if (sndIsCommandBusySigned()) {
+        btlBossDebugPrintf(D_003A3470);
+        return 0;
+    }
+    if (!btlAllActiveUnitsReady()) {
+        btlBossDebugPrintf(D_003A3490);
+        return 0;
+    }
+    if (btlCountRegisteredTasks()) {
+        btlBossDebugPrintf(D_003A34B8);
+        return 0;
+    }
+    if (scene->eventReady == 1 && brsTaskIsUpdateBlocked()) return 0;
+
+    if (scene->scriptState == 0xF000003) {
+        state = scene->scriptState;
+        if (!(scene->endFlags & 2)) {
+            if (!btlReleaseScriptResourceB()) return 0;
+            scene->endFlags |= 2;
+        }
+        if (scene->scriptState == state) goto ready;
+    }
+    if (scene->scenePhaseFrame < scene->sceneState) {
+        if (scene->eventReady != 1 || scene->scenePhaseFrame < 37 ||
+            ((s8)D_00324510[0x21] >= 0 && (s8)D_00324510[0x23] >= 0)) goto wait;
+    }
+ready:
+    if (scene->endDelay != 0) goto wait;
+    switch (scene->eventReady) {
+    case 0:
+        break;
+    case 1:
+        btlBossDebugPrintf(D_003A34D0);
+        break;
+    case 2:
+    case 3:
+    case 7:
+        fldUnloadPlayerModel();
+        request = 0x29E;
+        dds3AdminSubmitModeRequest(6, &request, 4, 0);
+        btlBossDebugPrintf(D_003A34E8);
+        break;
+    case 4:
+        btlResetActorEntryState();
+        btlBossDebugPrintf(D_003A3510);
+        break;
+    case 5:
+        btlBossDebugPrintf(D_003A3530);
+        break;
+    case 6:
+        btlResetActorEntryState();
+        btlBossDebugPrintf(D_003A3550);
+        break;
+    default:
+        break;
+    }
+    if (scene->eventReady != 5) btlAdvanceTitleState();
+    if (scene->eventReady == 1) {
+        if (!(scene->endFlags & 1)) {
+            sndQueueNoPayloadCommand210();
+            sndQueueNoPayloadCommand1A0();
+            sndLoadAndPlayStationedSe(0x1C);
+            scene->endFlags |= 1;
+        }
+    } else {
+        sndQueueNoPayloadCommand210();
+        sndQueueNoPayloadCommand1A0();
+    }
+    if (scene->eventReady == 5) {
+        task = scene->tasks;
+        scene->turnPhase = 0;
+        scene->eventReady = 0;
+        scene->spawnCount = 0;
+        scene->turnCount = 0;
+        scene->defeatedLevelCount = 0;
+        scene->defeatedLevelTotal = 0;
+        while (task != NULL) {
+            if ((task->flags & 8) && (task->unit->status.flags & 0x400)) {
+                btlDestroyUnit(task->unit);
+                task->flags &= ~8;
+                if (task->state != 0x1E) btlDispatchStateHandler(task, 0x1E);
+            }
+            task = task->next;
+        }
+        btlRemoveActorsWithFlags(0x400);
+        btlClearModelFlagRange();
+        nextMode = scene->requestArgument;
+        nextEntry = scene->nextAdjustmentEntryIndex;
+        flags = scene->battleFlags;
+        flags &= ~0x800;
+        flags &= ~0x400;
+        flags |= 0x4000;
+        flags &= ~0x20;
+        scene->battleMode = nextMode;
+        scene->adjustmentEntryIndex = nextEntry;
+        scene->battleFlags = flags;
+        scene->phase++;
+        return 4;
+    }
+    event = scene->eventReady;
+    return event != 1 ? 11 : 10;
+wait:
+    if (scene->endDelay > 0) scene->endDelay--;
+    return 0;
+}
 
 
 
