@@ -79,7 +79,7 @@ extern void btlSetEffectCameraKeys(s32 command, f32, f32, f32, f32, f32, f32, f3
 
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
-extern u32 btlCreateScriptResourceTask(BtlUnit *unit, u32 group);
+extern BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *unit, u32 group);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
 extern BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
@@ -900,16 +900,16 @@ void btlQueueLinkedActorModelStateTasks(ActionStateLink *action) {
 
         if ((flags & 0xE0) == 0) {
             if (unitId != 0x12F) {
-                u32 scriptTask = btlCreateScriptResourceTask(unit, 0x50);
-                ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
-                btlStartTask((void *)scriptTask);
+                BtlRuntimeTask *scriptTask = btlCreateScriptResourceTask(unit, 0x50);
+                scriptTask->ownerId = scriptSequence;
+                btlStartTask(scriptTask);
                 task = sndCreateStationedSeTask(battle->sequenceHandle);
                 task->ownerId = soundSequence;
                 btlStartTask(task);
             } else {
-                u32 scriptTask = btlCreateScriptResourceTask(unit, 0x51);
-                ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
-                btlStartTask((void *)scriptTask);
+                BtlRuntimeTask *scriptTask = btlCreateScriptResourceTask(unit, 0x51);
+                scriptTask->ownerId = scriptSequence;
+                btlStartTask(scriptTask);
                 task = sndCreateStationedSeTask(battle->sequenceHandle + 1);
                 task->ownerId = soundSequence;
                 btlStartTask(task);
