@@ -720,7 +720,7 @@ extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 extern s32 sdfAllocHeapMemory(s32);
 
-extern s32 sdfDevReadFileBytes(s32, s32, s32);
+extern s32 sdfDevReadFileBytes(s32 fileHandle, s32 buffer, s32 byteCount);
 
 extern s32 sceClose(s32 fd);
 
