@@ -971,25 +971,25 @@ void fldCreateResourceScriptObjects(void) {
     f32 position[4];
     f32 rotation[4];
     FldFileResource *resource = D_00438EB8;
-    u32 count = D_00438EBC;
-    void *world;
-    struct EffWorldNode *object;
-    FldFileResource *binding;
-    FldFileNameEntry *name;
-    FldScriptResource *script;
-    FldResourceName *linkedName;
-    s32 i;
-    s32 j;
-    u32 k;
+    u32 resourceCount = D_00438EBC;
+    void *secondaryWorld;
+    struct EffWorldNode *scriptObject;
+    FldFileResource *bindingResource;
+    FldFileNameEntry *nameEntry;
+    FldScriptResource *scriptResource;
+    FldResourceName *linkedResourceName;
+    s32 resourceIndex;
+    s32 bindingIndex;
+    u32 nameIndex;
 
     if (resource == NULL) {
         return;
     }
-    world = dds3GetWorldSecondaryObject();
-    for (i = 0; i < count; i++, resource++) {
-        script = resource->data;
-        evtCreateScriptObjectWithResource(resource->id, &script->itemList,
-                                         script->motionTable, D_00435FA4, resource->name);
+    secondaryWorld = dds3GetWorldSecondaryObject();
+    for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+        scriptResource = resource->data;
+        evtCreateScriptObjectWithResource(resource->id, &scriptResource->itemList,
+                                         scriptResource->motionTable, D_00435FA4, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
@@ -1010,51 +1010,51 @@ void fldCreateResourceScriptObjects(void) {
             rotation[2] = 0.0f;
             rotation[3] = 0.0f;
         }
-        object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
-        dds3SetWorldNodeValue(object, (u32)resource->name);
+        scriptObject = dds3SpawnInnerVecObj6(resource->id, position, rotation);
+        dds3SetWorldNodeValue(scriptObject, (u32)resource->name);
         if (fldAreaState.area >= 200 && fldAreaState.area < 500) {
-            if (fldAreaState.area == 230 && fldAreaState.floor == 6 && i == 2) {
-                effObjSetActiveId(object, 6);
+            if (fldAreaState.area == 230 && fldAreaState.floor == 6 && resourceIndex == 2) {
+                effObjSetActiveId(scriptObject, 6);
             } else {
-                switch (i) {
+                switch (resourceIndex) {
                     case 0:
-                        effObjSetActiveId(object, 2);
+                        effObjSetActiveId(scriptObject, 2);
                         break;
                     case 1:
-                        effObjSetActiveId(object, 3);
+                        effObjSetActiveId(scriptObject, 3);
                         break;
                     case 2:
-                        effObjSetActiveId(object, 4);
+                        effObjSetActiveId(scriptObject, 4);
                         break;
                     default:
-                        effObjSetActiveId(object, 5);
+                        effObjSetActiveId(scriptObject, 5);
                         break;
                 }
             }
         } else {
-            effObjSetActiveId(object, 7);
+            effObjSetActiveId(scriptObject, 7);
         }
-        effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
-        dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
-        dds3CreateObjectModelAndMotion(object);
-        binding = D_00438EC0;
-        for (j = 0; j < D_00438EC4; j++, binding++) {
-            if (binding->names != NULL) {
-                name = binding->names->entries;
-                k = 0;
-                for (; k < binding->names->count; k++, name++) {
-                    if (strcmp(resource->name, name->name) == 0) {
-                        fldSetRecordWorldNodeById(binding->id, object);
+        effObjSetRoomNumber(scriptObject, fldParseRoomNumberFromName((char *)resource->name));
+        dds3SetSlotByKind(scriptObject, dds3FindWorldObjectNodeByKey(secondaryWorld, resource->id, 10));
+        dds3CreateObjectModelAndMotion(scriptObject);
+        bindingResource = D_00438EC0;
+        for (bindingIndex = 0; bindingIndex < D_00438EC4; bindingIndex++, bindingResource++) {
+            if (bindingResource->names != NULL) {
+                nameEntry = bindingResource->names->entries;
+                nameIndex = 0;
+                for (; nameIndex < bindingResource->names->count; nameIndex++, nameEntry++) {
+                    if (strcmp(resource->name, nameEntry->name) == 0) {
+                        fldSetRecordWorldNodeById(bindingResource->id, scriptObject);
                         break;
                     }
                 }
             }
         }
         /* Retail fetches the link descriptor even when the object is NULL. */
-        linkedName = (FldResourceName *)resource->word14;
-        if (object != NULL) {
-            dds3SetSlotByKind(object, dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
-            dds3RegisterObjectInHandlerIndex(object);
+        linkedResourceName = (FldResourceName *)resource->word14;
+        if (scriptObject != NULL) {
+            dds3SetSlotByKind(scriptObject, dds3FindIndexedObjectChainNodeByName(secondaryWorld, 2, (const u8 *)linkedResourceName->name));
+            dds3RegisterObjectInHandlerIndex(scriptObject);
         }
     }
 }
