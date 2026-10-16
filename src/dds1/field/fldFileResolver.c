@@ -3622,8 +3622,8 @@ s64 fldGetUnselectedWorldEntry(void) {
     return currentEntry;
 }
 
-void fldSetCameraMoveMode(u32 value) {
-    D_003BAD1C = value;
+void fldSetCameraMoveMode(u32 mode) {
+    D_003BAD1C = mode;
     dds3TransformCameraVectorsByInnerRotation(dds3GetWorldCameraObject(dds3GetWorldObject()), D_003C9230,
                                               D_003C9220);
     D_003BAD20 = 0;
