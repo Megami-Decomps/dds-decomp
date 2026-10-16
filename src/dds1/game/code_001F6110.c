@@ -3043,9 +3043,9 @@ void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32
 }
 
 /* Read the browser descriptor's zero-based selected entry index. */
-u32 btlGetResourceBrowserSelectedIndex(s32 recordAddress) {
-    const u32 *recordWords = (const u32 *)recordAddress;
-    return recordWords[5];
+u32 btlGetResourceBrowserSelectedIndex(
+    const BtlResourceDescriptor *descriptor) {
+    return descriptor->selectedIndex;
 }
 
 u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor) {

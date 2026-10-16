@@ -74,6 +74,8 @@ typedef struct BtlResourceDescriptor {
 
 typedef char BtlResourceDescriptor_size_must_be_0x48[
     (sizeof(BtlResourceDescriptor) == 0x48) ? 1 : -1];
+typedef char BtlResourceDescriptor_selectedIndex_offset_must_be_0x14[
+    ((u32)&((BtlResourceDescriptor *)0)->selectedIndex == 0x14) ? 1 : -1];
 
 s32 btlOpenPfsDebugDirectory(const char *directoryName);
 struct BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags);
@@ -90,6 +92,8 @@ s32 btlFormatSelectedResourceName(struct BtlResourceDescriptor *descriptor,
 s32 btlTrimResourceName(struct BtlResourceDescriptor *descriptor,
                         char *output);
 u32 btlGetResourcePathVariant(const struct BtlResourceDescriptor *descriptor);
+u32 btlGetResourceBrowserSelectedIndex(
+    const struct BtlResourceDescriptor *descriptor);
 void btlDrawResourcePreview(struct BtlResourceDescriptor *descriptor);
 
 void btlSetResourceBrowserPosition(struct BtlResourceDescriptor *descriptor, s32 x, s32 y);
