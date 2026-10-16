@@ -180,7 +180,7 @@ extern void btlInitializeWorldCamera(void);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
-s32 btlGetActorBedAssetIdFromIndex(s32 arg0);
+s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
