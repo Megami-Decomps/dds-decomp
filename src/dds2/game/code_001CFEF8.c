@@ -2284,7 +2284,7 @@ void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
         ((BtlUnit *)actorAddress)->partyRecord.unitId <= 0x17F) {
         ((ActionStateLink *)taskAddress)->actionNumber =
-            datEnemyRecords[((BtlUnit *)actorAddress)->partyRecord.unitId].actionNumber;
+            datEnemyRecords[((BtlUnit *)actorAddress)->partyRecord.unitId].summonCategory;
     }
     flags = ((ActionStateLink *)taskAddress)->pendingFlags;
     ((ActionStateLink *)taskAddress)->pendingFlags = flags | FLD_SCENE_TASK_BOUND_BIT;

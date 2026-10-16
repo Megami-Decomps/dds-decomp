@@ -322,7 +322,7 @@ typedef struct DatEnemyRecord {
     u8 pad0E[2];
 #endif
     u8 baseStats[DAT_BASE_STAT_COUNT]; /* 0x10 */
-    u8 actionNumber;     /* 0x15: copied to the command actor; its consumer repeats this many scene actions. */
+    u8 summonCategory;  /* 0x15: ENEMY_TABLE category used as a secondary actor's action number. */
     u8 usePanelIcons; /* 0x16: nonzero selects panel icon groups instead of numeric level/vitals. */
     u8 pad17;
     u16 skills[8];        /* 0x18 */
@@ -346,8 +346,6 @@ typedef struct DatEnemyRecord {
 } DatEnemyRecord;
 
 typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];
-typedef char DatEnemyRecordActionNumberOffsetCheck[
-    ((u32)&((DatEnemyRecord *)0)->actionNumber == 0x15) ? 1 : -1];
 typedef char DatEnemyRecordUsePanelIconsOffsetCheck[
     ((u32)&((DatEnemyRecord *)0)->usePanelIcons == 0x16) ? 1 : -1];
 typedef char DatEnemyRecordBattleExperienceRewardOffsetCheck[
