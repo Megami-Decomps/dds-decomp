@@ -272,27 +272,27 @@ const MantraAttributeNameTable mnuMantraAttributeNames __attribute__((aligned(8)
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
-s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *resource, s8 direction) {
-    MantraNodePos *position = resource->menu.defaultSelector;
+s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *resource, s8 directionFlags) {
+    MantraNodePos *selectedNode = resource->menu.defaultSelector;
     s32 grid[2];
-    s32 neighbor;
+    s32 neighborIndex;
 
-    grid[0] = position->x / 10 + (position->x & 1);
-    grid[1] = position->y / 10;
-    switch (direction) {
+    grid[0] = selectedNode->x / 10 + (selectedNode->x & 1);
+    grid[1] = selectedNode->y / 10;
+    switch (directionFlags) {
     /* Vertical moves depend on the staggered row; horizontal moves do not. */
-    case 1: neighbor = (grid[1] & 1) ? 5 : 0; break;
-    case 4: neighbor = (grid[1] & 1) ? 3 : 2; break;
-    case 2: neighbor = 1; break;
-    case 8: neighbor = 4; break;
+    case 1: neighborIndex = (grid[1] & 1) ? 5 : 0; break;
+    case 4: neighborIndex = (grid[1] & 1) ? 3 : 2; break;
+    case 2: neighborIndex = 1; break;
+    case 8: neighborIndex = 4; break;
     /* Upper diagonals, then lower diagonals. */
-    case 9: neighbor = 5; break;
-    case 3: neighbor = 0; break;
-    case 12: neighbor = 3; break;
-    case 6: neighbor = 2; break;
+    case 9: neighborIndex = 5; break;
+    case 3: neighborIndex = 0; break;
+    case 12: neighborIndex = 3; break;
+    case 6: neighborIndex = 2; break;
     default: return -1;
     }
-    return neighbor;
+    return neighborIndex;
 }
 
 
