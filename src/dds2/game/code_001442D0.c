@@ -4778,7 +4778,7 @@ void fldUpdateDevilizeEventSequence(void) {
         break;
     case 6:
         if (fileIsRequestReadyInCurrentMode(D_004363A0) != 0) {
-            D_004363A8 = fileGetLoadedDataAddress(D_004363A0);
+            D_004363A8 = (u32)fileGetLoadedDataAddress(D_004363A0);
             D_004363A4 = fileGetResourceHandle(D_004363A0);
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;

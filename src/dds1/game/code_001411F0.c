@@ -4440,7 +4440,7 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case 6:
         if (fileIsRequestReadyInCurrentMode(D_003BAFE8) != 0) {
-            D_003BAFF0 = fileGetLoadedDataAddress(D_003BAFE8);
+            D_003BAFF0 = (u32)fileGetLoadedDataAddress(D_003BAFE8);
             D_003BAFEC = fileGetResourceHandle(D_003BAFE8);
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;
@@ -4626,7 +4626,7 @@ void fldUpdateSparkEncounterScene(void) {
         if (fileIsRequestReadyInCurrentMode(D_003BAFE8) == 0) {
             return;
         }
-        D_003BAFF0 = fileGetLoadedDataAddress(D_003BAFE8);
+        D_003BAFF0 = (u32)fileGetLoadedDataAddress(D_003BAFE8);
         D_003BAFEC = fileGetResourceHandle(D_003BAFE8);
         area = &fldAreaState;
         firstVector[0] = area->x;

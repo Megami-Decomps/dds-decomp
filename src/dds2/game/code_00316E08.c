@@ -372,7 +372,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         struct FileRequest *request = work->packageRequest;
 
         if (request != NULL) {
-            data = (void *)(u32)fileGetLoadedDataAddress(request);
+            data = (void *)fileGetLoadedDataAddress(request);
             request = work->packageRequest;
             evtPrintDeveloperConsoleMessage(D_0042D548,
                                             fileGetResourceSize(request));

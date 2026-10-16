@@ -351,7 +351,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
 
     if (ready != 0) {
         struct SdfMemBlock *resourceHandle = fileGetResourceHandle(mnuTitleStreamFileRequest);
-        u32 fileDataAddress = fileGetLoadedDataAddress(mnuTitleStreamFileRequest);
+        void *fileData = fileGetLoadedDataAddress(mnuTitleStreamFileRequest);
         s32 fileBytes = (s32)fileGetResourceSize(mnuTitleStreamFileRequest);
         struct SdfMemBlock *allocation;
 
@@ -359,7 +359,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
         mnuTitleStreamStatus.compressedData = (u8 *)sdfMemoryGetBlockAddress(allocation);
         mnuTitleStreamStatus.allocation = allocation;
-        memcpy(destinationState->compressedData, (void *)fileDataAddress, fileBytes);
+        memcpy(destinationState->compressedData, fileData, fileBytes);
         destinationState->frameCount = fileBytes / destinationState->frameBytes;
         destinationState->frameIndex = 0;
         sdfQueueGeneralAllocationRelease(resourceHandle);

@@ -100,7 +100,7 @@ void mtrLoadMantraNodePositions(void) {
     request = fileQueueDefaultCallbackRequest("/facility/data/mtrMantraBlockData.tbl");
     while (!fileIsRequestReadyInCurrentMode(request)) {
     }
-    mnuLoadMantraNodePositionTable(fileGetLoadedDataAddress(request));
+    mnuLoadMantraNodePositionTable((u32)fileGetLoadedDataAddress(request));
     mnuRebuildMantraCategoryAvailability();
     sdfReleaseResourceAllocation(fileGetResourceHandle(request));
     filePollEntryCleanup(request);

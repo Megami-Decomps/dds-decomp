@@ -2598,7 +2598,7 @@ s32 fileRunMenuState(KwlnTask *task) {
     if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
         fileSaveIconResourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)job);
-        fileSaveIconData = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
+        fileSaveIconData = (u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
         fileSaveIconDataSize = fileGetResourceSize((struct FileRequest *)(u32)job);
         filePollEntryCleanup((struct FileRequest *)(u32)job);
     }
