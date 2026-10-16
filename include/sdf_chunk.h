@@ -45,7 +45,7 @@ typedef char SdfMapPositionRecord_direction_at_30[
 
 SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId);
 SdfChunkHeader *sdfChunkFindByTag(const struct SdfModel *model, s32 tag);
-u32 sdfCountMapPositionRecords(struct SdfModel *model);
+u32 sdfCountMapPositionRecords(const struct SdfModel *model);
 SdfMapPositionRecord *sdfChunkFindRecordById(struct SdfModel *model, s32 recordId);
 void sdfSetLookAtBasisFromRecord(struct SdfModel *model, SdfMapPositionRecord *record);
 void sdfVuTransformMapRecordPosition(struct SdfModel *model, SdfMapPositionRecord *record);
