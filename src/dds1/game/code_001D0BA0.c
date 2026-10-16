@@ -1946,13 +1946,13 @@ s32 btlCountRegisteredTasks(void) {
 }
 
 /* Count registrations with this full-width owner key. */
-s32 btlCountTasksForOwner(s64 key) {
+s32 btlCountTasksForOwner(s64 owner) {
     SoundTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     s32 count = 0;
     while (task != 0) {
-        s64 owner = task->owner;
+        s64 taskOwner = task->owner;
         task = task->next;
-        if (owner == key) {
+        if (taskOwner == owner) {
             count++;
         }
     }
