@@ -3014,7 +3014,45 @@ void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A8748", btlLowestSetPairIndex);
+/* Index of the lowest set bit pair in the mask (bits 10 and 13 are single), or -1. */
+s32 btlLowestSetPairIndex(u32 mask) {
+    s32 index = 0;
+    s32 step = 1;
+
+    if (mask == 0)
+        return -step;
+    if (mask & 0x0001)
+        return index;
+    if (mask & 0x0002)
+        return index;
+    index += step;
+    if (mask & 0x0004)
+        return index;
+    if (mask & 0x0008)
+        return index;
+    index += step;
+    if (mask & 0x0010)
+        return index;
+    if (mask & 0x0020)
+        return index;
+    index += step;
+    if (mask & 0x0040)
+        return index;
+    if (mask & 0x0080)
+        return index;
+    index += step;
+    if (mask & 0x0100)
+        return index;
+    if (mask & 0x0200)
+        return index;
+    index += step;
+    if (mask & 0x0400)
+        return index;
+    index += step;
+    if (mask & 0x2000)
+        return index;
+    return -step;
+}
 
 void btlTickActorEntryCountdowns(BtlUnit *unit) {
     s16 *entry = &unit->entrySlots[0].countdown;
