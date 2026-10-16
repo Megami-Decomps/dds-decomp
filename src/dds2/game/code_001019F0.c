@@ -223,7 +223,7 @@ extern void sdfConsSetDefaultFirstReference(u32);
 extern void sdfConsSetDefaultSecondReference(u32);
 extern SdfListHead *evtBuildFrameStatePacketList(s32);
 extern void evtSetDrawSurfaceIndex(u32);
-extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Rebuild and queue the selected buffer's scene, overlay and view packets. */
