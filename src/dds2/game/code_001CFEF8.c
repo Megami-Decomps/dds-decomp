@@ -256,7 +256,140 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", btlInitializeBattleUnits);
+extern void btlReleaseUnitResources(BtlUnit *);
+extern BtlUnit *btlCreateUnit(void);
+void btlInitializeBattleUnits(BtlState *scene) {
+    s32 battleMode;
+    u32 index;
+    u32 slot;
+    BtlUnit *unit;
+    ActionStateLink *task;
+    if (!(scene->battleFlags & 0x4000)) {
+        
+        s32 selectedEntry;
+        slot=0;
+        selectedEntry=-1;
+        for (index=0;index<5;index++) {
+            if (datGameState->party[index].flags & 1) {
+                if (!(scene->commandRestrictFlags & 0x80)) {
+                    if (btlHasSpecialAbilityOrModelFlag(&datGameState->party[index]) != 0) {
+                        datGameState->party[index].flags &= 0xEFFF;
+                    } else {
+                        datGameState->party[index].flags |= 0x1000;
+                    }
+                    if (datGameState->party[index].flags & 2) {
+                        if (btlDoesEnabledStatusMatchCurrentId(&datGameState->party[index],0xE2)) selectedEntry=0x150;
+                    }
+                    datGameState->party[index].flags &= 0xBFFF;
+                    if (scene->encounterKind == 3) datGameState->party[index].flags = (datGameState->party[index].flags | 0x10) & ~0x1000;
+                    else datGameState->party[index].flags &= ~0x10;
+                }
+                slot++;
+            }
+        }
+        datGameState->partyCount=slot;
+        slot=0;
+        for (index=0;index<5 && slot<3;index++) {
+            u8 partyIndex=datGameState->partyOrder[index];
+            u16 flags=datGameState->party[partyIndex].flags;
+            if ((flags & 1) && (flags & 2)) {
+                s32 baseKind;
+                s32 modelKind;
+                unit=btlCreateUnit();
+                btlCopyUnitStats(unit,&datGameState->party[partyIndex]);
+                unit->partyIndex=partyIndex;
+                unit->lookupId=slot;
+                unit->status.flags |= 0x301;
+                unit->partyRecord.flags |= 7;
+                if (btlHasSpecialAbilityOrModelFlag(&unit->partyRecord) != 0) {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags &= 0xEFFF;
+                } else {
+                    unit->status.flags |= 0x1000;
+                    unit->partyRecord.flags |= 0x1000;
+                }
+                if (unit->partyRecord.flags & 0x4000) unit->status.stateFlags |= 0x2000;
+                if (selectedEntry > 0) btlSetActorSelectedEntryIndex(unit,selectedEntry);
+                if (btlDoesEnabledStatusMatchCurrentId(&unit->partyRecord,0xE8)) {
+                    btlApplyMaskedActorEntryAdjustments(unit,0x100,2);
+                    btlApplyMaskedActorEntryAdjustments(unit,0x10,2);
+                    btlApplyMaskedActorEntryAdjustments(unit,2,2);
+                }
+                if (btlDoesEnabledStatusMatchCurrentId(&unit->partyRecord,0xE9)) {
+                    btlApplyMaskedActorEntryAdjustments(unit,1,2);
+                    btlApplyMaskedActorEntryAdjustments(unit,0x80,2);
+                }
+                task=btlCreateActionSeq();
+                btlBindActorTaskAndSelectActionNumber(task,unit);
+                fldAppendTaskToGroup(task);
+                btlDispatchStateHandler(task,2);
+                btlSetSceneTaskActiveFlag(task);
+                unit->modelId=0;
+                if (!(unit->partyRecord.flags & 0x10)) {
+                    modelKind=unit->partyRecord.unitId;
+                    baseKind=modelKind;
+                } else {
+                    baseKind=unit->partyRecord.unitId;
+                    modelKind=baseKind+0x20;
+                }
+                unit->modelVariant=modelKind;
+                unit->modelResourceKind=0;
+                unit->combatantKind=baseKind+16;
+                if (unit->status.flags & 0x1000) btlInitializeEffectVectorsFromSourceRecords(unit,0,unit->combatantKind);
+                else btlInitializeEffectVectorsFromSourceRecords(unit,unit->modelId,modelKind);
+                if (scene->initializeUnitEntry != NULL) scene->initializeUnitEntry(unit);
+                slot++;
+            }
+        }
+        for (index=slot;index<3;index++) {
+            unit=btlCreateUnit();
+            btlReleaseUnitResources(unit);
+            unit->status.flags=(unit->status.flags|0x200)&~0x103;
+            unit->lookupId=index;
+        }
+    }
+    battleMode=scene->battleMode;
+    index=0;
+    do {
+        u16 enemyId=datBattleSceneRecords[battleMode].unitModes[index];
+        if (enemyId != 0 && index<8) {
+            unit=btlCreateUnit();
+            btlInitializePartyRecordFromEnemy(&unit->partyRecord,enemyId);
+            unit->lookupId=index;
+            unit->status.flags |= 1;
+            unit->status.flags |= 0x500;
+            unit->partyRecord.flags |= 0x23;
+            task=btlCreateActionSeq();
+            btlBindActorTaskAndSelectActionNumber(task,unit);
+            fldAppendTaskToGroup(task);
+            btlDispatchStateHandler(task,2);
+            btlSetSceneTaskActiveFlag(task);
+            unit->modelResourceKind=1;
+            unit->combatantKind=enemyId;
+            btlInitializeEffectVectorsFromSourceRecords(unit,1,enemyId);
+        } else {
+            unit=btlCreateUnit();
+            btlReleaseUnitResources(unit);
+            unit->status.flags=(unit->status.flags|0x500)&~3;
+            unit->lookupId=index;
+        }
+        if (scene->initializeUnitEntry != NULL) scene->initializeUnitEntry(unit);
+        index++;
+    } while (index<9);
+    if (scene->unk26C == 0) scene->unk26C=btlSelectPreemptiveOutcome();
+    scene->mode=scene->unk26C;
+    if (!(scene->battleFlags & 0x4000)) {
+        s32 voice;
+        if (scene->encounterKind) btlClearUnitStatusMask();
+        if (scene->encounterKind == 2) scene->commandRestrictFlags &= ~2;
+        voice=btlChooseStartVoice();
+        if (voice>=0 && scene->unk26C==1) {
+            BtlRuntimeTask *sound=sndCreateAtracEffectLoadTask(voice);
+            sound->ownerId=0x8000000000000002ULL;
+            btlStartTask(sound);
+        }
+    }
+}
 
 s32 fldSceneStateRestoreDisplay(BtlState *scene) {
     if (btlCountTasksForOwner(0x8000000000000002LL) == 0) {

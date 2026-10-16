@@ -218,7 +218,119 @@ s32 btlStartOwnerTaskIfClear(u8 *object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", btlInitializeBattleUnits);
+extern void btlReleaseUnitResources(BtlUnit *);
+extern BtlUnit *btlCreateUnit(void);
+/* The native +0x5C0 hook occupies the currently opaque pad5C0 word. */
+static inline void initializeBattleUnitHook(BtlState *scene, BtlUnit *unit) {
+    void (*initialize)(BtlUnit *) = *(void (**)(BtlUnit *))scene->pad5C0;
+    if (initialize != NULL) initialize(unit);
+}
+void btlInitializeBattleUnits(BtlState *scene) {
+    u32 index;
+    u32 slot;
+    BtlUnit *unit;
+    BtlTask *task;
+    s32 battleMode;
+    if (!(scene->battleFlags & 0x4000)) {
+        
+        slot=0;
+        for (index=0;index<5;index++) {
+            if (datGameState->party[index].flags & 1) {
+                if (!(scene->commandRestrictFlags & 0x80)) {
+                    if (btlCheckSpecialAbility(&datGameState->party[index],0x259) != 0) {
+                        datGameState->party[index].flags &= 0xEFFF;
+                    } else {
+                        datGameState->party[index].flags |= 0x1000;
+                    }
+                    datGameState->party[index].flags &= 0xBFFF;
+                }
+                slot++;
+            }
+        }
+        datGameState->partyCount=slot;
+        slot=0;
+        for (index=0;index<5 && slot<3;index++) {
+            u8 partyIndex=datGameState->partyOrder[index];
+            u16 flags=datGameState->party[partyIndex].flags;
+            if ((flags & 1) && (flags & 2)) {
+                unit=btlCreateUnit();
+                btlCopyUnitStats(unit,&datGameState->party[partyIndex]);
+                unit->partyIndex=partyIndex;
+                unit->lookupId=slot;
+                unit->status.flags |= 0x301;
+                unit->partyRecord.flags |= 7;
+                if (btlCheckSpecialAbility(&unit->partyRecord,0x259) != 0) {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags &= 0xEFFF;
+                } else {
+                    unit->status.flags |= 0x1000;
+                    unit->partyRecord.flags |= 0x1000;
+                }
+                if (unit->partyRecord.flags & 0x4000) unit->status.stateFlags |= 0x2000;
+                task=btlCreateActionSeq();
+                btlBindActorTaskAndSelectActionNumber(task,unit);
+                fldAppendTaskToGroup(task);
+                btlDispatchStateHandler(task,2);
+                btlSetSceneTaskActiveFlag(task);
+                unit->modelId=0;
+                unit->modelVariant=unit->partyRecord.unitId;
+                unit->modelResourceKind=0;
+                unit->displaySpecies=unit->partyRecord.unitId+16;
+                if (unit->status.flags & 0x1000) btlInitializeEffectVectorsFromSourceRecords(unit,0,unit->displaySpecies);
+                else btlInitializeEffectVectorsFromSourceRecords(unit,0,unit->partyRecord.unitId);
+                initializeBattleUnitHook(scene,unit);
+                slot++;
+            }
+        }
+        for (index=slot;index<3;index++) {
+            unit=btlCreateUnit();
+            btlReleaseUnitResources(unit);
+            unit->status.flags=(unit->status.flags|0x200)&~0x103;
+            unit->lookupId=index;
+        }
+    }
+    battleMode=scene->battleMode;
+    index=0;
+    do {
+        u16 enemyId=datBattleSceneRecords[battleMode].unitModes[index];
+        if (enemyId != 0 && index<8) {
+            unit=btlCreateUnit();
+            btlInitializePartyRecordFromEnemy(&unit->partyRecord,enemyId);
+            unit->lookupId=index;
+            unit->status.flags |= 1;
+            unit->status.flags |= 0x500;
+            unit->partyRecord.flags |= 0x23;
+            task=btlCreateActionSeq();
+            btlBindActorTaskAndSelectActionNumber(task,unit);
+            fldAppendTaskToGroup(task);
+            btlDispatchStateHandler(task,2);
+            btlSetSceneTaskActiveFlag(task);
+            unit->modelResourceKind=1;
+            unit->displaySpecies=enemyId;
+            btlInitializeEffectVectorsFromSourceRecords(unit,1,enemyId);
+        } else {
+            unit=btlCreateUnit();
+            btlReleaseUnitResources(unit);
+            unit->status.flags=(unit->status.flags|0x500)&~3;
+            unit->lookupId=index;
+        }
+        initializeBattleUnitHook(scene,unit);
+        index++;
+    } while (index<9);
+    if (scene->turnPhase == 0) scene->turnPhase=btlSelectPreemptiveOutcome();
+    scene->mode=scene->turnPhase;
+    if (!(scene->battleFlags & 0x4000)) {
+        s32 voice;
+        if (scene->unk24A) btlClearUnitStatusMask();
+        if (scene->unk24A == 2) scene->commandRestrictFlags &= ~2;
+        voice=btlChooseStartVoice();
+        if (voice>=0 && scene->turnPhase==1) {
+            BtlRuntimeTask *sound=sndCreateAtracEffectLoadTask(voice);
+            sound->ownerId=0x8000000000000002ULL;
+            btlStartTask(sound);
+        }
+    }
+}
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
