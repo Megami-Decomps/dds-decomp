@@ -1302,13 +1302,13 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
     evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
-extern void evtViewerClampMovieTimes(s32, EvtRuntime *);
-extern void evtViewerSyncWorldGroups(s32, EvtRuntime *);
-extern void evtViewerApplyGlyphLodChannel(s32, EvtRuntime *);
-extern void evtEventViewerAttachIndexedObject(s32, EvtRuntime *);
-extern void evtViewerActivateWindowForGlyphEntry(s32, EvtRuntime *);
+extern void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer);
+extern void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer);
+extern void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer);
+extern void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer);
+extern void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer);
 extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
-extern void evtEventViewerApplyEffectChannels(s32, EvtRuntime *);
+extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
