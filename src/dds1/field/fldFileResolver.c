@@ -3222,7 +3222,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     }
 }
 
-void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
+void fldSubmitAreaOverlayQuads(s32 alpha, s32 offset) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -3259,21 +3259,21 @@ void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
-    vertex->a = a1;
-    quarter = a2;
-    if (a2 < 0) {
-        quarter = a2 + 3;
+    vertex->a = alpha;
+    quarter = offset;
+    if (offset < 0) {
+        quarter = offset + 3;
     }
     quarter >>= 2;
     vertex->corner[0].u = 0;
     vertex->corner[0].v = 0;
-    vertex->corner[0].x = 0x6FF7 - a2;
+    vertex->corner[0].x = 0x6FF7 - offset;
     vertex->corner[0].y = 0x78FB - quarter;
     vertex->corner[0].mask = 0x3FFF;
     vertex->corner[0].flag = 0;
     vertex->corner[1].u = 0x2000;
     vertex->corner[1].v = 0xE00;
-    vertex->corner[1].x = a2 + quarter + 0x9009;
+    vertex->corner[1].x = offset + quarter + 0x9009;
     vertex->corner[1].y = quarter + 0x8705;
     vertex->corner[1].mask = 0x3FFF;
     vertex->corner[1].flag = 0;
