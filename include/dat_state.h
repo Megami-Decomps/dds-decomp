@@ -125,7 +125,7 @@ typedef struct DatPartyRecord {
         };
         u32 skillSnapshotWords[77]; /* Stock merge includes the reserved trailing word. */
     };
-    u16 unk18C;
+    u16 savedCommandPhase; /* +0x18C: saved action phase restored with actionSlot. */
     u16 unk18E;
     u16 actionSlot; /* 0x190: saved command-table slot; matches DDS2's actionSlot. */
     u8 pad192[2];
@@ -137,7 +137,7 @@ typedef struct DatPartyRecord {
     u8 profileId;
     u8 pad56[2];
     u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
-    u16 unk1AC; /* Synced from the active battle record. */
+    u16 savedCommandPhase; /* +0x1AC: saved action phase restored with actionSlot. */
     u16 unk1AE; /* Synced from the active battle record. */
     s16 actionSlot;
     u16 itemId;
@@ -146,6 +146,14 @@ typedef struct DatPartyRecord {
     u8 pad1BC[8];
 #endif
 } DatPartyRecord;
+
+#ifdef VERSION_DDS1
+typedef char DatPartyRecord_savedCommandPhase_offset[
+    ((u32)&((DatPartyRecord *)0)->savedCommandPhase == 0x18C) ? 1 : -1];
+#else
+typedef char DatPartyRecord_savedCommandPhase_offset[
+    ((u32)&((DatPartyRecord *)0)->savedCommandPhase == 0x1AC) ? 1 : -1];
+#endif
 
 typedef char DatPartyRecord_effectDataCount_offset[
     ((unsigned long)&((DatPartyRecord *)0)->effectDataCount == 0x20) ? 1 : -1];

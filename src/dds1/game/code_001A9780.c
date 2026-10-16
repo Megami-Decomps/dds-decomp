@@ -2795,12 +2795,11 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
 
 /* Store the confirmed command-selection tuple on the owning actor. */
 void btlSetActorCommandSelection(s32 object, s16 first, s16 second, s16 slot) {
-    s32 temp_v0;
+    BtlUnit *unit = ((BattleSceneObject *)object)->owner->unit;
 
-    temp_v0 = *(s32 *)(*(s32 *)(object + 0x2c) + 0x18);
-    *(s16 *)(temp_v0 + 0x2ac) = first;
-    *(s16 *)(temp_v0 + 0x2ae) = second;
-    *(s16 *)(temp_v0 + 0x2b0) = slot;
+    unit->partyRecord.savedCommandPhase = first;
+    unit->partyRecord.unk18E = second;
+    unit->partyRecord.actionSlot = slot;
 }
 
 s32 btlCountEligibleLinkedActors(BtlState *battle) {

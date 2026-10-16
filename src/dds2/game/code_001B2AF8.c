@@ -3694,7 +3694,7 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
 /* Store the confirmed command-selection tuple on the owning actor. */
 void btlSetActorCommandSelection(BattleSceneObject *object, s32 first, s32 second, s32 slot) {
     BtlUnit *unit = object->owner->unit;
-    unit->partyRecord.unk1AC = first;
+    unit->partyRecord.savedCommandPhase = first;
     unit->partyRecord.unk1AE = second;
     unit->partyRecord.actionSlot = slot;
 }
