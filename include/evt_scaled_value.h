@@ -27,7 +27,7 @@ typedef char EvtScaledValue_size_must_be_0x1C[
  * Dds3PathCurveWork, and polygon-movie callers pass PolyMovieClip; both expose
  * the corresponding fields at +0x04/+0x08/+0x0C without requiring a complete
  * EvtScaledValue object. */
-f32 evtGetValueScaleFactor(EvtScaledValue *value);
+f32 evtGetValueScaleFactor(const EvtScaledValue *value);
 void evtScaleValueByMultiplier(EvtScaledValue *value, f32 multiplier);
 void sdfFreezeFloatCounter(EvtScaledValue *value);
 void sdfUnfreezeFloatCounter(EvtScaledValue *value);

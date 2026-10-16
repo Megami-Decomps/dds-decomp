@@ -112,7 +112,7 @@ void evtScaleValueByMultiplier(EvtScaledValue *value, float multiplier) {
     value->scaled = multiplier * value->base;
 }
 
-float evtGetValueScaleFactor(EvtScaledValue *value) {
+float evtGetValueScaleFactor(const EvtScaledValue *value) {
     return value->scaled / value->base;
 }
 
