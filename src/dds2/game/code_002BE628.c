@@ -2558,7 +2558,73 @@ s32 ptyChooseFirstAvailableRosterId(void) {
     return ptyIsRosterEntryPresent(8) ? 8 : 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5A28);
+extern s32 fldIsFlagActive(void);
+extern void fldSetPrimarySceneFlag(void);
+extern s32 fldTestSecondarySceneFlag(void);
+extern void fldSetSecondarySceneFlag(void);
+extern s32 fldTestFieldTransitionFlag(void);
+extern void fldSetFieldTransitionFlag(void);
+extern u8 *D_00435E48;
+s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *target,
+                  struct DatPartyRecord *selected) {
+    s32 result = btlItemApplyPermanentBonus(ability, selected);
+
+    switch (result) {
+    case 1:
+        mnuQueueListEntry(page, mnuFindMatchingPartyEntryIndex(selected), 1, 0);
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        return 1;
+    case 2:
+        return result;
+    }
+    switch (ability) {
+    case 0x3B:
+        if (fldIsFlagActive()) {
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        }
+        sndPlayPartyItemSe(ability, 0);
+        fldSetPrimarySceneFlag();
+        goto accepted;
+    case 0x3C:
+        if (fldTestSecondarySceneFlag()) {
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        }
+        sndPlayPartyItemSe(ability, 0);
+        fldSetSecondarySceneFlag();
+        goto accepted;
+    case 0x3D:
+        if (fldTestFieldTransitionFlag()) {
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        }
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + ptyChooseFirstAvailableRosterId() * 17);
+        sndPlayPartyItemSe(ability, 0);
+        fldSetFieldTransitionFlag();
+        goto accepted;
+    case 0x3E:
+        switch (fldGetSceneCommandState()) {
+        case -1:
+            sndPlayPartyItemSe(ability, 2);
+            return 2;
+        case 1:
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        default:
+            goto activate;
+        }
+    default:
+        return 0;
+    }
+activate:
+    sndPlayPartyItemSe(ability, 0);
+    fldActivatePendingSceneCommand();
+accepted:
+    mnuQueueListEntry(page, mnuFindMatchingPartyEntryIndex(selected), 2, 0);
+    sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+    return 1;
+}
 
 /* Return the first matching status index in native priority order, or -1. */
 s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry) {
