@@ -455,7 +455,7 @@ extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector);
 extern s32 fldUpdateFieldPlayerMovement(void);
-extern void fldUpdateCameraModelMotion(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames);
 extern s32 *fldGetPlayerSceneStateAddress();
 extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
@@ -4808,7 +4808,7 @@ s32 fldUpdateCameraObjectPose(void) {
 }
 
 extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
-extern void fldUpdateCameraModelMotion(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames);
 
 void fldSetCameraNodeModeWithTen(void) {
     s16 node = fldPlayerModelContext->current.h.motionIndex;
