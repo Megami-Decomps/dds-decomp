@@ -2220,9 +2220,9 @@ extern u8 *billAllocQuadNode(u8 *);
 
 extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
-extern void billInitializeEmitterRows(u8 *, u8 *);
+extern void billInitializeEmitterRows(u8 *work, u8 *descriptor);
 
-extern void billInitializeQuadRows(u8 *, u8 *);
+extern void billInitializeQuadRows(u8 *work, u8 *descriptor);
 
 u8 *billCloneAnimatedTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
@@ -2485,15 +2485,15 @@ u8 *billAllocEmitterNode(u8 *config) {
     return node;
 }
 
-void billInitializeEmitterRows(u8 *node, u8 *config) {
-    u32 count = ((EffBillTimedHeader *)config)->count;
+void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
+    transform = (f32 *)((EffBillFrameState *)work)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -3202,15 +3202,15 @@ u8 *billAllocQuadNode(u8 *config) {
     return node;
 }
 
-void billInitializeQuadRows(u8 *node, u8 *config) {
-    u32 count = ((EffBillTimedHeader *)config)->count;
+void billInitializeQuadRows(u8 *work, u8 *descriptor) {
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     u32 index;
     f32 *transform;
 
     if (count == 0) {
         return;
     }
-    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
+    transform = (f32 *)((EffBillFrameState *)work)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
