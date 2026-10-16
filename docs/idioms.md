@@ -14099,3 +14099,37 @@ All twenty paired data names are inferred from current matched consumers
 and identical native sixteen-byte windows. No header, type, bound, data
 bytes, imports, provider, control flow or existing assembly changes; no
 new function or data-ownership credit.
+
+## Mantra flag banks, navigation tables and help conditions
+
+DDS2's member-adjusted mantra flag bank has fourteen node/flag-base pairs
+and nine signed member offsets. Its other three copied banks contain the
+literal node ranges 97--100, 113--120 and 145--152 with fixed model flags.
+These are separate native objects, not an invitation to merge their loops
+or reinterpret their halfwords. The profile-candidate banks retain their
+16/12/18 four-byte records, selected by state zero, state one and the final
+else respectively; the last name does not assert that only state two can
+reach it. The `None...` diagnostic reports only the failed neighbor pass,
+not failure of the subsequent independent profile search.
+
+`mnuMantraAttributeNames` keeps six nine-byte text cells, including all
+terminators and fixed-cell zero fill. The alternate-neighbor bank remains
+fifty 14-byte records (one node ID and six neighbor IDs). Bridge destinations
+remain s16[4][3]; the two u16[3][5] node banks are named by the actual
+0/5 and 2/3 direction tests rather than an inferred screen axis. Preserve
+the existing explicit readonly sections, eight-byte starts and natural
+alignment gaps outside these objects.
+
+`mnuMantraUnitLevelTextFormat` is the existing `%2d` small-data string.
+`mnuMantraPublishedSourceRecords` retains the NULL MenuMantraRecord pointer
+assigned the actual 112-record menu bank by the source-list builder; it is
+not a MantraMenuSrc acquisition result, and no native reader is invented.
+The camp help-condition bank retains eight native words (only entry one
+is 0x901). The grid-label helper tests the indexed flag before adding eight
+to the text index. Its current char-array declaration and integer casts
+remain unchanged rather than being converted to a new typed interface.
+
+These are data-identifier names only. Existing lookup/dialog/navigation
+reconstruction and Cedar typed-data ownership credits remain intact;
+held neighboring bodies, headers, types, initializers, bounds, prototypes,
+control flow, SDK calls and generated assembly are not edited.
