@@ -2094,7 +2094,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
     }
 }
 
-extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32, s32);
+extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions);
 extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
 
 EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
@@ -2105,7 +2105,7 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
     EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
     u32 palette[4];
-    s32 a, b;
+    s32 historyLength, subdivisions;
     u32 i;
 
     work->params = *src;
@@ -2114,15 +2114,15 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
     work->slots = slot;
     work->tintColor = 0x80808080;
     work->soundMixer = effEventCloneSoundMixer(eventParams);
-    a = work->params.historyLength;
-    if (a == 0) {
+    historyLength = work->params.historyLength;
+    if (historyLength == 0) {
         work->params.historyLength = 1;
-        a = 1;
+        historyLength = 1;
     }
-    b = work->params.subdivisions;
-    if (b <= 0) {
+    subdivisions = work->params.subdivisions;
+    if (subdivisions <= 0) {
         work->params.subdivisions = 1;
-        b = 1;
+        subdivisions = 1;
     }
     if (work->params.startDelayRange <= 0) {
         work->params.startDelayRange = 1;
@@ -2144,7 +2144,7 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
     place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->fragment = effCreateFragmentResources(a, b);
+        slot->fragment = effCreateFragmentResources(historyLength, subdivisions);
         effInitializeFragmentHistoryColors(slot->fragment, palette);
         slot->age = 0;
         slot->fadeScale = 1.0f;
@@ -2173,7 +2173,7 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
     u32 palette[4];
-    s32 a, b;
+    s32 historyLength, subdivisions;
     u32 i;
 
     work->params = src->params;
@@ -2182,15 +2182,15 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     work->soundMixer = src->soundMixer;
     work->slots = slot;
     work->tintColor = 0x80808080;
-    a = work->params.historyLength;
-    if (a == 0) {
+    historyLength = work->params.historyLength;
+    if (historyLength == 0) {
         work->params.historyLength = 1;
-        a = 1;
+        historyLength = 1;
     }
-    b = work->params.subdivisions;
-    if (b <= 0) {
+    subdivisions = work->params.subdivisions;
+    if (subdivisions <= 0) {
         work->params.subdivisions = 1;
-        b = 1;
+        subdivisions = 1;
     }
     if (work->params.startDelayRange <= 0) {
         work->params.startDelayRange = 1;
@@ -2212,7 +2212,7 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->fragment = effCreateFragmentResources(a, b);
+        slot->fragment = effCreateFragmentResources(historyLength, subdivisions);
         effInitializeFragmentHistoryColors(slot->fragment, palette);
         slot->age = 0;
         slot->fadeScale = 1.0f;
