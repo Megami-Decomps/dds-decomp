@@ -665,18 +665,18 @@ s32 evtCommandRelinkCameraOwnerToPath(void) {
 
 
 s32 evtCommandWaitCameraOwnerResourceScale(void) {
-    void *object;
+    void *cameraOwner;
     s32 status;
 
     if (scrReadIntParameter(0) < 0) {
-        object = (void *)fldGetPlayerSceneState();
+        cameraOwner = (void *)fldGetPlayerSceneState();
     } else {
-        object = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
-    if (object == NULL) {
+    if (cameraOwner == NULL) {
         return 1;
     }
-    status = evtCheckWorldObjectResourceScale(object);
+    status = evtCheckWorldObjectResourceScale(cameraOwner);
     switch (status) {
     case 0:
         return 1;
