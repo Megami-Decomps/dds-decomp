@@ -220,9 +220,9 @@ extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
 extern void func_0022D040(void);
 
-extern u8 D_003BF961[];
+extern u8 btlScriptGroupSlotByte1View[];
 
-extern u16 D_003BF962[];
+extern u16 btlScriptGroupSlotAuxValueView[];
 
 
 extern void ptyAdjustItemQuantity(u32, u32);
@@ -771,7 +771,7 @@ typedef struct BtlGroupSlot {
     u8 pad[3];
 } BtlGroupSlot;
 
-extern BtlGroupSlot D_003BF960[];
+extern BtlGroupSlot btlScriptGroupSlotRows[];
 
 
 /* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
@@ -783,10 +783,10 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
     u32 i;
 
     if (value < 100) {
-        group = D_003BF960[value].group;
+        group = btlScriptGroupSlotRows[value].group;
         count = 0;
         for (i = 0; i < 100; i++) {
-            if (group == D_003BF960[i].group) {
+            if (group == btlScriptGroupSlotRows[i].group) {
                 if (mdlFlagTest(0x8FF - i) == 0) {
                     count++;
                 }
@@ -795,7 +795,7 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
         if (count > 0) {
             pick = effMiscRandMod(0, count);
             for (i = 0; i < 100; i++) {
-                if (group == D_003BF960[i].group) {
+                if (group == btlScriptGroupSlotRows[i].group) {
                     if (mdlFlagTest(0x8FF - i) == 0) {
                         if (--pick == -1) {
                             break;
@@ -818,7 +818,7 @@ u32 btlCmdGetIndexedBattleStateValue(void) {
     u32 index = scrReadIntParameter(0);
     u32 value = 0;
     if (index < 100) {
-        value = D_003BF961[index * 4];
+        value = btlScriptGroupSlotByte1View[index * 4];
     }
     scrSetIntegerReturnValue(value);
     return 1;
@@ -849,7 +849,7 @@ u32 btlCommandGetGroupSlotAuxValue(void) {
     u32 index = scrReadIntParameter(0);
     u32 value = 1;
     if (index < 100) {
-        value = D_003BF962[index * 2];
+        value = btlScriptGroupSlotAuxValueView[index * 2];
     }
     scrSetIntegerReturnValue(value);
     return 1;
@@ -1590,10 +1590,10 @@ extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 tanf(f32);
 extern f32 sinf(f32);
 extern SdfAsset *D_00436D10;
-extern EffPacketParams D_00453030;
-extern u32 D_003BFB30[];
-extern f32 D_003BFAF0[6][2];
-extern f32 D_003BFB40[4];
+extern EffPacketParams btlCapturedScreenTileDrawParams;
+extern u32 btlCapturedScreenTilePacketParameters[];
+extern f32 btlCapturedScreenTileVertexOffsets[6][2];
+extern f32 btlCapturedScreenTileNormal[4];
 extern f32 D_00384790[4][4];
 extern SdfPoolNode D_00380708, D_00380628;
 
@@ -1679,11 +1679,11 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         if (D_00436D10 == NULL) {
             D_00436D10 = sdfCreateAssetWithDrawEntries();
             btlInitLightParams();
-            memset(&D_00453030, 0, sizeof(D_00453030));
-            D_00453030.primitive = 0x4000;
-            D_00453030.parameters = D_003BFB30;
-            D_00453030.parameterCount = 4;
-            D_00453030.vertexCount = 6;
+            memset(&btlCapturedScreenTileDrawParams, 0, sizeof(btlCapturedScreenTileDrawParams));
+            btlCapturedScreenTileDrawParams.primitive = 0x4000;
+            btlCapturedScreenTileDrawParams.parameters = btlCapturedScreenTilePacketParameters;
+            btlCapturedScreenTileDrawParams.parameterCount = 4;
+            btlCapturedScreenTileDrawParams.vertexCount = 6;
         }
         tiles = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(tiles);
@@ -1694,10 +1694,10 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         kwlnHeldTextureReference->primaryBuffer->clampState = 0x37C00000008ULL;
         sdfSetAssetPrimaryTextureAddress(D_00436D10, kwlnHeldTextureReference);
         sdfConsAppendAssetPacket(tiles, D_00436D10, NULL);
-        D_00453030.color = 0x80808080;
-        D_00453030.positions = (u128 *)positions;
-        D_00453030.normals = (u128 *)normals;
-        D_00453030.texcoords = (u32 *)coordinates;
+        btlCapturedScreenTileDrawParams.color = 0x80808080;
+        btlCapturedScreenTileDrawParams.positions = (u128 *)positions;
+        btlCapturedScreenTileDrawParams.normals = (u128 *)normals;
+        btlCapturedScreenTileDrawParams.texcoords = (u32 *)coordinates;
         height = tanf(D_0037F980.camera.fov * 0.5f) * 1000.0f;
         width = height * 1.333333254f;
         packet = (u64 *)sdfAllocPacketAligned(0x40);
@@ -1797,8 +1797,8 @@ draw_tile:
                     centerY = centerOffsetY + 0xE00;
                     VU0_LOAD_VF($vf11, center);
                     for (vertex = 0; vertex < 6; vertex++) {
-                        pixelX = centerX + (s32)(D_003BFAF0[vertex][0] * size);
-                        pixelY = centerY + (s32)(D_003BFAF0[vertex][1] * size);
+                        pixelX = centerX + (s32)(btlCapturedScreenTileVertexOffsets[vertex][0] * size);
+                        pixelY = centerY + (s32)(btlCapturedScreenTileVertexOffsets[vertex][1] * size);
                         coordinates[vertex][0] = (f32)pixelX / 8192.0f;
                         coordinates[vertex][1] = (f32)(pixelY >> 1) * 0.875f / 3584.0f;
                         positions[vertex][0] = width * (f32)(pixelX - 0x1000) / 4096.0f;
@@ -1809,11 +1809,11 @@ draw_tile:
                         VU0_APPLY_MATRIX($vf10, $vf10);
                         VU0_ADD($vf10, $vf10, $vf11);
                         VU0_STORE_VF($vf10, positions[vertex]);
-                        VU0_LOAD_VF($vf10, D_003BFB40);
+                        VU0_LOAD_VF($vf10, btlCapturedScreenTileNormal);
                         VU0_ROTATE_VEC($vf10, $vf10);
                         VU0_STORE_VF($vf10, normals[vertex]);
                     }
-                    sdfAppendPacket(tiles, (u32)effCreateVertexDrawPacket(&D_00453030));
+                    sdfAppendPacket(tiles, (u32)effCreateVertexDrawPacket(&btlCapturedScreenTileDrawParams));
                 }
                 x += xStep;
             }
@@ -2980,15 +2980,15 @@ typedef struct BattleDebugWindow {
     s32 y;
 } BattleDebugWindow;
 
-extern BattleDebugSelector D_003C0298;
-extern BattleDebugWindow D_003C05E0;
+extern BattleDebugSelector btlDebugEncounterIndexSelectorView;
+extern BattleDebugWindow btlDebugEncounterWindowView;
 extern u8 D_00436F5F, D_00436F61;
 extern u32 D_00436F64, D_00436F68;
 extern u16 D_00436F6C, D_00436F6E, D_00436F70;
 extern u32 D_00436F74, D_00436F78;
 extern const char *D_00436F80, *D_00436F84;
 extern char D_00436F98[];
-extern DatPartyRecord D_003C0620[][5];
+extern DatPartyRecord btlDebugPartyPresets[][5];
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(u32);
@@ -3078,14 +3078,14 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_00436F5F ^= 1;
     }
     if (D_00436F5F != 0) {
-        D_003C0298.title = D_00436F84;
-        D_003C0298.index = &D_00436F64;
+        btlDebugEncounterIndexSelectorView.title = D_00436F84;
+        btlDebugEncounterIndexSelectorView.index = &D_00436F64;
     } else {
-        D_003C0298.title = D_00436F80;
-        D_003C0298.index = &D_00436F68;
+        btlDebugEncounterIndexSelectorView.title = D_00436F80;
+        btlDebugEncounterIndexSelectorView.index = &D_00436F68;
     }
     {
-        BattleDebugWindow *window = &D_003C05E0;
+        BattleDebugWindow *window = &btlDebugEncounterWindowView;
         D_00436F78 = state->unk220;
         D_00436F74 = state->battleFlags;
         btlReturnDebugMenuSetupWord((u32)window);
@@ -3096,10 +3096,10 @@ s32 btlUpdateDebugEncounterSelector(void) {
         btlDebugMenuAfterRecordNoOp();
     }
     if (D_00436F5F == 0) {
-        for (i = 0; i < 5 && (unitId = D_003C0620[D_00436F61][i].unitId) != 0; i++) {
+        for (i = 0; i < 5 && (unitId = btlDebugPartyPresets[D_00436F61][i].unitId) != 0; i++) {
             if (unitId - 1u < 15) {
-                glyph = itfCreateConvertedTextGlyph((D_003C05E0.x - 72) << 4,
-                    (D_003C05E0.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x - 72) << 4,
+                    (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                     (const u8 *)D_00435E48 + unitId * 17, NULL);
                 frFontDrawGlyphChain(glyph, 1, 0x53);
                 frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -3109,8 +3109,8 @@ s32 btlUpdateDebugEncounterSelector(void) {
             for (i = 0; i < 8; i++) {
                 unitId = datBattleSceneRecords[D_00436F68].unitModes[i];
                 if (unitId - 1u < 0x17F) {
-                    glyph = itfCreateConvertedTextGlyph((D_003C05E0.x + 185) << 4,
-                        (D_003C05E0.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                    glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
+                        (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         (const u8 *)D_00435E4C + unitId * 17, NULL);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
                     frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -3118,7 +3118,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
             }
         }
     } else {
-        btlBossDebugPrintfN(D_003C05E0.x + 185, D_003C05E0.y + 4, 0,
+        btlBossDebugPrintfN(btlDebugEncounterWindowView.x + 185, btlDebugEncounterWindowView.y + 4, 0,
             D_00436F98, datGameState->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_00436F64));
     }
     if (sdfPadButtonStates[1] < 0) {
@@ -3154,7 +3154,7 @@ extern u8 D_00436F5E;
 extern u8 D_00436F60;
 extern u8 D_00436F62;
 extern u8 D_00436F96;
-extern s32 D_003C3248[5][24];
+extern s32 btlDebugPartyEffectDataOverrides[5][24];
 /* Apply the debug party bank/preset, refreshed HP/MP and inventory flags. */
 void btlApplyDebugEncounterPartySelection(void) {
     u32 i;
@@ -3164,14 +3164,14 @@ void btlApplyDebugEncounterPartySelection(void) {
         i = 0;
         btlGetRuntime();
         datGameState->partyCount = 0;
-        if (D_003C0620[D_00436F61][0].unitId != 0) {
+        if (btlDebugPartyPresets[D_00436F61][0].unitId != 0) {
             do {
                 if (D_00436F62 != D_00436F61) {
-                    memcpy(&datGameState->party[i], &D_003C0620[D_00436F61][i], sizeof(DatPartyRecord));
+                    memcpy(&datGameState->party[i], &btlDebugPartyPresets[D_00436F61][i], sizeof(DatPartyRecord));
                 }
                 if (D_00436F96 != 0) {
-                    for (n = 0; D_003C3248[i][n] >= 0; n++) {
-                        datGameState->party[i].effectData[n] = D_003C3248[i][n];
+                    for (n = 0; btlDebugPartyEffectDataOverrides[i][n] >= 0; n++) {
+                        datGameState->party[i].effectData[n] = btlDebugPartyEffectDataOverrides[i][n];
                     }
                     for (; n < 24; n++) {
                         datGameState->party[i].effectData[n] = 0;
@@ -3195,7 +3195,7 @@ void btlApplyDebugEncounterPartySelection(void) {
                 datGameState->party[i].menuValue = 0xA1;
                 datGameState->partyCount++;
                 i++;
-            } while (i < 5 && D_003C0620[D_00436F61][i].unitId != 0);
+            } while (i < 5 && btlDebugPartyPresets[D_00436F61][i].unitId != 0);
         }
         for (; i < 5; i++) {
             memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));

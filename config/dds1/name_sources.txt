@@ -9675,6 +9675,10 @@
 0x001E16C0	btlBuildTargetGroupFramingCameraPose	inferred	Frames the actor against the extreme endpoints of the selected target side.
 0x001EE658	btlBuildProjectedActorPairBoundsVU	inferred	Projects the eligible actor pair onto the supplied line, returns its bounding radius and VF10 center, and optionally publishes vertical extrema.
 0x001E0B68	btlBuildGroupSizeActionCameraPair	inferred	Builds both action cameras from active target-group count and acting-unit side, using the selected-preset pair for one eligible actor.
+0x00361A38	btlDebugEncounterIndexSelectorView	inferred	confidence=high; Debug encounter-index selector descriptor; corresponding DDS2 object 0x003C0298. Identifier-only. [b103+b104 readability]
+0x00361D68	btlDebugEncounterWindowView	inferred	confidence=high; Debug encounter-window descriptor; corresponding DDS2 object 0x003C05E0. Identifier-only. [b103+b104 readability]
+0x00361DA0	btlDebugPartyPresets	inferred	confidence=high; Five-unit DatPartyRecord preset bank; corresponding DDS2 object 0x003C0620. Identifier-only. [b103+b104 readability]
+0x003625D8	btlDebugPartyEffectDataOverrides	inferred	confidence=high; s32[5][24] effect-data override table; corresponding DDS2 object 0x003C3248. Identifier-only. [b103+b104 readability]
 0x00355AF8	effTexturedBlurSetupParameters	inferred	confidence=high; EffBlurTemplateBody setup parameters read by effEventGetBlurTemplateSetupParams and written by effEventSetBlurTemplateParameters. Identifier-only; twin 0x003B2428 in DDS2. [PurC data b14; matched-C evidence]
 0x00355C70	effScatterBlurSetupParameters	inferred	confidence=high; EffBlurScatterParams setup parameters read by effEventGetScatterBlurSetupParams. Identifier-only; twin 0x003B25A0 in DDS2. [PurC data b14; matched-C evidence]
 0x00356088	effResourceRectangleSetupParameters	inferred	confidence=high; EffResourceRectParams setup body read by effEventGetResourceTemplateSetupParams. Identifier-only; twin 0x003B29B8 in DDS2. [PurC data b14; matched-C evidence]
