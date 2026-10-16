@@ -45,6 +45,6 @@ void effApplyNodeTransformMatrix(EffNode *node, const void *matrix);
 void effSetNodeParameterValue(EffNode *node, u32 value);
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag);
 s32 effInvokeOptionalNodeInstanceCallback(EffNode *node);
-EffNode *effCloneSourceWithTypeHandler(EffNode *source);
+EffNode *effCloneSourceWithTypeHandler(const EffNode *source);
 
 #endif
