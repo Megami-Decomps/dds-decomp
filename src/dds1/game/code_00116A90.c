@@ -82,6 +82,7 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;
     Dds3PathCurveWork *work;
+    Dds3PathPositionSample *positionSamples;
     u32 i;
 
     if (table->count == 0) {
@@ -104,9 +105,10 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
             work->flags |= DDS3_PATH_SCALAR_CHANNEL;
             break;
         case DDS3_PATH_CURVE_POSITION:
+            positionSamples = keys->data.position;
             work->flags |= DDS3_PATH_POSITION_CHANNEL;
             work->positionKeys = keys;
-            work->primitiveCurve = effCreatePrimitiveCurve(keys->data, keys->count, 1);
+            work->primitiveCurve = effCreatePrimitiveCurve(positionSamples[0], keys->count, 1);
             break;
         case DDS3_PATH_CURVE_ROTATION:
             work->rotationKeys = keys;

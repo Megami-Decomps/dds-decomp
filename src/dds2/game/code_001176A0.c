@@ -90,7 +90,7 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
     if (user->flags & DDS3_PATH_SCALAR_CHANNEL) {
         curve = user->scalarKeys;
         dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->time);
-        values = curve->data;
+        values = curve->data.scalar;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }
     return 0.0f;
