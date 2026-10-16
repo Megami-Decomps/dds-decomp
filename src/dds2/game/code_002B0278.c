@@ -743,7 +743,7 @@ void mnuCopyPartyEntries(context)
 
 /* Move a current party entry into the selected backup slot and refresh its panel. */
 extern void *memcpy(void *, const void *, u32);
-extern void mnuPopulatePartyPanelSlot(u8 *, s32, u32, PartyPanel *);
+extern void mnuPopulatePartyPanelSlot(u8 *entry, s32 unused, u32 index, PartyPanel *panel);
 void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
     s32 activeCount = context->partyPanel.frontlineCount;
