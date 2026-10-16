@@ -187,7 +187,7 @@ void itfDeactivateModelInstances(ModelInstanceList *list) {
 }
 
 /* Claim a slot with a fresh animation cycle and no timed fade/motion yet. */
-s32 itfClaimFreeModelInstance(ModelInstanceList *list) {
+ModelInstance *itfClaimFreeModelInstance(ModelInstanceList *list) {
     ModelInstance *item;
     s32 index;
 
@@ -201,13 +201,13 @@ s32 itfClaimFreeModelInstance(ModelInstanceList *list) {
                 item->animationFrame = 0;
                 item->remainingLifetime = 0;
                 item->initialLifetime = 0;
-                return (s32)item;
+                return item;
             }
             index = index + 1;
             item = item + 1;
         } while (index < list->count);
     }
-    return 0;
+    return NULL;
 }
 
 void itfDeactivateModelInstance(ModelInstance *item) {
