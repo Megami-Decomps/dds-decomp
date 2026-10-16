@@ -1473,10 +1473,10 @@ extern FldTransferChunk *D_003BAC28;
 extern u32 D_003BAC2C;
 extern struct FileRequest *D_003BAC38;
 extern struct SdfMemBlock *D_003BAC4C;
-extern u32 fldCachedRoomResourceAllocation;
-extern u32 fldCachedRoomF1ResourceAllocation;
-extern u32 fldCachedRoomF2ResourceAllocation;
-extern u32 fldCachedRoomKF2ResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomF1ResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomF2ResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomKF2ResourceAllocation;
 extern struct SdfMemBlock *fldAreaCachedResource;
 extern void fldSetSceneLocation(s32 area, s32 floor, s32 stage);
 extern void fldLoadPlayerModel(void);
@@ -1517,9 +1517,9 @@ u32 fldLoadAreaRoomResources(const char *name) {
 
     D_003BAC30 = 0;
     D_003BAC10 = 0;
-    fldCachedRoomF1ResourceAllocation = 0;
-    fldCachedRoomF2ResourceAllocation = 0;
-    fldCachedRoomKF2ResourceAllocation = 0;
+    fldCachedRoomF1ResourceAllocation = NULL;
+    fldCachedRoomF2ResourceAllocation = NULL;
+    fldCachedRoomKF2ResourceAllocation = NULL;
     D_003BAE40 = 0;
     area = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) >> 16;
     room = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) & 0xFFFF;
@@ -1567,16 +1567,16 @@ u32 fldLoadAreaRoomResources(const char *name) {
         index = 0;
         D_003BAC14 = NULL;
         work = ((FilePacRequest *)D_003BAC38)->packet.queueHead;
-        fldCachedRoomResourceAllocation = 0;
+        fldCachedRoomResourceAllocation = NULL;
         for (; work != NULL; work = work->next) {
             switch (index) {
             case 0:
                 D_003BAC14 = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)work->resourceHandle);
-                fldCachedRoomResourceAllocation = 0;
+                fldCachedRoomResourceAllocation = NULL;
                 break;
             case 1:
-                fldCachedRoomF2ResourceAllocation = 0;
+                fldCachedRoomF2ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
                 D_003BAC24 = (u32)roomData;
@@ -1585,7 +1585,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
                 fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
                 break;
             case 2:
-                fldCachedRoomF1ResourceAllocation = 0;
+                fldCachedRoomF1ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
                 D_003BAC1C = (u32)roomData;
@@ -1598,21 +1598,21 @@ u32 fldLoadAreaRoomResources(const char *name) {
         }
     }
     if (isField == 0) {
-        fldCachedRoomResourceAllocation = (u32)fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
-        if (fldCachedRoomResourceAllocation == 0) {
+        fldCachedRoomResourceAllocation = fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
+        if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_003BAC98, name);
             D_003BAC14 = sndLoadNamedOffsetResourceList(path);
         } else {
             D_003BAC14 = sndBuildResourceHandleListFromOffsets(roomOffsets);
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomResourceAllocation);
-            fldCachedRoomResourceAllocation = 0;
+            sdfQueueGeneralAllocationRelease(fldCachedRoomResourceAllocation);
+            fldCachedRoomResourceAllocation = NULL;
         }
     }
     if (isField == 0) {
         sprintf(path, D_003BACA0, name);
-        fldCachedRoomF2ResourceAllocation = (u32)fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
-        if (fldCachedRoomF2ResourceAllocation == 0) {
-            fldCachedRoomF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
+        fldCachedRoomF2ResourceAllocation = fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
+        if (fldCachedRoomF2ResourceAllocation == NULL) {
+            fldCachedRoomF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
         D_003BAC24 = (u32)roomData;
@@ -1623,9 +1623,9 @@ u32 fldLoadAreaRoomResources(const char *name) {
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldFormatAreaDirectory(directory, area, 1);
         sprintf(path, D_0039FF18, directory, area, room);
-        fldCachedRoomKF2ResourceAllocation = (u32)fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
-        if (fldCachedRoomKF2ResourceAllocation == 0) {
-            fldCachedRoomKF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
+        fldCachedRoomKF2ResourceAllocation = fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
+        if (fldCachedRoomKF2ResourceAllocation == NULL) {
+            fldCachedRoomKF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
         D_003BAC2C = (u32)roomData;
@@ -1635,9 +1635,9 @@ u32 fldLoadAreaRoomResources(const char *name) {
     }
     if (isField == 0) {
         sprintf(path, D_003BACA8, name);
-        fldCachedRoomF1ResourceAllocation = (u32)fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
-        if (fldCachedRoomF1ResourceAllocation == 0) {
-            fldCachedRoomF1ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
+        fldCachedRoomF1ResourceAllocation = fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
+        if (fldCachedRoomF1ResourceAllocation == NULL) {
+            fldCachedRoomF1ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
         D_003BAC1C = (u32)roomData;
@@ -1659,7 +1659,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     if (fldAreaState.transitionMode != 0) {
         fldUpdateSparkSlots();
     }
-    return fldCachedRoomF1ResourceAllocation;
+    return (u32)fldCachedRoomF1ResourceAllocation;
 }
 
 extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
@@ -1676,10 +1676,10 @@ extern FldTransferChunk *D_003BAC28;
 extern u32 D_003BAC2C;
 extern struct FileRequest *D_003BAC38;
 extern struct SdfMemBlock *D_003BAC4C;
-extern u32 fldCachedRoomResourceAllocation;
-extern u32 fldCachedRoomF1ResourceAllocation;
-extern u32 fldCachedRoomF2ResourceAllocation;
-extern u32 fldCachedRoomKF2ResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomF1ResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomF2ResourceAllocation;
+extern struct SdfMemBlock *fldCachedRoomKF2ResourceAllocation;
 
 void fldReleaseFieldResources(void) {
     s32 i;
@@ -1744,21 +1744,21 @@ void fldReleaseFieldResources(void) {
     }
     D_003BAC10 = 0;
     D_003BAC4C = NULL;
-    if (fldCachedRoomResourceAllocation != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomResourceAllocation);
-        fldCachedRoomResourceAllocation = 0;
+    if (fldCachedRoomResourceAllocation != NULL) {
+        sdfQueueGeneralAllocationRelease(fldCachedRoomResourceAllocation);
+        fldCachedRoomResourceAllocation = NULL;
     }
-    if (fldCachedRoomF1ResourceAllocation != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomF1ResourceAllocation);
-        fldCachedRoomF1ResourceAllocation = 0;
+    if (fldCachedRoomF1ResourceAllocation != NULL) {
+        sdfQueueGeneralAllocationRelease(fldCachedRoomF1ResourceAllocation);
+        fldCachedRoomF1ResourceAllocation = NULL;
     }
-    if (fldCachedRoomF2ResourceAllocation != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomF2ResourceAllocation);
-        fldCachedRoomF2ResourceAllocation = 0;
+    if (fldCachedRoomF2ResourceAllocation != NULL) {
+        sdfQueueGeneralAllocationRelease(fldCachedRoomF2ResourceAllocation);
+        fldCachedRoomF2ResourceAllocation = NULL;
     }
-    if (fldCachedRoomKF2ResourceAllocation != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomKF2ResourceAllocation);
-        fldCachedRoomKF2ResourceAllocation = 0;
+    if (fldCachedRoomKF2ResourceAllocation != NULL) {
+        sdfQueueGeneralAllocationRelease(fldCachedRoomKF2ResourceAllocation);
+        fldCachedRoomKF2ResourceAllocation = NULL;
     }
     if (fldAreaState.area < 0xC8 && fldAreaState.cachedArea != fldAreaState.area) {
         fldAreaState.cachedArea = fldAreaState.area;
@@ -9762,13 +9762,13 @@ INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldAreaCached
 
 INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", D_003BAC4C);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceAllocation);
+INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomResourceAllocation);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF1ResourceAllocation);
+INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomF1ResourceAllocation);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF2ResourceAllocation);
+INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomF2ResourceAllocation);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
+INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceData);
 
