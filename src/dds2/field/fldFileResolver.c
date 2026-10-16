@@ -5561,7 +5561,7 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 }
 
 
-extern s32 kwlnSetDrawColorTarget(s32, void *);
+extern void kwlnSetDrawColorTarget(s32, f32 *);
 extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
 extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
