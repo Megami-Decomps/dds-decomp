@@ -121,7 +121,7 @@ typedef struct BtlUnit {
     f32 muzzleOffset[4]; /* 0xA0: read by btlUnitGetBodyPosVU */
     f32 height; /* 0xB0 */
     f32 reach; /* 0xB4 */
-    f32 unkB8; /* Setup mirrors height; its distinct geometry role is not established. */
+    f32 geometryHeight; /* 0xB8: geometry height, independently copied or overridden. */
     f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
     f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4: selects the actor resource table, as in DDS2 */
@@ -179,6 +179,8 @@ typedef char BtlUnitRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x12
 typedef char BtlUnitRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2C4) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
+typedef char BtlUnitGeometryHeightOffsetCheck[
+    ((u32)&((BtlUnit *)0)->geometryHeight == 0xB8) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x348) ? 1 : -1];
 #endif /* VERSION_DDS1 */
 
@@ -207,7 +209,7 @@ typedef struct BtlUnit {
     f32 muzzleOffset[4]; /* 0xA0 */
     f32 height;     /* 0xB0 */
     f32 reach;      /* 0xB4 */
-    f32 unkB8; /* 0xB8: formation setup copies height here. */
+    f32 geometryHeight; /* 0xB8: geometry height, copied from or overridden from height. */
     f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
     f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4 */
@@ -268,6 +270,8 @@ typedef char BtlUnitSoundSlotOwnerOffsetCheck[
     ((u32)&((BtlUnit *)0)->soundSlotOwner == 0x328) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
+typedef char BtlUnitGeometryHeightOffsetCheck[
+    ((u32)&((BtlUnit *)0)->geometryHeight == 0xB8) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
 #endif /* VERSION_DDS2 */
 

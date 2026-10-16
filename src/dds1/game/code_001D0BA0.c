@@ -2305,7 +2305,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
     }
     PCP_COPY_VECTOR(fx->muzzleOffset, base);
     fx->bodyRadius = base->reach;
-    fx->unkB8 = base->height;
+    fx->geometryHeight = base->height;
     fx->cameraRadius = base->cameraRadius;
     fx->scale = base->actorScale;
     fx->actorScale = base->actorScale;
