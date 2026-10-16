@@ -195,12 +195,12 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
     for (; bufferIndex < SND_IOP_BUFFER_COUNT; bufferIndex++) {
         sndMidiTrackState.buffers[bufferIndex].size = 0;
-        sndMidiTrackState.buffers[bufferIndex].address = 0;
+        sndMidiTrackState.buffers[bufferIndex].iopAddress = 0;
     }
     iopAddress = sndReserveIopWorkMemory(totalBytes);
     bufferIndex = 0;
     do {
-        sndMidiTrackState.buffers[bufferIndex].address = iopAddress;
+        sndMidiTrackState.buffers[bufferIndex].iopAddress = iopAddress;
         iopAddress += sndMidiTrackState.buffers[bufferIndex].size;
         bufferIndex++;
     } while (bufferIndex != bufferCount);
