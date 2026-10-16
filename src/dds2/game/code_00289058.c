@@ -117,32 +117,32 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
     mnuUpdateSelectedMantraLimitLineState(object);
 }
 
-void mnuSelectPreviousMantraUnit(MnuStatusResource *object) {
-    MantraMenuWork *work = &object->menu;
+void mnuSelectPreviousMantraUnit(MnuStatusResource *resource) {
+    MantraMenuWork *work = &resource->menu;
     DatPartyRecord *value;
 
-    evtPrintDeveloperConsoleMessage("UnitIndex:%d\n", object->list->cursor->index);
-    mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
-    mnuRetreatNodeCursorAndClearListFlags(object);
-    value = mnuGetSelectedNodeValue(object);
-    work->defaultSelector = mnuFindNodePosition(object->list->cursor->userValue);
+    evtPrintDeveloperConsoleMessage("UnitIndex:%d\n", resource->list->cursor->index);
+    mnuAdvanceMantraUnitPanelListState(resource->menu.selectionController);
+    mnuRetreatNodeCursorAndClearListFlags(resource);
+    value = mnuGetSelectedNodeValue(resource);
+    work->defaultSelector = mnuFindNodePosition(resource->list->cursor->userValue);
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
-    mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
-    mnuRefreshNodeTransitionIcons(object, work, value);
-    evtPrintDeveloperConsoleMessage("Next UnitIndex:%d\n", object->list->cursor->index);
+    mnuSpawnMantraPanelsFromSelectedUnitFlags(resource, 2, 0);
+    mnuRefreshNodeTransitionIcons(resource, work, value);
+    evtPrintDeveloperConsoleMessage("Next UnitIndex:%d\n", resource->list->cursor->index);
 }
 
-void mnuSelectNextMantraUnit(MnuStatusResource *object) {
-    MantraMenuWork *work = &object->menu;
+void mnuSelectNextMantraUnit(MnuStatusResource *resource) {
+    MantraMenuWork *work = &resource->menu;
     DatPartyRecord *value;
 
-    mnuQueueNextUnitPanelSelection(object->menu.selectionController);
-    mnuAdvanceNodeCursorAndClearListFlags(object);
-    value = mnuGetSelectedNodeValue(object);
-    work->defaultSelector = mnuFindNodePosition(object->list->cursor->userValue);
+    mnuQueueNextUnitPanelSelection(resource->menu.selectionController);
+    mnuAdvanceNodeCursorAndClearListFlags(resource);
+    value = mnuGetSelectedNodeValue(resource);
+    work->defaultSelector = mnuFindNodePosition(resource->list->cursor->userValue);
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
-    mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
-    mnuRefreshNodeTransitionIcons(object, work, value);
+    mnuSpawnMantraPanelsFromSelectedUnitFlags(resource, 2, 0);
+    mnuRefreshNodeTransitionIcons(resource, work, value);
 }
 
 void mnuSelectMantraUnitByIndex(MnuStatusResource *resource, s8 targetIndex) {
