@@ -527,8 +527,8 @@ void mnuUnloadStaffFonts(void) {
 }
 
 /* Decode a two-byte glyph through the DDS1 lookup table; 0xFFFF is missing. */
-u32 itfDecodeGlyph(u32 value) {
-    s32 adjusted = (value & 0xffff) + 0xffff7f80;
+u32 itfDecodeGlyph(u32 glyphCode) {
+    s32 adjusted = (glyphCode & 0xffff) + 0xffff7f80;
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
 
     if ((u32)index < 0x9b0) {
