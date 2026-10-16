@@ -344,4 +344,95 @@ void mtrRefreshMantraStateForUnit7(void) {
     mtrRecomputeMantraFlagsForPartyUnit(&record);
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrSynchronizeMantraFlagsAcrossParty);
+#include "mnu_mantra.h"
+extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern u32 ptyGetProfileRecordCap(u16);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern struct MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+void mtrSynchronizeMantraFlagsAcrossParty(void) {
+    DatPartyRecord first;
+    DatPartyRecord second;
+    DatPartyRecord merged;
+    u16 firstId = 0;
+    u16 secondId = 0;
+    u32 i;
+    s32 maxState;
+    u16 flags;
+
+    maxState = mnuGetActiveMantraModelFlagState();
+    memset(&first, 0, sizeof(first));
+    memset(&second, 0, sizeof(second));
+    memset(&merged, 0, sizeof(merged));
+    first.unitId = 1;
+    second.unitId = 2;
+    merged.unitId = 8;
+    for (i = 0; i < 16; i++) {
+        if (datGameState->templates[i].unitId == 2) {
+            secondId = scrGetSelectedScriptEntryId(&datGameState->templates[i]);
+        } else if (datGameState->templates[i].unitId == 1) {
+            firstId = scrGetSelectedScriptEntryId(&datGameState->templates[i]);
+        }
+    }
+    if (firstId == secondId) {
+        secondId = 0;
+    }
+    for (i = 1; (s32)i < 0xB0; i++) {
+        u16 entryId = i;
+        u16 other = scrGetEntryLowFlags(&second, entryId);
+        u16 firstFlags = scrGetEntryLowFlags(&first, entryId);
+
+        if (firstFlags == 0) {
+            scrSetEntryLowFlags(&merged, entryId, 0);
+        } else {
+            u32 firstLow = firstFlags & 0xF;
+            u32 low = other & 0xF;
+
+            if (firstLow < low) {
+                low = firstLow;
+            }
+            flags = low | (firstFlags & 0xF0);
+
+            if ((u16)(((firstFlags & 0xFF00) >> 8) & 1) || (u16)((other >> 8) & 1)) {
+                flags = (u16)(flags | 0x100);
+            }
+            if ((((firstFlags & 0xFF00) >> 8) & 2) || ((other >> 8) & 2)) {
+                flags = (u16)(flags | 0x200);
+            }
+            if (((firstFlags & 0xFF00) >> 8) & 4) {
+                flags = (u16)(flags | 0x400);
+            }
+            if ((((firstFlags & 0xFF00) >> 8) & 8) || ((other >> 8) & 8)) {
+                flags = (u16)(flags | 0x800);
+            }
+            scrSetEntryLowFlags(&merged, entryId, flags);
+        }
+    }
+    if (ptyGetProfileRecordValue(&second, secondId) == ptyGetProfileRecordCap(secondId)) {
+        struct MantraNodePos *node;
+
+
+        scrSetEntryLowFlags(&merged, secondId, (scrGetEntryLowFlags(&merged, secondId) & 0xFFF0) | 0x301);
+        node = mnuGetMantraNodePositionRecord((s16)secondId);
+        for (i = 0; (s32)i < 6; i++) {
+            struct MantraNodePos *neighbor = node->neighbors[i];
+            u32 kind;
+
+            if (neighbor == NULL) {
+                continue;
+            }
+            if (neighbor->modelFlagState > maxState) {
+                continue;
+            }
+            kind = neighbor->selector.packed & 0xF;
+            if (kind == 1 || kind == 4) {
+                flags = scrGetEntryLowFlags(&merged, (u16)neighbor->id);
+
+                if ((flags & 0xF) == 2) {
+                    scrSetEntryLowFlags(&merged, node->neighbors[i]->id, (flags & 0xFFF0) | 1);
+                }
+            }
+        }
+    }
+    mtrRefreshMantraStateForUnit2();
+}
