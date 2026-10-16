@@ -30,6 +30,7 @@
 #include "fld.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_scene_request.h"
+#include "fld_spawn_event.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -707,12 +708,6 @@ extern void fldToggleWorldNodeState(s32);
 extern void fldProbeCameraSupportSurface(void);
 
 /* Relocated collision headers contain their eight-word geometry header. */
-
-typedef struct FldSpawnEvent {
-    u32 flags;
-    const char *label;
-    u32 reserved[2];
-} FldSpawnEvent;
 
 #include "fld_placement_data.h"
 

@@ -33,6 +33,7 @@
 #include "fld_encounter_runtime_api.h"
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
+#include "fld_spawn_event.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -644,12 +645,6 @@ extern char D_003BAC40[];
 extern void fldSpawnSceneResourceBatches(FldSpawnBatch *, u32);
 
 /* Relocated collision headers contain their eight-word geometry header. */
-
-typedef struct FldSpawnEvent {
-    u32 flags;
-    const char *label;
-    u32 reserved[2];
-} FldSpawnEvent;
 
 #include "fld_placement_data.h"
 
