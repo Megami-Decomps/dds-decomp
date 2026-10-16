@@ -51,8 +51,8 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
 }
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
-SdfModelPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfModelPacket *packet, s32 index) {
-    u32 address = (u32)(node->workspace + (index << 7)) & 0x0FFFFFFF;
+SdfModelPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfModelPacket *packet, s32 frameIndex) {
+    u32 address = (u32)(node->workspace + (frameIndex << 7)) & 0x0FFFFFFF;
 
     packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
     packet->vifCodes.fields.secondCode = 0x6C07C000;
