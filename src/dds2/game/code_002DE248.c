@@ -4226,8 +4226,8 @@ void effLoadFlashTextures(void) {
     D_00437E48[1] = (u32)sdfReadNamedResource("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
 }
 
-u32 effGetFlashTextureHandle(s32 index) {
-    return (u32)(&effFlashTextureHandles)[index];
+u32 effGetFlashTextureHandle(s32 flashTextureIndex) {
+    return (u32)(&effFlashTextureHandles)[flashTextureIndex];
 }
 
 typedef struct EffCounterHeader {
