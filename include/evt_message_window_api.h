@@ -10,4 +10,7 @@ u32 evtFinishMessageWindowAndNotify(void);
  * value, not a boolean; other stored values pass through. */
 s32 evtGetMessageWindowControlState(void);
 
+s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value);
+void evtSetMessageWindowOptionWhenOpen(s32 option);
+
 #endif

@@ -16,8 +16,8 @@
 #include "sdf_texture_offset_list.h"
 
 #include "dds3_world_primary.h"
-extern Motion *mdlFindNodeById(MdlCtx *, s32);
-extern s32 evtSetBgmVolumePan(s32, s32);
+extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
+extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {
@@ -25,15 +25,15 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
-                                            const SdfTextureOffsetListHeader *, s32);
-extern void fldSetRelocateOnRelease(u32);
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+                                            const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
+extern void fldSetRelocateOnRelease(u32 relocateOnRelease);
 extern u32 kwlnDrawControlFlags;
 
 extern s32 D_004377D8;
 extern s32 sdfDebugPrintf(const char *, ...);
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
-extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 /* Keep the complete diagnostic records, including their native trailing zeros. */
 const char D_00424830[0x20] __attribute__((aligned(8))) = "unit decode rid:%d, size:%d\n";

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "dsp_channel.h"
 #include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
@@ -156,7 +157,6 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command);
 
 /* The label resource index is the copied party record's unit ID. */ void *btlGetIndexedUiResource(BtlUnit *unit);
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
@@ -211,7 +211,7 @@ s32 btlSelectSerialEncounter(void) {
     }
 
     entries = D_003BAA3C[encounterPack].groups[groupIndex].entries;
-    chance = entries[selectionIndex].unk05;
+    chance = entries[selectionIndex].serialEncounterChanceAdjustment;
     if ((datGameState->world.fieldFlags & 2) != 0) {
         chance *= 5;
     }
@@ -468,7 +468,142 @@ s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
     return result != 0 ? result : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AA130);
+/* Roster detail table entries are 0x14 bytes; the leading halfword is the ranking value. */
+typedef struct {s16 base; u8 data[0x12];} BattleRosterDetail;
+void func_001AA130(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third)
+{
+  BtlUnit *sources[3];
+  u32 i;
+  u32 n;
+  u32 count;
+  BtlUnit *src;
+  s32 currentScore;
+  s32 incomingScore;
+  sources[0] = first;
+  sources[1] = second;
+  sources[2] = third;
+  memset(dst, 0, sizeof(BtlUnit));
+  dst->status.flags = (first->status.flags & 0x600) | 1;
+  if ((&dst->partyRecord) != (&first->partyRecord))
+  {
+    memcpy(&dst->partyRecord, &first->partyRecord, sizeof(DatPartyRecord));
+  }
+  dst->partyRecord.level = 0;
+  dst->partyRecord.menuValue = 0xA1;
+  dst->partyRecord.hp = 0;
+  dst->partyRecord.mp = 0;
+  dst->partyRecord.maxHp = 0;
+  dst->partyRecord.maxMp = 0;
+  for (i = 0; i < 5; i++)
+  {
+    dst->partyRecord.baseStats[i] = 0;
+  }
+
+  dst->partyRecord.status = 0;
+  btlClearAllActorEntrySlots(dst);
+  for (i = 0; i < 7; i++)
+  {
+    if (dst->entrySlots[i].code < first->entrySlots[i].code)
+    {
+      dst->entrySlots[i].code = first->entrySlots[i].code;
+    }
+  }
+
+  btlClearActorEntrySlot(dst, 5);
+  btlClearActorEntrySlot(dst, 6);
+  count = 0;
+  for (n = 0; n < 3; n++)
+  {
+    src = sources[n];
+    if (src == ((void *) 0))
+    {
+      continue;
+    }
+    if (dst->partyRecord.level < src->partyRecord.level)
+    {
+      dst->partyRecord.level = src->partyRecord.level;
+    }
+    if (dst->partyRecord.hp < src->partyRecord.hp)
+    {
+      dst->partyRecord.hp = src->partyRecord.hp;
+    }
+    if (dst->partyRecord.mp < src->partyRecord.mp)
+    {
+      dst->partyRecord.mp = src->partyRecord.mp;
+    }
+    if (dst->partyRecord.maxHp < src->partyRecord.maxHp)
+    {
+      dst->partyRecord.maxHp = src->partyRecord.maxHp;
+    }
+    if (dst->partyRecord.maxMp < src->partyRecord.maxMp)
+    {
+      dst->partyRecord.maxMp = src->partyRecord.maxMp;
+    }
+    for (i = 0; i < 5; i++)
+    {
+      s8 stat = datGetStatWithStatusOverride(&src->partyRecord, i);
+      if (dst->partyRecord.baseStats[i] < stat)
+      {
+        dst->partyRecord.baseStats[i] = stat;
+      }
+    }
+
+    for (i = 0; i < 24; i++)
+    {
+      if (src->partyRecord.effectData[i] != 0)
+      {
+        if (src->partyRecord.effectData[i] < 0x260)
+        {
+          u16 effect = src->partyRecord.effectData[i];
+          if (datCommandSelectors[effect].kind != 4)
+          {
+            dst->partyRecord.effectData[count] = effect;
+            count++;
+          }
+        }
+      }
+    }
+
+    dst->partyRecord.status |= src->partyRecord.status & 0x10;
+    if (((btlUnitStatusPair(src) & 0x1200) == 0x200) && (src->partyRecord.menuValue != 0))
+    {
+      currentScore = ((BattleRosterDetail *) datRosterDetails)[dst->partyRecord.unitId].base;
+      incomingScore = ((BattleRosterDetail *) datRosterDetails)[src->partyRecord.unitId].base;
+      if (currentScore < incomingScore)
+      {
+        dst->partyRecord.unitId = src->partyRecord.unitId;
+      }
+      if (dst->status.flags & 0x1000)
+      {
+        dst->status.flags &= ~0x1000;
+        dst->partyRecord.menuValue = src->partyRecord.menuValue;
+      }
+      else
+      {
+        currentScore = datItemSkillRecords[dst->partyRecord.menuValue].commandIndex;
+        incomingScore = datItemSkillRecords[src->partyRecord.menuValue].commandIndex;
+        if (datCommandRecords[currentScore].hpPower < datCommandRecords[incomingScore].hpPower)
+        {
+          dst->partyRecord.menuValue = src->partyRecord.menuValue;
+        }
+      }
+    }
+  }
+
+  if (dst->partyRecord.maxHp < dst->partyRecord.hp)
+  {
+    dst->partyRecord.hp = dst->partyRecord.maxHp;
+  }
+  if (dst->partyRecord.maxMp < dst->partyRecord.mp)
+  {
+    dst->partyRecord.mp = dst->partyRecord.maxMp;
+  }
+  for (n = count; n < 24; n++)
+  {
+    dst->partyRecord.effectData[n] = 0;
+  }
+
+}
 
 typedef struct BattleStartVoiceRow {
     s32 flagId;       /* negative, or a model flag that must be set */
@@ -666,7 +801,7 @@ s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 specie
 }
 
 s32 btlIsActorModeActionCodeAllowed(BtlUnit *actor) {
-    if (actor->unkDC != 1) {
+    if (actor->modelResourceKind != 1) {
         return 1;
     }
     switch (actor->displaySpecies) {
@@ -1107,9 +1242,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = (s32)(u32)sdfReadNamedResource(D_003A21C8, params, 0);
-        btlResourceBlock->nameB = (s32)(u32)sdfReadNamedResource(D_003A21E8, params, 0);
-        btlResourceBlock->nameC = (s32)(u32)sdfReadNamedResource(D_003A2208, params, 0);
+        btlResourceBlock->resourceAllocationA = sdfReadNamedResource(D_003A21C8, params, 0);
+        btlResourceBlock->resourceAllocationB = sdfReadNamedResource(D_003A21E8, params, 0);
+        btlResourceBlock->resourceAllocationC = sdfReadNamedResource(D_003A2208, params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_003BB3E4 = 1;
@@ -1119,11 +1254,11 @@ void btlLoadResourceBlock(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
         btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+            btlResourceBlock->resourceAllocationA, 0);
         btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+            btlResourceBlock->resourceAllocationB, 0);
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
+            btlResourceBlock->resourceAllocationC, 0);
         work->resA = btlResourceBlock->resA;
         work->numberGlyphSlots = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
@@ -1184,8 +1319,8 @@ s32 btlResetSceneSlotFades(void) {
     state->unk18 = 0;
     state->completed = 0;
     for (i = 0; i < count; i++) {
-        (*bank)->unk6C[i] = 30.0f;
-        (*bank)->unk8C[i] = 130;
+        (*bank)->rotationAngleDegrees[i] = 30.0f;
+        (*bank)->drawOffsetScalePercent[i] = 130;
     }
     btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
@@ -1928,7 +2063,7 @@ extern s32 btlDrawTimedDialogTask(KwlnTask *);
 
 extern void btlReleaseDialogTaskData(KwlnTask *);
 
-s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
+s32 btlReplaceDialogTasksAndQueueMessage(s32 window, s32 entryIndex) {
     s32 context = (s32)(u32)btlGetRuntime();
     s32 task = btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
@@ -1946,8 +2081,8 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
-    data->id = arg0;
-    data->unk08 = arg1;
+    data->id = window;
+    data->unk08 = entryIndex;
     data->value = 0x2D;
     task = (s32)kwlnTaskCreate(D_003BB3A8, 0x2B0E, 1, 1, btlDrawTimedDialogTask, btlReleaseDialogTaskData, (u32)data);
     kwlnTaskAddChild((KwlnTask *)*(u32 *)(context + 0x29C), (KwlnTask *)task);
@@ -2021,7 +2156,7 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
     }
 }
 
-extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
+extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern char D_003BB3F8[];
 extern s32 sprintf(char *, const char *, ...);
@@ -2299,7 +2434,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(0, work->alpha);
                         break;
                     }
@@ -2340,7 +2475,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(1, work->alpha);
                         break;
                     }
@@ -2361,7 +2496,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(2, work->alpha);
                         break;
                     }
@@ -2386,7 +2521,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(3, work->alpha);
                         break;
                     }
@@ -2414,7 +2549,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     actor = (BtlUnit *)work->entry;
-                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(4, work->alpha);
                         break;
                     }
@@ -2794,13 +2929,12 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
 }
 
 /* Store the confirmed command-selection tuple on the owning actor. */
-void btlSetActorCommandSelection(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
-    s32 temp_v0;
+void btlSetActorCommandSelection(s32 object, s16 first, s16 second, s16 slot) {
+    BtlUnit *unit = ((BattleSceneObject *)object)->owner->unit;
 
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0x2c) + 0x18);
-    *(s16 *)(temp_v0 + 0x2ac) = arg1;
-    *(s16 *)(temp_v0 + 0x2ae) = arg2;
-    *(s16 *)(temp_v0 + 0x2b0) = arg3;
+    unit->partyRecord.savedCommandPhase = first;
+    unit->partyRecord.unk18E = second;
+    unit->partyRecord.actionSlot = slot;
 }
 
 s32 btlCountEligibleLinkedActors(BtlState *battle) {
@@ -2971,10 +3105,10 @@ s32 btlUpdateRegisteredPanelTask(KwlnTask *task) {
     return 0;
 }
 
-void btlReleaseRegisteredChildTaskWork(KwlnTask *arg0) {
+void btlReleaseRegisteredChildTaskWork(KwlnTask *task) {
     u32 temp_v0;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(7, 0);
 }
@@ -3120,10 +3254,10 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     return state->frames < 50 ? 0 : -1;
 }
 
-void btlReleasePsechgPanelWork(KwlnTask *arg0) {
+void btlReleasePsechgPanelWork(KwlnTask *task) {
     BattlePhasePanelWork *work;
 
-    work = (BattlePhasePanelWork *)kwlnTaskGetUserValue(arg0);
+    work = (BattlePhasePanelWork *)kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock(work);
     btlSetTrackedTaskHandle(6, 0);
 }
@@ -3200,10 +3334,10 @@ void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3FB0);
 
-void btlReleaseCmsleffPanelWork(KwlnTask *arg0) {
+void btlReleaseCmsleffPanelWork(KwlnTask *task) {
     u32 temp_v0;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(5, 0);
 }
@@ -3852,7 +3986,86 @@ void btlInitializeStaffActorPanels(void) {
     btlSetTrackedTaskHandle(3, (s32)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B6498);
+s32 func_001B6498(s8 mode) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3B0);
+    BtlState *battle;
+    BattleActorPanelWork *work;
+    BtlUnit *actor;
+    s32 eligibleCount;
+    s32 state;
+    u32 slot;
+    s32 i;
+
+    if (task == NULL) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    eligibleCount = btlCountEligibleLinkedActors(battle);
+    actor = battle->units;
+
+    if (mode == 0) {
+        BattleCmdPanel *panel;
+        state = mdlFlagTest(0xC0E) != 0 ? 1 : 2;
+        panel = btlCommandPanelWork;
+        if (panel == NULL || panel->state == 0) {
+            state = 1;
+        } else if (panel->state == 3) {
+            state = 1;
+        }
+    } else {
+        state = (s32)mode + 2;
+    }
+
+    /* i is never advanced: the count only gates the walk on any eligible actor. */
+    switch (state) {
+    case 1:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] += 6;
+                work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
+                work->activeEntries[slot].position[1] += 1;
+                work->activeEntries[slot].position[1] = work->activeEntries[slot].position[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].position[1] > 0x159 ? 0x159 : work->activeEntries[slot].position[1];
+            }
+        }
+        break;
+    case 2:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] -= 6;
+                work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
+                work->activeEntries[slot].position[1] -= 1;
+                work->activeEntries[slot].position[1] = work->activeEntries[slot].position[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].position[1] > 0x159 ? 0x159 : work->activeEntries[slot].position[1];
+            }
+        }
+        break;
+    case 3:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] = 0x159;
+                work->activeEntries[slot].position[1] = 0x159;
+            }
+        }
+        break;
+    case 4:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] = 0x143;
+                work->activeEntries[slot].position[1] = 0x143;
+            }
+        }
+        break;
+    }
+    return 1;
+}
 
 typedef struct BattleActorPanelPositions {
     BattleSelectionPosition entries[3];
@@ -3969,10 +4182,10 @@ void btlUpdateActivePanelEntryFades(BtlState *battle, BattleActorPanelWork *work
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B6CF8);
 
-void btlReleaseStwrPanelResource(KwlnTask *arg0) {
+void btlReleaseStwrPanelResource(KwlnTask *task) {
     u32 temp_v0;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)temp_v0));
     btlSetTrackedTaskHandle(3, 0);
 }
@@ -4081,7 +4294,7 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (D_00324510.unk23 < 0) {
+            } else if (D_00324510.primaryCancel < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
@@ -5369,7 +5582,55 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BB440);
+void func_001BB440(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
+    switch (work->activeEntries[slot].presentation.hpState) {
+    case 0x11:
+        work->activeEntries[slot].presentation.offset[0] = btlNextScaledRandom(8);
+        work->activeEntries[slot].presentation.offset[0] =
+            work->activeEntries[slot].presentation.offset[0] <= 0 ? 0 :
+            work->activeEntries[slot].presentation.offset[0] > 8 ? 8 : work->activeEntries[slot].presentation.offset[0];
+        work->activeEntries[slot].presentation.offset[1] = btlNextScaledRandom(8);
+        work->activeEntries[slot].presentation.offset[1] =
+            work->activeEntries[slot].presentation.offset[1] <= 0 ? 0 :
+            work->activeEntries[slot].presentation.offset[1] > 8 ? 8 : work->activeEntries[slot].presentation.offset[1];
+        work->activeEntries[slot].presentation.hpHighlightLevel -= 8;
+        work->activeEntries[slot].presentation.hpHighlightLevel =
+            work->activeEntries[slot].presentation.hpHighlightLevel <= 0 ? 0 :
+            work->activeEntries[slot].presentation.hpHighlightLevel > 0x7F ? 0x7F :
+            work->activeEntries[slot].presentation.hpHighlightLevel;
+        if (++work->activeEntries[slot].presentation.hpEffectTimer >= 0x14) {
+            work->activeEntries[slot].presentation.hpState = 0;
+            work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+            
+            work->activeEntries[slot].presentation.offset[0] = work->activeEntries[slot].presentation.hpEffectTimer = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+            work->activeEntries[slot].presentation.offset[1] = 0;
+            btlClearFinishedActorSlotChannels(work, 0);
+        }
+        break;
+    case 0x21:
+        work->activeEntries[slot].presentation.hpState = 0;
+        work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+        work->activeEntries[slot].presentation.hpEffectTimer = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+        work->activeEntries[slot].presentation.offset[0] = 0;
+        work->activeEntries[slot].presentation.offset[1] = 0;
+        break;
+    }
+    if (work->activeEntries[slot].presentation.mpState != 0x11 &&
+        work->activeEntries[slot].presentation.mpState != 0x21) {
+        goto finished;
+    }
+    work->activeEntries[slot].presentation.mpEffectTimer++;
+    if (work->activeEntries[slot].presentation.mpEffectTimer < 20) {
+        goto finished;
+    }
+    work->activeEntries[slot].presentation.mpState = 0;
+    work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+    work->activeEntries[slot].presentation.mpHighlightLevel = 0;
+    work->activeEntries[slot].presentation.mpEffectTimer = 0;
+    btlClearFinishedActorSlotChannels(work, 0);
+finished:
+    return;
+}
 
 extern void func_001BC540(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -5444,7 +5705,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
-                        work->activeEntries[slot].presentation.unk1C0 = 0;
+                        work->activeEntries[slot].presentation.hpEffectTimer = 0;
                         work->activeEntries[slot].presentation.offset[0] = 0;
                         work->activeEntries[slot].presentation.offset[1] = 0;
                     }
@@ -5470,7 +5731,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
-                work->activeEntries[slot].presentation.unk1C0 = 0;
+                work->activeEntries[slot].presentation.hpEffectTimer = 0;
                 work->activeEntries[slot].presentation.offset[0] = 0;
                 work->activeEntries[slot].presentation.offset[1] = 0;
                 work->activeEntries[slot].presentation.hpState++;
@@ -5509,7 +5770,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[0], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[1], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[2], 0, sizeof(BattleStatPulse));
-                work->activeEntries[slot].presentation.unk1C4 = 0;
+                work->activeEntries[slot].presentation.mpEffectTimer = 0;
                 work->activeEntries[slot].presentation.mpState++;
                 break;
             }
@@ -5962,22 +6223,22 @@ extern void btlDrawRetreatCommandLabel(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
-void btlDrawCommandClassRows(s32 arg0) {
-    switch (btlGetActorCommandClass((BattleSceneObject *)arg0, btlCommandPanelWork->classIndex)) {
+void btlDrawCommandClassRows(s32 sceneContext) {
+    switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
-        func_001BDF60(arg0, 0, 2, 3);
+        func_001BDF60(sceneContext, 0, 2, 3);
         return;
     case 4:
-        func_001BEB58(arg0);
+        func_001BEB58(sceneContext);
         return;
     case 2:
-        btlDrawItemCommandRows((BattleSceneObject *)arg0);
+        btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
         return;
     case 3:
-        func_001BE590(arg0);
+        func_001BE590(sceneContext);
         return;
     case 6:
-        btlDrawRetreatCommandLabel(arg0);
+        btlDrawRetreatCommandLabel(sceneContext);
     }
 }
 
@@ -6128,7 +6389,7 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
         if (btlAreLinkedSceneCountersAtThreshold()) {
             object->commandData->phase = 9;
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3B0));
-            object->commandData->unk18 = panel->partyRecordIndex;
+            BTL_COMMAND_PARTY_RECORD_INDEX(object->commandData) = panel->partyRecordIndex;
             object->state = 3;
             ((SceneAiWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3A0)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
@@ -6148,11 +6409,11 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
     return 0;
 }
 
-void btlReleaseCommandPanelTask(KwlnTask *arg0) {
+void btlReleaseCommandPanelTask(KwlnTask *task) {
     u32 temp_v0;
     BtlState *battle;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock((void *)temp_v0);
     battle = (BtlState *)btlGetRuntime();
     battle->sceneObject = 0;
@@ -6516,7 +6777,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         return;
     }
 
-    if (D_00324510.unk23 < 0) {
+    if (D_00324510.primaryCancel < 0) {
         work->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {
@@ -6850,11 +7111,11 @@ void btlReleaseTargetSelectionWork(SceneAiWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void btlReleaseTargetSelectionTask(KwlnTask *arg0) {
+void btlReleaseTargetSelectionTask(KwlnTask *task) {
     SceneAiWork *temp_v0;
     s32 temp_v1;
 
-    temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(arg0);
+    temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(task);
     btlReleaseTargetSelectionWork(temp_v0);
     temp_v1 = (s32)(u32)btlGetRuntime();
     *(u32 *)(temp_v1 + 0x2ac) = 0;
@@ -6880,7 +7141,7 @@ extern s32 btlUpdateTargetSelectionTask(KwlnTask *);
 
 extern SceneAiWork *btlCreateTargetSelectionWork(BtlTask *);
 
-void btlCreateTargetSelectionTask(s32 arg0) {
+void btlCreateTargetSelectionTask(s32 sourceTask) {
     BtlState *scene;
     s32 task;
     kwlnTaskGetTaskByName(D_003BB3A0);
@@ -6898,7 +7159,7 @@ void btlCreateTargetSelectionTask(s32 arg0) {
     }
     scene = (BtlState *)btlGetRuntime();
     task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, btlUpdateTargetSelectionTask, btlReleaseTargetSelectionTask,
-                          (u32)btlCreateTargetSelectionWork((BtlTask *)arg0));
+                          (u32)btlCreateTargetSelectionWork((BtlTask *)sourceTask));
     kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)task);
     scene->spriteObject = task;
 }
@@ -6980,13 +7241,13 @@ void btlUpdateActorSlotOrderAnimation(void) {
                 }
                 D_003BD840[side]->slotFade[i] += 0x20;
                 D_003BD840[side]->slotFade[i] = D_003BD840[side]->slotFade[i] <= 0 ? 0 : D_003BD840[side]->slotFade[i] >= 0x81 ? 0x80 : D_003BD840[side]->slotFade[i];
-                D_003BD840[side]->unk6C[i] -= 5.0f;
-                if (D_003BD840[side]->unk6C[i] <= 0.0f) {
-                    D_003BD840[side]->unk6C[i] = 0.0f;
+                D_003BD840[side]->rotationAngleDegrees[i] -= 5.0f;
+                if (D_003BD840[side]->rotationAngleDegrees[i] <= 0.0f) {
+                    D_003BD840[side]->rotationAngleDegrees[i] = 0.0f;
                 }
-                D_003BD840[side]->unk8C[i] = D_003BD840[side]->unk8C[i] - 5.0f;
-                if (D_003BD840[side]->unk8C[i] <= 100.0f) {
-                    D_003BD840[side]->unk8C[i] = 100;
+                D_003BD840[side]->drawOffsetScalePercent[i] = D_003BD840[side]->drawOffsetScalePercent[i] - 5.0f;
+                if (D_003BD840[side]->drawOffsetScalePercent[i] <= 100.0f) {
+                    D_003BD840[side]->drawOffsetScalePercent[i] = 100;
                 }
                 if (D_003BD840[side]->slotFade[i] >= 0x80) {
                     if (D_003BD840[side]->state[i + 1] < 3) {
@@ -7004,13 +7265,13 @@ void btlUpdateActorSlotOrderAnimation(void) {
             }
             break;
         case 2:
-            D_003BD840[side]->unk6C[i] -= 5.0f;
-            if (D_003BD840[side]->unk6C[i] <= 0.0f) {
-                D_003BD840[side]->unk6C[i] = 0.0f;
+            D_003BD840[side]->rotationAngleDegrees[i] -= 5.0f;
+            if (D_003BD840[side]->rotationAngleDegrees[i] <= 0.0f) {
+                D_003BD840[side]->rotationAngleDegrees[i] = 0.0f;
             }
-            D_003BD840[side]->unk8C[i] = D_003BD840[side]->unk8C[i] - 5.0f;
-            if (D_003BD840[side]->unk8C[i] <= 100.0f) {
-                D_003BD840[side]->unk8C[i] = 100;
+            D_003BD840[side]->drawOffsetScalePercent[i] = D_003BD840[side]->drawOffsetScalePercent[i] - 5.0f;
+            if (D_003BD840[side]->drawOffsetScalePercent[i] <= 100.0f) {
+                D_003BD840[side]->drawOffsetScalePercent[i] = 100;
             }
             btlUpdateActorSlotOrderColors(side, i);
             break;
@@ -7023,9 +7284,9 @@ void btlUpdateActorSlotOrderAnimation(void) {
             D_003BD840[side]->state[i]++;
             D_003BD840[side]->scalePercent[i][1] = 120.0f;
             D_003BD840[side]->slotValues[i][1] = 0x80;
-            D_003BD840[side]->unk6C[i] = 0.0f;
+            D_003BD840[side]->rotationAngleDegrees[i] = 0.0f;
             D_003BD840[side]->unk1B4[i][1] = 0;
-            D_003BD840[side]->unk8C[i] = 100;
+            D_003BD840[side]->drawOffsetScalePercent[i] = 100;
             break;
         case 4:
             D_003BD840[side]->scalePercent[i][0] -= 1.0f;
@@ -7143,10 +7404,10 @@ void btlDrawActorSlotOrder(void) {
             }
 
             btlResourceBlock->resC->workEntries[coordinates[index][2]]
-                .geometry.angleDegrees = D_003BD840[bank]->unk6C[index];
+                .geometry.angleDegrees = D_003BD840[bank]->rotationAngleDegrees[index];
             func_001C2E90(btlResourceBlock->resC, coordinates[index][2],
                           &xOffset, &yOffset,
-                          (f32)D_003BD840[bank]->unk8C[index]);
+                          (f32)D_003BD840[bank]->drawOffsetScalePercent[index]);
             effDrawSpriteWithCornerColors((coordinates[index][0] + xOffset) << 4,
                           (coordinates[index][1] + yOffset) << 3,
                           0, colors, 0, btlResourceBlock->resC,
@@ -7156,7 +7417,7 @@ void btlDrawActorSlotOrder(void) {
             fldScaleSceneCoordinateRecord(btlResourceBlock->resC,
                                          coordinates[index][2]);
 
-            if (D_003BD840[bank]->unk6C[index] > 0.0f) {
+            if (D_003BD840[bank]->rotationAngleDegrees[index] > 0.0f) {
                 for (channel = 0; channel < 4; channel++) {
                     colors[channel] = btlSetSlotLowByteClamped(
                         btlResourceBlock->resC, coordinates[index][2],
@@ -7307,7 +7568,29 @@ void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
     work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C2E90);
+void func_001C2E90(EffectSlotSet *work, s32 entry, s32 *offsetX, s32 *offsetY, f32 percent) {
+    f32 scale = percent / 100.0f;
+    s32 width = work->workEntries[entry].geometry.bounds[2];
+    s32 height = work->workEntries[entry].geometry.bounds[3];
+    s32 x;
+    s32 y;
+
+    if (scale >= 1.0f) {
+        x = -((f32)(width >> 4) * (scale - 1.0f) * 0.5f);
+    } else {
+        x = (f32)(width >> 4) * (1.0f - scale) * 0.5f;
+    }
+    width = (f32)width * scale;
+    if (scale >= 1.0f) {
+        y = -((f32)(height >> 3) * (scale - 1.0f) * 0.5f);
+    } else {
+        y = (f32)(height >> 3) * (1.0f - scale) * 0.5f;
+    }
+    work->workEntries[entry].geometry.bounds[3] = (f32)height * scale;
+    work->workEntries[entry].geometry.bounds[2] = width;
+    *offsetX = x;
+    *offsetY = y;
+}
 
 void fldSetSceneSlotRange(s32 index) {
     SceneSlotFadeWork *scene = D_003BD83C;
@@ -7797,11 +8080,11 @@ void btlLoadStartupPanelResources(void) {
     btlPanelResourcesLoad();
 }
 
-u32 fldGetSceneIndexedValue(s32 arg0) {
+u32 fldGetSceneIndexedValue(s32 index) {
     s32 temp_v0;
 
     temp_v0 = (s32)(u32)btlGetRuntime();
-    return *(u32 *)(arg0 * 4 + temp_v0 + 0x4b0);
+    return *(u32 *)(index * 4 + temp_v0 + 0x4b0);
 }
 
 void func_001C4540(void) {

@@ -340,9 +340,59 @@ INCLUDE_ASM(const s32, "game/code_00250E88", mnuUpdateMantraSceneTaskState);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawMantraSceneFrame);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuSelectMantraGridLeftCell);
+extern u8 D_0036B410[17][15];
+s32 mnuSelectMantraGridLeftCell(SdfGrid *grid, s32 x, s32 y, u32 from) {
+    if (from != 0 && sdfGridSelectFilledCell(grid, x, y) != NULL) {
+        return 1;
+    }
+    if (D_0036B410[y][x] & 0x20) {
+        if (mnuSelectMantraGridLeftCell(grid, x - 1, y, 0x20) != 0) {
+            return 1;
+        }
+    } else if ((D_0036B410[y][x] & 0x8) || (D_0036B410[y][x] & 0x4)) {
+        if (mnuSelectMantraGridLeftCell(grid, x - 1, y, 0x20) != 0) {
+            return 1;
+        }
+    }
+    if ((D_0036B410[y][x] & 0x80) && (from & 0x40) == 0) {
+        if (mnuSelectMantraGridLeftCell(grid, x, y - 1, 0x80) != 0) {
+            return 1;
+        }
+    }
+    if ((D_0036B410[y][x] & 0x40) && (from & 0x80) == 0) {
+        if (mnuSelectMantraGridLeftCell(grid, x, y + 1, 0x40) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuSelectMantraGridRightCell);
+extern u8 D_0036B410[17][15];
+s32 mnuSelectMantraGridRightCell(SdfGrid *grid, s32 x, s32 y, u32 from) {
+    if ((from & 0x10) && sdfGridSelectFilledCell(grid, x, y) != NULL) {
+        return 1;
+    }
+    if (D_0036B410[y][x] & 0x10) {
+        if (mnuSelectMantraGridRightCell(grid, x + 1, y, 0x10) != 0) {
+            return 1;
+        }
+    } else if ((D_0036B410[y][x] & 0x8) || (D_0036B410[y][x] & 0x4)) {
+        if (mnuSelectMantraGridRightCell(grid, x + 1, y, 0x10) != 0) {
+            return 1;
+        }
+    }
+    if ((D_0036B410[y][x] & 0x80) && !(from & 0x40)) {
+        if (mnuSelectMantraGridRightCell(grid, x, y - 1, 0x80) != 0) {
+            return 1;
+        }
+    }
+    if ((D_0036B410[y][x] & 0x40) && !(from & 0x80)) {
+        if (mnuSelectMantraGridRightCell(grid, x, y + 1, 0x40) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 extern u8 D_0036B410[17][15];
 
@@ -729,7 +779,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
 extern s32 mnuDrawLoadedProgressPanels(void *, MenuProgressHost *, s32);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325818[4];

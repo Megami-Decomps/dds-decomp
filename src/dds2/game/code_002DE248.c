@@ -65,6 +65,7 @@
 #include "btl_resource_name.h"
 #include "btl_state.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "mdl.h"
 #include "eff.h"
 #include "eff_billboard_work.h"
@@ -222,7 +223,7 @@ typedef struct EffectBlock128 {
     u32 word[32];
 } EffectBlock128;
 
-extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
+extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
@@ -1207,7 +1208,87 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     effBlurDrawFramebufferQuad(out);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002DF6C8);
+extern f32 atan2f(f32, f32);
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewMatrix[4][4];
+extern f32 sdfProjectionMatrix[4][4];
+extern f32 D_004582A0[4];
+void func_002DF6C8(EffKindWork *work) {
+    EffRateConfig *config = (EffRateConfig *)work->payload;
+    s32 duration = config->duration;
+    s32 frame = 0;
+    EffBlurQuad *out = &config->out;
+    f32 delta[4];
+    f32 ahead[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+    f32 stretch;
+    f32 length;
+    f32 zero;
+
+    if (duration != 0) {
+        frame = work->frame;
+    }
+    if (duration < frame) {
+        return;
+    }
+    out->position[0] = 0;
+    out->position[1] = 0;
+    out->corners[0][0] = 0;
+    out->corners[0][1] = 0;
+    out->corners[1][0] = 0x200;
+    out->corners[1][1] = 0x1C0;
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
+    color1[0] = work->color;
+    {
+        s32 *src = color1;
+
+        unit = 0x3C000000;
+        EE_MMI_RGBA_UNPACK(src, unit);
+    }
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed);
+    blended[0] = packed;
+    out->color = blended[0];
+    stretch = effSampleScalarCurve(&config->blendB, frame, duration);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(100.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, ahead);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    VU0_LOAD_VF(vf10, ahead);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_004582A0);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_SUB(vf10, vf10, vf11);
+    do {
+        VU0_STORE_VF(vf10, delta);
+    } while (0);
+    zero = 0.0f;
+    length = fsqrtf(delta[0] * delta[0] + delta[1] * delta[1]);
+    if (delta[0] != zero || delta[1] != zero) {
+        out->angle = atan2f(delta[0], delta[1]) * 57.29577637f;
+    }
+    out->displacement = stretch * length * 10.0f + 1.0f;
+    PCP_COPY_VECTOR(D_004582A0, ahead);
+    out->blendControl = work->mode;
+    effBlurDrawFramebufferQuad(out);
+}
 
 /* Draw the color-only fade from the copied payload's curves.
  * Its output uses fixed rectangle bounds and the kind work's packed color and mode. */
@@ -4978,7 +5059,7 @@ extern void effRebuildSurfaceJobs(EffectSlotNode54 *, void *);
 
 extern void effSurfaceNodeCreateQueues(EffectSlotNode54 *, void *);
 
-extern void effReplaceSurfaceResourceHolder(s32, u32);
+extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
 
 void effConfigureSurfaceNodeByKind(s32 *object, s32 kind, s32 *settings) {
     u16 type = kind;
@@ -5188,12 +5269,12 @@ void effReplaceResourceRef(s32 nodeAddr, s32 entryId, s32 resource) {
     node->record = fileAllocateGridRecordSlots(entryId & 0xffff, node->count, (const void *)resource);
 }
 
-void effSetSurfaceRetainedResource(s32 *object, s32 arg) {
-    u8 *work = (u8 *)object;
+void effSetSurfaceRetainedResource(s32 *node, s32 resourceId) {
+    u8 *work = (u8 *)node;
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = effCreateBillboardSharingIndexedResource(arg);
+    ((EffectSlotNode54 *)work)->billResource = effCreateBillboardSharingIndexedResource(resourceId);
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((EffectSlotNode54 *)work)->record->data0)->alphaTrack.surfaceIndex);
     }
@@ -6971,11 +7052,11 @@ EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
     return node;
 }
 
-void effReplaceFileResourceRef(EffectStripNode *obj, u32 id, void *arg) {
-    if (obj->active != 0) {
-        fileReleaseGridRecordHandle(obj->active);
+void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, void *resource) {
+    if (node->active != 0) {
+        fileReleaseGridRecordHandle(node->active);
     }
-    obj->active = fileAllocateGridRecordSlots((u16)id, obj->percent, arg);
+    node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
 }
 
 void effClearStripRecordReferences(EffectStripNode *node) {
@@ -9039,7 +9120,6 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 /* Apply timed actor light transitions, then fade back to the original colors/directions. */
 void effUpdateBattleActorLighting(EffActiveResource *work) {
@@ -9386,7 +9466,7 @@ typedef struct EffCopiedSpawnList {
     u32 count;
     FldSpawnBatch *groups;
 } EffCopiedSpawnList;
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 
 /* Capture constructor arguments before consuming the entry; see
  * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */
@@ -12226,7 +12306,7 @@ typedef struct EffectAlignedBlock128 {
     u64 word[16];
 } EffectAlignedBlock128;
 
-u32 effLoadBattleCameraSnapshot(u32 arg0) {
+u32 effLoadBattleCameraSnapshot(u32 value) {
     FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)D_0045C110 = *(EffectBlock90 *)record;
@@ -12244,10 +12324,10 @@ u32 effLoadBattleCameraSnapshot(u32 arg0) {
             effBattleCameraSnapshotSelection.menu.cursor = 1;
         }
     }
-    return arg0;
+    return value;
 }
 
-u32 effStoreBattleCameraSnapshot(u32 arg0) {
+u32 effStoreBattleCameraSnapshot(u32 value) {
     FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)record = *(EffectBlock90 *)D_0045C110;
@@ -12266,7 +12346,7 @@ u32 effStoreBattleCameraSnapshot(u32 arg0) {
             effBattleCameraSnapshotSelection.menu.cursor = 1;
         }
     }
-    return arg0;
+    return value;
 }
 
 /* The menu state at D_003FFBB0 is distinct from the linked-file object. */
@@ -14694,7 +14774,7 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *owner) {
     effReleaseSlotTextureReferencesAndResetWork(owner, 0);
 }
 
-u8 effHasFirstTextureHandle(EffectSlotSet *owner) {
+u8 effHasFirstTextureHandle(const EffectSlotSet *owner) {
     return owner->textureReferences[0] != NULL;
 }
 
@@ -14962,29 +15042,29 @@ u32 effConfigureWithDefaultSetting(EffectSlotSet *effect, u32 slot,
     return 1;
 }
 
-u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
+u32 effResetRecordRun(u8 *work, u32 first, u32 unused) {
     u32 i = 0;
     u32 index;
 
     do {
         effSlotTransitionClearTarget((EffTimedState *)((first + i) * 0xA0 +
-                                    (s32)((EffectSlotSet *)table)->workEntries + 0x28), arg);
+                                    (s32)((EffectSlotSet *)work)->workEntries + 0x28), unused);
         i++;
         index = first + i;
-    } while (index < ((EffectSlotSet *)table)->count && (((EffectSlotSet *)table)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
+    } while (index < ((EffectSlotSet *)work)->count && (((EffectSlotSet *)work)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
     return 1;
 }
 
-void effSelectPresetByKind(u32 kind, u32 arg) {
-    switch (kind) {
+void effSelectPresetByKind(u32 mode, u32 value) {
+    switch (mode) {
     case 0:
-        sdfSubmitGsAlphaOneRegisterPacket(0x44, arg);
+        sdfSubmitGsAlphaOneRegisterPacket(0x44, value);
         return;
     case 1:
-        sdfSubmitGsAlphaOneRegisterPacket(0x48, arg);
+        sdfSubmitGsAlphaOneRegisterPacket(0x48, value);
         return;
     case 2:
-        sdfSubmitGsAlphaOneRegisterPacket(0x42, arg);
+        sdfSubmitGsAlphaOneRegisterPacket(0x42, value);
         break;
     }
 }

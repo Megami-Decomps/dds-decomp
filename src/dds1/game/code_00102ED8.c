@@ -90,15 +90,15 @@ extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
 
 extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
-extern void kwlnInitializeFrameDrawPackets(s32 arg0);
+extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 
 extern void evtInitializeFrameStatePacketTemplates(void);
 
 extern void evtEnsureDrawVectorState(void);
 
-extern void sdfGraphSetDisplayMode(s32 arg0);
+extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
-extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
+extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
 extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 typedef s32 (*KwlnTaskUpdateCallback)();
@@ -117,7 +117,7 @@ extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 extern SdfPoolNode D_00325708;
 
 
-extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
+extern void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 extern char dds3AdminTaskName[];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
@@ -1214,10 +1214,9 @@ extern void kwlnTextureReleaseHeldReference(void);
 extern void kwlnInitHeldTextureScenePackets(void);
 extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
-extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
-s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
+s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 aspect) {
     SdfTex *texture;
 
     if (kwlnHeldTextureReference != 0) {
@@ -1237,7 +1236,7 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     kwlnHeldTextureReference = texture;
     sdfTexSetClampMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
     sdfTexCreateFirstPacket(texture);
-    D_003247B0.camera.aspect = value;
+    D_003247B0.camera.aspect = aspect;
     D_003247B0.camera.width = width;
     D_003247B0.camera.height = height;
     kwlnInitHeldTextureScenePackets();

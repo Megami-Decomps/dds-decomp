@@ -298,7 +298,7 @@ s32 mnuChooseWeightedItem(s32 index) {
 
 extern s32 scrFindSlot(DatPartyRecord *, u16);
 extern s32 mnuStaffPickRollByMode(u32);
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 typedef struct StaffItemRow {
     u8 minLevel;

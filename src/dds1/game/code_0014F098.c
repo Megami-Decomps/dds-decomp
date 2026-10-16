@@ -15,7 +15,7 @@ extern s32 fldResolveEventSelectorTarget(s32 index);
 
 extern s32 func_0013CEB0(s32 param0, s32 param1);
 
-extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
+extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
 
 extern void fldStartSelectedActorTask(void);
 
@@ -29,21 +29,21 @@ extern void fldReleaseCurrentBgm(void);
 
 extern void fldPlayCurrentBgmSound(void);
 
-extern void fldPlayFieldSeVolumePan(s32 param);
+extern void fldPlayFieldSeVolumePan(s32 soundId);
 
-extern void fldPlayFieldSe(s32 param);
+extern void fldPlayFieldSe(s32 soundId);
 
-extern s32 fldPollArchiveLoad(s32 param);
+extern s32 fldPollArchiveLoad(s32 archiveId);
 
-extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
+extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
-extern void fldPlayArchiveSound(s32 param0, s32 param1);
+extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
-extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
 extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
 

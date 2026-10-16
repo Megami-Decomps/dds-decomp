@@ -264,7 +264,7 @@ f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
  * The step is integer 1/sampleCount converted to f32, not a float reciprocal.
  * The caller must provide valid table bounds for the final sample index.
  */
-f32 sdfTableInterpolate(f32 value, f32 *table, s32 sampleCount) {
+f32 sdfTableInterpolate(f32 value, const f32 *table, s32 sampleCount) {
     f32 positionStep = 1 / sampleCount;
     s32 lowerIndex = 0;
     s32 upperIndex = sampleCount;

@@ -69,7 +69,7 @@ extern char D_00428368[];
 
 
 
-extern void ptyAdjustItemQuantity(s32, s32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern char brsStaffInputTaskName[];
 
@@ -628,11 +628,11 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
 
     for (i = 0; i < 3; i++) {
         u16 id = refs->id;
-        u8 param = refs->param;
+        u8 quantityDelta = refs->param;
 
         refs++;
         if (id != 0) {
-            ptyAdjustItemQuantity(id, param);
+            ptyAdjustItemQuantity(id, quantityDelta);
         }
     }
 }
@@ -1031,7 +1031,7 @@ extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
                                  u32 retainScale);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void sndQueueSoundId(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {

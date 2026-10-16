@@ -103,7 +103,7 @@ extern u8 mnuShopMessageSequencePopupEntry[];
 extern SdfTex *kwlnHeldTextureReference;
 
 
-extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
+extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
 
 extern s32 strcmp(const char *a, const char *b);
 
@@ -1248,9 +1248,9 @@ s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
 extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
-extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
-extern void mnuOrEntryFlags(u32, u32 *);
+extern void mnuInitializeMapPacket(u32 packetValue, u32 *values, s32 count, MapPacket *packet);
+extern void mnuCopyCampEffectRowData(const CampEffectRows *source, MenuEffectResources *resources);
+extern void mnuOrEntryFlags(u32 flags, u32 *entryFlags);
 
 void mnuInitializeCampEffectResources(EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
@@ -1676,14 +1676,14 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     return obj;
 }
 
-void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
-    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(arg);
+void mnuTerminalReleaseContextAndResources(KwlnTask *task) {
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
 
     if (scene != 0) {
         mnuShopReleaseWindowSprites(0, scene);
         mnuShopReleaseWindowAndEffectResources(scene);
         mnuShopReleaseSceneObjects(scene);
-        mnuDrainPanelTransitions(&scene->transitionWork, arg);
+        mnuDrainPanelTransitions(&scene->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&scene->messageResources);
         sdfReleaseResourceAllocation(scene->resourceHandle);
@@ -1775,7 +1775,7 @@ typedef struct ShopProgressPrice {
 
 extern ShopProgressPrice mnuShopProgressPriceScales[];
 
-s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
+s32 mnuCampGetSourceItemPrice(s32 entryIndex, s32 shopRow, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1784,12 +1784,12 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     s32 price;
     s32 progressStage;
 
-    rowIndex = (u8)mnuCampResolveFlagRowValue(source);
-    itemId = mnuShopSourcePriceRows[rowIndex].entries[index].itemId;
+    rowIndex = (u8)mnuCampResolveFlagRowValue(shopRow);
+    itemId = mnuShopSourcePriceRows[rowIndex].entries[entryIndex].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = mnuShopSourcePriceRows[rowIndex].pricePercent;
-        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[index].pricePercent;
+        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[entryIndex].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -1804,7 +1804,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
+s32 mnuCampGetRankedItemPrice(s32 entryIndex, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1814,11 +1814,11 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     s32 progressStage;
 
     rowIndex = (u8)mnuCampFindActiveSlot();
-    itemId = mnuShopRankPriceRows[rowIndex].entries[index].itemId;
+    itemId = mnuShopRankPriceRows[rowIndex].entries[entryIndex].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = mnuShopRankPriceRows[rowIndex].pricePercent;
-        pricePercent = mnuShopRankPriceRows[rowIndex].entries[index].pricePercent;
+        pricePercent = mnuShopRankPriceRows[rowIndex].entries[entryIndex].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -2499,7 +2499,6 @@ extern s32 D_003C9A20[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 sprintf(char *, const char *, ...);
 extern void evtClearActiveFlag();
-extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern s32 mnuShopProgressCompletionFlagView[];
@@ -3451,7 +3450,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
@@ -4101,7 +4099,6 @@ extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();
 extern void evtClearActiveFlag();
-extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern u32 D_003CE460[];
 extern char D_00437840[];
 extern void dspAdvanceMessageWindowControl();
@@ -4110,7 +4107,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
 extern s32 sprintf(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 struct KwlnTask;
 

@@ -135,7 +135,7 @@ extern s32 D_00436AF0;
 extern s32 D_00438F6C;
 
 
-extern void btlPickCommandElementCheckedTarget(s32, s32);
+extern void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action);
 extern void btlPickCommandTargetExcludingActor(s32, s32);
 
 extern void btlPickCommandLowestHpBlockTarget(s32, u16);
@@ -174,7 +174,7 @@ extern s32 D_003BE6E0[];
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 sceDopen(char *);
+extern s32 sceDopen(char *path);
 
 extern s32 btlBuiltinResourceNameIndex;
 
@@ -221,7 +221,7 @@ extern f32 D_00452FB0[];
 
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void evtConfigureUnitTransition(s32, s32);
+extern void evtConfigureUnitTransition(s32 unitAddress, s32 duration);
 
 extern u8 D_00436C50[];
 
@@ -3338,9 +3338,9 @@ void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32
 }
 
 /* Read the browser descriptor's zero-based selected entry index. */
-u32 btlGetResourceBrowserSelectedIndex(s32 recordAddress) {
-    const u32 *recordWords = (const u32 *)recordAddress;
-    return recordWords[5];
+u32 btlGetResourceBrowserSelectedIndex(
+    const BtlResourceDescriptor *descriptor) {
+    return descriptor->selectedIndex;
 }
 
 u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor) {
@@ -3373,8 +3373,9 @@ s32 btlTrimResourceName(BtlResourceDescriptor *descriptor, char *output) {
 }
 
 /* Return the selected entry's category-specific metadata word unchanged. */
-u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
-    return resource->selectedEntry->value;
+u32 btlGetResourcePathVariant(const BtlResourceDescriptor *resource) {
+    const BtlResourceEntry *entry = resource->selectedEntry;
+    return entry->value;
 }
 
 /* Replace an owned old texture, acquire the named resource's texture,
@@ -3402,8 +3403,8 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(textureResource));
 }
 
-extern void *sdfConsAllocateColumnPacket(s32 arg0);
-extern s32 sdfConsMeasurePacketWithHeader(s32 arg0);
+extern void *sdfConsAllocateColumnPacket(s32 loopCount);
+extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 
 /* Queue the descriptor's preview texture as a quad at its screen position. */
 void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
@@ -3608,11 +3609,11 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
     record->nameLength = strlen(name);
 }
 
-void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithExtension(const struct BtlResourceNameRecord *record, char *output) {
     sprintf(output, D_00436C50, record->resourceName, record->extension);
 }
 
-void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *record, char *output) {
     sprintf(output, D_00436C58, record->resourceName);
 }
 

@@ -48,9 +48,9 @@ extern s32 sceDread(s32 directory, EffDirEnt *entry);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 sceDclose(s32 directory);
 extern s32 sprintf(char *destination, const char *format, ...);
-extern s32 sceDopen(void *arg0);
-extern s32 sdfConsMeasurePacketWithHeader(s32 arg0);
-extern void *sdfConsAllocateColumnPacket(s32 arg0);
+extern s32 sceDopen(void *path);
+extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
+extern void *sdfConsAllocateColumnPacket(s32 loopCount);
 
 
 extern EffCreateHandler D_00355730[];
@@ -618,7 +618,7 @@ u32 effGetWorkLink(EffResourceDescriptor *work) {
 
 /* Format the prefix/name records through the native template and return the name record's first word.
    Buffer capacity and record pointers remain unchecked. */
-u32 effFormatMsgNames(EffResourceDescriptor *message, void *destination) {
+u32 effFormatMsgNames(EffResourceDescriptor *message, char *destination) {
     sprintf(destination, D_003BB060, message->resourceList->directoryPath, message->selectedEntry->name);
     return message->selectedEntry->type;
 }

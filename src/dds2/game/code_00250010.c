@@ -111,7 +111,9 @@ extern char D_004374F0[]; /* " EVENT" */
 extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
-extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
+extern s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
+                                  s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
+                                  s32 *secondaryCursor, s32 *primaryCursor);
 extern s32 evtDrawFrameListColumnHeadings();
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
@@ -241,7 +243,7 @@ extern char D_00437498[];
 
 /* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
  * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
-void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, u8 *data,
+void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *data,
                    EvtMenuHeaderFn header, EvtMenuRowFn row) {
     s32 i = 0;
     s32 textX;
@@ -684,7 +686,7 @@ s32 evtEditMovieToolName(s32 x, s32 y, EvtRuntime *ctx) {
     s32 key;
 
     list = sdfCreateResetPacketList();
-    evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, (u8 *)ctx,
+    evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, ctx,
                      evtDrawInputValueRow, evtDrawKeyboardRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                     list);
@@ -1466,7 +1468,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 39, 21, ctx->frameCursor,
-                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, evtDrawFrameListRow);
+                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtDrawFrameListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 5) {
         return 0;
@@ -1957,7 +1959,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
     if (D_003C9730[group->type].columnCount == 0) {
         return 0;
     }
-    evtDrawMenuFrame((u32)packets, x, y, 28, 3, 0, 1, (u8 *)runtime, NULL, evtDrawGroupPropertyTable);
+    evtDrawMenuFrame(packets, x, y, 28, 3, 0, 1, runtime, NULL, evtDrawGroupPropertyTable);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packets);
     if (runtime->actionMode != 15) {
         return 0;
@@ -2461,7 +2463,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     count += 3;
     packets = sdfCreateResetPacketList();
-    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtDrawGroupListRow);
+    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtDrawGroupListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (ctx->actionMode != 17) {
         return 0;
@@ -2548,7 +2550,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
     group = runtime->frameGroup;
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x + runtime->horizontalOffset + 0x60, y,
-                     0xF, 6, 0, 1, (u8 *)runtime, NULL, evtNoOpXYSlotVectorEditorRow);
+                     0xF, 6, 0, 1, runtime, NULL, evtNoOpXYSlotVectorEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                      list);
 
@@ -2823,7 +2825,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
     }
     count += 2;
     packets = sdfCreateResetPacketList();
-    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtViewerDrawGroupRow);
+    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtViewerDrawGroupRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (ctx->actionMode != 21) {
         return 0;
@@ -2871,7 +2873,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     s32 lastRow = 0;
     s32 lastMode = 0;
 
-    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, evtViewerDrawShadowConfigRow);
+    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, ctx, 0, evtViewerDrawShadowConfigRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x16) {
         return 0;
@@ -4379,32 +4381,32 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 }
 
 
-u16 evtGetRowValue(PolyMovieWork *work, s32 row) {
+u16 evtGetRowValue(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].value;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].value;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].value;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].value;
 }
 
-s16 evtGetRowVariant(PolyMovieWork *work, s32 row) {
+s16 evtGetRowVariant(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].variant;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].variant;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].variant;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].variant;
 }
 
-u16 evtGetRowParameter(PolyMovieWork *work, s32 row) {
+u16 evtGetRowParameter(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].parameter;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].parameter;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].parameter;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].parameter;
 }
 
-u16 evtGetRowFlags(PolyMovieWork *work, s32 row) {
+u16 evtGetRowFlags(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].flags;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].flags;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].flags;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].flags;
 }
 
 u8 *evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
@@ -4472,11 +4474,11 @@ typedef struct EvtPmdRuntimeHeader {
     s32 frameCount;
     s32 metadata;
 } EvtPmdRuntimeHeader;
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, const SdfTextureOffsetListHeader *, s32);
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 extern EvtUnit *evtGetWorldUnitNestedValue(s32);
-extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
+extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
@@ -4485,7 +4487,7 @@ extern s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
 extern s32 evtPreloadBgm(s32);
 extern s32 evtIsBgmLoaded(s32);
 extern s32 fldTitleIsActive(void);
-extern void fldStartTitle(s32, s32, s32);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void kwlnFadeBackgroundStartIn(s32);
 
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime) {
@@ -5181,7 +5183,7 @@ extern void mnuStopMovieDrawTask(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern u32 kwlnDrawControlFlags;
-extern void evtFormatPolygonMoviePaths(u16 a, u16 b, char *path0, char *path1, char *path2);
+extern void evtFormatPolygonMoviePaths(u16 eventId, u16 sceneId, char *path0, char *path1, char *path2);
 extern s32 sdfPathExists(char *path);
 extern void evtDestroySecondaryWorldNode(void);
 

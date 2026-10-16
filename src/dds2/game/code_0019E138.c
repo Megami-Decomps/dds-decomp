@@ -46,7 +46,7 @@
 #define ITF_LINE_STRIP_PRIMITIVE_BITS 0x14A
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
@@ -1595,7 +1595,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, (u32)packet);
 }
 
-extern u32 sdfConsFinalizePacketHeader(u32, s32);
+extern u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes);
 
 /* The packet builder returns a 0x30-byte command with two trailing qwords. */
 typedef struct TextPacketTail {

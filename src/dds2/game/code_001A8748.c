@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "itf_debug_panel_work.h"
 #include "itf_color_panel_row.h"
 #include "btl_boss_data_api.h"
@@ -97,7 +98,7 @@ extern void *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
 
-extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
+extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 typedef struct BattleController {
     u8 pad_000[0x214];
@@ -153,7 +154,7 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
-extern s32 evtCheckValueThreshold(s32, s32);
+extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
 extern s32 sndUpdateTestMsgTask(KwlnTask *task);
@@ -468,7 +469,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
-        if ((u8)D_0037F510.cancel & 2) {
+        if ((u8)D_0037F510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -524,7 +525,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
                 }
             }
         }
-        if (D_0037F510.cancel < 0) {
+        if (D_0037F510.secondaryCancel < 0) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
@@ -624,7 +625,7 @@ s32 itfEditOverlayColor(void) {
             D_00452E90.editing ^= 1;
             D_00452E90.blink = 0;
         }
-        if ((u8)D_0037F510.cancel & 2) {
+        if ((u8)D_0037F510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -659,7 +660,7 @@ s32 itfEditOverlayColor(void) {
                 D_00438F3C = 0;
             }
         }
-        if (D_0037F510.cancel < 0) {
+        if (D_0037F510.secondaryCancel < 0) {
             D_00452E90.editing ^= 1;
             D_00452E90.blink = 0;
         }
@@ -1434,7 +1435,7 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
     memcpy(dst->baseStats, src->baseStats, sizeof(dst->baseStats));
     dst->status = src->status & 0x7FFF;
-    dst->unk1AC = src->unk1AC;
+    dst->savedCommandPhase = src->savedCommandPhase;
     dst->unk1AE = src->unk1AE;
     dst->actionSlot = (u16)src->actionSlot;
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
@@ -1746,7 +1747,7 @@ s32 btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, BtlUnit *second,
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
     if (index == 0 && (object->status.flags & 0x400) != 0) {
-        return datEnemyRecords[object->partyRecord.unitId].unk46;
+        return datEnemyRecords[object->partyRecord.unitId].indexedValueOverride;
     }
     return datCommandSelectors[index].stat;
 }
@@ -1768,11 +1769,11 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 element) {
     return datGetEffectiveAffinity(record, element);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
     if (side == 0) {
-        return D_00435DE0 + index * 0x270;
+        return (void *)(u32)(D_00435DE0 + index * 0x270);
     }
-    return D_00435DF0 + index * 0x270;
+    return (void *)(u32)(D_00435DF0 + index * 0x270);
 }
 
 BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
@@ -1782,11 +1783,11 @@ BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 sid
     return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 side, s32 index) {
-    if (side == 0) {
-        return D_00435DE4 + index * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+    if (category == 0) {
+        return D_00435DE4 + actorId * 0x74;
     }
-    return D_00435DF8 + index * 0x74;
+    return D_00435DF8 + actorId * 0x74;
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
@@ -1979,7 +1980,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         mask = -1;
         break;
     }
-    if (battle->unk220 & 0x800) {
+    if (battle->unk220 & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         mode = 3;
         flags &= ~0xB;
         mask = 0;
@@ -2445,11 +2446,11 @@ s32 btlHasSkillInFirstEightSlots(DatSkillOwner *unit, s32 skill) {
     return 0;
 }
 
-s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *status, u32 value) {
-    if (status->flags & 0x20) {
+s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *partyRecord, u32 entryId) {
+    if (partyRecord->flags & 0x20) {
         return 0;
     }
-    return mnuGetPartyEntryCurrentId(status) == value;
+    return mnuGetPartyEntryCurrentId(partyRecord) == entryId;
 }
 
 s32 btlSelectActorAction(s32 state) {
@@ -2460,9 +2461,9 @@ s32 btlSelectActorAction(s32 state) {
     return selection;
 }
 
-s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
-    s32 id = arg & 0xFFFF;
-    switch (id) {
+s32 btlIsEventThresholdSatisfiedForEntry(s32 entryValue) {
+    s32 eventId = entryValue & 0xFFFF;
+    switch (eventId) {
     case 0x8A:
         if (evtCheckValueThreshold(0x8A, 1) != 0 || evtCheckValueThreshold(0x93, 1) != 0) {
             return 1;
@@ -2474,7 +2475,7 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
         }
         break;
     }
-    if ((u32)((id + 0xFF80) & 0xFFFF) < 0x20 && evtCheckValueThreshold(id, 1) != 0) {
+    if ((u32)((eventId + 0xFF80) & 0xFFFF) < 0x20 && evtCheckValueThreshold(eventId, 1) != 0) {
         return 1;
     }
     return 0;
@@ -2531,9 +2532,9 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
     if (selected == 0) {
         total = 0;
         for (index = 0; index < 2; index++) {
-            if (enemy->unk3E[index] != 0) {
-                if (btlIsEventThresholdSatisfiedForEntry(enemy->unk3E[index])) {
-                    btlBossDebugPrintf("btl:event item check[%X]\n", enemy->unk3E[index]);
+            if (enemy->additionalDropItemIds[index] != 0) {
+                if (btlIsEventThresholdSatisfiedForEntry(enemy->additionalDropItemIds[index])) {
+                    btlBossDebugPrintf("btl:event item check[%X]\n", enemy->additionalDropItemIds[index]);
                 } else {
                     total += enemy->actionChances[index];
                 }
@@ -2543,13 +2544,13 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
             roll = effMiscRandMod(0, total);
             total = 0;
             for (index = 0; index < 2; index++) {
-                if (enemy->unk3E[index] != 0) {
-                    if (btlIsEventThresholdSatisfiedForEntry(enemy->unk3E[index])) {
-                        btlBossDebugPrintf("btl:event item check[%X]\n", enemy->unk3E[index]);
+                if (enemy->additionalDropItemIds[index] != 0) {
+                    if (btlIsEventThresholdSatisfiedForEntry(enemy->additionalDropItemIds[index])) {
+                        btlBossDebugPrintf("btl:event item check[%X]\n", enemy->additionalDropItemIds[index]);
                     } else {
                         total += enemy->actionChances[index];
                         if (roll < total) {
-                            selected = enemy->unk3E[index];
+                            selected = enemy->additionalDropItemIds[index];
                             break;
                         }
                     }
@@ -2618,11 +2619,11 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         level = 62;
     }
     if (level >= enemyLevel + allowance && datBattleParameters->rewardDivisor != 0.0f) {
-        reward = (s32)(record->unk2C / datBattleParameters->rewardDivisor);
+        reward = (s32)(record->battleExperienceReward / datBattleParameters->rewardDivisor);
         btlBossDebugPrintf(D_004151E8, reward, level, enemyLevel, allowance,
                           datBattleParameters->rewardDivisor);
     } else {
-        reward = record->unk2C;
+        reward = record->battleExperienceReward;
     }
     if (record->flags & 0x2000) {
         reward *= 100;
@@ -2869,7 +2870,7 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
 
 #include "btl_actor_entry_code_api.h"
 
-s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
+s16 btlGetActorEntryCode(const BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
@@ -3014,7 +3015,45 @@ void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A8748", btlLowestSetPairIndex);
+/* Index of the lowest set bit pair in the mask (bits 10 and 13 are single), or -1. */
+s32 btlLowestSetPairIndex(u32 mask) {
+    s32 index = 0;
+    s32 step = 1;
+
+    if (mask == 0)
+        return -step;
+    if (mask & 0x0001)
+        return index;
+    if (mask & 0x0002)
+        return index;
+    index += step;
+    if (mask & 0x0004)
+        return index;
+    if (mask & 0x0008)
+        return index;
+    index += step;
+    if (mask & 0x0010)
+        return index;
+    if (mask & 0x0020)
+        return index;
+    index += step;
+    if (mask & 0x0040)
+        return index;
+    if (mask & 0x0080)
+        return index;
+    index += step;
+    if (mask & 0x0100)
+        return index;
+    if (mask & 0x0200)
+        return index;
+    index += step;
+    if (mask & 0x0400)
+        return index;
+    index += step;
+    if (mask & 0x2000)
+        return index;
+    return -step;
+}
 
 void btlTickActorEntryCountdowns(BtlUnit *unit) {
     s16 *entry = &unit->entrySlots[0].countdown;
@@ -3826,7 +3865,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
-    } else if (datCommandRecords[command].unk_0B == 1) {
+    } else if (datCommandRecords[command].distributeRandomTargetHits == 1) {
         return 1;
     }
     return 0;

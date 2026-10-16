@@ -17,7 +17,7 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
-void *memcpy(void *arg0, const void *arg1, u32 arg2);
+void *memcpy(void *destination, const void *source, u32 size);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */

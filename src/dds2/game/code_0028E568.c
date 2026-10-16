@@ -45,7 +45,7 @@ extern u32 mnuGetSelectedMantraUnitIndex(struct MnuStatusResource *);
 extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(struct MantraPanelPool *, s32, s8, s16, s16, u32);
 extern void mnuOffsetPanelAndSetVisualParams(struct MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
 extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
-extern void mnuStorePanelEntry(s32, s32);
+extern void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining);
 
 /* Mark the selected mantra node and start its panel animation. */
 void mnuActivateMantraNode(MnuStatusResource *menu, u16 nodeId) {
@@ -118,11 +118,57 @@ void mnuUpdateMantraNodeState(MnuStatusResource *menu, u16 nodeId) {
     mnuStorePanelEntry(0x2000A, 5);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
+extern void *memcpy(void *, const void *, u32);
+extern const u16 D_00427218[4][8];
+extern const u16 D_00427258[4][2];
+extern const char D_00427268[];
+s32 func_0028E858(MnuStatusResource *object) {
+    u16 layouts[4][8];
+    u16 requirements[4][2];
+    s32 enabled = 0;
+    s32 i;
+    s16 rankIndex;
+    s16 rank;
+    MantraMenuWork *work;
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427258);
-
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E858);
+    memcpy(layouts, D_00427218, sizeof(layouts));
+    memcpy(requirements, D_00427258, sizeof(requirements));
+    for (i = 0; i < 4; i++) {
+        if (mdlFlagTest(requirements[i][1])) {
+            enabled |= 1 << i;
+        }
+    }
+    work = &object->menu;
+    evtPrintDeveloperConsoleMessage(D_00427268, work->drawBits.unk10);
+    rankIndex = work->drawBits.unk10 == 0 ? 0 : work->drawBits.unk10 - 1;
+    rank = work->drawBits.unk10;
+    switch (rank) {
+    case 0:
+    case 1:
+        if (enabled) {
+            MantraNodePos *node = work->defaultSelector;
+            work->scrollX = (s32)((f32)node->x / 10.0f * 40.0f - 256.0f);
+            work->scrollY = (s32)((f32)node->y / 10.0f * 39.0f - 191.0f);
+        } else {
+            work->scrollX = 124;
+            work->scrollY = 160;
+        }
+        break;
+    case 2:
+    case 3:
+        {
+            MantraNodePos *node = work->defaultSelector;
+            s16 nodeY;
+            work->scrollX = (s32)((f32)node->x / 10.0f * 40.0f - 256.0f);
+            nodeY = node->y;
+            work->scrollEndX = work->scrollX + layouts[rankIndex][4];
+            work->scrollY = (s32)((f32)nodeY / 10.0f * 39.0f - 191.0f);
+            work->scrollEndY = work->scrollY + layouts[rankIndex][5];
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028E568", mnuAdvanceMantraSelectionCursor);
 
@@ -132,6 +178,12 @@ extern MenuMantraRecord *mnuMantraPublishedSourceRecords;
  * level comes from event flags 0x920-0x922, then one record per kind-2/4 node
  * and six per kind-3 node, each claiming the next event flag from 0x923. The
  * final store recomputes the list address so `record` stays the live cursor. */
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427258);
+
+INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427268);
+
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427278);
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272C8);

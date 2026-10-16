@@ -133,14 +133,12 @@ extern s32 D_0032E474[];
 
 extern s32 D_0033EB78[];
 
-extern void sndReleaseTrackHandle(s32 arg0);
+extern void sndReleaseTrackHandle(s32 trackHandle);
 
 
 
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
-
-extern s32 fldGetTransferChunkPayload(s32 arg0);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
@@ -216,13 +214,15 @@ typedef struct {
     s16 unk2;
     s32 entryCount;            /* 0x04 */
     s32 duration;              /* 0x08 */
-    s16 unk0C;
+    s16 encounterSelection;
     s16 reservedModel;         /* 0x0E: model for reserved object slot 16. */
     FldSparkSequence sequences[16]; /* 0x10 */
 } FldEnt110; /* 0x110 bytes */
 
 typedef char FldSparkSequenceSizeCheck[(sizeof(FldSparkSequence) == 0x10) ? 1 : -1];
 typedef char FldEnt110SizeCheck[(sizeof(FldEnt110) == 0x110) ? 1 : -1];
+typedef char FldEnt110_encounterSelection_offset_must_be_0x0C[
+    ((u32)&((FldEnt110 *)0)->encounterSelection == 0x0C) ? 1 : -1];
 
 extern FldEnt110 *D_003BAA48;
 
@@ -236,7 +236,7 @@ typedef struct {
 extern FldTbl50 D_003D46C0[];
 
 
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 kwlnTaskCreate(void *name, s32 priority, s32 startDelay, s32 destroyDelay, void *update, void *destroy, void *userValue);
 
 extern u8 D_003BAE78[];
 
@@ -628,7 +628,7 @@ extern s32 fldCurrentBgmMode;
 
 extern s32 D_0033EAE8[];
 
-extern void sndReleaseTrackHandle();
+extern void sndReleaseTrackHandle(s32 trackHandle);
 
 void fldSetBgmMode(s32 mode) {
     switch (mode) {
@@ -716,8 +716,8 @@ u32 fldGetArchiveLoadPending(void) {
     return fldArchiveLoadPending;
 }
 
-s32 fldPollArchiveLoad(s32 id) {
-    s32 name = 0x30000000 + (id << 16);
+s32 fldPollArchiveLoad(s32 archiveId) {
+    s32 name = 0x30000000 + (archiveId << 16);
     s32 result = sndFindPackedTrackLoadStatus(name);
     if (result == 0) {
         sndEnsureMidiBankResident(name);
@@ -769,11 +769,11 @@ u32 fldGetCurrentBgmHandle(void) {
     return fldCurrentBgmHandle;
 }
 
-extern s32 fldFindMapLabelIndexByCoordinate(s32, s32);
+extern s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 
-extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32, s32);
+extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 
-extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 
 extern s32 strlen(const char *);
 
@@ -787,17 +787,17 @@ extern s16 D_003BD7D0;
 
 #include "fld_label_cache_api.h"
 
-void fldCacheMapLabelLengths(s32 map) {
+void fldCacheMapLabelLengths(s32 mapId) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_003D43B0[i] = strlen(D_0033F06C[fldFindMapLabelIndexByCoordinate(map, i)]);
+        D_003D43B0[i] = strlen(D_0033F06C[fldFindMapLabelIndexByCoordinate(mapId, i)]);
     }
     for (i = 0; i < 24; i++) {
-        D_003D4460[i] = strlen(D_0034286C[fldFindSecondaryMapLabelIndexByCoordinate(map, i)]);
+        D_003D4460[i] = strlen(D_0034286C[fldFindSecondaryMapLabelIndexByCoordinate(mapId, i)]);
     }
     for (i = 0; i < 41; i++) {
-        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(map, i)]);
+        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(mapId, i)]);
     }
     i = 0;
     if (D_0032E3C0[0] < 100) {
@@ -819,7 +819,7 @@ void fldLoadSceneRecordTable(void) {
     s32 area;
     s32 room;
     FldSceneRecordTableHeader *header;
-    s32 rows;
+    FldSceneRecord *rows;
     s32 count;
 
     fldFormatAreaDirectory(directory, fldAreaState.area, 1);
@@ -881,11 +881,11 @@ void fldLoadSceneRecordTable(void) {
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceAddress, 0);
     transferStart = resourceAddress + 8;
     fldRelocatePackedTransferChunk(resourceAddress, (FldTransferChunk *)transferStart);
-    header = (FldSceneRecordTableHeader *)fldGetTransferChunkPayload(transferStart);
+    header = (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
     rows = header->rows;
     count = header->count;
     fldSceneRecordCount = count;
-    fldSceneRecords = (FldSceneRecord *)(u32)rows;
+    fldSceneRecords = rows;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
@@ -895,12 +895,13 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
         fldRelocatePackedTransferChunk((u32)chunk, (FldTransferChunk *)transferStart);
         {
-            s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
-            s32 rows = ((FldSceneRecordTableHeader *)header)->rows;
-            s32 count = ((FldSceneRecordTableHeader *)header)->count;
+            FldSceneRecordTableHeader *header =
+                (FldSceneRecordTableHeader *)fldGetTransferChunkPayload((FldTransferChunk *)transferStart);
+            FldSceneRecord *rows = header->rows;
+            s32 count = header->count;
 
             fldSceneRecordCount = count;
-            fldSceneRecords = (FldSceneRecord *)(u32)rows;
+            fldSceneRecords = rows;
         }
     }
 }
@@ -1110,14 +1111,14 @@ extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
-extern s32 fldTestStageExplorationCell(s32, f32, f32);
-extern s32 fldGetFloorFlag(s32, s32, s32);
+extern s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z);
+extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
-extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
+extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
-extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
@@ -1896,7 +1897,7 @@ extern SdfModel *D_00348F30[];
 
 extern FldSlot D_003D40B0[];
 
-extern void sdfReleaseDevSlot(SdfModel *, s32, s32);
+extern void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release);
 
 void fldReleaseMenuSlots(void) {
     s32 i;
@@ -2500,7 +2501,121 @@ void fldClearAllAreaFloorFlags(void) {
     } while (index < 0xd);
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00147188);
+extern f32 D_003BAEE8;
+extern s32 frFontMeasureTextAdvance(const u8 *, u8, u8);
+extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
+void func_00147188(s32 unused) {
+    FldAreaWork *work;
+    s32 mode;
+    s32 map;
+    s32 record;
+    s32 lookupIndex;
+    s32 textWidth;
+    s32 x;
+    s32 y;
+    f32 alpha;
+    f32 positionX, positionY;
+    s32 xOffset;
+    s32 yOffset;
+
+    if (fldAreaState.unk118 == 1) {
+        return;
+    }
+    if (fldAreaState.area >= 200) {
+        return;
+    }
+
+    mode = fldAreaState.unkD4;
+    switch (mode) {
+    case 0:
+        alpha = 0.0f;
+        D_003BAEE8 = alpha;
+        break;
+    case 2:
+        alpha = D_003BAEE8;
+        if (alpha > 0.0f) {
+            alpha -= 0.1f;
+            if (alpha < 0.0f) {
+                alpha = 0.0f;
+                goto storeClampedAlpha;
+            }
+            D_003BAEE8 = alpha;
+        }
+        break;
+    case 3:
+        alpha = D_003BAEE8;
+        if (!(alpha < 1.0f)) {
+            break;
+        }
+        alpha += 0.1f;
+        if (!(1.0f < alpha)) {
+            D_003BAEE8 = alpha;
+            break;
+        }
+        /* A completed fade-in uses the fully visible state. */
+    case 1:
+        alpha = 1.0f;
+        D_003BAEE8 = alpha;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    default:
+        alpha = D_003BAEE8;
+        break;
+    }
+
+    goto interpolate;
+storeClampedAlpha:
+    D_003BAEE8 = alpha;
+interpolate:
+    positionX = alpha * 0.0f + (1.0f - alpha) * 250.0f;
+    positionY = alpha * 0.0f + (1.0f - alpha) * 0.0f;
+    xOffset = (s32)positionX;
+    yOffset = (s32)positionY;
+
+    work = &fldAreaState;
+    map = work->unkC8;
+    if (map != -1) {
+        if (D_003D4460[map] < 2) {
+            return;
+        }
+        {
+            s32 queryY = map;
+            s32 queryX = work->area % 100;
+            record = fldFindSecondaryMapLabelIndexByCoordinate(queryX, queryY);
+        }
+        textWidth = frFontMeasureTextAdvance((const u8 *)D_0034286C[record], 1, 0);
+        fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
+        if (textWidth >= 0x9E) {
+            x = 0x155;
+        } else {
+            x = 0x1A3 - textWidth / 2;
+        }
+        y = (yOffset + 0x12) / 2;
+        fldDrawConvertedTextGlyph(xOffset + x, y, 0xF0DC6480, (const u8 *)D_0034286C[record]);
+    } else {
+        lookupIndex = work->unkC4;
+        if (lookupIndex == map || D_003D43B0[lookupIndex] < 2) {
+            return;
+        }
+        {
+            s32 queryY = lookupIndex;
+            s32 queryX = work->area % 100;
+            record = fldFindMapLabelIndexByCoordinate(queryX, queryY);
+        }
+        textWidth = frFontMeasureTextAdvance((const u8 *)D_0033F06C[record], 1, 0);
+        fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
+        if (textWidth >= 0x9E) {
+            x = 0x155;
+        } else {
+            x = 0x1A3 - textWidth / 2;
+        }
+        y = (yOffset + 0x12) / 2;
+        fldDrawConvertedTextGlyph(xOffset + x, y, 0xA09DC380, (const u8 *)D_0033F06C[record]);
+    }
+}
 
 extern s32 fldEffectTextureLoadHandles[];
 
@@ -2818,12 +2933,16 @@ typedef struct {
     s32 unk0;
     f32 unk4, unk8, unkC;
     f32 unk10[4];
-    s32 *unk20;
+    s32 *object; /* 0x20: room effect object/record. */
     u8 pad24[8];
     s32 unk2C, unk30, unk34, unk38;
     s16 unk3C, unk3E;
     char name[0x10];
 } FldTblEnt50; /* 0x50 bytes */
+
+typedef char FldTblEnt50_size_check[(sizeof(FldTblEnt50) == 0x50) ? 1 : -1];
+typedef char FldTblEnt50_object_offset_check[
+    ((u32)&((FldTblEnt50 *)0)->object == 0x20) ? 1 : -1];
 
 extern FldTblEnt50 fldRoomEffectEntries[];
 
@@ -2837,7 +2956,7 @@ void fldClearMenuEntries(void) {
         fldRoomEffectEntries[i].unk4 = 0.0f;
         fldRoomEffectEntries[i].unk8 = 0.0f;
         fldRoomEffectEntries[i].unkC = 0.0f;
-        fldRoomEffectEntries[i].unk20 = 0;
+        fldRoomEffectEntries[i].object = 0;
         fldRoomEffectEntries[i].unk2C = 0;
         fldRoomEffectEntries[i].unk30 = 0;
         fldRoomEffectEntries[i].unk34 = 0;
@@ -2853,13 +2972,16 @@ void fldClearMenuEntries(void) {
 typedef struct {
     s32 unk0;
     s32 id;
-    s32 unk8;
+    s32 activationState;
     s32 activationRequested;
     u8 pad10[0x10];
     s32 effectVariant;
     s32 effectNode;
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
+typedef char FldObj30_activationState_offset_must_be_0x08[
+    ((u32)&((FldObj30 *)0)->activationState == 0x08) ? 1 : -1];
+typedef char FldObj30_size_must_be_0x30[sizeof(FldObj30) == 0x30 ? 1 : -1];
 
 extern FldObj30 fldObjectSlots[32];
 
@@ -2876,7 +2998,7 @@ void fldResetObjectSlots(void) {
     for (i = 0; i < 32; i++) {
         fldObjectSlots[i].id = -1;
         fldObjectSlots[i].unk0 = 0;
-        fldObjectSlots[i].unk8 = 0;
+        fldObjectSlots[i].activationState = 0;
         fldObjectSlots[i].activationRequested = 0;
         if (fldObjectSlots[i].effectNode != 0) {
             effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
@@ -2905,7 +3027,7 @@ void fldActivateObjectById(s32 id) {
     s32 i;
 
     for (i = 0; i < fldObjectSlotCount; i++) {
-        if (fldObjectSlots[i].id == id && fldObjectSlots[i].unk8 == 0) {
+        if (fldObjectSlots[i].id == id && fldObjectSlots[i].activationState == 0) {
             fldObjectSlots[i].activationRequested = 1;
         }
     }
@@ -2924,7 +3046,7 @@ void fldReleaseObjectSlots(void) {
     for (i = 0; i < 32; i++) {
         fldObjectSlots[i].id = -1;
         fldObjectSlots[i].unk0 = 0;
-        fldObjectSlots[i].unk8 = 0;
+        fldObjectSlots[i].activationState = 0;
         fldObjectSlots[i].activationRequested = 0;
     }
 }
@@ -2936,12 +3058,12 @@ void fldUpdateObjectSlotActivation(void) {
     MdlCtx *resource;
 
     for (i = 0; i < fldObjectSlotCount; i++) {
-        switch (fldObjectSlots[i].unk8) {
+        switch (fldObjectSlots[i].activationState) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
                 resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryPlain(resource, 0, 1);
-                fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
+                fldObjectSlots[i].activationState = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
                 case 0:
                 case 3:
@@ -2973,7 +3095,7 @@ void fldUpdateObjectSlotActivation(void) {
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
-                fldObjectSlots[i].unk8 = 2;
+                fldObjectSlots[i].activationState = 2;
             }
             break;
         case 2:
@@ -2981,7 +3103,7 @@ void fldUpdateObjectSlotActivation(void) {
                 resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryFlagged(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
-                fldObjectSlots[i].unk8 = 3;
+                fldObjectSlots[i].activationState = 3;
                 if (D_003BAF58 != 0) {
                     effDestroyNode((EffNode *)(u32)D_003BAF58);
                     D_003BAF58 = 0;
@@ -3006,7 +3128,7 @@ extern s32 D_0032E4C8[];
 
 extern f32 fldBannerColorPhase;
 
-extern s32 ptyAnyUnitFlagMatch(s32, s32);
+extern s32 ptyAnyUnitFlagMatch(s32 statusMask, s32 flagMode);
 
 
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
@@ -3071,7 +3193,7 @@ void fldDrawTitleBanner(s32 x, s32 y) {
 }
 
 extern s32 fldGetSparkDialogPhase(void);
-extern s16 *fldFindLocationCoordinateRecord(s32, s32);
+extern s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
@@ -3151,7 +3273,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 
 extern s32 fldRoomEffectEntryCount;
 
-extern s32 fldTestMapSlotAuxiliaryFlag();
+extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern void dds3SetObjectFlags();
 
@@ -3161,8 +3283,8 @@ void fldFireRoomEffects(void) {
     for (i = 0; i < fldRoomEffectEntryCount; i++) {
         s32 room = fldRoomEffectEntries[i].unk38;
         if (room != 0 && fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1, room) != 0) {
-            if (fldRoomEffectEntries[i].unk20 != 0) {
-                dds3SetObjectFlags(fldRoomEffectEntries[i].unk20, 1);
+            if (fldRoomEffectEntries[i].object != 0) {
+                dds3SetObjectFlags(fldRoomEffectEntries[i].object, 1);
             }
         }
     }
@@ -3201,7 +3323,7 @@ s32 fldFindEffectByName(const char *name) {
 
     for (i = 0; i < fldRoomEffectEntryCount; i++) {
         if (fldRoomEffectEntries[i].unk0 != 999 && strcmp(fldRoomEffectEntries[i].name, name) == 0) {
-            return fldRoomEffectEntries[i].unk20[1];
+            return fldRoomEffectEntries[i].object[1];
         }
     }
     return 0;
@@ -3878,9 +4000,9 @@ void fldResetSparkTable(void) {
     }
 }
 
-s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
-    PCP_COPY_VECTOR(fldSparkSlots[index].position, pos);
-    PCP_COPY_VECTOR(fldSparkSlots[index].rotation, vel);
+s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation) {
+    PCP_COPY_VECTOR(fldSparkSlots[index].position, position);
+    PCP_COPY_VECTOR(fldSparkSlots[index].rotation, rotation);
     fldSparkSlots[index].hasVectors = 1;
     return 1;
 }
@@ -4096,7 +4218,6 @@ extern FldSparkController fldSparkControlState;
 
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
@@ -4500,7 +4621,7 @@ void fldTickWeatherEffectNodes(void) {
 
 
 s32 fldGetEncounterSelection(void) {
-    return *(s16 *)((u8 *)D_003D62A4[0] + 0xC);
+    return ((FldEnt110 *)D_003D62A4[0])->encounterSelection;
 }
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE78);
 

@@ -48,8 +48,8 @@ extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 
 extern void effObjInnerVecBackup(ObjectTransform *node);
-extern void effMagatuhiCopyFloatBlock(void *, const void *);
-extern void effMagatuhiSetControlPointParams(void *, const void *);
+extern void effMagatuhiCopyFloatBlock(void *work, const void *src);
+extern void effMagatuhiSetControlPointParams(void *work, const void *src);
 
 
 
@@ -85,7 +85,7 @@ void effObjReleaseObjectData(u32 object) {
 }
 
 #include "dds3_world_primary.h"
-extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjForwardOwnerBillEntry(EffectObj *obj);
 extern void effMiscNormalizeVU(void);

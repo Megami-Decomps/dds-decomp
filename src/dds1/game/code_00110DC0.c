@@ -5,15 +5,15 @@
 #include "evt_world.h"
 
 
-s32 dds3ExchangeAreaSlot(void *arg);
+s32 dds3ExchangeAreaSlot(void *areaObject);
 
-const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
+const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value) {
     EffWorldNode *node;
 
     if (object == NULL || value == 0) {
         return 0;
     }
-    node = ((EvtWorldTable *)object->data)->slots[index].head;
+    node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
     while (node != NULL) {
         if (node == value) {
             return 1;
@@ -60,7 +60,7 @@ s32 dds3GetWorldObjectValue(EffWorldNode *object) {
     return ((EvtWorldTable *)object->data)->areaRoomKey;
 }
 
-EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 index, const u8 *name) {
+EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 slotIndex, const u8 *name) {
     EffWorldNode *node;
     u8 *s;
     s32 i;
@@ -68,7 +68,7 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 ind
     if (object == NULL || name == NULL) {
         return NULL;
     }
-    node = ((EvtWorldTable *)object->data)->slots[index].head;
+    node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
     while (node != NULL) {
         s = ((u8 *)node->value);
         if (s == NULL) {

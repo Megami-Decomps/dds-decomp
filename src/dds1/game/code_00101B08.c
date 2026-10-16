@@ -10,6 +10,7 @@
 #include "kwln.h"
 #include "kwln_task_flags.h"
 #include "sdf.h"
+#include "sdf_pad_mode_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 
@@ -55,20 +56,19 @@ extern void func_002FC0A8(void);
 extern void sceSifInitRpc(s32);
 extern s32 sceSifInitIopHeap(void);
 extern void sdfInitDeviceSemaphores(void);
-extern s32 sceSifRebootIop(const char *);
+extern s32 sceSifRebootIop(const char *iopImagePath);
 extern s32 func_00312AC0(void);
 extern void sceSifLoadFileReset(void);
 extern void sceFsReset(void);
 extern void func_002F3CB8(s32);
 extern void func_002F4190(u32);
-extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern void sdfLoadIopModulePair(const char *, s32);
-extern void sdfInitializeRuntimeServices(u32, u32, u32);
-extern void sdfPadRequestMode(s32, u8);
-extern void sdfDevSetCurrentDirectory(const char *);
-extern void sdfDevSetDefaultDeviceWorker(s32);
-extern void sdfEnsureDeviceWorkerThreadStarted(s32);
-extern void sdfLoadModulesAndBindNamedResourceRpc(const char *, const char *);
+extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
+extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
+extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
+extern void sdfDevSetCurrentDirectory(const char *path);
+extern void sdfDevSetDefaultDeviceWorker(s32 worker);
+extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
+extern void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath);
 extern void sdfStartAndSuspendWorkerThread(void);
 extern void kwlnRunMainLoop(void);
 
@@ -131,7 +131,7 @@ extern u8 D_00325860[];
 extern u8 D_00325870[];
 extern void sdfWaitAndSelectBuffer(void);
 extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
-extern void kwlnInitializeFrameDrawPackets(s32);
+extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
 #define KWLN_FRAME_BUFFER_BYTES 0x1F40
@@ -224,7 +224,7 @@ extern void sdfConsSetDefaultFirstReference(u32);
 extern void sdfConsSetDefaultSecondReference(u32);
 extern SdfListHead *evtBuildFrameStatePacketList(s32);
 extern void evtSetDrawSurfaceIndex(u32);
-extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Rebuild and queue the selected buffer's scene, overlay and view packets. */

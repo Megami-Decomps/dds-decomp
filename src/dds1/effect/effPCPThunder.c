@@ -290,8 +290,8 @@ void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 i
 }
 
 
-extern void effThunderBuildVectorHistory(EffThunderVectorWork *, s32);
-extern void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *, s32);
+extern void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index);
+extern void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 index);
 
 /* Delay -> active geometry -> alpha fade -> restart; tint each render cell.
    The unsigned wrap-add is not a saturating fade. Submit even for signed count <= 0. */
@@ -555,8 +555,8 @@ void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 
 }
 
 
-extern void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *, s32);
-extern void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *, s32);
+extern void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index);
+extern void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 index);
 
 /* Indexed vector countdown/fade/restart with shared tint and native render-cell stride.
    Fade is unsigned wrap-add; submission is unconditional after the signed-count loop. */
@@ -1515,7 +1515,7 @@ void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 
 }
 
 
-extern void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *, s32);
+extern void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 fragmentIndex);
 
 /* One countdown/fade/restart state drives both systems; write the same tinted color to each.
    Secondary initialization/submission precedes primary; submission also occurs for count <= 0. */
@@ -2097,8 +2097,8 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
     }
 }
 
-extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32, s32);
-extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
+extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions);
+extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *history, u32 *gradientColors);
 
 EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
 {
@@ -2108,7 +2108,7 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
     EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
     u32 palette[4];
-    s32 a, b;
+    s32 historyLength, subdivisions;
     u32 i;
 
     work->params = *src;
@@ -2117,15 +2117,15 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
     work->slots = slot;
     work->tintColor = 0x80808080;
     work->soundMixer = effEventCloneSoundMixer(eventParams);
-    a = work->params.historyLength;
-    if (a == 0) {
+    historyLength = work->params.historyLength;
+    if (historyLength == 0) {
         work->params.historyLength = 1;
-        a = 1;
+        historyLength = 1;
     }
-    b = work->params.subdivisions;
-    if (b <= 0) {
+    subdivisions = work->params.subdivisions;
+    if (subdivisions <= 0) {
         work->params.subdivisions = 1;
-        b = 1;
+        subdivisions = 1;
     }
     if (work->params.startDelayRange <= 0) {
         work->params.startDelayRange = 1;
@@ -2147,7 +2147,7 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
     place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->fragment = effCreateFragmentResources(a, b);
+        slot->fragment = effCreateFragmentResources(historyLength, subdivisions);
         effInitializeFragmentHistoryColors(slot->fragment, palette);
         slot->age = 0;
         slot->fadeScale = 1.0f;
@@ -2176,7 +2176,7 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
     u32 palette[4];
-    s32 a, b;
+    s32 historyLength, subdivisions;
     u32 i;
 
     work->params = src->params;
@@ -2185,15 +2185,15 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     work->soundMixer = src->soundMixer;
     work->slots = slot;
     work->tintColor = 0x80808080;
-    a = work->params.historyLength;
-    if (a == 0) {
+    historyLength = work->params.historyLength;
+    if (historyLength == 0) {
         work->params.historyLength = 1;
-        a = 1;
+        historyLength = 1;
     }
-    b = work->params.subdivisions;
-    if (b <= 0) {
+    subdivisions = work->params.subdivisions;
+    if (subdivisions <= 0) {
         work->params.subdivisions = 1;
-        b = 1;
+        subdivisions = 1;
     }
     if (work->params.startDelayRange <= 0) {
         work->params.startDelayRange = 1;
@@ -2215,7 +2215,7 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->fragment = effCreateFragmentResources(a, b);
+        slot->fragment = effCreateFragmentResources(historyLength, subdivisions);
         effInitializeFragmentHistoryColors(slot->fragment, palette);
         slot->age = 0;
         slot->fadeScale = 1.0f;
@@ -2259,8 +2259,8 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
-extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
+extern void effResetFragmentHistory(EffPcpThunderFragmentResources *history);
+extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u128 *source);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.

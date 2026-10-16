@@ -56,7 +56,7 @@ u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
 
-extern void frFontEnsureSlotLoaded(s32, const char *);
+extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 
 #define FR_FONT_ENTRY_CAPACITY 9
 #define FR_FONT_IMAGE_WORD_COUNT 16
@@ -1008,7 +1008,7 @@ u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
     return totalAdvance;
 }
 
-extern void frFontFillGlyphMetrics(void *work, s32 code);
+extern void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex);
 
 s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;

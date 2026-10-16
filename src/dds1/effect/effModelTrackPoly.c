@@ -26,7 +26,7 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
     effTrackPolyInitData(work->data);
 }
 
-void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src);
+void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src);
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
     MdlCtx *model = work->params.model;
@@ -39,8 +39,8 @@ void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
     effTrackPolyResampleHistory(work->data, points);
 }
 
-void effTrackPolyPushWorkEndpoints(EffTrackPolyWork *work, void *data) {
-    effTrackPolyResampleHistory(work->data, data);
+void effTrackPolyPushWorkEndpoints(EffTrackPolyWork *work, const u128 *endpoints) {
+    effTrackPolyResampleHistory(work->data, endpoints);
 }
 
 void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
@@ -103,8 +103,8 @@ void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list) {
     sdfReleaseResourceAllocation(list->handle);
 }
 
-void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, void *data) {
-    effTrackPolyPushWorkEndpoints(list->items[index], data);
+void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, const u128 *endpoints) {
+    effTrackPolyPushWorkEndpoints(list->items[index], endpoints);
 }
 
 void effTrackPolyResetIndexedWork(EffTrackPolyList *list, s32 index) {
@@ -265,7 +265,7 @@ void effTrackPolyAdvancePosition(EffTrackPolyData *data, s32 amount) {
 }
 
 /* Append a point pair at the ring position, wrapping back to the reserved pair. */
-void effTrackPolyAppendPointPair(EffTrackPolyData *data, u128 *src) {
+void effTrackPolyAppendPointPair(EffTrackPolyData *data, const u128 *src) {
     s32 position = data->position;
     u128 *points = data->points;
     s32 count;
@@ -287,7 +287,7 @@ void effTrackPolyAppendPointPair(EffTrackPolyData *data, u128 *src) {
 
 /* Resample the newest history span at a fixed interval, smoothing established
  * tracks with Catmull-Rom interpolation and linearly extending short tracks. */
-void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src) {
+void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src) {
     f32 firstHistory[4][4];
     f32 secondHistory[4][4];
     f32 firstBasePoint[4];

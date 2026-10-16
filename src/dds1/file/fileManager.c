@@ -196,20 +196,20 @@ struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
 }
 
 /* Return the stored resource handle without changing ownership. work is required. */
-u32 fileGetResourceHandle(struct FileRequest *request) {
-    FileWork *work = (FileWork *)request;
+u32 fileGetResourceHandle(const struct FileRequest *request) {
+    const FileWork *work = (const FileWork *)request;
     return work->resourceHandle;
 }
 
 /* Return the stored loaded-data address as its existing u32 representation. */
-u32 fileGetLoadedDataAddress(struct FileRequest *request) {
-    FileWork *work = (FileWork *)request;
+u32 fileGetLoadedDataAddress(const struct FileRequest *request) {
+    const FileWork *work = (const FileWork *)request;
     return work->loadedDataAddress;
 }
 
 /* Return the recorded resource size; work is required. */
-u32 fileGetResourceSize(struct FileRequest *request) {
-    FileWork *work = (FileWork *)request;
+u32 fileGetResourceSize(const struct FileRequest *request) {
+    const FileWork *work = (const FileWork *)request;
     return work->size;
 }
 
@@ -220,7 +220,7 @@ u32 func_00288BA0(FileWork *work) {
 
 /* Kind one additionally requires readinessEnabled; other kinds only require
  * state six. The enable word is a gate, not the expected state value. */
-s32 fileIsRequestReadyInCurrentMode(FileRequest *request) {
+s32 fileIsRequestReadyInCurrentMode(const FileRequest *request) {
     s32 result;
 
     if (request->kind == FILE_REQUEST_KIND_PAC) {
@@ -234,7 +234,7 @@ s32 fileIsRequestReadyInCurrentMode(FileRequest *request) {
 }
 
 /* Always require the enable gate and state six, irrespective of request kind. */
-s32 fileRequestIsReady(FileRequest *request) {
+s32 fileRequestIsReady(const FileRequest *request) {
     s32 result = 0;
     if (request->readinessEnabled != 0) {
         result = request->state == FILE_REQUEST_COMPLETE;

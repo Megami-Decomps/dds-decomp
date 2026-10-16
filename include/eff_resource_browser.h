@@ -50,7 +50,7 @@ void effFreeWork(EffResourceDescriptor *work);
 void effSetMsgHeader(EffResourceDescriptor *work, s32 x, s32 y);
 u32 effGetWorkParam(EffResourceDescriptor *work);
 u32 effGetWorkLink(EffResourceDescriptor *work);
-u32 effFormatMsgNames(EffResourceDescriptor *work, void *destination);
+u32 effFormatMsgNames(EffResourceDescriptor *work, char *destination);
 void effSetWorkFirst(EffResourceDescriptor *work, u32 delay);
 void effSetWorkSecond(EffResourceDescriptor *work, u32 surface);
 void effSetMsgPair(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);

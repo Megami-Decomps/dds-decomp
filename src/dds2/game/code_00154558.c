@@ -30,7 +30,7 @@ extern void fldSetTitleBannerPending(s32);
 
 
 
-extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 extern s32 D_004362D4;
@@ -159,7 +159,7 @@ extern s32 fldQuerySelectedActorMotionState(s32 value);
 
 extern s32 func_0013FA98(s32 param0, s32 param1);
 
-extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
+extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
 
 extern void fldStartSelectedActorTask(void);
 
@@ -169,15 +169,15 @@ extern void fldPlayCurrentBgmSound(void);
 
 extern void fldReleaseCurrentBgm(void);
 
-extern void fldPlayMenuSound(s32 param);
+extern void fldPlayMenuSound(s32 soundId);
 
-extern void fldPlayFieldSe(s32 param);
+extern void fldPlayFieldSe(s32 soundId);
 
-extern s32 fldPollArchiveLoad(s32 param);
+extern s32 fldPollArchiveLoad(s32 archiveId);
 
-extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
+extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
-extern void fldPlayArchiveSound(s32 param0, s32 param1);
+extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
@@ -252,13 +252,13 @@ extern s32 D_0043633C;
 
 extern s32 D_00389784[];
 
-extern s32 fldSetMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern s32 fldSetAlternateMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetAlternateMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern void fldClearFloorFlag(s32, s32, s32);
+extern void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
-extern void fldSetFloorFlag(s32, s32, s32);
+extern void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
 extern s32 scrReadIntParameter(s32);
@@ -277,7 +277,7 @@ extern char fldRoomNameSentinel[];
 
 extern char *strstr(const char *, const char *);
 
-extern void fldSetFadeTarget(s32, s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 
 extern void fldSetSwayMode(s32);
 
@@ -294,7 +294,8 @@ extern s32 D_0043630C;
 extern u32 fldGetPlayerSceneState(void);
 
 
-extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
+extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
+                                                       f32 *targetPositionOut);
 
 extern void fldUpdateCameraProjectionEndpoints(void);
 
@@ -306,7 +307,7 @@ extern s32 D_004360B4;
 
 extern s32 D_004360B8;
 
-extern void fldSetRoomSceneFlag(s32, s32, s32, s32);
+extern void fldSetRoomSceneFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern int strcmp(const char *, const char *);
 
@@ -314,7 +315,7 @@ extern char D_004363F0[]; /* "BARIA" */
 
 extern char *D_004361D8;
 
-extern void fldSetMapSlotValueFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotValueFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern s32 fldResolveEventSelectorTarget(s32 index);
 
@@ -778,7 +779,7 @@ s32 fldCmdSetFadeAndSway(void) {
     return 1;
 }
 
-extern void fldSetRoomModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 
@@ -1059,7 +1060,7 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
     return 1;
 }
 
-s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
+s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode) {
     s32 i;
     s32 searchId;
     void *obj;
@@ -1070,16 +1071,16 @@ s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
     if (stage == 0) {
         stage = fldAreaState.floor + 1;
     }
-    if (name == NULL) {
+    if (roomName == NULL) {
         for (i = 0; i < 16; i++) {
             fldSetRoomObjectModeFlag(world, stage, i, 0);
         }
     } else {
-        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 0);
+        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(roomName), 0);
     }
     if (world == fldAreaState.area) {
         if (stage == fldAreaState.floor + 1) {
-            searchId = fldFindSearchId(name);
+            searchId = fldFindSearchId(roomName);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
                 switch (mode) {
@@ -1148,7 +1149,7 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
     return 1;
 }
 
-s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
+s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode) {
     s32 i;
     s32 searchId;
     void *obj;
@@ -1159,16 +1160,16 @@ s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
     if (stage == 0) {
         stage = fldAreaState.floor + 1;
     }
-    if (name == NULL) {
+    if (roomName == NULL) {
         for (i = 0; i < 16; i++) {
             fldSetRoomObjectModeFlag(world, stage, i, 1);
         }
     } else {
-        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 1);
+        fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(roomName), 1);
     }
     if (world == fldAreaState.area) {
         if (stage == fldAreaState.floor + 1) {
-            searchId = fldFindSearchId(name);
+            searchId = fldFindSearchId(roomName);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
                 switch (mode) {
@@ -1289,7 +1290,7 @@ s32 fldOpSetAlternateMapTargetFlag(void) {
     return 1;
 }
 
-extern void fldSetMapSlotByte(s32, s32, s32, s32);
+extern void fldSetMapSlotByte(s32 area, s32 slotIndex, s32 valueIndex, s32 value);
 
 s32 fldCmdSetMapSlotByte(void) {
     s32 world;
@@ -1314,29 +1315,29 @@ s32 fldCmdSetMapSlotByte(void) {
 
 s32 fldCmdClearFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_00389780[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldSetFloorFlag(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldSetFloorFlag(area, floor, flagNumber);
     return 1;
 }
 
 s32 fldCmdSetFloorFlag(void) {
     s32 area = scrReadIntParameter(0);
-    s32 floor, target;
+    s32 floor, flagNumber;
     if (area == 0) area = D_00389780[0];
     floor = scrReadIntParameter(1);
     if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldClearFloorFlag(area, floor, target);
+    flagNumber = scrReadIntParameter(2);
+    if (flagNumber == 0) return 1;
+    fldClearFloorFlag(area, floor, flagNumber);
     return 1;
 }
 
-extern void fldSetMapSlotAuxiliaryFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotAuxiliaryFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
@@ -1681,18 +1682,18 @@ u8 fldCommandLoadArchive(void) {
 }
 
 s32 fldCmdSetArchiveSoundVolumePan(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+    s32 sequenceGroup = scrReadIntParameter(0);
+    s32 sequenceIndex = scrReadIntParameter(1);
 
-    fldSetArchiveSoundVolumePan(param0, param1);
+    fldSetArchiveSoundVolumePan(sequenceGroup, sequenceIndex);
     return 1;
 }
 
 s32 fldCmdPlayArchiveSound(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+    s32 sequenceGroup = scrReadIntParameter(0);
+    s32 sequenceIndex = scrReadIntParameter(1);
 
-    fldPlayArchiveSound(param0, param1);
+    fldPlayArchiveSound(sequenceGroup, sequenceIndex);
     return 1;
 }
 

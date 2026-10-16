@@ -6,7 +6,8 @@
 extern u32 sdfCounterAnimationValue;
 extern u32 D_004390A0;
 extern void fldDrawTransitionBackdrop(f32);
-extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
+extern void sdfDrawScaledCenteredSlotImage(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z,
+                                           s32 alpha, s32 placementIndex, s32 flags, s32 context);
 
 void mnuDrawAnimatedTransition(s32 opening) {
     f32 progress;

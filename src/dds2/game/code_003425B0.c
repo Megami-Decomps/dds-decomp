@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
 #include "sdf_resource.h"
 #include "sdf_packed_resource.h"
@@ -75,10 +76,6 @@ extern s32 D_00438D1C;
 
 extern u32 D_00438D20;
 
-u32 sndQueueCommandPacket(u32, u32, void *, u32);
-
-u32 sndSendCommandPacket(u32, u32, void *, u32);
-
 typedef void *(*SdfSoundReadCallback)(s32);
 typedef union SdfSoundCommand {
     u32 word;
@@ -99,7 +96,7 @@ extern char D_0040BAF8[];
 
 extern s32 sdfSoundRpcSemaphore;
 
-extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern s32 GetThreadId(void);
 
@@ -123,7 +120,7 @@ extern s32 sceIpuSync(s32, s32);
 
 extern s32 DIntr(void);
 
-extern void sdfDispatchNextStreamNode(s32);
+extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
 
@@ -239,8 +236,7 @@ extern SdfSoundRpcRequest *D_004391D4;
 extern s32 D_004391D8;
 extern DevState *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
-extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
-extern s32 sdfDevQueueActiveOperation(DevState *);
+extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
@@ -804,7 +800,7 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
     return result;
 }
 
-extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32);
+extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32 capacity);
 
 DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;

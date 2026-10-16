@@ -8,6 +8,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "eff.h"
 #include "eff_resource_records.h"
 #include "itf.h"
@@ -219,8 +220,8 @@ void mnuDrawSelectionLabel(s32 selection) {
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
-extern s32 ptyGetAffinityKind(s32, s32);
-extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
+extern s32 ptyGetAffinityKind(s32 affinityId, s32 index);
+extern s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index);
 extern s32 mnuLookupRangeEntry(u16);
 extern const u8 *mnuComboGunRequirementTexts[16];
 extern const u8 *D_003BAA8C;
@@ -309,9 +310,8 @@ s32 mnuHasAvailableSlotResource(s32 id) {
 }
 
 extern void ptyDrawLinkageSkillEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
-extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
-extern s32 ptyMatchAffinityPermutation(s32 *, s32);
-extern u16 mnuPickPairedTableValue(s32, s32);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
+extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
 extern const u8 D_003BC708[];
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern void mnuSortItems(MenuList *, s32, s32);
@@ -360,7 +360,7 @@ void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
                 node = mnuAppendWindowListNode(windows[0], D_003BAA8C + skill * 17);
                 node->sortKeyPrimary = skill;
                 {
-                    s32 unavailable = ptyMatchAffinityPermutation((s32 *)party, skill);
+                    s32 unavailable = ptyMatchAffinityPermutation((const s32 *)party, skill);
                     /* The matcher returns 0/1. The consumed local preserves
                      * the inverted Boolean as XOR rather than a comparison. */
                     unavailable ^= 1;
@@ -481,14 +481,14 @@ void mnuDrawListFrames(s32 menu) {
     }
 }
 
-s32 mnuCampMenuDrawStatus(KwlnTask *param) {
-    s32 context = kwlnTaskGetUserValue(param);
+s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
     MenuList *list;
     s32 label;
 
-    mnuDrawCampScreenDefault(param);
+    mnuDrawCampScreenDefault(callback);
     mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
@@ -504,7 +504,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
         }
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContextSprites *)context)->sprite78));
-    return menuRunPanel((void *)context, 1, (void *)param);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 /* Run the camp-status panel's phase-two control and return its result. */
@@ -634,19 +634,19 @@ void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
 
 extern void itfGridLookupValueOrDefault(s32, s32);
 
-void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
+void mnuDrawCursorIcons(MenuAssets *assets, s32 surface) {
     EffectSlotSet *icon = assets->sprites[2];
     s32 *state = *(s32 **)((u8 *)icon + 0x18);
 
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    effDrawSpriteWithCornerFade(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, arg);
+    effDrawSpriteWithCornerFade(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, surface);
     itfGridLookupValueOrDefault((s32)assets->sprites[2], 0);
     icon = assets->sprites[3];
     state = *(s32 **)((u8 *)icon + 0x18);
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    effDrawSpriteWithCornerFade(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, arg);
+    effDrawSpriteWithCornerFade(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, surface);
     itfGridLookupValueOrDefault((s32)assets->sprites[3], 0);
 }
 

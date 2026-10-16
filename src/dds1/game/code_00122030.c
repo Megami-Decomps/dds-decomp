@@ -93,10 +93,10 @@ extern char D_0039FCB0[];
 
 extern char D_0039FCC8[];
 
-extern void fldDispatchSceneAction(u32 arg0);
+extern void fldDispatchSceneAction(u32 action);
 
 
-extern struct ScrData *scrFindNamedProcessNode(char *arg0);
+extern struct ScrData *scrFindNamedProcessNode(char *name);
 
 
 
@@ -208,9 +208,9 @@ extern u32 D_0032E570[];
 
 extern u32 D_0032E570[];
 
-/* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 x, s32 y);
+/* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
-/* Read the matching location record's fourth signed halfword; zero on miss. */ s32 fldGetLocationCoordinateValue(s32 x, s32 y);
+/* Read the matching location record's fourth signed halfword; zero on miss. */ s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 
 void fldLoadFieldTables(void);
 
@@ -491,10 +491,10 @@ f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 to
     return result;
 }
 
-extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
+extern f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 
-f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
-    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(ax, ay, bx, by) + 90.0f);
+f32 fldGetNormalizedComplementaryAngle(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
+    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(fromX, fromZ, toX, toZ) + 90.0f);
     return (f32)(angle % 360);
 }
 
@@ -1030,12 +1030,12 @@ extern FieldVec4 D_0039FC40;
 extern char D_0039FC50[];
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern s32 D_0032E4C8[];
-extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
-extern void fldApplySceneLightSet(s32, s32);
+extern void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId);
+extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
 extern s32 fldUpdateCameraObjectPose(void);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
-extern void fldApplySkyLightSet(u32, s32);
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 extern void ddsReleaseUnitObject(EffWorldNode *);
 
@@ -1612,12 +1612,12 @@ extern f32 D_0032F250[4];
 #include "dds3_world_primary.h"
 extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
-extern void evtAdvanceSolarClockAndExpireControls(f32);
+extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
-extern s32 ptyAnyUnitFlagMatch(u32,s32);
-extern void ptyApplyFieldHpAttrition(s32);
-extern s32 btlAdvanceConditionalEncounterRoll(f32,s32);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern void ptyApplyFieldHpAttrition(s32 attritionMode);
+extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void dds3WorkClear(void);
 extern char D_0039FCA0[], D_0039FCB0[];
 
@@ -1988,7 +1988,7 @@ extern void fldRequestMiniTitleDismiss(void);
 
 extern s32 fldRestartSceneResourceTask(void);
 
-extern s32 fldSetEncounterMode(s32);
+extern s32 fldSetEncounterMode(s32 encounterMode);
 
 extern void fldStartDeferredFieldExit(void);
 
@@ -2263,7 +2263,66 @@ s32 fldProcSequence(KwlnTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00122030", fldProcDraw);
+#include "fld_encounter_runtime_api.h"
+extern void fldDrawFloorQuad(s32, s32, const char *);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern void func_00149B68(void);
+extern void fldDrawAutomapWhenReady(void);
+extern void func_0011EA10(void);
+extern void fldTickWeatherEffectNodes(void);
+extern s32 D_0032E590[];
+extern s32 D_0032E598[];
+extern s32 D_003BABFC;
+s32 fldProcDraw(KwlnTask *task) {
+    s32 flags;
+    FldSequenceController *lifecycle = &fldSceneLifecycleFlags;
+
+    if (dds3AdminGetRequestedMode() != -1) {
+        return 0;
+    }
+    if (fldGetResourceReadyFlag() == 1) {
+        if (D_0032E590[0] == 1) {
+            fldDrawFloorQuad(0x40, 0xC0, "NowLoading...");
+        }
+        if (!lifecycle->stage) {
+            return 0;
+        }
+    } else {
+        if (!lifecycle->stage) {
+            return 0;
+        }
+    }
+    if (fldGetEncounterRuntimeResult() != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (fldGetCampSceneControlMode() == 1) {
+        return 0;
+    }
+    if (fldGetSceneReadyFlag() == 0 && fldGetCampSceneControlMode() == 0 &&
+        fldIsEventPhaseAtLeastTwo() == 0) {
+        func_00149B68();
+    }
+    fldDrawAutomapWhenReady();
+    func_0011EA10();
+    if (fldAreaState.transitionMode != 0) {
+        fldTickWeatherEffectNodes();
+    }
+    if (lifecycle->stage >= 2 && D_0032E598[0] != 0 &&
+        fldGetEncounterRuntimeResult() == 0) {
+    flags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
+    if (flags & 0x40) {
+        effBlurStepScatterSlotsAndDraw(D_003BABE4);
+        return 0;
+    }
+    if (flags & 0x80) {
+        effBlurStepScatterSlotsAndDraw(D_003BABE4);
+    }
+    }
+    return 0;
+}
 
 /* Lifecycle flags and the separate scene-control flags have independent
  * set, clear and test operations. */
@@ -2299,26 +2358,26 @@ extern s32 fldProcDraw(KwlnTask *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
 void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
-    FieldSequenceRecord *scene = (FieldSequenceRecord *)&D_0032F1A0;
+    FieldPlayerSceneWork *scene = &D_0032F1A0;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
 
     controller->stage = 0;
     controller->flags = 0;
-    scene->unk_34 = mode;
+    scene->primaryState = mode;
     if (mode == 0) {
-        scene->unk_3c = record->unk_3c;
-        scene->unk_38 = record->unk_38;
-        strcpy(scene->name, record->name);
-        scene->stage = record->stage;
-        scene->code = record->code;
-        scene->kind = record->kind;
-        scene->unk_62 = record->unk_62;
-        scene->enabled = record->enabled;
-        scene->mode = record->mode;
-        scene->link = record->link;
-        strcpy(scene->detail, record->detail);
-        strcpy(scene->note, record->note);
-        scene->options = record->options;
+        scene->sequenceWord3C = record->unk_3c;
+        scene->sequenceWord38 = record->unk_38;
+        strcpy(scene->entryName, record->name);
+        scene->area = record->stage;
+        scene->sequenceCode = record->code;
+        scene->room = record->kind;
+        scene->sequenceMode = record->unk_62;
+        scene->retainCachedAreaResource = record->enabled;
+        scene->secondaryState = record->mode;
+        scene->cameraLinkMode = record->link;
+        strcpy(scene->cameraName, record->detail);
+        strcpy(scene->resourceName, record->note);
+        scene->sequenceOption = record->options;
     }
     kwlnTaskCreate(D_0039FD30, 0x3F7, 0, 0, fldProcSequence, 0, 0);
     kwlnTaskCreate(D_0039FD40, 0x2B0A, 0, 0, fldProcDraw, 0, 0);
@@ -2432,3 +2491,8 @@ INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD40);
 
+/* Validate the packet where its native initialization is reconstructed. */
+typedef char FieldSequenceRecord_size_check[
+    (sizeof(FieldSequenceRecord) == 0xA0) ? 1 : -1];
+typedef char FieldSequenceRecord_enabled_offset_check[
+    ((u32)&((FieldSequenceRecord *)0)->enabled == 0x58) ? 1 : -1];

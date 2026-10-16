@@ -52,7 +52,7 @@ typedef struct EffMagatuhiValueWork {
     u32 unk10;
     f32 (*positions)[4];
     u32 *colorTable;
-    f32 *unk1C;
+    f32 *historyScalars;
     u32 *slotColors;
     u16 *writeIndices;
     u16 *validCounts;
@@ -78,6 +78,7 @@ typedef struct EffMagatuhiOwner {
 } EffMagatuhiOwner;
 
 typedef char EffMagatuhiValueWork_size_must_be_0x38[(sizeof(EffMagatuhiValueWork) == 0x38) ? 1 : -1];
+typedef char EffMagatuhiValueWork_historyScalars_offset[((u32)&((EffMagatuhiValueWork *)0)->historyScalars == 0x1C) ? 1 : -1];
 typedef char EffMagatuhiHistoryParams_size_must_be_0x1C[(sizeof(EffMagatuhiHistoryParams) == 0x1C) ? 1 : -1];
 typedef char EffMagatuhiOwner_size_must_be_0x20[(sizeof(EffMagatuhiOwner) == 0x20) ? 1 : -1];
 
@@ -87,15 +88,15 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work);
 void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
 void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vector);
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #else
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vector);
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #endif
 
 struct MdlCtx;
@@ -128,8 +129,8 @@ EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src);
 void effTrackPolyRelease(EffTrackPolyWork *work);
 void effTrackPolyUpdate(EffTrackPolyWork *work);
 
-/* Copy one vector from source storage into destination storage. */
-void effCopyVector(void *dst, void *src);
+/* Copy one 128-bit vector from the read-only source to destination storage. */
+void effCopyVector(void *dst, const void *src);
 void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
 
@@ -638,7 +639,7 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer);
 typedef struct EffResourceEntry {
     f32 position[3];
     u8 pad0C[4];
-    u32 value;
+    u32 color; /* 0x10: initialized to neutral grey and submitted as draw color. */
 } EffResourceEntry; /* 0x14 */
 
 typedef struct EffResourceWork {
@@ -717,16 +718,20 @@ typedef struct EffRingWork {
     u32 updateCount;
     u32 color;
     f32 scale;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
+    f32 currentRadius;
+    f32 currentAxisOffset;
+    f32 currentSideOffsetB;
+    f32 currentSideOffsetA;
     SdfMemBlock *allocationHandle;
     EffRecordPool *recordPool;
 } EffRingWork;
 
 typedef char EffRingParticleSizeCheck[sizeof(EffRingParticle) == 0x10 ? 1 : -1];
 typedef char EffRingWorkSizeCheck[sizeof(EffRingWork) == 0x80 ? 1 : -1];
+typedef char EffRingWork_currentRadius_offset_check[((u32)&((EffRingWork *)0)->currentRadius == 0x68) ? 1 : -1];
+typedef char EffRingWork_currentAxisOffset_offset_check[((u32)&((EffRingWork *)0)->currentAxisOffset == 0x6C) ? 1 : -1];
+typedef char EffRingWork_currentSideOffsetB_offset_check[((u32)&((EffRingWork *)0)->currentSideOffsetB == 0x70) ? 1 : -1];
+typedef char EffRingWork_currentSideOffsetA_offset_check[((u32)&((EffRingWork *)0)->currentSideOffsetA == 0x74) ? 1 : -1];
 
 typedef struct PcpFlashPulseParticle {
     u32 color;
@@ -836,6 +841,7 @@ typedef struct EffPCPNeedleWork {
 } EffPCPNeedleWork; /* 0x74, followed by count slots */
 
 typedef char EffResourceEntrySizeCheck[sizeof(EffResourceEntry) == 0x14 ? 1 : -1];
+typedef char EffResourceEntry_color_offset_check[((u32)&((EffResourceEntry *)0)->color == 0x10) ? 1 : -1];
 typedef char EffResourceWorkSizeCheck[sizeof(EffResourceWork) == 0x74 ? 1 : -1];
 typedef char EffPCPNeedleParamsSizeCheck[sizeof(EffPCPNeedleParams) == 0x5C ? 1 : -1];
 typedef char EffPCPNeedleSlotSizeCheck[sizeof(EffPCPNeedleSlot) == 0x2C ? 1 : -1];

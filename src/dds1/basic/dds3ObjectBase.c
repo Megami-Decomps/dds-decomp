@@ -22,7 +22,6 @@ extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 s32 dds3SelectSlotForObjectKind(u32 kind);
 void *dds3GetExtData(void *obj);
 void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
-void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
 void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *slot, EffWorldNode *owner);
@@ -275,7 +274,7 @@ void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 
     VU0_SET_W_ONE(vf10);
     mdlStorePrimaryVectorVU(model);
     base->resourceHandle = model;
-    object->inner->radius = model->unk34;
+    object->inner->radius = model->objectRadius;
     base->resourceState = DDS3_OBJECT_RESOURCE_MODEL_CONTEXT;
     base->unk44 = 0;
     {
@@ -363,8 +362,8 @@ s32 dds3RegisterObjectInHandlerIndex(void *object) {
 }
 
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
-extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
 struct SdfPoolNode;

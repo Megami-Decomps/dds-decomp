@@ -96,23 +96,23 @@ typedef enum MdlViewerRecordKind {
 typedef struct MdlViewState {
     s32 unk00;
     s32 viewerTask;
-    s8 unk08;
+    s8 exitCleanupStarted; /* 0x08: one-shot guard for viewer task/resource teardown. */
     s8 unk09;
     s8 taskPhase; /* 0x0A: one-based index into D_003C87F0 */
     s8 unk0B;
     s8 unitStepMode;  /* 0x0C: toggled by the step button, read as a 0/2 step */
     s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys */
     u8 unk0E;
-    s8 unk0F;
+    s8 assetDisplayMode; /* 0x0F: toggles asset labels and cursor paging. */
     s8 yawStepMode; /* 0x10: one yaw step per left/right button press */
     u8 pad11[3];
-    s16 unk14;
+    s16 selectedTaskIndex;
     s16 resourceCount;
     s16 resourceGroup; /* 0x18: group passed to the resource loader */
     s16 resourceId;    /* 0x1A: ID passed to the resource loader */
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
+    s16 selectedResourceGroup; /* 0x1C: resource group under the selection cursor. */
+    s16 selectedResourceId; /* 0x1E: resource ID under the selection cursor. */
+    s16 selectionCursor; /* 0x20: selects one of five controls in the asset panel. */
     s16 activeEntryId;   /* 0x22: record key most recently added to the viewer */
     u16 selectedEntryId; /* 0x24: key passed to mdlAddEntry* */
     s16 selectedNodeId;  /* 0x26: checked by mdlHasNode */
@@ -126,13 +126,13 @@ typedef struct MdlViewState {
     s16 labelIndexB; /* 0x36: indexes D_003C88C8 */
     s16 scrollPage;  /* 0x38: page stepped by mdlUpdateViewerCursorWithPageStep */
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
-    s16 unk3C;
+    s16 settingsCursor; /* 0x3C: selected row among the ten viewer settings. */
     s16 unk3E;
     s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
     s16 selectedRecordIndex; /* 0x42: index across the shared and active-entry record lists */
     s16 effectListScroll; /* 0x44: first record displayed by the effect list */
     s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
-    s16 unk48;
+    s16 workspaceSetupPhase; /* 0x48: capture workspace setup advances through phases 0, 1, 2. */
     s16 captureScale; /* 0x4A: model capture scale setting */
     s16 captureDivX;  /* 0x4C: model capture horizontal division setting */
     s16 captureDivY;  /* 0x4E: model capture vertical division setting */
@@ -144,11 +144,28 @@ typedef struct MdlViewState {
     MdlCtx *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
     SdfListHead *packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
+typedef char MdlViewState_selectedTaskIndex_offset_check[
+    ((u32)&((MdlViewState *)0)->selectedTaskIndex == 0x14) ? 1 : -1];
+typedef char MdlViewState_selectedResourceId_offset_check[
+    ((u32)&((MdlViewState *)0)->selectedResourceId == 0x1E) ? 1 : -1];
+typedef char MdlViewState_selectedResourceGroup_offset_check[
+    ((u32)&((MdlViewState *)0)->selectedResourceGroup == 0x1C) ? 1 : -1];
+typedef char MdlViewState_size_check[sizeof(MdlViewState) == 0xD0 ? 1 : -1];
+typedef char MdlViewState_exitCleanupStarted_offset_check[
+    ((u32)&((MdlViewState *)0)->exitCleanupStarted == 0x08) ? 1 : -1];
+typedef char MdlViewState_workspaceSetupPhase_offset_check[
+    ((u32)&((MdlViewState *)0)->workspaceSetupPhase == 0x48) ? 1 : -1];
+typedef char MdlViewState_assetDisplayMode_offset_check[
+    ((u32)&((MdlViewState *)0)->assetDisplayMode == 0x0F) ? 1 : -1];
+typedef char MdlViewState_selectionCursor_offset_check[
+    ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
+typedef char MdlViewState_settingsCursor_offset_check[
+    ((u32)&((MdlViewState *)0)->settingsCursor == 0x3C) ? 1 : -1];
 
 extern MdlViewState mdlViewerState;
 
 static inline s8 mdlGetViewerDisplayMode(MdlViewState *state) {
-    return state->unk0F;
+    return state->assetDisplayMode;
 }
 
 extern char D_00421208[]; /* "MODEL : %d-%03d " */
@@ -503,8 +520,8 @@ u16 mdlGetRecordPartIndex(MdlRecord *record) {
 }
 
 /* Read the counted group record's number of following entity-slot packets. */
-u16 mdlGetRecordSlotCount(MdlRecord *record) {
-    return record->tail.half.unk10;
+u16 mdlGetRecordSlotCount(const MdlRecord *record) {
+    return record->tail.half.slotCount;
 }
 
 extern char D_00420FF0[], D_00421000[], D_00421010[], D_00421020[], D_00421030[], D_00421040[];
@@ -1215,7 +1232,7 @@ void mdlDrawViewerOptionLabels(void) {
     label = D_003C8780;
     i = 0;
     do {
-        s32 style = (i == mdlViewerState.unk14 && mdlViewerState.unk09 < 0x14) ? 4 : 0;
+        s32 style = (i == mdlViewerState.selectedTaskIndex && mdlViewerState.unk09 < 0x14) ? 4 : 0;
         s32 xOffset;
         u32 row;
         u32 packet;
@@ -1258,7 +1275,7 @@ void mdlDrawViewerModelAndMotionSummary(void) {
     if (nodeCount == 0) {
         formatted = sdfFormatSifPacket(&packet, D_00437068);
     } else {
-        if (mdlViewerState.unk0F == 0) {
+        if (mdlViewerState.assetDisplayMode == 0) {
             format = D_00421238;
         } else {
             format = D_00421248;
@@ -1353,10 +1370,10 @@ void mdlHandleViewerAssetSelection(void) {
     s32 entryCount;
     s32 referenceCount;
 
-    if (mdlUpdateViewerCursor(&mdlViewerState.unk20, 5) != 0) {
+    if (mdlUpdateViewerCursor(&mdlViewerState.selectionCursor, 5) != 0) {
         return;
     }
-    pageStep = mdlViewerState.unk0F == 0 ? 10 : 16;
+    pageStep = mdlViewerState.assetDisplayMode == 0 ? 10 : 16;
     if (sdfPadButtonStates[0] < 0) {
         mdlViewerState.selectedNodeId++;
         if (mdlViewerState.selectedNodeId == 4) {
@@ -1368,19 +1385,19 @@ void mdlHandleViewerAssetSelection(void) {
         }
         mdlViewerState.selectedEntryId = motionIndex;
     }
-    switch (mdlViewerState.unk20) {
+    switch (mdlViewerState.selectionCursor) {
     case 0:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1C, mdlGetResourceTableCount(), 1) != 0) {
-            entryCount = mdlGetTableWord(mdlViewerState.unk1C);
-            if (mdlViewerState.unk1E < entryCount) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceGroup, mdlGetResourceTableCount(), 1) != 0) {
+            entryCount = mdlGetTableWord(mdlViewerState.selectedResourceGroup);
+            if (mdlViewerState.selectedResourceId < entryCount) {
                 return;
             }
-            mdlViewerState.unk1E = entryCount - 1;
+            mdlViewerState.selectedResourceId = entryCount - 1;
             return;
         }
         break;
     case 1:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1E, mdlGetTableWord(mdlViewerState.unk1C), pageStep) != 0) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceId, mdlGetTableWord(mdlViewerState.selectedResourceGroup), pageStep) != 0) {
             return;
         }
         break;
@@ -1412,23 +1429,23 @@ void mdlHandleViewerAssetSelection(void) {
         mdlRefreshDebugModelWorkFileList();
         if (mdlViewerState.resourceGroup == mdlGetResourceTableCount() - 1) {
             mdlViewerState.resourceId = 0;
-            mdlViewerState.unk1C = mdlViewerState.resourceGroup;
-            mdlViewerState.unk1E = 0;
+            mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup;
+            mdlViewerState.selectedResourceId = 0;
         }
         mdlLoadViewerResourceAndResetCursors();
         return;
     }
-    if (mdlViewerState.unk20 < 2) {
+    if (mdlViewerState.selectionCursor < 2) {
         if (sdfPadButtonStates[1] >= 0) {
             return;
         }
-        if (mdlViewerState.resourceGroup == mdlViewerState.unk1C && mdlViewerState.resourceId == mdlViewerState.unk1E) {
+        if (mdlViewerState.resourceGroup == mdlViewerState.selectedResourceGroup && mdlViewerState.resourceId == mdlViewerState.selectedResourceId) {
             return;
         }
         mdlDestroyContext(mdlViewerState.resources[0]);
         mdlViewerState.resources[0] = NULL;
-        mdlViewerState.resourceGroup = mdlViewerState.unk1C;
-        mdlViewerState.resourceId = mdlViewerState.unk1E;
+        mdlViewerState.resourceGroup = mdlViewerState.selectedResourceGroup;
+        mdlViewerState.resourceId = mdlViewerState.selectedResourceId;
         mdlLoadViewerResourceAndResetCursors();
         return;
     } else if (sdfPadButtonStates[1] < 0) {
@@ -1469,7 +1486,7 @@ void mdlDrawViewerAssetSelection(void) {
     mdlAppendViewerRectToDrawList(0x8410, panelTop - 0x18, 0xFF0080, 0xAE0,
                                  panelHeight, 0);
 
-    mdlCopyResourceBasename(mdlViewerState.unk1C, mdlViewerState.unk1E, basename, 0x20);
+    mdlCopyResourceBasename(mdlViewerState.selectedResourceGroup, mdlViewerState.selectedResourceId, basename, 0x20);
     basenameWidth = (s32)strlen(basename) * 3 << 6;
     mdlAppendViewerRectToDrawList(0x8E90 - basenameWidth,
                                  panelTop - 0xD8, 0xFF0080,
@@ -1480,8 +1497,8 @@ void mdlDrawViewerAssetSelection(void) {
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
-               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 0 ? 4 : 0);
-    formatted = sdfFormatSifPacket(&packet, D_00437070, mdlViewerState.unk1C + 0x30);
+               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, D_00437070, mdlViewerState.selectedResourceGroup + 0x30);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet, 0);
@@ -1489,22 +1506,22 @@ void mdlDrawViewerAssetSelection(void) {
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 1 ? 4 : 0);
-    if (mdlViewerState.unk0F == 0) {
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 1 ? 4 : 0);
+    if (mdlViewerState.assetDisplayMode == 0) {
         format = D_00437080;
     } else {
         format = D_00437088;
     }
-    formatted = sdfFormatSifPacket(&packet, format, mdlViewerState.unk1E);
+    formatted = sdfFormatSifPacket(&packet, format, mdlViewerState.selectedResourceId);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 3 ? 4 : 0);
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 3 ? 4 : 0);
     formatted = sdfFormatSifPacket(&packet, D_00421278, mdlViewerState.entryHeight);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 4 ? 4 : 0);
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 4 ? 4 : 0);
     formatted = sdfFormatSifPacket(&packet, D_00437090, mdlViewerState.entryWidth);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
@@ -1514,13 +1531,13 @@ void mdlDrawViewerAssetSelection(void) {
         s32 referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
 
         if (mdlViewerState.selectedNodeId == index) {
-            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 2 ? 4 : 0;
+            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 2 ? 4 : 0;
 
             if (referenceCount == 0) {
                 formatted = sdfCreateFormattedSifCommand(
                     0x88C0, rowY, 0xFF0080, style, D_00437098);
             } else {
-                if (mdlViewerState.unk0F == 0) {
+                if (mdlViewerState.assetDisplayMode == 0) {
                     format = D_004370A0;
                 } else {
                     format = D_004370A8;
@@ -1539,7 +1556,7 @@ void mdlDrawViewerAssetSelection(void) {
 
                 referenceCount--;
                 motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], index);
-                if (mdlViewerState.unk0F == 0) {
+                if (mdlViewerState.assetDisplayMode == 0) {
                     format = D_00421238;
                 } else {
                     format = D_00421248;
@@ -1903,7 +1920,7 @@ extern f32 D_00438A60;
 void mdlUpdateViewerWorkspaceSetup(void) {
     s32 initialPhase = 1;
 
-    switch (mdlViewerState.unk48) {
+    switch (mdlViewerState.workspaceSetupPhase) {
     case 0:
         if (D_0040B7D9[0] < 0) {
             f32 scale = mdlViewerState.captureScale;
@@ -1916,7 +1933,7 @@ void mdlUpdateViewerWorkspaceSetup(void) {
             mdlViewerState.unitStepMode = initialPhase;
             D_00438A50 = initialPhase;
             D_00438A58 = D_00438A54 = scale;
-            mdlViewerState.unk48 = initialPhase;
+            mdlViewerState.workspaceSetupPhase = initialPhase;
         }
         break;
     case 1:
@@ -1924,7 +1941,7 @@ void mdlUpdateViewerWorkspaceSetup(void) {
                    mdlViewerState.unk50 * 0x200 - 0x100;
         D_00438A60 = mdlViewerState.captureDivY * 0x70 -
                    mdlViewerState.unk52 * 0xE0 - 0x70;
-        mdlViewerState.unk48 = 2;
+        mdlViewerState.workspaceSetupPhase = 2;
         break;
     case 2:
         /* 0x00236D88..0x00236D98: completed phase retained in retail dispatch. */
@@ -1997,8 +2014,8 @@ void mdlApplyViewerResourceMenuAction(void) {
         }
         break;
     }
-    mdlViewerState.unk1C = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
-    mdlViewerState.unk1E = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
+    mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
+    mdlViewerState.selectedResourceId = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
     i = mdlViewerState.resources[0]->current.h.motionIndex;
     if (i < 0) {
         i = 0;
@@ -2134,13 +2151,13 @@ s32 mdlIsDebugTimeGraph(void) {
 void mdlUpdateViewerSettingsInput(void) {
     switch (mdlViewerState.unk3E) {
     case 0:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk3C, 10, 1) != 0) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.settingsCursor, 10, 1) != 0) {
             return;
         }
         if (sdfPadButtonStates[1] >= 0) {
             return;
         }
-        switch (mdlViewerState.unk3C) {
+        switch (mdlViewerState.settingsCursor) {
         case 0:
             mdlViewerState.unk0E ^= 1;
             break;
@@ -2148,7 +2165,7 @@ void mdlUpdateViewerSettingsInput(void) {
             kwlnDebugGraphSetEnabled(mdlIsDebugTimeGraph() == 0);
             break;
         case 2:
-            mdlViewerState.unk0F ^= 1;
+            mdlViewerState.assetDisplayMode ^= 1;
             break;
         case 3:
         case 4:
@@ -2158,7 +2175,7 @@ void mdlUpdateViewerSettingsInput(void) {
         case 6:
         case 7:
         case 8:
-            mdlViewerState.unk3E = mdlViewerState.unk3C - 4;
+            mdlViewerState.unk3E = mdlViewerState.settingsCursor - 4;
             break;
         case 9:
             PCP_COPY_VECTOR(&D_003C87C0, &D_00453620);
@@ -2168,7 +2185,7 @@ void mdlUpdateViewerSettingsInput(void) {
         }
         break;
     case 1:
-        fldStepColorChannelByPad(&D_00435CBC, mdlViewerState.unk3C - 3, sdfPadButtonStates);
+        fldStepColorChannelByPad(&D_00435CBC, mdlViewerState.settingsCursor - 3, sdfPadButtonStates);
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         }
@@ -2232,7 +2249,7 @@ void mdlDrawViewerSettings(void) {
     enabled[0] = mdlViewerState.unk0E;
     packetList = mdlViewerState.packetList;
     enabled[1] = mdlIsDebugTimeGraph();
-    enabled[2] = mdlViewerState.unk0F;
+    enabled[2] = mdlViewerState.assetDisplayMode;
     for (i = 0, y = 0x7A80; i < 3; i++, y += 0x60) {
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
             0x7300, y, 0xFF0080, 0, D_003C8910[i],
@@ -2240,10 +2257,10 @@ void mdlDrawViewerSettings(void) {
     }
     if (mdlViewerState.unk09 < 20) {
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
-            0x7240, D_003C88E8[mdlViewerState.unk3C], 0xFF0080, 0, D_004370E0));
+            0x7240, D_003C88E8[mdlViewerState.settingsCursor], 0xFF0080, 0, D_004370E0));
     }
     fldDrawPackedRgbEditor(packetList, 0x7300, D_003C88E8[3],
-                           mdlViewerState.unk3E == 1 ? mdlViewerState.unk3C - 3 : -1,
+                           mdlViewerState.unk3E == 1 ? mdlViewerState.settingsCursor - 3 : -1,
                            D_00435CBC, 0);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
         0x7B40, 0x7C60, 0xFF0080, 0, "BACK COLOR"));
@@ -2257,7 +2274,7 @@ void mdlDrawViewerSettings(void) {
         }
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
             0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_003C8920[i], value));
-        style = i == mdlViewerState.unk3C - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
+        style = i == mdlViewerState.settingsCursor - 6 && i == mdlViewerState.unk3E - 2 ? 6 : 0;
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
             0x7F00, 0x7D80 + i * 0x60, 0xFF0080, style, D_004370E8, value));
     }
@@ -2509,8 +2526,8 @@ u32 mdlRunViewerEffectEditorTask(void) {
 }
 
 s32 mdlRequestViewerExitOnce(void) {
-    if (mdlViewerState.unk08 == 0) {
-        mdlViewerState.unk08 = 1;
+    if (mdlViewerState.exitCleanupStarted == 0) {
+        mdlViewerState.exitCleanupStarted = 1;
         mdlCleanupViewerTasksAndResources();
         dds3AdminSetControlFlag();
     }
@@ -2598,7 +2615,83 @@ void mdlRestartViewerPhaseTask(void) {
     kwlnTaskAddChild((KwlnTask *)mdlViewerState.unk00, (KwlnTask *)mdlViewerState.viewerTask);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
+#include "sdf_gs_header.h"
+extern s8 D_0040B7E6[];
+extern s8 D_0037F532[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewUpVector[];
+extern u32 sdfGetLodChunkValue(SdfModel *);
+s32 mdlViewer(KwlnTask *task) {
+    SdfModel *model;
+    SdfGsPacketHeader *packet;
+    s32 lodCount;
+    s32 selection;
+
+    mdlViewerState.unk09 += 2;
+    if (mdlViewerState.unk09 == 30) mdlViewerState.unk09 = 0;
+    if (D_0040B7E6[0] < 0) {
+        model = mdlViewerState.resources[0]->inner;
+        lodCount = sdfGetLodChunkValue(model);
+        if (lodCount > 0) {
+            if (model->lodIndex == lodCount) model->lodIndex = 0;
+            else model->lodIndex++;
+        }
+    }
+    if (mdlViewerState.taskPhase == 0) {
+        selection = mdlViewerState.selectedTaskIndex;
+        if ((D_0037F510[0x27] & 2) && (u32)selection < 12) {
+            mdlViewerState.selectedTaskIndex = selection + 1;
+        } else if (D_0037F510[0x27] < 0) {
+            if (selection == 12) mdlViewerState.selectedTaskIndex = 0;
+            else { mdlViewerState.selectedTaskIndex = selection + 1; }
+        } else if ((D_0037F510[0x26] & 2) && selection > 0) {
+            mdlViewerState.selectedTaskIndex = selection - 1;
+        } else if (D_0037F510[0x26] < 0) {
+            if (selection == 0) mdlViewerState.selectedTaskIndex = 12;
+            else { mdlViewerState.selectedTaskIndex = selection - 1; }
+        } else if (D_0037F510[0x25] < 0 || D_0037F510[0x24] < 0) {
+            if ((u32)selection < 7) {
+                selection += 7;
+                if ((u32)selection < 13) mdlViewerState.selectedTaskIndex = selection;
+            } else {
+                u16 pageStep = -7;
+
+                mdlViewerState.selectedTaskIndex = selection + pageStep;
+            }
+        } else if (D_0037F510[0x21] < 0) {
+            mdlViewerState.unk09 = 0;
+            mdlViewerState.taskPhase = (u8)mdlViewerState.selectedTaskIndex + 1;
+            mdlRestartViewerPhaseTask();
+        } else if (D_0037F510[0x22] < 0) {
+            mdlViewerState.taskPhase = mdlViewerState.unk0B;
+            mdlRestartViewerPhaseTask();
+        }
+    } else if (mdlViewerState.taskPhase >= 0 && D_0037F532[0] < 0) {
+        mdlViewerTaskDestroy();
+        mdlViewerState.unk0B = mdlViewerState.taskPhase;
+        mdlViewerState.taskPhase = 0;
+        mdlViewerState.selectedTaskIndex = mdlViewerState.unk0B - 1;
+    }
+    PCP_COPY_VECTOR(sdfViewTargetVector, &D_00453620);
+    PCP_COPY_VECTOR(sdfViewEyeVector, &D_00453630);
+    PCP_COPY_VECTOR(sdfViewUpVector, &D_00453640);
+    mdlViewerState.packetList = sdfCreateResetPacketList();
+    packet = sdfAllocPacketAligned(0x40);
+    sdfInitializeDmaReferenceTag(packet, 2);
+    ((u64*)packet)[4] = 0x44;
+    ((u64*)packet)[5] = 0x42;
+    ((u64*)packet)[6] = 0x3000D;
+    ((u64*)packet)[7] = 0x47;
+    sdfAppendPacket(mdlViewerState.packetList, (u32)packet);
+    if (mdlViewerState.yawStepMode == 0) {
+        mdlDrawViewerModeLabel();
+        mdlDrawViewerModelAndMotionSummary();
+        mdlDrawViewerOptionLabels();
+        mdlSubmitViewerIntermediateDrawPacket();
+        mdlSubmitViewerResourceDrawPacket();
+    }
+    return 0;
+}
 
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
 void mdlDrawMapPositionRecords(MdlCtx *resource) {
@@ -2753,20 +2846,20 @@ void mdlInitializeViewerTasksAndResources(void) {
 
     mdlLoadViewerPresentationConfig();
     mdlViewerState.viewerScale = 1.0f;
-    mdlViewerState.unk0F = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
-    mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.unk1C = mdlViewerState.resourceGroup = 2;
+    mdlViewerState.assetDisplayMode = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
+    mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = 2;
     mdlViewerState.resourceId = 0;
-    mdlViewerState.unk1E = 0;
-    mdlViewerState.unk08 = 0;
+    mdlViewerState.selectedResourceId = 0;
+    mdlViewerState.exitCleanupStarted = 0;
     mdlViewerState.unk09 = 0;
-    mdlViewerState.unk20 = 0;
+    mdlViewerState.selectionCursor = 0;
     mdlViewerState.entryHeight = 0;
     mdlViewerState.entryWidth = 0;
     mdlViewerState.labelIndexB = 0;
     mdlViewerState.scrollPage = 0;
     mdlViewerState.unitStepMode = 0;
     mdlViewerState.unk0E = 0;
-    mdlViewerState.unk48 = 0;
+    mdlViewerState.workspaceSetupPhase = 0;
     mdlResetViewerBasisVectors();
     sdfSceneProjectionParameters.camera.fov = 0.4363323f;
     PCP_COPY_VECTOR(&D_0037F6C0, &D_003C8A80);

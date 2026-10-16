@@ -14,6 +14,7 @@
 #include "sdf_model_copy.h"
 #include "sdf_asset_state.h"
 #include "sdf_pending.h"
+#include "sdf_queued_resource_api.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "sdf_resource_list_item.h"
@@ -106,7 +107,7 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     sdfCopyAssetListParameterState(destination->resources, source->resources);
     sdfModelCopyData(destination->slotPairs, source->slotPairs);
     destination->flags = source->flags;
-    destination->unk1A = source->unk1A;
+    destination->drawFlags = source->drawFlags;
     destination->color = source->color;
     VU0_LOAD_MATRIX(source->matrix);
     VU0_STORE_MATRIX(destination->matrix);
@@ -197,7 +198,7 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
     return NULL;
 }
 
-SdfChunkHeader *sdfChunkFindByTag(SdfModel *model, s32 tag) {
+SdfChunkHeader *sdfChunkFindByTag(const SdfModel *model, s32 tag) {
     return sdfChunkFindById(model->chunkTable, tag);
 }
 
@@ -251,8 +252,8 @@ const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId) {
     } while (1);
 }
 
-u32 sdfCountMapPositionRecords(SdfModel *model) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+u32 sdfCountMapPositionRecords(const SdfModel *model) {
+    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
@@ -312,8 +313,8 @@ SdfMapPositionRecord *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
     return NULL;
 }
 
-s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
-    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, id);
+s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, mapRecordId);
     if (resource != NULL) {
         sdfSetLookAtBasisFromRecord(model, resource);
         return 1;
@@ -321,8 +322,8 @@ s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
     return 0;
 }
 
-s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id) {
-    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, id);
+s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, mapRecordId);
     if (resource != NULL) {
         sdfVuTransformMapRecordPosition(model, resource);
         return 1;
@@ -330,10 +331,10 @@ s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id) {
     return 0;
 }
 
-u32 sdfGetUniqueChunkValue(SdfModel *model) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
+u32 sdfGetUniqueChunkValue(const SdfModel *model) {
+    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
-        return *(u32 *)((u8 *)chunk + sizeof(*chunk));
+        return *(const u32 *)((const u8 *)chunk + sizeof(*chunk));
     }
     return 0;
 }
@@ -443,7 +444,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
 }
 
 /* Apply the palette update only to textures with a nonempty color lookup table. */
-void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
+void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount) {
     s32 itemIndex;
     s32 itemCount;
 
@@ -455,7 +456,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
         SdfTex *texture = ((SdfTex **)list->buffer)[itemIndex];
 
         if (texture->paletteCount != 0) {
-            sdfTexBlendPaletteToTintedIntensityVU(texture, arg, value);
+            sdfTexBlendPaletteToTintedIntensityVU(texture, tint, amount);
         }
     }
 }
@@ -533,9 +534,9 @@ void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
-void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, SdfTex *texture) {
-    param->texture = texture;
-    param->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetAssetPrimaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
+    asset->texture = texture;
+    asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Initialize packed scalar values 0,0,1,1,0; the final opaque word is untouched. */
@@ -551,92 +552,92 @@ SdfSubParam *sdfSubParamCreate(void) {
 }
 
 /* Lazily create the primary scalar block; this does not itself dirty an entry. */
-SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *param) {
-    SdfSubParam *subParameter = param->primarySubParam;
+SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *asset) {
+    SdfSubParam *subParameter = asset->primarySubParam;
     if (subParameter == NULL) {
         subParameter = sdfSubParamCreate();
-        param->primarySubParam = subParameter;
+        asset->primarySubParam = subParameter;
     }
     return subParameter;
 }
 
 /* Store the five primary scalars in order and dirty both draw entries. */
-void sdfSetPrimaryTextScalars(SdfAsset *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
-    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
+void sdfSetPrimaryTextScalars(SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e) {
+    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = a;
     scalarValues[1] = b;
     scalarValues[2] = c;
     scalarValues[3] = d;
     scalarValues[4] = e;
-    param->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
 }
 
 /* Copy five scalar values, leaving the block's opaque final word unchanged. */
-void sdfCopyPrimaryTextScalars(SdfAsset *param, const f32 *sourceScalars) {
-    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
+void sdfCopyPrimaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
+    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = sourceScalars[0];
     scalarValues[1] = sourceScalars[1];
     scalarValues[2] = sourceScalars[2];
     scalarValues[3] = sourceScalars[3];
     scalarValues[4] = sourceScalars[4];
-    param->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
 }
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
-void sdfSetAssetSecondaryColor(SdfAsset *param, u32 packedColor) {
-    param->secondaryColor = packedColor;
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+void sdfSetAssetSecondaryColor(SdfAsset *asset, u32 packedColor) {
+    asset->secondaryColor = packedColor;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the mode used by the secondary packet's mode and palette lookup. */
-void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
-    param->secondaryMode = packetMode;
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+void sdfSetAssetSecondaryMode(SdfAsset *asset, u32 packetMode) {
+    asset->secondaryMode = packetMode;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, SdfTex *texture) {
-    param->secondaryTexture = texture;
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+void sdfSetAssetSecondaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
+    asset->secondaryTexture = texture;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Lazily create the secondary scalar block; this does not itself dirty an entry. */
-SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfAsset *param) {
-    SdfSubParam *subParameter = param->secondarySubParam;
+SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfAsset *asset) {
+    SdfSubParam *subParameter = asset->secondarySubParam;
     if (subParameter == NULL) {
         subParameter = sdfSubParamCreate();
-        param->secondarySubParam = subParameter;
+        asset->secondarySubParam = subParameter;
     }
     return subParameter;
 }
 
 /* Store the five secondary scalars in order and dirty both draw entries. */
-void sdfSetSecondaryTextScalars(SdfAsset *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
-    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
+void sdfSetSecondaryTextScalars(SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e) {
+    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = a;
     scalarValues[1] = b;
     scalarValues[2] = c;
     scalarValues[3] = d;
     scalarValues[4] = e;
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Copy five scalar values, leaving the block's opaque final word unchanged. */
-void sdfCopySecondaryTextScalars(SdfAsset *param, const f32 *sourceScalars) {
-    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
+void sdfCopySecondaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
+    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = sourceScalars[0];
     scalarValues[1] = sourceScalars[1];
     scalarValues[2] = sourceScalars[2];
     scalarValues[3] = sourceScalars[3];
     scalarValues[4] = sourceScalars[4];
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the scalar pair and mark its corresponding group dirty for both entries. */
-void sdfSetTextScalarPair(SdfAsset *param, f32 first, f32 second) {
-    param->scalarPairFirst = first;
-    param->scalarPairSecond = second;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PAIR_STATE_DIRTY;
+void sdfSetTextScalarPair(SdfAsset *asset, f32 first, f32 second) {
+    asset->scalarPairFirst = first;
+    asset->scalarPairSecond = second;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PAIR_STATE_DIRTY;
 }
 
 /* Allocate both native draw-entry command blocks and mark every change group dirty. */
@@ -765,9 +766,9 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     entry->unk1C = asset->primaryStateFloat;
     entry->unk08 = asset->primaryStateWordSecond;
     if (sdfForcedAssetTextureMode == SDF_FORCED_TEXTURE_ZERO_STATE_MODE) {
-        entry->unk10 = 0;
+        entry->primaryStateWordThird = 0;
     } else {
-        entry->unk10 = asset->primaryStateWordThird;
+        entry->primaryStateWordThird = asset->primaryStateWordThird;
     }
     entry->unk14 = asset->primaryStateWordFourth;
     texture = asset->texture;
@@ -781,7 +782,7 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
 
 /* Build the 3x2 scalar-block transform from the sub-parameter's five floats
  * and rotation, or the identity layout when the block is absent. */
-void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubParam *param) {
+void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubParam *subParam) {
     f32 v0;
     f32 v1;
     f32 v2;
@@ -794,7 +795,7 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
     f32 m2;
     f32 m3;
 
-    if (param == NULL) {
+    if (subParam == NULL) {
         /* Identity {1,0}/{0,1}/{0,0}; the constant 24-byte block is written
          * through the packed view, the form that emits three 64-bit stores. */
         transform->words[0] = 0x000000003F800000;
@@ -803,13 +804,13 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
         return;
     }
 
-    angle = -param->transformInputs.rotationInput;
+    angle = -subParam->transformInputs.rotationInput;
     s = sdfSinPoly(angle);
     c = sdfEvaluateCosineViaSinePhaseShift(angle);
-    v0 = param->transformInputs.centerOffsetX;
-    v1 = param->transformInputs.centerOffsetY;
-    v2 = param->transformInputs.basisScaleX;
-    v3 = param->transformInputs.basisScaleY;
+    v0 = subParam->transformInputs.centerOffsetX;
+    v1 = subParam->transformInputs.centerOffsetY;
+    v2 = subParam->transformInputs.basisScaleX;
+    v3 = subParam->transformInputs.basisScaleY;
 
     m0 = c * v2;
     m1 = s * v3;

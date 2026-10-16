@@ -8,6 +8,7 @@
 #include "fld_waypoint.h"
 #include "fld_npc_motion.h"
 #include "fld_inf.h"
+#include "fld_title_banner_menu.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_vu_matrix.h"
 #include "kwln_fade.h"
@@ -17,6 +18,7 @@ extern FldInfTable D_0038E2D0;
 #include "dds3obj.h"
 #include "evt_world_source_transform.h"
 #include "fld.h"
+#include "fld_resource_resolver.h"
 #include "fld_collision_geometry.h"
 #include "evt_world.h"
 #include "scr.h"
@@ -109,9 +111,9 @@ extern void fldResetActorSlots(void);
 
 extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
-extern void kwlnFadeSetRGB(s32, s32, s32);
+extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 extern void fldApplyPendingCameraHeading(void);
-extern void fldApplyRoomObjectModeZero(s32, s32, void *, s32);
+extern void fldApplyRoomObjectModeZero(s32 world, s32 stage, void *roomName, s32 mode);
 extern void fldBeginNpcInteractionById(s32);
 extern s32 D_003898FC[];
 extern s32 D_00389780[];
@@ -124,7 +126,7 @@ extern s32 fldHasKiretaLabelProcess(void);
 extern s32 fldHasHirakenaiLabelProcess(void);
 extern s32 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
 
 extern s16 D_00444C68[];
 
@@ -211,7 +213,6 @@ extern s32 D_004361BC;
 
 
 
-extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 
 
 extern f32 fldDotVector(f32 *, f32 *);
@@ -229,9 +230,9 @@ extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the sepa
 
 extern FldNpcMotion D_00391FA0[];
 
-extern void *D_004361D4;
+extern char *D_004361D4;
 
-extern void *D_004361D8;
+extern char *D_004361D8;
 
 extern u32 D_004361DC;
 
@@ -247,7 +248,7 @@ typedef struct {
     u32 actorId;
     u32 unk08;
     u32 firstKey;
-    u32 unk10;
+    u32 secondaryMotion;
     u32 secondKey;
     u32 transitionKey;
     s32 firstFrame;
@@ -259,6 +260,9 @@ typedef struct {
     f32 secondValues[3];
     f32 secondStep[3];
 } FldActorRow; /* 0x5C bytes */
+typedef char FldActorRow_secondaryMotion_offset_must_be_0x10[
+    ((u32)&((FldActorRow *)0)->secondaryMotion == 0x10) ? 1 : -1];
+typedef char FldActorRow_size_must_be_0x5C[sizeof(FldActorRow) == 0x5C ? 1 : -1];
 
 extern FldActorRow fldActorSlots[];
 
@@ -403,15 +407,15 @@ void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normal
     *planeConstant = -(*normalX * thirdPoint[0] + *normalY * thirdPoint[1] + *normalZ * thirdPoint[2]);
 }
 
-/* Return the first matching record's value; zero also denotes a missing ID. */
-s32 fldGetRecordValueById(s32 id) {
+/* Return the first matching record's world node; NULL also denotes a missing ID. */
+struct EffWorldNode *fldGetRecordWorldNodeById(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
         FldValueRecord *record = (FldValueRecord *)fldValueRecords;
         do {
             if (record->id == id) {
-                return record->value;
+                return record->worldNode;
             }
             index++;
             record++;
@@ -421,12 +425,12 @@ s32 fldGetRecordValueById(s32 id) {
 }
 
 /* Update every matching ID, including duplicates; leave other records intact. */
-void fldSetRecordValueById(s32 id, s32 value) {
+void fldSetRecordWorldNodeById(s32 id, struct EffWorldNode *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
         if (((FldValueRecord *)fldValueRecords)[index].id == id) {
-            ((FldValueRecord *)fldValueRecords)[index].value = value;
+            ((FldValueRecord *)fldValueRecords)[index].worldNode = worldNode;
         }
     }
 }
@@ -434,7 +438,7 @@ void fldSetRecordValueById(s32 id, s32 value) {
 void fldResetRecordState(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
-        ((FldValueRecord *)fldValueRecords)[index].value = 0;
+        ((FldValueRecord *)fldValueRecords)[index].worldNode = 0;
     }
     fldValueRecordCount = 0;
     fldAreaState.unkA0 = -1;
@@ -1036,7 +1040,7 @@ void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                 }
                 record->unkC8 = D_00436188;
                 record->id = id;
-                record->value = 0;
+                record->worldNode = 0;
                 record->face = face;
                 record->stopData = stopData;
                 record->sceneFlag = sceneFlag;
@@ -1160,8 +1164,8 @@ void fldUpdatePositionZoneHits(f32 *input) {
         savedPrevious[0] = previous[0];
         savedPrevious[1] = previous[1];
         savedPrevious[2] = previous[2];
-        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             relative = 1;
             position[0] -= transform->position[0];
             position[1] -= transform->position[1];
@@ -1179,15 +1183,15 @@ void fldUpdatePositionZoneHits(f32 *input) {
             fldClassifyPositionInZoneWithMargin(&clearance, record->mode, record->count, 45.0f, position, record);
             inside = clearance < 0.0f ? 0 : 1;
             if (inside == 1) {
-                if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+                if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
                     if (fldAreaState.unk90 == -1 ||
-                        ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[fldAreaState.unk90].value)->key ==
-                            ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->key) {
+                        ((FldValueRecord *)fldValueRecords)[fldAreaState.unk90].worldNode->key ==
+                            ((FldValueRecord *)fldValueRecords)[index].worldNode->key) {
                         fldAreaState.unk90 = index;
                     } else {
                         fldAreaState.unk94 = index;
                     }
-                    anchor = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+                    anchor = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
                     ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = anchor->position[0];
                     ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = anchor->position[1];
                     ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = anchor->position[2];
@@ -1195,7 +1199,7 @@ void fldUpdatePositionZoneHits(f32 *input) {
             }
         }
         if (relative) {
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             position[0] += transform->position[0];
             position[1] += transform->position[1];
             position[2] += transform->position[2];
@@ -1222,10 +1226,10 @@ void fldApplyRelativeZoneMotion(f32 *position) {
     }
     index = fldAreaState.unk90;
     if (index != -1) {
-        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
             ObjectTransform *transform;
 
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             movement[0] = transform->position[0] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[0];
             movement[1] = transform->position[1] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[1];
             movement[2] = transform->position[2] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[2];
@@ -1239,10 +1243,10 @@ void fldApplyRelativeZoneMotion(f32 *position) {
             if (index != -1 && fldTestRoomSceneFlag(fldAreaState.area,
                         fldAreaState.floor + 1,
                         ((FldValueRecord *)fldValueRecords)[index].sceneFlag) == 0) {
-                if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+                if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
                     ObjectTransform *transform;
 
-                    transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+                    transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
                     movement[0] += transform->position[0] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[0];
                     movement[1] += transform->position[1] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[1];
                     movement[2] += transform->position[2] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[2];
@@ -1345,7 +1349,7 @@ void fldClassifyMovementAgainstZoneFaces(f32 *position) {
                 savedReference[1] = reference[1];
                 savedReference[2] = reference[2];
 
-                node = (EffWorldNode *)((FldValueRecord *)fldValueRecords)[recordIndex].value;
+                node = ((FldValueRecord *)fldValueRecords)[recordIndex].worldNode;
                 if (node != 0) {
                     point[0] = savedPoint[0] - node->inner->position[0];
                     point[1] = savedPoint[1] - node->inner->position[1];
@@ -1503,9 +1507,9 @@ s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
                                  ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
             relative = 1;
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             origin[0] -= transform->position[0];
             origin[1] -= transform->position[1];
             origin[2] -= transform->position[2];
@@ -1564,7 +1568,7 @@ s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
             }
         }
         if (relative) {
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             origin[0] += transform->position[0];
             origin[1] += transform->position[1];
             origin[2] += transform->position[2];
@@ -1623,9 +1627,9 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
         if (((FldValueRecord *)fldValueRecords)[index].face->special[0] != 4) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
             relative = 1;
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             origin[0] -= transform->position[0];
             origin[1] -= transform->position[1];
             origin[2] -= transform->position[2];
@@ -1678,7 +1682,7 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
             }
         }
         if (relative) {
-            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
             origin[0] += transform->position[0];
             origin[1] += transform->position[1];
             origin[2] += transform->position[2];
@@ -2835,7 +2839,7 @@ void func_00141898(void) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            stage = entry->unk65 != 0 ? entry->unk65 : fldAreaState.area;
+            stage = entry->explorationArea != 0 ? entry->explorationArea : fldAreaState.area;
             room = floorFlags >> 2;
             if (room == 0) {
                 room = fldAreaState.floor + 1;
@@ -2844,7 +2848,8 @@ void func_00141898(void) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->explorationColumn, entry->explorationRow,
+                                                entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
@@ -2947,7 +2952,10 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
 s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     FieldSequenceRecord record;
     s32 warp;
-    s32 stage;
+    union {
+        s32 value;
+        u8 bytes[sizeof(s32)]; /* The field mode request copies this word. */
+    } stagePayload;
     s32 room;
     u32 floorFlags;
     u32 flags;
@@ -2979,29 +2987,35 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            stage = entry->unk65 != 0 ? entry->unk65 : fldAreaState.area;
+            if (entry->explorationArea == 0) {
+                stagePayload.value = fldAreaState.area;
+            } else {
+                stagePayload.value = entry->explorationArea;
+            }
             room = floorFlags >> 2;
             if (room == 0) {
                 room = fldAreaState.floor + 1;
             }
-            fldSetFloorFlag(stage, room, entry->floorFlagBit);
+            fldSetFloorFlag(stagePayload.value, room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->explorationColumn, entry->explorationRow,
+                                                entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
-            stage = fldAreaState.area;
-            dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0);
+            stagePayload.value = fldAreaState.area;
+            dds3AdminSubmitModeRequest(0x1C, stagePayload.bytes, sizeof(stagePayload.bytes), 0);
             return 0;
         }
-        stage = command;
-        if (entry->variant != 0) {
-            stage = entry->variant;
+        if (entry->variant == 0) {
+            stagePayload.value = command;
+        } else {
+            stagePayload.value = entry->variant;
         }
         room = entry->warpEntry;
-        if (fldAreaState.area != stage) {
+        if (fldAreaState.area != stagePayload.value) {
             fldReleaseCurrentBgm();
         }
         fldApplySceneRoomSelection(entry);
@@ -3011,7 +3025,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             strcpy((char *)D_00387D60, taskName);
             D_00435F28 = i + 1;
         }
-        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
+        fldInitializeFieldSequenceRecord(&record, stagePayload.value, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         record.mode = 6;
         dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
         return 0;
@@ -3121,10 +3135,10 @@ s32 fldGetActorMotionEntry(u32 attribute) {
             return objectNode->key;
         }
     case 3:
-        D_004361D4 = D_00391FA0[motionIndex].unk24;
+        D_004361D4 = D_00391FA0[motionIndex].roomModeGroupOneName;
         return 0;
     case 4:
-        D_004361D8 = D_00391FA0[motionIndex].unk34;
+        D_004361D8 = D_00391FA0[motionIndex].sceneBitsBarrierRoomName;
         return 0;
     case 5:
         return D_00391FA0[motionIndex].unk44;
@@ -3198,7 +3212,7 @@ void fldResetActorSlots(void) {
         fldActorSlots[actorIndex].actorId = 0;
         fldActorSlots[actorIndex].unk08 = 0;
         fldActorSlots[actorIndex].firstKey = -1;
-        fldActorSlots[actorIndex].unk10 = 0;
+        fldActorSlots[actorIndex].secondaryMotion = 0;
         fldActorSlots[actorIndex].secondKey = -1;
         fldActorSlots[actorIndex].transitionKey = -1;
         fldActorSlots[actorIndex].firstFrame = 0;
@@ -3375,7 +3389,7 @@ void fldInitializeActorMotionSlots(void) {
             }
             primaryMotion = actor->motion;
             row->kind = 1;
-            row->unk10 = actor->secondaryMotion;
+            row->secondaryMotion = actor->secondaryMotion;
             row->unk08 = primaryMotion;
             row->firstFrame = 0;
             row->secondFrame = 0;
@@ -3516,7 +3530,7 @@ void fldInitializeActorMotionSlots(void) {
                 row->firstStep[2] = 0.0f;
             }
             if (row->secondKey != (u32)-1) {
-                switch (row->unk10) {
+                switch (row->secondaryMotion) {
                 case 1:
                     switch (secondDirection) {
                     case 0:
@@ -3779,7 +3793,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
 void func_00143C90(void) {
 }
 
-extern void fldApplyRoomObjectModeOne(s32, s32, void *, s32);
+extern void fldApplyRoomObjectModeOne(s32 world, s32 stage, void *roomName, s32 mode);
 
 void fldApplyCurrentAreaActorEntries(void) {
     FldActorEntry *entry;

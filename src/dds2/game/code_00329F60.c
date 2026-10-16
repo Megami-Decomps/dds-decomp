@@ -68,7 +68,7 @@ extern SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 
 extern SdfTextureQueue sdfTextureQueueWork;
 
-s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern s8 sdfBufferSlotIndices[2];
 
@@ -868,8 +868,8 @@ SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture) {
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
  * contribute to its 16-byte block count. */
-s32 sdfTexGetPrimaryBufferSize(SdfTex *texture) {
-    SdfTexBuf *buffer = texture->primaryBuffer;
+s32 sdfTexGetPrimaryBufferSize(const SdfTex *texture) {
+    const SdfTexBuf *buffer = texture->primaryBuffer;
 
     if (buffer == NULL) {
         return 0;
@@ -889,8 +889,8 @@ SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
-s32 sdfTexGetSecondaryBufferSize(SdfTex *texture) {
-    SdfTexBuf *buffer = texture->secondaryBuffer;
+s32 sdfTexGetSecondaryBufferSize(const SdfTex *texture) {
+    const SdfTexBuf *buffer = texture->secondaryBuffer;
 
     if (buffer == NULL) {
         return 0;
@@ -987,7 +987,7 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
     buffer->samplingState = (minFilter << SDF_MIN_FILTER_SHIFT) | ((magFilter << SDF_MAG_FILTER_SHIFT) | (buffer->samplingState & ~SDF_TEX_FILTER_MASK));
 }
 
-void sdfTexSetClampMode(SdfTex *texture, u8 value) {
+void sdfTexSetClampMode(SdfTex *texture, SdfTextureClampMode value) {
     texture->clampMode = value;
     sdfTexRefreshResourcePackets(texture);
 }

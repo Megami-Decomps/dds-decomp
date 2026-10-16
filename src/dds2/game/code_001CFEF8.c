@@ -78,7 +78,7 @@ extern void btlBossDebugPrintf(const char *, ...);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void btlSetCommandPanelFadeMode(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
 
 extern void btlResetDebugEncounterSelection(s32);
 
@@ -343,7 +343,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
     for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             kind = scene->selectEntryModelVariant != NULL ? scene->selectEntryModelVariant(unit) : unit->combatantKind;
-            load = btlCreateModelLoadPollTask(unit, unit->unkDC, kind, 0);
+            load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, kind, 0);
             load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             load->startDelay = 1;
             load->startCondition.value.handle = chain;
@@ -415,7 +415,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
             if ((btlUnitStatusPair(unit) & 0x0010000000001000ULL) == 0x1000) {
-                load = btlCreateModelLoadPollTask(unit, unit->unkDC, unit->combatantKind, 0);
+                load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, unit->combatantKind, 0);
             } else {
                 load = btlCreateModelLoadPollTask(unit, unit->modelId, unit->modelVariant, 0);
             }
@@ -991,8 +991,8 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     rewardRatio = 1.0f;
     averageLevel = btlAverageLevelsForMaskExcludingStatus20(4);
     defeatedLevel = averageLevel;
-    if (scene->unk290 != 0) {
-        defeatedLevel = (u16)(scene->unk292 / scene->unk290);
+    if (scene->defeatedLevelCount != 0) {
+        defeatedLevel = (u16)(scene->defeatedLevelTotal / scene->defeatedLevelCount);
     }
     band = 0;
     for (levelLimit = 10; levelLimit < 100 && averageLevel >= levelLimit; levelLimit += 10) {
@@ -2013,7 +2013,7 @@ void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
         ((BtlUnit *)actorAddress)->partyRecord.unitId <= 0x17F) {
         ((ActionStateLink *)taskAddress)->actionNumber =
-            datEnemyRecords[((BtlUnit *)actorAddress)->partyRecord.unitId].unk15;
+            datEnemyRecords[((BtlUnit *)actorAddress)->partyRecord.unitId].actionNumber;
     }
     flags = ((ActionStateLink *)taskAddress)->pendingFlags;
     ((ActionStateLink *)taskAddress)->pendingFlags = flags | FLD_SCENE_TASK_BOUND_BIT;

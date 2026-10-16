@@ -8,8 +8,8 @@ typedef struct FldNpcMotion {
     s32 defaultMotionId; /* 0x00 */
     u8 primaryName[0x10]; /* 0x04 */
     u8 secondaryName[0x10]; /* 0x14 */
-    u8 unk24[0x10]; /* 0x24: opaque row bytes returned through attribute 3 */
-    u8 unk34[0x10]; /* 0x34: opaque row bytes returned through attribute 4 */
+    char roomModeGroupOneName[0x10]; /* 0x24: fallback room name for the group-one command */
+    char sceneBitsBarrierRoomName[0x10]; /* 0x34: fallback room name for the scene-barrier command */
     s32 unk44; /* 0x44: value returned through attribute 5 */
 } FldNpcMotion;
 
@@ -19,8 +19,10 @@ typedef char FldNpcMotion_size[(sizeof(FldNpcMotion) == 0x48) ? 1 : -1];
 typedef char FldNpcMotion_defaultMotionId_offset[((unsigned long)&((FldNpcMotion *)0)->defaultMotionId == 0x00) ? 1 : -1];
 typedef char FldNpcMotion_primaryName_offset[((unsigned long)&((FldNpcMotion *)0)->primaryName == 0x04) ? 1 : -1];
 typedef char FldNpcMotion_secondaryName_offset[((unsigned long)&((FldNpcMotion *)0)->secondaryName == 0x14) ? 1 : -1];
-typedef char FldNpcMotion_unk24_offset[((unsigned long)&((FldNpcMotion *)0)->unk24 == 0x24) ? 1 : -1];
-typedef char FldNpcMotion_unk34_offset[((unsigned long)&((FldNpcMotion *)0)->unk34 == 0x34) ? 1 : -1];
+typedef char FldNpcMotion_roomModeGroupOneName_offset[
+    ((unsigned long)&((FldNpcMotion *)0)->roomModeGroupOneName == 0x24) ? 1 : -1];
+typedef char FldNpcMotion_sceneBitsBarrierRoomName_offset[
+    ((unsigned long)&((FldNpcMotion *)0)->sceneBitsBarrierRoomName == 0x34) ? 1 : -1];
 typedef char FldNpcMotion_unk44_offset[((unsigned long)&((FldNpcMotion *)0)->unk44 == 0x44) ? 1 : -1];
 typedef char FldNpcMotion_table_extent[(FLD_NPC_MOTION_ROW_COUNT * sizeof(FldNpcMotion) == 0x1200) ? 1 : -1];
 

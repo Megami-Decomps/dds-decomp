@@ -19,7 +19,7 @@ typedef struct SndChannel {
 
 typedef struct SndIopBuffer {
     s32 size;
-    u32 address;
+    u32 iopAddress; /* IOP address returned by sndReserveIopWorkMemory. */
 } SndIopBuffer;
 
 /* Prefix and arrays of the MIDI sound state. The IOP image header identifies
@@ -47,7 +47,10 @@ typedef struct SifDmaTransfer {
 } SifDmaTransfer;
 
 typedef char SndChannelSizeAssert[(sizeof(SndChannel) == 0x10) ? 1 : -1];
-typedef char SndIopBufferSizeAssert[(sizeof(SndIopBuffer) == 8) ? 1 : -1];
+typedef char SndIopBufferLayoutAssert[
+    (sizeof(SndIopBuffer) == 8 &&
+     (u32)&((SndIopBuffer *)0)->size == 0 &&
+     (u32)&((SndIopBuffer *)0)->iopAddress == 4) ? 1 : -1];
 typedef char SndWorkArrayOffsetsAssert[
     ((u32)&((SndWork *)0)->channels == 0x10 &&
      (u32)&((SndWork *)0)->buffers == 0x110 &&

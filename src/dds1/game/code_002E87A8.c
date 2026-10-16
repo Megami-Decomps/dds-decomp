@@ -20,10 +20,6 @@
 #define SND_TRACK_SLOT_COUNT 13
 #define SND_IOP_BUFFER_ALIGNMENT 16
 
-u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
-
-u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 size);
-
 void sndEnsureMidiBankResident(s32 trackId);
 
 /* Sound command work block: header, 16 channels/buffers, 13 track slots (see code_002E9140). */
@@ -48,7 +44,7 @@ extern void FlushCache(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
 
-u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadBytes) {
+u32 sndQueueCommandPacket(u32 command, u32 channel, const void *packet, s32 payloadBytes) {
     s32 nextWriteIndex;
     s32 wakeAttemptsRemaining;
     SndRingPacket *entry;
@@ -92,7 +88,7 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadByt
 void sndPostQueueCommandNoOp(u32 unused) {
 }
 
-u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
+u32 sndSendCommandPacket(u32 command, u32 channel, const void *packet, u32 size) {
     u32 result = sndQueueCommandPacket(command, channel, packet, size);
 
     sndPostQueueCommandNoOp(result);
@@ -200,12 +196,12 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
     for (; bufferIndex < SND_IOP_BUFFER_COUNT; bufferIndex++) {
         sndMidiTrackState.buffers[bufferIndex].size = 0;
-        sndMidiTrackState.buffers[bufferIndex].address = 0;
+        sndMidiTrackState.buffers[bufferIndex].iopAddress = 0;
     }
     iopAddress = sndReserveIopWorkMemory(totalBytes);
     bufferIndex = 0;
     do {
-        sndMidiTrackState.buffers[bufferIndex].address = iopAddress;
+        sndMidiTrackState.buffers[bufferIndex].iopAddress = iopAddress;
         iopAddress += sndMidiTrackState.buffers[bufferIndex].size;
         bufferIndex++;
     } while (bufferIndex != bufferCount);

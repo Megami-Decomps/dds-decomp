@@ -8,7 +8,7 @@ struct ParSystem;
 struct ParSystem *parAllocateCellSystem(s32 count, s32 perCell,
                                       s32 groupDivisor, u32 kind);
 void parReleaseCellSystem(struct ParSystem *system);
-void parCellInit(struct ParSystem *system, s32 index);
+void parCellInit(struct ParSystem *system, s32 cellIndex);
 void parPrependCellNode(struct ParSystem *system);
 void parSetCellDrawBucket(struct ParSystem *system, u16 value);
 void parDrawPendingCellSystems(void);
@@ -22,8 +22,8 @@ void parIncreaseSymmetricCellAlpha(struct ParSystem *system, u32 centerWord,
                                    u32 middleWord, u32 edgeWord);
 void parRiseFallSymmetricCellAlpha(struct ParSystem *system, u32 centerWord,
                                    u32 middleWord, u32 edgeWord);
-void parUpdateCellVertexPair(struct ParSystem *system, s32 index,
+void parUpdateCellVertexPair(struct ParSystem *system, s32 cellIndex,
                              const u128 *vertices);
-void parFadeAlphaCell(struct ParSystem *system, s32 index);
+void parFadeAlphaCell(struct ParSystem *system, s32 cellIndex);
 
 #endif

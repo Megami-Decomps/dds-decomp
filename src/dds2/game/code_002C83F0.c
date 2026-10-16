@@ -40,14 +40,13 @@ extern s32 (*fileIdleUpdateCallback)(void);
 
 void *memset(void *dst, s32 val, u32 len);
 
-s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 
 
 
 
 extern s32 sdfDevQueueControlRequest(DevState *);
-extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);

@@ -35,7 +35,7 @@ extern u32 itfMessageFlags;
 
 s32 scrGetWindow(void);
 
-s32 scrReadIntParameter(s32 arg0);
+s32 scrReadIntParameter(s32 parameterIndex);
 
 void func_0014DAF0(s32 arg0);
 
@@ -58,9 +58,9 @@ void itfMesDestroyWindow(s32 window);
 
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
-s32 itfMesSetOptionValue(s32 window, s32 arg1, s32 arg2);
+s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 
-void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
+void sdfRelocatePackedResourceWords(int *words, int relocationBase, u8 *table, int tableBytes);
 
 
 
@@ -81,7 +81,7 @@ void itfMesInitCharTable(s32 *table);
 
 s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 
-extern void frFontLoadTemporaryEntry(u32 arg0);
+extern void frFontLoadTemporaryEntry(u32 fontData);
 
 
 
@@ -1005,7 +1005,6 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
-extern void sndStepIndexByPad(SndPadStepper *panel);
 
 /* Run and draw the interactive message-layout inspector. */
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1480);
@@ -1239,7 +1238,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     itfMesCopyGlyphShade(glyph, entryBlock);
     interfaceMask = itfTestTextInterfaceMask(3);
-    entryBlock->unk11 = interfaceMask;
+    entryBlock->textInterfaceMask = interfaceMask;
     /* Copy interface-mask bit 0x2 into window flag 0x10000. */
     if (interfaceMask & 2) {
         mes->flags |= 0x10000;

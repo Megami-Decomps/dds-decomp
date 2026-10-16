@@ -162,7 +162,7 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
     groupNode->partInfo = NULL;
     groupNode->partList = NULL;
     groupNode->unk_AC = 1.0f;
-    groupNode->unk_B0 = 100.0f;
+    groupNode->objectRadius = 100.0f;
 }
 
 /* Capture ownership before clearing it for callbacks; keep the context-release
@@ -230,13 +230,13 @@ void btlReleaseAllEntities(void) {
     } while (groupIndex < BTL_GROUP_COUNT);
 }
 
-/* Create and attach the motion for the selected resource record. */
-Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
-    MotionTable *motionTable = owner->sub->slots[index].motionTable;
-    s16 motionSlotIndex = owner->sub->slots[index].motionSlotIndex;
+/* Create and attach the motion selected by the resource record's search ID. */
+Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId) {
+    MotionTable *motionTable = owner->sub->slots[searchId].motionTable;
+    s16 motionSlotIndex = owner->sub->slots[searchId].motionSlotIndex;
     Motion *object = sdfCreateMotion(owner->inner, motionTable);
 
-    object->searchId = index;
+    object->searchId = searchId;
     owner->slots[motionSlotIndex] = object;
     object->slotIndex = motionSlotIndex;
     if (motionSlotIndex == 0) {
@@ -266,11 +266,11 @@ void mdlClearSlotAndRelease(MdlCtx *ctx, Motion *node) {
     sdfDestroyMotion(node);
 }
 
-void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
+void mdlReleaseFirstMatch(MdlCtx *ctx, s32 searchId) {
     Motion *node = ctx->inner->motionList;
 
     while (node != NULL) {
-        if (node->searchId == id) {
+        if (node->searchId == searchId) {
             mdlClearSlotAndRelease(ctx, node);
             break;
         }
@@ -280,40 +280,40 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 
 
 
-/* Release slot `index`: destroy its motions in every context and free the attached resource. */
-void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
+/* Release the grouped resource record and matching motions for `searchId`. */
+void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 searchId) {
     MdlCtx *ctx;
 
     if (owner != NULL) {
-        if (owner->slots[index].motionTable == NULL) {
+        if (owner->slots[searchId].motionTable == NULL) {
             return;
         }
         for (ctx = owner->modelContext; ctx != NULL; ctx = ctx->next) {
-            mdlReleaseFirstMatch(ctx, index);
+            mdlReleaseFirstMatch(ctx, searchId);
         }
         if (owner->ownsResources != 0) {
-            if (owner->slots[index].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
+            if (owner->slots[searchId].resourceHandle != 0) {
+                sdfReleaseResourceAllocation(owner->slots[searchId].resourceHandle);
             }
         }
-        owner->slots[index].motionTable = NULL;
-        owner->slots[index].resourceHandle = 0;
+        owner->slots[searchId].motionTable = NULL;
+        owner->slots[searchId].resourceHandle = 0;
     }
 }
 
-void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
+void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 searchId) {
     BattleGroupNode *entity;
 
     entity = btlFindGroupedEntity(group, id);
-    mdlReleaseOwnerSlotResources(entity, index);
+    mdlReleaseOwnerSlotResources(entity, searchId);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, MotionTable *data, struct SdfMemBlock *resourceHandle) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 searchId, s32 slotIndex, MotionTable *data, struct SdfMemBlock *resourceHandle) {
     BattleGroupNode *owner = btlFindGroupedEntity(group, id);
     BattleGroupSlot *slot;
 
-    mdlReleaseOwnerSlotResources(owner, index);
-    slot = &owner->slots[index];
+    mdlReleaseOwnerSlotResources(owner, searchId);
+    slot = &owner->slots[searchId];
     slot->motionSlotIndex = slotIndex;
     slot->motionIndex = motionIndex;
     slot->motionTable = data;
@@ -391,7 +391,7 @@ extern u8 D_0037F660[];
 
 
 
-extern Motion *mdlFindNodeById(MdlCtx *, s32);
+extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
 
 
 
@@ -448,9 +448,9 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern s32 btlGroupContainsId(s32, s32);
-extern void btlAddGroupId(s32, s32);
-extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
+extern s32 btlGroupContainsId(s32 groupIndex, s32 wantedId);
+extern void btlAddGroupId(s32 groupIndex, s32 newId);
+extern BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id);
 extern char *strrchr(const char *, s32);
 extern s32 strcasecmp(const char *, const char *);
 extern const char D_00436FA8[];
@@ -658,7 +658,7 @@ void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
 }
 
 extern DevRequest *sdfResourceListClone(DevRequest *list);
-extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
+extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId);
 
 /* Instantiate a model context from the group's resource list and item list, then
  * start every populated slot's motion owner. */
@@ -669,7 +669,7 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     SdfModel *inner;
     f32 modelScale;
     f32 scale[4];
-    s32 i;
+    s32 searchId;
 
     ctx->sub = node;
     head = node->modelContext;
@@ -686,15 +686,15 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     scale[2] = modelScale;
     scale[3] = 1.0f;
     PCP_COPY_VECTOR(inner->scaleVector, scale);
-    ctx->unk34 = node->unk_B0;
+    ctx->objectRadius = node->objectRadius;
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;
-    for (i = 0; i != 8; i++) {
-        if (node->slots[i].motionTable != NULL && (node->slots[i].flags & 1)) {
-            motionOwnerCreateObjectForRecord(ctx, i);
-            if (i > 0) {
-                if (node->slots[i].motionIndex >= 0) {
-                    mdlAddEntryFlagged(ctx, i, node->slots[i].motionIndex);
+    for (searchId = 0; searchId != 8; searchId++) {
+        if (node->slots[searchId].motionTable != NULL && (node->slots[searchId].flags & 1)) {
+            motionOwnerCreateObjectForRecord(ctx, searchId);
+            if (searchId > 0) {
+                if (node->slots[searchId].motionIndex >= 0) {
+                    mdlAddEntryFlagged(ctx, searchId, node->slots[searchId].motionIndex);
                 }
             }
         }
@@ -871,7 +871,7 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
     }
 }
 
-extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
+extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId);
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
@@ -924,14 +924,19 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLea
         ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
+Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId) {
     Motion *node;
     for (node = ctx->inner->motionList; node != NULL; node = node->next) {
-        if (node->searchId == id) {
+        if (node->searchId == searchId) {
             return node;
         }
     }
     return NULL;
+}
+
+static inline const Motion *mdlFindNodeByIdReadOnly(const MdlCtx *ctx, s32 searchId) {
+    /* The mutable lookup remains available to writers; this path only reads. */
+    return mdlFindNodeById((MdlCtx *)ctx, searchId);
 }
 
 #define MDL_NODE_FIELD_MISSING (-1)
@@ -939,8 +944,8 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+s32 mdlGetNodeMotionIndex(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_FIELD_MISSING;
     }
@@ -948,8 +953,8 @@ s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Read the selected motion's frame count; return zero for a missing node. */
-u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+u16 mdlGetNodeFrameCount(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
@@ -958,8 +963,8 @@ u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
-s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+s32 mdlGetNodeFrameAsInt(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
     }
@@ -967,8 +972,8 @@ s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Report whether a node is terminal, using 2 to distinguish a missing node. */
-s32 mdlGetNodeMotionTerminalStatus(MdlCtx *ctx, s32 searchId) {
-    Motion *matchedNode = mdlFindNodeById(ctx, searchId);
+s32 mdlGetNodeMotionTerminalStatus(const MdlCtx *ctx, s32 searchId) {
+    const Motion *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_MOTION_STATUS_MISSING;
     }
@@ -1422,7 +1427,7 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern void btlRemoveGroupId(s32, s32);
+extern void btlRemoveGroupId(s32 groupIndex, s32 wantedId);
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */

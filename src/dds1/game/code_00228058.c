@@ -34,11 +34,11 @@ extern char D_003BBDC8[];
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 
-extern void fldSetFadeTarget(s32, s32, s32);
-extern void evtBeginSkyParameterTransition(s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void evtBeginSkyParameterTransition(s32 duration, s32 target);
 
 s32 scrReadIntParameter(s32 idx);
-extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
+extern void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
 s32 evtCommandWaitLightResourceScale(void) {
@@ -386,9 +386,9 @@ extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
 
-void evtAdvanceSolarClockAndExpireControls(f32 delta) {
+void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
     if ((u8)(datGameState->world.flags & SOLAR_PHASE_ADVANCE_FLAG)) {
-        f32 timer = datGameState->world.phaseTimer + delta;
+        f32 timer = datGameState->world.phaseTimer + travelDistance;
 
         datGameState->world.phaseTimer = timer;
         if (timer > 4500.0f) {

@@ -23,6 +23,7 @@
 #include "btl_ai_table.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 
@@ -104,7 +105,7 @@ s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
 s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
-u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1);
+u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue);
 
 s8 btlGetLinkageSlotCost(s32 command);
 
@@ -485,7 +486,7 @@ s32 btlSelectedEntryHitsElement(s32 unitAddress, BtlUnit *unit, s32 selectorInde
     btlGetRuntime();
     indexedSelectorValue = btlGetActorIndexedSignedValue(unitAddress, selectorIndex);
     selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
-    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].unk2E;
+    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].commandEffectId;
     if (maskTableIndex == 0) {
         return 0;
     }
@@ -501,7 +502,7 @@ s32 btlSelectedEntryHitsElement(s32 unitAddress, BtlUnit *unit, s32 selectorInde
 s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
     u16 lookupTableIndex;
 
-    lookupTableIndex = datCommandRecords[actionRecordIndex].unk2E;
+    lookupTableIndex = datCommandRecords[actionRecordIndex].commandEffectId;
     return D_00358510[lookupTableIndex * 3];
 }
 
@@ -511,7 +512,7 @@ s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
     if (selectedEntryIndex == -1) {
         return 0;
     }
-    maskTableIndex = datCommandRecords[selectedEntryIndex].unk2E;
+    maskTableIndex = datCommandRecords[selectedEntryIndex].commandEffectId;
     return (D_00358518[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
@@ -528,7 +529,7 @@ s32 btlGetSelectedUnitProperty(s32 unitAddress) {
     if (selectedEntryIndex == -1) {
         return 0;
     }
-    return D_00358514[datCommandRecords[selectedEntryIndex].unk2E * 3];
+    return D_00358514[datCommandRecords[selectedEntryIndex].commandEffectId * 3];
 }
 
 s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlOperandGroup *results) {
@@ -619,7 +620,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     if ((((BtlUnit *)object)->partyRecord.status & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].unknown00[0] == 0;
+    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].kind == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
@@ -629,8 +630,6 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
     }
     return (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 0x40) < 1;
 }
-
-extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
 
 s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, void **second) {
     s32 statAddresses[3];
@@ -812,10 +811,10 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
 }
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
-    u8 *status = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk3E;
+    u8 *itemIds = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].additionalDropItemIds;
     u32 i;
     for (i = 0; i < 2; i++) {
-        if (*status++ != 0) {
+        if (*itemIds++ != 0) {
             return 1;
         }
     }

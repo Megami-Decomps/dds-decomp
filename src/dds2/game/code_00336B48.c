@@ -95,7 +95,7 @@ void sdfPremultiplyVuMatrixFromMemory(void *matrix) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void sdfPostmultiplyVuMatrixFromMemory(void *matrix) {
+void sdfPostmultiplyVuMatrixFromMemory(const void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
     sdfMultiplyVuMatrixInPlace();
 }

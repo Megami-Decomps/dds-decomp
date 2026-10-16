@@ -384,7 +384,7 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
 }
 
 extern SdfPoolNode D_00325228;
-extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = billPendingRenderPairList;

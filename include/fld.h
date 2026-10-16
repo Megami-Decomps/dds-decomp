@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct EffWorldNode;
+
 /* Field-work flag prefix (0xA5C, flags at +0xA58); DDS1/2 game/code_0011D3A0/0011F208.c. */
 typedef struct FldWorkFlags {
     u8 pad00[0xA58];
@@ -30,6 +32,7 @@ typedef struct FieldSequenceRecord {
     u32 options; /* 0x90: record options */
     u8 pad94[0xC];
 } FieldSequenceRecord;
+
 
 /* Packed actor placement rows used by field searches, motion and sound dispatch.
  * Both games use 0x6C-byte rows, with different signed flags and sequence fields. */
@@ -59,13 +62,25 @@ typedef struct FldActorEntry {
     s8 flags54;
     char taskName[0xF]; /* 0x55 */
     u8 flags64;
-    s8 unk65;
-    s8 unk66;
+    s8 explorationArea; /* 0x65: area key for exploration and optional floor flags */
+    s8 explorationFloor; /* 0x66: floor key for the exploration map */
     s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
-    s8 unk68;
-    s8 unk69;
-    s8 unk6A;
-    s8 unk6B;
+    union {
+        s8 unk68;
+        s8 explorationColumn; /* 0x68: first bitmap column marked for exploration */
+    };
+    union {
+        s8 unk69;
+        s8 explorationRow; /* 0x69: first bitmap row marked for exploration */
+    };
+    union {
+        s8 unk6A;
+        s8 explorationColumnCount; /* 0x6A: number of bitmap columns to mark */
+    };
+    union {
+        s8 unk6B;
+        s8 explorationRowCount; /* 0x6B: number of bitmap rows to mark */
+    };
 #endif
 #ifdef VERSION_DDS2
     u8 motionName[0xC]; /* 0x18 */
@@ -84,15 +99,34 @@ typedef struct FldActorEntry {
     s8 flags54;
     char taskName[0xF]; /* 0x55 */
     u8 flags64;
-    s8 unk65;
-    s8 unk66;
+    s8 explorationArea; /* 0x65: area key for exploration and optional floor flags */
+    s8 explorationFloor; /* 0x66: floor key for the exploration map */
     s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
-    s8 unk68;
-    s8 unk69;
-    s8 unk6A;
-    s8 unk6B;
+    union {
+        s8 unk68;
+        s8 explorationColumn; /* 0x68: first bitmap column marked for exploration */
+    };
+    union {
+        s8 unk69;
+        s8 explorationRow; /* 0x69: first bitmap row marked for exploration */
+    };
+    union {
+        s8 unk6A;
+        s8 explorationColumnCount; /* 0x6A: number of bitmap columns to mark */
+    };
+    union {
+        s8 unk6B;
+        s8 explorationRowCount; /* 0x6B: number of bitmap rows to mark */
+    };
 #endif
 } FldActorEntry;
+
+typedef char FldActorExplorationAreaOffset[((u32)&((FldActorEntry *)0)->explorationArea == 0x65) ? 1 : -1];
+typedef char FldActorExplorationFloorOffset[((u32)&((FldActorEntry *)0)->explorationFloor == 0x66) ? 1 : -1];
+typedef char FldActorExplorationColumnOffset[((u32)&((FldActorEntry *)0)->explorationColumn == 0x68) ? 1 : -1];
+typedef char FldActorExplorationRowOffset[((u32)&((FldActorEntry *)0)->explorationRow == 0x69) ? 1 : -1];
+typedef char FldActorExplorationColumnCountOffset[((u32)&((FldActorEntry *)0)->explorationColumnCount == 0x6A) ? 1 : -1];
+typedef char FldActorExplorationRowCountOffset[((u32)&((FldActorEntry *)0)->explorationRowCount == 0x6B) ? 1 : -1];
 
 /* Collision faces are 0x24-byte wire records in the field resource.
  * The room-record builders retain the face and stop-table addresses. */
@@ -125,7 +159,7 @@ typedef struct FldValueRecord {
     u16 unkC8;
     u16 unkCA;
     s32 id;
-    s32 value; /* Record API word; some callers store an actor address. */
+    struct EffWorldNode *worldNode; /* Cached object for this record ID. */
     FldCollisionFace *face;
     void *stopData;
     s32 sceneFlag;
@@ -134,6 +168,8 @@ typedef struct FldValueRecord {
 
 typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];
 typedef char FldValueRecordSizeCheck[(sizeof(FldValueRecord) == 0xE4) ? 1 : -1];
+typedef char FldValueRecord_worldNode_at_D0[
+    ((u32)&((FldValueRecord *)0)->worldNode == 0xD0) ? 1 : -1];
 
 /* fldFileResolver::fldSpawnSceneResourceBatches publishes file rows; fldSpawnPlacementObjectsFromBatches walks them
  * at stride 0x24. Both game resolvers walk counted names at stride 0x0C.

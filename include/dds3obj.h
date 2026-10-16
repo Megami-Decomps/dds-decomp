@@ -36,6 +36,7 @@ ObjBase *dds3CreateSlotResourceState(void *owner);
 void dds3EnsureSlotData(void *object);
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object);
 u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object);
+void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Forward a callback to the object's slot-1 handler when one is present. */
 void dds3SetObjectSlot1MoverCallback(EffWorldNode *object,
                                      s32 (*update)(struct ObjectTransform *, struct EffWorldNode *));
@@ -44,7 +45,7 @@ void *dds3ExchangeSlot(EffWorldNode *object, void *slotData, s32 slotIndex);
 void *dds3GetSlot(EffWorldNode *object, s32 slotIndex);
 void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value);
 EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
-EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
+EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 slotIndex, const u8 *name);
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 /* Allocate and initialize the inner transform object for a world node. */
@@ -102,16 +103,16 @@ void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object);
 u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 u16 dds3GetWorldValueCount(WorldValueIndices *object);
-s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, const EffWorldNode *targetNode);
 u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value);
-u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
+u32 dds3ReadIndexedWorldObjectWord(const WorldValueIndices *object);
 u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
 WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 void dds3EnsureWorldNodeInSlot(EffWorldNode *indexOwner, EffWorldNode *node);
-WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index);
+WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 slotIndex);
 
 /* Eight-byte entries link both allocated and free world value chains. */
 typedef struct WorldValueEntry {
@@ -192,7 +193,7 @@ typedef struct WorldTransformData {
 } WorldTransformData;
 
 void dds3LoadWorldTransformSetup(EffWorldNode *object, WorldTransformSetup *setup);
-void dds3LoadWorldTransformParams(EffWorldNode *object, WorldTransformParams *params);
+void dds3LoadWorldTransformParams(EffWorldNode *object, const WorldTransformParams *params);
 
 typedef char WorldTransformData_offsets_must_match_paired_loaders[
     ((u32)&((WorldTransformData *)0)->position == 0x00 &&

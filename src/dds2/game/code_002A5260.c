@@ -125,7 +125,8 @@ extern void *memset(void *, s32, u32);
 extern void func_00345BA0(void *, SdfPoolNode *);
 extern void mnuSubmitMovieDrawPacket(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
-extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
+                          s32 drawContext);
 
 void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     f32 factor;
@@ -497,14 +498,14 @@ void mnuDrawTitleSceneForPhase(void) {
     }
 }
 
-void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
+void mnuArmTitleMovieDrawAndResetFrame(u32 movieIndex, s32 startTransparent) {
     MenuTitleState *work;
 
-    mnuRequestIndexedMovieResource(arg0);
+    mnuRequestIndexedMovieResource(movieIndex);
     work = mnuMovieMenuState;
     if (mnuMovieMenuState != 0) {
         ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
-        if (arg1 == 0) {
+        if (startTransparent == 0) {
             work->drawAlpha = 0x80;
         }
         else {
@@ -1475,7 +1476,7 @@ void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
 
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern void itfConfigureSurfaceAlphaBlendMode(s32, s32);
+extern void itfConfigureSurfaceAlphaBlendMode(s32 mode, s32 surface);
 void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;

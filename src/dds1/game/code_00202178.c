@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_active_api.h"
@@ -49,7 +50,6 @@ extern u32 btlGetEffectValue(void);
 extern u32 btlGetSelectedBossEffectId(void);
 
 extern u32 btlGetSpecialModeEffectValue(void);
-extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 
 
@@ -104,7 +104,7 @@ extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-s32 btlElementToBitIndex(s32 mask, s32 index);
+s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 /* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */ u32 btlRollAiBucket(void);
 
@@ -684,7 +684,42 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00203E38);
+s32 func_00203E38(s32 actor) {
+    BtlIndexList *list = btlAllocateIndexList(13);
+    u8 mode = datCommandRecords[((BtlTask *)actor)->indexWork.skillId].targetType;
+    u32 count;
+    u16 picked[12];
+    u32 i;
+    s32 found;
+    s32 result;
+
+    btlBuildEligibleTargetIndexList((void *)actor, list, 2, 0, 0);
+    if (mode != 0) {
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlFreeIndexList(list);
+        result = 1;
+        goto completed;
+    }
+    count = btlGetIndexListCount(list);
+    found = 0;
+    memset(picked, 0, sizeof(picked));
+    for (i = 0; i < count; i++) {
+        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+            picked[found] = 1;
+            found++;
+        }
+    }
+    if (found == 0) {
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
+        btlFreeIndexList(list);
+        return 1;
+    }
+    btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, count));
+    btlFreeIndexList(list);
+    result = 1;
+completed:
+    return result;
+}
 
 s32 btlAppendSelfAfterTargetScan(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
@@ -3302,7 +3337,7 @@ s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
             eligible = 1;
         }
     } else {
-        eligible = datCommandRecords[command].unk_0B == 1;
+        eligible = datCommandRecords[command].distributeRandomTargetHits == 1;
     }
     if (eligible) {
         s32 hitBudget = datCommandRecords[command].rangeMax;
@@ -4359,18 +4394,18 @@ s32 btlMapCommandToSkill(u32 command) {
 }
 
 /* Map linked-command responses; response 1 on these boss modes starts a one-tick shake task. */
-s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
+s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 commandResult) {
     BtlRuntimeTask *task;
 
     if (!(unit->status.flags & 0x400)) {
-        return arg1;
+        return commandResult;
     }
     switch (unit->partyRecord.unitId) {
     case 0x11B:
-        if (arg1 == 2) {
+        if (commandResult == 2) {
             return 0;
         }
-        if (arg1 == 0xD) {
+        if (commandResult == 0xD) {
             return -1;
         }
         break;
@@ -4380,7 +4415,7 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
     case 0x140:
     case 0x141:
     case 0x142:
-        switch (arg1) {
+        switch (commandResult) {
         case 2:
             return 0;
         case 3:
@@ -4403,7 +4438,7 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
         }
         break;
     }
-    return arg1;
+    return commandResult;
 }
 /* HARI2 turn hook: mode 2 rerolls agility for units 0x13D..0x142; mode 1 queues 0xD2
  * for a random 0x2000-status party task; otherwise unit 0x11B queues 0xD5 into a free slot. */
@@ -4506,7 +4541,7 @@ s32 func_0020A860(void) {
         fldAppendSceneGroupHandle(task);
         task->indexWork.phase = 2;
         task->indexWork.skillId = 0xD5;
-        task->indexWork.unk18 = summon;
+        task->indexWork.summonId = summon;
         btlAppendIndexListEntry(task->indexWork.indices, slot);
     }
     return -1;

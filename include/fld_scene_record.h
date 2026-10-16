@@ -37,7 +37,7 @@ typedef struct FldSceneRecord {
 /* Payload header produced after relocating the packed scene-record chunk. */
 typedef struct FldSceneRecordTableHeader {
     u8 opaque00[4];
-    s32 rows;  /* 0x04: relocated first FldSceneRecord address */
+    FldSceneRecord *rows; /* 0x04: relocated first row; the next count records follow. */
     s32 count; /* 0x08: number of scene records */
 } FldSceneRecordTableHeader;
 

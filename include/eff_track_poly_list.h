@@ -19,7 +19,8 @@ typedef char EffTrackPolyListHandleOffsetCheck[
 
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count);
 void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list);
-void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, void *data);
+/* Read two caller-owned 128-bit endpoint vectors. */
+void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, const u128 *endpoints);
 void effTrackPolyResetIndexedWork(EffTrackPolyList *list, s32 index);
 void effTrackPolySetIndexedColor(EffTrackPolyList *list, s32 index, u32 color);
 void effTrackPolyDrawModelWorkList(EffTrackPolyList *list);

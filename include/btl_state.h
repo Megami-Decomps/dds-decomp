@@ -5,6 +5,9 @@
 #include "btl_command.h"
 #include "btl_runtime.h"
 
+/* Broadens command targeting and suppresses command-block reasons when set. */
+#define BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS 0x800
+
 struct KwlnTask;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
@@ -201,7 +204,7 @@ typedef struct BtlState {
     s32 frame; /* 0x1F0 */
     u32 battleFlags; /* 0x1F4 */
     u32 commandRestrictFlags; /* 0x1F8: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
+    u32 unk_1FC; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
     struct EffWorldNode *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
     s32 listener; /* 0x204: stored world-node address. */
     s32 currentScene; /* 0x208 */
@@ -240,8 +243,8 @@ typedef struct BtlState {
     u8 pad25F[5];
     u32 motionSeLoadFrame; /* 0x264: disabled at -1; native updater tests the signed word. */
     u32 skillSeLoadFrame; /* 0x268: same signed disabled sentinel. */
-    u16 unk26C;
-    u16 unk26E;
+    u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
+    u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 encounterPack; /* 0x270: ENC PACK test selection (btlUpdateDebugEncounterSelector) */
     s32 adjustmentGroupIndex; /* 0x274: encounter reward lookup in code_001A1960 */
     s32 adjustmentEntryIndex; /* 0x278: entry within that encounter group */
@@ -371,6 +374,10 @@ typedef char BtlSideFloorResourceOffset[
 typedef char BtlMotionSeOwnersOffset[((unsigned int)&((BtlState *)0)->soundSlotOwners == 0x23C) ? 1 : -1];
 typedef char BtlMotionSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
 typedef char BtlSkillSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];
+typedef char BtlDefeatedLevelCountDds1Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelCount == 0x26C) ? 1 : -1];
+typedef char BtlDefeatedLevelTotalDds1Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelTotal == 0x26E) ? 1 : -1];
 typedef char BtlTimingRateOffset[((unsigned int)&((BtlState *)0)->timingRate == 0x490) ? 1 : -1];
 typedef char BtlHitResultOverrideOffset[((unsigned int)&((BtlState *)0)->hitResultOverride == 0x59C) ? 1 : -1];
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
@@ -434,9 +441,9 @@ typedef struct BtlState {
     u8 pad214[4];
     u32 battleFlags; /* 0x218 */
     u32 commandRestrictFlags; /* 0x21C: bit 0x10 blocks commands with the +0x30 restriction */
-    u32 unk220;
+    u32 unk220; /* BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS bypasses block reasons. */
     struct EffWorldNode *cameraObject; /* 0x224: world camera stored at 001E9514. */
-    s32 unk228;
+    struct EffWorldNode *sceneLightNode; /* 0x228: action node used for scene-light transitions. */
     s32 currentScene; /* 0x22C */
     s32 queuedScene;
     s32 frame;
@@ -469,16 +476,16 @@ typedef struct BtlState {
     s32 escapeAttemptCount; /* 0x278: same escape-attempt counter as DDS1. */
     u8 eventReady; /* 0x27C */
     u8 pad27D;
-    u16 unk27E;
+    u16 spawnCount; /* 0x27E: enemies spawned so far, compared with maxEnemySpawns. */
     u16 phase; /* 0x280 */
     u8 requestMode; /* 0x282 */
     u8 pad283;
     u16 earringPlaybackCount;
     u8 pad286[2];
-    u32 unk288;
-    u32 unk28C;
-    u16 unk290;
-    u16 unk292;
+    u32 motionSeLoadFrame; /* 0x288: -1 disables the motion-SE ATRAC3 buffer delay. */
+    u32 skillSeLoadFrame; /* 0x28C: -1 disables the skill-SE frame gate. */
+    u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
+    u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 effectLayer; /* 0x294 */
     s32 adjustmentGroupIndex; /* 0x298: encounter pack's group selector */
     s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
@@ -644,6 +651,14 @@ typedef struct BtlState {
     s16 debugMotionCountdown; /* 0xFD2: frames until preview motion; -1 when idle. */
 } BtlState;
 typedef char BtlEscapeAttemptCountDds2Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x278) ? 1 : -1];
+typedef char BtlMotionSeLoadFrameDds2Offset[
+    ((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x288) ? 1 : -1];
+typedef char BtlSkillSeLoadFrameDds2Offset[
+    ((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x28C) ? 1 : -1];
+typedef char BtlDefeatedLevelCountDds2Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelCount == 0x290) ? 1 : -1];
+typedef char BtlDefeatedLevelTotalDds2Offset[
+    ((unsigned int)&((BtlState *)0)->defeatedLevelTotal == 0x292) ? 1 : -1];
 typedef char BtlSceneLightOffset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightOffset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
 typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];
@@ -658,6 +673,10 @@ typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId
 typedef char BtlFieldResourceIdsSpanCheck[
     (((unsigned int)&((BtlState *)0)->scriptOwner -
       (unsigned int)&((BtlState *)0)->fieldF1ResourceId) == 0xC) ? 1 : -1];
+typedef char BtlSpawnCountOffsetCheck[
+    ((unsigned int)&((BtlState *)0)->spawnCount == 0x27E) ? 1 : -1];
+typedef char BtlSceneLightNodeOffsetCheck[
+    ((unsigned int)&((BtlState *)0)->sceneLightNode == 0x228) ? 1 : -1];
 typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];

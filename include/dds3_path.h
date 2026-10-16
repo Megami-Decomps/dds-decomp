@@ -29,7 +29,7 @@ typedef struct Dds3PathKeyframes {
 
 /* The path object's variable-length curve table starts with this count. */
 typedef struct Dds3PathCurveEntry {
-    u32 kind;
+    enum Dds3PathCurveKind kind;
     Dds3PathKeyframes *keys;
 } Dds3PathCurveEntry;
 
@@ -55,6 +55,10 @@ typedef char Dds3PathKeyframes_size_must_be_0x0C[
     (sizeof(Dds3PathKeyframes) == 0x0C) ? 1 : -1];
 typedef char Dds3PathCurveEntry_size_must_be_8[
     (sizeof(Dds3PathCurveEntry) == 0x08) ? 1 : -1];
+typedef char Dds3PathCurveKind_size_must_be_4[
+    (sizeof(enum Dds3PathCurveKind) == 4) ? 1 : -1];
+typedef char Dds3PathCurveEntry_kind_at_0[
+    ((u32)&((Dds3PathCurveEntry *)0)->kind == 0) ? 1 : -1];
 typedef char Dds3PathCurveEntry_keys_at_4[
     ((u32)&((Dds3PathCurveEntry *)0)->keys == 0x04) ? 1 : -1];
 typedef char Dds3PathCurveTable_entries_at_4[
@@ -79,7 +83,7 @@ typedef struct Dds3SlotResource {
 typedef char Dds3SlotResource_size_must_be_0x10[
     (sizeof(Dds3SlotResource) == 0x10) ? 1 : -1];
 
-void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame);
+void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame);
 Dds3PathCurveWork *dds3CreatePathCurveWork(struct EffWorldNode *object);
 void dds3FreePathObject(Dds3PathCurveWork *path);
 Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *object);

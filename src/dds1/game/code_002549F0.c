@@ -12,7 +12,7 @@ typedef struct DspWindowContext {
     DspUnit *unit;
 } DspWindowContext;
 
-extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
 void mnuDrawDisplayModeSprites(s32 x, s32 y, s32 layer, s32 scale,
                    DspWindowContext *window, s32 context) {

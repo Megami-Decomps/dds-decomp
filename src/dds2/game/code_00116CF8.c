@@ -34,12 +34,12 @@ u32 dds3GetPathStateValueById(u32 id) {
     return ((Dds3PathStatePayload *)path->data)->value;
 }
 
-EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
+EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_D);
 
     obj->data = work;
-    obj->key = a;
-    obj->value = (const char *)c;
+    obj->key = key;
+    obj->value = (const char *)name;
     return obj;
 }
 
@@ -47,7 +47,7 @@ void *dds3GetWorldObjectPayload(EffWorldNode *object) {
     return object->data;
 }
 
-void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame) {
+void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame) {
     u32 count = keys->count;
     u32 i;
     u32 *frames = keys->frames;
@@ -64,10 +64,10 @@ void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes
     *weight = 1.0f;
 }
 
-EffWorldNode *evtSpawnActionObj10(s32 a, void *work, const char *name) {
+EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_10);
 
-    obj->key = a;
+    obj->key = key;
     obj->value = name;
     obj->data = work;
     return obj;

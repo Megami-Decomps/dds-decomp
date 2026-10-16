@@ -21,9 +21,9 @@ typedef struct DatStateHeader {
     s8 partyIds[8];
     s8 partyLevels[8];
     u32 savedMoney; /* 0x20: save-slot money copied to and from the live currency. */
-    u32 unk24;
-    u32 unk28;
-    u32 unk2C;
+    u32 saveFlags; /* 0x24: packed mdlFlagTest bits persisted in save word 0. */
+    u32 saveFlags1; /* 0x28: packed mdlFlagTest bits persisted in save word 1. */
+    u32 saveFlags2; /* 0x2C: packed mdlFlagTest bits persisted in save word 2. */
     struct SdfMemBlock *backingAllocation;
     u32 firstTick;
     u32 secondTick;
@@ -33,6 +33,12 @@ typedef char DatStateHeaderSavedMoneyOffsetCheck[
     ((u32)&((DatStateHeader *)0)->savedMoney == 0x20) ? 1 : -1];
 typedef char DatStateHeaderStatusOffsetCheck[
     ((u32)&((DatStateHeader *)0)->status == 0x0C) ? 1 : -1];
+typedef char DatStateHeaderSaveFlagsOffsetCheck[
+    ((u32)&((DatStateHeader *)0)->saveFlags == 0x24) ? 1 : -1];
+typedef char DatStateHeaderSaveFlags1OffsetCheck[
+    ((u32)&((DatStateHeader *)0)->saveFlags1 == 0x28) ? 1 : -1];
+typedef char DatStateHeaderSaveFlags2OffsetCheck[
+    ((u32)&((DatStateHeader *)0)->saveFlags2 == 0x2C) ? 1 : -1];
 
 /* Shared script storage begins at +0x40; +0x388 is integer register 210. */
 typedef struct DatScriptGlobals {
@@ -51,13 +57,17 @@ typedef struct DatWorldState {
     u8 secondaryPhase;
     u8 overlayFlag;
     f32 phaseTimer;
-    u32 unkA48;
-    u32 unkA4C;
+    u32 specialEncounterAttemptCount; /* +0x08: attempts in the current solar cycle. */
+    u32 fieldTransitionCycleCount; /* 0xA4C: solar cycles while a field transition is pending. */
     s32 score;
     u32 slotFlags;
     u32 fieldFlags;
     u32 updateMode;
 } DatWorldState;
+typedef char DatWorldState_fieldTransitionCycleCount_offset[
+    ((u32)&((DatWorldState *)0)->fieldTransitionCycleCount == 0x0C) ? 1 : -1];
+typedef char DatWorldState_specialEncounterAttemptCount_offset[
+    ((u32)&((DatWorldState *)0)->specialEncounterAttemptCount == 0x08) ? 1 : -1];
 
 /* Occupied records participate in roster lookup; frontline records occupy
  * the active battle formation. Other record flag bits remain unresolved. */
@@ -119,7 +129,7 @@ typedef struct DatPartyRecord {
         };
         u32 skillSnapshotWords[77]; /* Stock merge includes the reserved trailing word. */
     };
-    u16 unk18C;
+    u16 savedCommandPhase; /* +0x18C: saved action phase restored with actionSlot. */
     u16 unk18E;
     u16 actionSlot; /* 0x190: saved command-table slot; matches DDS2's actionSlot. */
     u8 pad192[2];
@@ -131,7 +141,7 @@ typedef struct DatPartyRecord {
     u8 profileId;
     u8 pad56[2];
     u32 skillFlags[85];                    /* 0x058: scrClearFlagsTable clears all 0x154 bytes. */
-    u16 unk1AC; /* Synced from the active battle record. */
+    u16 savedCommandPhase; /* +0x1AC: saved action phase restored with actionSlot. */
     u16 unk1AE; /* Synced from the active battle record. */
     s16 actionSlot;
     u16 itemId;
@@ -140,6 +150,14 @@ typedef struct DatPartyRecord {
     u8 pad1BC[8];
 #endif
 } DatPartyRecord;
+
+#ifdef VERSION_DDS1
+typedef char DatPartyRecord_savedCommandPhase_offset[
+    ((u32)&((DatPartyRecord *)0)->savedCommandPhase == 0x18C) ? 1 : -1];
+#else
+typedef char DatPartyRecord_savedCommandPhase_offset[
+    ((u32)&((DatPartyRecord *)0)->savedCommandPhase == 0x1AC) ? 1 : -1];
+#endif
 
 typedef char DatPartyRecord_effectDataCount_offset[
     ((unsigned long)&((DatPartyRecord *)0)->effectDataCount == 0x20) ? 1 : -1];
@@ -304,33 +322,44 @@ typedef struct DatEnemyRecord {
     u8 pad0E[2];
 #endif
     u8 baseStats[DAT_BASE_STAT_COUNT]; /* 0x10 */
-    u8 unk15;            /* Copied to the command actor's actionNumber on model change. */
-    u8 pad16[2];
+    u8 actionNumber;     /* 0x15: copied to the command actor; its consumer repeats this many scene actions. */
+    u8 usePanelIcons; /* 0x16: nonzero selects panel icon groups instead of numeric level/vitals. */
+    u8 pad17;
     u16 skills[8];        /* 0x18 */
     s32 money;            /* 0x28 */
-    u16 unk2C;
+    u16 battleExperienceReward; /* 0x2C: base EXP awarded on enemy defeat. */
     u16 experience;       /* 0x2E */
     u16 huntExperience;   /* 0x30 */
     u8 pad32[4];
     u16 huntPenaltyFlags; /* 0x36: hunt's adverse-outcome mask. */
     u16 huntPenaltyChance; /* 0x38: base percentage before status modifiers. */
     u8 pad3A[4];
-    u8 unk3E[2];          /* The battle status accessor tests both adjacent bytes. */
-    u8 actionChances[2];  /* 0x40: bucket thresholds for the two unk3E actions. */
+    u8 additionalDropItemIds[2]; /* 0x3E: optional item IDs selected with actionChances. */
+    u8 actionChances[2];  /* 0x40: bucket thresholds for the additional drop item IDs. */
     u16 overrideFlag;     /* 0x42: model flag gating the override action. */
     u8 overrideAction;    /* 0x44: action selected before the ordinary slots. */
     u8 overrideChance;    /* 0x45: bucket threshold for the override action. */
-    s8 unk46;            /* Signed indexed-value accessor. */
+    s8 indexedValueOverride; /* 0x46: signed value used for enemy selector index zero. */
     u8 tickCount;         /* 0x47: enemy action tick count; zero is read as one. */
     u8 attackSpacing;    /* Repeat-hit interval, scaled by the command's effect data. */
     u8 pad49[3];
 } DatEnemyRecord;
 
 typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];
+typedef char DatEnemyRecordActionNumberOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->actionNumber == 0x15) ? 1 : -1];
+typedef char DatEnemyRecordUsePanelIconsOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->usePanelIcons == 0x16) ? 1 : -1];
+typedef char DatEnemyRecordBattleExperienceRewardOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->battleExperienceReward == 0x2C) ? 1 : -1];
 typedef char DatEnemyActionChancesOffsetCheck[((u32)&((DatEnemyRecord *)0)->actionChances == 0x40) ? 1 : -1];
 typedef char DatEnemyOverrideFlagOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideFlag == 0x42) ? 1 : -1];
 typedef char DatEnemyOverrideActionOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideAction == 0x44) ? 1 : -1];
 typedef char DatEnemyOverrideChanceOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideChance == 0x45) ? 1 : -1];
+typedef char DatEnemyIndexedValueOverrideOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->indexedValueOverride == 0x46) ? 1 : -1];
+typedef char DatEnemyRecordAdditionalDropItemIdsOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->additionalDropItemIds == 0x3E) ? 1 : -1];
 
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {
@@ -371,7 +400,7 @@ typedef struct BattleAdjustmentEntry {
     u16 sceneIndex;
     u16 weight;
     s8 value;
-    u8 unk05;
+    u8 serialEncounterChanceAdjustment; /* 0x05: input percentage before world-flag scaling and clamp. */
 } BattleAdjustmentEntry;
 
 typedef struct BattleAdjustmentGroup {
@@ -390,6 +419,8 @@ typedef struct BattleAdjustmentRecord {
 } BattleAdjustmentRecord;
 
 typedef char BattleAdjustmentEntrySizeCheck[sizeof(BattleAdjustmentEntry) == 6 ? 1 : -1];
+typedef char BattleAdjustmentEntrySerialChanceAdjustmentOffsetCheck[
+    ((u32)&((BattleAdjustmentEntry *)0)->serialEncounterChanceAdjustment == 5) ? 1 : -1];
 typedef char BattleAdjustmentGroupSizeCheck[sizeof(BattleAdjustmentGroup) == 0x7C ? 1 : -1];
 typedef char BattleAdjustmentRecordSizeCheck[sizeof(BattleAdjustmentRecord) == 0x20C ? 1 : -1];
 typedef char BattleAdjustmentStreamOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->streamSelection == 4 ? 1 : -1];
@@ -403,7 +434,7 @@ typedef struct BattleAdjustmentEntry {
     u16 sceneIndex;
     u16 weight;
     s8 value;
-    u8 opaque05;
+    u8 serialEncounterChanceAdjustment; /* 0x05: input percentage before world-flag scaling and clamp. */
 } BattleAdjustmentEntry;
 
 typedef struct BattleAdjustmentGroup {
@@ -421,6 +452,8 @@ typedef struct BattleAdjustmentRecord {
 } BattleAdjustmentRecord;
 
 typedef char BattleAdjustmentEntrySizeCheck[(sizeof(BattleAdjustmentEntry) == 6) ? 1 : -1];
+typedef char BattleAdjustmentEntrySerialChanceAdjustmentOffsetCheck[
+    ((u32)&((BattleAdjustmentEntry *)0)->serialEncounterChanceAdjustment == 5) ? 1 : -1];
 typedef char BattleAdjustmentGroupSizeCheck[(sizeof(BattleAdjustmentGroup) == 0x7C) ? 1 : -1];
 typedef char BattleAdjustmentRecordSizeCheck[(sizeof(BattleAdjustmentRecord) == 0x190) ? 1 : -1];
 typedef char BattleAdjustmentConditionsOffsetCheck[((u32)&((BattleAdjustmentRecord *)0)->conditions == 0x08) ? 1 : -1];

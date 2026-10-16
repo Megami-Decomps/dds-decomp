@@ -15,6 +15,9 @@ typedef struct CmdPacket {
 /* Queue sound command 0x40 without a payload. */
 void sndQueueNoPayloadCommand40(void);
 
+u32 sndQueueCommandPacket(u32 command, u32 channel, const void *packet, s32 payloadBytes);
+u32 sndSendCommandPacket(u32 command, u32 channel, const void *packet, u32 size);
+
 typedef char CmdPacket_size_must_be_0x10[(sizeof(CmdPacket) == 0x10) ? 1 : -1];
 typedef char CmdPacket_trackId_offset_must_be_0[
     ((u32)&((CmdPacket *)0)->trackId == 0) ? 1 : -1];

@@ -27,7 +27,7 @@ void dds3EnsureWorldNodeInSlot(EffWorldNode *object, EffWorldNode *node) {
     WorldIndexNode *slot = dds3GetWorldSlotValue(object, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
 
     dds3ResetObjectValueCursor((WorldValueIndices *)slot);
-    if (dds3SeekWorldNode((WorldValueIndices *)slot, (u32)node) != 1) {
+    if (dds3SeekWorldNode((WorldValueIndices *)slot, node) != 1) {
         dds3GrowWorldValueChain((WorldValueIndices *)slot, 1);
         dds3WriteIndexedWorldObjectWord((WorldValueIndices *)slot, (u32)node);
     }

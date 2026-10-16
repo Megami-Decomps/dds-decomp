@@ -48,7 +48,7 @@ extern void effFlashTrianglePulseWriteCorners();
 extern void effDrawTriangleRecordPool(EffRecordPool *);
 
 
-extern void effFlashBillboardQuad(PcpFlashStreakWork *, s32, void *);
+extern void effFlashBillboardQuad(PcpFlashStreakWork *work, s32 index, void *view);
 
 extern void effDrawScaledRecordPool(EffRecordPool *);
 
@@ -61,9 +61,9 @@ extern void effFlashFadingOrbitWriteCorners(PcpFlashFadingOrbitWork *, s32);
 
 extern void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *, s32, void *);
 
-void effFlashTrianglePulseSpawnFromTable(void *data)
+void effFlashTrianglePulseSpawnFromTable(void *table)
 {
-    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(data, 0));
+    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(table, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -92,7 +92,7 @@ void effFlashTrianglePulseSetRenderScale(PcpFlashTrianglePulseWork *work, f32 va
     work->renderScale = value;
 }
 
-void effFlashTrianglePulseSetParticleColors(PcpFlashTrianglePulseWork *work, s32 index, s32 param)
+void effFlashTrianglePulseSetParticleColors(PcpFlashTrianglePulseWork *work, s32 index, s32 color)
 {
     PcpFlashColorSlot *slot;
     s32 rgb1;
@@ -101,9 +101,9 @@ void effFlashTrianglePulseSetParticleColors(PcpFlashTrianglePulseWork *work, s32
     slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->first = effMultiplyPackedColors(rgb2, param);
-    slot->second = effMultiplyPackedColors(rgb2, param);
-    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, color);
+    slot->second = effMultiplyPackedColors(rgb2, color);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
@@ -286,7 +286,7 @@ void effFlashRotatingStreakSetRenderScale(PcpFlashStreakWork *work, f32 value)
 
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 
-void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index, s32 param)
+void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index, s32 color)
 {
     PcpFlashQuadColorSlot *slot;
     s32 rgb1;
@@ -295,16 +295,16 @@ void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index
     slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->color[0] = effMultiplyPackedColors(rgb2, param);
-    slot->color[1] = effMultiplyPackedColors(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, color);
+    slot->color[1] = effMultiplyPackedColors(rgb2, color);
     if (index & 1) {
-        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, color);
     } else {
-        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, color);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, color);
     }
 }
 
@@ -558,7 +558,7 @@ void effFlashOrbitScalingSetRenderScale(PcpFlashScalingOrbitWork *work, f32 valu
     work->renderScale = value;
 }
 
-void effFlashOrbitScalingSetParticleColors(PcpFlashScalingOrbitWork *work, s32 index, s32 param)
+void effFlashOrbitScalingSetParticleColors(PcpFlashScalingOrbitWork *work, s32 index, s32 color)
 {
     PcpFlashQuadColorSlot *slot;
     s32 rgb1;
@@ -567,16 +567,16 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashScalingOrbitWork *work, s32 i
     slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->color[0] = effMultiplyPackedColors(rgb2, param);
-    slot->color[1] = effMultiplyPackedColors(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, color);
+    slot->color[1] = effMultiplyPackedColors(rgb2, color);
     if (index & 1) {
-        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, color);
     } else {
-        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, color);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, color);
     }
 }
 
@@ -918,8 +918,8 @@ void effFlashAccumulatingParticleAdvance(PcpFlashAccumulatingWork *work, s32 ind
     part->orbitAngle += work->increment;
 }
 
-extern void effFlashAccumulatingSetParticleColors(PcpFlashAccumulatingWork *, s32, u32);
-extern void effFlashAccumulatingBuildParticleQuads(PcpFlashAccumulatingWork *, s32);
+extern void effFlashAccumulatingSetParticleColors(PcpFlashAccumulatingWork *work, s32 index, u32 colorMultiplier);
+extern void effFlashAccumulatingBuildParticleQuads(PcpFlashAccumulatingWork *work, s32 index);
 
 void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
 {
@@ -1061,7 +1061,7 @@ void effFlashOrbitArcSetRenderScale(PcpFlashOrbitArcWork *work, f32 value)
     work->renderScale = value;
 }
 
-void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 index, s32 param)
+void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 index, s32 color)
 {
     PcpFlashQuadColorSlot *slot;
     s32 rgb1;
@@ -1070,16 +1070,16 @@ void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 index, s3
     slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->color[0] = effMultiplyPackedColors(rgb2, param);
-    slot->color[1] = effMultiplyPackedColors(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, color);
+    slot->color[1] = effMultiplyPackedColors(rgb2, color);
     if (index & 1) {
-        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, color);
     } else {
-        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, color);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, color);
     }
 }
 
@@ -1315,7 +1315,7 @@ void effFlashRotatingQuadSetRenderScale(PcpFlashRotatingQuadWork *work, f32 valu
     work->renderScale = value;
 }
 
-void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 index, s32 param)
+void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 index, s32 color)
 {
     PcpFlashQuadColorSlot *slot;
     s32 rgb1;
@@ -1324,16 +1324,16 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 i
     slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->color[0] = effMultiplyPackedColors(rgb2, param);
-    slot->color[1] = effMultiplyPackedColors(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, color);
+    slot->color[1] = effMultiplyPackedColors(rgb2, color);
     if (index & 1) {
-        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, color);
     } else {
-        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, color);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, color);
     }
 }
 
@@ -1569,7 +1569,7 @@ void effFlashRadialTriangleSetRenderScale(PcpFlashRadialTriangleWork *work, f32 
     work->renderScale = value;
 }
 
-void effFlashRadialTriangleSetParticleColors(PcpFlashRadialTriangleWork *work, s32 index, s32 param)
+void effFlashRadialTriangleSetParticleColors(PcpFlashRadialTriangleWork *work, s32 index, s32 color)
 {
     PcpFlashColorSlot *slot;
     s32 rgb1;
@@ -1578,9 +1578,9 @@ void effFlashRadialTriangleSetParticleColors(PcpFlashRadialTriangleWork *work, s
     slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->first = effMultiplyPackedColors(rgb2, param);
-    slot->second = effMultiplyPackedColors(rgb2, param);
-    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, color);
+    slot->second = effMultiplyPackedColors(rgb2, color);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
@@ -2035,7 +2035,7 @@ void effFlashFadingOrbitSetRenderScale(PcpFlashFadingOrbitWork *work, f32 value)
     work->renderScale = value;
 }
 
-void effFlashFadingOrbitSetParticleColors(PcpFlashFadingOrbitWork *work, s32 index, s32 param)
+void effFlashFadingOrbitSetParticleColors(PcpFlashFadingOrbitWork *work, s32 index, s32 color)
 {
     PcpFlashQuadColorSlot *slot;
     s32 rgb1;
@@ -2044,16 +2044,16 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashFadingOrbitWork *work, s32 ind
     slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->color[0] = effMultiplyPackedColors(rgb2, param);
-    slot->color[1] = effMultiplyPackedColors(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, color);
+    slot->color[1] = effMultiplyPackedColors(rgb2, color);
     if (index & 1) {
-        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
-        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, color);
     } else {
-        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
-        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, color);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, color);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, color);
     }
 }
 
@@ -2271,7 +2271,7 @@ void effFlashOffsetRadialTriangleSetRenderScale(PcpFlashOffsetRadialWork *work, 
     work->renderScale = value;
 }
 
-void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashOffsetRadialWork *work, s32 index, s32 param)
+void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashOffsetRadialWork *work, s32 index, s32 color)
 {
     PcpFlashColorSlot *slot;
     s32 rgb1;
@@ -2280,9 +2280,9 @@ void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashOffsetRadialWork *wor
     slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->first = effMultiplyPackedColors(rgb2, param);
-    slot->second = effMultiplyPackedColors(rgb2, param);
-    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, color);
+    slot->second = effMultiplyPackedColors(rgb2, color);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */

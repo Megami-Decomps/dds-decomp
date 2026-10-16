@@ -140,10 +140,10 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
                 return code;
             }
             if (code == 1) {
-                if (unit == second && first->unkEC == 0x11) {
+                if (unit == second && first->motionId == 0x11) {
                     return code;
                 }
-                if (unit == first && second->unkEC == 0x10) {
+                if (unit == first && second->motionId == 0x10) {
                     return code;
                 }
                 if (unit->partyRecord.unitId == 0x12E) {
@@ -237,14 +237,14 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
         if (second == NULL) {
             goto unavailable_pair;
         }
-        if (first->unkEC < 0x14) {
-            if (first->unkEC >= 0x12) {
-                return first->unkEC;
+        if (first->motionId < 0x14) {
+            if (first->motionId >= 0x12) {
+                return first->motionId;
             }
         }
-        if (second->unkEC < 0x14) {
-            if (second->unkEC >= 0x12) {
-                return second->unkEC;
+        if (second->motionId < 0x14) {
+            if (second->motionId >= 0x12) {
+                return second->motionId;
             }
         }
 /* Share pair rejections so early conversion does not hoist the return
@@ -1587,7 +1587,7 @@ extern s32 btlGetBossModeScriptReturnCode(void);
 extern s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action);
 extern s32 btlSelectAction211CameraPair(BtlLinkedCommand *command);
 extern void btlPromoteSerphToFrontline(void);
-extern void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1);
+extern void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *operandData);
 extern void btlRefreshAbaddonPresentationAfterUnitUpdate(void);
 extern void btlQueueGateComponentScriptAndSound(ActionStateLink *record);
 extern void btlResetGateComponentTransforms(void);
@@ -1599,7 +1599,7 @@ extern void btlRefreshVritraPresentationAfterUnitUpdate(void);
 extern void btlQueueVritraTentacleActionTasks(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite);
 extern s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSide);
 extern s32 btlSetupVritraCameraFromActionFlags(BtlLinkedCommand *command);
-extern u8 btlIsNonCalamityAction(s32 arg0);
+extern u8 btlIsNonCalamityAction(s32 actionId);
 extern void btlApplyMarkedCommandStateMotion(void);
 extern void btlPromoteTrueHeatToFrontline(void);
 extern s32 btlRemapKartikeyaMotionForLinkedState(BtlUnit *unit, s32 command);

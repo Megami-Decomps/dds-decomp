@@ -511,7 +511,7 @@ s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorInde
     btlGetRuntime();
     indexedSelectorValue = btlGetActorIndexedSignedValue(source, selectorIndex);
     selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
-    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].unk2E;
+    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].commandEffectId;
     if (maskTableIndex == 0) {
         return 0;
     }
@@ -527,7 +527,7 @@ s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorInde
 s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
     u16 lookupTableIndex;
 
-    lookupTableIndex = datCommandRecords[actionRecordIndex].unk2E;
+    lookupTableIndex = datCommandRecords[actionRecordIndex].commandEffectId;
     return D_003B4F70[lookupTableIndex * 3];
 }
 
@@ -537,7 +537,7 @@ s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
     if (selectedEntryIndex == -1) {
         return 0;
     }
-    maskTableIndex = datCommandRecords[selectedEntryIndex].unk2E;
+    maskTableIndex = datCommandRecords[selectedEntryIndex].commandEffectId;
     return (D_003B4F78[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
@@ -555,7 +555,7 @@ s32 btlGetSelectedUnitProperty(BtlUnit *unit) {
     if (index == -1) {
         return 0;
     }
-    property = datCommandRecords[index].unk2E;
+    property = datCommandRecords[index].commandEffectId;
     return D_003B4F74[property * 3];
 }
 

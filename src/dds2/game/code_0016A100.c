@@ -335,7 +335,7 @@ void effParamInitWork(MdlCtx *work) {
 }
 
 extern u16 D_00436434;
-extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
+extern void mdlLoadViewerPackage(s32 resourceGroup, u16 resourceId, s32 flags, void *packageData, u32 packageSize);
 
 /* Create and initialize a viewer-package context in the fixed effect group.
  * DDS2 skips occupied halfword ids before loading; DDS1 does not scan them. */
@@ -508,36 +508,36 @@ u32 effParamDescriptorGetTableIndex(const u32 *descriptor) {
 /* Records follow a 16-byte header and have a 16-byte stride. Block offsets
  * are signed and relative to the whole table, not to individual records.
  * Neither the index nor the resulting target address is validated here. */
-void *effParamTableGetBlock(void *table, s32 index) {
+void *effParamTableGetBlock(void *table, s32 recordIndex) {
     u8 *base = (u8 *)table;
-    u8 *indexedBase = base + index * EFF_PARAM_RECORD_BYTES;
+    u8 *indexedBase = base + recordIndex * EFF_PARAM_RECORD_BYTES;
 
     return base + *(s32 *)(indexedBase + EFF_PARAM_BLOCK_OFFSET);
 }
 
 /* Return the record's first word without interpreting its meaning. */
-u32 effParamTableGetWord(void *table, s32 index) {
+u32 effParamTableGetWord(void *table, s32 recordIndex) {
     u8 *bytes = (u8 *)table;
 
-    bytes += index * EFF_PARAM_RECORD_BYTES;
+    bytes += recordIndex * EFF_PARAM_RECORD_BYTES;
     return *(u32 *)(bytes + EFF_PARAM_TABLE_HEADER_BYTES);
 }
 
 /* Return the full record word whose low halfword selects a compact-work factory. */
-u32 effParamTableGetWord2(void *table, s32 index) {
+u32 effParamTableGetWord2(void *table, s32 recordIndex) {
     u8 *bytes = (u8 *)table;
 
-    bytes += index * EFF_PARAM_RECORD_BYTES;
+    bytes += recordIndex * EFF_PARAM_RECORD_BYTES;
     return *(u32 *)(bytes + EFF_PARAM_KIND_WORD_OFFSET);
 }
 
 /* Create compact work from a serialized table record. */
-EffParamWork *effParamCreateFromTable(void *table, s32 index) {
+EffParamWork *effParamCreateFromTable(void *table, s32 recordIndex) {
     u16 kind;
     void *source;
 
-    kind = (u16)effParamTableGetWord2(table, index);
-    source = effParamTableGetBlock(table, index);
+    kind = (u16)effParamTableGetWord2(table, recordIndex);
+    source = effParamTableGetBlock(table, recordIndex);
     return effParamWorkCreate(kind, source);
 }
 

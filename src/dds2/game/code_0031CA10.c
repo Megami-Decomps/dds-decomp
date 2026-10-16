@@ -85,7 +85,24 @@ void itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flag
     itfDrawScaledIndexedImage(x, y, z, alpha, scale, scale, flags, index, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031CA10", itfDrawScaledIndexedImage);
+/* The resource-bank words hold EffectSlotSet pointers. */
+#define SCALED_INDEXED_BANK(index) (((EffectSlotSet **)itfIndexedImageResourceBanks)[itfIndexedImageDescriptors[index][0]])
+#define SCALED_INDEXED_SPRITE(index) (SCALED_INDEXED_BANK(index)->workEntries + itfIndexedImageDescriptors[index][1])
+
+void itfDrawScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale, s32 flags, s32 index, s32 context) {
+    SCALED_INDEXED_SPRITE(index)->geometry.bounds[2] = (s32)(xScale * (f32)SCALED_INDEXED_SPRITE(index)->sourceWidth) << 4;
+    SCALED_INDEXED_SPRITE(index)->geometry.bounds[3] = (s32)(yScale * (f32)SCALED_INDEXED_SPRITE(index)->sourceHeight) << 3;
+    effDrawTextureSlotWithBlendedCornerColors(((x + itfIndexedImageDescriptors[index][2]) << 4) - (SCALED_INDEXED_SPRITE(index)->geometry.bounds[2] >> 1),
+                  ((y + itfIndexedImageDescriptors[index][3]) << 3) - (SCALED_INDEXED_SPRITE(index)->geometry.bounds[3] >> 1),
+                  z, (u32)((f32)alpha * 256.0f * 0.0078125f), flags,
+                  SCALED_INDEXED_BANK(index),
+                  itfIndexedImageDescriptors[index][1], context);
+    SCALED_INDEXED_SPRITE(index)->geometry.bounds[2] = SCALED_INDEXED_SPRITE(index)->sourceWidth << 4;
+    SCALED_INDEXED_SPRITE(index)->geometry.bounds[3] = SCALED_INDEXED_SPRITE(index)->sourceHeight << 3;
+}
+
+#undef SCALED_INDEXED_SPRITE
+#undef SCALED_INDEXED_BANK
 
 /* Convert radians to degrees for this draw, then reset the shared angle to zero. */
 void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {

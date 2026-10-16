@@ -1387,15 +1387,15 @@ void *effPcpAllocateFixedOriginGroup(void) {
     return work;
 }
 
-void effPcpAngledBurstGroupRelease(EffPCPThunderGroup *work) {
+void effPcpAngledBurstGroupRelease(EffPCPThunderGroup *group) {
     s32 i;
     EffThunderFragmentWork **handle;
 
-    handle = work->handles;
+    handle = group->handles;
     for (i = 0; i < 12; i++) {
         effThunderReleaseFragmentWork(handle[i]);
     }
-    sdfReleaseChipBlock(work);
+    sdfReleaseChipBlock(group);
 }
 
 void *effPcpCreateFixedOriginParticles(void) {
@@ -3059,7 +3059,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpBlockSetUpdate);
 
-void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src) {
+void effPcpCopyVector60(EffPCPBlockSetWork *work, const void *src) {
     PCP_COPY_VECTOR(work->params.position, src);
 }
 
@@ -3068,7 +3068,7 @@ void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 val) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src) {
+void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, const void *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
@@ -3231,7 +3231,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     work->frame = frame + 1;
 }
 
-void effPcpRotateSetChildVectors(EffPCPRotateWork *work, void *src) {
+void effPcpRotateSetChildVectors(EffPCPRotateWork *work, const void *src) {
     u32 i;
     EffPCPBlockSetWork **blockSets;
 
@@ -3251,7 +3251,7 @@ void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
     }
 }
 
-void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
+void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, const void *src) {
     u32 i;
     EffPCPBlockSetWork **blockSets;
 

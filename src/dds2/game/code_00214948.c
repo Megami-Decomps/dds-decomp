@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
@@ -116,7 +117,6 @@ extern void *btlCreateActionTask(void *, s32);
 
 extern s32 btlFindScriptResource(char *);
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
 
@@ -215,7 +215,7 @@ extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
-extern s32 btlElementToBitIndex(s32, s32);
+extern s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 
@@ -1033,7 +1033,42 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00216B40);
+s32 func_00216B40(s32 actor) {
+    BtlIndexList *list = btlAllocateIndexList(13);
+    u8 mode = datCommandRecords[((ActionStateLink *)actor)->indexWork.skillId].targetType;
+    u32 count;
+    u16 picked[12];
+    u32 i;
+    s32 found;
+    s32 result;
+
+    btlBuildUnitIndexList((void *)actor, list, 2, 0, 0);
+    if (mode != 0) {
+        btlCopyIndexList(((ActionStateLink *)actor)->indexWork.indices, list);
+        btlFreeIndexList(list);
+        result = 1;
+        goto completed;
+    }
+    count = btlGetIndexListCount(list);
+    found = 0;
+    memset(picked, 0, sizeof(picked));
+    for (i = 0; i < count; i++) {
+        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+            picked[found] = 1;
+            found++;
+        }
+    }
+    if (found == 0) {
+        btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, ((ActionStateLink *)actor)->unit);
+        btlFreeIndexList(list);
+        return 1;
+    }
+    btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlSelectRandomUnitFromMask(list, picked, count));
+    btlFreeIndexList(list);
+    result = 1;
+completed:
+    return result;
+}
 
 u32 btlAppendSelfAfterTargetScan(s32 battle) {
     BtlIndexList *list = btlAllocateIndexList(13);
@@ -1619,7 +1654,7 @@ s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x5F || user->partyRecord.unitId == 0x101) {
-        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -2020,14 +2055,14 @@ void btlResetUnitSelectionStateAndSetMode(void) {
 }
 
 /* Apply Abaddon's selection operand flags and accumulate its reported damage. */
-void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1) {
+void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *operandData) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     u8 *sub = (u8 *)work->sub;
     BtlUnit *actor;
     u32 flags;
     u32 actorFlags;
 
-    flags = *(u32 *)(arg1 + 0x28);
+    flags = *(u32 *)(operandData + 0x28);
     if (flags & 0x2000) {
         btlAttachActionEffectToUnit(unit);
         *(s32 *)(sub + 4) = 0;
@@ -2054,7 +2089,7 @@ void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1) {
         }
     }
     if ((unit->status.flags & 0x400) && unit->partyRecord.unitId == 0x108) {
-        s32 damage = *(s32 *)(sub + 4) - *(s32 *)arg1;
+        s32 damage = *(s32 *)(sub + 4) - *(s32 *)operandData;
         *(s32 *)(sub + 4) = damage;
         btlBossDebugPrintf("btl:ABADON damage = %d\n", damage);
     }
@@ -2175,7 +2210,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x108) {
-        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -2700,7 +2735,7 @@ s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit) {
             actor = actor->nextActor;
         }
         if (actor != NULL) {
-            return actor->unkEC == 0x13 ? 0x13 : -1;
+            return actor->motionId == 0x13 ? 0x13 : -1;
         }
         return -1;
     }
@@ -3172,7 +3207,7 @@ void btlResetSpecialActionActorPresentation(void) {
                 mode = unit->partyRecord.unitId;
                 if (mode < 0x113) {
                     if (mode >= 0x111) {
-                        switch (unit->unkEC) {
+                        switch (unit->motionId) {
                         case 0x10:
                             unit->motionStartFrame = 0;
                             unit->motionEndFrame = 0;
@@ -3716,8 +3751,8 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
 
 extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
-extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
+extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
+extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
@@ -3813,7 +3848,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             }
             if (sub->guardHandled != 0) {
                 btlBossDebugPrintf("VURI:IT-0 ++++\n");
-                func_001EEB78(command, &command->frontCamera, 1);
+                btlBuildActorPairFramingCameraPose(command, &command->frontCamera, 1);
                 btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
                 command->backCamera.distance += 100.0f;
                 command->motionParameter = 35.0f;
@@ -3852,7 +3887,7 @@ flag_defeat_candidates:
                 return 1;
             } else {
                 btlBossDebugPrintf("VURI:ITP-P ++++\n");
-                func_001EF030(command, &command->frontCamera);
+                btlBuildTargetGroupFramingCameraPose(command, &command->frontCamera);
                 btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
                 command->backCamera.distance += 100.0f;
                 command->motionParameter = 30.0f;
@@ -4671,8 +4706,8 @@ s32 btlMapActorMotionId(u32 id) {
 }
 
 /* Calamity alone returns false; retain the native byte-sized predicate result. */
-u8 btlIsNonCalamityAction(s32 arg0) {
-    return arg0 != 0x196;
+u8 btlIsNonCalamityAction(s32 actionId) {
+    return actionId != 0x196;
 }
 
 s32 btlIsSpecialMotion(BtlUnit *actor) {
@@ -5206,7 +5241,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
             actor = actor->nextActor;
         }
         if (actor != NULL) {
-            s32 status = actor->unkEC;
+            s32 status = actor->motionId;
 
             if (status != 0x10) {
                 if (status != 0x12) {
@@ -5522,7 +5557,7 @@ s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit) {
         if (found == 0) {
             return -1;
         }
-        return found->unkEC == 0x10 ? 0x10 : -1;
+        return found->motionId == 0x10 ? 0x10 : -1;
     }
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
@@ -7854,7 +7889,6 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
     }
 }
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 /* Move the Kali target +400 on Z for status-table kinds 2/7 without a trigger. */
 s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
@@ -7867,7 +7901,7 @@ s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (unit->partyRecord.unitId == 0x113) {
-        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(
+        table = (u8 *)btlGetSideIndexedActorStatusTable(
             unit->resourceKind, unit->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             s32 slot = command->link->indexWork.slot;

@@ -38,7 +38,7 @@ void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 slotIndex) {
     angleRow[3] = 0.0f;
 }
 
-EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {
+EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep) {
     s32 countFrames;
     s32 frameTerm;
     s32 countTerm;
@@ -55,14 +55,14 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     s16 *defaults;
     u32 i;
 
-    countFrames = count * frames;
-    frameTerm = countFrames + frames;
+    countFrames = count * historyCount;
+    frameTerm = countFrames + historyCount;
     countTerm = (countFrames << 2) + count;
     allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + sizeof(EffMagatuhiValueWork);
     allocation = sdfAllocGeneralBlock(allocationSize);
     positions = sdfResourceRetainAddress(allocation);
     colorTable = positions + (countFrames << 4);
-    historyScalars = colorTable + (frames << 2);
+    historyScalars = colorTable + (historyCount << 2);
     values = historyScalars + (countFrames << 2);
     writeIndices = values + (count << 2);
     validCounts = writeIndices + (count << 1);
@@ -70,13 +70,13 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     resource = (EffMagatuhiValueWork *)(angleValues + (count << 4));
 
     resource->count = count;
-    resource->historyCount = frames;
-    resource->historyAngleStep = param0C;
-    resource->historyDistanceScale = param08;
+    resource->historyCount = historyCount;
+    resource->historyAngleStep = historyAngleStep;
+    resource->historyDistanceScale = historyDistanceScale;
     resource->unk10 = param;
     resource->positions = (f32 (*)[4])positions;
     resource->colorTable = (u32 *)colorTable;
-    resource->unk1C = (f32 *)historyScalars;
+    resource->historyScalars = (f32 *)historyScalars;
     resource->slotColors = (u32 *)values;
     resource->writeIndices = (u16 *)writeIndices;
     resource->validCounts = (u16 *)validCounts;

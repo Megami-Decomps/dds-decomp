@@ -28,7 +28,6 @@ struct EffectObj;
 struct BillObj;
 extern void effObjSetFlags(struct EffectObj *object, u32 flags);
 extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
-extern void billSetVariantValue(struct BillObj *billboard, s32 value);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
  * passes its resource data pointer directly to the billboard binder. */
@@ -70,7 +69,7 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
 }
 
 extern s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
-extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset);
+extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
 extern f32 sdfViewTargetVector[4];
 
 void effUpdateConfiguredBillboard(EffWorldNode *object) {

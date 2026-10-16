@@ -236,16 +236,16 @@ typedef struct EffVec4 {
 extern EffVec4 D_0039F720;
 extern EffVec4 D_0039F730;
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
-extern void effObjInnerVecInit(ObjectTransform *);
+extern void effObjInnerVecInit(ObjectTransform *transform);
 extern s32 func_00222ED8(ObjectTransform *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effObjInnerVecBackup(ObjectTransform *);
-extern void effUpdateValueTransitionProximity(EffWorldNode *);
-extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
-extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
+extern void effObjInnerVecBackup(ObjectTransform *inner);
+extern void effUpdateValueTransitionProximity(EffWorldNode *obj);
+extern void effObjStepFollowAngleTowardZero(EffWorldNode *object);
+extern void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPosition);
 extern void *dds3GetWorldNodeData(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
@@ -366,7 +366,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     }
     config = (MdlCtx *)dds3GetEffectObjectModelHolder(obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
-        level = target->unkD3;
+        level = target->shadowLevel;
     } else {
         level = config->inner->color >> 24;
     }
@@ -465,28 +465,28 @@ attach_transition:
     }
 }
 
-ObjBase *effObjGetDataHandle(EffWorldNode *object) {
-    EffectTransformData *data = object->data;
+ObjBase *effObjGetDataHandle(const EffWorldNode *object) {
+    const EffectTransformData *data = object->data;
 
     return data->resourceState;
 }
 
-EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
+EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation) {
     f32 zero[4];
     EffWorldNode *obj;
 
     memset(zero, 0, 0x10);
     zero[3] = 1.0f;
     obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_TRANSFORM);
-    obj->key = (u32)a;
+    obj->key = (u32)key;
     dds3EnsureSlotData(obj);
-    effObjSetInnerRotation(obj, second);
+    effObjSetInnerRotation(obj, rotation);
     effObjSetInnerPosition(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
-    ((EffectTransformData *)obj->data)->offset[0] = vec[0];
-    ((EffectTransformData *)obj->data)->offset[1] = vec[1];
-    ((EffectTransformData *)obj->data)->offset[2] = vec[2];
-    ((EffectTransformData *)obj->data)->offset[3] = vec[3];
+    ((EffectTransformData *)obj->data)->offset[0] = offset[0];
+    ((EffectTransformData *)obj->data)->offset[1] = offset[1];
+    ((EffectTransformData *)obj->data)->offset[2] = offset[2];
+    ((EffectTransformData *)obj->data)->offset[3] = offset[3];
     return obj;
 }
 
@@ -523,8 +523,8 @@ void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value) {
     payload[2] = value;
 }
 
-u32 dds3GetObjectPayloadWord8(EffWorldNode *object) {
-    u32 *payload = object->data;
+u32 dds3GetObjectPayloadWord8(const EffWorldNode *object) {
+    const u32 *payload = object->data;
 
     return payload[2];
 }
@@ -831,3 +831,6 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
 
 INCLUDE_SDATA(const s32, "game/code_001130E0", effObjOpacityPassEnabled);
 
+/* Shadow projection reads this byte from the native unit layout. */
+typedef char EvtUnitShadowLevelOffsetCheck[
+    ((u32)&((EvtUnit *)0)->shadowLevel == 0xD3) ? 1 : -1];

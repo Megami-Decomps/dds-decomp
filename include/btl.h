@@ -131,7 +131,7 @@ typedef struct BtlUnit {
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
     u8 padD8[4];
-    s32 unkDC; /* 0xDC: model for the slot-0x10 model-change command, with displaySpecies */
+    s32 modelResourceKind; /* 0xDC: model-asset kind paired with displaySpecies for special-mode loads. */
     u32 displaySpecies; /* 0xE0 */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
@@ -209,7 +209,7 @@ typedef struct BtlUnit {
     f32 reach;      /* 0xB4 */
     f32 unkB8; /* 0xB8: formation setup copies height here. */
     f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
-    f32 unkC0;
+    f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4 */
     s32 resourceIndex; /* 0xC8 */
     u8 modelBorrowed; /* Nonzero shares another unit's model state. */
@@ -217,11 +217,11 @@ typedef struct BtlUnit {
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
     u8 padD8[4];
-    s32 unkDC; /* 0xDC: mode actor selector paired with combatantKind. */
+    s32 modelResourceKind; /* 0xDC: model-asset kind paired with combatantKind for special-mode loads. */
     u32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
-    s32 unkEC;
+    s32 motionId; /* 0xEC: current primary model motion; -1 before selection. */
     s32 effectState; /* 0xF0: same actor effect state as DDS1 */
     f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
     s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
@@ -244,7 +244,7 @@ typedef struct BtlUnit {
     struct SoundResourceLink *resourceLink; /* 0x31C: linked model-resource task. */
     struct SoundLink *link; /* 0x320: per-unit command effect. */
     struct ActiveSoundNode *listNode; /* 0x324: independently loaded sound node. */
-    struct SoundSlotOwner *unk328; /* Owner of the actor model's file slots and allocation handles. */
+    struct SoundSlotOwner *soundSlotOwner; /* 0x328: shared category/id motion-SE owner, as in DDS1. */
     void *gunResource;
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
     u8 linkedNumberCount; /* 0x338: active linked-number displays; selects modulo-12 offset. */
@@ -264,6 +264,8 @@ typedef struct BtlUnit {
 typedef char BtlUnitPartyRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
 typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2E4) ? 1 : -1];
 typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
+typedef char BtlUnitSoundSlotOwnerOffsetCheck[
+    ((u32)&((BtlUnit *)0)->soundSlotOwner == 0x328) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
@@ -274,6 +276,9 @@ typedef char BtlUnitStatusSizeCheck[(sizeof(BtlUnitStatus) == 8) ? 1 : -1];
 typedef char BtlUnitStatusAlignmentCheck[(__alignof__(BtlUnitStatus) == 4) ? 1 : -1];
 typedef char BtlUnitAlignmentCheck[(__alignof__(BtlUnit) == 8) ? 1 : -1];
 typedef char BtlUnitStatusOffsetCheck[((u32)&((BtlUnit *)0)->status == 0x110) ? 1 : -1];
+typedef char BtlUnitMotionIdOffsetCheck[((u32)&((BtlUnit *)0)->motionId == 0xEC) ? 1 : -1];
+typedef char BtlUnitCameraRadiusOffsetCheck[((u32)&((BtlUnit *)0)->cameraRadius == 0xC0) ? 1 : -1];
+typedef char BtlUnitModelResourceKindOffsetCheck[((u32)&((BtlUnit *)0)->modelResourceKind == 0xDC) ? 1 : -1];
 typedef char BtlUnitStatusFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.flags == 0x110) ? 1 : -1];
 typedef char BtlUnitStateFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.stateFlags == 0x114) ? 1 : -1];
 typedef char BtlUnitGunResourceFlagsOffsetCheck[((u32)&((BtlUnit *)0)->gunResourceFlags == 0x118) ? 1 : -1];

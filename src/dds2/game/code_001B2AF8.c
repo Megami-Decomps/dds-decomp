@@ -3,6 +3,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
 #include "btl_effect_active_api.h"
@@ -34,6 +35,7 @@
 #include "btl_ai_table.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
@@ -186,7 +188,6 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
 s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
 
@@ -268,7 +269,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     if (unit->partyRecord.status & 0x2A0F) {
         return 0;
     }
-    return datEnemyAiRecords[unit->partyRecord.unitId].unknown00[0] == 0;
+    return datEnemyAiRecords[unit->partyRecord.unitId].kind == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
@@ -278,8 +279,6 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
     }
     return (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 0x40) < 1;
 }
-
-extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
 
 s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second) {
     s32 statAddresses[3];
@@ -461,10 +460,10 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
 }
 
 s32 btlHasAdjacentActorRecordStatus(BtlUnit *object) {
-    u8 *status = datEnemyRecords[object->partyRecord.unitId].unk3E;
+    u8 *itemIds = datEnemyRecords[object->partyRecord.unitId].additionalDropItemIds;
     u32 i;
     for (i = 0; i < 2; i++) {
-        if (*status++ != 0) {
+        if (*itemIds++ != 0) {
             return 1;
         }
     }
@@ -507,7 +506,7 @@ s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     }
     if (datBattleSceneRecords[battle->battleMode].maxEnemySpawns != 0) {
         spawnLimit = datBattleSceneRecords[battle->battleMode].maxEnemySpawns;
-        if (battle->unk27E >= spawnLimit) {
+        if (battle->spawnCount >= spawnLimit) {
             return 0;
         }
     }
@@ -935,7 +934,7 @@ s32 btlSelectSerialEncounter(void) {
     }
 
     entries = D_00435E0C[encounterPack].groups[groupIndex].entries;
-    chance = entries[selectionIndex].opaque05;
+    chance = entries[selectionIndex].serialEncounterChanceAdjustment;
     if ((datGameState->world.fieldFlags & 2) != 0) {
         chance *= 5;
     }
@@ -1007,7 +1006,7 @@ s32 btlRollMajinEncounter(void) {
     }
     rate = datBattleParameters->specialEncounterChance[evtGetMirroredSolarPhase()];
     threshold = rate;
-    if (datGameState->world.unkA48 != 0) {
+    if (datGameState->world.specialEncounterAttemptCount != 0) {
         threshold = rate * datBattleParameters->specialEncounterScale;
         btlBossDebugPrintf("btl:majin=%d%%[%f]\n", threshold,
                            datBattleParameters->specialEncounterScale);
@@ -1020,7 +1019,7 @@ s32 btlRollMajinEncounter(void) {
             return 1;
         }
     }
-    datGameState->world.unkA48++;
+    datGameState->world.specialEncounterAttemptCount++;
     return btlRollAiBucket() < threshold;
 }
 
@@ -1300,7 +1299,142 @@ s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
     return result != 0 ? result : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B4AA0);
+/* Roster detail table entries are 0x14 bytes; the leading halfword is the ranking value. */
+typedef struct {s16 base; u8 data[0x12];} BattleRosterDetail;
+void func_001B4AA0(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third)
+{
+  BtlUnit *sources[3];
+  u32 i;
+  u32 n;
+  u32 count;
+  BtlUnit *src;
+  s32 currentScore;
+  s32 incomingScore;
+  sources[0] = first;
+  sources[1] = second;
+  sources[2] = third;
+  memset(dst, 0, sizeof(BtlUnit));
+  dst->status.flags = (first->status.flags & 0x600) | 1;
+  if ((&dst->partyRecord) != (&first->partyRecord))
+  {
+    memcpy(&dst->partyRecord, &first->partyRecord, sizeof(DatPartyRecord));
+  }
+  dst->partyRecord.level = 0;
+  dst->partyRecord.menuValue = 0xA1;
+  dst->partyRecord.hp = 0;
+  dst->partyRecord.mp = 0;
+  dst->partyRecord.maxHp = 0;
+  dst->partyRecord.maxMp = 0;
+  for (i = 0; i < 5; i++)
+  {
+    dst->partyRecord.baseStats[i] = 0;
+  }
+
+  dst->partyRecord.status = 0;
+  btlClearAllActorEntrySlots(dst);
+  for (i = 0; i < 7; i++)
+  {
+    if (dst->entrySlots[i].code < first->entrySlots[i].code)
+    {
+      dst->entrySlots[i].code = first->entrySlots[i].code;
+    }
+  }
+
+  btlClearActorEntrySlot(dst, 5);
+  btlClearActorEntrySlot(dst, 6);
+  count = 0;
+  for (n = 0; n < 3; n++)
+  {
+    src = sources[n];
+    if (src == ((void *) 0))
+    {
+      continue;
+    }
+    if (dst->partyRecord.level < src->partyRecord.level)
+    {
+      dst->partyRecord.level = src->partyRecord.level;
+    }
+    if (dst->partyRecord.hp < src->partyRecord.hp)
+    {
+      dst->partyRecord.hp = src->partyRecord.hp;
+    }
+    if (dst->partyRecord.mp < src->partyRecord.mp)
+    {
+      dst->partyRecord.mp = src->partyRecord.mp;
+    }
+    if (dst->partyRecord.maxHp < src->partyRecord.maxHp)
+    {
+      dst->partyRecord.maxHp = src->partyRecord.maxHp;
+    }
+    if (dst->partyRecord.maxMp < src->partyRecord.maxMp)
+    {
+      dst->partyRecord.maxMp = src->partyRecord.maxMp;
+    }
+    for (i = 0; i < 5; i++)
+    {
+      s8 stat = datGetStatWithStatusOverride(&src->partyRecord, i);
+      if (dst->partyRecord.baseStats[i] < stat)
+      {
+        dst->partyRecord.baseStats[i] = stat;
+      }
+    }
+
+    for (i = 0; i < 24; i++)
+    {
+      if (src->partyRecord.effectData[i] != 0)
+      {
+        if (src->partyRecord.effectData[i] < 0x2A0)
+        {
+          u16 effect = src->partyRecord.effectData[i];
+          if (datCommandSelectors[effect].kind != 4)
+          {
+            dst->partyRecord.effectData[count] = effect;
+            count++;
+          }
+        }
+      }
+    }
+
+    dst->partyRecord.status |= src->partyRecord.status & 0x10;
+    if (((btlUnitStatusPair(src) & 0x1200) == 0x200) && (src->partyRecord.menuValue != 0))
+    {
+      currentScore = ((BattleRosterDetail *) datRosterDetails)[dst->partyRecord.unitId].base;
+      incomingScore = ((BattleRosterDetail *) datRosterDetails)[src->partyRecord.unitId].base;
+      if (currentScore < incomingScore)
+      {
+        dst->partyRecord.unitId = src->partyRecord.unitId;
+      }
+      if (dst->status.flags & 0x1000)
+      {
+        dst->status.flags &= ~0x1000;
+        dst->partyRecord.menuValue = src->partyRecord.menuValue;
+      }
+      else
+      {
+        currentScore = datItemSkillRecords[dst->partyRecord.menuValue].commandIndex;
+        incomingScore = datItemSkillRecords[src->partyRecord.menuValue].commandIndex;
+        if (datCommandRecords[currentScore].hpPower < datCommandRecords[incomingScore].hpPower)
+        {
+          dst->partyRecord.menuValue = src->partyRecord.menuValue;
+        }
+      }
+    }
+  }
+
+  if (dst->partyRecord.maxHp < dst->partyRecord.hp)
+  {
+    dst->partyRecord.hp = dst->partyRecord.maxHp;
+  }
+  if (dst->partyRecord.maxMp < dst->partyRecord.mp)
+  {
+    dst->partyRecord.mp = dst->partyRecord.maxMp;
+  }
+  for (n = count; n < 24; n++)
+  {
+    dst->partyRecord.effectData[n] = 0;
+  }
+
+}
 
 typedef struct BattleStartVoiceRow {
     s32 flagId;       /* negative, or a model flag that must be set */
@@ -1503,7 +1637,7 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
 
 s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index) {
     s32 (*predicate)(s32, s32, s32);
-    s32 table;
+    u8 *table;
     predicate = *(s32 (**)(s32, s32, s32))((u8 *)btlGetRuntime() + 0x6cc);
     if (predicate != 0 && !predicate(object, other, index)) {
         return 0;
@@ -1523,7 +1657,7 @@ s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 in
 
 s32 btlIsActorModeActionCodeAllowed(BtlUnit *object) {
     s32 value;
-    if (object->unkDC != 1) {
+    if (object->modelResourceKind != 1) {
         return 1;
     }
     value = object->combatantKind;
@@ -2040,9 +2174,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = (s32)(u32)sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
-        btlResourceBlock->nameB = (s32)(u32)sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
-        btlResourceBlock->nameC = (s32)(u32)sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
+        btlResourceBlock->resourceAllocationA = sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
+        btlResourceBlock->resourceAllocationB = sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
+        btlResourceBlock->resourceAllocationC = sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_00436800 = 1;
@@ -2059,11 +2193,11 @@ void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
         btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+            btlResourceBlock->resourceAllocationA, 0);
         btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+            btlResourceBlock->resourceAllocationB, 0);
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
-            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
+            btlResourceBlock->resourceAllocationC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
@@ -2128,8 +2262,8 @@ s32 btlResetSceneSlotFades(void) {
     state->unk18 = 0;
     state->completed = 0;
     for (i = 0; i < count; i++) {
-        (*bank)->unk6C[i] = 30.0f;
-        (*bank)->unk8C[i] = 130;
+        (*bank)->rotationAngleDegrees[i] = 30.0f;
+        (*bank)->drawOffsetScalePercent[i] = 130;
     }
     btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
@@ -2876,7 +3010,7 @@ extern void btlReleaseDialogTaskData(KwlnTask *task);
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
-s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
+s32 btlReplaceDialogTasksAndQueueMessage(s32 window, s32 entryIndex) {
     BtlState *context = (BtlState *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
@@ -2894,8 +3028,8 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
-    data->id = arg0;
-    data->unk08 = arg1;
+    data->id = window;
+    data->unk08 = entryIndex;
     data->value = 0x2D;
     task = kwlnTaskCreate(D_004367C4, 0x2B0E, 1, 1, btlDrawTimedDialogTask,
                           btlReleaseDialogTaskData, (u32)data);
@@ -2970,7 +3104,7 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
     }
 }
 
-extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
+extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern char D_00436810[];
 extern s32 sprintf(char *, const char *, ...);
@@ -3243,7 +3377,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     btlDrawCompositePanelSprites(work, work->x, work->y, work->fade);
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(0, work->fade);
                     } else {
                         sprintf((char *)text, D_00436818, work->unit->partyRecord.level);
@@ -3271,7 +3405,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                 case 3:
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(1, work->fade);
                     } else {
                         sprintf((char *)text, D_00436820,
@@ -3286,7 +3420,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                 case 4:
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(2, work->fade);
                     } else {
                         sprintf((char *)text, D_00436820,
@@ -3302,7 +3436,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     yOffset = 93;
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(3, work->fade);
                     } else {
                         skills = btlGatherEnemyCommands(work->unit, &skillCount);
@@ -3324,7 +3458,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     yOffset = 206;
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
-                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        datEnemyRecords[work->unit->partyRecord.unitId].usePanelIcons != 0) {
                         btlDrawPanelIconGroup(4, work->fade);
                     } else {
                         position = 0;
@@ -3694,7 +3828,7 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
 /* Store the confirmed command-selection tuple on the owning actor. */
 void btlSetActorCommandSelection(BattleSceneObject *object, s32 first, s32 second, s32 slot) {
     BtlUnit *unit = object->owner->unit;
-    unit->partyRecord.unk1AC = first;
+    unit->partyRecord.savedCommandPhase = first;
     unit->partyRecord.unk1AE = second;
     unit->partyRecord.actionSlot = slot;
 }
@@ -4357,7 +4491,155 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416610);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BFB58);
+/* btlCreateMessageWindow allocates0x40 bytes; native fade halfword+0x14, coordinates+0x38/+0x3C. */
+typedef struct BtlCommandHintWork {u8 pad00[0x10];s32 unk10;s16 fade;u8 pad16[2];u32 colors[4];u8 pad28[0x10];s32 x;s32 y;} BtlCommandHintWork;
+extern const BattlePanelColors D_00416620;
+extern s32 fldGetSceneObjectState(void);
+extern u32 btlGetActorCommandClass(s32,s8);
+extern u32 fldUpdateSceneKindCounter(s32,s8,s8);
+extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
+extern void fldCollectAvailableRosterEntries(s32,s16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(s32,u16 *);
+extern void btlReleaseRegisteredTaskBuffer(s32);
+extern void func_001BF978(s32,s32,u32,u32,u16,s16);
+extern u8 D_003B5B10[];
+s32 func_001BFB58(KwlnTask *task) {
+    BattlePanelColors colors = D_00416620;
+    BattleSceneObject *object = NULL;
+    KwlnTask *panelTask;
+    BtlState *battle;
+    s16 count;
+    s16 optionCount;
+    s16 cursor;
+    s16 row;
+    u32 state;
+    s32 kind;
+    s32 selector;
+    s32 draw;
+    s32 i;
+
+    if (btlGetTrackedTaskHandle(4) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+
+    panelTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (panelTask != NULL) {
+        object = (BattleSceneObject *)kwlnTaskGetUserValue(panelTask);
+    }
+    draw = 0;
+    state = fldGetSceneObjectState();
+    switch (state) {
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+
+    {
+        BtlCommandHintWork *fadeWindow;
+    fadeWindow = (BtlCommandHintWork *)D_004367F8;
+    fadeWindow->fade += 0x20;
+    fadeWindow->fade = fadeWindow->fade <= 0 ? 0 :
+                   fadeWindow->fade > 0x80 ? 0x80 : fadeWindow->fade;
+
+    }
+    if (mdlFlagTest(0xC0E) == 0 && panelTask != NULL) {
+    kind = btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex);
+    optionCount = (s16)fldUpdateSceneKindCounter((s32)object,
+                                         btlCommandPanelWork->classIndex, 1);
+    row = object->selections[kind].entry;
+    cursor = object->selections[kind].cursor;
+
+    switch (kind) {
+    case 0:
+        if ((cursor == 0 && row == 0) || optionCount - 1 == row) {
+            BtlCommandHintWork *hintWindow;
+            if (row == 0) {
+                ActionStateLink *owner = object->owner;
+                selector = ((owner->unit->status.flags & 0x1000) != 0 || (owner->unit->partyRecord.flags & 0x10) != 0) ? 1 : 2;
+            } else {
+                selector = 3;
+            }
+            hintWindow = (BtlCommandHintWork *)D_004367F8;
+            func_001BF978(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
+                          (s16)hintWindow->fade | 0x80808000, 0, selector);
+        } else {
+            BtlCommandHintWork *entryWindow;
+            u16 textId;
+            u16 *entries = btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
+            textId = entries[row - 1];
+            entryWindow = (BtlCommandHintWork *)D_004367F8;
+            func_001BF978(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
+                          (s16)entryWindow->fade | 0x80808000, textId, 0);
+        }
+        draw = 1;
+        break;
+    case 4: {
+        BtlCommandHintWork *skillWindow;
+        u16 textId;
+        BattleRosterTable *entries = btlGetActorLinkageSkillList((s32)object, (u16 *)&count);
+        textId=entries->entries[row].skill;
+        skillWindow = (BtlCommandHintWork *)D_004367F8;
+        draw = 1;
+        func_001BF978(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
+                      (s16)skillWindow->fade | 0x80808000, textId, 0);
+        break;
+    }
+    case 2: {
+        BtlCommandHintWork *drawWindow;
+        u16 textId;
+        fldCollectAvailableRosterEntries((s32)object,&count);
+        textId=D_003B5B10[row*2];
+        drawWindow=(BtlCommandHintWork *)D_004367F8;
+        draw=1;
+        func_001BF978(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
+        break;
+    }
+    case 3: {
+        BtlCommandHintWork *drawWindow;
+        s32 textKind;
+        if(row==0) {
+            textKind=((object->owner->unit->status.flags&0x1000)!=0 || (object->owner->unit->partyRecord.flags&0x10)!=0)?4:5;
+        } else {
+            textKind=row==1?6:7;
+        }
+        drawWindow=(BtlCommandHintWork *)D_004367F8;
+        draw=1;
+        func_001BF978(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
+        break;
+    }
+    case 6: {
+        BtlCommandHintWork *backdropWindow = (BtlCommandHintWork *)D_004367F8;
+        draw = 1;
+        func_001BF978(backdropWindow->x + 0x13, backdropWindow->y - 6, 0xFF0000,
+                      (s16)backdropWindow->fade | 0x80808000, 0, 8);
+        break;
+    }
+    }
+
+    if (draw != 0) {
+        BtlCommandHintWork *spriteWindow;
+
+        for (i = 0; i < 4; i++) {
+            colors.values[i] = btlSetSlotLowByteClamped(
+                btlResourceBlock->resA, 0x2A, i,
+                (s16)((BtlCommandHintWork *)D_004367F8)->fade);
+        }
+        spriteWindow = (BtlCommandHintWork *)D_004367F8;
+        effDrawSpriteWithCornerColors(spriteWindow->x << 4, spriteWindow->y << 3, 0,
+                                      colors.values, 0, btlResourceBlock->resA, 0x2A, 0x53);
+    }
+    }
+    break;
+    case 5:
+        btlReleaseRegisteredTaskBuffer((s32)task);
+        return -1;
+    }
+    return 0;
+}
 
 void btlReleaseRegisteredTaskBuffer(s32 unused) {
     btlGetRuntime();
@@ -4384,12 +4666,12 @@ s32 btlIsLinkageTutorialEligible(void) {
 
 
 /* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
-s32 btlHasUnmarkedLinkageSkill(s32 arg0) {
+s32 btlHasUnmarkedLinkageSkill(s32 unit) {
     s32 count;
     s32 i;
 
     btlClearPendingLinkageSkillFlags();
-    count = btlBuildActorLinkageSkillList(arg0, &D_003B5D10);
+    count = btlBuildActorLinkageSkillList(unit, &D_003B5D10);
     if (count != 0) {
         for (i = 0; i < count; i++) {
             if (btlAccessRecordedLinkageSkillFlag(D_003B5D10.entries[i].skill, 2) == 0) {
@@ -4952,7 +5234,86 @@ void btlInitializeStaffActorPanels(void) {
     btlSetTrackedTaskHandle(3, (s32)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C16B0);
+s32 func_001C16B0(s8 mode) {
+    KwlnTask *task = kwlnTaskGetTaskByName(D_004367CC);
+    BtlState *battle;
+    BattleActorPanelWork *work;
+    BtlUnit *actor;
+    s32 eligibleCount;
+    s32 state;
+    u32 slot;
+    s32 i;
+
+    if (task == NULL) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    eligibleCount = btlCountEligibleLinkedActors(battle);
+    actor = battle->units;
+
+    if (mode == 0) {
+        BattleCmdPanel *panel;
+        state = mdlFlagTest(0xC0E) != 0 ? 1 : 2;
+        panel = btlCommandPanelWork;
+        if (panel == NULL || panel->state == 0) {
+            state = 1;
+        } else if (panel->state == 3) {
+            state = 1;
+        }
+    } else {
+        state = (s32)mode + 2;
+    }
+
+    /* i is never advanced: the count only gates the walk on any eligible actor. */
+    switch (state) {
+    case 1:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] += 6;
+                work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
+                work->activeEntries[slot].position[1] += 1;
+                work->activeEntries[slot].position[1] = work->activeEntries[slot].position[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].position[1] > 0x159 ? 0x159 : work->activeEntries[slot].position[1];
+            }
+        }
+        break;
+    case 2:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] -= 6;
+                work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
+                work->activeEntries[slot].position[1] -= 1;
+                work->activeEntries[slot].position[1] = work->activeEntries[slot].position[1] <= 0x143 ? 0x143 :
+                    work->activeEntries[slot].position[1] > 0x159 ? 0x159 : work->activeEntries[slot].position[1];
+            }
+        }
+        break;
+    case 3:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] = 0x159;
+                work->activeEntries[slot].position[1] = 0x159;
+            }
+        }
+        break;
+    case 4:
+        for (i = 0; actor != NULL && i < eligibleCount; actor = actor->nextActor) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                work->activeEntries[slot].basePosition[1] = 0x143;
+                work->activeEntries[slot].position[1] = 0x143;
+            }
+        }
+        break;
+    }
+    return 1;
+}
 
 typedef struct BattleActorPanelPositions {
     BattleSelectionPosition entries[3];
@@ -5181,7 +5542,7 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (D_0037F510.unk23 < 0) {
+            } else if (D_0037F510.primaryCancel < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
@@ -6499,7 +6860,55 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C6648);
+void func_001C6648(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
+    switch (work->activeEntries[slot].presentation.hpState) {
+    case 0x11:
+        work->activeEntries[slot].presentation.offset[0] = btlNextScaledRandom(8);
+        work->activeEntries[slot].presentation.offset[0] =
+            work->activeEntries[slot].presentation.offset[0] <= 0 ? 0 :
+            work->activeEntries[slot].presentation.offset[0] > 8 ? 8 : work->activeEntries[slot].presentation.offset[0];
+        work->activeEntries[slot].presentation.offset[1] = btlNextScaledRandom(8);
+        work->activeEntries[slot].presentation.offset[1] =
+            work->activeEntries[slot].presentation.offset[1] <= 0 ? 0 :
+            work->activeEntries[slot].presentation.offset[1] > 8 ? 8 : work->activeEntries[slot].presentation.offset[1];
+        work->activeEntries[slot].presentation.hpHighlightLevel -= 8;
+        work->activeEntries[slot].presentation.hpHighlightLevel =
+            work->activeEntries[slot].presentation.hpHighlightLevel <= 0 ? 0 :
+            work->activeEntries[slot].presentation.hpHighlightLevel > 0x7F ? 0x7F :
+            work->activeEntries[slot].presentation.hpHighlightLevel;
+        if (++work->activeEntries[slot].presentation.hpEffectTimer >= 0x14) {
+            work->activeEntries[slot].presentation.hpState = 0;
+            work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+            
+            work->activeEntries[slot].presentation.offset[0] = work->activeEntries[slot].presentation.hpEffectTimer = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+            work->activeEntries[slot].presentation.offset[1] = 0;
+            btlClearFinishedActorSlotChannels(work, 0);
+        }
+        break;
+    case 0x21:
+        work->activeEntries[slot].presentation.hpState = 0;
+        work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+        work->activeEntries[slot].presentation.hpEffectTimer = work->activeEntries[slot].presentation.hpHighlightLevel = 0;
+        work->activeEntries[slot].presentation.offset[0] = 0;
+        work->activeEntries[slot].presentation.offset[1] = 0;
+        break;
+    }
+    if (work->activeEntries[slot].presentation.mpState != 0x11 &&
+        work->activeEntries[slot].presentation.mpState != 0x21) {
+        goto finished;
+    }
+    work->activeEntries[slot].presentation.mpEffectTimer++;
+    if (work->activeEntries[slot].presentation.mpEffectTimer < 20) {
+        goto finished;
+    }
+    work->activeEntries[slot].presentation.mpState = 0;
+    work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+    work->activeEntries[slot].presentation.mpHighlightLevel = 0;
+    work->activeEntries[slot].presentation.mpEffectTimer = 0;
+    btlClearFinishedActorSlotChannels(work, 0);
+finished:
+    return;
+}
 
 extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -6575,7 +6984,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
                         memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
-                        work->activeEntries[slot].presentation.unk1C0 = 0;
+                        work->activeEntries[slot].presentation.hpEffectTimer = 0;
                         work->activeEntries[slot].presentation.offset[0] = 0;
                         work->activeEntries[slot].presentation.offset[1] = 0;
                     }
@@ -6601,7 +7010,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
-                work->activeEntries[slot].presentation.unk1C0 = 0;
+                work->activeEntries[slot].presentation.hpEffectTimer = 0;
                 work->activeEntries[slot].presentation.offset[0] = 0;
                 work->activeEntries[slot].presentation.offset[1] = 0;
                 work->activeEntries[slot].presentation.hpState++;
@@ -6640,7 +7049,7 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[0], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[1], 0, sizeof(BattleStatPulse));
                 memset(&work->activeEntries[slot].presentation.mpBarPulses[2], 0, sizeof(BattleStatPulse));
-                work->activeEntries[slot].presentation.unk1C4 = 0;
+                work->activeEntries[slot].presentation.mpEffectTimer = 0;
                 work->activeEntries[slot].presentation.mpState++;
                 break;
             }
@@ -7455,8 +7864,9 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
 
 
 
-extern void func_001C0EF0(void);
-extern void func_001C1300(void);
+/* Retail returns 0 or 1 from both; this caller discards the result. */
+extern s32 func_001C0EF0(void);
+extern s32 func_001C1300(void);
 extern void func_001B5A20(BattleSceneObject *);
 /* Task-update result: retail returns 0 or -1, even when this caller discards it. */
 extern s32 func_001BFB58(KwlnTask *);
@@ -7524,7 +7934,7 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
         if (btlAreLinkedSceneCountersAtThreshold()) {
             object->commandData->phase = 9;
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
-            object->commandData->unk18 = panel->partyRecordIndex;
+            BTL_COMMAND_PARTY_RECORD_INDEX(object->commandData) = panel->partyRecordIndex;
             object->state = 3;
             ((SceneScriptState *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
@@ -8017,7 +8427,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         return;
     }
 
-    if (D_0037F510.unk23 < 0) {
+    if (D_0037F510.primaryCancel < 0) {
         state->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {
@@ -8317,8 +8727,8 @@ void btlReleaseTargetSelectionWork(SceneAiWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void btlReleaseTargetSelectionTask(KwlnTask *arg) {
-    btlReleaseTargetSelectionWork((SceneAiWork *)kwlnTaskGetUserValue(arg));
+void btlReleaseTargetSelectionTask(KwlnTask *task) {
+    btlReleaseTargetSelectionWork((SceneAiWork *)kwlnTaskGetUserValue(task));
     ((BtlState *)btlGetRuntime())->spriteObject = 0;
 }
 
@@ -8444,13 +8854,13 @@ void btlUpdateActorSlotOrderAnimation(void) {
                 }
                 D_00438F58[side]->slotFade[i] += 0x20;
                 D_00438F58[side]->slotFade[i] = D_00438F58[side]->slotFade[i] <= 0 ? 0 : D_00438F58[side]->slotFade[i] >= 0x81 ? 0x80 : D_00438F58[side]->slotFade[i];
-                D_00438F58[side]->unk6C[i] -= 5.0f;
-                if (D_00438F58[side]->unk6C[i] <= 0.0f) {
-                    D_00438F58[side]->unk6C[i] = 0.0f;
+                D_00438F58[side]->rotationAngleDegrees[i] -= 5.0f;
+                if (D_00438F58[side]->rotationAngleDegrees[i] <= 0.0f) {
+                    D_00438F58[side]->rotationAngleDegrees[i] = 0.0f;
                 }
-                D_00438F58[side]->unk8C[i] = D_00438F58[side]->unk8C[i] - 5.0f;
-                if (D_00438F58[side]->unk8C[i] <= 100.0f) {
-                    D_00438F58[side]->unk8C[i] = 100;
+                D_00438F58[side]->drawOffsetScalePercent[i] = D_00438F58[side]->drawOffsetScalePercent[i] - 5.0f;
+                if (D_00438F58[side]->drawOffsetScalePercent[i] <= 100.0f) {
+                    D_00438F58[side]->drawOffsetScalePercent[i] = 100;
                 }
                 if (D_00438F58[side]->slotFade[i] >= 0x80) {
                     if (D_00438F58[side]->state[i + 1] < 3) {
@@ -8473,13 +8883,13 @@ void btlUpdateActorSlotOrderAnimation(void) {
             }
             break;
         case 2:
-            D_00438F58[side]->unk6C[i] -= 5.0f;
-            if (D_00438F58[side]->unk6C[i] <= 0.0f) {
-                D_00438F58[side]->unk6C[i] = 0.0f;
+            D_00438F58[side]->rotationAngleDegrees[i] -= 5.0f;
+            if (D_00438F58[side]->rotationAngleDegrees[i] <= 0.0f) {
+                D_00438F58[side]->rotationAngleDegrees[i] = 0.0f;
             }
-            D_00438F58[side]->unk8C[i] = D_00438F58[side]->unk8C[i] - 5.0f;
-            if (D_00438F58[side]->unk8C[i] <= 100.0f) {
-                D_00438F58[side]->unk8C[i] = 100;
+            D_00438F58[side]->drawOffsetScalePercent[i] = D_00438F58[side]->drawOffsetScalePercent[i] - 5.0f;
+            if (D_00438F58[side]->drawOffsetScalePercent[i] <= 100.0f) {
+                D_00438F58[side]->drawOffsetScalePercent[i] = 100;
             }
             btlUpdateActorSlotOrderColors(side, i);
             break;
@@ -8492,9 +8902,9 @@ void btlUpdateActorSlotOrderAnimation(void) {
             D_00438F58[side]->state[i]++;
             D_00438F58[side]->scalePercent[i][1] = 120.0f;
             D_00438F58[side]->slotValues[i][1] = 0x80;
-            D_00438F58[side]->unk6C[i] = 0.0f;
+            D_00438F58[side]->rotationAngleDegrees[i] = 0.0f;
             D_00438F58[side]->unk1B4[i][1] = 0;
-            D_00438F58[side]->unk8C[i] = 100;
+            D_00438F58[side]->drawOffsetScalePercent[i] = 100;
             break;
         case 4:
             D_00438F58[side]->scalePercent[i][0] -= 1.0f;
@@ -8619,10 +9029,10 @@ void btlDrawActorSlotOrder(void) {
             }
 
             btlResourceBlock->resC->workEntries[coordinates[index][2]]
-                .geometry.angleDegrees = D_00438F58[bank]->unk6C[index];
+                .geometry.angleDegrees = D_00438F58[bank]->rotationAngleDegrees[index];
             func_001CE418(btlResourceBlock->resC, coordinates[index][2],
                           &xOffset, &yOffset,
-                          (f32)D_00438F58[bank]->unk8C[index]);
+                          (f32)D_00438F58[bank]->drawOffsetScalePercent[index]);
             effDrawSpriteWithCornerColors((coordinates[index][0] + xOffset) << 4,
                           (coordinates[index][1] + yOffset) << 3,
                           0, colors, 0, btlResourceBlock->resC,
@@ -8632,7 +9042,7 @@ void btlDrawActorSlotOrder(void) {
             fldScaleSceneCoordinateRecord(btlResourceBlock->resC,
                                          coordinates[index][2]);
 
-            if (D_00438F58[bank]->unk6C[index] > 0.0f) {
+            if (D_00438F58[bank]->rotationAngleDegrees[index] > 0.0f) {
                 for (channel = 0; channel < 4; channel++) {
                     colors[channel] = btlSetSlotLowByteClamped(
                         btlResourceBlock->resC, coordinates[index][2],
@@ -8786,7 +9196,29 @@ void fldScaleSceneCoordinateRecord(EffectSlotSet *work, s32 index) {
     work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CE418);
+void func_001CE418(EffectSlotSet *work, s32 entry, s32 *offsetX, s32 *offsetY, f32 percent) {
+    f32 scale = percent / 100.0f;
+    s32 width = work->workEntries[entry].geometry.bounds[2];
+    s32 height = work->workEntries[entry].geometry.bounds[3];
+    s32 x;
+    s32 y;
+
+    if (scale >= 1.0f) {
+        x = -((f32)(width >> 4) * (scale - 1.0f) * 0.5f);
+    } else {
+        x = (f32)(width >> 4) * (1.0f - scale) * 0.5f;
+    }
+    width = (f32)width * scale;
+    if (scale >= 1.0f) {
+        y = -((f32)(height >> 3) * (scale - 1.0f) * 0.5f);
+    } else {
+        y = (f32)(height >> 3) * (1.0f - scale) * 0.5f;
+    }
+    work->workEntries[entry].geometry.bounds[3] = (f32)height * scale;
+    work->workEntries[entry].geometry.bounds[2] = width;
+    *offsetX = x;
+    *offsetY = y;
+}
 
 void fldSetSceneSlotRange(s32 index) {
     SceneSlotFadeWork *scene = D_00438F54;

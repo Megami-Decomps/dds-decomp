@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
@@ -21,7 +22,6 @@
 #include "dat_command.h"
 #include "eff.h"
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
@@ -687,7 +687,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
 
 extern s32 btlPollActorOrEntryLabelTask();
 
-BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
+BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -699,7 +699,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
     task->callback = btlPollActorOrEntryLabelTask;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    link->arg = arg;
+    link->arg = resourceIndex;
     link->elapsedTicks = 0;
     return task;
 }
@@ -905,7 +905,7 @@ u32 btlCompleteEffectTaskImmediately(void) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
+BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -917,7 +917,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
     task->callback = btlCompleteEffectTaskImmediately;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = arg;
+    *(u16 *)&link->arg = messageId;
     link->elapsedTicks = 0;
     return task;
 }
@@ -1134,7 +1134,7 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 }
 
 extern AiSpecies *datEnemyAiRecords;
-extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 arg);
+extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 requestedRow);
 extern s32 btlRunAiAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
@@ -1202,9 +1202,9 @@ void btlPickCommandHighestMpTarget(s32 context) {
     func_00203BA8(context, 0);
 }
 
-/* Select by group element checks; value is the query input, not a status mask. */
-void btlPickCommandElementCheckedTarget(s32 context, s32 value) {
-    btlSelectTargetsPassingCheck(context, value);
+/* Select by group element checks; action is the query input, not a status mask. */
+void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action) {
+    btlSelectTargetsPassingCheck(commandContext, action);
 }
 
 /* Select by status-mask presence; retain the native zero-formal forwarding surface. */

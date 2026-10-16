@@ -134,7 +134,7 @@ extern char D_0039E200[];
 
 extern s32 evtPendingEventSelection;
 
-extern void evtCreateEventScriptProcess(s32 arg0);
+extern void evtCreateEventScriptProcess(s32 eventId);
 
 extern void evtCreateSkyTask(void);
 
@@ -410,7 +410,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 
 
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
@@ -1546,7 +1546,7 @@ void evtToggleDebugTimeGraphTask(s8 mode) {
 extern u32 D_003BA97C;
 /* Render an allocation span as partial rows and complete heap-map rows. */
 void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
-                   u32 heapBase, u32 address, s32 remainingBytes, u8 kind) {
+                   u32 heapBase, u32 blockAddress, s32 blockSize, u8 state) {
     s32 color;
     u32 byteOffset;
     s32 rowIndex;
@@ -1556,7 +1556,7 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     u32 bytesPerRow;
     u32 bytesPerCell;
 
-    switch (kind) {
+    switch (state) {
     case 0:
         color = 0x80000000;
         break;
@@ -1570,12 +1570,12 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
         color = 0x80800000;
         break;
     }
-    byteOffset = address - heapBase;
+    byteOffset = blockAddress - heapBase;
     bytesPerRow = D_003BA97C >> 8;
     bytesPerCell = D_003BA97C >> 15;
     rowIndex = byteOffset / bytesPerRow;
     columnIndex = (byteOffset % bytesPerRow) / bytesPerCell;
-    if (D_003BA97C < remainingBytes || remainingBytes < 0) {
+    if (D_003BA97C < blockSize || blockSize < 0) {
         return;
     }
 
@@ -1584,33 +1584,33 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     if (columnIndex > 0) {
         s32 remainingCells = 128 - columnIndex;
 
-        if (remainingBytes >= remainingCells / bytesPerCell) {
+        if (blockSize >= remainingCells / bytesPerCell) {
             sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
                                          leftX + remainingCells * 16, topY + 8,
                                          0x0FFFFF80, NULL);
-            remainingBytes -= remainingCells / (D_003BA97C >> 15);
+            blockSize -= remainingCells / (D_003BA97C >> 15);
         } else {
-            s32 cellCount = remainingBytes / bytesPerCell;
+            s32 cellCount = blockSize / bytesPerCell;
 
-            if (cellCount == 0 && remainingBytes > 0) {
+            if (cellCount == 0 && blockSize > 0) {
                 cellCount = 1;
             }
             sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
                                          leftX + cellCount * 16, topY + 8,
                                          0x0FFFFF80, NULL);
-            remainingBytes = 0;
+            blockSize = 0;
         }
         topY += 8;
     }
-    while (remainingBytes >= (D_003BA97C >> 8)) {
+    while (blockSize >= (D_003BA97C >> 8)) {
         sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
                                      x + 0x800, topY + 8, 0x0FFFFF80, NULL);
-        remainingBytes -= D_003BA97C >> 8;
+        blockSize -= D_003BA97C >> 8;
         topY += 8;
     }
-    if (remainingBytes > 0) {
+    if (blockSize > 0) {
         sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
-                                     x + (remainingBytes / (D_003BA97C >> 15)) * 16,
+                                     x + (blockSize / (D_003BA97C >> 15)) * 16,
                                      topY + 8, 0x0FFFFF80, NULL);
     }
 }
@@ -1677,7 +1677,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 
 
-extern void sdfDrawHeapMapOverlay(void *, s32, s32);
+extern void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y);
 extern void sprintf(char *, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];

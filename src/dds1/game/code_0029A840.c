@@ -688,13 +688,13 @@ RefObj *effRetainSharedReference(RefObj *obj) {
 extern SdfTex *func_0029C048(void *, RefObj *);
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C048);
 
-s32 effCountExpandedEntries(EffExpandedList *list) {
+s32 effCountExpandedEntries(const EffExpandedList *list) {
     u32 count = list->count;
     u32 i = 0;
     s32 total = 0;
 
     if (count != 0) {
-        EffExpandedEntry *entries = list->entries;
+        const EffExpandedEntry *entries = list->entries;
         do {
             s32 additionalCount = entries->additionalCount;
             entries++;
@@ -756,11 +756,11 @@ EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
     return obj;
 }
 
-void effSampleAnimSet(EffExpandedList *set, u32 frame, EffAnimSample *out) {
+void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
     s32 segment = -1;
-    EffExpandedEntry *seg;
+    const EffExpandedEntry *seg;
     u32 acc;
     u32 i;
 

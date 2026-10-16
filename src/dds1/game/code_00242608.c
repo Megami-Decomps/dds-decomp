@@ -95,7 +95,7 @@ extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
+extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
 extern s32 mnuShopPrimarySpriteNames[];
 
 #define CAMP_TASK_PRIORITY 0x3EC
@@ -1385,14 +1385,14 @@ ShopScene *mnuShopCreateScene(void) {
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
-void mnuShopDestroyScene(KwlnTask *arg) {
-    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(arg);
+void mnuShopDestroyScene(KwlnTask *task) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (scene != NULL) {
         mnuShopReleaseSprites(scene);
         mnuReleaseShopSceneSpriteResources(scene);
         mnuShopReleaseSceneObjects(scene);
-        mnuDrainPanelTransitions(&scene->transitionWork, arg);
+        mnuDrainPanelTransitions(&scene->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&scene->messageResource);
         sdfReleaseResourceAllocation(scene->resourceHandle);
@@ -2029,7 +2029,6 @@ extern void mnuSetValueListTransition(struct MenuList *, u32);
 extern s32 mnuDrawShopPanelTransition(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
-extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern void sndReleaseTrackHandle(s32);
 
 extern s32 mnuDrawShopCommandPanel(ShopScene *context);
@@ -2717,7 +2716,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
 extern void sprintf(char *, const char *, ...);
 extern char D_003BC3B8[];
 extern void evtCopyEntryStringToActiveWindow(s32 window, char *text);
-extern void evtSetMessageWindowOptionWhenOpen(s32 option);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32 value);
 
 /* Format the buy/sell price in the message window; sells over the currency cap use the overflow message. */

@@ -33,7 +33,6 @@ extern s32 D_003BD974;
 
 extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern void sndReleaseTrackHandle(u32);
@@ -61,10 +60,10 @@ extern s32 fldLocalMapTrackState;
 #include "dds3_world_secondary.h"
 extern void fldCreateLocalMapCamera(void);
 extern s32 mdlCollectLowFlagBits(void);
-extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
-extern s32 sdfCreateMaskedCounterChannels(s32, s32);
+extern s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal);
+extern s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index);
 extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
-extern void sdfInitializeMapCounterSelection(s32, s32);
+extern void sdfInitializeMapCounterSelection(s32 index, s32 count);
 extern s32 fldLoadLocalMapResources();
 extern void fldCreateMapRequestQueues(void);
 extern void fldApplyLightSetIndex(s32);
@@ -258,7 +257,8 @@ void fldLocalMapDrawScrollIndicators(s32 offsetX, s32 offsetY, s32 z, u32 color,
 
 extern s32 D_003BD238;
 extern LmapList *D_003BD968;
-extern void fldLmapSubmitScaledSpritePacket(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
+                                            s32 fillColor, s32 borderColor, s32 surfaceIndex);
 extern void itfDrawGridTextRows(s32, s32, s32, LmapList *, s32);
 
 void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
@@ -303,13 +303,13 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_bordered_rectangle_packet.h"
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
-void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 argument, s32 index, const char *command, s32 surfaceIndex) {
+void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
     sdfInitPacketList(packetList);
-    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, argument, index);
+    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
     sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(&packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append(drawSurface, packetList);

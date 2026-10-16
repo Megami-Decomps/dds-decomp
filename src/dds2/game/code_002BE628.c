@@ -121,7 +121,7 @@ extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
+extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
@@ -168,7 +168,7 @@ extern void evtStageTestAdvanceMotionQueue(void);
 
 
 
-extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
+extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot);
 
 extern char D_00437CB0[];
 
@@ -230,14 +230,14 @@ typedef struct MenuList MenuList;
 
 
 /* Give both complete commands in each page the same draw resource. */
-void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
+void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *resourceSet) {
     MenuPageSlot *panel = menu->slots;
     s32 i;
     s32 j;
 
     for (i = 0; i < 5; i++, panel++) {
         for (j = 0; j < 2; j++) {
-            panel->commands[j].resources = value;
+            panel->commands[j].resources = resourceSet;
         }
     }
 }
@@ -665,7 +665,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
-void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
+void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 surface) {
     MenuPageSlot *panel = &menu->slots[panelIndex];
     s32 mode = panel->kind;
 
@@ -677,10 +677,10 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
     }
     switch (mode) {
     case 1:
-        mnuDrawPartyMemberCommandPanel(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberCommandPanel(x, y, z, menu, panelIndex, surface);
         return;
     case 2:
-        mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, surface);
         break;
     }
 }
@@ -736,7 +736,7 @@ void mnuAdvancePanelTransition(MenuPageWindow *menu) {
 }
 
 /* Apply a temporary override to the selected node while drawing its panel. */
-void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
+void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface) {
     s32 positionOffset[2];
     MenuPageSlot *panel = &menu->slots[menu->selected];
     MenuSprites *node;
@@ -750,9 +750,9 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
     if (menu->flags & MNU_PAGE_WINDOW_SPRITE_MODE) {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, surface);
     } else {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, surface);
     }
     node = panel->windowSprites;
     if (node != NULL) {
@@ -761,7 +761,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
 }
 
 /* Draw the selected panel or all visible/additional panels, then advance the transition. */
-void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
+void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface) {
     s32 positionOffset[2];
     PartyPanel *layout = menu->records;
     s32 panelCount;
@@ -770,18 +770,18 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *m
     panelCount = layout->frontlineCount;
     panelCount += layout->reserveCount;
     if (menu->selected >= 0) {
-        mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
+        mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, surface);
     } else {
         for (panelIndex = 0; panelIndex < panelCount; panelIndex++) {
             mnuCalcListEntryOffset(positionOffset, menu, panelIndex);
-            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, panelIndex, param);
+            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, panelIndex, surface);
         }
     }
     mnuAdvancePanelTransition(menu);
 }
 
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 mode) {
-    mnuDrawListPanels(x, y, depth, 0, window, mode);
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 surface) {
+    mnuDrawListPanels(x, y, depth, 0, window, surface);
 }
 
 
@@ -2558,7 +2558,73 @@ s32 ptyChooseFirstAvailableRosterId(void) {
     return ptyIsRosterEntryPresent(8) ? 8 : 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C5A28);
+extern s32 fldIsFlagActive(void);
+extern void fldSetPrimarySceneFlag(void);
+extern s32 fldTestSecondarySceneFlag(void);
+extern void fldSetSecondarySceneFlag(void);
+extern s32 fldTestFieldTransitionFlag(void);
+extern void fldSetFieldTransitionFlag(void);
+extern u8 *D_00435E48;
+s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *target,
+                  struct DatPartyRecord *selected) {
+    s32 result = btlItemApplyPermanentBonus(ability, selected);
+
+    switch (result) {
+    case 1:
+        mnuQueueListEntry(page, mnuFindMatchingPartyEntryIndex(selected), 1, 0);
+        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        return 1;
+    case 2:
+        return result;
+    }
+    switch (ability) {
+    case 0x3B:
+        if (fldIsFlagActive()) {
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        }
+        sndPlayPartyItemSe(ability, 0);
+        fldSetPrimarySceneFlag();
+        goto accepted;
+    case 0x3C:
+        if (fldTestSecondarySceneFlag()) {
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        }
+        sndPlayPartyItemSe(ability, 0);
+        fldSetSecondarySceneFlag();
+        goto accepted;
+    case 0x3D:
+        if (fldTestFieldTransitionFlag()) {
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        }
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + ptyChooseFirstAvailableRosterId() * 17);
+        sndPlayPartyItemSe(ability, 0);
+        fldSetFieldTransitionFlag();
+        goto accepted;
+    case 0x3E:
+        switch (fldGetSceneCommandState()) {
+        case -1:
+            sndPlayPartyItemSe(ability, 2);
+            return 2;
+        case 1:
+            sndPlayPartyItemSe(ability, 1);
+            return 2;
+        default:
+            goto activate;
+        }
+    default:
+        return 0;
+    }
+activate:
+    sndPlayPartyItemSe(ability, 0);
+    fldActivatePendingSceneCommand();
+accepted:
+    mnuQueueListEntry(page, mnuFindMatchingPartyEntryIndex(selected), 2, 0);
+    sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+    return 1;
+}
 
 /* Return the first matching status index in native priority order, or -1. */
 s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry) {
@@ -2850,8 +2916,8 @@ extern u8 D_0042B538[];
 extern u8 D_0042B548[];
 extern u8 D_0042B558[];
 extern void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second);
-extern void kwlnSetLightColorTarget(s32 mode, s32 slot, f32 *color);
-extern void kwlnSetLightDirectionTarget(s32 mode, s32 slot, f32 *color);
+extern void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
 extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
 extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
 extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
@@ -3314,7 +3380,74 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestDrawCameraTransformDebug);
+extern s32 D_00437CA4;
+extern const char *D_00437CA0;
+extern char D_00437CA8[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
+
+void evtStageTestDrawCameraTransformDebug(void) {
+    EffWorldNode *world = (EffWorldNode *)dds3GetWorldObject();
+    EffWorldNode *camera;
+    const char *caption;
+    const char *name;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+
+    if (world == NULL) {
+        return;
+    }
+    if (D_0037F510[0x2D] < 0) {
+        if (D_00437CA4 != 0) {
+            D_00437CA4 = 0;
+        } else {
+            D_00437CA4 = 1;
+        }
+    }
+    if (D_00437CA4 == 0) {
+        return;
+    }
+    camera = dds3GetWorldCameraObject(world);
+    if (camera == NULL) {
+        return;
+    }
+    if (D_0037F510[0x20] < 0) {
+        if (camera->next != NULL) {
+            camera = camera->next;
+        } else {
+            camera = ((EvtWorldTable *)world->data)->slots[4].head;
+        }
+        dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
+    } else if (D_0037F510[0x22] < 0) {
+        if (camera->previous != NULL) {
+            camera = camera->previous;
+        } else {
+            camera = ((EvtWorldTable *)world->data)->slots[4].tail;
+        }
+        dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
+    }
+    name = camera->value;
+    caption = D_00437CA0;
+    if (name != NULL) {
+        caption = name;
+    }
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8680, 0x79C0, 0xFF0000, 5, D_00437CA8, caption));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7240, 0x79C0, 0xFF0000, 0, "P:%.2f %.2f %.2f",
+                                                           camera->inner->position[0],
+                                                           camera->inner->position[1],
+                                                           camera->inner->position[2]));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7240, 0x7A20, 0xFF0000, 0, "R:%.2f %.2f %.2f",
+                                                           camera->inner->rotation[0],
+                                                           camera->inner->rotation[1],
+                                                           camera->inner->rotation[2]));
+    surface = &kwlnDrawSurfaces[96];
+    surface->append(surface, list);
+    list = sdfCreateResetPacketList();
+    (&kwlnDrawSurfaces[40])->append(&kwlnDrawSurfaces[40], list);
+}
 
 u32 evtStageTestCameraUpdate(void) {
     evtStageTestDrawCameraTransformDebug();

@@ -23,9 +23,13 @@ typedef char EvtScaledValue_scaled_at_0C[
 typedef char EvtScaledValue_size_must_be_0x1C[
     sizeof(EvtScaledValue) == 0x1C ? 1 : -1];
 
-/* This reader accesses only base/scaled at +0x08/+0x0C. Path callers pass
- * Dds3PathCurveWork through this prefix, where duration/time occupy those
- * offsets; those calls do not require a complete EvtScaledValue object. */
-f32 evtGetValueScaleFactor(EvtScaledValue *value);
+/* These helpers use only the flags/base/scaled prefix. Path callers pass
+ * Dds3PathCurveWork, and polygon-movie callers pass PolyMovieClip; both expose
+ * the corresponding fields at +0x04/+0x08/+0x0C without requiring a complete
+ * EvtScaledValue object. */
+f32 evtGetValueScaleFactor(const EvtScaledValue *value);
+void evtScaleValueByMultiplier(EvtScaledValue *value, f32 multiplier);
+void sdfFreezeFloatCounter(EvtScaledValue *value);
+void sdfUnfreezeFloatCounter(EvtScaledValue *value);
 
 #endif

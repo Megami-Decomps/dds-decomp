@@ -20,10 +20,10 @@ typedef char EffCubicBezierSlotLayoutAssert[
 
 struct EffArrHdr *effAllocSlotArray(s32 count);
 void effMathReleaseWorkResource(struct EffArrHdr *work);
-s32 effMathStepBezierSlot(struct EffArrHdr *table, s32 index, f32 *out);
+s32 effMathStepBezierSlot(struct EffArrHdr *table, s32 slotIndex, f32 *out);
 s32 effMathStepBezierSlotDirect(EffCubicBezierSlot *slot, f32 *out);
-void effMathResetBezierSlot(struct EffArrHdr *table, s32 index);
-EffCubicBezierSlot *effMathGetSlotAt(struct EffArrHdr *table, s32 index);
+void effMathResetBezierSlot(struct EffArrHdr *table, s32 slotIndex);
+EffCubicBezierSlot *effMathGetSlotAt(struct EffArrHdr *table, s32 slotIndex);
 /* Blend packed RGBA8888 colors; t >= 1 returns colorB unchanged. */
 u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 

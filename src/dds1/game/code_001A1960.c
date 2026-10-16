@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_animation_mode_entry.h"
@@ -226,14 +227,14 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
     memcpy(dst->baseStats, src->baseStats, sizeof(dst->baseStats));
     dst->status = src->status & 0x7FFF;
-    dst->unk18C = src->unk18C;
+    dst->savedCommandPhase = src->savedCommandPhase;
     dst->unk18E = src->unk18E;
     dst->actionSlot = src->actionSlot;
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
-s32 btlFindPartyEntryIndexForActor(s32 arg0) {
-    return dds3FindEntryIndex(((BtlUnit *)arg0)->partyRecord.unitId);
+s32 btlFindPartyEntryIndexForActor(s32 unit) {
+    return dds3FindEntryIndex(((BtlUnit *)unit)->partyRecord.unitId);
 }
 
 /* Retail no-op after party actor insertion, removal or roster swap. */
@@ -511,7 +512,7 @@ s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
     if (index == 0 && (unit->status.flags & 0x400) != 0) {
-        return datEnemyRecords[unit->partyRecord.unitId].unk46;
+        return datEnemyRecords[unit->partyRecord.unitId].indexedValueOverride;
     }
     return datCommandSelectors[index].stat;
 }
@@ -533,25 +534,25 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 value) {
     return datGetEffectiveAffinity(record, value);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_003BAA10 + arg1 * 0x270;
+void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+    if (side == 0) {
+        return (void *)(u32)(D_003BAA10 + index * 0x270);
     }
-    return D_003BAA20 + arg1 * 0x270;
+    return (void *)(u32)(D_003BAA20 + index * 0x270);
 }
 
-BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
+    if (side == 0) {
         return (BtlActorTransformParameters *)btlSharedActorTransformParameters;
     }
-    return (BtlActorTransformParameters *)(D_003BAA30 + arg1 * 24);
+    return (BtlActorTransformParameters *)(D_003BAA30 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_003BAA14 + arg1 * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+    if (category == 0) {
+        return D_003BAA14 + actorId * 0x74;
     }
-    return D_003BAA28 + arg1 * 0x74;
+    return D_003BAA28 + actorId * 0x74;
 }
 
 extern char D_003A1788[];
@@ -743,7 +744,7 @@ u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 un
         mask = -1;
         break;
     }
-    if (battle->unk_1FC & 0x800) {
+    if (battle->unk_1FC & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         mode = 3;
         flags &= ~0xB;
         mask = 0;
@@ -1199,8 +1200,8 @@ s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
         }
     }
     for (i = 0; i < 2 && item == 0; i++) {
-        if (enemy->unk3E[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
-            item = enemy->unk3E[i];
+        if (enemy->additionalDropItemIds[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
+            item = enemy->additionalDropItemIds[i];
         }
     }
     return item;
@@ -1261,11 +1262,11 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         level = 60;
     }
     if (level >= enemyLevel + allowance && datBattleParameters->rewardDivisor != 0.0f) {
-        reward = (s32)(record->unk2C / datBattleParameters->rewardDivisor);
+        reward = (s32)(record->battleExperienceReward / datBattleParameters->rewardDivisor);
         btlBossDebugPrintf(D_003A17F8, reward, level, enemyLevel, allowance,
                           datBattleParameters->rewardDivisor);
     } else {
-        reward = record->unk2C;
+        reward = record->battleExperienceReward;
     }
     if (record->flags & 0x2000) {
         reward *= 100;
@@ -1489,7 +1490,7 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
 
 #include "btl_actor_entry_code_api.h"
 
-s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
+s16 btlGetActorEntryCode(const BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
@@ -1636,7 +1637,45 @@ void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlLowestSetPairIndex);
+/* Index of the lowest set bit pair in the mask (bits 10 and 13 are single), or -1. */
+s32 btlLowestSetPairIndex(u32 mask) {
+    s32 index = 0;
+    s32 step = 1;
+
+    if (mask == 0)
+        return -step;
+    if (mask & 0x0001)
+        return index;
+    if (mask & 0x0002)
+        return index;
+    index += step;
+    if (mask & 0x0004)
+        return index;
+    if (mask & 0x0008)
+        return index;
+    index += step;
+    if (mask & 0x0010)
+        return index;
+    if (mask & 0x0020)
+        return index;
+    index += step;
+    if (mask & 0x0040)
+        return index;
+    if (mask & 0x0080)
+        return index;
+    index += step;
+    if (mask & 0x0100)
+        return index;
+    if (mask & 0x0200)
+        return index;
+    index += step;
+    if (mask & 0x0400)
+        return index;
+    index += step;
+    if (mask & 0x2000)
+        return index;
+    return -step;
+}
 
 void btlTickActorEntryCountdowns(u8 *scene) {
     u32 index;
@@ -1789,8 +1828,8 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
     return 0;
 }
 
-u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1) {
-    if (arg1 == 0 && btlCheckSpecialAbility(&arg0->partyRecord, 0x254) != 0) {
+u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue) {
+    if (argumentValue == 0 && btlCheckSpecialAbility(&unit->partyRecord, 0x254) != 0) {
         return 1;
     }
     return 0;
@@ -2310,7 +2349,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
-    } else if (datCommandRecords[command].unk_0B == 1) {
+    } else if (datCommandRecords[command].distributeRandomTargetHits == 1) {
         return 1;
     }
     return 0;

@@ -8,7 +8,7 @@ typedef struct BtlCameraParameterRecord {
     u8 flags00; /* 0x00: case-5 pose handling tests bits 0 and 2 */
     u8 pad01[0xF];
     f32 value[4]; /* 0x10: values forwarded to the active track helper */
-    u8 flags20; /* 0x20 */
+    u8 transitionFlags; /* 0x20: active-high start/end duration controls (see masks below) */
     u8 pad21[0xF];
     f32 fadeInDuration; /* 0x30 */
     u8 pad34[0xC];
@@ -21,10 +21,17 @@ typedef struct BtlCameraParameterRecord {
     u8 pad71[0xF];
 } BtlCameraParameterRecord;
 
+enum {
+    /* func_001EBE88 (DDS1) and func_001FA480 (DDS2) enter each adjustment
+     * when its mask is nonzero: 0x01/0x04 use +0x30, 0x02/0x08 use +0x40. */
+    BTL_CAMERA_RECORD_START_TRANSITION_MASK = 0x05,
+    BTL_CAMERA_RECORD_END_TRANSITION_MASK = 0x0A
+};
+
 typedef char BtlCameraParameterRecord_size[(sizeof(BtlCameraParameterRecord) == 0x80) ? 1 : -1];
 typedef char BtlCameraParameterRecord_flags00_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->flags00 == 0x00) ? 1 : -1];
 typedef char BtlCameraParameterRecord_value_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->value == 0x10) ? 1 : -1];
-typedef char BtlCameraParameterRecord_flags20_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->flags20 == 0x20) ? 1 : -1];
+typedef char BtlCameraParameterRecord_transitionFlags_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->transitionFlags == 0x20) ? 1 : -1];
 typedef char BtlCameraParameterRecord_fadeInDuration_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->fadeInDuration == 0x30) ? 1 : -1];
 typedef char BtlCameraParameterRecord_fadeOutDuration_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->fadeOutDuration == 0x40) ? 1 : -1];
 typedef char BtlCameraParameterRecord_curveScale5C_offset[((unsigned long)&((BtlCameraParameterRecord *)0)->curveScale5C == 0x5C) ? 1 : -1];

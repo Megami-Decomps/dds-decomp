@@ -35,7 +35,7 @@ extern void (*itfPanelHandlers[])(UiSprite *, SdfListHead *);
 extern u32 scrGetWindow(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesResetWindow(s32 window);
-extern void itfMesCleanupWindow(s32 window, s32 arg1);
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 extern s32 itfPanelColorTemplates[];
 extern s32 D_00357B50[];
@@ -53,7 +53,7 @@ extern u8 D_003BB1E0[8];
 extern s32 itfPanelGradientColorTemplate[];
 extern s32 itfPanelGradientColorPair[];
 extern s32 scrReadIntParameter(s32);
-extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
 extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
 extern u8 D_003BB1A8[8], D_003BB1B0[8];
@@ -623,18 +623,18 @@ s32 itfPanelStartEntry(void) {
 }
 
 /* Forward this record's layout sprite address and the supplied value; index is unchecked. */
-void itfPanelEmitRecord(s32 index, s32 value) {
-    itfAdvancePanelLayoutAndNotify(itfWindowSlots[index].ptr->layoutSpriteAddress, 0, value, 0, 0, 0);
+void itfPanelEmitRecord(s32 windowIndex, s32 topDelta) {
+    itfAdvancePanelLayoutAndNotify(itfWindowSlots[windowIndex].ptr->layoutSpriteAddress, 0, topDelta, 0, 0, 0);
 }
 
 /* Return the signed byte entry status; this is separate from the option-block s16 status. */
-s8 itfPanelGetStatus(s32 index) {
-    return itfWindowSlots[index].ptr->sub24.status;
+s8 itfPanelGetStatus(s32 windowIndex) {
+    return itfWindowSlots[windowIndex].ptr->sub24.status;
 }
 
 /* Store the signed byte entry status; index and payload pointer are trusted. */
-void itfPanelSetStatus(s32 index, s8 status) {
-    itfWindowSlots[index].ptr->sub24.status = status;
+void itfPanelSetStatus(s32 windowIndex, s8 status) {
+    itfWindowSlots[windowIndex].ptr->sub24.status = status;
 }
 
 /* Capture the script window, reset its held queue, and switch to page three.
@@ -808,18 +808,18 @@ s32 itfCommandSelectOptionWithFade(void) {
 }
 
 /* Return the option-block signed status word, not the separate entry status byte. */
-s16 itfPanelGetPairFirst(s32 index) {
-    return itfWindowSlots[index].ptr->options.status;
+s16 itfPanelGetPairFirst(s32 windowIndex) {
+    return itfWindowSlots[windowIndex].ptr->options.status;
 }
 
 /* Store the option-block signed status word without validating the slot. */
-void itfPanelSetPairFirst(s32 index, s16 status) {
-    itfWindowSlots[index].ptr->options.status = status;
+void itfPanelSetPairFirst(s32 windowIndex, s16 status) {
+    itfWindowSlots[windowIndex].ptr->options.status = status;
 }
 
 /* Return the same signed word forwarded as the script result when an option completes. */
-s16 itfPanelGetPairSecond(s32 index) {
-    return itfWindowSlots[index].ptr->options.clearBitCount;
+s16 itfPanelGetPairSecond(s32 windowIndex) {
+    return itfWindowSlots[windowIndex].ptr->options.clearBitCount;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00199AD8", D_003BB1A8);

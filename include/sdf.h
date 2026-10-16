@@ -4,6 +4,7 @@
 #include "common.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
+#include "sdf_texture_clamp.h"
 #include "sdf_thread.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
@@ -374,7 +375,7 @@ typedef struct SdfTex {
     u8 maxMipLevel;
     u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
     u8 unk1E;
-    u8 clampMode;
+    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
     s32 resourceKey;
     s32 battleTextureSlot;
     SdfTexBuf *primaryBuffer;
@@ -384,6 +385,11 @@ typedef struct SdfTex {
     s32 unk38;
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
+
+typedef char SdfTex_size_must_be_0x40[
+    (sizeof(SdfTex) == 0x40) ? 1 : -1];
+typedef char SdfTex_clampMode_offset_must_be_0x1F[
+    ((u32)&((SdfTex *)0)->clampMode == 0x1F) ? 1 : -1];
 
 /* Release one caller-owned texture reference. The direct form releases the
  * texture immediately when this is the last reference; the handler form queues
@@ -640,7 +646,7 @@ typedef struct SdfAssetEntry {
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
     u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
-    u32 unk10;             /* 0x10 */
+    u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
     u32 unk14;             /* 0x14 */
     u32 pad18;             /* 0x18 */
     f32 unk1C;             /* 0x1C */
@@ -658,6 +664,8 @@ typedef struct SdfAssetEntry {
 
 typedef char SdfAssetEntry_size_must_be_0xA0[
     (sizeof(SdfAssetEntry) == 0xA0) ? 1 : -1];
+typedef char SdfAssetEntry_primaryStateWordThird_offset_must_be_0x10[
+    ((u32)&((SdfAssetEntry *)0)->primaryStateWordThird == 0x10) ? 1 : -1];
 typedef char SdfAssetEntry_primaryTextureState_offset_must_be_0x38[
     ((u32)&((SdfAssetEntry *)0)->primaryTextureState == 0x38) ? 1 : -1];
 typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[

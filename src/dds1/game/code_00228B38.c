@@ -4,7 +4,8 @@
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
-extern void evtDrawSolarNoiseLayerAtCenteredScale(s32, s32, s32, s32, s32, s32, s32, s32, f32);
+extern void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer,
+                                                   s32 mode, s32 contextHandle, s32 color, f32 scale);
 
 
 typedef struct {
@@ -13,9 +14,12 @@ typedef struct {
     s8 active;  /* 0x06 */
 } SolarLayerTimer;
 
-void evtDrawSolarNoiseLayerAtConfiguredScale(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void sdfDrawColoredTriangleFan(s32, s32, s32 *, s32, s32, s32);
-extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+                                             s32 contextHandle, s32 color);
+extern void sdfDrawColoredTriangleFan(s32 points, s32 tail, s32 *colors, s32 count,
+                                      s32 useFirstColor, s32 surfaceIndex);
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 extern s32 D_0036832C[];
 extern s32 evtSolarNoiseLayerPlacements[][3];
 extern SolarOverlayShape evtSolarOverlayShapes[];
@@ -36,24 +40,24 @@ void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite) {
     effDestroyResourceSlotSet(*sprite);
 }
 
-void evtInitializeSolarOverlay(s32 object) {
-    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
-    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, object);
-    uiDrawActiveSurfaceRegion(object);
-    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
+void evtInitializeSolarOverlay(s32 renderHandle) {
+    sdfSubmitGsTestOneRegisterPacket(0x30000, renderHandle);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, renderHandle);
+    uiDrawActiveSurfaceRegion(renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, renderHandle);
 }
 
-void evtFinalizeSolarOverlay(s32 object) {
-    sdfDispatchSurfaceWithPreparedTexturePacket(object);
-    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
-    sdfSubmitGsTestOneRegisterPacket(0x50000, object);
+void evtFinalizeSolarOverlay(s32 renderHandle) {
+    sdfDispatchSurfaceWithPreparedTexturePacket(renderHandle);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, renderHandle);
 }
 
-void evtPrepareSolarOverlayTestState(s32 object) {
-    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
-    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
-    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, object);
-    sdfSubmitGsTestOneRegisterPacket(0x5100DL, object);
+void evtPrepareSolarOverlayTestState(s32 renderHandle) {
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, renderHandle);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, renderHandle);
 }
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,

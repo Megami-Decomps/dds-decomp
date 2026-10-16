@@ -148,7 +148,7 @@ s32 itfEditOverlayColor(void) {
             D_003D73E0.editing ^= 1;
             D_003D73E0.blink = 0;
         }
-        if ((u8)D_00324510.cancel & 2) {
+        if ((u8)D_00324510.secondaryCancel & 2) {
             return -1;
         }
     } else {
@@ -183,7 +183,7 @@ s32 itfEditOverlayColor(void) {
                 D_003BD824 = 0;
             }
         }
-        if (D_00324510.cancel < 0) {
+        if (D_00324510.secondaryCancel < 0) {
             D_003D73E0.editing ^= 1;
             D_003D73E0.blink = 0;
         }
@@ -673,7 +673,7 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
 
 extern EncBgRow *D_003BAA44;
 
-extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
+extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];

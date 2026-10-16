@@ -135,8 +135,8 @@ void effApplyNodeTransformMatrix(EffNode *node, const void *matrix) {
     effNodeTypeOperations[node->type].setMatrix(node->instance, matrix);
 }
 
-void effSetNodeParameterValue(EffNode *node, u32 value) {
-    effNodeTypeOperations[node->type].setParameterWord(node->instance, value);
+void effSetNodeParameterValue(EffNode *node, u32 parameterWord) {
+    effNodeTypeOperations[node->type].setParameterWord(node->instance, parameterWord);
 }
 
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag) {

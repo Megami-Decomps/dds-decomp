@@ -1,9 +1,11 @@
+#include "btl_vec3.h"
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
 #include "btl_camera_cursor.h"
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_actor_status_table_api.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "kwln_fade.h"
@@ -257,7 +259,7 @@ extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 extern s32 datActionAnimationRecords;
 
-extern s32 btlArrangeFormationSlots(s32 arg0);
+extern s32 btlArrangeFormationSlots(s32 filter);
 
 extern s8 effSharedRandomState[];
 
@@ -294,7 +296,6 @@ extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
@@ -398,7 +399,6 @@ void btlClearAllUnitDefeatCandidatesTask(void);
 
 void btlClearUnitDefeatCandidate(BtlUnit *object);
 
-void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src);
 
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
 
@@ -412,9 +412,7 @@ void btlFreeIndexList(BtlIndexList *list);
 
 u32 btlGetActiveUnitId(void);
 
-/* Return the number of live entries, not the allocated capacity. */ u32 btlGetIndexListCount(BtlIndexList *list);
 
-/* The caller supplies an in-range index. */ void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 
 /* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(void *task);
 
@@ -543,7 +541,126 @@ s32 btlRunTimedCameraFinishHook(s32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", btlBuildBattleUnitFramingCameraPose);
+extern f32 fabsf(f32);
+extern f32 btlUnitGetBottomY(BtlUnit *);
+extern void btlFlagAllUnitsDefeatCandidate(void);
+
+extern f32 tanf(f32);
+extern void sdfVuLoadRotationMatrixZ(f32);
+
+void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *out, f32 tiltDegrees) {
+    BtlState *state;
+    BtlUnit *unit;
+    u32 count;
+    s32 firstEnemy;
+    u32 flags;
+    f32 fov;
+    f32 maxAllyTop;
+    f32 minEnemyTop;
+    f32 measure;
+    f32 reachTotal;
+    f32 reach;
+    f32 sample;
+    f32 horizontalSpan;
+    f32 cameraDistance;
+    f32 centers[3][4] __attribute__((aligned(16)));
+
+    state = (BtlState *)btlGetRuntime();
+    btlFlagAllUnitsDefeatCandidate();
+
+    count = 0;
+    maxAllyTop = 0.0f;
+    measure = 0.0f;
+    fov = action->camera.fov;
+    minEnemyTop = 0.0f;
+    reachTotal = 0.0f;
+    unit = state->units;
+    firstEnemy = 1;
+    out->fov = fov;
+    while (unit != NULL) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (!(unit->status.flags & 0xC0)) {
+                reach = unit->reach * unit->scale;
+                sample = btlUnitGetTopY(unit);
+                flags = unit->status.flags;
+                if ((flags & 0x200) != 0) {
+                    if (maxAllyTop < sample) {
+                        maxAllyTop = sample;
+                    }
+                } else if ((flags & 0x400) != 0) {
+                    if (firstEnemy || sample < minEnemyTop) {
+                        minEnemyTop = sample;
+                        measure = btlUnitGetBottomY(unit);
+                        firstEnemy = 0;
+                    }
+                }
+                reachTotal += reach;
+                count++;
+            }
+        }
+        unit = unit->next;
+    }
+
+    if (count == 0) {
+        return;
+    }
+
+    if (minEnemyTop > 600.0f) {
+        minEnemyTop = (minEnemyTop - measure) * 0x1.666666p-2f + measure;
+    } else if (minEnemyTop > 150.0f) {
+        minEnemyTop = (minEnemyTop - measure) * 0.5f + measure;
+    } else {
+        minEnemyTop = (minEnemyTop - measure) * 0.25f + measure;
+    }
+
+    measure = reachTotal / (f32)count;
+    btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
+    VU0_STORE_VF(vf10, centers[1]);
+    btlMeasureMaskedUnitBounds(0x400, NULL, NULL);
+    VU0_STORE_VF(vf10, centers[2]);
+    centers[2][0] = centers[1][0];
+    centers[2][1] = -minEnemyTop;
+    centers[1][1] = -maxAllyTop;
+    horizontalSpan = btlMeasureMaskedUnitBounds(0x600, NULL, NULL);
+    cameraDistance = horizontalSpan;
+    if (measure > 100.0f) {
+        cameraDistance += measure;
+    } else {
+        cameraDistance += 100.0f;
+    }
+    VU0_STORE_VF(vf10, centers[0]);
+    if (cameraDistance < 1200.0f) {
+        cameraDistance += ffabsf(centers[0][0] - centers[1][0]);
+    }
+
+    sample = maxAllyTop - minEnemyTop;
+    {
+        f32 separation = ffabsf(centers[2][2] - centers[1][2]);
+        f32 offset = ffabsf(centers[2][2] - centers[0][2]);
+        centers[0][0] = centers[1][0];
+        if (separation > 0.0f) {
+            centers[0][1] = -(sample * offset / separation) - minEnemyTop;
+        }
+    }
+    VU0_LOAD_VF(vf10, centers[0]);
+    VU0_STORE_VF(vf10, out->position);
+
+    if (action->camera.direction[0] > 0.0f) {
+        sdfVuLoadRotationMatrixZ(tiltDegrees * 0x1.1df46ap-6f);
+    } else {
+        sdfVuLoadRotationMatrixZ(-tiltDegrees * 0x1.1df46ap-6f);
+    }
+    VU0_LOAD_VF(vf10, centers[2]);
+    VU0_LOAD_VF(vf11, centers[1]);
+    __asm__ volatile("vsub.xyzw vf10, vf10, vf11");
+    VU0_NORMALIZE_VF10();
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, out->direction);
+
+    out->distance = cameraDistance / tanf(fov * 0x1.555554p-1f);
+    btlAdjustCameraDirectionForDefaultPlane(out);
+}
 
 void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);
@@ -726,9 +843,9 @@ void btlAimEffectPoseAtUnit(BtlLinkedCommand *actor) {
     }
 }
 
-extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
+extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
 
-extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
+extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
@@ -750,9 +867,9 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         if (btlHasSingleLinkedResource(action) == 0) {
-            func_001E16C0(action, from);
+            btlBuildTargetGroupFramingCameraPose(action, from);
         } else {
-            func_001E1288(action, from, 1);
+            btlBuildActorPairFramingCameraPose(action, from, 1);
         }
         btlCopyUnitRotationQuaternion(unit, quat);
         btlUnitGetMuzzlePosVU(unit);
@@ -859,7 +976,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
             }
         } else {
             target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
-            func_001E1288(action, from, 2);
+            btlBuildActorPairFramingCameraPose(action, from, 2);
             halfFov = to->fov * 0.5f * 1.3333333f;
             btlCopyMotionTransform(to, from);
             minimumDistance = target->reach * target->scale / tanf(halfFov);
@@ -1156,7 +1273,65 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
     action->motionParameter = parameter;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E0B68);
+extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
+
+void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back) {
+    f32 position[4] __attribute__((aligned(16)));
+    BtlState *runtime;
+    BtlTask *task;
+    BtlUnit *unit;
+    BtlUnit *user;
+    u32 groups = 0;
+    u32 i;
+    u32 count;
+    u8 mode;
+    f32 blend;
+
+    runtime = (BtlState *)btlGetRuntime();
+    count = btlGetIndexListCount(command->targetList);
+    for (i = 0; i < count; i++) {
+        unit = (BtlUnit *)btlGetIndexListEntry(command->targetList, (s32)i);
+        groups |= unit->status.flags & 0x600;
+    }
+
+    count = 0;
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
+        u32 flags = unit->status.flags;
+        if (!(flags & 1)) continue;
+        if (flags & 0xC0) continue;
+        if (flags & groups) count++;
+    }
+
+    if (count == 1) {
+        btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
+        command->motionParameter = 30.0f;
+        command->flags |= 0x41;
+        return;
+    }
+
+    task = command->task;
+    user = task->unit;
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(user->status.flags & 0x600);
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF_PTR(vf10, position);
+    if (user->status.flags & 0x200) {
+        mode = position[0] < 0.0f ? 2 : 3;
+        btlSetupCameraAimDualUnit(command, front, mode, 60.0f, 0.1499999911f);
+        btlSetupCameraAimDualUnit(command, back, mode, 5.0f, 0.0f);
+        front->distance += 100.0f;
+    } else {
+        mode = 0.0f < position[0] ? 2 : 3;
+        blend = 0.1999999881f;
+        btlSetupCameraAimDualUnit(command, front, mode, 75.0f, blend);
+        btlSetupCameraAimDualUnit(command, back, mode, 35.0f, blend);
+        back->distance += 100.0f;
+    }
+    command->motionParameter = 40.0f;
+    command->flags |= 0x41;
+}
 
 
 void btlSetupCameraAimDualUnit(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
@@ -1313,9 +1488,336 @@ f32 angle, f32 blend) {
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E1288);
+extern f32 func_002F9CD0(f32);
+extern f32 tanf(f32);
+extern f32 sinf(f32);
+extern void sdfVuLoadRotationMatrixZ(f32);
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E16C0);
+void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *pose, u8 mode) {
+    BtlUnit *actor;
+    BtlUnit *target;
+    f32 actorMuzzle[4];
+    f32 targetMuzzle[4];
+    f32 midpoint[4];
+    f32 span;
+    f32 midpointDistance;
+    f32 scaledReach;
+    f32 sideReach;
+    f32 heightOffset;
+    f32 angleScale;
+    f32 angle;
+    f32 halfFov;
+    f32 sideLength;
+    f32 tangent;
+    s32 reverse;
+    s32 alternate;
+    f32 reachScale;
+
+    switch (mode) {
+    case 1:
+        reverse = 0;
+        alternate = 0;
+        btlFlagAllUnitsDefeatCandidate();
+        break;
+    case 2:
+        reverse = 1;
+        alternate = 0;
+        btlFlagAllUnitsDefeatCandidate();
+        break;
+    case 3:
+        reverse = 0;
+        alternate = 1;
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(action->task->unit->status.flags & 0x600);
+        break;
+    case 0:
+    default:
+        reverse = 0;
+        alternate = 0;
+        break;
+    }
+
+    /* Select the actor side and its framing reach multiplier. */
+    switch (reverse) {
+    case 0:
+        actor = action->task->unit;
+        target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+        reachScale = 1.0f;
+        break;
+    default:
+        target = action->task->unit;
+        reachScale = 4.0f;
+        actor = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+        break;
+    }
+
+    pose->fov = action->camera.fov;
+    scaledReach = actor->reach * actor->scale;
+    btlUnitGetMuzzlePosVU(actor);
+    scaledReach *= reachScale;
+    VU0_STORE_VF(vf10, actorMuzzle);
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF(vf10, targetMuzzle);
+
+    if (btlUnitGetTopY(target) < 600.0f) {
+        heightOffset = 0.0f;
+        actorMuzzle[1] -= actor->height * actor->scale * 0.25f;
+    } else {
+        tangent = tanf(pose->fov * 0.5f);
+        heightOffset = actor->height * actor->scale * 0.5f / tangent;
+    }
+
+    VU0_LOAD_VF(vf10, targetMuzzle);
+    VU0_LOAD_VF_FROM(vf11, *(const PcpVectorCopyF32 *)actorMuzzle);
+    VU0_SCALAR_OP(0.5f, "vsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w");
+    VU0_STORE_VF(vf10, midpoint);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(midpointDistance);
+
+    if (!reverse) {
+        sideLength = fsqrtf(midpointDistance * midpointDistance - scaledReach * scaledReach);
+        if (!alternate) {
+            angleScale = scaledReach * 0x1.199998p+0f;
+        } else {
+            angleScale = scaledReach * 1.75f;
+        }
+    } else {
+        sideReach = scaledReach / reachScale;
+        sideLength = fsqrtf(midpointDistance * midpointDistance - sideReach * sideReach);
+        angleScale = sideReach;
+    }
+    angle = func_002F9CD0(angleScale / sideLength);
+
+    if (!alternate) {
+        if (targetMuzzle[0] > actorMuzzle[0]) {
+            angle = -angle;
+        }
+    } else if (targetMuzzle[0] < actorMuzzle[0]) {
+        if (actorMuzzle[2] < 0.0f) {
+            angle = -angle;
+        }
+    } else if (0.0f < actorMuzzle[2]) {
+        angle = -angle;
+    }
+
+    sdfVuLoadRotationMatrixZ(angle);
+    VU0_LOAD_VF(vf10, actorMuzzle);
+    VU0_LOAD_VF(vf11, midpoint);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, targetMuzzle);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, pose->position);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(span);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, pose->direction);
+
+    halfFov = pose->fov * 0x1.555554p+0f * 0.5f;
+    if (!reverse) {
+        tangent = sinf(0x1.921fb4p+0f - halfFov);
+        sideReach = scaledReach / tangent;
+        tangent = tanf(halfFov);
+        pose->distance = span + heightOffset + (angleScale + sideReach) / tangent;
+    } else {
+        tangent = tanf(halfFov);
+        pose->distance = span + heightOffset + scaledReach / tangent;
+    }
+
+    btlUnitFaceTarget(actor, target);
+    if (!alternate) {
+        btlUnitFaceTargetScaled(target, actor, 0x1.0c1522p-1f);
+    }
+    btlAdjustCameraDirectionForDefaultPlane(pose);
+}
+
+
+
+extern void btlFlagAllUnitsDefeatCandidate(void);
+extern s32 btlPointInBox(BtlVec3 *, BtlVec3 *, BtlVec3 *);
+extern f32 tanf(f32);
+extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
+
+void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
+    f32 actorPoint[4] __attribute__((aligned(16)));
+    f32 targetPoint[4] __attribute__((aligned(16)));
+    f32 projection[4] __attribute__((aligned(16)));
+    f32 currentMuzzle[4] __attribute__((aligned(16)));
+    f32 facingRotation[4] __attribute__((aligned(16)));
+    f32 firstExtreme[4] __attribute__((aligned(16)));
+    f32 secondExtreme[4] __attribute__((aligned(16)));
+    f32 framingDistances[2];
+    f32 selectorScalar;
+    f32 actorMargin, span, halfFov, length, distance;
+    f32 fieldOfView;
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = command->task->unit;
+    BtlUnit *unit, *firstActor, *secondActor;
+    u32 count, i, flags;
+
+    if (btlHasSingleLinkedResource(command)) {
+        if (actor->status.flags & 0x200) {
+            btlBuildActorPairFramingCameraPose(command, pose, 1);
+        } else {
+            btlBuildActorPairFramingCameraPose(command, pose, 2);
+        }
+        return;
+    }
+    btlFlagAllUnitsDefeatCandidate();
+    pose->fov = command->camera.fov;
+    actorMargin = actor->reach * actor->scale;
+    actorMargin *= 1.5f;
+    count = btlGetIndexListCount(command->targetList);
+    flags = 0;
+    for (i = 0; i < count; i++) {
+        flags |= ((BtlUnit *)btlGetIndexListEntry(command->targetList, i))->status.flags & 0x600;
+    }
+    if (flags == 0 || flags == 0x600) {
+        btlSetDefaultActionCameraPose(command, pose);
+        return;
+    }
+    span = btlMeasureMaskedUnitBounds(flags, 0, &selectorScalar);
+    VU0_STORE_VF(vf10, targetPoint);
+    if (count == 1) {
+        if (500.0f < selectorScalar) {
+            targetPoint[1] = -selectorScalar * 0x1.266666p-1f;
+        } else {
+            targetPoint[1] = -selectorScalar * 0x1.333332p-2f;
+        }
+    } else {
+        targetPoint[1] = -selectorScalar * 0x1.ccccccp-2f;
+    }
+    firstActor = 0;
+    secondActor = 0;
+    for (unit = state->units; unit; unit = unit->next) {
+        u32 unitFlags = unit->status.flags;
+        if (unitFlags & 1) {
+            if (!(unitFlags & 0xC0)) {
+                if (unitFlags & flags) {
+                    btlUnitGetMuzzlePosVU(unit);
+                    VU0_STORE_VF(vf10, currentMuzzle);
+                    if (firstActor == 0) {
+                        firstActor = unit;
+                        VU0_STORE_VF_UNCLOBBERED(vf10, firstExtreme);
+                        secondActor = unit;
+                        VU0_STORE_VF(vf10, secondExtreme);
+                    } else {
+                        f32 sampledX = currentMuzzle[0];
+                        if (unit->status.flags & 0x200) {
+                            if (sampledX < firstExtreme[0]) {
+                                firstActor = unit;
+                                PCP_COPY_VECTOR(firstExtreme, currentMuzzle);
+                            }
+                            if (secondExtreme[0] < sampledX) {
+                                secondActor = unit;
+                                PCP_COPY_VECTOR(secondExtreme, currentMuzzle);
+                            }
+                        } else {
+                            if (firstExtreme[0] < sampledX) {
+                                firstActor = unit;
+                                PCP_COPY_VECTOR(firstExtreme, currentMuzzle);
+                            }
+                            if (sampledX < secondExtreme[0]) {
+                                secondActor = unit;
+                                PCP_COPY_VECTOR(secondExtreme, currentMuzzle);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (firstActor == 0 || secondActor == 0) {
+        btlSetDefaultActionCameraPose(command, pose);
+        return;
+    }
+    btlUnitGetMuzzlePosVU(actor);
+    VU0_STORE_VF(vf10, actorPoint);
+    actorPoint[1] = -btlUnitGetTopY(actor);
+    fieldOfView = pose->fov;
+    distance = ffabsf(targetPoint[0] - actorPoint[0]);
+    halfFov = fieldOfView * 0x1.555554p+0f * 0.5f;
+    if (actorMargin < distance) {
+        distance = btlProjectOnPlaneVU(targetPoint, actorPoint, firstExtreme);
+        distance += firstActor->reach * firstActor->scale * 0x1.599998p+0f;
+        VU0_STORE_VF_UNCLOBBERED(vf10, projection);
+        framingDistances[0] = distance / tanf(halfFov);
+        VU0_LOAD_VF(vf10, projection);
+        VU0_LOAD_VF(vf11, targetPoint);
+        VU0_SUB(vf10, vf10, vf11);
+        if (btlPointInBox((BtlVec3 *)targetPoint, (BtlVec3 *)actorPoint, (BtlVec3 *)projection)) {
+            f32 projectedLength;
+            VU0_LENGTH_VF10(projectedLength);
+            framingDistances[0] += projectedLength;
+        } else {
+            f32 projectedLength;
+            VU0_LENGTH_VF10(projectedLength);
+            framingDistances[0] -= projectedLength;
+        }
+        distance = btlProjectOnPlaneVU(targetPoint, actorPoint, secondExtreme);
+        distance += secondActor->reach * secondActor->scale * 0x1.599998p+0f;
+        VU0_STORE_VF_UNCLOBBERED(vf10, projection);
+        framingDistances[1] = distance / tanf(halfFov);
+        VU0_LOAD_VF(vf10, projection);
+        VU0_LOAD_VF(vf11, targetPoint);
+        VU0_SUB(vf10, vf10, vf11);
+        if (btlPointInBox((BtlVec3 *)targetPoint, (BtlVec3 *)actorPoint, (BtlVec3 *)projection)) {
+            f32 projectedLength;
+            VU0_LENGTH_VF10(projectedLength);
+            framingDistances[1] += projectedLength;
+        } else {
+            f32 projectedLength;
+            VU0_LENGTH_VF10(projectedLength);
+            framingDistances[1] -= projectedLength;
+        }
+    } else {
+        f32 secondMargin = secondActor->reach * secondActor->scale;
+        f32 firstMargin = firstActor->reach * firstActor->scale;
+        f32 tangent;
+        if (firstMargin < secondMargin) {
+            distance = secondMargin;
+        } else {
+            distance = firstMargin;
+        }
+        tangent = tanf(halfFov);
+        framingDistances[0] = (span + distance * 0.5f) / tangent;
+        framingDistances[0] += actorMargin / tanf(halfFov);
+        framingDistances[1] = framingDistances[0];
+    }
+    VU0_LOAD_VF(vf10, targetPoint);
+    VU0_STORE_VF(vf10, pose->position);
+    VU0_LOAD_VF(vf11, actorPoint);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, pose->direction);
+    length = distance + (actorMargin + actorMargin) / tanf(halfFov);
+    if (framingDistances[1] < framingDistances[0]) {
+        distance = framingDistances[0];
+    } else {
+        distance = framingDistances[1];
+    }
+    if (distance < length) {
+        pose->distance = length;
+    } else {
+        pose->distance = distance;
+    }
+    if (actor->status.flags & 0x80000) {
+        btlUnitGetBodyPosVU(actor);
+        VU0_STORE_VF(vf10, actorPoint);
+        if (btlAimHorizontalDirectionVU(actorPoint, targetPoint)) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, facingRotation);
+            btlSetUnitRotation(actor, facingRotation);
+        }
+    }
+    btlAdjustCameraDirectionForDefaultPlane(pose);
+}
+
 
 extern f32 cosf(f32);
 extern f32 sinf(f32);
@@ -3602,7 +4104,7 @@ extern f32 func_001EDB20(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 
 
 extern f32 func_001EE160(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 *, const f32 *, s8);
 
-extern f32 func_001EE658(s32, BtlUnit *, BtlUnit *, s8, s8, f32 *, f32 *, const f32 *, const f32 *);
+extern f32 btlBuildProjectedActorPairBoundsVU(s32, BtlUnit *, BtlUnit *, s8, s8, f32 *, f32 *, const f32 *, const f32 *);
 
 extern f32 D_0035F590[4];
 
@@ -3771,7 +4273,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
             VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         } else {
-            func_001EE658(0x200, action->task->unit, action->linkedA,
+            btlBuildProjectedActorPairBoundsVU(0x200, action->task->unit, action->linkedA,
                           (s8)p->focusPolicy.mode, (s8)p->focusPolicy.mode,
                           NULL, NULL, NULL, NULL);
             VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
@@ -4134,7 +4636,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             if (eye[0] < focus[0]) worldAxis[0] = p->eyePolicy.side;
             else worldAxis[0] = -p->eyePolicy.side;
         }
-        span = func_001EE658(0x600, unit, action->task->unit,
+        span = btlBuildProjectedActorPairBoundsVU(0x600, unit, action->task->unit,
                             (s8)p->focusPolicy.mode, (s8)p->eyePolicy.mode,
                             0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4189,7 +4691,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         }
         if (focus[0] > eye[0]) worldAxis[0] = p->eyePolicy.side;
         else worldAxis[0] = -p->eyePolicy.side;
-        span = func_001EE658(0x600, unit, otherUnit,
+        span = btlBuildProjectedActorPairBoundsVU(0x600, unit, otherUnit,
                             (s8)p->focusPolicy.mode, (s8)p->eyePolicy.mode,
                             0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4404,7 +4906,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
                 worldAxis[0] *= 0.6f;
             VU0_LOAD_VF(vf10, worldAxis);
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-            span = func_001EE658(0x200, action->task->unit, action->linkedA,
+            span = btlBuildProjectedActorPairBoundsVU(0x200, action->task->unit, action->linkedA,
                                 (s8)p->eyePolicy.mode, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
             measuredDistance = span / tanf(halfFov);
             VU0_STORE_VF_UNCLOBBERED(vf10, eye);
@@ -4682,7 +5184,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         eye[1] = p->eyePolicy.height; /* absolute assignment, 001E9258 */
         otherUnit = btlGetIndexListEntry(action->targetList, 0);
-        span = func_001EE658(0x600, action->task->unit, otherUnit,
+        span = btlBuildProjectedActorPairBoundsVU(0x600, action->task->unit, otherUnit,
                             (s8)p->eyePolicy.mode, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
         measuredDistance = span / tanf(halfFov);
@@ -5317,7 +5819,187 @@ INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EDB20);
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EE160);
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EE658);
+f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second, s8 firstMode, s8 secondMode,
+                  f32 *maxY, f32 *minY, const f32 *lineStart, const f32 *lineEnd) {
+    union {
+        u128 quadword;
+        f32 component[4];
+    } vectors[4];
+    f32 lineLength;
+    f32 largestActorRadius;
+    f32 minX;
+    f32 maxX;
+    f32 minZ;
+    f32 maxZ;
+    f32 highestOffset;
+    f32 lowestOffset;
+    f32 radius;
+    s32 found;
+    s32 i;
+
+    memset(&vectors[1], 0, sizeof(vectors[1]));
+    btlGetRuntime();
+    if (lineStart == 0 || lineEnd == 0) {
+        VU0_LOAD_VF(vf10, &vectors[1]);
+        VU0_STORE_VF(vf10, &vectors[2]);
+    } else {
+        VU0_LOAD_VF(vf10, lineEnd);
+        VU0_LOAD_VF(vf11, lineStart);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(lineLength);
+        VU0_NORMALIZE_VF10();
+        /* VU-only direction scratch, immediately reloaded with no scalar read. */
+        VU0_STORE_VF_UNCLOBBERED(vf10, &vectors[3]);
+        VU0_LOAD_VF(vf10, &vectors[3]);
+        VU0_SCALAR_OP_CLOBBER(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, &vectors[1]);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, &vectors[2]);
+    }
+
+    minZ = maxZ = minX = maxX = lowestOffset =
+        largestActorRadius = highestOffset = 0.0f;
+    found = 1;
+    for (i = 0; i < 2; i++) {
+        BtlUnit *unit;
+        s32 mode;
+        f32 halfHeight;
+        f32 lowerX;
+        f32 upperX;
+        f32 lowerZ;
+        f32 upperZ;
+        f32 projection;
+        u32 flags;
+
+        if (i == 0) {
+            if (first == 0) {
+                continue;
+            }
+            mode = firstMode;
+            unit = first;
+        } else {
+            if (second == 0) {
+                continue;
+            }
+            mode = secondMode;
+            unit = second;
+        }
+        flags = unit->status.flags;
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0xC0) != 0) {
+            continue;
+        }
+        if ((flags & mask) == 0) {
+            continue;
+        }
+
+        if (mode == 1) {
+            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            radius = unit->cameraRadius * unit->scale;
+            halfHeight = radius * 0.5f;
+        } else {
+            btlUnitGetMuzzlePosVU(unit);
+            radius = unit->reach * unit->scale;
+            halfHeight = unit->height * unit->scale * 0.5f;
+        }
+
+        VU0_STORE_VF(vf10, &vectors[0]);
+        projection = btlProjectOnPlaneVU((f32 *)&vectors[1], (f32 *)&vectors[2], (f32 *)&vectors[0]);
+        VU0_STORE_VF(vf10, &vectors[0]);
+        upperX = (vectors[0].component[0] + projection) + radius;
+        lowerX = (vectors[0].component[0] - projection) - radius;
+        upperZ = (vectors[0].component[2] + projection) + radius;
+        lowerZ = (vectors[0].component[2] - projection) - radius;
+        halfHeight -= vectors[0].component[1];
+
+        if (found != 0) {
+            largestActorRadius = radius;
+            if (lowerX < upperX) {
+                maxX = upperX;
+                minX = lowerX;
+            } else {
+                maxX = lowerX;
+                minX = upperX;
+            }
+            if (lowerZ < upperZ) {
+                maxZ = upperZ;
+                minZ = lowerZ;
+            } else {
+                maxZ = lowerZ;
+                minZ = upperZ;
+            }
+            lowestOffset = halfHeight;
+            highestOffset = lowestOffset;
+            found = 0;
+        } else {
+            if (largestActorRadius < radius) {
+                largestActorRadius = radius;
+            }
+            if (maxX < upperX) {
+                maxX = upperX;
+            }
+            if (upperX < minX) {
+                minX = upperX;
+            }
+            if (maxX < lowerX) {
+                maxX = lowerX;
+            }
+            if (lowerX < minX) {
+                minX = lowerX;
+            }
+            if (maxZ < upperZ) {
+                maxZ = upperZ;
+            }
+            if (upperZ < minZ) {
+                minZ = upperZ;
+            }
+            if (maxZ < lowerZ) {
+                maxZ = lowerZ;
+            }
+            if (lowerZ < minZ) {
+                minZ = lowerZ;
+            }
+            if (highestOffset < halfHeight) {
+                highestOffset = halfHeight;
+            }
+            if (halfHeight < lowestOffset) {
+                lowestOffset = halfHeight;
+            }
+        }
+    }
+
+    vectors[0].component[0] = (maxX + minX) * 0.5f;
+    vectors[0].component[1] = -highestOffset * 0.5f;
+    vectors[0].component[2] = (maxZ + minZ) * 0.5f;
+    vectors[0].component[3] = 0.0f;
+    {
+        f32 halfWidth = (maxX - minX) * 0.5f;
+        f32 halfDepth = (maxZ - minZ) * 0.5f;
+        f32 halfHeight = highestOffset * 0.5f;
+
+        if (halfDepth < halfWidth) {
+            radius = halfHeight;
+            if (radius < halfWidth) {
+                radius = halfWidth;
+            }
+        } else {
+            radius = halfDepth;
+            if (!(halfHeight < radius)) {
+                radius = halfHeight;
+            }
+        }
+    }
+    VU0_LOAD_VF(vf10, &vectors[0]);
+    if (maxY != 0) {
+        *maxY = highestOffset;
+    }
+    if (minY != 0) {
+        *minY = lowestOffset;
+    }
+    return radius;
+}
 
 u32 btlCountUnitsByFlags(u32 mask) {
     s32 context = (s32)(u32)btlGetRuntime();
@@ -5360,7 +6042,7 @@ void btlInitializeCameraCursorForActorMode(BtlLinkedCommand *action, BtlCamState
         return;
     default:
         if (btlHasSingleLinkedResource(action) != 0) {
-            func_001E1288(action, (BtlCamState *)action, 1);
+            btlBuildActorPairFramingCameraPose(action, (BtlCamState *)action, 1);
         }
         break;
     }
@@ -5492,16 +6174,16 @@ extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16
 
 extern void func_001E6668(BtlLinkedCommand *, BtlCamState *, s32, s32);
 
-void btlInitLinkedUnitActionCursor(BtlTask *arg0) {
+void btlInitLinkedUnitActionCursor(BtlTask *task) {
     BtlLinkedCommand *command = &((BtlState *)btlGetRuntime())->cameraCommand;
-    command->task = arg0;
+    command->task = task;
     memset(CURSOR, 0, 0x130);
     CURSOR->scriptSetIndex = 0;
     CURSOR->unk_0E = 0;
-    btlRefreshUnitEffectMotionAndEntry(arg0->unit);
+    btlRefreshUnitEffectMotionAndEntry(task->unit);
     btlBuildPresetCameraPose(command, &command->camera, 6, 0);
     btlClearAllUnitDefeatCandidatesTask();
-    btlFlagUnitDefeatCandidate(arg0->unit);
+    btlFlagUnitDefeatCandidate(task->unit);
     CURSOR->scriptIndex = 0;
     func_001E6668(command, &command->camera, 0, 0);
 }
@@ -5664,7 +6346,7 @@ void btlInitializeSceneLightingAndTint(void) {
     *(u32 *)(context + 0x698) = 0x807E5C5E;
 }
 
-void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
+void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlActionTableEntry *action;
     f32 *vector;
@@ -5673,7 +6355,7 @@ void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
 
     if ((*(u32 *)(work + 0x1F4) & 0x30000000) == 0) {
         /* The record table is stored as an integer address. */
-        action = (BtlActionTableEntry *)(index * sizeof(BtlActionTableEntry) +
+        action = (BtlActionTableEntry *)(skillIndex * sizeof(BtlActionTableEntry) +
                                         datActionAnimationRecords);
         if (action->lightColorMode != 0.0f) {
             light->color[0] = action->lightColor[0];
@@ -5706,12 +6388,12 @@ void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     light->position[2] = D_00324770[0][6];
 }
 
-s32 btlGetActionDefaultOrOverride(s32 index) {
+s32 btlGetActionDefaultOrOverride(s32 skillIndex) {
     s32 context = (s32)(u32)btlGetRuntime();
     if (*(u32 *)(context + 0x1F4) & 0x30000000) {
         return *(s32 *)(context + 0x6A0);
     }
-    return *(s32 *)(datActionAnimationRecords + index * 32 + 0x18);
+    return *(s32 *)(datActionAnimationRecords + skillIndex * 32 + 0x18);
 }
 
 u32 btlCameraVectorHasNaN(void) {
@@ -5899,12 +6581,12 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B08);
 
-void btlCreateRainEffect(u32 kind, u32 arg) {
+void btlCreateRainEffect(u32 majorId, u32 minorId) {
     BtlState *work = (BtlState *)btlGetRuntime();
 
-    switch (kind) {
+    switch (majorId) {
     case 0xDF:
-        switch (arg) {
+        switch (minorId) {
         case 0:
             break;
         case 1:
@@ -5915,19 +6597,19 @@ void btlCreateRainEffect(u32 kind, u32 arg) {
         }
         break;
     case 0xE0:
-        if (arg == 5) {
+        if (minorId == 5) {
             work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
         }
         break;
     case 0xE1:
-        if (arg == 5) {
+        if (minorId == 5) {
             work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
         }
         break;
     }
     if (work->soundTransitionTask != 0) {
         btlBossDebugPrintf("btl:rain create[f%03X_%03X]
-", kind, arg);
+", majorId, minorId);
     }
 }
 
@@ -5969,8 +6651,8 @@ extern char D_003A4BF8[]; /* "btl:floor load end 0\n" */
 
 extern char D_003A4C10[]; /* "btl:floor load end 1\n" */
 
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
-                                            const SdfTextureOffsetListHeader *, s32);
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+                                            const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 
 extern char D_003A4B50[]; /* "%sf%03d_%03d.LB" */
 
@@ -6856,8 +7538,8 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     return task;
 }
 
-u32 btlTaskStartFadeIn(u32 *arg0) {
-    kwlnFadeStartIn(*arg0);
+u32 btlTaskStartFadeIn(u32 *taskArgs) {
+    kwlnFadeStartIn(*taskArgs);
     return 1;
 }
 
@@ -6872,8 +7554,8 @@ void *btlCreateFadeInTask(u32 sound) {
     return task;
 }
 
-u32 btlTaskStartCustomFadeIn(u8 *arg0) {
-    kwlnFadeInStart(*arg0, arg0[1], arg0[2], *(u32 *)(arg0 + 4));
+u32 btlTaskStartCustomFadeIn(u8 *taskArgs) {
+    kwlnFadeInStart(*taskArgs, taskArgs[1], taskArgs[2], *(u32 *)(taskArgs + 4));
     return 1;
 }
 
@@ -6937,11 +7619,11 @@ const char D_003A4CA8[16] __attribute__((aligned(8))) = "%s%03X.BED";
 
 const char D_003A4CB8[32] __attribute__((aligned(8))) = "/efftool/bed/BTL_TEST.BED";
 
-s32 btlFormatActionEventFilename(s32 index, char *output) {
+s32 btlFormatActionEventFilename(s32 skillIndex, char *output) {
     BtlState *state = (BtlState *)btlGetRuntime();
 
     if ((state->battleFlags & 0x10000000) == 0) {
-        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
+        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skillIndex].displayCode;
         if (assetId == 0) {
             return 0;
         }
@@ -7182,7 +7864,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     u16 effectId;
 
     if (actor->selectedEntryIndex > 0) {
-        effectId = datCommandRecords[actor->selectedEntryIndex].unk2E;
+        effectId = datCommandRecords[actor->selectedEntryIndex].commandEffectId;
     } else {
         effectId = 0;
     }
@@ -7561,26 +8243,26 @@ s32 sndHasFlaggedActiveNode(void) {
     return 0;
 }
 
-s32 sndPlaySkillSeTask(u32 *arg0) {
-    u8 *task = (u8 *)arg0;
-    s32 context = (s32)(u32)btlGetRuntime();
+s32 sndPlaySkillSeTask(u32 *taskArgs) {
+    u8 *taskData = (u8 *)taskArgs;
+    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     u32 value;
 
-    if (*(u16 *)(task + 4) == 2 && *(u32 *)(context + 0x268) < 6) {
-        btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", *(u32 *)(context + 0x268));
+    if (*(u16 *)(taskData + 4) == 2 && work->skillSeLoadFrame < 6) {
+        btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", work->skillSeLoadFrame);
         return 1;
     }
-    *(u32 *)(context + 0x268) = 0;
-    if (sndFindPackedTrackLoadStatus(*(u32 *)task) != 0) {
-        switch (*(u16 *)(task + 4)) {
+    work->skillSeLoadFrame = 0;
+    if (sndFindPackedTrackLoadStatus(*(u32 *)taskData) != 0) {
+        switch (*(u16 *)(taskData + 4)) {
         case 1:
-            value = *(u32 *)task;
+            value = *(u32 *)taskData;
             break;
         case 2:
-            value = *(u32 *)task | 1;
+            value = *(u32 *)taskData | 1;
             break;
         case 3:
-            value = *(u32 *)task | 1;
+            value = *(u32 *)taskData | 1;
             break;
         default:
             value = 0;
@@ -7590,7 +8272,7 @@ s32 sndPlaySkillSeTask(u32 *arg0) {
         btlBossDebugPrintf("btl:sound skillSE play[%X-%X]\n", value >> 16, value & 0xFFFF);
         return 1;
     }
-    btlBossDebugPrintf("btl:sound load wait[%X]\n", *(u16 *)(task + 2));
+    btlBossDebugPrintf("btl:sound load wait[%X]\n", *(u16 *)(taskData + 2));
     return 0;
 }
 
@@ -7721,8 +8403,8 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *node) {
     return (temp_v0 & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 index, char *output) {
-    sprintf(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
+void sndFormatResourceNameFromIndex(s32 skillIndex, char *output) {
+    sprintf(output, D_003A5158, D_003BB6B0, (skillIndex + 0x200) & 0xffff);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A50D8);
@@ -7798,7 +8480,7 @@ typedef struct SoundTaskArgs {
     s32 waitFrames;
 } SoundTaskArgs;
 
-extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
+extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {
@@ -8044,7 +8726,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         key >>= 16;
         btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
     } else {
-        if (work->unk264 >= 0xB) {
+        if (work->motionSeLoadFrame >= 0xB) {
             if (mnuGetSoundBufferStateLocked() != 0) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
@@ -8054,10 +8736,10 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             sdfDebugPrintf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
-            work->unk264 = 0;
+            work->motionSeLoadFrame = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
         } else {
-            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->unk264);
+            btlBossDebugPrintf("btl:motSE ignore(ATRAC3)[frame:%d]\n", work->motionSeLoadFrame);
         }
         return 1;
     }
@@ -8093,8 +8775,8 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
 void btlResetMotionSoundFrameCounters(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
-    work->unk264 = -1;
-    work->unk268 = -1;
+    work->motionSeLoadFrame = -1;
+    work->skillSeLoadFrame = -1;
 }
 
 void sndLoadBattleBank(void) {
@@ -8903,7 +9585,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
     f32 newPosition[4] __attribute__((aligned(16)));
     BtlUnit *target;
     const BtlFormationSpacingCell *spacing;
-    s32 actorStatusAddress;
+    u8 *actorStatusAddress;
     s32 actionCode;
     s32 selector;
     u32 i;
@@ -8939,7 +9621,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
             continue;
         }
         actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
-        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + actorStatusAddress + 0x38);
+        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
         btlUnitGetMuzzlePosVU(participants[i]);

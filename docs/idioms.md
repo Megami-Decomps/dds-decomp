@@ -9069,7 +9069,7 @@ Canonical `cc1probe --all` traces of the current-owner pointer control and
 the exact indexed form have hooked/unhooked assembly and all-RTL parity.
 At entry to **cse1**, control instruction `uid97` is already
 `PLUS(base reg106, scaled-index reg105)`. Direct accesses such as
-`((FldValueRecord *)fldValueRecords)[index].value` instead enter cse1
+`((FldValueRecord *)fldValueRecords)[index].worldNode` instead enter cse1
 with `uid97 = PLUS(scaled-index reg105, base reg99)`. The field form
 retains the native operand order through the later passes. This evidence
 locates the distinction in address-expression lowering, before cse1;
@@ -14133,3 +14133,90 @@ These are data-identifier names only. Existing lookup/dialog/navigation
 reconstruction and Cedar typed-data ownership credits remain intact;
 held neighboring bodies, headers, types, initializers, bounds, prototypes,
 control flow, SDK calls and generated assembly are not edited.
+
+
+### Actor-pair and target-group framing camera poses
+
+`btlBuildActorPairFramingCameraPose` selects the actor side with a normal
+`switch (reverse)`. The reverse arm selects the command actor as target,
+sets its consumed reach multiplier, and looks up the actor. In the DDS1
+sched1 trace the scale-constant setup has priority 2 instead of 1 and issues
+before the lookup/capture group, reproducing the retail ordering. This is
+an ordinary side-selection boundary; no dummy loop, attribute or lookup
+stub is needed. The real earlier definition also supplies the subsequent
+camera's same-unit call metadata.
+
+DDS2 retains its actual mode-3 callbacks: clear candidates, then reload the
+command's actor or target list after callbacks, snapshot the count after
+flagging the actor, and reload the list on each iteration. Its reverse
+multiplier is 3.25 rather than 4, and its rotation is around Y rather than Z.
+
+`btlBuildTargetGroupFramingCameraPose` compares each pair of input margins
+before assigning the distance. Initializing the distance from one input and
+then comparing through that output loses the native input-to-output moves.
+Its X-span absolute value uses the existing `ffabsf` FPU boundary: a builtin
+absolute value lets the scheduler move half-angle setup across the native
+subtract/absolute sequence. The fallback accumulates the first distance
+before mirroring it into the second, preserving native store order.
+
+The first selected endpoint's initialization and the two projection stores
+use the existing legacy SDK store macro, with finite qualification of these
+emitted bodies. Each writes all four aligned lanes before its VU load or
+CPU consumer. Traversal muzzle stores and later vector copies keep their
+memory effects, retaining fresh endpoint-X reads across loop iterations.
+`tanf` receives a scalar; the box predicate reads projection XYZ without
+writing or retaining the pointer. No read bypasses initialization, and
+scalar XYZ updates preserve W. Other stores retain their memory effects;
+reaudit any changed lifetimes, providers, macros or compiler.
+
+
+### Battle-unit framing loop setup and the DDS2 horizontal cap
+
+`btlBuildBattleUnitFramingCameraPose` keeps one consumed workspace for the
+minimum enemy top and the later adjusted focus. The actual camera FOV read
+separates its zero seed from the ally maximum; the bottom-height seed retains
+its own native initialization phase. Initialize the `firstEnemy` flag with
+the loop setup, after loading the unit head, before publishing FOV and entering
+the loop. It is set before every use and no provider receives its address.
+This ordinary source order closes the final sum-copy versus FOV-store scheduler
+difference without adding an operation or lifetime.
+
+DDS2 follows `nextActor`, measures groups through its filtered-bounds provider,
+and rotates around Y. Inside the distance-below-1200 path it caps the absolute
+horizontal offset at 50 before adding it to camera distance. Keep the ordered
+`50.0f < horizontalSpan` comparison: NaN does not select the cap. These six
+extra native operations account for DDS2's 912 bytes versus DDS1's 888.
+
+### Projected actor-pair bounds
+
+`btlBuildProjectedActorPairBoundsVU` returns the projected pair's radius and
+leaves its center in VF10. Its seven scalar accumulators share a zero seed;
+the chained initialization retains the native copy graph without adding a
+temporary or an artificial consumer. The per-actor half-height is consumed
+by subtracting projected Y, then supplies both vertical extrema. Keep the
+native maximum-radius recurrence even though the final extent calculation
+does not consume it.
+
+DDS2 prints the three half-extents between constructing the center and
+selecting its radius. Preserve all three debug calls and the ordinary double
+promotions of their variadic arguments, together with the format strings.
+
+### Keep concrete layout checks with their consumers
+
+The shadow-projection owners in both titles check `EvtUnit.shadowLevel` at
+offset `0xD3` after their function bodies. The field name, type and native
+layout remain shared. Adding the same offset-expression typedef to the common
+header changes unrelated switch-table address selection in this compiler's
+full-unit context. Keeping the unchanged check with the concrete operation
+preserves the contract and the already matching switch dispatches.
+
+The `FieldSequenceRecord` constructors similarly check their `0xA0` packet
+size and `enabled` offset `0x58` after code and data. Keeping those assertions
+in the shared header changes three load-scheduling instructions in an unrelated
+DDS1 actor-transition consumer. Both constructor owners retain the unchanged
+checks; the record type and all runtime operations remain shared and exact.
+
+The battle-index reset owners use the same placement for the `summonId`,
+`battleExperienceReward` and `moneyReward` offset checks. Header-level
+assertions otherwise expand an unrelated alternate effect callback from
+80 to 84 bytes in full-unit compilation. The resetters write all three fields.
