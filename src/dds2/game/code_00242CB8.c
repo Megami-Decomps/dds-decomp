@@ -192,14 +192,14 @@ u32 evtHideSky(void) {
 }
 
 u32 evtCommandAwaitBgmPreload(void) {
-    s32 id;
+    s32 eventId;
 
     /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
     if (scrGetCommandTimer() == 0) {
         evtPreloadBgm(scrReadIntParameter(0));
     } else {
-        id = scrReadIntParameter(0);
-        if (evtIsBgmLoaded(id) != 0) {
+        eventId = scrReadIntParameter(0);
+        if (evtIsBgmLoaded(eventId) != 0) {
             return 1;
         }
     }
@@ -207,32 +207,32 @@ u32 evtCommandAwaitBgmPreload(void) {
 }
 
 u32 evtOpcodePlayBgm(void) {
-    u64 id;
+    u64 eventId;
     u64 fade;
 
-    id = scrReadIntParameter(0);
+    eventId = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
-    evtPlayBgm(id, fade);
+    evtPlayBgm(eventId, fade);
     return 1;
 }
 
 u32 evtOpcodeTransitionBgm(void) {
-    u64 id;
+    u64 eventId;
     u64 fade;
 
-    id = scrReadIntParameter(0);
+    eventId = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
-    evtTransitionBgm(id, fade);
+    evtTransitionBgm(eventId, fade);
     return 1;
 }
 
 u32 evtCommandQueueBgmWithFade(void) {
-    u64 first;
+    u64 eventId;
     u64 second;
 
-    first = scrReadIntParameter(0);
+    eventId = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    evtQueueValidatedBgmSoundCode(first, second);
+    evtQueueValidatedBgmSoundCode(eventId, second);
     return 1;
 }
 
@@ -257,12 +257,12 @@ u32 evtOpcodeSetBgmVolumePan(void) {
 }
 
 u32 evtCommandStartBgmWithFade(void) {
-    u64 first;
+    u64 eventId;
     u64 second;
 
-    first = scrReadIntParameter(0);
+    eventId = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    evtStartBgmBySoundIdAndFade(first, second);
+    evtStartBgmBySoundIdAndFade(eventId, second);
     return 1;
 }
 
