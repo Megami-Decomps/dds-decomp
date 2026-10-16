@@ -22,7 +22,7 @@ extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern u8 D_003556C0[];
+extern u8 effBossLookAtReferenceAxis[];
 
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
@@ -233,7 +233,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
             VU0_STORE_VF(vf10, work->position);
         }
         direction = work->parameterVector;
-        sdfVuBuildLookAtBasis(work, direction, D_003556C0);
+        sdfVuBuildLookAtBasis(work, direction, effBossLookAtReferenceAxis);
         sdfInvertRigidVuTransform();
         VU0_MOVE_VF(vf31, vf0);
         VU0_STORE_MATRIX(matrix);

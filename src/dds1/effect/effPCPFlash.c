@@ -20,15 +20,15 @@ extern void *effGetGroupIndexRecord(EffRecordPool *pool, s32 index);
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern u8 effDefaultRandomState[];
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
-extern f32 D_00354900[];
-extern f32 D_00354910[];
-extern f32 D_00354920[];
-extern f32 D_00354960[];
-extern f32 D_00354930[];
-extern f32 D_00354940[];
-extern f32 D_00354950[];
-extern f32 D_003548F0[];
-extern f32 D_00354970[];
+extern f32 effFlashStreakOrigin[];
+extern f32 effFlashScalingOrbitNormalScratch[];
+extern f32 effFlashAccumulatingNormalScratch[];
+extern f32 effFlashFadingOrbitNormalScratch[];
+extern f32 effFlashOrbitArcNormalScratch[];
+extern f32 effFlashRotatingQuadOrigin[];
+extern f32 effFlashRadialTriangleOrigin[];
+extern f32 effFlashTrianglePulseOrigin[];
+extern f32 effFlashOffsetRadialOrigin[];
 extern void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
 extern void *effGetRecordGroupElement(EffRecordPool *pool, s32 index);
 
@@ -134,7 +134,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
     VU0_LOAD_VF(vf11, size);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_003548F0);
+    VU0_LOAD_VF(vf10, effFlashTrianglePulseOrigin);
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
@@ -143,7 +143,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
     VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_003548F0);
+    VU0_LOAD_VF(vf11, effFlashTrianglePulseOrigin);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
@@ -379,7 +379,7 @@ void effFlashBillboardQuad(PcpFlashStreakWork *work, s32 index, void *view)
     VU0_LOAD_VF(vf11, scale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, D_00354900);
+    VU0_LOAD_VF(vf10, effFlashStreakOrigin);
     VU0_LOAD_VF(vf11, up);
     VU0_STORE_VF(vf10, quad + 12);
     VU0_ADD(vf10, vf10, vf11);
@@ -387,7 +387,7 @@ void effFlashBillboardQuad(PcpFlashStreakWork *work, s32 index, void *view)
     VU0_SUB(vf10, vf10, vf11);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 16);
-    VU0_LOAD_VF(vf10, D_00354900);
+    VU0_LOAD_VF(vf10, effFlashStreakOrigin);
     VU0_LOAD_VF(vf11, across);
     VU0_ADD(vf10, vf10, vf12);
     VU0_ADD(vf10, vf10, vf11);
@@ -612,10 +612,10 @@ void effFlashArcQuadScaling(PcpFlashScalingOrbitWork *work, s32 index)
     offset[1] = 0;
     offset[2] = sinv * work->orbitRadius;
     height = work->tilt;
-    D_00354910[0] = unit[0] * height;
-    D_00354910[1] = height + -1.0f;
-    D_00354910[2] = sinv * height;
-    VU0_LOAD_VF(vf10, D_00354910);
+    effFlashScalingOrbitNormalScratch[0] = unit[0] * height;
+    effFlashScalingOrbitNormalScratch[1] = height + -1.0f;
+    effFlashScalingOrbitNormalScratch[2] = sinv * height;
+    VU0_LOAD_VF(vf10, effFlashScalingOrbitNormalScratch);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
@@ -861,10 +861,10 @@ void effFlashAccumulatingBuildParticleQuads(PcpFlashAccumulatingWork *work, s32 
     offset[1] = 0;
     offset[2] = sinv * work->orbitRadius;
     height = work->tilt;
-    D_00354920[0] = unit[0] * height;
-    D_00354920[1] = height + -1.0f;
-    D_00354920[2] = sinv * height;
-    VU0_LOAD_VF(vf10, D_00354920);
+    effFlashAccumulatingNormalScratch[0] = unit[0] * height;
+    effFlashAccumulatingNormalScratch[1] = height + -1.0f;
+    effFlashAccumulatingNormalScratch[2] = sinv * height;
+    VU0_LOAD_VF(vf10, effFlashAccumulatingNormalScratch);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
@@ -1107,10 +1107,10 @@ void effFlashArcQuad(PcpFlashOrbitArcWork *work, s32 index)
     offset[1] = 0;
     offset[2] = sinv * work->orbitRadius;
     height = part->stepSpeed;
-    D_00354930[0] = unit[0] * height;
-    D_00354930[1] = height + -1.0f;
-    D_00354930[2] = sinv * height;
-    VU0_LOAD_VF(vf10, D_00354930);
+    effFlashOrbitArcNormalScratch[0] = unit[0] * height;
+    effFlashOrbitArcNormalScratch[1] = height + -1.0f;
+    effFlashOrbitArcNormalScratch[2] = sinv * height;
+    VU0_LOAD_VF(vf10, effFlashOrbitArcNormalScratch);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
@@ -1399,7 +1399,7 @@ void effFlashRotatedQuad(PcpFlashRotatingQuadWork *work, s32 index, void *view)
     VU0_LOAD_VF(vf11, scale);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf12, vf10);
-    VU0_LOAD_VF(vf10, D_00354940);
+    VU0_LOAD_VF(vf10, effFlashRotatingQuadOrigin);
     VU0_LOAD_VF(vf11, up);
     VU0_STORE_VF(vf10, quad + 12);
     VU0_ADD(vf10, vf10, vf11);
@@ -1407,7 +1407,7 @@ void effFlashRotatedQuad(PcpFlashRotatingQuadWork *work, s32 index, void *view)
     VU0_SUB(vf10, vf10, vf11);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 16);
-    VU0_LOAD_VF(vf10, D_00354940);
+    VU0_LOAD_VF(vf10, effFlashRotatingQuadOrigin);
     VU0_LOAD_VF(vf11, across);
     VU0_ADD(vf10, vf10, vf12);
     VU0_ADD(vf10, vf10, vf11);
@@ -1611,7 +1611,7 @@ void effFlashRotatedTriangle(PcpFlashRadialTriangleWork *work, s32 index, void *
     VU0_LOAD_VF(vf11, size);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_00354950);
+    VU0_LOAD_VF(vf10, effFlashRadialTriangleOrigin);
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
@@ -1620,7 +1620,7 @@ void effFlashRotatedTriangle(PcpFlashRadialTriangleWork *work, s32 index, void *
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
     VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_00354950);
+    VU0_LOAD_VF(vf11, effFlashRadialTriangleOrigin);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
@@ -2089,10 +2089,10 @@ void effFlashFadingOrbitWriteCorners(PcpFlashFadingOrbitWork *work, s32 index)
     offset[1] = 0;
     offset[2] = sinv * work->orbitRadius;
     height = work->tilt;
-    D_00354960[0] = unit[0] * height;
-    D_00354960[1] = height + -1.0f;
-    D_00354960[2] = sinv * height;
-    VU0_LOAD_VF(vf10, D_00354960);
+    effFlashFadingOrbitNormalScratch[0] = unit[0] * height;
+    effFlashFadingOrbitNormalScratch[1] = height + -1.0f;
+    effFlashFadingOrbitNormalScratch[2] = sinv * height;
+    VU0_LOAD_VF(vf10, effFlashFadingOrbitNormalScratch);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
@@ -2313,7 +2313,7 @@ void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *work, s32 index,
     VU0_LOAD_VF(vf11, size);
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, D_00354970);
+    VU0_LOAD_VF(vf10, effFlashOffsetRadialOrigin);
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
@@ -2322,7 +2322,7 @@ void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *work, s32 index,
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
     VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_00354970);
+    VU0_LOAD_VF(vf11, effFlashOffsetRadialOrigin);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
