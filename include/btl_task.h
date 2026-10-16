@@ -160,12 +160,12 @@ typedef struct BattleIndexWork {
     s32 moneyReward; /* 0x58: accumulated per-enemy currency sent to the reward packet. */
     u16 flags;
 #ifdef VERSION_DDS1
-    u8 unk5E;
+    u8 refreshEligibleActors;
     u8 pad5F;
 #else
     u8 pad5E[2];
     s32 unk60;
-    u8 unk64;
+    u8 refreshEligibleActors;
     u8 pad65[3];
 #endif
     BtlOperandGroup *groups;
@@ -173,6 +173,13 @@ typedef struct BattleIndexWork {
 } BattleIndexWork;
 typedef char BattleIndexWork_costValidationFailed_offset_must_be_0x2D[
     ((u32)&((BattleIndexWork *)0)->costValidationFailed == 0x2D) ? 1 : -1];
+#ifdef VERSION_DDS1
+typedef char BattleIndexWork_refreshEligibleActors_offset_must_be_0x5E[
+    ((u32)&((BattleIndexWork *)0)->refreshEligibleActors == 0x5E) ? 1 : -1];
+#else
+typedef char BattleIndexWork_refreshEligibleActors_offset_must_be_0x64[
+    ((u32)&((BattleIndexWork *)0)->refreshEligibleActors == 0x64) ? 1 : -1];
+#endif
 #define BTL_COMMAND_PARTY_RECORD_INDEX(work) ((work)->summonId)
 
 void btlInitBattleIndexWork(BattleIndexWork *work);
