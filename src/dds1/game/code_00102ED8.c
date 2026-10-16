@@ -90,7 +90,7 @@ extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
 
 extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
-extern void kwlnInitializeFrameDrawPackets(s32 arg0);
+extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 
 extern void evtInitializeFrameStatePacketTemplates(void);
 

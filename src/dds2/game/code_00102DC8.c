@@ -1172,7 +1172,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
 }
 
 extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
-extern void kwlnInitializeFrameDrawPackets(s32);
+extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 extern void evtInitializeFrameStatePacketTemplates(void);
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
