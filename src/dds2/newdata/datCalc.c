@@ -1063,7 +1063,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
     ptyAssignRosterItemAndMarkOwned(entry);
 }
 
-extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
 void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
