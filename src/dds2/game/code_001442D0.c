@@ -286,7 +286,7 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern s32 fldFieldTaskUpdate(void);
 
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern s32 kwlnTaskCreate(void *name, s32 priority, s32 startDelay, s32 destroyDelay, void *update, void *destroy, void *userValue);
 
 extern u8 D_00436208[];
 
