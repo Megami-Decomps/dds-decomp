@@ -65,10 +65,10 @@ extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern void sdfLoadIopModulePair(const char *, s32);
 extern void sdfInitializeRuntimeServices(u32, u32, u32);
 extern void sdfPadRequestMode(s32, u8);
-extern void sdfDevSetCurrentDirectory(const char *);
+extern void sdfDevSetCurrentDirectory(const char *path);
 extern void sdfDevSetDefaultDeviceWorker(s8);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32);
-extern void sdfLoadModulesAndBindNamedResourceRpc(const char *, const char *);
+extern void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath);
 extern void sdfStartAndSuspendWorkerThread(void);
 extern void kwlnRunMainLoop(void);
 
