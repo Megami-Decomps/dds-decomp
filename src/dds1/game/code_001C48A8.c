@@ -418,7 +418,7 @@ extern void *btlCreateActorTransparencyTask(BtlUnit *);
 extern u8 *btlCreateUnitFadeInTask(u8 *, u32, u32);
 extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
-extern void *btlCreateImmediateCompletionTask(void);
+extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern struct SoundTask *sndCreateEarringTask(void);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
