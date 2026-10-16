@@ -3403,7 +3403,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(textureResource));
 }
 
-extern void *sdfConsAllocateColumnPacket(s32 arg0);
+extern void *sdfConsAllocateColumnPacket(s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32 arg0);
 
 /* Queue the descriptor's preview texture as a quad at its screen position. */
