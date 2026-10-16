@@ -3694,87 +3694,87 @@ s32 evtIndexGroupTypeElevenChildren(EvtRuntime *runtime) {
 }
 
 s32 evtIndexGroupTypeThirteenChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeFourteenChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeFifteenChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeTwentyThreeChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeTwentySevenChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeSixteenChildren(EvtRuntime *runtime) {
-    s32 index = 0;
+    s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->body.f.groupTypeIndex = index++;
+                child->body.f.groupTypeIndex = childIndex++;
             }
         }
     }
-    return index;
+    return childIndex;
 }
 
 s32 evtIndexGroupTypeSeventeenChildren(EvtRuntime *runtime) {
