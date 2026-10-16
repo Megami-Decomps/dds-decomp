@@ -790,11 +790,11 @@ s32 scrCmdSetTexturedSquarePackedColor(void)
 
 s32 scrCmdSetTexturedSquareIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetE08Triple(p0, p1, scrReadIntParameter(2));
+    s32 extent;
+    s32 centerX;
+    extent = scrReadIntParameter(0);
+    centerX = scrReadIntParameter(1);
+    kwlnDrawSetE08Triple(extent, centerX, scrReadIntParameter(2));
     return 1;
 }
 
