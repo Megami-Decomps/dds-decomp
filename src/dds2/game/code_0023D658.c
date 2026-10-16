@@ -453,29 +453,29 @@ u32 evtOpCreateLinkedCameraViewer(void) {
 }
 
 u32 evtOpBindMotionSoundToModel(void) {
-    s32 param0;
-    s32 rid;
-    s32 model;
-    KwlnTask *task;
+    s32 eventId;
+    s32 resourceId;
+    s32 modelKey;
+    KwlnTask *motionSeTask;
 
     if (scrGetCurrentContext() == 0) {
         return 1;
     }
-    param0 = scrReadIntParameter(0);
-    rid = scrReadIntParameter(1);
-    model = evtCreateModelFromPackResource(param0, rid);
-    if (model < 0) {
+    eventId = scrReadIntParameter(0);
+    resourceId = scrReadIntParameter(1);
+    modelKey = evtCreateModelFromPackResource(eventId, resourceId);
+    if (modelKey < 0) {
         evtPrintDeveloperConsoleMessage("MODEL_BE not fount RID = %d!\n", scrReadIntParameter(1));
         return 1;
     }
-    param0 = scrReadIntParameter(0);
-    rid = scrReadIntParameter(1);
-    task = evtCreateMotionSeTask(model, param0, rid);
-    if (task != 0) {
-        kwlnTaskAddChild(evtFindTaskById(scrReadIntParameter(0)), task);
+    eventId = scrReadIntParameter(0);
+    resourceId = scrReadIntParameter(1);
+    motionSeTask = evtCreateMotionSeTask(modelKey, eventId, resourceId);
+    if (motionSeTask != 0) {
+        kwlnTaskAddChild(evtFindTaskById(scrReadIntParameter(0)), motionSeTask);
     }
     /* The original success path ends in this void call, without a return. */
-    scrSetIntegerReturnValue(model);
+    scrSetIntegerReturnValue(modelKey);
 }
 
 u32 evtOpUseSourceVectorForWorldObject(void) {
