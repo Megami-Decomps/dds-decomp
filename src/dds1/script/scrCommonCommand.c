@@ -507,11 +507,11 @@ s32 scrCmdSetFilterBlurPackedColor(void)
 
 s32 scrCmdSetFilterBlurIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetCd0Triple(p0, p1, scrReadIntParameter(2));
+    s32 positionSpread;
+    s32 x;
+    positionSpread = scrReadIntParameter(0);
+    x = scrReadIntParameter(1);
+    kwlnDrawSetCd0Triple(positionSpread, x, scrReadIntParameter(2));
     return 1;
 }
 
