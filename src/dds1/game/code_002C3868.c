@@ -177,9 +177,9 @@ void sdfLatchBaseVectorsForSelection(void) {
 }
 
 /* Reset the current selection before installing the requested index. */
-void sdfSetSelectedIndex(u32 index) {
+void sdfSetSelectedIndex(u32 selectedIndex) {
     sdfLatchBaseVectorsForSelection();
-    sdfSelectedCounterIndex = index;
+    sdfSelectedCounterIndex = selectedIndex;
 }
 
 void sdfCycleForward(void) {
