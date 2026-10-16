@@ -475,7 +475,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
     if (lighting == NULL) {
         lighting = D_00438A64;
     }
-    secondaryLighting = model->unk84;
+    secondaryLighting = model->secondaryLighting;
     if (secondaryLighting == NULL) {
         secondaryLighting = D_00438A68;
     }
