@@ -26,7 +26,7 @@ extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32
                                                        u32 resource0Data, u32 resource1Data,
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern void mdlSpawnViewerWorldObject(void);
-extern void sdfSetViewFieldOfView(f32);
+extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern void dds3DrawSetIndexedWord(u32 value, s32 index);
 extern void kwlnDrawCopyWords20(void *);
 extern void kwlnDrawCopyRow128(void *);
