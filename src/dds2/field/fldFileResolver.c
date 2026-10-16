@@ -71,50 +71,50 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
 }
 
 EffWorldNode *fldResolveWorldObjectByResourceId(u32 resourceId) {
-    u32 i = 0;
-    EffWorldNode *world = dds3GetWorldSecondaryObject();
+    u32 resourceIndex = 0;
+    EffWorldNode *secondaryWorld = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
 
-    for (; i < D_00438EC4; i++, resource++) {
+    for (; resourceIndex < D_00438EC4; resourceIndex++, resource++) {
         if (resourceId == resource->id) {
             if (resource->names != NULL) {
                 FldFileNameEntry *nameEntry = resource->names->entries;
-                u32 j = 0;
+                u32 nameIndex = 0;
 
-                for (; j < resource->names->count; j++, nameEntry++) {
-                    EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)nameEntry->name);
-                    if (object != NULL) {
-                        return object;
+                for (; nameIndex < resource->names->count; nameIndex++, nameEntry++) {
+                    EffWorldNode *resolvedObject = dds3FindIndexedObjectChainNodeByName(secondaryWorld, 6, (const u8 *)nameEntry->name);
+                    if (resolvedObject != NULL) {
+                        return resolvedObject;
                     }
                 }
             } else {
-                EffWorldNode *object = fldGetRecordWorldNodeById(resource->id);
-                if (object == NULL) {
-                    object = fldCreateDummyMatter();
-                    fldSetRecordWorldNodeById(resource->id, object);
+                EffWorldNode *resolvedObject = fldGetRecordWorldNodeById(resource->id);
+                if (resolvedObject == NULL) {
+                    resolvedObject = fldCreateDummyMatter();
+                    fldSetRecordWorldNodeById(resource->id, resolvedObject);
                 }
-                return object;
+                return resolvedObject;
             }
         }
     }
     return NULL;
 }
 
-EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *name) {
-    u32 i = 0;
-    EffWorldNode *world = dds3GetWorldSecondaryObject();
+EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *resourceEntryName) {
+    u32 resourceIndex = 0;
+    EffWorldNode *secondaryWorld = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
 
-    for (; i < D_00438EC4; i++, resource++) {
+    for (; resourceIndex < D_00438EC4; resourceIndex++, resource++) {
         if (resource->names != NULL) {
             FldFileNameEntry *nameEntry = resource->names->entries;
-            u32 j = 0;
+            u32 nameIndex = 0;
 
-            for (; j < resource->names->count; j++, nameEntry++) {
-                if (strcmp(name, nameEntry->name) == 0) {
-                    EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 11, (const u8 *)resource->name);
-                    if (object != NULL) {
-                        return object;
+            for (; nameIndex < resource->names->count; nameIndex++, nameEntry++) {
+                if (strcmp(resourceEntryName, nameEntry->name) == 0) {
+                    EffWorldNode *resolvedObject = dds3FindIndexedObjectChainNodeByName(secondaryWorld, 11, (const u8 *)resource->name);
+                    if (resolvedObject != NULL) {
+                        return resolvedObject;
                     }
                 }
             }
