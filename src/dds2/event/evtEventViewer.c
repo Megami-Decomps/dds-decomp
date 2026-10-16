@@ -426,29 +426,29 @@ extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
-void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
+void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
     EffWorldNode *owner;
-    struct PolyMovieObject *movie;
-    s32 frame;
+    struct PolyMovieObject *movieObject;
+    s32 currentFrame;
 
-    if (obj == 0) {
+    if (effectObject == 0) {
         return;
     }
-    frame = viewer->curFrame;
-    if (value < 0) {
+    currentFrame = viewer->curFrame;
+    if (ownerNameIndex < 0) {
         return;
     }
     owner = dds3FindObjectChainNodeByName(
         (EffWorldNode *)dds3GetWorldObject(),
-        (const u8 *)viewer->entryName[value]);
+        (const u8 *)viewer->entryName[ownerNameIndex]);
     if (owner == NULL) {
         return;
     }
     switch (owner->kindTag >> 24) {
     case EFF_WORLD_KIND_FOLLOW_MODEL:
-        if (type >= 0) {
-            effObjBindOwnerBillEntry((struct EffectObj *)obj,
-                                    (struct EffectObj *)owner, type);
+        if (billboardEntry >= 0) {
+            effObjBindOwnerBillEntry((struct EffectObj *)effectObject,
+                                    (struct EffectObj *)owner, billboardEntry);
             break;
         }
         /* A negative entry selects the normal owner link instead. */
@@ -458,15 +458,15 @@ void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, E
     case EFF_WORLD_KIND_RESOURCE_OWNER:
     case EFF_WORLD_KIND_LIGHT:
     case EFF_WORLD_KIND_TRANSFORM_SOURCE:
-        effObjBindValidatedOwner((struct EffectObj *)obj, (struct EffectObj *)owner);
+        effObjBindValidatedOwner((struct EffectObj *)effectObject, (struct EffectObj *)owner);
         break;
     case EFF_WORLD_KIND_ACTION_10:
-        evtStageRelinkOwnedNodeResource(owner, (void *)obj);
-        movie = dds3GetObjectOwnedHandle(obj)->slots[1];
+        evtStageRelinkOwnedNodeResource(owner, (void *)effectObject);
+        movieObject = dds3GetObjectOwnedHandle(effectObject)->slots[1];
         if (viewer->flags & 1) {
-            evtPolygonMovieScaleByProgress(movie, 0, word, frame);
+            evtPolygonMovieScaleByProgress(movieObject, 0, startFrame, currentFrame);
         } else {
-            evtPolygonMovieScaleByProgress(movie, 1, word, frame);
+            evtPolygonMovieScaleByProgress(movieObject, 1, startFrame, currentFrame);
         }
         break;
     }
@@ -562,7 +562,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer) {
 }
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
-void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 value, s32 type, u32 word,
+void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
                     EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
@@ -574,7 +574,7 @@ void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 value, s
     effect = effObjCreateEventNode(resource, position, scale);
     effObjSetFlags((s32)effect, 1);
     effObjReplaceActiveEventNode(effect, entryId);
-    evtViewerBindNamedOwner((EffWorldNode *)effect, value, type, word, viewer);
+    evtViewerBindNamedOwner((EffWorldNode *)effect, ownerNameIndex, billboardEntry, startFrame, viewer);
     return effect;
 }
 
