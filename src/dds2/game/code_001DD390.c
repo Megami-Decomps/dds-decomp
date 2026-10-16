@@ -5188,7 +5188,7 @@ BtlUnit *btlCreateUnit(void) {
     BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(allocation);
     BtlState *work;
     memset(unit, 0, 0x368);
-    unit->allocation = allocation;
+    unit->handle = (u32)allocation;
     unit->owner = btlAdvanceRuntimeSequenceCounter();
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
@@ -5261,7 +5261,7 @@ void btlDestroyUnit(BtlUnit *unit) {
     } else {
         ((BtlState *)btlGetRuntime())->units = unit->nextActor;
     }
-    sdfReleaseResourceAllocation(unit->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(unit->handle));
 }
 
 void btlDestroyAllUnits(void) {
