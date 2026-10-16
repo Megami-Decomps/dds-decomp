@@ -428,7 +428,7 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern void btlRunTask(BtlRuntimeTask *);
 
@@ -2225,7 +2225,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             indexedTarget = (BtlUnit *)btlGetIndexListEntry(indices, groupIndex);
             if (group->reflected == 0) currentTarget = indexedTarget;
             if (group->reflected != 0 || group->kind == 0x40000) {
-                mode = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skill].effectKind;
+                mode = datActionAnimationRecords[skill].effectKind;
             } else {
                 mode = -1;
             }
@@ -3215,7 +3215,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         unit->combatantKind = modelId;
         btlInitializeEffectVectorsFromSourceRecords(unit, 1, modelId);
         if (action->indexWork.skillId < 0x2A0 && action->indexWork.skillId != -1) {
-            if (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->indexWork.skillId].flags & 0x100) {
+            if (datActionAnimationRecords[action->indexWork.skillId].flags & 0x100) {
                 controlDelay = 2;
             }
         }
