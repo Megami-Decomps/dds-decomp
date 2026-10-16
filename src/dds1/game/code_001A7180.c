@@ -620,7 +620,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     if ((((BtlUnit *)object)->partyRecord.status & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].unknown00[0] == 0;
+    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].kind == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */

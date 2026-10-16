@@ -30,14 +30,9 @@ typedef char AiDecisionRow_routes_offset_must_be_0x0C[
 
 /* One species' decision tiers and weighted action slots; other bytes stay opaque. */
 typedef struct AiSpecies {
-    union {
-        u8 unknown00[4]; /* 0x00: byte 0 is tested by the support/status check. */
-        struct {
-            u8 kind; /* 0x00: scene AI task branch discriminator. */
-            u8 opaque01;
-            u16 sceneSlot; /* 0x02: optional actor slot bound by the scene task. */
-        };
-    };
+    u8 kind; /* 0x00: scene task discriminator and status/record eligibility gate. */
+    u8 opaque01;
+    u16 sceneSlot; /* 0x02: optional actor slot bound by the scene task. */
     AiDecisionRow decisions[3]; /* 0x04 */
     AiSlot slot[25]; /* 0x40: five rows of five weighted actions. */
     u8 unknown108[0x54]; /* 0x108 */
@@ -45,8 +40,6 @@ typedef struct AiSpecies {
 
 typedef char AiSpecies_size_must_be_0x15C[
     (sizeof(AiSpecies) == 0x15C) ? 1 : -1];
-typedef char AiSpecies_unknown00_offset_must_be_0[
-    ((u32)&((AiSpecies *)0)->unknown00 == 0x00) ? 1 : -1];
 typedef char AiSpecies_kind_offset_must_be_0[
     ((u32)&((AiSpecies *)0)->kind == 0x00) ? 1 : -1];
 typedef char AiSpecies_sceneSlot_offset_must_be_2[
