@@ -215,13 +215,13 @@ extern char evtPackScriptPathBuffer[];
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
-    s32 directoryId;
+    s32 eventDirectoryId;
     struct FileRequest *request;
 
     sdfDebugPrintf(D_004377E0);
     eventId = state->eventId;
-    directoryId = eventId - eventId % 10;
-    sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, directoryId, eventId, eventId);
+    eventDirectoryId = eventId - eventId % 10;
+    sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, eventDirectoryId, eventId, eventId);
     request = fileQueueDefaultCallbackRequest(evtPackScriptPathBuffer);
     state->pendingRequest = request;
     state->loaded = 1;
