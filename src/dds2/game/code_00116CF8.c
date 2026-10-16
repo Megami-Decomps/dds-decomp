@@ -34,12 +34,12 @@ u32 dds3GetPathStateValueById(u32 id) {
     return ((Dds3PathStatePayload *)path->data)->value;
 }
 
-EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
+EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_D);
 
     obj->data = work;
-    obj->key = a;
-    obj->value = (const char *)c;
+    obj->key = key;
+    obj->value = (const char *)name;
     return obj;
 }
 
