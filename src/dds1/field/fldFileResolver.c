@@ -3780,9 +3780,9 @@ void fldReleaseCameraModel(u32 enabled) {
     }
 }
 
-void fldSetCameraModelMotionRequest(u32 index, u32 value) {
-    D_003BAD34 = index;
-    D_003BAD38 = value;
+void fldSetCameraModelMotionRequest(u32 requestCode, u32 frameCountdown) {
+    D_003BAD34 = requestCode;
+    D_003BAD38 = frameCountdown;
 }
 
 void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames) {

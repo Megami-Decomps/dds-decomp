@@ -3877,9 +3877,9 @@ void fldReleaseCameraModel(u32 enabled) {
     }
 }
 
-void fldSetCameraModelMotionRequest(u32 first, u32 second) {
-    D_004360C4 = first;
-    D_004360C8 = second;
+void fldSetCameraModelMotionRequest(u32 requestCode, u32 frameCountdown) {
+    D_004360C4 = requestCode;
+    D_004360C8 = frameCountdown;
 }
 
 void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames) {
