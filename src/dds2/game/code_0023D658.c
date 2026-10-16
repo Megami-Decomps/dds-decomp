@@ -69,7 +69,7 @@ typedef char Entry270_scaleFactor_offset_check[
 typedef char Entry270_size_check[(sizeof(Entry270) == 0x270) ? 1 : -1];
 
 extern Entry270 *D_00435DF0;
-extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
 extern void sdfSetFloatCounterDirection(s32, s32);
 
