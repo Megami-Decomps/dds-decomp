@@ -37,7 +37,7 @@ extern s32 scrGetCommandTimer(void);
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
 
-void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
+void *evtFindWorldObjectByIdAndKind(s32 type, s32 worldObjectKey);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
