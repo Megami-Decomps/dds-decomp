@@ -485,7 +485,7 @@ extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct Effe
                                                struct EffectObj *fourth);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
-s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *cmd, EvtRuntimeChild *params, EvtRuntime *viewer) {
+s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, EvtRuntime *viewer) {
     f32 vec0[4];
     f32 vec1[4];
     s32 handle = 0;
@@ -505,39 +505,39 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *cmd, EvtRuntime
     if (slot == 0x7F) {
         return -1;
     }
-    switch (cmd->type) {
+    switch (track->type) {
     case 3:
     case 0x1A:
-        if (cmd->type == 3) {
-            handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)cmd->resourceData, vec0, vec1);
+        if (track->type == 3) {
+            handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)track->resourceData, vec0, vec1);
         } else {
-            handle = effObjCreateBillboardFromFactory((s32)cmd->resourceData, vec0, vec1);
+            handle = effObjCreateBillboardFromFactory((s32)track->resourceData, vec0, vec1);
         }
-        if (params->p0C.sb[0] != 0) {
+        if (key->p0C.sb[0] != 0) {
             effObjDispatchReadyState((EffWorldNode *)handle);
         }
-        if (cmd->metadata.extra1 == 0) {
-            evtViewerBindNamedOwner((EffWorldNode *)handle, params->p0C.sh[1], params->p0C.sb[1], params->frame, viewer);
+        if (track->metadata.extra1 == 0) {
+            evtViewerBindNamedOwner((EffWorldNode *)handle, key->p0C.sh[1], key->p0C.sb[1], key->frame, viewer);
         } else {
-            evtViewerBindNamedOwner((EffWorldNode *)handle, params->p0C.sh[1], params->p0C.sb[1], 0, viewer);
+            evtViewerBindNamedOwner((EffWorldNode *)handle, key->p0C.sh[1], key->p0C.sb[1], 0, viewer);
         }
         break;
     case 0x14:
     case 0x15:
-        switch (cmd->type) {
+        switch (track->type) {
         case 0x14:
-            handle = (s32)effForwardMagatuhiDescriptor(1, (struct EffNodeDescriptor *)cmd->resourceData);
+            handle = (s32)effForwardMagatuhiDescriptor(1, (struct EffNodeDescriptor *)track->resourceData);
             break;
         case 0x15:
-            handle = (s32)effForwardMagatuhiDescriptor(2, (struct EffNodeDescriptor *)cmd->resourceData);
+            handle = (s32)effForwardMagatuhiDescriptor(2, (struct EffNodeDescriptor *)track->resourceData);
             break;
         }
-        n0 = evtEventViewerGetNameObject(params->p0C.sb[0], viewer);
-        n1 = evtEventViewerGetNameObject(params->p0C.sb[1], viewer);
-        n2 = evtEventViewerGetNameObject(params->p0C.sb[2], viewer);
+        n0 = evtEventViewerGetNameObject(key->p0C.sb[0], viewer);
+        n1 = evtEventViewerGetNameObject(key->p0C.sb[1], viewer);
+        n2 = evtEventViewerGetNameObject(key->p0C.sb[2], viewer);
         effObjCopyMagatuhiSourceParameters((struct EffectObj *)handle, n0, n1, n2,
-                                           evtEventViewerGetNameObject(params->p0C.sb[3], viewer));
-        if (params->p08.sb[1] != 0) {
+                                           evtEventViewerGetNameObject(key->p0C.sb[3], viewer));
+        if (key->p08.sb[1] != 0) {
             effObjDispatchReadyState((EffWorldNode *)handle);
         }
         break;
