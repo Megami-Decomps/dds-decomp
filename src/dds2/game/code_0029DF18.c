@@ -980,7 +980,7 @@ u8 mnuIsTitleStreamIdle(void) {
 
 /* Flush EE cache, submit one word-sized transfer to IOP, and busy-wait for DMA.
  * Return the native request ID; there is no failure retry or timeout here. */
-s32 sndCopyWordsToIopSynchronously(u32 sourceAddress, u32 iopAddress, u32 wordCount) {
+s32 sndCopyWordsToIopSynchronously(const void *source, u32 iopAddress, u32 wordCount) {
     struct {
         u32 source;
         u32 destination;
@@ -988,7 +988,7 @@ s32 sndCopyWordsToIopSynchronously(u32 sourceAddress, u32 iopAddress, u32 wordCo
         u32 attributes;
     } transfer;
     s32 dmaRequest;
-    transfer.source = sourceAddress;
+    transfer.source = (u32)source;
     transfer.destination = iopAddress;
     transfer.size = wordCount * SND_TRANSFER_WORD_BYTES;
     transfer.attributes = 0;
@@ -1015,8 +1015,8 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     }
     D_00437A20[0] = sndStreamTransferIopHeapAddress;
     D_00437A20[1] = sndStreamTransferIopHeapAddress + bufferBytes;
-    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
-    sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
+    sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[0], wordCount);
+    sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[1], wordCount);
 }
 
 extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
@@ -1045,7 +1045,7 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
 extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
 extern u64 D_00438FD0;
 
-s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words) {
+s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {
     u64 status = sndDispatchIopAudioCommand(1, 0x8100, 0);
 
     if ((D_00438FD0 & 0x1000000) == (status & 0x1000000)) {
