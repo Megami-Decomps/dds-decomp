@@ -3009,7 +3009,7 @@ extern s32 D_0032E4C8[];
 
 extern f32 fldBannerColorPhase;
 
-extern s32 ptyAnyUnitFlagMatch(s32, s32);
+extern s32 ptyAnyUnitFlagMatch(s32 statusMask, s32 flagMode);
 
 
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
