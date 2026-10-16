@@ -87,7 +87,7 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
 
 #include "dds3_world_secondary.h"
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void itfPanelSetStatus(s32, s32);
+extern void itfPanelSetStatus(s32 windowIndex, s32 status);
 extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
 extern char mnuTerminalPopupEntries[];
@@ -593,7 +593,7 @@ s32 dspCaptureWindowSecondPanelValue(void) {
     return 1;
 }
 
-extern s8 itfPanelGetStatus(s32 index);
+extern s8 itfPanelGetStatus(s32 windowIndex);
 extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 

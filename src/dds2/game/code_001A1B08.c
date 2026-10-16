@@ -650,13 +650,13 @@ void itfPanelEmitRecord(s32 windowIndex, s32 topDelta) {
 }
 
 /* Return the signed byte entry status; this is separate from the option-block s16 status. */
-s8 itfPanelGetStatus(s32 index) {
-    return itfWindowSlots[index].ptr->sub24.status;
+s8 itfPanelGetStatus(s32 windowIndex) {
+    return itfWindowSlots[windowIndex].ptr->sub24.status;
 }
 
 /* Store the signed byte entry status; index and payload pointer are trusted. */
-void itfPanelSetStatus(s32 index, s8 status) {
-    itfWindowSlots[index].ptr->sub24.status = status;
+void itfPanelSetStatus(s32 windowIndex, s8 status) {
+    itfWindowSlots[windowIndex].ptr->sub24.status = status;
 }
 
 /* Capture the script window, reset its held queue, and switch to page three.
