@@ -78,11 +78,11 @@ EffWorldNode *fldResolveWorldObjectByResourceId(u32 id) {
     for (; i < D_00438EC4; i++, resource++) {
         if (id == resource->id) {
             if (resource->names != NULL) {
-                FldFileNameEntry *entry = resource->names->entries;
+                FldFileNameEntry *nameEntry = resource->names->entries;
                 u32 j = 0;
 
-                for (; j < resource->names->count; j++, entry++) {
-                    EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)entry->name);
+                for (; j < resource->names->count; j++, nameEntry++) {
+                    EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)nameEntry->name);
                     if (object != NULL) {
                         return object;
                     }
@@ -107,11 +107,11 @@ EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
     for (; i < D_00438EC4; i++, resource++) {
         if (resource->names != NULL) {
-            FldFileNameEntry *entry = resource->names->entries;
+            FldFileNameEntry *nameEntry = resource->names->entries;
             u32 j = 0;
 
-            for (; j < resource->names->count; j++, entry++) {
-                if (strcmp(name, entry->name) == 0) {
+            for (; j < resource->names->count; j++, nameEntry++) {
+                if (strcmp(name, nameEntry->name) == 0) {
                     EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 11, (const u8 *)resource->name);
                     if (object != NULL) {
                         return object;
