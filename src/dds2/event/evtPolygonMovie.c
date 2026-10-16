@@ -533,10 +533,10 @@ PolyMovieWork *evtPolygonMovieAllocWork(void) {
     return work;
 }
 
-PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, PmdHeader *sub, PmdHeader *sub2) {
+PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeader, PmdHeader *secondaryHeader, PmdHeader *tertiaryHeader) {
     s32 i;
 
-    if (data == NULL) {
+    if (mainHeader == NULL) {
         return NULL;
     }
     work->unk_114 = 0;
@@ -550,8 +550,8 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     work->mainEntry3Count = 0;
     work->mainEntry7Count = 0;
     work->mainEntry22Count = 0;
-    work->entries = data->entries;
-    work->data = data;
+    work->entries = mainHeader->entries;
+    work->data = mainHeader;
     work->mainEntry1Data = NULL;
     work->mainEntry2Data = NULL;
     work->mainEntry10Data = NULL;
@@ -566,31 +566,31 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     for (i = 0; i < work->data->count; i++) {
         switch (work->entries[i].type) {
         case 2:
-            work->mainEntry2Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry2Data = (u8 *)mainHeader + work->entries[i].offset;
             work->unk_24 = work->entries[i].value;
             break;
         case 10:
-            work->mainEntry10Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry10Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 11:
-            work->mainEntry11Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry11Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 12:
-            work->mainEntry12Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry12Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 3:
-            work->mainEntry3Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry3Data = (u8 *)mainHeader + work->entries[i].offset;
             work->mainEntry3Count = work->entries[i].value;
             break;
         case 9:
-            work->mainEntry9Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry9Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 1:
-            work->mainEntry1Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry1Data = (u8 *)mainHeader + work->entries[i].offset;
             work->unk_1C = work->entries[i].value;
             break;
         case 6:
-            work->mainEntry6Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry6Data = (u8 *)mainHeader + work->entries[i].offset;
             if (work->entries[i].value == 0) {
                 work->handle = -1;
             } else {
@@ -598,24 +598,24 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             }
             break;
         case 7:
-            work->mainEntry7Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry7Data = (u8 *)mainHeader + work->entries[i].offset;
             work->mainEntry7Count = work->entries[i].value;
             break;
         case 8:
-            work->mainEntry8Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry8Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 22:
-            work->mainEntry22Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry22Data = (u8 *)mainHeader + work->entries[i].offset;
             work->mainEntry22Count = work->entries[i].value;
             break;
         case 23:
-            work->mainEntry23Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry23Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         }
     }
-    work->sub = sub;
-    if (sub != NULL) {
-        work->subEntries = sub->entries;
+    work->sub = secondaryHeader;
+    if (secondaryHeader != NULL) {
+        work->subEntries = secondaryHeader->entries;
     } else {
         work->subEntries = NULL;
     }
@@ -648,93 +648,93 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     work->unk_F0 = 0;
     work->subEntry25Data = NULL;
     work->subEntry25Count = 0;
-    if (sub == NULL) {
+    if (secondaryHeader == NULL) {
         return work;
     }
     for (i = 0; i < work->sub->count; i++) {
         switch (work->subEntries[i].type) {
         case 0:
-            work->subEntry0Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry0Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             break;
         case 4:
             if (work->sub->kind == 4) {
                 work->subEntry4OtherData = NULL;
-                work->subEntry4Kind4Data = (u8 *)sub + work->subEntries[i].offset;
+                work->subEntry4Kind4Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             } else {
                 work->subEntry4Kind4Data = NULL;
-                work->subEntry4OtherData = (u8 *)sub + work->subEntries[i].offset;
+                work->subEntry4OtherData = (u8 *)secondaryHeader + work->subEntries[i].offset;
             }
             work->subEntry4Count = work->subEntries[i].value;
             break;
         case 1:
-            work->subEntry1Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry1Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_80 = work->subEntries[i].value;
             break;
         case 5:
-            work->subEntry5Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry5Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_A8 = work->subEntries[i].value;
             break;
         case 13:
-            work->subEntry13Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry13Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_B0 = work->subEntries[i].value;
             break;
         case 14:
-            work->subEntry14Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry14Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_B8 = work->subEntries[i].value;
             break;
         case 15:
-            work->subEntry15Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry15Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_C0 = work->subEntries[i].value;
             break;
         case 16:
-            work->subEntry16Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry16Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_C8 = work->subEntries[i].value;
             break;
         case 17:
-            work->subEntry17Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry17Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_D0 = work->subEntries[i].value;
             break;
         case 18:
-            work->subEntry18Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry18Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_D8 = work->subEntries[i].value;
             break;
         case 19:
-            work->subEntry19Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry19Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_E0 = work->subEntries[i].value;
             break;
         case 20:
-            work->subEntry20Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry20Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_E8 = work->subEntries[i].value;
             break;
         case 24:
-            work->subEntry24Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry24Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->unk_F0 = work->subEntries[i].value;
             break;
         case 21:
-            work->subEntry21Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry21Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->subEntry21Count = work->subEntries[i].value;
             sdfDebugPrintf("object table set ok.\n");
             break;
         case 25:
-            work->subEntry25Data = (u8 *)sub + work->subEntries[i].offset;
+            work->subEntry25Data = (u8 *)secondaryHeader + work->subEntries[i].offset;
             work->subEntry25Count = work->subEntries[i].value;
             break;
         }
     }
-    work->sub2 = sub2;
-    if (sub2 != NULL) {
-        work->sub2Entries = sub2->entries;
+    work->sub2 = tertiaryHeader;
+    if (tertiaryHeader != NULL) {
+        work->sub2Entries = tertiaryHeader->entries;
     } else {
         work->sub2Entries = NULL;
     }
     work->secondEntry4Data = NULL;
     work->extendedEntry4Count = 0;
-    if (sub2 == NULL) {
+    if (tertiaryHeader == NULL) {
         return work;
     }
     for (i = 0; i < work->sub2->count; i++) {
         if (work->sub2Entries[i].type == 4) {
-            work->secondEntry4Data = (u8 *)sub2 + work->sub2Entries[i].offset;
+            work->secondEntry4Data = (u8 *)tertiaryHeader + work->sub2Entries[i].offset;
             work->extendedEntry4Count = work->sub2Entries[i].value;
         }
     }
