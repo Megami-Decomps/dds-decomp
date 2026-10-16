@@ -998,7 +998,7 @@ extern u32 kwlnDrawControlFlags;
 
 void fldInitializeCameraColorResource(void);
 
-extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
+extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
 extern s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx);
 
 struct EvtRuntime;
