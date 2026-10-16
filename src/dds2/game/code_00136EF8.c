@@ -2039,14 +2039,14 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
 }
 
 
-s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position) {
+s32 fldTestActorRoomProbeCondition(s32 roomIndex, EffWorldNode *actor, f32 *position) {
     f32 dir[4];
     f32 length;
     f32 dot;
     f32 angle;
     u32 kind;
 
-    kind = ((FldTaskInfo *)D_0038BC50[index]->data)->shape->kind;
+    kind = ((FldTaskInfo *)D_0038BC50[roomIndex]->data)->shape->kind;
     switch (kind) {
     case 0:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
@@ -2075,7 +2075,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
         }
         return 1;
     case 1:
-        return fldRoomRecords[index].shapeKind == kind;
+        return fldRoomRecords[roomIndex].shapeKind == kind;
     case 2:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
@@ -2084,7 +2084,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
         VU0_LOAD_VF(vf10, dir);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, dir);
-        dot = fldDotVector(dir, fldRoomRecords[index].center);
+        dot = fldDotVector(dir, fldRoomRecords[roomIndex].center);
         if (dot < 0.5f) {
             return 0;
         }
@@ -2093,12 +2093,12 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
     return 0;
 }
 
-s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
+s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
     f32 probe[3];
     f32 planar[2];
     s32 i;
 
-    if (fldRoomRecords[index].axisMode == 0) {
+    if (fldRoomRecords[roomIndex].axisMode == 0) {
         probe[0] = 0.0f;
         probe[1] = direction[1];
         probe[2] = direction[2];
@@ -2112,7 +2112,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
         planar[1] = direction[1];
     }
     for (i = 0; i < 4; i++) {
-        if (fldDotVector(probe, fldRoomRecords[index].plane[i + 1]) - fldRoomRecords[index].limit[i + 1] < 0.0f) {
+        if (fldDotVector(probe, fldRoomRecords[roomIndex].plane[i + 1]) - fldRoomRecords[roomIndex].limit[i + 1] < 0.0f) {
             return -1;
         }
     }
