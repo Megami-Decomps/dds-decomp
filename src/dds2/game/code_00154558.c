@@ -30,7 +30,7 @@ extern void fldSetTitleBannerPending(s32);
 
 
 
-extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 extern s32 D_004362D4;
@@ -307,7 +307,7 @@ extern s32 D_004360B4;
 
 extern s32 D_004360B8;
 
-extern void fldSetRoomSceneFlag(s32, s32, s32, s32);
+extern void fldSetRoomSceneFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern int strcmp(const char *, const char *);
 
@@ -315,7 +315,7 @@ extern char D_004363F0[]; /* "BARIA" */
 
 extern char *D_004361D8;
 
-extern void fldSetMapSlotValueFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotValueFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern s32 fldResolveEventSelectorTarget(s32 index);
 
@@ -1290,7 +1290,7 @@ s32 fldOpSetAlternateMapTargetFlag(void) {
     return 1;
 }
 
-extern void fldSetMapSlotByte(s32, s32, s32, s32);
+extern void fldSetMapSlotByte(s32 area, s32 slotIndex, s32 valueOffset, s32 value);
 
 s32 fldCmdSetMapSlotByte(void) {
     s32 world;
