@@ -807,41 +807,66 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
     memset(packet + 0x2C, 0, 12);
 }
 
+typedef struct SdfTexturedQuadVifPacket {
+    u16 qwordCount;
+    u8 pad02[6];
+    u32 commandWords[8];
+    f32 position[3];
+    u32 commandWord34;
+    u32 color;
+    u32 commandWord3C;
+    u8 uvPayload[0x10];
+    u32 commandWord50;
+    f32 quad[8];
+    u32 trailer[3];
+} SdfTexturedQuadVifPacket;
+
+typedef char SdfTexturedQuadVifPacket_size_check[
+    sizeof(SdfTexturedQuadVifPacket) == 0x80 ? 1 : -1];
+typedef char SdfTexturedQuadVifPacket_position_offset_check[
+    ((u32)&((SdfTexturedQuadVifPacket *)0)->position == 0x28) ? 1 : -1];
+typedef char SdfTexturedQuadVifPacket_uv_offset_check[
+    ((u32)&((SdfTexturedQuadVifPacket *)0)->uvPayload == 0x40) ? 1 : -1];
+typedef char SdfTexturedQuadVifPacket_quad_offset_check[
+    ((u32)&((SdfTexturedQuadVifPacket *)0)->quad == 0x54) ? 1 : -1];
+
 /* Build a one-vertex textured-quad VIF packet: the position, color, the four
  * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
 void sdfBuildTexturedQuadVifPacket(u8 *packet, const f32 *position, u32 color, const void *uv,
                                    const f32 *quad) {
-    *(u16 *)packet = 7;
-    *(u32 *)(packet + 8) = 0x6C01C000;
-    *(u32 *)(packet + 12) = 1;
-    *(u32 *)(packet + 16) = 0xA0000000;
-    *(u32 *)(packet + 20) = 0x43434310;
-    *(u32 *)(packet + 24) = 0x43;
-    *(u32 *)(packet + 28) = 0x6001C001;
-    *(u32 *)(packet + 32) = 0x155;
-    *(u32 *)(packet + 36) = 0x6801C002;
-    *(f32 *)(packet + 40) = position[0];
-    *(f32 *)(packet + 44) = position[1];
-    *(f32 *)(packet + 48) = position[2];
-    *(u32 *)(packet + 52) = 0x6E01C003;
-    *(u32 *)(packet + 56) = color;
-    *(u32 *)(packet + 60) = 0x6504C004;
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 64), (const u8 *)uv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)uv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)uv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv + 12);
-    *(u32 *)(packet + 80) = 0x6404C008;
-    *(f32 *)(packet + 84) = quad[0];
-    *(f32 *)(packet + 88) = quad[1];
-    *(f32 *)(packet + 92) = quad[2];
-    *(f32 *)(packet + 96) = quad[3];
-    *(f32 *)(packet + 100) = quad[4];
-    *(f32 *)(packet + 104) = quad[5];
-    *(f32 *)(packet + 108) = quad[6];
-    *(f32 *)(packet + 112) = quad[7];
-    *(u32 *)(packet + 116) = 0x04000002;
-    *(u32 *)(packet + 120) = 0x14000008;
-    *(u32 *)(packet + 124) = 0;
+    SdfTexturedQuadVifPacket *view = (SdfTexturedQuadVifPacket *)packet;
+
+    view->qwordCount = 7;
+    view->commandWords[0] = 0x6C01C000;
+    view->commandWords[1] = 1;
+    view->commandWords[2] = 0xA0000000;
+    view->commandWords[3] = 0x43434310;
+    view->commandWords[4] = 0x43;
+    view->commandWords[5] = 0x6001C001;
+    view->commandWords[6] = 0x155;
+    view->commandWords[7] = 0x6801C002;
+    view->position[0] = position[0];
+    view->position[1] = position[1];
+    view->position[2] = position[2];
+    view->commandWord34 = 0x6E01C003;
+    view->color = color;
+    view->commandWord3C = 0x6504C004;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(view->uvPayload), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(view->uvPayload + 4), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(view->uvPayload + 8), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(view->uvPayload + 12), (const u8 *)uv + 12);
+    view->commandWord50 = 0x6404C008;
+    view->quad[0] = quad[0];
+    view->quad[1] = quad[1];
+    view->quad[2] = quad[2];
+    view->quad[3] = quad[3];
+    view->quad[4] = quad[4];
+    view->quad[5] = quad[5];
+    view->quad[6] = quad[6];
+    view->quad[7] = quad[7];
+    view->trailer[0] = 0x04000002;
+    view->trailer[1] = 0x14000008;
+    view->trailer[2] = 0;
 }
 
 s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
