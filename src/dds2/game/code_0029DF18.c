@@ -388,65 +388,65 @@ void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
     }
 }
 
-void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 rowIndex) {
     s32 y;
     s32 bob;
 
-    switch (work->profileAnimation[index].progressIconEnabled) {
+    switch (work->profileAnimation[rowIndex].progressIconEnabled) {
     case 0:
-        work->profileAnimation[index].progressIconOpacity = 0;
-        work->profileAnimation[index].progressIconPosition[0] = 0x12F;
-        work->profileAnimation[index].progressIconPosition[1] = 0x22;
-        work->profileAnimation[index].progressIconAngle = 0xB4;
+        work->profileAnimation[rowIndex].progressIconOpacity = 0;
+        work->profileAnimation[rowIndex].progressIconPosition[0] = 0x12F;
+        work->profileAnimation[rowIndex].progressIconPosition[1] = 0x22;
+        work->profileAnimation[rowIndex].progressIconAngle = 0xB4;
         break;
     case 1:
-        work->profileAnimation[index].progressIconAngle = (work->profileAnimation[index].progressIconAngle + 15) % 360;
-        work->profileAnimation[index].progressIconOpacity =
-            (u32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[index].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
-        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[index].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
-        work->profileAnimation[index].progressIconPosition[1] = 0x24 - bob;
-        work->profileAnimation[index].progressIconOpacity = (work->profileAnimation[index].progressIconOpacity > 0) ? ((work->profileAnimation[index].progressIconOpacity > 0x80) ? 0x80 : work->profileAnimation[index].progressIconOpacity) : 0;
-        y = work->profileAnimation[index].progressIconPosition[1];
-        work->profileAnimation[index].progressIconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
-        if (work->profileAnimation[index].progressIconOpacity >= 0x80) {
-            work->profileAnimation[index].progressIconEnabled += 2;
-            work->profileAnimation[index].progressIconAngle = 0x78;
+        work->profileAnimation[rowIndex].progressIconAngle = (work->profileAnimation[rowIndex].progressIconAngle + 15) % 360;
+        work->profileAnimation[rowIndex].progressIconOpacity =
+            (u32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[rowIndex].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[rowIndex].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+        work->profileAnimation[rowIndex].progressIconPosition[1] = 0x24 - bob;
+        work->profileAnimation[rowIndex].progressIconOpacity = (work->profileAnimation[rowIndex].progressIconOpacity > 0) ? ((work->profileAnimation[rowIndex].progressIconOpacity > 0x80) ? 0x80 : work->profileAnimation[rowIndex].progressIconOpacity) : 0;
+        y = work->profileAnimation[rowIndex].progressIconPosition[1];
+        work->profileAnimation[rowIndex].progressIconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
+        if (work->profileAnimation[rowIndex].progressIconOpacity >= 0x80) {
+            work->profileAnimation[rowIndex].progressIconEnabled += 2;
+            work->profileAnimation[rowIndex].progressIconAngle = 0x78;
         }
         break;
     case 2:
-        work->profileAnimation[index].progressIconEnabled++;
-        work->profileAnimation[index].progressIconAngle = 0x78;
+        work->profileAnimation[rowIndex].progressIconEnabled++;
+        work->profileAnimation[rowIndex].progressIconAngle = 0x78;
         break;
     default:
-        work->profileAnimation[index].progressIconOpacity -= 10;
-        work->profileAnimation[index].progressIconOpacity = (work->profileAnimation[index].progressIconOpacity > 0) ? ((work->profileAnimation[index].progressIconOpacity > 0x80) ? 0x80 : work->profileAnimation[index].progressIconOpacity) : 0;
-        y = work->profileAnimation[index].progressIconPosition[1] - 1;
-        work->profileAnimation[index].progressIconPosition[1] = y;
-        work->profileAnimation[index].progressIconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
-        if (work->profileAnimation[index].progressIconOpacity <= 0) {
-            work->profileAnimation[index].progressIconEnabled = 0;
+        work->profileAnimation[rowIndex].progressIconOpacity -= 10;
+        work->profileAnimation[rowIndex].progressIconOpacity = (work->profileAnimation[rowIndex].progressIconOpacity > 0) ? ((work->profileAnimation[rowIndex].progressIconOpacity > 0x80) ? 0x80 : work->profileAnimation[rowIndex].progressIconOpacity) : 0;
+        y = work->profileAnimation[rowIndex].progressIconPosition[1] - 1;
+        work->profileAnimation[rowIndex].progressIconPosition[1] = y;
+        work->profileAnimation[rowIndex].progressIconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
+        if (work->profileAnimation[rowIndex].progressIconOpacity <= 0) {
+            work->profileAnimation[rowIndex].progressIconEnabled = 0;
         }
         break;
     }
-    switch (work->profileAnimation[index].iconState) {
+    switch (work->profileAnimation[rowIndex].iconState) {
     case 0:
-        work->profileAnimation[index].auxiliaryColor = 0;
-        work->profileAnimation[index].unk58[0] = 0x122;
-        work->profileAnimation[index].unk58[1] = 0x15;
+        work->profileAnimation[rowIndex].auxiliaryColor = 0;
+        work->profileAnimation[rowIndex].unk58[0] = 0x122;
+        work->profileAnimation[rowIndex].unk58[1] = 0x15;
         break;
     case 1:
-        work->profileAnimation[index].auxiliaryColor = 0x80;
-        work->profileAnimation[index].iconState++;
-        work->profileAnimation[index].iconOpacity = 0;
+        work->profileAnimation[rowIndex].auxiliaryColor = 0x80;
+        work->profileAnimation[rowIndex].iconState++;
+        work->profileAnimation[rowIndex].iconOpacity = 0;
         break;
     case 2:
-        work->profileAnimation[index].iconOpacity = 0xFF;
-        work->profileAnimation[index].iconState++;
+        work->profileAnimation[rowIndex].iconOpacity = 0xFF;
+        work->profileAnimation[rowIndex].iconState++;
         break;
     default:
-        work->profileAnimation[index].iconOpacity -= 8;
-        work->profileAnimation[index].iconOpacity = (work->profileAnimation[index].iconOpacity > 0)
-            ? ((work->profileAnimation[index].iconOpacity > 0xFF) ? 0xFF : work->profileAnimation[index].iconOpacity)
+        work->profileAnimation[rowIndex].iconOpacity -= 8;
+        work->profileAnimation[rowIndex].iconOpacity = (work->profileAnimation[rowIndex].iconOpacity > 0)
+            ? ((work->profileAnimation[rowIndex].iconOpacity > 0xFF) ? 0xFF : work->profileAnimation[rowIndex].iconOpacity)
             : 0;
         break;
     }
