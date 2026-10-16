@@ -509,15 +509,15 @@ void evtSetMovieClipPositionClampedToDuration(PolyMovieObject *movie, s32 unused
 
     clip = movie->state->clip;
     if (clip != NULL) {
-        s32 frame = end - start + offset;
+        s32 elapsedFrames = end - start + offset;
 
-        if (frame < 0) {
-            frame = 0;
+        if (elapsedFrames < 0) {
+            elapsedFrames = 0;
         }
-        if ((s32)clip->duration <= frame) {
-            frame = (s32)clip->duration;
+        if ((s32)clip->duration <= elapsedFrames) {
+            elapsedFrames = (s32)clip->duration;
         }
-        clip->position = (f32)frame;
+        clip->position = (f32)elapsedFrames;
     }
 }
 

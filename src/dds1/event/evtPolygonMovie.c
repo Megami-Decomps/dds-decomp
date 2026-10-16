@@ -527,18 +527,18 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, 
 void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32 end)
 {
     PolyMovieClip *clip;
-    s32 frame;
+    s32 elapsedFrames;
 
-    frame = end - start;
-    if (frame < 0) {
-        frame = 0;
+    elapsedFrames = end - start;
+    if (elapsedFrames < 0) {
+        elapsedFrames = 0;
     }
     clip = movie->state->clip;
     if (clip != NULL) {
-        if ((s32)clip->duration <= frame) {
-            frame = (s32)clip->duration;
+        if ((s32)clip->duration <= elapsedFrames) {
+            elapsedFrames = (s32)clip->duration;
         }
-        clip->position = (f32)frame;
+        clip->position = (f32)elapsedFrames;
     }
 }
 
