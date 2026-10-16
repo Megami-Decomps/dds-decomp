@@ -2601,8 +2601,8 @@
 0x001D43D8	btlBindActorTaskAndSelectActionNumber	inferred	Binds an actor to its task and selects its table action number. [names_reviewed11.tsv]
 0x001D4438	btlActionSeqStateSelect	inferred	prints "btl:actnum 0 [%p]" then selects next state (9/6/8/0xA/0x1B/hook result)
 0x001D4590	btlUnitTurnEndStateSelect	inferred	state handler: routes to state 0x10/0x1E depending on unit flags (0x200/0x1000/0x114 bit 0x40)
-0x001D46A8	fldCheckSceneResourcesIdle	inferred	confidence=high; matched-C; src/dds2/game/code_001D4438.c:1252:func_001D46A8; Releases unreferenced scene actor resource/list nodes and reports idle only when actor wait conditions and scene task kinds are clear.; source=reviewed-prior-QP15 [names_qp15.tsv]
-0x001D4820	fldReleaseIdleSceneActorResources	inferred	Frees actor resource/list handles only once idle and returns whether its remaining actor tasks have drained.
+0x001D46A8	btlPollBattleResourceCleanup	inferred	Existing matched battle-wide cleanup poll frees idle actor sound-resource nodes and the callers list node, then waits gun-resource conditions and listed global task kinds; zero until clear; identifier only.
+0x001D4820	btlPollActorResourceCleanup	inferred	Existing matched actor cleanup poll frees idle resource/list nodes and waits effect references, active-unit-list handling, tagged owner tasks and shared task kind; identifier only.
 0x001D4908	btlReleaseIdleUnitSoundAndAdvanceTask	inferred	Releases an unreferenced sound node and advances the eligible actor task. [names_reviewed10.tsv]
 0x001D4A48	btlUnitStateSelectAfterAction	inferred	state handler: chooses next btlDispatchStateHandler state (0x11/0x10/0x12/0x15 or func_001D4590) from unit flags
 0x001D4BA8	btlActionSeqCheckDispatch	inferred	state handler: bails while any actor has 0x4000/0x30400000, else 0x1D / 5 / func_001D4438

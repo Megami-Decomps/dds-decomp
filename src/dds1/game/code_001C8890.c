@@ -228,7 +228,7 @@ void btlUnitTurnEndStateSelect(u8 *task) {
 
 extern s32 btlCountTasksByKind(u16 kind);
 
-s32 fldCheckSceneResourcesIdle(BtlUnit *self) {
+s32 btlPollBattleResourceCleanup(BtlUnit *self) {
     BtlActorWork *scene = (BtlActorWork *)btlGetRuntime();
     BtlUnit *actor;
 
@@ -271,7 +271,7 @@ s32 fldCheckSceneResourcesIdle(BtlUnit *self) {
     return btlCountTasksByKind(0x2B) == 0;
 }
 
-s32 fldReleaseIdleSceneActorResources(BtlUnit *actor) {
+s32 btlPollActorResourceCleanup(BtlUnit *actor) {
     if (actor->resourceNode != 0) {
         if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
             return 0;
@@ -390,7 +390,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 return;
             }
         }
-        if (!(flags & 0x8000) || fldCheckSceneResourcesIdle(unit) != 0) {
+        if (!(flags & 0x8000) || btlPollBattleResourceCleanup(unit) != 0) {
             if (btlBothSidesActive(unit) == 0) {
                 btlDispatchStateHandler(task, 0x1C);
                 return;
@@ -766,7 +766,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
 
     if (!(scene->battleFlags & 0x20)) {
         if (sndHasActiveActor() == 0) {
-            if (fldCheckSceneResourcesIdle(task->unit) != 0) {
+            if (btlPollBattleResourceCleanup(task->unit) != 0) {
                 if (!(task->flags & 0x80)) {
                     index = task->unit->partyRecord.unitId;
                     scene->boundTask = 0;
@@ -912,7 +912,7 @@ void btlCommandPrintAndFetchOwner(BtlTask *task) {
 
 void btlDispatchEffectCommandWhenActorReady(u8 *command) {
     u8 *actor = *(u8 **)(command + 0x18);
-    if (fldCheckSceneResourcesIdle((BtlUnit *)actor) == 0) {
+    if (btlPollBattleResourceCleanup((BtlUnit *)actor) == 0) {
         return;
     }
     if (*(u16 *)(command + 0x50) == 2) {
@@ -2370,7 +2370,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
     if (((u32)unit->status.flags & 0x40) == 0) {
         return;
     }
-    if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(task + 0x18)) != 0) {
+    if (btlPollActorResourceCleanup((BtlUnit *)*(s32 *)(task + 0x18)) != 0) {
         if ((u32)unit->status.flags & 0x200) {
             btlClearPartyRecordStatusBits(&unit->partyRecord, 8);
             btlRemovePartyActorAndShiftEntries(unit);
@@ -2669,7 +2669,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     if (!(unit->status.flags & 0x40)) {
         return;
     }
-    if (fldReleaseIdleSceneActorResources(unit) == 0) {
+    if (btlPollActorResourceCleanup(unit) == 0) {
         return;
     }
     unit->status.flags &= ~0xC0;
@@ -3060,7 +3060,7 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
     s32 entryFlags;
 
     if (actor->status.flags & 0x200) {
-        if (fldReleaseIdleSceneActorResources(actor) == 0) {
+        if (btlPollActorResourceCleanup(actor) == 0) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
@@ -3093,7 +3093,7 @@ void btlEnterDeadActionState(void) {
 
 void btlCommandTaskReleaseActor(s32 arg0) {
     if ((*(u32 *)(arg0 + 8) & 8) != 0) {
-        if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(arg0 + 0x18)) == 0) {
+        if (btlPollActorResourceCleanup((BtlUnit *)*(s32 *)(arg0 + 0x18)) == 0) {
             return;
         }
         if (*(s32 *)(arg0 + 0x18) != 0) {
