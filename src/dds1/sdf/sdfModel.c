@@ -412,14 +412,14 @@ s32 sdfModelTestTransformedClipVectors(const f32 *bounds) {
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
 
 #include "sdf.h"
-extern u8 D_00438A34;
-extern void *D_00438A64;
-extern void *D_00438A68;
-extern f32 D_00438A48, D_00438A4C;
-extern f32 D_0040B620[16];
+extern u8 D_003BD344;
+extern void *D_003BD374;
+extern void *D_003BD378;
+extern f32 D_003BD358, D_003BD35C;
+extern f32 D_00398470[16];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfVuSetGlobalScale(f32);
-extern u32 func_003396D0(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
+extern u32 func_002E0820(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
 typedef struct {
     SdfModelPacket address;
     u64 firstHeader;
@@ -473,21 +473,21 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 
     lighting = model->lighting;
     if (lighting == NULL) {
-        lighting = D_00438A64;
+        lighting = D_003BD374;
     }
     secondaryLighting = model->unk84;
     if (secondaryLighting == NULL) {
-        secondaryLighting = D_00438A68;
+        secondaryLighting = D_003BD378;
     }
-    globalByte = D_00438A34;
+    globalByte = D_003BD344;
     modelColor = model->color;
     nodeMask = model->drawFlags;
     if (model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) {
         firstScalar = model->scalarOverrideFirst;
         secondScalar = model->scalarOverrideSecond;
     } else {
-        firstScalar = D_00438A48;
-        secondScalar = D_00438A4C;
+        firstScalar = D_003BD358;
+        secondScalar = D_003BD35C;
     }
     skipCommands = 0;
     if (model->flags & 0x08) {
@@ -513,7 +513,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         }
 
         VU0_LOAD_MATRIX(node->worldMatrix);
-        sdfPostmultiplyVuMatrixFromMemory(D_0040B620);
+        sdfPostmultiplyVuMatrixFromMemory(D_00398470);
         if (node->boundsCorners != NULL &&
             sdfModelTestTransformedClipVectors(node->boundsCorners) != 0) {
             continue;
@@ -588,7 +588,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
                 u32 packet;
                 sdfVuSelectTransformMatrix((u32)lighting);
                 sdfVuCacheObjectVector((u8 *)secondaryLighting);
-                packet = func_003396D0(node, entry->payload, nodeFlags, color,
+                packet = func_002E0820(node, entry->payload, nodeFlags, color,
                                        firstScalar, secondScalar,
                                        frame, skipCommands);
                 if (packet != 0) {
