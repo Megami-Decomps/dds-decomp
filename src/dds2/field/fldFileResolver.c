@@ -685,7 +685,7 @@ extern char fldEncounterTaskName[];
 extern void btlClearRuntimeState(void);
 
 
-extern void fldUpdateCameraModelMotion(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames);
 
 extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 
