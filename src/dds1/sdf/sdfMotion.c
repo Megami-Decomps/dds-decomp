@@ -617,18 +617,18 @@ void sdfMotionReadKeyFlag(SdfMotionKeyFlagBinding *binding) {
     binding->keyFlagClear = (s8)(((binding->node->flags >> 4) ^ 1) & 1);
 }
 
-void sdfMotionCaptureDrawVector(void *work) {
-    SdfMotionDrawBinding *binding = work;
+void sdfMotionCaptureDrawVector(void *bindingData) {
+    SdfMotionDrawBinding *binding = bindingData;
     PCP_COPY_VECTOR(binding->capturedVector, binding->node->translation);
 }
 
-void sdfMotionCaptureQuaternion(void *work) {
-    SdfMotionDrawBinding *binding = work;
+void sdfMotionCaptureQuaternion(void *bindingData) {
+    SdfMotionDrawBinding *binding = bindingData;
     PCP_COPY_VECTOR(binding->capturedVector, binding->node->quaternion);
 }
 
-void sdfMotionCaptureScaleVector(void *work) {
-    SdfMotionDrawBinding *binding = work;
+void sdfMotionCaptureScaleVector(void *bindingData) {
+    SdfMotionDrawBinding *binding = bindingData;
     PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
 }
 
