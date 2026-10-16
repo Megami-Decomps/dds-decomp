@@ -410,7 +410,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 
 
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
