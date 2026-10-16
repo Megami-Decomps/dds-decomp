@@ -103,7 +103,7 @@ void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object);
 u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 u16 dds3GetWorldValueCount(WorldValueIndices *object);
-s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, const EffWorldNode *targetNode);
 u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value);
 u32 dds3ReadIndexedWorldObjectWord(const WorldValueIndices *object);
 u32 dds3ResetObjectValueCursor(WorldValueIndices *object);

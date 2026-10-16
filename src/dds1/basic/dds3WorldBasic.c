@@ -270,7 +270,7 @@ s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNo
     if (dds3GetWorldValueCount(indexNode) != 0) {
         dds3ResetObjectValueCursor(indexNode);
         do {
-            if (dds3SeekWorldNode(indexNode, (u32)targetNode) != 1) {
+            if (dds3SeekWorldNode(indexNode, targetNode) != 1) {
                 break;
             }
             dds3RemoveCurrentWorldValueEntry(indexNode);
@@ -283,7 +283,7 @@ s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNo
 /* Search from the current cursor without resetting it; leave it on a match.
  * A NULL payload terminates before comparison, even if later entries remain,
  * so a NULL target never matches. Return 1 for a match, otherwise 0. */
-s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord) {
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, const EffWorldNode *targetNode) {
     u32 candidateWord;
 
     do {
@@ -291,7 +291,7 @@ s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord) {
         if (candidateWord == 0) {
             return 0;
         }
-        if (targetWord == candidateWord) {
+        if ((u32)targetNode == candidateWord) {
             return 1;
         }
     } while (dds3AdvanceObjectValueCursor(indexNode) != 0);
