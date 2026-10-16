@@ -4,12 +4,12 @@
 #include "dds3_path.h"
 #include "evt_action_object.h"
 
-s32 dds3SelectOwnerWorldIndexSlot(u32 kind) {
+s32 dds3SelectOwnerWorldIndexSlot(u32 nodeKind) {
     s32 result = 0;
 
-    if (kind >= 4) {
-        if (kind >= 8) {
-            result = kind == 8;
+    if (nodeKind >= 4) {
+        if (nodeKind >= 8) {
+            result = nodeKind == 8;
         }
     }
     return result;
