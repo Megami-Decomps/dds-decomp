@@ -5059,7 +5059,7 @@ extern void effRebuildSurfaceJobs(EffectSlotNode54 *, void *);
 
 extern void effSurfaceNodeCreateQueues(EffectSlotNode54 *, void *);
 
-extern void effReplaceSurfaceResourceHolder(s32, u32);
+extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
 
 void effConfigureSurfaceNodeByKind(s32 *object, s32 kind, s32 *settings) {
     u16 type = kind;

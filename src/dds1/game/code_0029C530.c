@@ -4785,7 +4785,7 @@ extern EffectSurfaceNode *effResourceReferenceReplaceFromFile(u8 *);
 
 extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
 
-extern void effReplaceSurfaceResourceHolder(s32, u32);
+extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
 
 EffectSurfaceNode *effInitializeSurfaceForKind(u8 *work) {
     EffectSurfaceNode *node = effResourceReferenceReplaceFromFile(work);
