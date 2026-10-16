@@ -94,8 +94,8 @@ extern void parClearHistorySlotPoints(s32);
 
 
 
-void parSetObjectParameterWord(ParObj *work, u32 value) {
-    work->parameterWord = value;
+void parSetObjectParameterWord(ParObj *work, u32 parameterWord) {
+    work->parameterWord = parameterWord;
 }
 
 void parObjSetMode(ParObj *object, u8 mode) {
@@ -288,8 +288,8 @@ void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
-void effParSetInstanceParameterWord(ParObj *work, u32 value) {
-    work->parameterWord = value;
+void effParSetInstanceParameterWord(ParObj *work, u32 parameterWord) {
+    work->parameterWord = parameterWord;
 }
 
 void parChangeInstanceMode(ParObj *work, u8 mode) {

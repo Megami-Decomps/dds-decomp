@@ -81,7 +81,7 @@ typedef struct EvtWorldTable {
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
 void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled);
-void dds3SetWorldObjectValue(EffWorldNode *object, u32 value);
+void dds3SetWorldObjectValue(EffWorldNode *object, u32 areaRoomKey);
 s32 dds3GetWorldObjectValue(EffWorldNode *object);
 
 /* Scene resource scripts are selected by name on a world node. The start

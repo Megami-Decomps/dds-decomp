@@ -94,8 +94,8 @@ extern u8 sdfViewEyeVector[];
 
 extern u8 sdfViewTargetVector[];
 
-void parSetObjectParameterWord(ParObj *work, u32 value) {
-    work->parameterWord = value;
+void parSetObjectParameterWord(ParObj *work, u32 parameterWord) {
+    work->parameterWord = parameterWord;
 }
 
 void parObjSetMode(ParObj *object, s32 mode) {
@@ -281,8 +281,8 @@ void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
-void effParSetInstanceParameterWord(ParObj *work, u32 value) {
-    work->parameterWord = value;
+void effParSetInstanceParameterWord(ParObj *work, u32 parameterWord) {
+    work->parameterWord = parameterWord;
 }
 
 void parChangeInstanceMode(ParObj *work, u8 mode) {

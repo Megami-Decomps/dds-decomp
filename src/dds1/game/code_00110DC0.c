@@ -47,9 +47,9 @@ const s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *v
     return 0;
 }
 
-void dds3SetWorldObjectValue(EffWorldNode *object, u32 value) {
+void dds3SetWorldObjectValue(EffWorldNode *object, u32 areaRoomKey) {
     if (object != NULL) {
-        ((EvtWorldTable *)object->data)->areaRoomKey = value;
+        ((EvtWorldTable *)object->data)->areaRoomKey = areaRoomKey;
     }
 }
 

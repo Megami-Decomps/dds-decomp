@@ -697,11 +697,11 @@ s32 evtIsActiveFlagSet(s32 flagIndex) {
 }
 
 /* Reject only indices at/above the upper bound; negative indices are not checked. */
-s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value) {
+s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 displayValue) {
     if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
         return 0;
     }
-    evtDisplayValues[displayValueIndex] = value;
+    evtDisplayValues[displayValueIndex] = displayValue;
     return 1;
 }
 

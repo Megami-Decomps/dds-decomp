@@ -292,7 +292,7 @@ typedef struct MenuProgressList {
 
 extern s32 mnuTerminalScoreBox(DatPartyRecord *unit);
 
-extern s32 mnuDrawTerminalRecoveryListEntry(s32);
+extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 
 /* Build recovery-cost nodes for active party slots with a nonzero computed cost.
  * Node values are party indices here, unlike the command-list builder below. */

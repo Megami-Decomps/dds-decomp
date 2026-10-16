@@ -29,13 +29,13 @@ void effScatterCopyFlatParameterVector(PcpScatterPlainInstance *work, void *src)
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
-void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 value) {
-    work->scale = value;
+void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 scale) {
+    work->scale = scale;
 }
 
 /* Set the instance color used by the particle fade pass. */
-void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 value) {
-    work->color = value;
+void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 color) {
+    work->color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix through vf28-vf31 */
