@@ -98,16 +98,16 @@ void dds3DestroyAllOwnedIntrusiveNodes(void) {
     }
 }
 
-void dds3SetLinkedNodeValue(Dds3IntrusiveNode *node, u32 value) {
-    node->value = value;
+void dds3SetLinkedNodeValue(Dds3IntrusiveNode *node, u32 nodeValue) {
+    node->value = nodeValue;
 }
 
-void dds3DestroyNodesWithValue(s32 value) {
+void dds3DestroyNodesWithValue(s32 nodeValue) {
     Dds3IntrusiveNode *node = dds3OwnedNodeListHead.head;
 
     while (node != NULL) {
         Dds3IntrusiveNode *next = node->next;
-        if (node->value == value) {
+        if (node->value == nodeValue) {
             dds3DestroyLinkedNode(node);
         }
         node = next;
