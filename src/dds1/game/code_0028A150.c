@@ -3914,41 +3914,41 @@ void fileDrawConfigurationMenuBackground(void *unused) {
     };
     f32 labelFade = fileConfigTaskWork->labelFade;
     f32 choiceFade = fileConfigTaskWork->choiceFade;
-    s32 entry = 0;
+    s32 spriteIndex = 0;
     s32 row;
 
-    effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
-                 sprites[entry][FILE_CONFIG_Y] * 8,
+    effDrawSpriteWithCornerFade(sprites[spriteIndex][FILE_CONFIG_X] * 16,
+                 sprites[spriteIndex][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
-                 sprites[entry][FILE_CONFIG_FRAME], 0x53);
-    entry++;
-    effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
-                 sprites[entry][FILE_CONFIG_Y] * 8,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    spriteIndex++;
+    effDrawSpriteWithCornerFade(sprites[spriteIndex][FILE_CONFIG_X] * 16,
+                 sprites[spriteIndex][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
-                 sprites[entry][FILE_CONFIG_FRAME], 0x53);
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     if (fileConfigTaskWork->state == 1) {
         mnuDrawMantraPulseAndSparks((void *)fileConfigTaskWork->effect, 0x80, 0x52);
     }
-    entry++;
-    effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
-                 sprites[entry][FILE_CONFIG_Y] * 8,
+    spriteIndex++;
+    effDrawSpriteWithCornerFade(sprites[spriteIndex][FILE_CONFIG_X] * 16,
+                 sprites[spriteIndex][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
-                 sprites[entry][FILE_CONFIG_FRAME], 0x53);
-    entry++;
-    effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
-                 sprites[entry][FILE_CONFIG_Y] * 8,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    spriteIndex++;
+    effDrawSpriteWithCornerFade(sprites[spriteIndex][FILE_CONFIG_X] * 16,
+                 sprites[spriteIndex][FILE_CONFIG_Y] * 8,
                  0, (u32)(choiceFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
-                 sprites[entry][FILE_CONFIG_FRAME], 0x53);
-    entry++;
-    effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
-                 sprites[entry][FILE_CONFIG_Y] * 8,
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
+    spriteIndex++;
+    effDrawSpriteWithCornerFade(sprites[spriteIndex][FILE_CONFIG_X] * 16,
+                 sprites[spriteIndex][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
-                 sprites[entry][FILE_CONFIG_FRAME], 0x53);
+                 fileConfigTaskWork->slots[sprites[spriteIndex][FILE_CONFIG_SET]],
+                 sprites[spriteIndex][FILE_CONFIG_FRAME], 0x53);
     for (row = 0; row < 5; row++) {
         effDrawSpriteWithCornerFade(0, (131 + row * 35) * 8, 0, (u32)(labelFade * 256.0f), 0,
                      fileConfigTaskWork->slots[2], 9, 0x53);
