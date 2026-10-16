@@ -150,7 +150,7 @@ extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
 extern EffWorldNode *evtSpawnActionObj9(s32);
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
@@ -731,7 +731,7 @@ extern void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translatio
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
