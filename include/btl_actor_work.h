@@ -19,7 +19,7 @@ typedef struct BtlActorWork {
     struct ActiveSoundNode *soundList; /* Independent active-node list. */
     struct SoundSlotOwner *soundSlotOwners; /* Shared category/id owners. */
     u8 pad240[0x24];
-    u32 unk264;
+    u32 motionSeLoadFrame; /* 0x264: shared with BtlState; -1 disables frame counting. */
     s32 unk268;
     u8 pad26C[0x38];
     s32 unk2A4;
@@ -54,5 +54,7 @@ typedef char BtlActorWorkFadeEnabledOffset[
 typedef char BtlActorWorkFadeColorOffset[((unsigned int)&((BtlActorWork *)0)->fadeColor == 0x588) ? 1 : -1];
 typedef char BtlActorWorkHookOffset[((unsigned int)&((BtlActorWork *)0)->hook5E4 == 0x5E4) ? 1 : -1];
 typedef char BtlActorWorkFallbackHookOffset[((unsigned int)&((BtlActorWork *)0)->hook5E8 == 0x5E8) ? 1 : -1];
+typedef char BtlActorWorkMotionSeLoadFrameOffset[
+    ((unsigned int)&((BtlActorWork *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
 
 #endif
