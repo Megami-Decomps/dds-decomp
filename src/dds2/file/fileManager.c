@@ -199,8 +199,8 @@ u32 fileGetResourceHandle(struct FileRequest *request) {
 }
 
 /* Return the stored loaded-data address as its existing u32 representation. */
-u32 fileGetLoadedDataAddress(struct FileRequest *request) {
-    FileWork *work = (FileWork *)request;
+u32 fileGetLoadedDataAddress(const struct FileRequest *request) {
+    const FileWork *work = (const FileWork *)request;
     return work->loadedDataAddress;
 }
 
