@@ -3593,7 +3593,152 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AE0);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AF0);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B4F10);
+extern const BattlePanelColors D_003A2AF0;
+extern s32 fldGetSceneObjectState(void);
+extern s32 btlGetActorCommandClass(BattleSceneObject *,s8);
+extern u32 btlGetCommandOptionCount(s32,s8,s8);
+extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
+extern void btlBuildEligibleActorList(s32,s16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *);
+extern void btlReleaseRegisteredTaskBuffer(KwlnTask *);
+extern void func_001B4D58(s32,s32,u32,u32,u16,s16);
+extern u8 D_00358FE0[];
+s32 func_001B4F10(KwlnTask *task) {
+    BattlePanelColors colors = D_003A2AF0;
+    BattleSceneObject *object = NULL;
+    KwlnTask *panelTask;
+    BtlState *battle;
+    s16 count;
+    s16 optionCount;
+    s16 cursor;
+    s16 row;
+    u32 state;
+    s32 kind;
+    s32 selector;
+    s32 draw;
+    s32 i;
+
+    if (btlGetTrackedTaskHandle(4) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+
+    panelTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (panelTask != NULL) {
+        object = (BattleSceneObject *)kwlnTaskGetUserValue(panelTask);
+    }
+    draw = 0;
+    state = fldGetSceneObjectState();
+    switch (state) {
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+
+    {
+        BtlCommandHintWork *fadeWindow;
+    fadeWindow = (BtlCommandHintWork *)D_003BB3DC;
+    fadeWindow->fade += 0x20;
+    fadeWindow->fade = fadeWindow->fade <= 0 ? 0 :
+                   fadeWindow->fade > 0x80 ? 0x80 : fadeWindow->fade;
+
+    }
+    if (mdlFlagTest(0xC0E) == 0 && panelTask != NULL) {
+    kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
+    optionCount = (s16)btlGetCommandOptionCount((s32)object,
+                                         btlCommandPanelWork->classIndex, 1);
+    row = object->selections[kind].entry;
+    cursor = object->selections[kind].cursor;
+
+    switch (kind) {
+    case 0:
+        if ((cursor == 0 && row == 0) || optionCount - 1 == row) {
+            BtlCommandHintWork *hintWindow;
+            if (row == 0) {
+                BtlTask *owner = object->owner;
+                selector = (owner->unit->status.flags & 0x1000) != 0 ? 1 : 2;
+            } else {
+                selector = 3;
+            }
+            hintWindow = (BtlCommandHintWork *)D_003BB3DC;
+            func_001B4D58(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
+                          (s16)hintWindow->fade | 0x80808000, 0, selector);
+        } else {
+            BtlCommandHintWork *entryWindow;
+            u16 textId;
+            u16 *entries = btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
+            textId = entries[row - 1];
+            entryWindow = (BtlCommandHintWork *)D_003BB3DC;
+            func_001B4D58(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
+                          (s16)entryWindow->fade | 0x80808000, textId, 0);
+        }
+        draw = 1;
+        break;
+    case 4: {
+        BtlCommandHintWork *skillWindow;
+        u16 textId;
+        BattleRosterTable *entries = btlGetActorLinkageSkillList(object, (u16 *)&count);
+        textId=entries->entries[row].skill;
+        skillWindow = (BtlCommandHintWork *)D_003BB3DC;
+        draw = 1;
+        func_001B4D58(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
+                      (s16)skillWindow->fade | 0x80808000, textId, 0);
+        break;
+    }
+    case 2: {
+        BtlCommandHintWork *drawWindow;
+        u16 textId;
+        btlBuildEligibleActorList((s32)object,&count);
+        textId=D_00358FE0[row*2];
+        drawWindow=D_003BB3DC;
+        draw=1;
+        func_001B4D58(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
+        break;
+    }
+    case 3: {
+        BtlCommandHintWork *drawWindow;
+        s32 textKind;
+        if(row==0) {
+            textKind=(object->owner->unit->status.flags&0x1000)!=0?4:5;
+        } else {
+            textKind=row==1?6:7;
+        }
+        drawWindow=D_003BB3DC;
+        draw=1;
+        func_001B4D58(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
+        break;
+    }
+    case 6: {
+        BtlCommandHintWork *drawWindow = (BtlCommandHintWork *)D_003BB3DC;
+        draw = 1;
+        func_001B4D58(drawWindow->x + 0x13, drawWindow->y - 6, 0xFF0000,
+                      (s16)drawWindow->fade | 0x80808000, 0, 8);
+        break;
+    }
+    }
+
+    if (draw != 0) {
+    for (i = 0; i < 4; i++) {
+        colors.values[i] = btlSetSlotLowByteClamped(
+            btlResourceBlock->resA, 0x2A, i, (s16)D_003BB3DC->fade);
+    }
+    {
+    BtlCommandHintWork *spriteWindow = (BtlCommandHintWork *)D_003BB3DC;
+    effDrawSpriteWithCornerColors(spriteWindow->x << 4, spriteWindow->y << 3, 0, colors.values, 0,
+                  btlResourceBlock->resA, 0x2A, 0x53);
+    }
+    }
+    }
+    break;
+    case 5:
+        btlReleaseRegisteredTaskBuffer(task);
+        return -1;
+    }
+    return 0;
+}
 
 void btlReleaseRegisteredTaskBuffer(KwlnTask *unused) {
     btlGetRuntime();
