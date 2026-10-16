@@ -577,10 +577,10 @@ u16 mnuGetSelectedPanelValue(MnuStatusResource *object) {
     return *(u16 *)(object->menu.defaultSelector->selector.fields.index * 2 + values);
 }
 
-u16 mnuGetPanelValueAt(MnuStatusResource *object, s32 index) {
+u16 mnuGetPanelValueAt(MnuStatusResource *resource, s32 panelIndex) {
     return *(u16 *)
-                    (((index << 0x10) >> 0xf) +
-                    (s32)object->menu.slots[object->list->cursor->index]->flags);
+                    (((panelIndex << 0x10) >> 0xf) +
+                    (s32)resource->menu.slots[resource->list->cursor->index]->flags);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", mnuDrawMantraNodeDetails);
