@@ -174,9 +174,9 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
     u32 cacheCount = sizeof(loaded);
     u32 batchIndex;
     u32 resourceCount;
-    u32 i;
+    u32 resourceIndex;
     FldFileResource *resource;
-    void *object;
+    void *spawnedObject;
     u32 pathIndex;
 
     memset(loaded, 0, cacheCount);
@@ -195,7 +195,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
             D_00438EBC = resourceCount;
             break;
         case 11:
-            for (i = 0; i < resourceCount; i++, resource++) {
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 BillConfig *config;
                 u32 *resourceKeys;
                 u32 cacheByteOffset;
@@ -228,15 +228,15 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                         fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
                         sprintf(path, D_00435FD0, directory,
                                      resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
-                        object = effObjCreateResourceKindZero(path, position, (s32)rotation);
-                        effObjSetFlags(object, 1);
-                        billCopySourceVectorAndSetConfig(object, resource->data);
+                        spawnedObject = effObjCreateResourceKindZero(path, position, (s32)rotation);
+                        effObjSetFlags(spawnedObject, 1);
+                        billCopySourceVectorAndSetConfig(spawnedObject, resource->data);
                         loaded[((BillConfig *)resource->data)->resourceIndex] = 1;
-                        cached[((BillConfig *)resource->data)->resourceIndex] = object;
+                        cached[((BillConfig *)resource->data)->resourceIndex] = spawnedObject;
                     } else {
-                        object = effObjSpawnSharedBillNodeClone(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
-                        effObjSetFlags(object, 1);
-                        billCopySourceVectorAndSetConfig(object, resource->data);
+                        spawnedObject = effObjSpawnSharedBillNodeClone(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        effObjSetFlags(spawnedObject, 1);
+                        billCopySourceVectorAndSetConfig(spawnedObject, resource->data);
                     }
                     break;
                 case 1:
@@ -246,33 +246,33 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                         fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
                         sprintf(path, D_00435FD0, directory,
                                      resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
-                        object = effObjCreateResourceKindOne(path, position, (s32)rotation);
-                        effObjSetFlags(object, 1);
+                        spawnedObject = effObjCreateResourceKindOne(path, position, (s32)rotation);
+                        effObjSetFlags(spawnedObject, 1);
                         loaded[((BillConfig *)resource->data)->resourceIndex] = 1;
-                        cached[((BillConfig *)resource->data)->resourceIndex] = object;
-                        billCopySourceVectorAndSetConfig(object, resource->data);
+                        cached[((BillConfig *)resource->data)->resourceIndex] = spawnedObject;
+                        billCopySourceVectorAndSetConfig(spawnedObject, resource->data);
                     } else {
-                        object = effObjSpawnSharedBillClone(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
-                        effObjSetFlags(object, 1);
-                        billCopySourceVectorAndSetConfig(object, resource->data);
+                        spawnedObject = effObjSpawnSharedBillClone(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        effObjSetFlags(spawnedObject, 1);
+                        billCopySourceVectorAndSetConfig(spawnedObject, resource->data);
                     }
                     break;
                 case 2:
                     if (D_00444940[config->resourceIndex] != NULL) {
-                        object = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)D_00444940[config->resourceIndex], position, rotation);
-                        effObjSetFlags(object, 1);
-                        billCopySourceVectorAndSetConfig(object, resource->data);
+                        spawnedObject = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)D_00444940[config->resourceIndex], position, rotation);
+                        effObjSetFlags(spawnedObject, 1);
+                        billCopySourceVectorAndSetConfig(spawnedObject, resource->data);
                     }
                     break;
                 case 100:
-                    object = effObjCreateNamedScaledEffect(resource->name, position, rotation, config->width * 0.5f);
-                    effObjClearFlags(object, 1);
+                    spawnedObject = effObjCreateNamedScaledEffect(resource->name, position, rotation, config->width * 0.5f);
+                    effObjClearFlags(spawnedObject, 1);
                     break;
                 }
             }
             break;
         case 12:
-            for (i = 0; i < resourceCount; i++, resource++) {
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 if (resource->transform != NULL) {
                     position[0] = resource->transform[0];
                     position[1] = resource->transform[1];
@@ -292,25 +292,25 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                     rotation[2] = 0.0f;
                     rotation[3] = 0.0f;
                 }
-                object = evtSpawnActionObj9(resource->id);
-                dds3SetWorldNodeValue(object, (u32)resource->name);
-                effObjSetInnerPosition(object, (u128 *)position);
+                spawnedObject = evtSpawnActionObj9(resource->id);
+                dds3SetWorldNodeValue(spawnedObject, (u32)resource->name);
+                effObjSetInnerPosition(spawnedObject, (u128 *)position);
                 /* Type-12 serialization uses this shared slot for outer radius. */
-                effObjSetInnerFloat(object, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
-                dds3LoadWorldTransformSetup(object, resource->data);
+                effObjSetInnerFloat(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
+                dds3LoadWorldTransformSetup(spawnedObject, resource->data);
                 if ((u32)fldAreaState.area - 200U < 300U) {
-                    ((EffLightData *)((EffWorldNode *)object)->data)->flags |= 8;
-                    dds3SetWorldNodeValue(object, (u32)"BTL_DEF_LIGHT");
+                    ((EffLightData *)((EffWorldNode *)spawnedObject)->data)->flags |= 8;
+                    dds3SetWorldNodeValue(spawnedObject, (u32)"BTL_DEF_LIGHT");
                 }
             }
             break;
         case 9:
-            for (i = 0; i < resourceCount; i++, resource++) {
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 evtSpawnActionObj10(resource->id, resource->data, resource->name);
             }
             break;
         case 3:
-            for (i = 0, pathIndex = 1; i < resourceCount; i++, resource++, pathIndex++) {
+            for (resourceIndex = 0, pathIndex = 1; resourceIndex < resourceCount; resourceIndex++, resource++, pathIndex++) {
                 resource->id |= 0x20000;
                 if (resource->transform != NULL) {
                     position[0] = resource->transform[0];
@@ -335,8 +335,8 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                     s32 room = fldParseRoomNumberFromName((char *)resource->name);
                     fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)resource->data)->header, position,
                                   resource->id, room, -1);
-                    object = evtSpawnActionObjB(resource->id, (s32)resource->data, (s32)position, (s32)resource->name);
-                    dds3SetPathStateValue(object, pathIndex);
+                    spawnedObject = evtSpawnActionObjB(resource->id, (s32)resource->data, (s32)position, (s32)resource->name);
+                    dds3SetPathStateValue(spawnedObject, pathIndex);
                 }
             }
             break;
