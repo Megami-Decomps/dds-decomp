@@ -17,10 +17,12 @@ extern s32 D_0045C7B0[];
 
 
 
-extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
+                                 f32 progress);
 
 
-extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
+                                  f32 progress);
 
 extern MapRequestState *D_004390AC;
 
