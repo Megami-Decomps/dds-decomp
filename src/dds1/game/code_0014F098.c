@@ -43,7 +43,7 @@ extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
-extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
 extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
 

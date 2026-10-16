@@ -4355,7 +4355,7 @@ extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 fra
 extern s32 evtPreloadBgm(s32 id);
 extern s32 evtIsBgmLoaded(s32 id);
 extern s32 fldTitleIsActive(void);
-extern void fldStartTitle(s32 id, s32 mode, s32 frames);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void kwlnFadeBackgroundStartIn(s32 frames);
 
 typedef struct { u8 bytes[0x18]; } EvtRowPayload18;
