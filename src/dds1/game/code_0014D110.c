@@ -873,9 +873,9 @@ s32 fldCmdSetSceneBitsBarrierRoom(void) {
 
 extern s32 D_0032E3C4[];
 
-extern s32 fldSetMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern s32 fldSetAlternateMapTargetFlag(s32, s32, s32, s32);
+extern s32 fldSetAlternateMapTargetFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldOpClearMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
