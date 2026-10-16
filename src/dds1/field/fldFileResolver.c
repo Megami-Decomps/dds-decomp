@@ -158,7 +158,7 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
 extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
-extern void dds3SetPathStateValue(EffWorldNode *, u32);
+extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FD50);
 
@@ -665,7 +665,7 @@ extern s16 D_0032E4B4[];
 extern s32 fldParseRoomNumberFromName(const char *);
 extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
 extern EffWorldNode *evtSpawnActionObjB(s32, void *, f32 *, const char *);
-extern void dds3SetPathStateValue(EffWorldNode *, u32);
+extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
 extern u32 fldPushDisplayValue(u32, EffWorldNode *);
