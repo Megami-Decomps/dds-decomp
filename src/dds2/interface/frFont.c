@@ -56,7 +56,7 @@ u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
 
-extern void frFontEnsureSlotLoaded(s32, const char *);
+extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 
 #define FR_FONT_ENTRY_CAPACITY 9
 #define FR_FONT_IMAGE_WORD_COUNT 16

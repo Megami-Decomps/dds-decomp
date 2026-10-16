@@ -51,7 +51,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
 u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
 
-extern void frFontEnsureSlotLoaded(s32 id, const char *path);
+extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 
 #define FR_FONT_ENTRY_CAPACITY 9
 #define FR_FONT_IMAGE_WORD_COUNT 16
