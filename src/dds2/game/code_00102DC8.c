@@ -1135,8 +1135,8 @@ extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 extern u8 sdfViewMatrix[];
 extern u8 D_00384790[];
-extern SdfLightSources D_0037FB10;
-extern f32 D_0037FB20[4];
+extern SdfLightSources kwlnOverlayLightSources;
+extern f32 kwlnOverlayAmbientColor[4];
 extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
@@ -1167,7 +1167,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfInitPacketList(&D_00380870[bufferIndex].thirdList);
     sdfConsBuildMatrixPacket(&D_00380870[bufferIndex].thirdMatrix, &D_0037F980, D_00384790);
     sdfAppendPacket(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].thirdMatrix);
-    sdfBuildLightingPacket(&D_00380870[bufferIndex].overlayLightPacket, D_0037FB10, D_0037FB20);
+    sdfBuildLightingPacket(&D_00380870[bufferIndex].overlayLightPacket, kwlnOverlayLightSources, kwlnOverlayAmbientColor);
     sdfAppendPacket(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].overlayLightPacket);
 }
 

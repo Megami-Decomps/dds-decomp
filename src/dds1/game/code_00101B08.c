@@ -195,18 +195,18 @@ extern u32 D_003BA900;
 extern u32 D_003BA8EC;
 extern u8 kwlnHeldTextureLightingPackets[];
 extern u8 kwlnHeldTextureMatrixPackets[];
-extern u8 D_003276D0[];
-extern u8 D_00327600[];
+extern u8 kwlnOverlayLightingPackets[];
+extern u8 kwlnOverlayMatrixPackets[];
 extern u8 D_003270F0[];
 extern SdfLightSources kwlnHeldTextureLightSources;
-extern SdfLightSources D_00324B10;
+extern SdfLightSources kwlnOverlayLightSources;
 extern SdfLightSources D_00324770;
 extern f32 kwlnHeldTextureAmbientColor[4];
-extern f32 D_00324B20[4];
+extern f32 kwlnOverlayAmbientColor[4];
 extern f32 kwlnDefaultColorVector[4];
 extern f32 kwlnHeldTextureTargetVector[4], kwlnHeldTextureEyeVector[4], kwlnHeldTextureUpVector[4];
-extern f32 D_00324A20[4], D_00324A30[4], D_00324A40[4];
-extern KwlnDrawVectorParams D_00324960, D_00324B30, kwlnDrawVector;
+extern f32 D_00324A20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
+extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustumParameters, kwlnDrawVector;
 extern u8 kwlnHeldTextureViewMatrix[0x40];
 extern u8 D_00329790[];
 extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
@@ -255,7 +255,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
                 (SdfListHead *)(kwlnHeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
             sceneList = sdfCreateResetPacketList();
             sceneFrustum = (u64 *)sdfAllocPacketAligned(0x50);
-            sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)sceneFrustum, &D_00324960);
+            sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)sceneFrustum, &kwlnHeldTextureFrustumParameters);
             sdfAppendPacket(sceneList, (u32)sceneFrustum);
             sceneNode->append(sceneNode, sceneList);
         }
@@ -264,22 +264,22 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         SdfPoolNode *overlayNode;
         SdfListHead *overlayList;
         u64 *overlayFrustum;
-        sdfBuildLightingPacket((SdfLightingPacketStorage *)(D_003276D0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-            D_00324B10, D_00324B20);
+        sdfBuildLightingPacket((SdfLightingPacketStorage *)(kwlnOverlayLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+            kwlnOverlayLightSources, kwlnOverlayAmbientColor);
         sdfCameraBuildProjection(&D_00324980.camera);
-        sdfVuBuildLookAtBasis(D_00324A20, D_00324A30, D_00324A40);
+        sdfVuBuildLookAtBasis(D_00324A20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
         VU0_STORE_MATRIX_UNCLOBBERED(D_00329790);
-        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00327600 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_00324980, D_00329790);
+        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(kwlnOverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_00324980, D_00329790);
         overlayNode = &kwlnDrawSurfaces[85];
-        overlayNode->append(overlayNode, (SdfListHead *)(D_00327600 - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        overlayNode->append(overlayNode, (SdfListHead *)(kwlnOverlayMatrixPackets - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         overlayList = sdfCreateResetPacketList();
         overlayFrustum = (u64 *)sdfAllocPacketAligned(0x50);
-        sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)overlayFrustum, &D_00324B30);
+        sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)overlayFrustum, &kwlnOverlayFrustumParameters);
         sdfAppendPacket(overlayList, (u32)overlayFrustum);
         overlayNode->append(overlayNode, overlayList);
 
-        sdfBuildLightingPacket((SdfLightingPacketStorage *)(D_00327600 - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_00324770, kwlnDefaultColorVector);
-        *(u32 *)(D_00327600 - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
+        sdfBuildLightingPacket((SdfLightingPacketStorage *)(kwlnOverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_00324770, kwlnDefaultColorVector);
+        *(u32 *)(kwlnOverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
     }
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
