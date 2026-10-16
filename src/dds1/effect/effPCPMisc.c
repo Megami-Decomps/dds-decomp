@@ -632,7 +632,7 @@ EffPCPDelayedPairs *effPcpDelayedPairsCreate(void *source) {
         effPcpDelayedPairsRerollSlot(work, i);
     }
     work->color = 0x80808080;
-    work->unk14 = 1.0f;
+    work->scale = 1.0f;
     work->unk00 = 0;
     work->unk04 = 0;
     work->unk08 = 0;
@@ -667,7 +667,7 @@ EffPCPDelayedPairs *effPcpDelayedPairsClone(EffPCPDelayedPairs *source) {
         effPcpDelayedPairsRerollSlot(work, i);
     }
     work->color = 0x80808080;
-    work->unk14 = 1.0f;
+    work->scale = 1.0f;
     work->unk00 = 0;
     work->unk04 = 0;
     work->unk08 = 0;
@@ -703,7 +703,7 @@ void effPcpCopyDelayedPairVector(void *dst, void *src) {
 }
 
 void effPcpSetDelayedPairScale(EffPCPDelayedPairs *work, f32 val) {
-    work->unk14 = val;
+    work->scale = val;
 }
 
 void effPcpSetDelayedPairColor(EffPCPDelayedPairs *work, u32 val) {
