@@ -193,13 +193,13 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
     return result;
 }
 
-s32 btlQueryUnitChannelFlags(BtlUnit *first, BtlUnit *second, s32 other, s32 variant, s32 mode) {
+s32 btlQueryUnitChannelFlags(BtlUnit *source, BtlUnit *recipient, s32 command, s32 press, s32 kind) {
     s32 flags;
-    if (mode != 1) {
+    if (kind != 1) {
         return 0;
     }
-    flags = sdfQueryChannelBits(other, (s32)&first->partyRecord, (s32)&second->partyRecord);
-    if ((second->partyRecord.status & 8) != 0 && variant == 2) {
+    flags = sdfQueryChannelBits(command, (s32)&source->partyRecord, (s32)&recipient->partyRecord);
+    if ((recipient->partyRecord.status & 8) != 0 && press == 2) {
         flags |= 8;
     }
     return flags;
