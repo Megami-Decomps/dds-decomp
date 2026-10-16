@@ -445,7 +445,7 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
     state[3] = fourth;
 }
 
-extern u32 ptyAddProfilePoints(DatPartyRecord *, s32);
+extern u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
