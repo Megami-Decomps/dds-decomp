@@ -38,7 +38,7 @@ extern void fldSetFadeTarget(s32, s32, s32);
 extern void evtBeginSkyParameterTransition(s32, s32);
 
 s32 scrReadIntParameter(s32 idx);
-extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
+extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 worldObjectKey);
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
 s32 evtCommandWaitLightResourceScale(void) {

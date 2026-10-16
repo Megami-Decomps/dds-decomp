@@ -46,7 +46,7 @@ extern char D_00421FE8[];
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
-extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
+extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 worldObjectKey);
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
 s32 evtCommandWaitLightResourceScale(void) {
