@@ -3485,7 +3485,7 @@ typedef union FldLookAtVector {
     u128 q;
     f32 f[4];
 } FldLookAtVector;
-void func_0012F078(void) {
+void fldInitializeCameraViewFromPlayer(void) {
     FldAreaWork *area;
     FldLookAtVector nearPoint;
     FldLookAtVector referencePoint;
