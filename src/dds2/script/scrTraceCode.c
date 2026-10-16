@@ -98,16 +98,16 @@ u32 scrAdvanceTraceProgramCounter(ScrData *scr) {
 
 /* Yield without consuming operands until the command completes. */
 u32 bfOpWaitDispatch(ScrData *scr) {
-    s32 pc = scr->pc;
-    s32 commandIndex = scr->instructions[pc].parts.sOperand;
+    s32 programCounter = scr->pc;
+    s32 commandIndex = scr->instructions[programCounter].parts.sOperand;
 
     scrCurrentContext = scr;
     if (D_00411408[commandIndex].func() == 0) {
         return 2;
     }
     scr->sp -= D_00411408[commandIndex].paramCount;
-    if (pc == scr->pc) {
-        scr->pc = pc + 1;
+    if (programCounter == scr->pc) {
+        scr->pc = programCounter + 1;
     }
     return 1;
 }
@@ -457,18 +457,18 @@ u32 bfOpJumpIfFalse(ScrData *scr)
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
  * 1 when a handler returns 2 (yield for one tick). */
 s32 bfContextStep(ScrData *scr) {
-    u32 result;
+    u32 handlerResult;
 
     while (1) {
-        result = scrOpcodeHandlers[scr->instructions[scr->pc].parts.opCode](scr);
-        if (result == 0) {
+        handlerResult = scrOpcodeHandlers[scr->instructions[scr->pc].parts.opCode](scr);
+        if (handlerResult == 0) {
             scr->cmdTimer = 0;
             return 2;
         }
-        if (result == 2) {
+        if (handlerResult == 2) {
             break;
         }
-        if (result == 1) {
+        if (handlerResult == 1) {
             scr->cmdTimer = 0;
         }
     }
