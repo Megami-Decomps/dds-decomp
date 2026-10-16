@@ -156,12 +156,12 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
     process->pc = process->procedures[procedureIndex].addr;
     process->sp = 0;
     {
-        ScrStackValue *value = process->stackValues;
-        s8 *type = process->stackTypes;
+        ScrStackValue *stackValue = process->stackValues;
+        s8 *stackType = process->stackTypes;
 
         for (i = SCR_STACK_RET; i >= 0; i--) {
-            *type++ = 0;
-            value++->i = 0;
+            *stackType++ = 0;
+            stackValue++->i = 0;
         }
     }
     process->procedureIndex = procedureIndex;
