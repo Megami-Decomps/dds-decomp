@@ -730,7 +730,7 @@ extern void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translatio
                                                u32 id, s32 sceneFlag, s32 ownerIndex);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
-extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
+extern EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name);
 extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
