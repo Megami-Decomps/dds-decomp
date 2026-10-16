@@ -2616,7 +2616,7 @@ extern u8 D_003BD344;
 extern s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD4B0);
 
