@@ -149,7 +149,7 @@ extern DevState *sdfDevAllocState(void *, s32, s32,
 
 extern u16 sdfDefaultDevRequestOptions;
 
-extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern void func_0034D038(u32 arg0);
 
