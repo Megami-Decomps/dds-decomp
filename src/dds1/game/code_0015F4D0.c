@@ -29,7 +29,7 @@ extern BillDispatch billObjectCallbacks[];
 extern BillDispatch D_0034E654[];
 extern BillDispatch effBillConstructorEntries[];
 #include "sdf_packet_alloc.h"
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 extern void (*D_0034E680[])();
 extern void (*D_0034E690[])();
 extern void effBattleReleaseParameterBanks(SoundMixer *);
