@@ -1139,7 +1139,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
             btlBossDebugPrintf(D_003A3670, currentTarget);
             {
                 u64 owner = action->unit->identity;
-                endDelay = action->indexWork.unk2E != 0 ? endDelay : 0;
+                endDelay = action->indexWork.allTargetSideActorsSkipped != 0 ? endDelay : 0;
                 commandOwner = owner;
             }
         } else {
@@ -1722,7 +1722,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                     task = btlCreateImmediateCompletionTask();
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
-                    task->startDelay = action->indexWork.unk2E == 0 ? 10 : 18;
+                    task->startDelay = action->indexWork.allTargetSideActorsSkipped == 0 ? 10 : 18;
                     task->ownerId = unit->identity;
                     btlStartTask(task);
                 }
