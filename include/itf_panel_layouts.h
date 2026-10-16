@@ -51,7 +51,7 @@ typedef struct PanelRec {
     u8 bytes35[0xB];
     PanelOptionBlock options;
     u8 bytes58[0x50];
-    s32 layoutSpriteAddress; /* 0xA8: UiSprite address passed to the layout updater. */
+    UiSprite *layoutSprite; /* 0xA8: sprite passed to the layout updater. */
 } PanelRec;
 
 /* Table entry begins with its payload pointer; the trailing words are unknown. */
@@ -89,8 +89,9 @@ typedef char PanelRec_subrecord_at_0x24[
     ((u32)&((PanelRec *)0)->sub24 == 0x24) ? 1 : -1];
 typedef char PanelRec_options_at_0x40[
     ((u32)&((PanelRec *)0)->options == 0x40) ? 1 : -1];
-typedef char PanelRec_opaque_word_at_0xA8[
-    ((u32)&((PanelRec *)0)->layoutSpriteAddress == 0xA8) ? 1 : -1];
+typedef char PanelRec_layoutSprite_at_0xA8[
+    ((u32)&((PanelRec *)0)->layoutSprite == 0xA8) ? 1 : -1];
+typedef char PanelRec_size_must_be_0xAC[sizeof(PanelRec) == 0xAC ? 1 : -1];
 typedef char PanelEntry_ptr_at_0x00[
     ((u32)&((PanelEntry *)0)->ptr == 0x00) ? 1 : -1];
 typedef char PanelEntry_size_must_be_0x14[
