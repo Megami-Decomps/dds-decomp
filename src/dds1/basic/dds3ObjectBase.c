@@ -83,7 +83,7 @@ void dds3ClearObjectFlags(void *object, s32 mask) {
 }
 
 /* Return whether any requested mask bit is set, not whether all bits are set. */
-u8 dds3TestObjectFlags(void *object, s32 mask) {
+u8 dds3TestObjectFlags(void *object, u32 mask) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(object);
