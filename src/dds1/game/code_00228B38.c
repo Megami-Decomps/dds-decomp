@@ -17,7 +17,8 @@ typedef struct {
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
                                              s32 contextHandle, s32 color);
 extern void sdfDrawColoredTriangleFan(s32, s32, s32 *, s32, s32, s32);
-extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 extern s32 D_0036832C[];
 extern s32 evtSolarNoiseLayerPlacements[][3];
 extern SolarOverlayShape evtSolarOverlayShapes[];
