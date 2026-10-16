@@ -466,7 +466,7 @@ extern void fldInterpolateCameraEndpoints(void);
 extern void fldUpdateCameraFollowLinkedObject(void);
 extern void fldUpdateCameraMoveOscillation(void);
 extern u8 fldTestSceneControlFlags(u32);
-extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
+extern f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz);
 extern void fldClearCameraModelColor(void);
 extern void fldSetCameraObjectTransitionFlag(void);
 extern void fldClearCameraObjectTransitionFlags(void);

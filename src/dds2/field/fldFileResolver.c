@@ -3646,7 +3646,7 @@ void fldClearCameraMoveMode(void) {
     D_004360AC = 0;
 }
 
-extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
+extern f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz);
 extern void fldSetCameraObjectHighlightFlag(void);
 extern void fldClearSceneModelColors(void);
 extern void fldMarkPrimaryObjectByPeerPresence(void);
