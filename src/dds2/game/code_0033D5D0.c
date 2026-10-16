@@ -722,7 +722,7 @@ extern s32 sdfAllocHeapMemory(s32);
 
 extern s32 sdfDevReadFileBytes(s32, s32, s32);
 
-extern s32 sceClose(s32);
+extern s32 sceClose(s32 fd);
 
 /* Read a whole named file into the loader's allocated EE buffer, then close it. */
 void sdfDevLoadWholeFile(const char *fileName) {
@@ -899,7 +899,7 @@ extern char *sdfDevAllocateNormalizedPath();
 
 extern s32 sceOpen();
 
-extern s32 sceClose(s32);
+extern s32 sceClose(s32 fd);
 
 s32 sdfPathExists(char *path) {
     char *resolved = sdfDevAllocateNormalizedPath(path);
