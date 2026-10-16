@@ -2216,7 +2216,7 @@ void btlEnterBatActionState(s32 task) {
     ;
 }
 
-extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
+extern u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 /* Retail BAT state: schedule the status-table model; BAT's meaning is not expanded. */
 void btlScheduleBatStateModelChange(u8 *task) {
