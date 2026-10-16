@@ -516,11 +516,9 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
         (const u8 *)viewer->entryName[index]);
 }
 
-struct PolyMovieObject;
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
-extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *movie, s32 undo, s32 start, s32 end);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
@@ -1192,8 +1190,6 @@ void evtEventViewerUpdateUnitTransitions(s32 time, EvtRuntime *viewer) {
 
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
 extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
-struct PolyMovieObject;
-extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
  * unit's byte and float parameters from the active kind-3/4 key to the next
@@ -1473,8 +1469,6 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
 
 
 
-extern void evtPolygonMovieClampTime(s32 movie, s32 unused, s32 start, s32 end);
-
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset) and the supplied endTime. */
 void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
@@ -1503,7 +1497,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                 } else {
                                     time = node->metadata.value;
                                 }
-                                evtPolygonMovieClampTime(object, 0, time, endTime);
+                                evtPolygonMovieClampTime((PolyMovieObject *)object, 0, time, endTime);
                                 break;
                             }
                             node = node->next;
