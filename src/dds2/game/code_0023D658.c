@@ -1301,12 +1301,12 @@ u32 evtOpSetUnitPackedAlpha(void) {
 }
 
 u32 evtOpSetUnitValueTransitionTarget(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     EffWorldNode *target;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     target = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(2));
     if (target == NULL) {
         return 1;
@@ -1316,12 +1316,12 @@ u32 evtOpSetUnitValueTransitionTarget(void) {
 }
 
 u32 evtOpEndUnitValueTransition(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     s32 param1;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     param1 = scrReadIntParameter(1);
     evtEndUnitValueTransition(unit, param1);
     return 1;
@@ -1444,12 +1444,12 @@ u32 evtOpBuiltin359NoOp(void) {
 }
 
 u32 evtUnitCheckModelCut(void) {
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 param1;
 
-    id = scrReadIntParameter(0);
-    unit = evtFindWorldObjectByIdAndKind(7, id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (unit != NULL) {
         param1 = scrReadIntParameter(1);
         if (param1 >= 3U) {
