@@ -123,10 +123,10 @@ void mnuDrawMantraScenePlacementSprite(s32 x, s32 y, s32 z, s32 drawContext, s32
     mnuDrawPlacedSpriteFromTable(x, y, z, drawContext, 14, drawArgument);
 }
 
-void mnuDrawMantraSceneSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4) {
-    mnuDrawPlacedSpriteFromTable(a0, a1, a2, a3, 0x47, a4);
-    mnuDrawPlacedSpriteFromTable(a0, a1, a2, a3, 0x48, a4);
-    mnuDrawPlacedSpriteFromTable(a0, a1, a2, a3, 0x49, a4);
+void mnuDrawMantraSceneSpriteGroup(s32 x, s32 y, s32 z, s32 alpha, s32 context) {
+    mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x47, context);
+    mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x48, context);
+    mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x49, context);
 }
 
 typedef struct {

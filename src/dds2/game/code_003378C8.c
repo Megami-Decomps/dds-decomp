@@ -90,7 +90,7 @@ typedef struct VuGeomRef {
 
 extern VuGeomRef D_00468210[];
 
-extern void sdfVuEmitSelectedNodePacket(s32 workAddress);
+extern void sdfVuEmitSelectedNodePacket(VuWork *work);
 
 void sdfVuBlendNodeXY(VuBlendNode *node);
 
@@ -324,8 +324,8 @@ void sdfVuEmitColoredTriangleBatches(work)
 }
 
 /* Select textured or colored emission; preserve the native no-argument calls. */
-void sdfVuEmitSelectedNodePacket(s32 workAddress) {
-    if ((*(u32 *)(workAddress + 0x44) & SDF_VU_TEXTURED_FLAG) != 0) {
+void sdfVuEmitSelectedNodePacket(VuWork *work) {
+    if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
         sdfVuEmitTexturedTriangleBatches();
         return;
     }
