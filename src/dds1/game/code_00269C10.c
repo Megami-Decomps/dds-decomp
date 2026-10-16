@@ -76,16 +76,16 @@ extern void mnuInitializeTitleAudioStreams(void);
 
 extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
 
-s32 sndCopyWordsToIopSynchronously(u32 sourceAddress, u32 iopAddress, u32 wordCount);
+s32 sndCopyWordsToIopSynchronously(const void *source, u32 iopAddress, u32 wordCount);
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount);
 
-s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words);
+s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words);
 
 /* The argument is a word count, not a source address; both use the EE buffer. */
 void sndUploadStreamToBothIopBuffers(u32 wordCount) {
-    sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[0], wordCount);
-    sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[1], wordCount);
+    sndCopyWordsToIopSynchronously((const void *)D_003BC5B8, D_003BC5B0[0], wordCount);
+    sndCopyWordsToIopSynchronously((const void *)D_003BC5B8, D_003BC5B0[1], wordCount);
     sndDispatchIopAudioCommand(1, 0x8010, 0xf80, 0);
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0);
     sndDispatchIopAudioCommand(1, 0x80e0, 0, 2, 0, 0);
@@ -176,7 +176,7 @@ void mnuUpdateTitleAudioStreams(void) {
     }
 
     if (mnuTitleStreamStatus.control == 2 && mnuTitleSoundBufferState.control == 2) {
-        D_003BC5C0 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleAudioSilenceBuffer, 0x400);
+        D_003BC5C0 = mnuCopySoundStreamOnStatusChange(mnuTitleAudioSilenceBuffer, 0x400);
         source = (u8 *)mnuTitleStreamStatus.samples;
         memcpy(mnuTitleAudioSilenceBuffer, source, 0x1000);
         if (D_003BC5C4 != 0) {
@@ -192,11 +192,11 @@ void mnuUpdateTitleAudioStreams(void) {
     D_003BC5C4 = 1;
 
     if (mnuTitleStreamStatus.control != 2 && mnuTitleSoundBufferState.control == 2) {
-        D_003BC5C0 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleStreamStatus.samples, 0x400);
+        D_003BC5C0 = mnuCopySoundStreamOnStatusChange(mnuTitleStreamStatus.samples, 0x400);
         memcpy(mnuTitleAudioMixBuffer, mnuTitleStreamStatus.samples, 0x1000);
     } else {
         sndMixSampleBuffers((s16 *)mnuTitleAudioMixBuffer, &mnuTitleSoundBufferState, &mnuTitleStreamStatus);
-        D_003BC5C0 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleAudioMixBuffer, 0x400);
+        D_003BC5C0 = mnuCopySoundStreamOnStatusChange(mnuTitleAudioMixBuffer, 0x400);
     }
 
     if (mnuTitleStreamStatus.control == 0) {
