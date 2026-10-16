@@ -3609,7 +3609,7 @@ s32 evtViewerPickNextHandler(KwlnTask *task) {
 
 extern s16 D_003BBE7C;
 extern s8 D_00324510[];
-extern s32 itfMesStartEntry(s32, s32, s32);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
 extern s32 mnuGetMoviePlaybackMode(void);
