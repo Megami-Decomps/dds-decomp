@@ -295,12 +295,12 @@ void brsStepAnimDecay(BrsSkillPackageWork *work) {
 }
 
 /* Getter/clear pair for one word at byte offset 0xB6E0 of the work block. */
-s32 mnuGetTitleState(BrsSkillPackageWork *work) {
-    return work->fadeProgress;
+s32 mnuGetTitleState(BrsSkillPackageWork *skillPackage) {
+    return skillPackage->fadeProgress;
 }
 
-void mnuClearTitleState(BrsSkillPackageWork *work) {
-    work->fadeProgress = 0;
+void mnuClearTitleState(BrsSkillPackageWork *skillPackage) {
+    skillPackage->fadeProgress = 0;
 }
 
 void brsNoOpMessageInputCallback(void *work) {
