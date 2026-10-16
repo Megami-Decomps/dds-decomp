@@ -20,6 +20,7 @@
 #include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
 #include "sdf_pending.h"
+#include "sdf_queued_resource_api.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "sdf_gs_flat_shapes.h"
@@ -113,7 +114,6 @@ void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 desti
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
 void sdfDestroyObjectList(SdfModel *owner);
 #include "sdf_packet_alloc.h"
-extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 
 
