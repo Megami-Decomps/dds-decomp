@@ -1793,18 +1793,18 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
     s32 reason;
 
     if (fileTestSavedSlotFlags(2)) {
-        if ((s16)unit->partyRecord.unk18C == 10) {
-            work->phase = (s16)unit->partyRecord.unk18C;
+        if ((s16)unit->partyRecord.savedCommandPhase == 10) {
+            work->phase = (s16)unit->partyRecord.savedCommandPhase;
             return;
         }
-        if (((s16)unit->partyRecord.unk18C == 2 ||
-             (s16)unit->partyRecord.unk18C == 7) &&
+        if (((s16)unit->partyRecord.savedCommandPhase == 2 ||
+             (s16)unit->partyRecord.savedCommandPhase == 7) &&
             (btlUnitStatusPair(unit) & 0x1400)) {
             if ((s16)unit->partyRecord.actionSlot == 0) {
                 work->phase = 1;
             } else if ((unit->status.flags & 0x400) || (battle->battleFlags & 0x1000000) ||
                        btlCheckSpecialAbility(&unit->partyRecord, (s16)unit->partyRecord.actionSlot)) {
-                work->phase = (s16)unit->partyRecord.unk18C;
+                work->phase = (s16)unit->partyRecord.savedCommandPhase;
                 work->skillId = (s16)unit->partyRecord.actionSlot;
             } else {
                 work->skillId = 0;
@@ -1832,7 +1832,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
             work->skillId = 0;
             work->phase = 1;
         }
-        unit->partyRecord.unk18C = work->phase;
+        unit->partyRecord.savedCommandPhase = work->phase;
         unit->partyRecord.actionSlot = work->skillId;
         list = btlAllocateIndexList(13);
         kind = btlSelectCommandTargetPolicy(task, list, 0);
@@ -1841,7 +1841,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
             work->skillId = 0;
             work->phase = 1;
             unit->partyRecord.actionSlot = work->skillId;
-            unit->partyRecord.unk18C = work->phase;
+            unit->partyRecord.savedCommandPhase = work->phase;
             btlClearIndexList(list);
             kind = btlSelectCommandTargetPolicy(task, list, 0);
         }
