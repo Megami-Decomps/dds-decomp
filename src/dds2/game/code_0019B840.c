@@ -56,11 +56,11 @@ u16 frFontGetSlotCellHeight(s32 slotIndex) {
     return frFontWork.entries[slotIndex].resourceHeader->cellHeight;
 }
 
-void itfSetTextDrawLimit(s32 value) {
-    if (value < 1) {
-        value = 0x14;
+void itfSetTextDrawLimit(s32 limit) {
+    if (limit < 1) {
+        limit = 0x14;
     }
-    frFontDefaultGlyphCellSize = value;
+    frFontDefaultGlyphCellSize = limit;
 }
 
 /* Select by the low byte of slotId; enable the entry and store value + 1 as a byte. */
