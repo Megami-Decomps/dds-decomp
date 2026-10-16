@@ -990,7 +990,7 @@ extern char D_00436628[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
-extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
+extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode);
 
 /* Run and draw the interactive message-layout inspector. */
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414CE0);
@@ -2404,7 +2404,7 @@ void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     D_00380708.append(&D_00380708, list);
 }
 
-void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
+void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 boundsMode) {
     UiSprite *sprite = object->sprite;
     s32 *bounds;
     s32 dx;
@@ -2427,7 +2427,7 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
             dy *= 8;
         }
         if (dx != 0 || dy != 0) {
-            switch (mode) {
+            switch (boundsMode) {
             case 0:
                 itfAdvancePanelLayoutAndNotify(sprite, dx, dy, 0, 0, 0);
                 bounds[0] += dx;
