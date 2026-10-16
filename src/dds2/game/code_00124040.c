@@ -587,7 +587,7 @@ f32 fldSnapAngleToCompassOctant(f32 angle) {
     return angle;
 }
 
-extern f32 fldAngleDifference(f32, f32);
+extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 
 f32 fldSnapAngleToCardinalDirection(f32 angle) {
     f32 best;

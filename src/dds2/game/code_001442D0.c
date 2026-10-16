@@ -86,7 +86,7 @@ typedef struct EffNode EffNode;
 
 extern u8 fldTestSceneControlFlags(u32);
 
-extern f32 fldAngleDifference(f32, f32);
+extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 
 
 
