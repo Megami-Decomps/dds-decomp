@@ -48,7 +48,7 @@ extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 #include "sdf_vector_transform.h"
 extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
-extern void sdfVec3ScaleInPlace(f32, f32 *);
+extern void sdfVec3ScaleInPlace(f32 scale, f32 *vector);
 
 struct FrFontGlyph;
 
