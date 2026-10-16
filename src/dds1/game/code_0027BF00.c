@@ -366,8 +366,8 @@ MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *window, const void *n
 }
 
 
-MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *window, MenuListNode *anchor, const void *value, s32 mode, u32 options) {
-    return mnuInsertListNodeRelativeToAnchor(window->list, anchor, value, mode, options);
+MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *window, MenuListNode *anchor, const void *nodeValue, s32 mode, u32 options) {
+    return mnuInsertListNodeRelativeToAnchor(window->list, anchor, nodeValue, mode, options);
 }
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *window) {
