@@ -4066,13 +4066,15 @@ typedef struct FieldResourceRecord {
     s16 category;
     s16 id;
     s16 entryCount;
-    s16 unk06;
+    s16 encounterSelection;
     s16 duration;
     u8 pad0A[0x16];
     FldSparkSequence sequences[16];
 } FieldResourceRecord;
 
 typedef char FieldResourceRecordSizeCheck[(sizeof(FieldResourceRecord) == 0xE0) ? 1 : -1];
+typedef char FieldResourceRecord_encounterSelection_offset_must_be_0x06[
+    ((u32)&((FieldResourceRecord *)0)->encounterSelection == 0x06) ? 1 : -1];
 
 extern FieldResourceRecord *D_00435E18;
 
@@ -4821,7 +4823,7 @@ void fldTickWeatherEffectNodes(void) {
 
 /* The serialized resource row retains a signed parameter at +6. */
 s32 fldGetSparkEncounterSelection(void) {
-    return fldSparkControlState.entry->unk06;
+    return fldSparkControlState.entry->encounterSelection;
 }
 
 s32 fldGetSparkRewardProfileIndex(void) {
