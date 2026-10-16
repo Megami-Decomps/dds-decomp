@@ -1195,11 +1195,11 @@ u8 prfReq18GetWord3220(s32 entryIndex) {
     return D_00393220[entryIndex].v0;
 }
 
-s32 prfReqGetPair(s32 index, s32 requirement, s32 *minimum) {
+s32 prfReqGetPair(s32 entryIndex, s32 requirementIndex, s32 *minimum) {
     if (minimum != NULL) {
-        *minimum = D_00393220[index].requirement[requirement].minimum;
+        *minimum = D_00393220[entryIndex].requirement[requirementIndex].minimum;
     }
-    return D_00393220[index].requirement[requirement].id;
+    return D_00393220[entryIndex].requirement[requirementIndex].id;
 }
 
 /* Read the flag ID in an unchecked prerequisite-table entry. */
