@@ -184,7 +184,7 @@ ScrData *scrFindNamedProcessNode(char *name) {
 }
 
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
-s32 bfFindScriptIndexByName(const BfFlw0Header *header, const char *name) {
+s32 bfFindScriptIndexByName(const BfFlw0Header *header, const char *procedureName) {
     const ScrLabel *procedures = NULL;
     const ScrSection *sections;
     s32 sectionIndex;
@@ -204,7 +204,7 @@ s32 bfFindScriptIndexByName(const BfFlw0Header *header, const char *name) {
         return -1;
     }
     for (procedureIndex = 0; procedureIndex < sections[sectionIndex].count; procedureIndex++) {
-        if (strcmp(procedures[procedureIndex].name, name) == 0) {
+        if (strcmp(procedures[procedureIndex].name, procedureName) == 0) {
             return procedureIndex;
         }
     }
