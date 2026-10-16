@@ -3768,7 +3768,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *target, f32 scale) {
+BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, const f32 target[4], f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
     BtlPosLerpTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -3828,7 +3828,7 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, f32 *target, f32 scale, s8 mode) {
+BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 target[4], f32 scale, s8 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
     u8 *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
