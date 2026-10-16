@@ -509,21 +509,21 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *resource) {
 extern s8 D_0037F510[64];
 extern s32 mnuNavigateMantraSelector(MnuStatusResource *, s8);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
-s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
-    MantraMenuWork *work = &object->menu;
+s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
+    MantraMenuWork *work = &resource->menu;
     s32 sound = 0;
     s32 result = 0;
-    s32 direction = 0;
+    s32 directionFlags = 0;
 
     if (D_0037F510[0x26] != 0) {
-        direction = 1;
+        directionFlags = 1;
     } else if (D_0037F510[0x27] != 0) {
-        direction |= 4;
+        directionFlags |= 4;
     }
     if (D_0037F510[0x24] != 0) {
-        direction |= 8;
+        directionFlags |= 8;
     } else if (D_0037F510[0x25] != 0) {
-        direction |= 2;
+        directionFlags |= 2;
     }
     if (D_0037F510[0x26] < 0 || D_0037F510[0x27] < 0 ||
         D_0037F510[0x24] < 0 || D_0037F510[0x25] < 0) {
@@ -534,40 +534,40 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
     if (work->navigationState > 0) {
         work->navigationState--;
         if (work->navigationState >= 8) {
-            work->navigationMask |= direction;
+            work->navigationMask |= directionFlags;
         } else if (work->navigationState == 7) {
-            work->navigationMask |= direction;
+            work->navigationMask |= directionFlags;
             work->drawFlags |= 0x04000000;
         } else {
-            work->navigationMask = direction;
+            work->navigationMask = directionFlags;
             work->drawFlags &= ~0x04000000;
         }
-    } else if (direction != 0) {
-        work->navigationMask = direction;
+    } else if (directionFlags != 0) {
+        work->navigationMask = directionFlags;
         work->navigationState = 9;
     } else {
         work->navigationMask = 0;
     }
     if (((work->drawFlags >> 26) & 1) != 0 || D_0037F510[0x26] != 0 ||
         D_0037F510[0x27] != 0 || D_0037F510[0x24] != 0 || D_0037F510[0x25] != 0) {
-        if (mnuNavigateMantraSelector(object, (s8)work->navigationMask) != 0) {
+        if (mnuNavigateMantraSelector(resource, (s8)work->navigationMask) != 0) {
             MantraNodePos *position = (MantraNodePos *)work->defaultSelector;
             sound = 1;
             work->navigationMask = 0;
             mnuSpawnMantraIconAtPosition(
                 (s32)((f32)position->x / 10.0f * 40.0f),
                 (s32)((f32)position->y / 10.0f * 39.0f),
-                object->menu.selectionController);
+                resource->menu.selectionController);
         }
     }
     if (work->navigationState == 0) {
         if (D_0037F510[0x28] < 0) {
             sound = 4;
-            mnuSelectPreviousMantraUnit(object);
+            mnuSelectPreviousMantraUnit(resource);
             work->navigationState = 5;
         } else if (D_0037F510[0x2A] < 0) {
             sound = 4;
-            mnuSelectNextMantraUnit(object);
+            mnuSelectNextMantraUnit(resource);
             work->navigationState = 5;
         }
     }
@@ -576,13 +576,13 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
         if (work->drawBits.iconFade != 0) {
             sound = 3;
             work->drawBits.iconFade = 0;
-        } else if ((((MantraNodePos *)object->menu.defaultSelector)->selector.packed & 0x100) == 0) {
-            switch (mnuGetSelectedPanelValue(object) & 0xF) {
+        } else if ((((MantraNodePos *)resource->menu.defaultSelector)->selector.packed & 0x100) == 0) {
+            switch (mnuGetSelectedPanelValue(resource) & 0xF) {
             case 1:
                 result = 2;
                 sound = 2;
                 if (work->drawBits.showOverlay != 0) {
-                    mnuSetMantraFadeState(object->menu.selectionController, 5, 0);
+                    mnuSetMantraFadeState(resource->menu.selectionController, 5, 0);
                 }
                 break;
             default:
