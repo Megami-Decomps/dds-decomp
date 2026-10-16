@@ -771,9 +771,9 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     entry->unk1C = asset->primaryStateFloat;
     entry->unk08 = asset->primaryStateWordSecond;
     if (sdfForcedAssetTextureMode == SDF_FORCED_TEXTURE_ZERO_STATE_MODE) {
-        entry->unk10 = 0;
+        entry->primaryStateWordThird = 0;
     } else {
-        entry->unk10 = asset->primaryStateWordThird;
+        entry->primaryStateWordThird = asset->primaryStateWordThird;
     }
     entry->unk14 = asset->primaryStateWordFourth;
     texture = asset->texture;
