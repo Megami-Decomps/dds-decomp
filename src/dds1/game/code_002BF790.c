@@ -107,15 +107,15 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     return result;
 }
 
-void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
-    EffectSlotDescription *entry = &object->descriptions[index];
-    void *record = effGetSlotWorkOrOverride(object, index);
+void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height) {
+    EffectSlotDescription *entry = &resource->descriptions[resourceIndex];
+    void *record = effGetSlotWorkOrOverride(resource, resourceIndex);
 
     entry->bounds[0] = x >> 4;
     entry->bounds[1] = y >> 3;
     entry->bounds[2] = width >> 4;
     entry->bounds[3] = height >> 3;
-    effInitializeSlotWorkFromDescription(object, index, record);
+    effInitializeSlotWorkFromDescription(resource, resourceIndex, record);
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
