@@ -52,8 +52,8 @@ typedef struct UiObject {
 
 
 /* Clear only the requested bits of the unit's halfword status. */
-void datClearUnitStatusBits(DatPartyRecord *work, s32 mask) {
-    work->status &= ~mask;
+void datClearUnitStatusBits(DatPartyRecord *unit, s32 mask) {
+    unit->status &= ~mask;
 }
 
 /* Add each owned HP bonus separately against the original maximum, truncating
