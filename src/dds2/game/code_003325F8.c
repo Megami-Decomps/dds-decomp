@@ -568,13 +568,14 @@ SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *asset) {
 }
 
 /* Store the five primary scalars in order and dirty both draw entries. */
-void sdfSetPrimaryTextScalars(SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e) {
+void sdfSetPrimaryTextScalars(SdfAsset *asset, f32 centerOffsetX, f32 centerOffsetY,
+                              f32 basisScaleX, f32 basisScaleY, f32 rotationInput) {
     f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
-    scalarValues[0] = a;
-    scalarValues[1] = b;
-    scalarValues[2] = c;
-    scalarValues[3] = d;
-    scalarValues[4] = e;
+    scalarValues[0] = centerOffsetX;
+    scalarValues[1] = centerOffsetY;
+    scalarValues[2] = basisScaleX;
+    scalarValues[3] = basisScaleY;
+    scalarValues[4] = rotationInput;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
 }
 
@@ -618,13 +619,14 @@ SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfAsset *asset) {
 }
 
 /* Store the five secondary scalars in order and dirty both draw entries. */
-void sdfSetSecondaryTextScalars(SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e) {
+void sdfSetSecondaryTextScalars(SdfAsset *asset, f32 centerOffsetX, f32 centerOffsetY,
+                                f32 basisScaleX, f32 basisScaleY, f32 rotationInput) {
     f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
-    scalarValues[0] = a;
-    scalarValues[1] = b;
-    scalarValues[2] = c;
-    scalarValues[3] = d;
-    scalarValues[4] = e;
+    scalarValues[0] = centerOffsetX;
+    scalarValues[1] = centerOffsetY;
+    scalarValues[2] = basisScaleX;
+    scalarValues[3] = basisScaleY;
+    scalarValues[4] = rotationInput;
     asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
