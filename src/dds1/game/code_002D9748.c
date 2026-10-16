@@ -750,13 +750,13 @@ void sdfQueueAssetRelease(SdfAsset *asset) {
 }
 
 /* Reference the selected buffered asset draw entry and return the packet payload. */
-void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfDmaTagHeader *tag, s32 frame) {
+SdfDmaTagHeader *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfDmaTagHeader *tag, s32 frame) {
     tag->control = 0x30;
     tag->address = (u32)asset->drawEntries[frame] & SDF_NODE_SOURCE_WORD_MASK;
     tag->quadwordCount = 0xA;
     tag->firstVifCode = 0;
     tag->secondVifCode = 0;
-    return (void *)((u8 *)tag + SDF_NODE_HEADER_BYTES);
+    return (SdfDmaTagHeader *)((u8 *)tag + SDF_NODE_HEADER_BYTES);
 }
 
 /* Copy primary words and optional GS texture state; only mode one zeros its state word. */

@@ -11,6 +11,7 @@
 #include "sdf_quaternion.h"
 #include "btl_motion_transform.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_packets.h"
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
@@ -8667,7 +8668,6 @@ extern vu8 sdfCurrentBufferIndex;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfAssetApplyEntryChanges(SdfAsset *, s32);
-extern void *sdfInitAssetDrawEntryReferenceNode(u32 *, void *, s32);
 extern void sdfAppendReferencePacket(SdfListHead *, u32);
 extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 extern void sdfBuildMaskedFrameRegisterReference(s32, u32, s32);
@@ -8747,7 +8747,8 @@ void func_002F3F70(u8 *owner, void *matrix) {
     entry->secondaryMode = mode;
     entry->alphaState = registerId;
     referencePacket = sdfAllocPacketAligned(0x20);
-    sdfInitAssetDrawEntryReferenceNode((u32 *)work->handle, referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitAssetDrawEntryReferenceNode((SdfAsset *)work->handle, (SdfDmaTagHeader *)referencePacket,
+                                       (s8)sdfCurrentBufferIndex);
     referencePacket[1] = 0;
     sdfAppendReferencePacket(list, (u32)referencePacket);
     dmaPacket = sdfAllocPacketAligned(0x40);
