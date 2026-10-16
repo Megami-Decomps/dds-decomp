@@ -392,15 +392,15 @@ void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id) {
 u32 evtGetWorldObjectId(void) {
     void *world;
     EffWorldNode *object;
-    s32 id;
+    s32 playerObjectKey;
 
     world = dds3GetWorldObject();
     object = dds3GetWorldPlayerObject(world);
-    id = -1;
+    playerObjectKey = -1;
     if (object != NULL) {
-        id = object->key;
+        playerObjectKey = object->key;
     }
-    scrSetIntegerReturnValue(id);
+    scrSetIntegerReturnValue(playerObjectKey);
     return 1;
 }
 
