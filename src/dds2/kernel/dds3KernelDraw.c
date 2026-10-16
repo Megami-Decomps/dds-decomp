@@ -135,9 +135,9 @@ void kwlnDrawCopyWords20(KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
 }
 
-/* Store a light-source pointer in the indexed light-source table slot. */
-void dds3DrawSetLightSourcePointer(u32 lightSourceAddress, s32 index) {
-    D_0037F770[index] = lightSourceAddress;
+/* Store a light-source pointer in the indexed raw address table. */
+void dds3DrawSetLightSourcePointer(void *lightSource, s32 index) {
+    D_0037F770[index] = (u32)lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */
