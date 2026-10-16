@@ -189,7 +189,7 @@ McPollResult mcPollCompletionStatus(void) {
 
 /* Begin the SDK write through the existing unprototyped call. Keep its
  * argument form unchanged; this entry does not report completion. */
-void mcBeginWrite(s32 request, u32 first, u32 second) {
+void mcBeginWrite(s32 fileDescriptor, u32 dataAddress, u32 dataSize) {
     mcQueueWriteRequest();
 }
 
