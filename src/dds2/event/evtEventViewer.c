@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_dma_tag.h"
+#include "evt_window_shade_packet.h"
 #include "evt_camera_color_track_api.h"
 #include "kwln_background_fade_api.h"
 #include "evt_scaled_value.h"
@@ -2329,19 +2330,6 @@ void evtViewerMarkWindowActive(EvtRuntime *viewer) {
 void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
-
-/* One A+D register write (value, then the GS register id). */
-typedef struct EvtShadeRegister {
-    u64 value;
-    u64 registerId;
-} EvtShadeRegister;
-
-/* Per-draw-buffer window shade packet: setup registers, then a two-vertex
- * sprite covering the message window. */
-typedef struct EvtWindowShadePacket {
-    SdfDmaTagHeader tag;
-    EvtShadeRegister regs[10];
-} EvtWindowShadePacket;
 
 extern EvtWindowShadePacket evtWindowShadePackets[];
 extern u8 D_004372C8[4];
