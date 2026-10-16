@@ -624,12 +624,14 @@ typedef struct EffTemplatePacketList {
     };
     s32 recordList; /* 0x16C: start of the three-word packet records */
     s32 recordsPerPacket; /* 0x170 */
-    s32 listAllocation; /* 0x174 */
+    struct SdfMemBlock *listAllocation; /* 0x174: allocation descriptor */
     void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
-    s32 auxiliaryAllocation; /* 0x17C */
+    struct SdfMemBlock *auxiliaryAllocation; /* 0x17C: allocation descriptor */
 } EffTemplatePacketList;
 
 typedef char EffTemplatePacketList_layout_preserved[(sizeof(EffTemplatePacketList) == 0x180) ? 1 : -1];
+typedef char EffTemplatePacketList_listAllocation_offset[(u32)&((EffTemplatePacketList *)0)->listAllocation == 0x174 ? 1 : -1];
+typedef char EffTemplatePacketList_auxiliaryAllocation_offset[(u32)&((EffTemplatePacketList *)0)->auxiliaryAllocation == 0x17C ? 1 : -1];
 
 
 EffectBufferTail *effAllocateBuffer(s32 recordCount);

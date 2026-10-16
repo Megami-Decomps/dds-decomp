@@ -145,7 +145,7 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1);
+s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
