@@ -67,11 +67,11 @@ void brsDecaySharedAnimCounter(BrsSkillPackageWork *animationState) {
     brsStepAnimDecay(animationState);
 }
 
-u8 brsGetLevelStepForValue(s32 value) {
+u8 brsGetLevelStepForValue(s32 level) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (value >= brsLevelStepThresholds[i].threshold) {
+        if (level >= brsLevelStepThresholds[i].threshold) {
             return brsLevelStepThresholds[i].value;
         }
     }
