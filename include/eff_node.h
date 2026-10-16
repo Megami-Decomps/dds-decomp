@@ -42,7 +42,7 @@ void effApplyNodeScale(EffNode *node, f32 factor);
 s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node);
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix);
-void effSetNodeParameterValue(EffNode *node, u32 value);
+void effSetNodeParameterValue(EffNode *node, u32 parameterWord);
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag);
 s32 effInvokeOptionalNodeInstanceCallback(EffNode *node);
 EffNode *effCloneSourceWithTypeHandler(const EffNode *source);
