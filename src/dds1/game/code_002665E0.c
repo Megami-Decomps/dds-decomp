@@ -339,72 +339,72 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 }
 
 
-void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 progressRowIndex) {
     s32 y;
     s32 bob;
 
-    switch (work->levelAnimation[index].iconState) {
+    switch (work->levelAnimation[progressRowIndex].iconState) {
     case 0:
-        work->levelAnimation[index].iconColor = 0;
-        work->levelAnimation[index].iconPosition[0] = 0xA6;
-        work->levelAnimation[index].iconPosition[1] = 0x22;
-        work->levelAnimation[index].iconAngle = 0xB4;
+        work->levelAnimation[progressRowIndex].iconColor = 0;
+        work->levelAnimation[progressRowIndex].iconPosition[0] = 0xA6;
+        work->levelAnimation[progressRowIndex].iconPosition[1] = 0x22;
+        work->levelAnimation[progressRowIndex].iconAngle = 0xB4;
         break;
     case 1:
-        work->levelAnimation[index].iconAngle = (work->levelAnimation[index].iconAngle + 15) % 360;
-        work->levelAnimation[index].iconColor =
-            (u32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[index].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
-        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[index].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
-        work->levelAnimation[index].iconPosition[1] = 0x24 - bob;
-        work->levelAnimation[index].iconColor = (work->levelAnimation[index].iconColor > 0) ? ((work->levelAnimation[index].iconColor > 0x80) ? 0x80 : work->levelAnimation[index].iconColor) : 0;
-        y = work->levelAnimation[index].iconPosition[1];
-        work->levelAnimation[index].iconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
-        if (work->levelAnimation[index].iconColor >= 0x80) {
-            work->levelAnimation[index].iconState += 2;
-            work->levelAnimation[index].iconAngle = 0x78;
+        work->levelAnimation[progressRowIndex].iconAngle = (work->levelAnimation[progressRowIndex].iconAngle + 15) % 360;
+        work->levelAnimation[progressRowIndex].iconColor =
+            (u32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[progressRowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[progressRowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+        work->levelAnimation[progressRowIndex].iconPosition[1] = 0x24 - bob;
+        work->levelAnimation[progressRowIndex].iconColor = (work->levelAnimation[progressRowIndex].iconColor > 0) ? ((work->levelAnimation[progressRowIndex].iconColor > 0x80) ? 0x80 : work->levelAnimation[progressRowIndex].iconColor) : 0;
+        y = work->levelAnimation[progressRowIndex].iconPosition[1];
+        work->levelAnimation[progressRowIndex].iconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
+        if (work->levelAnimation[progressRowIndex].iconColor >= 0x80) {
+            work->levelAnimation[progressRowIndex].iconState += 2;
+            work->levelAnimation[progressRowIndex].iconAngle = 0x78;
         }
         break;
     case 2:
-        work->levelAnimation[index].iconState++;
-        work->levelAnimation[index].iconAngle = 0x78;
+        work->levelAnimation[progressRowIndex].iconState++;
+        work->levelAnimation[progressRowIndex].iconAngle = 0x78;
         break;
     default:
-        work->levelAnimation[index].iconColor -= 10;
-        work->levelAnimation[index].iconColor = (work->levelAnimation[index].iconColor > 0) ? ((work->levelAnimation[index].iconColor > 0x80) ? 0x80 : work->levelAnimation[index].iconColor) : 0;
-        y = work->levelAnimation[index].iconPosition[1] - 1;
-        work->levelAnimation[index].iconPosition[1] = y;
-        work->levelAnimation[index].iconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
-        if (work->levelAnimation[index].iconColor <= 0) {
-            work->levelAnimation[index].iconState = 0;
+        work->levelAnimation[progressRowIndex].iconColor -= 10;
+        work->levelAnimation[progressRowIndex].iconColor = (work->levelAnimation[progressRowIndex].iconColor > 0) ? ((work->levelAnimation[progressRowIndex].iconColor > 0x80) ? 0x80 : work->levelAnimation[progressRowIndex].iconColor) : 0;
+        y = work->levelAnimation[progressRowIndex].iconPosition[1] - 1;
+        work->levelAnimation[progressRowIndex].iconPosition[1] = y;
+        work->levelAnimation[progressRowIndex].iconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
+        if (work->levelAnimation[progressRowIndex].iconColor <= 0) {
+            work->levelAnimation[progressRowIndex].iconState = 0;
         }
         break;
     }
-    switch (work->levelAnimation[index].completionState) {
+    switch (work->levelAnimation[progressRowIndex].completionState) {
     case 0:
-        work->levelAnimation[index].auxiliaryColor = 0;
-        work->levelAnimation[index].auxiliaryPosition[0] = 0x95;
-        work->levelAnimation[index].auxiliaryPosition[1] = 0x15;
+        work->levelAnimation[progressRowIndex].auxiliaryColor = 0;
+        work->levelAnimation[progressRowIndex].auxiliaryPosition[0] = 0x95;
+        work->levelAnimation[progressRowIndex].auxiliaryPosition[1] = 0x15;
         break;
     case 1:
-        work->levelAnimation[index].auxiliaryColor += 10;
-        work->levelAnimation[index].auxiliaryColor = (work->levelAnimation[index].auxiliaryColor > 0) ? ((work->levelAnimation[index].auxiliaryColor > 0x80) ? 0x80 : work->levelAnimation[index].auxiliaryColor) : 0;
-        if (work->levelAnimation[index].auxiliaryColor >= 0x80) {
-            work->levelAnimation[index].completionState++;
-            work->levelAnimation[index].completionColor = 0;
+        work->levelAnimation[progressRowIndex].auxiliaryColor += 10;
+        work->levelAnimation[progressRowIndex].auxiliaryColor = (work->levelAnimation[progressRowIndex].auxiliaryColor > 0) ? ((work->levelAnimation[progressRowIndex].auxiliaryColor > 0x80) ? 0x80 : work->levelAnimation[progressRowIndex].auxiliaryColor) : 0;
+        if (work->levelAnimation[progressRowIndex].auxiliaryColor >= 0x80) {
+            work->levelAnimation[progressRowIndex].completionState++;
+            work->levelAnimation[progressRowIndex].completionColor = 0;
         }
         break;
     case 2:
-        work->levelAnimation[index].completionColor++;
-        work->levelAnimation[index].completionColor = (work->levelAnimation[index].completionColor > 0) ? ((work->levelAnimation[index].completionColor > 8) ? 8 : work->levelAnimation[index].completionColor) : 0;
-        if (work->levelAnimation[index].completionColor >= 8) {
-            work->levelAnimation[index].completionState++;
+        work->levelAnimation[progressRowIndex].completionColor++;
+        work->levelAnimation[progressRowIndex].completionColor = (work->levelAnimation[progressRowIndex].completionColor > 0) ? ((work->levelAnimation[progressRowIndex].completionColor > 8) ? 8 : work->levelAnimation[progressRowIndex].completionColor) : 0;
+        if (work->levelAnimation[progressRowIndex].completionColor >= 8) {
+            work->levelAnimation[progressRowIndex].completionState++;
         }
         break;
     default:
-        work->levelAnimation[index].auxiliaryColor -= 0x10;
-        work->levelAnimation[index].auxiliaryColor = (work->levelAnimation[index].auxiliaryColor > 0) ? ((work->levelAnimation[index].auxiliaryColor > 0x80) ? 0x80 : work->levelAnimation[index].auxiliaryColor) : 0;
-        if (work->levelAnimation[index].auxiliaryColor <= 0) {
-            work->levelAnimation[index].completionState = 0;
+        work->levelAnimation[progressRowIndex].auxiliaryColor -= 0x10;
+        work->levelAnimation[progressRowIndex].auxiliaryColor = (work->levelAnimation[progressRowIndex].auxiliaryColor > 0) ? ((work->levelAnimation[progressRowIndex].auxiliaryColor > 0x80) ? 0x80 : work->levelAnimation[progressRowIndex].auxiliaryColor) : 0;
+        if (work->levelAnimation[progressRowIndex].auxiliaryColor <= 0) {
+            work->levelAnimation[progressRowIndex].completionState = 0;
         }
         break;
     }
