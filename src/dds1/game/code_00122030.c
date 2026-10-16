@@ -1210,7 +1210,7 @@ void fldResetPlayerSceneObjectState(void) {
     D_0032E498[0] = 4;
 }
 
-extern void dds3ClearObjectFlags(void *, s32);
+extern void dds3ClearObjectFlags(void *object, s32 mask);
 
 
 
@@ -1259,7 +1259,7 @@ extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void fldResetCameraModelHandles(void);
 
 
-extern void dds3SetObjectFlags(void *, s32);
+extern void dds3SetObjectFlags(void *object, s32 mask);
 
 
 
