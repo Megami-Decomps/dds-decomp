@@ -450,7 +450,7 @@ extern f32 D_0043645C;
 extern f32 D_00452200[4][4];
 extern u32 D_003B21A0[4];
 extern SdfPoolNode D_00380028;
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
 void func_001969B8(f32 *position) {
     SdfAsset *asset = D_00436458;
