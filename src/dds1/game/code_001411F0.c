@@ -2853,13 +2853,16 @@ void fldClearMenuEntries(void) {
 typedef struct {
     s32 unk0;
     s32 id;
-    s32 unk8;
+    s32 activationState;
     s32 activationRequested;
     u8 pad10[0x10];
     s32 effectVariant;
     s32 effectNode;
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
+typedef char FldObj30_activationState_offset_must_be_0x08[
+    ((u32)&((FldObj30 *)0)->activationState == 0x08) ? 1 : -1];
+typedef char FldObj30_size_must_be_0x30[sizeof(FldObj30) == 0x30 ? 1 : -1];
 
 extern FldObj30 fldObjectSlots[32];
 
@@ -2876,7 +2879,7 @@ void fldResetObjectSlots(void) {
     for (i = 0; i < 32; i++) {
         fldObjectSlots[i].id = -1;
         fldObjectSlots[i].unk0 = 0;
-        fldObjectSlots[i].unk8 = 0;
+        fldObjectSlots[i].activationState = 0;
         fldObjectSlots[i].activationRequested = 0;
         if (fldObjectSlots[i].effectNode != 0) {
             effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
@@ -2905,7 +2908,7 @@ void fldActivateObjectById(s32 id) {
     s32 i;
 
     for (i = 0; i < fldObjectSlotCount; i++) {
-        if (fldObjectSlots[i].id == id && fldObjectSlots[i].unk8 == 0) {
+        if (fldObjectSlots[i].id == id && fldObjectSlots[i].activationState == 0) {
             fldObjectSlots[i].activationRequested = 1;
         }
     }
@@ -2924,7 +2927,7 @@ void fldReleaseObjectSlots(void) {
     for (i = 0; i < 32; i++) {
         fldObjectSlots[i].id = -1;
         fldObjectSlots[i].unk0 = 0;
-        fldObjectSlots[i].unk8 = 0;
+        fldObjectSlots[i].activationState = 0;
         fldObjectSlots[i].activationRequested = 0;
     }
 }
@@ -2936,12 +2939,12 @@ void fldUpdateObjectSlotActivation(void) {
     MdlCtx *resource;
 
     for (i = 0; i < fldObjectSlotCount; i++) {
-        switch (fldObjectSlots[i].unk8) {
+        switch (fldObjectSlots[i].activationState) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
                 resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryPlain(resource, 0, 1);
-                fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
+                fldObjectSlots[i].activationState = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
                 case 0:
                 case 3:
@@ -2973,7 +2976,7 @@ void fldUpdateObjectSlotActivation(void) {
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
-                fldObjectSlots[i].unk8 = 2;
+                fldObjectSlots[i].activationState = 2;
             }
             break;
         case 2:
@@ -2981,7 +2984,7 @@ void fldUpdateObjectSlotActivation(void) {
                 resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryFlagged(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
-                fldObjectSlots[i].unk8 = 3;
+                fldObjectSlots[i].activationState = 3;
                 if (D_003BAF58 != 0) {
                     effDestroyNode((EffNode *)(u32)D_003BAF58);
                     D_003BAF58 = 0;
