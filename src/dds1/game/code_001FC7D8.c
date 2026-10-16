@@ -837,7 +837,7 @@ s32 btlPollTimedTaskLink(BtlObjLink *link) {
 
 extern s32 btlPollTimedTaskLink();
 
-BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
+BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 skillNameIndex) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -849,7 +849,7 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
     task->callback = btlPollTimedTaskLink;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    link->arg = arg;
+    link->arg = skillNameIndex;
     link->elapsedTicks = 0;
     return task;
 }
