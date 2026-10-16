@@ -58,15 +58,15 @@ u32 mnuGetSelectedMantraUnitIndex(MnuStatusResource *resource) {
     return resource->list->cursor->index;
 }
 
-u32 mnuRetreatNodeCursorAndClearListFlags(MnuStatusResource *object) {
-    mnuRetreatListCursorDefault(object->list);
-    mnuClearListFlagsOneAndTwo(object->list);
+u32 mnuRetreatNodeCursorAndClearListFlags(MnuStatusResource *resource) {
+    mnuRetreatListCursorDefault(resource->list);
+    mnuClearListFlagsOneAndTwo(resource->list);
     return 1;
 }
 
-u32 mnuAdvanceNodeCursorAndClearListFlags(MnuStatusResource *object) {
-    mnuAdvanceListCursorDefault(object->list);
-    mnuClearListFlagsOneAndTwo(object->list);
+u32 mnuAdvanceNodeCursorAndClearListFlags(MnuStatusResource *resource) {
+    mnuAdvanceListCursorDefault(resource->list);
+    mnuClearListFlagsOneAndTwo(resource->list);
     return 1;
 }
 
