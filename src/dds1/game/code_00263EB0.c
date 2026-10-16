@@ -47,7 +47,7 @@ extern s32 evtStageTestUpdateCamera(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char brsStatConfirmationPopupEntry[];
 
-s32 mnuHandleStatPointAssignment(KwlnTask *request) {
+s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 inputFlags;
@@ -55,11 +55,11 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     s32 changed = 0;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, task);
     if (result != 0) {
         return result;
     }
@@ -128,12 +128,12 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 
-s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 1);
-    return menuRunPanel(context, 1, (void *)request);
+    return menuRunPanel(context, 1, (void *)task);
 }
 
 s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *input) {
@@ -163,15 +163,15 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern char brsLevelChangePopupEntry[];
 
-s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
+s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, task);
     if (result != 0) {
         return result;
     }
