@@ -146,8 +146,6 @@ struct SdfMemBlock;
 
 extern u32 effModelUpdateControlFlags;
 
-extern s32 fileConfigTaskWork;
-
 extern u32 D_003BC888;
 
 extern s32 sprintf(char *dst, const char *fmt, ...);
@@ -3353,6 +3351,9 @@ typedef struct FileConfigTask {
     u32 pending;    /* 0x34: zero when no load can start */
     MenuResourceWork *effect; /* 0x38: effect resource requested for the save scene */
 } FileConfigTask;
+typedef char FileConfigTask_size_check[(sizeof(FileConfigTask) == 0x3C) ? 1 : -1];
+typedef char FileConfigTask_state_offset_check[((u32)&((FileConfigTask *)0)->state == 0x04) ? 1 : -1];
+extern FileConfigTask *fileConfigTaskWork;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
@@ -3423,7 +3424,7 @@ void fileConfigTaskDestroy(KwlnTask *task) {
 
     if (fileConfigTaskWork != 0) {
         fileSavedSlotFlags = datGameState->world.slotFlags;
-        if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
+        if (*(u32 *)((u32)fileConfigTaskWork + 4) == 1) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
             mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
@@ -3456,7 +3457,7 @@ extern void fileConfigTaskDestroy(KwlnTask *task);
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
-        fileConfigTaskWork = fileCreateConfigTask(mode);
+        fileConfigTaskWork = (FileConfigTask *)(u32)fileCreateConfigTask(mode);
         kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
@@ -3488,7 +3489,7 @@ s32 fileConsumeConfigTaskReady(void) {
 
 u32 fileGetConfigTaskSlot(s32 slot) {
     if (slot < 4) {
-        return (u32)((FileConfigTask *)fileConfigTaskWork)->slots[slot];
+        return (u32)fileConfigTaskWork->slots[slot];
     }
     return 0;
 }
@@ -3506,110 +3507,110 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     FileConfigListNode *cursor;
     FileConfigTask *loadingWork;
 
-    if (((FileConfigTask *)fileConfigTaskWork)->transitionTicks != 0) {
-        ((FileConfigTask *)fileConfigTaskWork)->transitionTicks--;
+    if (fileConfigTaskWork->transitionTicks != 0) {
+        fileConfigTaskWork->transitionTicks--;
     }
-    switch (((FileConfigTask *)fileConfigTaskWork)->result) {
+    switch (fileConfigTaskWork->result) {
     case 0:
-        if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
-            ((FileConfigTask *)fileConfigTaskWork)->pending = 1;
+        if (fileConfigTaskWork->pending == 0) {
+            fileConfigTaskWork->pending = 1;
             for (i = 0; i < 4; i++) {
-                loadingWork = (FileConfigTask *)fileConfigTaskWork;
+                loadingWork = fileConfigTaskWork;
                 if (loadingWork->slots[i] == 0) {
                     loadingWork->pending = 0;
                     return 0;
                 }
             }
         }
-        ((FileConfigTask *)fileConfigTaskWork)->result = 1;
+        fileConfigTaskWork->result = 1;
         /* fallthrough */
     case 1:
-        ticks = ((FileConfigTask *)fileConfigTaskWork)->ticks;
-        ((FileConfigTask *)fileConfigTaskWork)->ticks = ticks + 1;
+        ticks = fileConfigTaskWork->ticks;
+        fileConfigTaskWork->ticks = ticks + 1;
         fade = (f32)ticks / 15.0f;
-        ((FileConfigTask *)fileConfigTaskWork)->choiceFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade = fade;
-        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 16) {
-            ((FileConfigTask *)fileConfigTaskWork)->result = 2;
-            ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
-            ((FileConfigTask *)fileConfigTaskWork)->choiceFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade = 1.0f;
+        fileConfigTaskWork->choiceFade = fileConfigTaskWork->labelFade = fade;
+        if (fileConfigTaskWork->ticks >= 16) {
+            fileConfigTaskWork->result = 2;
+            fileConfigTaskWork->ticks = 0;
+            fileConfigTaskWork->choiceFade = fileConfigTaskWork->labelFade = 1.0f;
         }
         break;
     case 2:
-        ((FileConfigTask *)fileConfigTaskWork)->ticks++;
-        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 121) {
-            ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
+        fileConfigTaskWork->ticks++;
+        if (fileConfigTaskWork->ticks >= 121) {
+            fileConfigTaskWork->ticks = 0;
         }
         break;
     case 3:
-        if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
+        if (fileConfigTaskWork->state == 1) {
             kwlnFadeInStart(0, 0, 0, 15);
         }
-        ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
-        ((FileConfigTask *)fileConfigTaskWork)->result = 4;
+        fileConfigTaskWork->ticks = 0;
+        fileConfigTaskWork->result = 4;
         /* fallthrough */
     case 4:
-        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 6) {
-            ((FileConfigTask *)fileConfigTaskWork)->labelFade = 0.0f;
+        if (fileConfigTaskWork->ticks >= 6) {
+            fileConfigTaskWork->labelFade = 0.0f;
         } else {
-            ((FileConfigTask *)fileConfigTaskWork)->labelFade = 1.0f - (f32)((FileConfigTask *)fileConfigTaskWork)->ticks / 5.0f;
+            fileConfigTaskWork->labelFade = 1.0f - (f32)fileConfigTaskWork->ticks / 5.0f;
         }
-        ticks = ((FileConfigTask *)fileConfigTaskWork)->ticks;
-        ((FileConfigTask *)fileConfigTaskWork)->ticks = ticks + 1;
-        ((FileConfigTask *)fileConfigTaskWork)->choiceFade = 1.0f - (f32)ticks / 15.0f;
-        if (((FileConfigTask *)fileConfigTaskWork)->ticks >= 16) {
-            ((FileConfigTask *)fileConfigTaskWork)->result = 5;
-            ((FileConfigTask *)fileConfigTaskWork)->ticks = 0;
-            ((FileConfigTask *)fileConfigTaskWork)->labelFade = 0.0f;
-            ((FileConfigTask *)fileConfigTaskWork)->choiceFade = 0.0f;
+        ticks = fileConfigTaskWork->ticks;
+        fileConfigTaskWork->ticks = ticks + 1;
+        fileConfigTaskWork->choiceFade = 1.0f - (f32)ticks / 15.0f;
+        if (fileConfigTaskWork->ticks >= 16) {
+            fileConfigTaskWork->result = 5;
+            fileConfigTaskWork->ticks = 0;
+            fileConfigTaskWork->labelFade = 0.0f;
+            fileConfigTaskWork->choiceFade = 0.0f;
         }
         return 0;
     case 5:
-        ((FileConfigTask *)fileConfigTaskWork)->result |= 0x80000000;
+        fileConfigTaskWork->result |= 0x80000000;
         return -1;
     }
 
-    oldIndex = ((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index;
+    oldIndex = fileConfigTaskWork->frame->cursor->index;
     if ((u8)D_00324510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuRetreatListCursorDefault(fileConfigTaskWork->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
-            ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
-            ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
+            fileConfigTaskWork->transitionTicks = 8;
+            fileConfigTaskWork->previousIndex = oldIndex;
         }
     }
     if ((u8)D_00324510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuAdvanceListCursorDefault(fileConfigTaskWork->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
-            ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
-            ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
+            fileConfigTaskWork->previousIndex = oldIndex;
+            fileConfigTaskWork->transitionTicks = 8;
         }
     }
-    index = ((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index;
+    index = fileConfigTaskWork->frame->cursor->index;
     if (index < 4) {
         if (D_00324510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
-            fileToggleSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
+            fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-            cursor = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->cursor;
+            cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
             cursor->resource->ticks = 8;
         }
         if (D_00324510[0x25] < 0) {
-            if (fileTestSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
-                fileToggleSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
+            if (fileTestSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
+                fileToggleSlotFlagsBit(fileConfigTaskWork->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-                cursor = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->cursor;
+                cursor = (FileConfigListNode *)fileConfigTaskWork->frame->cursor;
                 cursor->resource->ticks = 8;
             }
         }
     }
     if (D_00324510[0x26] == 0 && D_00324510[0x27] == 0) {
-        mnuClearListFlagsOneAndTwo((u32 *)((FileConfigTask *)fileConfigTaskWork)->frame);
+        mnuClearListFlagsOneAndTwo((u32 *)fileConfigTaskWork->frame);
     }
     if (D_00324510[0x21] < 0) {
-        if (((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index == 4) {
-            ((FileConfigTask *)fileConfigTaskWork)->result = 3;
+        if (fileConfigTaskWork->frame->cursor->index == 4) {
+            fileConfigTaskWork->result = 3;
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
     } else if (D_00324510[0x23] < 0) {
-        ((FileConfigTask *)fileConfigTaskWork)->result = 3;
+        fileConfigTaskWork->result = 3;
         fileRestoreSlotFlagsToState();
         sndSetSequenceVolumePan(10, 0x7F, 0x3F);
     }
@@ -3618,14 +3619,14 @@ s32 fileUpdateConfigurationMenu(KwlnTask *task) {
 
 
 s32 fileStartQueuedLoad(KwlnTask *task) {
-    if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
+    if (fileConfigTaskWork->pending == 0) {
         return 0;
     }
-    if (((FileConfigTask *)fileConfigTaskWork)->result < 0) {
+    if (fileConfigTaskWork->result < 0) {
         return -1;
     }
     fileDrawConfigurationMenuBackground((void *)fileConfigTaskWork);
-    mnuCallInitWide(0x400, 0x400, 0, (u32)((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
+    mnuCallInitWide(0x400, 0x400, 0, (u32)fileConfigTaskWork->frame, 0x53);
     return 0;
 }
 
@@ -3633,7 +3634,7 @@ s32 fileUpdateConfigOwnerTask(KwlnTask *task) {
     s32 result;
 
     result = -1;
-    if ((((FileConfigTask *)fileConfigTaskWork)->result & 0x80000000) == 0) {
+    if ((fileConfigTaskWork->result & 0x80000000) == 0) {
         result = 0;
     }
     return result;
@@ -3762,50 +3763,50 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
     f32 labelFade;
 
     pulse = 0.0f;
-    if (((FileConfigTask *)fileConfigTaskWork)->result != 1) {
-        pulse = (f32)(((FileConfigTask *)fileConfigTaskWork)->ticks % 120) / 60.0f;
+    if (fileConfigTaskWork->result != 1) {
+        pulse = (f32)(fileConfigTaskWork->ticks % 120) / 60.0f;
         if (pulse > choiceFade) {
             pulse = 2.0f - pulse;
         }
     }
     countdown = node->resource;
-    choiceFade = ((FileConfigTask *)fileConfigTaskWork)->choiceFade;
-    labelFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade;
+    choiceFade = fileConfigTaskWork->choiceFade;
+    labelFade = fileConfigTaskWork->labelFade;
     if (countdown->ticks != 0) {
         --countdown->ticks;
     }
     if (list->cursor->index == node->index) {
         effDrawSpriteWithCornerFade(0x80, (index * 35 + 129) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
-                     0, ((FileConfigTask *)fileConfigTaskWork)->slots[1], 18, 0x53);
+                     0, fileConfigTaskWork->slots[1], 18, 0x53);
         effDrawSpriteWithCornerFade(0x1830, (index * 35 + 129) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
-                     0, ((FileConfigTask *)fileConfigTaskWork)->slots[1], 19, 0x53);
+                     0, fileConfigTaskWork->slots[1], 19, 0x53);
         effDrawSpriteWithCornerFade(0x8B0, 0x9B0, 0, (u32)(labelFade * 256.0f),
-                     0, ((FileConfigTask *)fileConfigTaskWork)->slots[3], labelFrames[index], 0x53);
+                     0, fileConfigTaskWork->slots[3], labelFrames[index], 0x53);
         entryIndex = index * 2;
         effDrawSpriteWithCornerFade(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] << 3, 0,
                      (u32)(choiceFade * 256.0f), 0,
-                     ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                     fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                      fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
-        if (((FileConfigTask *)fileConfigTaskWork)->transitionTicks != 0) {
+        if (fileConfigTaskWork->transitionTicks != 0) {
             ++entryIndex;
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] << 3, 0,
-                         (u32)((f32)((FileConfigTask *)fileConfigTaskWork)->transitionTicks * 0.125f * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                         (u32)((f32)fileConfigTaskWork->transitionTicks * 0.125f * 256.0f), 0,
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     } else {
         entryIndex = index + 18;
         effDrawSpriteWithCornerFade(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] << 3, 0,
                      (u32)(labelFade * 256.0f), 0,
-                     ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                     fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                      fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
         entryIndex = index * 2;
-        if (((FileConfigTask *)fileConfigTaskWork)->previousIndex == node->index) {
+        if (fileConfigTaskWork->previousIndex == node->index) {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[entryIndex][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[entryIndex][FILE_CONFIG_Y] << 3, 0,
-                         (u32)((f32)((FileConfigTask *)fileConfigTaskWork)->transitionTicks * 0.125f * 128.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
+                         (u32)((f32)fileConfigTaskWork->transitionTicks * 0.125f * 128.0f), 0,
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[entryIndex][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     }
@@ -3813,43 +3814,43 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
         if (fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) != 0) {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[10][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[10][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[10][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[11][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[11][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[11][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[11][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[11][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[25][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[25][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[25][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[25][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[25][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[14][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[14][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[14][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[23][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[23][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[23][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[23][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[23][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[10][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[10][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[10][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[14][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[14][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[14][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[14][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[15][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[15][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[15][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[15][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[15][FILE_CONFIG_FRAME], 0x53);
             }
         }
@@ -3857,43 +3858,43 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
         if (fileTestSlotFlagsBit(3, (s32 *)&datGameState->world.slotFlags) != 0) {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[12][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[12][FILE_CONFIG_Y] << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[12][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[13][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[13][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[13][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[13][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[13][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[26][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[26][FILE_CONFIG_Y] << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[26][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[26][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[26][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[16][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[16][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[16][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[24][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[24][FILE_CONFIG_Y] << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[24][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[24][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[24][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[12][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[12][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[12][FILE_CONFIG_FRAME], 0x53);
             }
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[16][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[16][FILE_CONFIG_Y] << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
+                         fileConfigTaskWork->slots[fileConfigSpritePlacements[16][FILE_CONFIG_SET]],
                          fileConfigSpritePlacements[16][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 effDrawSpriteWithCornerFade(fileConfigSpritePlacements[17][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[17][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             ((FileConfigTask *)fileConfigTaskWork)->slots[fileConfigSpritePlacements[17][FILE_CONFIG_SET]],
+                             fileConfigTaskWork->slots[fileConfigSpritePlacements[17][FILE_CONFIG_SET]],
                              fileConfigSpritePlacements[17][FILE_CONFIG_FRAME], 0x53);
             }
         }
@@ -3911,51 +3912,51 @@ void fileDrawConfigurationMenuBackground(void *unused) {
         {0, 4, 0, 120},
         {0, 6, -20, -20}
     };
-    f32 labelFade = ((FileConfigTask *)fileConfigTaskWork)->labelFade;
-    f32 choiceFade = ((FileConfigTask *)fileConfigTaskWork)->choiceFade;
+    f32 labelFade = fileConfigTaskWork->labelFade;
+    f32 choiceFade = fileConfigTaskWork->choiceFade;
     s32 entry = 0;
     s32 row;
 
     effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     entry++;
     effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
-    if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
-        mnuDrawMantraPulseAndSparks((void *)((FileConfigTask *)fileConfigTaskWork)->effect, 0x80, 0x52);
+    if (fileConfigTaskWork->state == 1) {
+        mnuDrawMantraPulseAndSparks((void *)fileConfigTaskWork->effect, 0x80, 0x52);
     }
     entry++;
     effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     entry++;
     effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(choiceFade * 256.0f), 0,
-                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     entry++;
     effDrawSpriteWithCornerFade(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 fileConfigTaskWork->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     for (row = 0; row < 5; row++) {
         effDrawSpriteWithCornerFade(0, (131 + row * 35) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                     ((FileConfigTask *)fileConfigTaskWork)->slots[2], 9, 0x53);
+                     fileConfigTaskWork->slots[2], 9, 0x53);
         effDrawSpriteWithCornerFade(461 * 16, (131 + row * 35) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                     ((FileConfigTask *)fileConfigTaskWork)->slots[2], 10, 0x53);
+                     fileConfigTaskWork->slots[2], 10, 0x53);
     }
     effDrawSpriteWithCornerFade(73 * 16, 326 * 8, 0, (u32)(labelFade * 256.0f), 0,
-                 ((FileConfigTask *)fileConfigTaskWork)->slots[2], 11, 0x53);
+                 fileConfigTaskWork->slots[2], 11, 0x53);
 }
 
 
