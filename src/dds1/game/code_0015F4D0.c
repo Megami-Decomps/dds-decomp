@@ -1,6 +1,7 @@
 #include "eff_packet_params.h"
 #include "sdf_packet_header.h"
 #include "common.h"
+#include "bill_work.h"
 #include "eff_blur.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -47,16 +48,6 @@ extern s32 D_003BA900;
 extern s8 D_003BB018;
 extern u32 D_003BB01C;
 extern u32 D_003BB020;
-
-typedef struct BillWork {
-    u8 pad00[0x64];
-    u8 currentValue;
-    u8 pad65[0x4B];
-    u16 pendingCount;
-    u16 queuedCount;
-    u8 padB4[0xC];
-    u8 stagedValue;
-} BillWork;
 
 void *effBillCreateDispatch(s32 index, void *arg) {
     EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
