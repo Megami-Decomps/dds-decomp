@@ -1316,7 +1316,7 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
 
 
 extern u32 mdlGetViewerRecordPayloadWord(MdlRecord *record);
-extern void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, struct SdfMemBlock *allocation, s32 size);
+extern void mdlAppendObjectPart(DevRequest *list, u8 *sourceAddress, struct SdfMemBlock *allocation, s32 size);
 
 /* Apply the group's counted parts and entity slots; return the next packet. */
 PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 mode) {
@@ -1368,7 +1368,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
                     objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->payloadSize
                                + (((SdfPacModelPacketHeader *)packetWork->packet)->flags & 0xF0) - 0x10;
                 }
-                mdlAppendObjectPart(partList, (s32)packetWork->dataCursor,
+                mdlAppendObjectPart(partList, packetWork->dataCursor,
                                     (struct SdfMemBlock *)packetWork->resourceHandle, objectSize);
                 break;
             default:

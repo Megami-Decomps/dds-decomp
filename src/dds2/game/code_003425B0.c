@@ -1037,9 +1037,9 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
 
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
-void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
+void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
-    u8 *frameBytes = (u8 *)sourceAddress;
+    u8 *frameBytes = sourceAddress;
     sdfSoundInitNodeFromFormat(node, format);
     node->width = ((SdfStreamFrameHeader *)frameBytes)->width;
     node->cycleLength = ((SdfStreamFrameHeader *)frameBytes)->cycleLength;
@@ -1474,13 +1474,13 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
     sdfDispatchNextStreamNode(0);
 }
 
-void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 size, s32 resource) {
+void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, u8 *source, s32 size, s32 resource) {
     sdfStreamOpen(node, format, source, size);
     node->resourceWord = resource;
     sdfSoundAppendNode(node);
 }
 
-void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, s32 source, s32 size, SdfTex *resource) {
+void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, u8 *source, s32 size, SdfTex *resource) {
     SdfStreamParams streamParams = *params;
     switch (resource->pixelFormat) {
     case 0:

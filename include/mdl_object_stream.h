@@ -16,7 +16,7 @@ typedef char SdfStreamParams_size_must_be_4[(sizeof(SdfStreamParams) == 4) ? 1 :
 
 /* The model-object allocation ends with its complete embedded stream node. */
 typedef struct MdlObj {
-    s32 sourceAddress; /* 0x00: frame data passed to sdfStreamOpen */
+    u8 *sourceAddress; /* 0x00: frame data passed to sdfStreamOpen */
     SdfMemBlock *backingAllocation; /* 0x04: released by mdlObjDestroy */
     u8 inUse; /* 0x08: claimed by a model resource item */
     u8 initialized; /* 0x09: stream-node initialization guard */
