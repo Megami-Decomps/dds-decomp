@@ -506,11 +506,11 @@ s32 bfContextStep(ScrData *scr)
     return 1;
 }
 
-/* Script command parameter `idx` (0 = first) as an int, converting floats and
+/* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
-s32 scrReadIntParameter(s32 idx) {
+s32 scrReadIntParameter(s32 parameterIndex) {
     ScrData *scr = scrCurrentContext;
-    s32 stackIndex = scr->sp - idx - 1;
+    s32 stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
     case 0:
@@ -526,10 +526,10 @@ s32 scrReadIntParameter(s32 idx) {
     return 0;
 }
 
-f32 bfWaitReadArgFloat(s32 idx)
+f32 bfWaitReadArgFloat(s32 parameterIndex)
 {
     ScrData *scr = scrCurrentContext;
-    s32 stackIndex = scr->sp - idx - 1;
+    s32 stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
     case 0:
@@ -546,10 +546,10 @@ f32 bfWaitReadArgFloat(s32 idx)
 }
 
 /* Return a string parameter only when its VM stack tag is STRING. */
-char *scrReadStringParameter(s32 paramIdx)
+char *scrReadStringParameter(s32 parameterIndex)
 {
     ScrData *scr = scrCurrentContext;
-    s32 stackIndex = scr->sp - paramIdx - 1;
+    s32 stackIndex = scr->sp - parameterIndex - 1;
     s32 type = (s8)scr->stackTypes[stackIndex];
 
     if (type >= 0) {
