@@ -73,11 +73,11 @@ SdfDmaTagHeader *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, Sdf
         ((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
 }
 
-/* Walk a command list and report its total packet byte size, the number of
- * kind-3 entries, and the kind 4-8 quadword total. */
-s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
+/* Walk a read-only command list and report its total packet byte size, the
+ * number of kind-3 entries, and the kind 4-8 quadword total. */
+s32 sdfCommandListMeasure(const u32 *list, s32 *outCount, s32 *outQuadwords) {
     s32 remainingCommandCount;
-    SdfMeasureCommandPrefix *command;
+    const SdfMeasureCommandPrefix *command;
     s32 bytes;
     s32 kind3Count;
     s32 quadwords;
@@ -95,7 +95,7 @@ s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
     quadwords = 0;
     if (remainingCommandCount != 0) {
         do {
-            command = (SdfMeasureCommandPrefix *)*list;
+            command = (const SdfMeasureCommandPrefix *)*list;
             list++;
             switch (command->kind) {
             case 1:
