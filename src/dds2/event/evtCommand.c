@@ -917,21 +917,21 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E78);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 
 s32 evtCommandWaitObjectResourceScale(void) {
-    s32 id = scrReadIntParameter(0);
-    void *object = evtFindWorldObjectByIdAndKind(6, id);
+    s32 objectId = scrReadIntParameter(0);
+    void *worldObject = evtFindWorldObjectByIdAndKind(6, objectId);
     s32 status;
 
-    if (object == NULL) {
-        id = scrReadIntParameter(0);
-        object = fldResolveWorldObjectByResourceId((u32)id);
-        if (object == NULL) {
+    if (worldObject == NULL) {
+        objectId = scrReadIntParameter(0);
+        worldObject = fldResolveWorldObjectByResourceId((u32)objectId);
+        if (worldObject == NULL) {
             sdfDebugPrintf(D_00421E58, scrReadIntParameter(0));
             sdfDebugPrintf(D_00421E68, scrReadIntParameter(1));
             sdfDebugPrintf("e OBJ_PATH_WAIT : obj==NULL\n");
             return 1;
         }
     }
-    status = evtCheckWorldObjectResourceScale(object);
+    status = evtCheckWorldObjectResourceScale(worldObject);
     switch (status) {
     case 0:
         return 1;
