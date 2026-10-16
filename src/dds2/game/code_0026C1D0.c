@@ -404,7 +404,7 @@ void dspRequestMessageWindowModeOne(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+extern void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText);
 
 void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
     itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceText);
