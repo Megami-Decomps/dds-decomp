@@ -238,7 +238,7 @@ extern char D_004377E8[];
  * no entry-point record leaves the existing entryPoint value untouched. */
 void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
     EvtPackHeader *header;
-    s32 entryIndex;
+    s32 entryPointIndex;
 
     if (state->pendingRequest != NULL) {
         if (fileIsRequestReadyInCurrentMode(state->pendingRequest) != 0) {
@@ -249,9 +249,9 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
-            for (entryIndex = 0; entryIndex < state->header->entryCount; entryIndex++) {
-                if (state->entries[entryIndex].kind == EVT_PACK_ENTRY_POINT_KIND) {
-                    state->entryPoint = state->data + state->entries[entryIndex].dataOffset;
+            for (entryPointIndex = 0; entryPointIndex < state->header->entryCount; entryPointIndex++) {
+                if (state->entries[entryPointIndex].kind == EVT_PACK_ENTRY_POINT_KIND) {
+                    state->entryPoint = state->data + state->entries[entryPointIndex].dataOffset;
                     break;
                 }
             }
