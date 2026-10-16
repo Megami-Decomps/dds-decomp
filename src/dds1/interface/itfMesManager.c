@@ -81,7 +81,7 @@ void itfMesInitCharTable(s32 *table);
 
 s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 
-extern void frFontLoadTemporaryEntry(u32 arg0);
+extern void frFontLoadTemporaryEntry(u32 fontData);
 
 
 
