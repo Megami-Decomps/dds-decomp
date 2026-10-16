@@ -2574,7 +2574,7 @@ void btlMarkLinkedActorStatusFlag(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
-extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
