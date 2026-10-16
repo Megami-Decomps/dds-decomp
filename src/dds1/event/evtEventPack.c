@@ -137,7 +137,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
 s32 evtUpdateMotionSeTask(KwlnTask *task) {
     EvtMotionSeTaskParams *params;
     EffWorldNode *node;
-    EvtPackLoadState *data;
+    EvtPackLoadState *packState;
     EvtUnit *unit;
     u16 motionId;
     s32 frame;
@@ -153,8 +153,8 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (node == NULL) {
         return -1;
     }
-    data = evtGetEventPackLoadState(params->eventTaskId);
-    if (data == NULL) {
+    packState = evtGetEventPackLoadState(params->eventTaskId);
+    if (packState == NULL) {
         return -1;
     }
     if (params->eventTaskId < 600) {
@@ -166,12 +166,12 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     }
     motionId = mdlFindNodeById(unit->owner, 0)->motionIndex;
     frame = unit->owner->first->currentFrame;
-    for (entryIndex = 0; entryIndex < data->header->entryCount; entryIndex++) {
-        if (data->entries[entryIndex].kind == 6 &&
-            data->entries[entryIndex].resourceId == params->resourceId &&
-            data->entries[entryIndex].motionId == motionId) {
-            cues = (EvtMotionSeCue *)(data->data + data->entries[entryIndex].dataOffset);
-            for (cueIndex = 0; cueIndex < data->entries[entryIndex].cueCount; cueIndex++) {
+    for (entryIndex = 0; entryIndex < packState->header->entryCount; entryIndex++) {
+        if (packState->entries[entryIndex].kind == 6 &&
+            packState->entries[entryIndex].resourceId == params->resourceId &&
+            packState->entries[entryIndex].motionId == motionId) {
+            cues = (EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
+            for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == frame) {
                     evtSetBgmVolumePan(params->eventTaskId, cues[cueIndex].fade);
                     sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, frame);
