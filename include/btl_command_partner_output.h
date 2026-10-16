@@ -6,8 +6,8 @@
 typedef struct BtlCommandPartnerOutput {
     u16 commandId; /* 0x00 */
     u8 opaque02[2];
-    void *firstPartner; /* 0x04 */
-    void *secondPartner; /* 0x08 */
+    BtlUnit *firstPartner; /* 0x04: first matched command partner */
+    BtlUnit *secondPartner; /* 0x08: optional second matched command partner */
 } BtlCommandPartnerOutput;
 
 typedef char BtlCommandPartnerOutputSizeCheck[

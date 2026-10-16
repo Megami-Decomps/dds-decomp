@@ -631,7 +631,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
     return (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 0x40) < 1;
 }
 
-s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, void **second) {
+s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second) {
     s32 statAddresses[3];
     u32 requiredCount = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();

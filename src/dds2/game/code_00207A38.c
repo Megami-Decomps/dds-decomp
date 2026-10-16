@@ -92,8 +92,8 @@ typedef struct BtlCommandCtx {
     u32 commandMode;
     u32 commandValue;
     u8 pad28[4];
-    void *actionProbeFirst;  /* 0x2C: first pointer from an action probe */
-    void *actionProbeSecond; /* 0x30: second pointer from an action probe */
+    BtlUnit *actionProbeFirst;  /* 0x2C: first matched command partner */
+    BtlUnit *actionProbeSecond; /* 0x30: optional second matched command partner */
     u8 pad34[4];
     s32 selectedValue; /* 0x38: command selection */
     u8 pad3C[0x58];

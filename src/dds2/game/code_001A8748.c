@@ -2276,7 +2276,7 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
 
 
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
-extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, void **second);
+extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second);
 
 s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
     BtlState *controller = (BtlState *)btlGetRuntime();
@@ -2304,7 +2304,7 @@ s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPart
     if ((datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
         (datBattleSceneRecords[controller->battleMode].flags & 1) == 0) {
         output->commandId = command;
-        result = btlFindCommandPartnersByAffinity(unit, command, (void **)&output->firstPartner, (void **)&output->secondPartner);
+        result = btlFindCommandPartnersByAffinity(unit, command, &output->firstPartner, &output->secondPartner);
     } else {
         output->commandId = command;
         output->firstPartner = NULL;
