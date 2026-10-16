@@ -572,7 +572,7 @@ extern s32 fldSynchronizePlayerPositionAndAreaState();
 
 extern void fldClearCameraObjectHighlightFlag();
 
-extern void func_0012F078();
+extern void fldInitializeCameraViewFromPlayer();
 
 s32 fldUpdateLookAtSegment(void) {
     FldAreaWork *cam = &fldAreaState;
@@ -595,7 +595,7 @@ s32 fldUpdateLookAtSegment(void) {
     fldLookAtFarPoint[2] = far.z;
     fldSynchronizePlayerPositionAndAreaState();
     fldClearCameraObjectHighlightFlag();
-    func_0012F078();
+    fldInitializeCameraViewFromPlayer();
     return 1;
 }
 
@@ -627,7 +627,7 @@ s32 fldCmdSetLookAtHeading(void) {
     fldLookAtFarPoint[0] = far.x;
     fldLookAtFarPoint[1] = far.y;
     fldLookAtFarPoint[2] = far.z;
-    func_0012F078();
+    fldInitializeCameraViewFromPlayer();
     return 1;
 }
 

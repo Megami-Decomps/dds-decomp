@@ -950,7 +950,7 @@ extern void fldCreateChaseCameraObject(void);
 extern void fldPreparePlayerSceneCameraTarget(void);
 extern void fldCreateSecondaryWorldCamera(void);
 extern void fldUpdateCameraViewFromPlayer(void);
-extern void func_0012F078(void);
+extern void fldInitializeCameraViewFromPlayer(void);
 extern void func_0012F400(void);
 extern void fldActivateCameraColorSetting(s32 enabled);
 extern void mnuInitializeResourceEntries(void);
@@ -1086,7 +1086,7 @@ void fldRebuildFieldScene(void) {
                     fldUpdateCameraViewFromPlayer();
                 } else {
                     fldAreaState.mode = 0;
-                    func_0012F078();
+                    fldInitializeCameraViewFromPlayer();
                 }
             } else {
                 if (cameraLinkMode == 2) {
@@ -1097,7 +1097,7 @@ void fldRebuildFieldScene(void) {
                 if (sceneWork->secondaryState == 3) {
                     func_0012F400();
                 } else {
-                    func_0012F078();
+                    fldInitializeCameraViewFromPlayer();
                 }
             }
         }
