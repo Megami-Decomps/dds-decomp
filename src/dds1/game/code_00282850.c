@@ -129,7 +129,7 @@ extern u8 fldIsFlagActive(void);
 extern u8 fldTestSecondarySceneFlag(void);
 extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
-extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
+extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel);
 
 
 extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot);

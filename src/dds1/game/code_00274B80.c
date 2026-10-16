@@ -375,7 +375,7 @@ void mnuCopyPartyEntries(context)
     menuWork->selection = 0;
 }
 
-extern void mnuPopulatePartyPanelSlot(DatPartyRecord *, s32, u32, PartyPanel *);
+extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Transfer one current party record and refresh the selected panel slot. */
