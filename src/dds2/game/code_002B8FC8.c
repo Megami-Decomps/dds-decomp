@@ -955,8 +955,8 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window) {
     window->flags = window->flags & MNU_WINDOW_TRANSITION_CLEAR_MASK;
 }
 
-MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, const void *value) {
-    return mnuListAppendNode(menu->list, value);
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, const void *nodeValue) {
+    return mnuListAppendNode(menu->list, nodeValue);
 }
 
 
