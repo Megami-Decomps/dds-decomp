@@ -820,7 +820,11 @@ typedef struct EffPCPNeedleParams {
     u32 centerColor;
     u32 outerColor;
     f32 width;
+#ifdef VERSION_DDS2
+    s32 perCellInput; /* 0x54: passed to parAllocateCellSystem's perCell sizing argument. */
+#else
     s32 unk54;
+#endif
     s32 unk58;
 } EffPCPNeedleParams;
 
