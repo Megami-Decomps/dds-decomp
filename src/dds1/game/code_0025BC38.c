@@ -171,7 +171,8 @@ void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
     sdfReleaseChipBlock(work);
 }
-extern void mnuDrawSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite,
+                                     s32 placementIndex, s32 flags, s32 context);
 extern void mnuTickMantraSparkParticles(DspParticleState *);
 extern void mnuDrawMantraSparkBackdrop(DspParticleState *, s32, s32);
 
