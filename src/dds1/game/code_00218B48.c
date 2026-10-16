@@ -229,7 +229,7 @@ void mdlDrawViewerSelectionLabel(void);
 
 
 
-void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
+void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, u8 *, s32, SdfTex *);
 void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 void mdlCleanupViewerTasksAndResources(void);
 
@@ -625,12 +625,13 @@ void mdlAddEffectPart(DevRequest *partList, EffNodeDescriptor *descriptor) {
 }
 
 
-void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, SdfMemBlock *backingAllocation, s32 sourceSize) {
+void mdlAppendObjectPart(DevRequest *list, u8 *sourceAddress, SdfMemBlock *backingAllocation, s32 sourceSize) {
     MdlObj *node = sdfAllocAndClearQuadwords(sizeof(*node));
     MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
 
     node->sourceSize = sourceSize;
-    node->sourceAddress = sourceAddress;
+    /* Store the recovered pointer through the legacy 32-bit address slot. */
+    *(u32 *)&node->sourceAddress = (u32)sourceAddress;
     node->backingAllocation = backingAllocation;
     entry->kind = MDL_PART_OBJECT;
     entry->state = 0;
