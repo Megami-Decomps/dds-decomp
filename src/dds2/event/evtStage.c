@@ -171,10 +171,10 @@ void evtClearWorldSlotStatusFlag(void *object) {
 
 
 /* Scale the object's retained path time within the clamped multiplier range. */
-void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
+void evtScaleSlotByClampedMultiplier(void *worldNode, f32 multiplier) {
     Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data(object);
+    slotData = dds3GetSlot1Data(worldNode);
     if (slotData != 0) {
         if (multiplier < 0.0f) {
             multiplier = 0.0f;
