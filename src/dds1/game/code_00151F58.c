@@ -23,6 +23,7 @@
 
 #include "sdf_asset_create.h"
 #include "eff.h"
+#include "eff_template_scale_record.h"
 #include "eff_particle_view.h"
 #include "eff_look_at_ring.h"
 #include "eff_track_poly_list.h"
@@ -2458,23 +2459,14 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
     }
 }
 
-/* Same 0x40-byte per-packet scale view as the DDS2 effect twin. */
-typedef struct EffScaledRecord {
-    u8 pad00[0x20];
-    u32 flags; /* 0x20 */
-    u8 pad24[0x10];
-    f32 scale; /* 0x34 */
-    u8 pad38[8];
-} EffScaledRecord;
-
 /* Initialize each packet's native tag and its template-selected uniform scale. */
 void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     s32 packetIndex = 0;
-    EffectBufferRecord *packetCursor = effect->head.buffer->records;
+    EffTemplateScaleRecord *packetCursor = (EffTemplateScaleRecord *)effect->head.buffer->records;
     if (effect->head.particleCount != 0) {
         do {
-            packetCursor->age = EFF_PACKET_INITIAL_TAG;
-            ((EffScaledRecord *)packetCursor)->scale = effect->recordScale;
+            packetCursor->initialTag = EFF_PACKET_INITIAL_TAG;
+            packetCursor->scale = effect->recordScale;
             packetIndex++;
             packetCursor++;
         } while ((u32)packetIndex < effect->head.particleCount);

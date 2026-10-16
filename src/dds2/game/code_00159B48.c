@@ -24,6 +24,7 @@
 #include "sdf_asset_create.h"
 extern s32 effEmitterDelayRandomState[];
 #include "eff.h"
+#include "eff_template_scale_record.h"
 #include "eff_particle_view.h"
 #include "eff_look_at_ring.h"
 #include "eff_track_poly_list.h"
@@ -64,15 +65,6 @@ typedef char EffInstance_billboard_offset_check[
     ((u32)&((EffInstance *)0)->billboard == 0x80) ? 1 : -1];
 typedef char EffInstance_renderState_offset_check[
     ((u32)&((EffInstance *)0)->renderState == 0x84) ? 1 : -1];
-
-typedef struct EffScaledRecord {
-    u8 pad00[0x20];
-    u32 flags; /* 0x20 */
-    u8 pad24[0x10];
-    f32 scale; /* 0x34 */
-    u8 pad38[8];
-} EffScaledRecord; /* 0x40 */
-
 
 extern s32 effBillResourceOwners[];
 
@@ -2451,10 +2443,10 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
 /* Initialize each packet's native tag and its template-selected uniform scale. */
 void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     s32 packetIndex = 0;
-    EffScaledRecord *packetCursor = (EffScaledRecord *)effect->head.buffer->records;
+    EffTemplateScaleRecord *packetCursor = (EffTemplateScaleRecord *)effect->head.buffer->records;
     if (effect->head.particleCount != 0) {
         do {
-            packetCursor->flags = EFF_PACKET_INITIAL_TAG;
+            packetCursor->initialTag = EFF_PACKET_INITIAL_TAG;
             packetCursor->scale = effect->recordScale;
             packetIndex++;
             packetCursor++;
