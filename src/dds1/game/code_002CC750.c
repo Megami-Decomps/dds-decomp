@@ -1221,8 +1221,8 @@ void sdfSetAllFlagsFromTable(void) {
     } while (entryIndex++ >= 0);
 }
 
-PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 index) {
-    return &D_00391230[index];
+PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 profileId) {
+    return &D_00391230[profileId];
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
