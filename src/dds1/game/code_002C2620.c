@@ -379,10 +379,10 @@ void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
 
 /* Field-map mode index -> track slot. Indices 7 and 12 are the only values in
  * range with no arm of their own, so they fall through to the default of 1. */
-s32 fldLocalMapTrackSlotFromMode(s32 index) {
+s32 fldLocalMapTrackSlotFromMode(s32 mode) {
     s32 slot = 1;
 
-    switch (index - 2) {
+    switch (mode - 2) {
     case 0:
         slot = 1;
         break;
