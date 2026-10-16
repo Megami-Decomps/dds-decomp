@@ -91,7 +91,7 @@ extern void itfPanelSetStatus(s32 windowIndex, s32 status);
 extern void itfPanelSetPairFirst(s32 windowIndex, s32 status);
 extern void itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern char mnuTerminalPopupEntries[];
-extern void itfMesDestroyWindowIfPresent(s32);
+extern void itfMesDestroyWindowIfPresent(s32 window);
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;
 extern s32 D_003BAA78;
