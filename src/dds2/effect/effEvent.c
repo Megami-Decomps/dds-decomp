@@ -827,7 +827,7 @@ void effDispatchActive(void) {
 
 /* callbackResult must be valid whenever callback is present. */
 extern EffEventSetupRecord effRectangleBlurSetupRecord;
-extern s8 D_004364AD;
+extern s8 effRectangleBlurSetupReady;
 extern s8 D_0040B7DB[];
 extern void effEventSetupRecordNoOp();
 extern void effEventSetupBeforeRecordNoOp();
@@ -836,25 +836,25 @@ extern void effEventSetupAfterRecordNoOp();
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
 s8 effUpdateCh72Params(void) {
-    if (D_004364AD == 0) {
+    if (effRectangleBlurSetupReady == 0) {
         if (effRectangleBlurSetupRecord.callback != 0) {
             *effRectangleBlurSetupRecord.callbackResult = effRectangleBlurSetupRecord.callback(effRectangleBlurSetupRecord.source);
         }
         if (effRectangleBlurSetupRecord.destination != 0 && effRectangleBlurSetupRecord.source != 0) {
             memcpy(effRectangleBlurSetupRecord.destination, effRectangleBlurSetupRecord.source, effRectangleBlurSetupRecord.copyBytes);
         }
-        D_004364AD = 1;
+        effRectangleBlurSetupReady = 1;
     }
-    if ((u8)D_004364AD != 0) {
+    if ((u8)effRectangleBlurSetupReady != 0) {
         effReturnEventSetupWord((u32)&effRectangleBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
         effEventSetupRecordNoOp(&effRectangleBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        D_004364AD = 0;
+        effRectangleBlurSetupReady = 0;
     }
-    return D_004364AD;
+    return effRectangleBlurSetupReady;
 }
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
@@ -868,30 +868,30 @@ void effSetLoadDescA(void *parameters) {
 }
 
 extern EffEventSetupRecord effTexturedBlurSetupRecord;
-extern s8 D_004364BD;
+extern s8 effTexturedBlurSetupReady;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
 s8 effEventAdvanceBlurTemplateSetup(void) {
-    if (D_004364BD == 0) {
+    if (effTexturedBlurSetupReady == 0) {
         if (effTexturedBlurSetupRecord.callback != 0) {
             *effTexturedBlurSetupRecord.callbackResult = effTexturedBlurSetupRecord.callback(&effTexturedBlurSetupParameters);
         }
         if (effTexturedBlurSetupRecord.destination != 0 && effTexturedBlurSetupRecord.source != 0) {
             memcpy(effTexturedBlurSetupRecord.destination, effTexturedBlurSetupRecord.source, effTexturedBlurSetupRecord.copyBytes);
         }
-        D_004364BD = 1;
+        effTexturedBlurSetupReady = 1;
     }
-    if ((u8)D_004364BD != 0) {
+    if ((u8)effTexturedBlurSetupReady != 0) {
         effReturnEventSetupWord((u32)&effTexturedBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
         effEventSetupRecordNoOp(&effTexturedBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        D_004364BD = 0;
+        effTexturedBlurSetupReady = 0;
     }
-    return D_004364BD;
+    return effTexturedBlurSetupReady;
 }
 
 /* Expose the blur-template setup parameters by address. */
@@ -905,29 +905,29 @@ void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
 }
 
 extern EffEventSetupRecord effScatterBlurSetupRecord;
-extern s8 D_004364EF;
+extern s8 effScatterBlurSetupReady;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
 s8 effEventAdvanceScatterBlurSetup(void) {
-    if (D_004364EF == 0) {
+    if (effScatterBlurSetupReady == 0) {
         if (effScatterBlurSetupRecord.callback != 0) {
             *effScatterBlurSetupRecord.callbackResult = effScatterBlurSetupRecord.callback(&effScatterBlurSetupParameters);
         }
         if (effScatterBlurSetupRecord.destination != 0 && effScatterBlurSetupRecord.source != 0) {
             memcpy(effScatterBlurSetupRecord.destination, effScatterBlurSetupRecord.source, effScatterBlurSetupRecord.copyBytes);
         }
-        D_004364EF = 1;
+        effScatterBlurSetupReady = 1;
     }
-    if ((u8)D_004364EF != 0) {
+    if ((u8)effScatterBlurSetupReady != 0) {
         effReturnEventSetupWord((u32)&effScatterBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
         effEventSetupRecordNoOp(&effScatterBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        D_004364EF = 0;
+        effScatterBlurSetupReady = 0;
     }
-    return D_004364EF;
+    return effScatterBlurSetupReady;
 }
 
 /* Expose the scatter-blur setup parameters by address. */
@@ -977,29 +977,29 @@ void effSetLoadDescD(void *parameters) {
 }
 
 extern EffEventSetupRecord effSolidRectangleSetupRecord;
-extern s8 D_00436517;
+extern s8 effSolidRectangleSetupReady;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
 s8 effEventAdvanceSolidRectangleSetup(void) {
-    if (D_00436517 == 0) {
+    if (effSolidRectangleSetupReady == 0) {
         if (effSolidRectangleSetupRecord.callback != 0) {
             *effSolidRectangleSetupRecord.callbackResult = effSolidRectangleSetupRecord.callback(effSolidRectangleSetupRecord.source);
         }
         if (effSolidRectangleSetupRecord.destination != 0 && effSolidRectangleSetupRecord.source != 0) {
             memcpy(effSolidRectangleSetupRecord.destination, effSolidRectangleSetupRecord.source, effSolidRectangleSetupRecord.copyBytes);
         }
-        D_00436517 = 1;
+        effSolidRectangleSetupReady = 1;
     }
-    if ((u8)D_00436517 != 0) {
+    if ((u8)effSolidRectangleSetupReady != 0) {
         effReturnEventSetupWord((u32)&effSolidRectangleSetupRecord);
         effEventSetupBeforeRecordNoOp();
         effEventSetupRecordNoOp(&effSolidRectangleSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        D_00436517 = 0;
+        effSolidRectangleSetupReady = 0;
     }
-    return D_00436517;
+    return effSolidRectangleSetupReady;
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
@@ -1012,24 +1012,24 @@ void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters) {
     D_003B28B8 = *parameters;
 }
 
-extern EffEventSetupRecord D_003B2AB8;
+extern EffEventSetupRecord effResourceRectangleSetupRecord;
 extern s8 D_0043651C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
 s8 effEventAdvanceResourceTemplateSetup(void) {
     if (D_0043651C == 0) {
-        if (D_003B2AB8.callback != 0) {
-            *D_003B2AB8.callbackResult = D_003B2AB8.callback(&effResourceRectangleSetupParameters);
+        if (effResourceRectangleSetupRecord.callback != 0) {
+            *effResourceRectangleSetupRecord.callbackResult = effResourceRectangleSetupRecord.callback(&effResourceRectangleSetupParameters);
         }
-        if (D_003B2AB8.destination != 0 && D_003B2AB8.source != 0) {
-            memcpy(D_003B2AB8.destination, D_003B2AB8.source, D_003B2AB8.copyBytes);
+        if (effResourceRectangleSetupRecord.destination != 0 && effResourceRectangleSetupRecord.source != 0) {
+            memcpy(effResourceRectangleSetupRecord.destination, effResourceRectangleSetupRecord.source, effResourceRectangleSetupRecord.copyBytes);
         }
         D_0043651C = 1;
     }
     if ((u8)D_0043651C != 0) {
-        effReturnEventSetupWord((u32)&D_003B2AB8);
+        effReturnEventSetupWord((u32)&effResourceRectangleSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_003B2AB8);
+        effEventSetupRecordNoOp(&effResourceRectangleSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
@@ -1048,30 +1048,30 @@ void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters) {
     effResourceRectangleSetupParameters = *parameters;
 }
 
-extern EffEventSetupRecord D_003B2C90;
-extern s8 D_0043652F;
+extern EffEventSetupRecord effStaggeredBlurSetupRecord;
+extern s8 effStaggeredBlurSetupReady;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
 s8 effEventAdvanceScaleBlurSetup(void) {
-    if (D_0043652F == 0) {
-        if (D_003B2C90.callback != 0) {
-            *D_003B2C90.callbackResult = D_003B2C90.callback(&effStaggeredBlurSetupParameters);
+    if (effStaggeredBlurSetupReady == 0) {
+        if (effStaggeredBlurSetupRecord.callback != 0) {
+            *effStaggeredBlurSetupRecord.callbackResult = effStaggeredBlurSetupRecord.callback(&effStaggeredBlurSetupParameters);
         }
-        if (D_003B2C90.destination != 0 && D_003B2C90.source != 0) {
-            memcpy(D_003B2C90.destination, D_003B2C90.source, D_003B2C90.copyBytes);
+        if (effStaggeredBlurSetupRecord.destination != 0 && effStaggeredBlurSetupRecord.source != 0) {
+            memcpy(effStaggeredBlurSetupRecord.destination, effStaggeredBlurSetupRecord.source, effStaggeredBlurSetupRecord.copyBytes);
         }
-        D_0043652F = 1;
+        effStaggeredBlurSetupReady = 1;
     }
-    if ((u8)D_0043652F != 0) {
-        effReturnEventSetupWord((u32)&D_003B2C90);
+    if ((u8)effStaggeredBlurSetupReady != 0) {
+        effReturnEventSetupWord((u32)&effStaggeredBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_003B2C90);
+        effEventSetupRecordNoOp(&effStaggeredBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
-        D_0043652F = 0;
+        effStaggeredBlurSetupReady = 0;
     }
-    return D_0043652F;
+    return effStaggeredBlurSetupReady;
 }
 
 /* Expose the scale-blur setup parameters by address. */

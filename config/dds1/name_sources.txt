@@ -9688,6 +9688,17 @@
 0x00355AB8	effRectangleBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the rectangle blur setup pass. Identifier-only; twin 0x003B23E8 in DDS2. [PurC data b14; matched-C evidence]
 0x00355F48	effFramebufferQuadSetupRecord	inferred	confidence=high; EffEventSetupRecord for the framebuffer-quad setup pass. Identifier-only; twin 0x003B2878 in DDS2. [PurC data b14; matched-C evidence]
 0x00356048	effSolidRectangleSetupRecord	inferred	confidence=high; EffEventSetupRecord for the solid-rectangle setup pass. Identifier-only; twin 0x003B2978 in DDS2. [PurC data b14; matched-C evidence]
+0x003BB0BD	effRectangleBlurSetupReady	inferred	confidence=high; s8 readiness byte for the rectangle blur setup; set and cleared in effUpdateCh72Params. Identifier-only; twin 0x004364AD in DDS2. [PurC data b15; matched-C evidence]
+0x003BB0CD	effTexturedBlurSetupReady	inferred	confidence=high; s8 readiness byte for the textured blur setup; set and cleared in effEventAdvanceBlurTemplateSetup. Identifier-only; twin 0x004364BD in DDS2. [PurC data b15; matched-C evidence]
+0x003BB0FF	effScatterBlurSetupReady	inferred	confidence=high; s8 readiness byte for the scatter blur setup; set and cleared in effEventAdvanceScatterBlurSetup. Identifier-only; twin 0x004364EF in DDS2. [PurC data b15; matched-C evidence]
+0x003BB127	effSolidRectangleSetupReady	inferred	confidence=high; s8 readiness byte for the solid-rectangle setup; set and cleared in effEventAdvanceSolidRectangleSetup. Identifier-only; twin 0x00436517 in DDS2. [PurC data b15; matched-C evidence]
+0x003BB13F	effStaggeredBlurSetupReady	inferred	confidence=high; s8 readiness byte for the scale-blur setup; set and cleared in effEventAdvanceScaleBlurSetup. Identifier-only; twin 0x0043652F in DDS2. [PurC data b15; matched-C evidence]
+0x00356188	effResourceRectangleSetupRecord	inferred	confidence=high; EffEventSetupRecord for the resource-rectangle setup pass. Identifier-only; twin 0x003B2AB8 in DDS2. [PurC data b15; matched-C evidence]
+0x00356360	effStaggeredBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the scale-blur setup pass. Identifier-only; twin 0x003B2C90 in DDS2. [PurC data b15; matched-C evidence]
+0x0034E630	polyTimedTintEndColor	inferred	confidence=high; constant f32[4] end colour vector blended by polyTimed tint. Identifier-only; twin 0x003AAF60 in DDS2. [PurC data b15; matched-C evidence]
+0x0034E640	polyTimedTintStartColor	inferred	confidence=high; constant f32[4] start colour vector blended by polyTimed tint. Identifier-only; twin 0x003AAF70 in DDS2. [PurC data b15; matched-C evidence]
+0x003D6490	parSharedViewDelta	inferred	confidence=high; f32[] view-delta vector written by parUpdateSharedScaleAndDelta and read by billboard cross-axis updates. Identifier-only; twin 0x00451F30 in DDS2. [PurC data b15; matched-C evidence]
+0x003D64A0	parSharedCrossScale	inferred	confidence=high; f32[] cross-axis scale vector written by parUpdateSharedScaleAndDelta and read by billboard cross-axis updates. Identifier-only; twin 0x00451F40 in DDS2. [PurC data b15; matched-C evidence]
 0x003BD824	itfTestOverlayPhase	inferred	battle overlay color/phase data renamed from D_003BD824; referenced from the battle overlay unit code_001A04C0.c.
 0x003BD828	itfTestOverlayPhaseStep	inferred	battle overlay color/phase data renamed from D_003BD828; referenced from the battle overlay unit code_001A04C0.c.
 0x003D73E0	itfOverlayColorEditorWork	inferred	battle overlay color/phase data renamed from D_003D73E0; referenced from the battle overlay unit code_001A04C0.c.

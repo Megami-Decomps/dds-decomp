@@ -267,8 +267,8 @@ void polyStripPushPairsApart(PolyNode *node, s32 index) {
     }
 }
 
-extern f32 D_0034E630[4];
-extern f32 D_0034E640[4];
+extern f32 polyTimedTintEndColor[4];
+extern f32 polyTimedTintStartColor[4];
 
 /* Blend two constant colour vectors by elapsed/duration (1 once elapsed reaches duration) and tint the result with the packed colour. */
 u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
@@ -280,8 +280,8 @@ u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
     if (elapsed < duration) {
         ratio = (f32)elapsed / (f32)duration;
     }
-    VU0_LOAD_VF(vf10, D_0034E640);
-    VU0_LOAD_VF(vf11, D_0034E630);
+    VU0_LOAD_VF(vf10, polyTimedTintStartColor);
+    VU0_LOAD_VF(vf11, polyTimedTintEndColor);
     VU0_SCALE_VF(vf10, 1.0f - ratio);
     VU0_SCALE_VF(vf11, ratio);
     VU0_ADD(vf10, vf10, vf11);
