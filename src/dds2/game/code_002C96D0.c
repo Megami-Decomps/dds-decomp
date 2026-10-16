@@ -100,7 +100,7 @@ typedef struct EffectSurfaceNode {
     u16 unk50;
 } EffectSurfaceNode;
 
-extern u32 fileSaveReadBuffer;
+extern void *fileSaveReadBuffer;
 typedef struct MdlFlagPair {
     s32 flag;
     s32 unk4;
@@ -557,7 +557,7 @@ u32 fileMainBlobSize(void) {
 void fileReloadSaveBuffer(void) {
     struct SdfMemBlock *saved = datGameState->header.backingAllocation;
     s32 size = FILE_MAIN_BLOB_SIZE;
-    memcpy(datGameState, (void *)fileSaveReadBuffer, size);
+    memcpy(datGameState, fileSaveReadBuffer, size);
     datGameState->header.backingAllocation = saved;
 }
 
@@ -972,8 +972,8 @@ s32 fileReadSlotPreviewBegin(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
-        fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
-        mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
+        fileSaveReadBuffer = (void *)(u32)sdfResourceRetainAddress(fileSaveReadBufferResource);
+        mcReadOpenFile(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, 0x30);
         return (s32)fileReadSlotPreviewWait;
     }
     return fileBeginSlotMetadataRefresh();
@@ -1006,7 +1006,7 @@ s32 fileStoreSlotHeader(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        memcpy(&fileSavePreviewRecords[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
+        memcpy(&fileSavePreviewRecords[fileSlotScanIndex], fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return fileBeginReadRemainingSlotIcons();
     }
@@ -2085,9 +2085,9 @@ s32 fileLoadMainBlobBegin(void) {
     }
     size = fileMainBlobSize();
     fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
-    fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
+    fileSaveReadBuffer = (void *)(u32)sdfResourceRetainAddress(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
-        mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
+        mcReadOpenFile(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, size);
         return (s32)mcHandleSetupResult;
     }
     fileSetMenuFlowState(0);
