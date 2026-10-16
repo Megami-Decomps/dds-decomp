@@ -3110,7 +3110,7 @@ void btlStartLinkedActorEffectTask(ActionStateLink *unit) {
             btlDispatchStateHandler(unit, 0x1B);
             return;
         }
-        work->unk27E += 1;
+        work->spawnCount += 1;
     }
 }
 

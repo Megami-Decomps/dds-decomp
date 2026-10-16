@@ -473,7 +473,7 @@ typedef struct BtlState {
     s32 escapeAttemptCount; /* 0x278: same escape-attempt counter as DDS1. */
     u8 eventReady; /* 0x27C */
     u8 pad27D;
-    u16 unk27E;
+    u16 spawnCount; /* 0x27E: enemies spawned so far, compared with maxEnemySpawns. */
     u16 phase; /* 0x280 */
     u8 requestMode; /* 0x282 */
     u8 pad283;
@@ -670,6 +670,8 @@ typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId
 typedef char BtlFieldResourceIdsSpanCheck[
     (((unsigned int)&((BtlState *)0)->scriptOwner -
       (unsigned int)&((BtlState *)0)->fieldF1ResourceId) == 0xC) ? 1 : -1];
+typedef char BtlSpawnCountOffsetCheck[
+    ((unsigned int)&((BtlState *)0)->spawnCount == 0x27E) ? 1 : -1];
 typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
