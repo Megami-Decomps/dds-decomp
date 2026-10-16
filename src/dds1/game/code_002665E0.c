@@ -51,7 +51,77 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         }
     }
 }
-INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowOverlays);
+#include "sdf.h"
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void btlDrawButtonIconFixed64(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32);
+/* The four sprite corner colours start from the shared grey table. */
+typedef struct BrsCornerColors {
+    u32 rgba[4];
+} BrsCornerColors;
+extern const BrsCornerColors D_003AFC40;
+
+void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                   BrsProgressRow *row, s32 context, s32 index) {
+    DatPartyRecord *unit = row->unit;
+    DatPartyRecord *tintUnit;
+    BrsCornerColors color = D_003AFC40;
+    s32 iconX;
+    s32 iconY;
+    u32 packed;
+
+    if (unit->flags & DAT_PARTY_FLAG_FRONTLINE) {
+        iconX = 8;
+    } else {
+        iconX = 0x18;
+    }
+    iconX += work->fadeAnimation[index].portraitPosition[0];
+    iconY = work->fadeAnimation[index].portraitPosition[1] - 0x14;
+    evtSetDrawSurfaceIndex(context);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+
+    tintUnit = row->unit;
+    if (tintUnit->hp != 0 && !(tintUnit->status & 0x4000)) {
+        packed = (work->fadeAnimation[index].portraitOpacity << 24) | 0x00808080;
+        color.rgba[0] = packed;
+        color.rgba[1] = packed;
+        color.rgba[2] = packed;
+        color.rgba[3] = packed;
+    } else {
+        color.rgba[0] = (work->fadeAnimation[index].portraitOpacity << 24) | 0x00282222;
+        packed = (work->fadeAnimation[index].portraitOpacity << 24) | 0x002C242A;
+        color.rgba[1] = packed;
+        color.rgba[2] = packed;
+        color.rgba[3] = packed;
+    }
+
+    btlDrawButtonIconFixed64(&kwlnDrawSurfaces[context], iconX + (x >> 4),
+                             iconY + (y >> 3), color.rgba[0], color.rgba[1], color.rgba[2],
+                             color.rgba[3], unit->unitId);
+
+    if (unit->hp == 0 || (unit->status & 0x4000)) {
+        if (unit->flags & DAT_PARTY_FLAG_FRONTLINE) {
+            iconX = 1;
+            iconY = 9;
+        } else {
+            iconX = 0x16;
+            iconY = 9;
+        }
+
+        packed = (work->fadeAnimation[index].portraitOpacity + 0x20) | 0x80808000;
+        color.rgba[0] = packed;
+        color.rgba[1] = packed;
+        color.rgba[2] = packed;
+        color.rgba[3] = packed;
+
+        if (work->teardownResource != NULL) {
+            effDrawSpriteWithCornerColors(x + (iconX << 4), y + (iconY << 3), z,
+                          color.rgba, 0, work->teardownResource, 0xF, context);
+        }
+    }
+}
 
 
 extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
