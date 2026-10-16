@@ -1205,8 +1205,8 @@ extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern u32 D_00435CD0;
 extern u32 D_0040B2A0[];
-extern SdfLightSources D_0037F940;
-extern f32 D_0037F950[4];
+extern SdfLightSources kwlnHeldTextureLightSources;
+extern f32 kwlnHeldTextureAmbientColor[4];
 extern u8 kwlnHeldTextureViewMatrix[0x40];
 
 /* Rebuild the held-texture render target's view and both frame banks. */
@@ -1229,7 +1229,7 @@ void kwlnInitHeldTextureScenePackets(void) {
         sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].scene);
         sdfConsBuildMatrixPacket(&kwlnHeldTexturePacketBanks[i].matrix, &D_0037F7B0, kwlnHeldTextureViewMatrix);
         sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].matrix);
-        sdfBuildLightingPacket(&kwlnHeldTexturePacketBanks[i].lighting, D_0037F940, D_0037F950);
+        sdfBuildLightingPacket(&kwlnHeldTexturePacketBanks[i].lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
         sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].lighting);
     }
 }

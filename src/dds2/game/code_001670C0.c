@@ -46,8 +46,8 @@ extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern void sdfDebugPrintf(const char *fmt, ...);
 extern f32 D_003AAEB0[4];
-extern f32 D_0037F850[];
-extern f32 D_0037F860[];
+extern f32 kwlnHeldTextureTargetVector[];
+extern f32 kwlnHeldTextureEyeVector[];
 extern u8 D_00380870[];
 extern s32 D_00435CD0;
 extern s8 D_00436408;
@@ -422,14 +422,14 @@ void dds3StartCrossfade(s32 frames) {
         dds3EndCrossfade();
     }
     if (frames != 0) {
-        D_0037F850[0] = 0.0f;
-        D_0037F850[1] = 0.0f;
-        D_0037F850[2] = 0.0f;
-        D_0037F860[0] = 0.0f;
-        D_0037F860[1] = 0.0f;
-        D_0037F860[2] = 0.0f;
+        kwlnHeldTextureTargetVector[0] = 0.0f;
+        kwlnHeldTextureTargetVector[1] = 0.0f;
+        kwlnHeldTextureTargetVector[2] = 0.0f;
+        kwlnHeldTextureEyeVector[0] = 0.0f;
+        kwlnHeldTextureEyeVector[1] = 0.0f;
+        kwlnHeldTextureEyeVector[2] = 0.0f;
         D_00435CD0 = 0x80808080;
-        kwlnCreateHeldTextureBuffer(0x100, 0xE0, D_0037F850[0]);
+        kwlnCreateHeldTextureBuffer(0x100, 0xE0, kwlnHeldTextureTargetVector[0]);
         kwlnTextureSetReferenceFlagIfPresent();
         i = 0;
         entry = D_00380870;

@@ -198,13 +198,13 @@ extern u8 kwlnHeldTextureMatrixPackets[];
 extern u8 D_003276D0[];
 extern u8 D_00327600[];
 extern u8 D_003270F0[];
-extern SdfLightSources D_00324940;
+extern SdfLightSources kwlnHeldTextureLightSources;
 extern SdfLightSources D_00324B10;
 extern SdfLightSources D_00324770;
-extern f32 D_00324950[4];
+extern f32 kwlnHeldTextureAmbientColor[4];
 extern f32 D_00324B20[4];
 extern f32 kwlnDefaultColorVector[4];
-extern f32 D_00324850[4], D_00324860[4], D_00324870[4];
+extern f32 kwlnHeldTextureTargetVector[4], kwlnHeldTextureEyeVector[4], kwlnHeldTextureUpVector[4];
 extern f32 D_00324A20[4], D_00324A30[4], D_00324A40[4];
 extern KwlnDrawVectorParams D_00324960, D_00324B30, kwlnDrawVector;
 extern u8 kwlnHeldTextureViewMatrix[0x40];
@@ -239,14 +239,14 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     kwlnUpdateDrawParameterTransitions();
     if (kwlnTextureReferenceFlag != 0) {
         sdfBuildLightingPacket((SdfLightingPacketStorage *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-            D_00324940, D_00324950);
+            kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
         *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA900;
         if (kwlnTextureReferenceFlag != 0) {
             SdfPoolNode *sceneNode;
             SdfListHead *sceneList;
             u64 *sceneFrustum;
             sdfCameraBuildProjection(&D_003247B0.camera);
-            sdfVuBuildLookAtBasis(D_00324850, D_00324860, D_00324870);
+            sdfVuBuildLookAtBasis(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, kwlnHeldTextureUpVector);
             VU0_STORE_MATRIX_UNCLOBBERED(kwlnHeldTextureViewMatrix);
             sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
                 &D_003247B0, kwlnHeldTextureViewMatrix);
