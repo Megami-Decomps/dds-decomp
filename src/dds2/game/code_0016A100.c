@@ -335,7 +335,7 @@ void effParamInitWork(MdlCtx *work) {
 }
 
 extern u16 D_00436434;
-extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
+extern void mdlLoadViewerPackage(s32 resourceGroup, u16 resourceId, s32 flags, void *packageData, u32 packageSize);
 
 /* Create and initialize a viewer-package context in the fixed effect group.
  * DDS2 skips occupied halfword ids before loading; DDS1 does not scan them. */
