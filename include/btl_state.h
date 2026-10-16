@@ -12,6 +12,7 @@ struct KwlnTask;
 struct BtlRuntimeTask;
 struct SdfFlagListWork;
 struct SdfMemBlock;
+struct RefObj;
 
 /* Three-byte scene scheduling slot; IDs move with their group/countdown. */
 typedef struct BtlSceneSlot {
@@ -285,7 +286,7 @@ typedef struct BtlState {
     struct EffectSlotSet *numberGlyphSlots; /* 0x4A8: resource slots used for battle-number glyphs. */
     struct EffectSlotSet *resC; /* 0x4AC: btlReleaseResourceBlock clears this at retail 0x001AC7B4. */
     u8 pad4B0[4];
-    u32 buttonTextureHandle; /* 0x4B4 */
+    struct RefObj *buttonTextureHandle; /* 0x4B4: retained button-icon texture reference. */
     struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
     void *frontFloorResource; /* 0x57C: retained front floor texture resource. */
     void *sideFloorResource; /* 0x580: retained side floor texture resource. */
@@ -382,6 +383,8 @@ typedef char BtlDefeatedLevelCountDds1Offset[
 typedef char BtlDefeatedLevelTotalDds1Offset[
     ((unsigned int)&((BtlState *)0)->defeatedLevelTotal == 0x26E) ? 1 : -1];
 typedef char BtlTimingRateOffset[((unsigned int)&((BtlState *)0)->timingRate == 0x490) ? 1 : -1];
+typedef char BtlButtonTextureHandleDds1Offset[
+    ((unsigned int)&((BtlState *)0)->buttonTextureHandle == 0x4B4) ? 1 : -1];
 typedef char BtlHitResultOverrideOffset[((unsigned int)&((BtlState *)0)->hitResultOverride == 0x59C) ? 1 : -1];
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
 typedef char BtlPreActionHookOffset[((unsigned int)&((BtlState *)0)->preActionHook == 0x648) ? 1 : -1];
@@ -535,7 +538,7 @@ typedef struct BtlState {
     struct EffectSlotSet *resB; /* 0x4DC: resource slots used for battle-number glyphs */
     u8 pad4E0[4];
     u32 unk4E4; /* First word returned by the indexed scene-value API. */
-    u32 buttonTextureHandle; /* 0x4E8 */
+    struct RefObj *buttonTextureHandle; /* 0x4E8: retained button-icon texture reference. */
     struct SoundResourceNode *resources[0x31]; /* 0x4EC: SYSEFF resource slots */
     void *primaryBuffer;
     void *secondaryBuffer;
@@ -680,6 +683,8 @@ typedef char BtlSpawnCountOffsetCheck[
     ((unsigned int)&((BtlState *)0)->spawnCount == 0x27E) ? 1 : -1];
 typedef char BtlSceneLightNodeOffsetCheck[
     ((unsigned int)&((BtlState *)0)->sceneLightNode == 0x228) ? 1 : -1];
+typedef char BtlButtonTextureHandleDds2Offset[
+    ((unsigned int)&((BtlState *)0)->buttonTextureHandle == 0x4E8) ? 1 : -1];
 typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
