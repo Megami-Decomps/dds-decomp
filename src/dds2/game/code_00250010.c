@@ -111,7 +111,9 @@ extern char D_004374F0[]; /* " EVENT" */
 extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
-extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
+extern s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
+                                  s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
+                                  s32 *secondaryCursor, s32 *primaryCursor);
 extern s32 evtDrawFrameListColumnHeadings();
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
