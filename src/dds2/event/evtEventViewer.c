@@ -246,16 +246,16 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 entryType, EvtRuntime *viewer) {
 }
 
 s32 evtEventViewerCountEntriesById(s32 entryType, EvtRuntime *viewer) {
-    EvtRuntimeGroup *node;
-    s32 currentId;
+    EvtRuntimeGroup *entry;
+    s32 currentType;
     s32 count;
 
-    node = viewer->groups;
+    entry = viewer->groups;
     count = 0;
-    while (node != NULL) {
-        currentId = node->type;
-        node = node->next;
-        if (currentId == entryType) {
+    while (entry != NULL) {
+        currentType = entry->type;
+        entry = entry->next;
+        if (currentType == entryType) {
             count++;
         }
     }
@@ -263,11 +263,11 @@ s32 evtEventViewerCountEntriesById(s32 entryType, EvtRuntime *viewer) {
 }
 
 s32 evtEventViewerCountEntries(EvtRuntime *viewer) {
-    EvtRuntimeGroup *node;
+    EvtRuntimeGroup *entry;
     s32 count;
 
     count = 0;
-    for (node = viewer->groups; node != NULL; node = node->next) {
+    for (entry = viewer->groups; entry != NULL; entry = entry->next) {
         count++;
     }
     return count;
