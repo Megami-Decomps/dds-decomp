@@ -721,7 +721,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         }
     }
     helperResult = btlGetUnitMotionDurationFrames(action->unit, ((BtlActionAnimationRecord *)datActionAnimationRecords)[command].cameraKind);
-    if (datCommandRecords[command].unk2E != 0) {
+    if (datCommandRecords[command].commandEffectId != 0) {
         counterCommand = command;
         btlBossDebugPrintf("btl:counter=%d\n", command);
     } else {
