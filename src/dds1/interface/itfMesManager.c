@@ -35,7 +35,7 @@ extern u32 itfMessageFlags;
 
 s32 scrGetWindow(void);
 
-s32 scrReadIntParameter(s32 arg0);
+s32 scrReadIntParameter(s32 parameterIndex);
 
 void func_0014DAF0(s32 arg0);
 
