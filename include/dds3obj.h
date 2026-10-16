@@ -36,6 +36,7 @@ ObjBase *dds3CreateSlotResourceState(void *owner);
 void dds3EnsureSlotData(void *object);
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object);
 u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object);
+void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Forward a callback to the object's slot-1 handler when one is present. */
 void dds3SetObjectSlot1MoverCallback(EffWorldNode *object,
                                      s32 (*update)(struct ObjectTransform *, struct EffWorldNode *));

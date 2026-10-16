@@ -7686,7 +7686,6 @@ extern s32 D_003BAE18;
 extern s32 D_003BAE20;
 extern s32 D_003BAE2C;
 #include "fld_trigger_shape.h"
-extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {
     s32 slotIndex;
