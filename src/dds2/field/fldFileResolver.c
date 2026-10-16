@@ -925,15 +925,15 @@ typedef struct FldActionSpawn {
     u32 firstValue;
 } FldActionSpawn;
 
-void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
-    u32 i;
-    struct EffWorldNode *node;
+void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
+    u32 spawnIndex;
+    struct EffWorldNode *spawnedObject;
 
     dds3GetWorldSecondaryObject();
-    for (i = 0; i < count; i++, list++) {
-        node = evtSpawnActionObj2(list->firstValue, list->secondValue);
-        if (i == 0) {
-            fldAreaState.taskHandle = (s32)node;
+    for (spawnIndex = 0; spawnIndex < spawnCount; spawnIndex++, spawnList++) {
+        spawnedObject = evtSpawnActionObj2(spawnList->firstValue, spawnList->secondValue);
+        if (spawnIndex == 0) {
+            fldAreaState.taskHandle = (s32)spawnedObject;
         }
     }
 }

@@ -856,15 +856,15 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
 }
 
 
-void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
-    u32 i;
+void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
+    u32 spawnIndex;
 
     dds3GetWorldSecondaryObject();
-    for (i = 0; i < count; i++) {
-        struct EffWorldNode *node = evtSpawnActionObj2(list->firstValue, list->secondValue);
-        list++;
-        if (i == 0) {
-            fldAreaState.taskHandle = (s32)node;
+    for (spawnIndex = 0; spawnIndex < spawnCount; spawnIndex++) {
+        struct EffWorldNode *spawnedObject = evtSpawnActionObj2(spawnList->firstValue, spawnList->secondValue);
+        spawnList++;
+        if (spawnIndex == 0) {
+            fldAreaState.taskHandle = (s32)spawnedObject;
         }
     }
 }
