@@ -1129,7 +1129,7 @@ void sdfDevDeactivate(DevState *state, s32 result) {
     }
 }
 
-extern s32 sceWrite(s32, s32, s32);
+extern s32 sceWrite(s32 fileHandle, s32 buffer, s32 byteCount);
 
 /* Service queued host-file requests for one device worker. */
 INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E288);
