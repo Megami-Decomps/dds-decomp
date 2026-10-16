@@ -23,6 +23,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+evtViewCmdSetObjectTarget = 0x0024CE18; // type:func
 evtNextCameraSlotViewerKey = 0x004377D8; // type:s32
 mnuRuntimeHitTargetList = 0x0045C870;
 mnuRuntimeAnimationList = 0x0045C880;
