@@ -75,7 +75,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32 statIndex);
 
-extern u32 sdfRollActionHit(s32 channel, s32 arg1, DatPartyRecord *item);
+extern u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *item);
 
 extern void scrDestroyWorkTask(void);
 
