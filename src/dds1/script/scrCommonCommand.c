@@ -76,12 +76,12 @@ s32 scrCommandPrintString(void)
 
 s32 bfWaitCbScreenFadeA(void)
 {
-    s32 mode;
+    s32 colorMode;
 
     if (scrGetCommandTimer() == 0)
     {
-        mode = scrReadIntParameter(0);
-        switch (mode)
+        colorMode = scrReadIntParameter(0);
+        switch (colorMode)
         {
         case 0:
             kwlnFadeOutStart(0, 0, 0, scrReadIntParameter(1));
@@ -99,12 +99,12 @@ s32 bfWaitCbScreenFadeA(void)
 
 s32 bfWaitCbScreenFadeB(void)
 {
-    s32 mode;
+    s32 colorMode;
 
     if (scrGetCommandTimer() == 0)
     {
-        mode = scrReadIntParameter(0);
-        switch (mode)
+        colorMode = scrReadIntParameter(0);
+        switch (colorMode)
         {
         case 0:
             kwlnFadeInStart(0, 0, 0, scrReadIntParameter(1));
