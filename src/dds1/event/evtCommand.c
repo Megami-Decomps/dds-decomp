@@ -152,23 +152,23 @@ extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 
 /* Copy two source points into the primary effect object. */
 s32 evtCommandCopyEffectSourcePoints(void) {
-    struct EffectObj *primary;
-    struct EffectObj *point0;
-    struct EffectObj *point1;
+    struct EffectObj *primaryEffect;
+    struct EffectObj *sourcePoint0;
+    struct EffectObj *sourcePoint1;
 
-    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    if (primary == NULL) {
+    primaryEffect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primaryEffect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
         return 1;
     }
 
-    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
-    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
-    if (point0 == NULL || point1 == NULL) {
+    sourcePoint0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    sourcePoint1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    if (sourcePoint0 == NULL || sourcePoint1 == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
         return 1;
     }
-    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, NULL, NULL) == 0) {
+    if (effObjCopyMagatuhiSourceParameters(primaryEffect, sourcePoint0, sourcePoint1, NULL, NULL) == 0) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
         return 1;
     }
@@ -189,28 +189,28 @@ extern char D_003AC958[];
 
 /* Apply four effect parameters after resolving every input object. */
 s32 evtCommandSetMagatuhiSourcePoints(void) {
-    struct EffectObj *primary;
-    struct EffectObj *point0;
-    struct EffectObj *point1;
-    struct EffectObj *point2;
-    struct EffectObj *point3;
+    struct EffectObj *primaryEffect;
+    struct EffectObj *sourcePoint0;
+    struct EffectObj *sourcePoint1;
+    struct EffectObj *sourcePoint2;
+    struct EffectObj *sourcePoint3;
 
-    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    if (primary == NULL) {
+    primaryEffect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primaryEffect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
         return 1;
     }
 
-    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
-    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
-    point2 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(3));
-    point3 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(4));
+    sourcePoint0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    sourcePoint1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    sourcePoint2 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(3));
+    sourcePoint3 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(4));
 
-    if (point0 == NULL || point1 == NULL || point2 == NULL || point3 == NULL) {
+    if (sourcePoint0 == NULL || sourcePoint1 == NULL || sourcePoint2 == NULL || sourcePoint3 == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
         return 1;
     }
-    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, point2, point3) == 0) {
+    if (effObjCopyMagatuhiSourceParameters(primaryEffect, sourcePoint0, sourcePoint1, sourcePoint2, sourcePoint3) == 0) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
         return 1;
     }
