@@ -54,11 +54,6 @@ extern s8 D_00436408;
 extern u32 D_0043640C;
 extern u32 D_00436410;
 
-typedef struct EffectEntry {
-    u8 pad00[0x10];
-    u32 value;
-} EffectEntry;
-
 typedef struct BillWork {
     u8 pad00[0x64];
     u8 currentValue;
