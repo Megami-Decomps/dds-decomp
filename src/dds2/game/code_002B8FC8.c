@@ -2187,9 +2187,9 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
     }
 }
 
-void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 index, s32 kind) {
-    MenuPageSlot *slot = &menu->slots[index];
-    DatPartyRecord *actor = &datGameState->party[menu->records->slots[index].index];
+void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 partySlotIndex, s32 kind) {
+    MenuPageSlot *slot = &menu->slots[partySlotIndex];
+    DatPartyRecord *actor = &datGameState->party[menu->records->slots[partySlotIndex].index];
     s32 resourceIndex;
     s32 statusIndex;
 
@@ -2227,7 +2227,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 index, s32 kind) {
         effDestroyResourceSlotSet(slot->frame[4]);
         effDestroyResourceSlotSet(slot->frame[5]);
     }
-    resourceIndex = menu->records->slots[index].unitIndex;
+    resourceIndex = menu->records->slots[partySlotIndex].unitIndex;
     if (resourceIndex >= 0) {
         if (effHasFirstTextureHandle(menu->mainResources[resourceIndex]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)menu->mainResources[resourceIndex]);

@@ -1750,9 +1750,9 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 /* Rebuild one party row's icon and frame resources from its current selectors. */
-void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 index, s32 kind) {
-    MenuPageSlot *slot = &window->slots[index];
-    PartyPanelEntry *entry = &window->records->slots[index];
+void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 partySlotIndex, s32 kind) {
+    MenuPageSlot *slot = &window->slots[partySlotIndex];
+    PartyPanelEntry *entry = &window->records->slots[partySlotIndex];
     DatPartyRecord *actor = &datGameState->party[entry->index];
     s32 resourceIndex;
     s32 selection;
@@ -1808,7 +1808,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 index, s32 kind) {
         effDestroyResourceSlotSet(slot->frame[3]);
     }
 
-    resourceIndex = window->records->slots[index].unitIndex;
+    resourceIndex = window->records->slots[partySlotIndex].unitIndex;
     if (resourceIndex >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[resourceIndex]) == 0) {
             effResolveAndReleaseResource(window->handlesA[resourceIndex]);
