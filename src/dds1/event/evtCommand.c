@@ -52,7 +52,7 @@ void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
 
 void effObjSetFlags(void *unit, s32 flag);
 
-void evtApplyIndexValueToWorldNodes(s32 which, s32 value);
+void evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 baseMode);
 
 void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
 void evtSubmitEventRequest(s32 eventId, s32 mode);
@@ -575,19 +575,19 @@ s32 evtCommandHandleChangedSecondaryWorldKey(void)
 
 s32 evtCommandSetWorldNodeBaseMode(void)
 {
-    s32 value;
+    s32 baseMode;
 
-    value = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(0, value);
+    baseMode = scrReadIntParameter(0);
+    evtApplyIndexValueToWorldNodes(0, baseMode);
     return 1;
 }
 
 s32 evtCommandSetWorldNodeUpperMode(void)
 {
-    s32 value;
+    s32 baseMode;
 
-    value = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(1, value);
+    baseMode = scrReadIntParameter(0);
+    evtApplyIndexValueToWorldNodes(1, baseMode);
     return 1;
 }
 
