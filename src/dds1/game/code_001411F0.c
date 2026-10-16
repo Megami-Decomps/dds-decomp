@@ -1779,13 +1779,13 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
 extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 
-extern KwlnDrawVectorParams D_00324B30;
+extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
 
 
 
-extern u128 D_00324A30;
+extern u128 kwlnOverlayEyeVector;
 
-extern u128 D_00324A40;
+extern u128 kwlnOverlayUpVector;
 
 extern s32 D_003BAEB8;
 
@@ -1856,14 +1856,14 @@ void func_00145B18(void) {
     eye[0] = D_003BAEBC;
     eye[1] = -24000.0f;
     eye[2] = D_003BAEC0;
-    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&D_00324A40, &up);
-    D_00324B30.fogNear = 255.0f;
-    D_00324B30.depthNear = 1000.0f;
-    D_00324B30.fogFar = 255.0f;
-    D_00324B30.depthFar = 20000.0f;
-    D_00324B30.fogColor = 0x108010;
+    PCP_COPY_VECTOR(&kwlnOverlayUpVector, &up);
+    kwlnOverlayFrustumParameters.fogNear = 255.0f;
+    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogFar = 255.0f;
+    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
+    kwlnOverlayFrustumParameters.fogColor = 0x108010;
     D_00324980.camera.offsetX = 2048.0f;
     D_00324980.camera.offsetY = 2048.0f;
     kwlnDrawVector.fogNear = 255.0f;
@@ -1979,14 +1979,14 @@ void fldEnterSceneCamera(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&D_00324A40, &up);
-    D_00324B30.fogNear = 255.0f;
-    D_00324B30.depthNear = 1000.0f;
-    D_00324B30.fogFar = 255.0f;
-    D_00324B30.depthFar = 20000.0f;
-    D_00324B30.fogColor = 0x108010;
+    PCP_COPY_VECTOR(&kwlnOverlayUpVector, &up);
+    kwlnOverlayFrustumParameters.fogNear = 255.0f;
+    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogFar = 255.0f;
+    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
+    kwlnOverlayFrustumParameters.fogColor = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2037,14 +2037,14 @@ void fldLoadSceneModelsAndCamera(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&D_00324A40, &up);
-    D_00324B30.fogNear = 255.0f;
-    D_00324B30.depthNear = 1000.0f;
-    D_00324B30.fogFar = 255.0f;
-    D_00324B30.depthFar = 20000.0f;
-    D_00324B30.fogColor = 0x108010;
+    PCP_COPY_VECTOR(&kwlnOverlayUpVector, &up);
+    kwlnOverlayFrustumParameters.fogNear = 255.0f;
+    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogFar = 255.0f;
+    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
+    kwlnOverlayFrustumParameters.fogColor = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2209,14 +2209,14 @@ void fldUpdateAutomapInput(void) {
     eye[0] = D_003BAEBC;
     eye[1] = -24000.0f;
     eye[2] = D_003BAEC0;
-    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&D_00324A40, up);
-    D_00324B30.fogNear = 255.0f;
-    D_00324B30.depthNear = 1000.0f;
-    D_00324B30.fogFar = 255.0f;
-    D_00324B30.depthFar = 20000.0f;
-    D_00324B30.fogColor = 0x808080;
+    PCP_COPY_VECTOR(&kwlnOverlayUpVector, up);
+    kwlnOverlayFrustumParameters.fogNear = 255.0f;
+    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogFar = 255.0f;
+    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
+    kwlnOverlayFrustumParameters.fogColor = 0x808080;
     PCP_COPY_VECTOR(sdfViewTargetVector, eye);
     PCP_COPY_VECTOR(sdfViewEyeVector, focus);
     PCP_COPY_VECTOR(sdfViewUpVector, up);
@@ -2248,14 +2248,14 @@ void fldCenterCameraOnEntry(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&kwlnOverlayEyeVector, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
-    PCP_COPY_VECTOR(&D_00324A40, up);
-    D_00324B30.fogNear = 255.0f;
-    D_00324B30.depthNear = 1000.0f;
-    D_00324B30.fogFar = 255.0f;
-    D_00324B30.depthFar = 20000.0f;
-    D_00324B30.fogColor = 0x808080;
+    PCP_COPY_VECTOR(&kwlnOverlayUpVector, up);
+    kwlnOverlayFrustumParameters.fogNear = 255.0f;
+    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogFar = 255.0f;
+    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
+    kwlnOverlayFrustumParameters.fogColor = 0x808080;
 }
 
 /* Stores the area, floor/room and third location selection, and selects the

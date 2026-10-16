@@ -145,7 +145,7 @@ extern BtlLightParams D_0037FA90;
 
 extern BtlLightParams D_0037FAD0;
 
-extern BtlLightParams D_0037FB20;
+extern BtlLightParams kwlnOverlayAmbientColor;
 extern s32 btlCountTasksByKind(u16);
 
 
@@ -1566,9 +1566,9 @@ void btlInitLightParams(void) {
     D_0037FAD0.unk10 = 0;
     D_0037FAD0.unk14 = 0;
     D_0037FAD0.unk18 = 0;
-    D_0037FB20.r = 1.15f;
-    D_0037FB20.g = 1.15f;
-    D_0037FB20.b = 1.15f;
+    kwlnOverlayAmbientColor.r = 1.15f;
+    kwlnOverlayAmbientColor.g = 1.15f;
+    kwlnOverlayAmbientColor.b = 1.15f;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022D040);
