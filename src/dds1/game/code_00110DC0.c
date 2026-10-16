@@ -7,15 +7,15 @@
 
 s32 dds3ExchangeAreaSlot(void *areaObject);
 
-const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value) {
+const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *targetNode) {
     EffWorldNode *node;
 
-    if (object == NULL || value == 0) {
+    if (object == NULL || targetNode == 0) {
         return 0;
     }
     node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
     while (node != NULL) {
-        if (node == value) {
+        if (node == targetNode) {
             return 1;
         }
         node = node->next;
@@ -23,11 +23,11 @@ const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, Eff
     return 0;
 }
 
-const s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *value) {
+const s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *targetNode) {
     EvtWorldSlot *slots;
     s32 i;
 
-    if (object == NULL || value == 0) {
+    if (object == NULL || targetNode == 0) {
         return 0;
     }
     slots = ((EvtWorldTable *)object->data)->slots;
@@ -38,7 +38,7 @@ const s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *v
             continue;
         }
         do {
-            if (node == value) {
+            if (node == targetNode) {
                 return 1;
             }
             node = node->next;
