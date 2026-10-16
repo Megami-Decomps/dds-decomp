@@ -3903,14 +3903,14 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
 s32 evtViewerStartUpdate(KwlnTask *task) {
     EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *context;
-    u16 eventId;
+    u16 viewerEventId;
     u16 sceneId;
 
     fldInitializeCameraColorResource();
     context = viewer->windowContext;
-    eventId = context->eventId;
+    viewerEventId = context->eventId;
     sceneId = context->sceneId;
-    D_004372B0 = eventId;
+    D_004372B0 = viewerEventId;
     D_004372B2 = sceneId;
     sprintf(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
     viewer->flags = 1;
