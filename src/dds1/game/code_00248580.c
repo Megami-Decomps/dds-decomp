@@ -842,8 +842,8 @@ void mnuTerminalCreateEffects(MenuTerminalWork *state) {
 }
 
 /* Destroy every retained effect batch; the slots and terminal allocation are not cleared. */
-void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
-    EffMappedResource **batch = ((MenuTerminalWork *)object)->effect;
+void mnuDestroyAllMenuSlotEffectBatches(s32 workAddress) {
+    EffMappedResource **batch = ((MenuTerminalWork *)workAddress)->effect;
     u32 i;
 
     for (i = 0; i < MNU_EFFECT_BATCH_COUNT; i++) {
