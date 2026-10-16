@@ -15,7 +15,7 @@ extern void mnuClearCampResourceFlagEntries(void);
 
 extern void mnuSynchronizeMantraModelFlags(s32 mode);
 
-extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
