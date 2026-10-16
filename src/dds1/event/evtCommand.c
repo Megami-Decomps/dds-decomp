@@ -947,19 +947,19 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC908);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC928);
 
 s32 evtCommandWaitObjectResourceScale(void) {
-    void *object = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
+    void *worldObject = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     s32 status;
 
-    if (object == NULL) {
-        object = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (object == NULL) {
+    if (worldObject == NULL) {
+        worldObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (worldObject == NULL) {
             sdfDebugPrintf(D_003AC8E8, scrReadIntParameter(0));
             sdfDebugPrintf(D_003AC8F8, scrReadIntParameter(1));
             sdfDebugPrintf("e OBJ_PATH_WAIT : obj==NULL\n");
             return 1;
         }
     }
-    status = evtCheckWorldObjectResourceScale(object);
+    status = evtCheckWorldObjectResourceScale(worldObject);
     switch (status) {
     case 0:
         return 1;
