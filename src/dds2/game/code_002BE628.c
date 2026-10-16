@@ -2851,7 +2851,84 @@ s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6008);
+extern const u16 D_0042B518[];
+
+s32 func_002C6008(PartyPanel *partyPanel, MenuPageWindow *page,
+                  DatPartyRecord *caster, s32 commit) {
+    DatPartyRecord *targets[5];
+    DatPartyRecord preview[5];
+    u16 abilities[6];
+    DatPartyRecord *entry;
+    DatPartyRecord **target;
+    u16 *ability;
+    s32 abilityId;
+    u16 abilityArg;
+    u16 occupied;
+    s32 count = 0;
+    s32 i;
+    u32 abilityIndex;
+    s32 bestDeficit;
+    s32 bestAbility;
+    s32 deficit;
+
+    memcpy(abilities, D_0042B518, sizeof(abilities));
+    entry = datGameState->party;
+    target = targets;
+    for (i = 4; i >= 0; i--, entry++) {
+        occupied = entry->flags & 1;
+        if (occupied && entry->hp < entry->maxHp) {
+            *target++ = entry;
+            count++;
+        }
+    }
+    if (count == 0) {
+        return 3;
+    }
+    qsort(targets, count, sizeof(targets[0]), mnuComparePartyEntryCostRatio);
+    bestAbility = 0;
+    ability = abilities;
+    bestDeficit = 4995;
+    for (abilityIndex = 0; abilityIndex < 6; abilityIndex++, ability++) {
+        abilityId = *ability;
+        for (i = 0; i < count; i++) {
+            memcpy(&preview[i], targets[i], sizeof(preview[i]));
+        }
+        abilityArg = abilityId;
+        if (ptyGetSkillNibbleState(caster, abilityArg) == 0 ||
+            mnuIsEntryCostUnaffordable(abilityArg, caster) != 0) {
+            continue;
+        }
+        if (mnuGetAbilityTargetCategory(abilityArg) == 1) {
+            sdfApplyCommandResults(abilityId, caster, preview);
+        } else {
+            for (i = 0; i < count; i++) {
+                if (preview[i].flags & 2) {
+                    sdfApplyCommandResults(abilityId, caster, &preview[i]);
+                }
+            }
+        }
+        deficit = 0;
+        for (i = 0; i < count; i++) {
+            deficit += preview[i].maxHp - preview[i].hp;
+        }
+        if (deficit < bestDeficit) {
+            bestDeficit = deficit;
+            bestAbility = *ability;
+        }
+    }
+    if (bestAbility == 0) {
+        return 1;
+    }
+    if (commit) {
+        abilityArg = bestAbility;
+        ptySkillApplyFieldUseEffect(page, abilityArg, caster, targets[0]);
+        mnuConsumeEntryCost(abilityArg, caster);
+        mnuInitPartyPanelSlots(partyPanel);
+        mnuReleaseAndRefreshWindowSlots(page);
+        mnuRefreshPartyPanelBars(page);
+    }
+    return 2;
+}
 
 s32 mnuUseFieldSkillOnParty(PartyPanel *partyPanel, MenuPageWindow *page, s32 commit) {
     u32 used[32];
