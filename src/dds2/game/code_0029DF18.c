@@ -39,11 +39,51 @@ void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428560);
+void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, BrsProgressRow *row,
+                   BrsActiveProgressList *list, s32 context, s32 index) {
+    u32 color[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
+    const s32 enemyPos[3] = { 0x19, 0x10, 2 };
+    s32 allyPos[3] = { 0x38, 5, 3 };
+    s32 i;
+    DatPartyRecord *unit;
+    u32 packed;
+    const s32 *enemy;
+    s32 *ally;
 
-INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428570);
+    packed = work->fadeAnimation[index].backgroundOpacity | 0x80808000;
+    unit = row->unit;
+    color[0] = packed;
+    color[1] = packed;
+    color[2] = packed;
+    color[3] = packed;
+    if (work->teardownResource == NULL) {
+        return;
+    }
+    ally = allyPos;
+    enemy = enemyPos;
+    for (i = 0; i < 1; i++, ally += 3, enemy += 3) {
+        s32 px;
+        s32 py;
+        s32 slot;
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowEntries);
+        if (unit->flags & 2) {
+            effDrawTextureSlotWithBlendedCornerColors(x - 0x1D0, y + 0x60, z,
+                          (work->fadeAnimation[index].backgroundOpacity << 8) >> 7, 0,
+                          work->teardownResource, 0x1F, context);
+            brsDrawProgressRowOverlays(x, y, z, work, &list->rows[index], context, index);
+            px = enemy[0];
+            py = enemy[1];
+            slot = enemy[2];
+        } else {
+            brsDrawProgressRowOverlays(x, y, z, work, &list->rows[index], context, index);
+            px = ally[0];
+            py = ally[1];
+            slot = ally[2];
+        }
+        effDrawSpriteWithCornerColors(x + (px << 4), y + (py << 3), z, color, 0,
+                      work->teardownResource, slot, context);
+    }
+}
 
 /* Shared gray palette retained for the still-ASM unit-info renderer. */
 INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowUnitInfo);
