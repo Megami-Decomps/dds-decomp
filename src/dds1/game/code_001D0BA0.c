@@ -1147,7 +1147,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         }
     }
     if (btlCompareSkippedAndActiveTargetCounts(work->indices, work->groups)) {
-        work->unk2E = 1;
+        work->allTargetSideActorsSkipped = 1;
     }
     work->slot = btlClassifyActionOperand(action->unit, work);
     {
@@ -1191,7 +1191,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->wait = -1;
     work->unk3C = 0;
     work->costValidationFailed = 0;
-    work->unk2E = 0;
+    work->allTargetSideActorsSkipped = 0;
     work->huntEpReward = 0;
     work->battleExperienceReward = 0;
     work->moneyReward = 0;

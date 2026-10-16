@@ -145,7 +145,7 @@ typedef struct BattleIndexWork {
     s8 resultKind;
 #endif
     u8 costValidationFailed; /* +0x2D: cost check failed; suppress normal command follow-up. */
-    u8 unk2E;
+    u8 allTargetSideActorsSkipped; /* +0x2E: target resolution reports every active actor on selected sides skipped. */
     u8 pad2F;
     u16 stage;
     u8 pad32[2];
@@ -173,6 +173,8 @@ typedef struct BattleIndexWork {
 } BattleIndexWork;
 typedef char BattleIndexWork_costValidationFailed_offset_must_be_0x2D[
     ((u32)&((BattleIndexWork *)0)->costValidationFailed == 0x2D) ? 1 : -1];
+typedef char BattleIndexWork_allTargetSideActorsSkipped_offset_must_be_0x2E[
+    ((u32)&((BattleIndexWork *)0)->allTargetSideActorsSkipped == 0x2E) ? 1 : -1];
 typedef char BattleIndexWork_huntEpReward_offset_must_be_0x50[
     ((u32)&((BattleIndexWork *)0)->huntEpReward == 0x50) ? 1 : -1];
 #ifdef VERSION_DDS1
