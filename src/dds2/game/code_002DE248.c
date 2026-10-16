@@ -445,7 +445,7 @@ extern u32 effScalyTextureHandle;
 
 extern s32 effSharedStripReferenceCount;
 
-extern u32 effSharedScalyStripResource;
+extern RefObj *effSharedScalyStripResource;
 extern FileJobPayload *effTemporaryFileJob;
 
 extern FileQueue *effAuxiliaryFileQueue;
@@ -8575,17 +8575,17 @@ void effSetModelBlockMatrixComponent(Matrix4 *mat, float value) {
 /* Retain and return the lazy shared reference to /effect/scaly00.tmx. */
 u32 effRetainScalyTextureReference(void) {
     if (effSharedStripReferenceCount == 0) {
-        effSharedScalyStripResource = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effScalyTextureHandle, 0x200);
+        effSharedScalyStripResource = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effScalyTextureHandle, 0x200);
     }
     effSharedStripReferenceCount = effSharedStripReferenceCount + 1;
-    return effSharedScalyStripResource;
+    return (u32)effSharedScalyStripResource;
 }
 
 /* Drop a scaly texture reference; unused is ignored and the last owner releases the clone. */
 void effReleaseScalyTextureReference(u32 unused) {
     effSharedStripReferenceCount = effSharedStripReferenceCount - 1;
     if (effSharedStripReferenceCount == 0) {
-        effReleaseSharedReference((RefObj *)effSharedScalyStripResource);
+        effReleaseSharedReference(effSharedScalyStripResource);
         effSharedScalyStripResource = 0;
     }
 }
@@ -8639,7 +8639,7 @@ u64 effCreateTexturedStripWithSharedTexture(void) {
 }
 
 void effReleaseScalyStripResources(u8 *work) {
-    effReleaseScalyTextureReference(effSharedScalyStripResource);
+    effReleaseScalyTextureReference((u32)effSharedScalyStripResource);
     sdfQueueAssetRelease(((EffStripWork *)work)->handle);
     sdfReleaseResourceAllocation(((EffStripWork *)work)->allocation);
 }
