@@ -36,8 +36,8 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 /* Work block at object+0x240; the node IDs fill the eight slots before
    the selected index and count. */
 
-DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *object) {
-    return object->list->cursor->partyRecord;
+DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *resource) {
+    return resource->list->cursor->partyRecord;
 }
 
 DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *object, s32 index) {
