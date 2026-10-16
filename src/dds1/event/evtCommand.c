@@ -639,35 +639,35 @@ s32 evtCommandClearAllUnitsAndWait(void)
 }
 
 s32 evtCommandAddEffectUnitToWorld(void) {
-    EffWorldNode *unit;
+    EffWorldNode *cameraOwner;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (EffWorldNode *)fldGetPlayerSceneState();
+        cameraOwner = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
-    if (unit == NULL) {
+    if (cameraOwner == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), cameraOwner);
     return 1;
 }
 
 s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
-    EffWorldNode *unit;
+    EffWorldNode *cameraOwner;
     CameraData *cameraData;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (EffWorldNode *)fldGetPlayerSceneState();
+        cameraOwner = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
-        cameraData = unit->data;
+        cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        cameraData = cameraOwner->data;
         cameraData->fovUpdatePending |= 1;
     }
-    if (unit == NULL) {
+    if (cameraOwner == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), cameraOwner);
     return 1;
 }
 
