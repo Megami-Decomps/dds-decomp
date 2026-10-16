@@ -84,23 +84,23 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
 /* Starts the named script task on the scene object's resource. */
 s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
-    struct BfFlw0Header *resource = worldData->sceneScript;
+    struct BfFlw0Header *sceneScript = worldData->sceneScript;
     s32 scriptIndex;
 
-    if (resource == NULL) {
+    if (sceneScript == NULL) {
         return 0;
     }
     if (taskName == NULL) {
         return 0;
     }
-    scriptIndex = bfFindScriptIndexByName(resource, taskName);
+    scriptIndex = bfFindScriptIndexByName(sceneScript, taskName);
     if (scriptIndex < 0) {
         return 0;
     }
     if (kwlnTaskGetTaskByName(taskName) != NULL) {
         return 0;
     }
-    return scrCreateTaskForProcessId(0x3EA, (s32)resource, scriptIndex);
+    return scrCreateTaskForProcessId(0x3EA, (s32)sceneScript, scriptIndex);
 }
 
 /* Destroy the task selected by taskName; NULL or an absent task is a no-op.
