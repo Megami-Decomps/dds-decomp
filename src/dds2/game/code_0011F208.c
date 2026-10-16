@@ -883,12 +883,8 @@ void fldResetFieldMapState(void) {
     memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
 }
 
-typedef struct FldVrResetView {
-    s16 previewX;
-    s16 previewY;
-    u8 pad04[4];
-    u32 words[15];
-} FldVrResetView;
+#include "fld_vr_reset_view.h"
+
 extern u32 D_00389988[];
 void fldResetFieldRuntimeState(s32 mode) {
     FldAreaWork *area = &fldAreaState;
