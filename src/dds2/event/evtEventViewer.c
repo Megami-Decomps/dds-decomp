@@ -1088,7 +1088,7 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
     u8 slot;
     s32 active;
     s32 start;
-    s32 current;
+    s32 currentFrame;
     s32 duration;
     s32 end;
     s32 alpha;
@@ -1103,19 +1103,19 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
         if (active) {
             duration = key->p10.sb[0] != 0 ? 0 : key->duration;
             start = key->frame;
-            current = viewer->curFrame;
-            if (current < start) {
+            currentFrame = viewer->curFrame;
+            if (currentFrame < start) {
                 evtEventViewerFreeSlot((s8)slot, viewer);
                 key->p08.sb[0] = -1;
                 break;
             }
             end = start + interval + duration;
-            if (current >= end) {
+            if (currentFrame >= end) {
                 evtEventViewerFreeSlot((s8)slot, viewer);
                 key->p08.sb[0] = -1;
                 break;
             }
-            alpha = (s32)((128.0f / (f32)duration) * (f32)(end - current));
+            alpha = (s32)((128.0f / (f32)duration) * (f32)(end - currentFrame));
             return effSetNodeParameterValue(
                 ((EvtViewerObjectData *)viewer->objects[(s8)slot]->data)->parameterNode,
                 ((u32)alpha << 24) | 0x00808080);
