@@ -458,40 +458,40 @@ extern void mnuSetMapTimerFlags(s32);
 
 /* Navigate the counter channels or restore the selection before confirming. */
 s32 sdfPollCounterSelectionInput(void) {
-    s32 index;
+    s32 channelIndex;
     s32 previousIndex;
 
     if ((s8)D_0037F510[1][0][6] < 0 || (D_0037F510[1][0][6] & 2)) {
         previousIndex = sdfActiveCounterRuntime->state.channel->index;
         if (mnuRetreatListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
-            index = sdfActiveCounterRuntime->state.channel->index;
+            channelIndex = sdfActiveCounterRuntime->state.channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
-                index * (sdfActiveCounterRuntime->state.posX >> 3));
+                channelIndex * (sdfActiveCounterRuntime->state.posX >> 3));
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
-            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(channelIndex) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
     if ((s8)D_0037F510[1][0][7] < 0 || (D_0037F510[1][0][7] & 2)) {
         previousIndex = sdfActiveCounterRuntime->state.channel->index;
         if (mnuAdvanceListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
-            index = sdfActiveCounterRuntime->state.channel->index;
+            channelIndex = sdfActiveCounterRuntime->state.channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
-                index * (sdfActiveCounterRuntime->state.posX >> 3));
+                channelIndex * (sdfActiveCounterRuntime->state.posX >> 3));
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
-            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(channelIndex) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
     if ((s8)D_0037F510[1][0][3] < 0) {
         sdfCounterSetMode(sdfActiveCounterRuntime->state.channel->index);
-        index = sdfActiveCounterRuntime->state.channel->index;
-        if (D_00438894 != index) {
+        channelIndex = sdfActiveCounterRuntime->state.channel->index;
+        if (D_00438894 != channelIndex) {
             sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime,
                 D_00438894);
-            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(channelIndex) - 1, 10);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
         }
         sdfSetSelectedIndex(D_00438894);

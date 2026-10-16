@@ -447,33 +447,33 @@ extern void mnuSetMapTimerFlags(s32);
 
 /* Step the map selection, restore its starting channel, or confirm/cancel. */
 s32 sdfHandleMapCounterSelectionInput(void) {
-    s32 index;
+    s32 channelIndex;
     s32 previousIndex;
 
     if (D_00324510[0x26] < 0 || (D_00324510[0x26] & 2)) {
         previousIndex = sdfActiveCounterRuntime->state.channel->index;
         if (mnuRetreatListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
-            index = sdfActiveCounterRuntime->state.channel->index;
+            channelIndex = sdfActiveCounterRuntime->state.channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
-                index * (sdfActiveCounterRuntime->state.posX >> 3));
+                channelIndex * (sdfActiveCounterRuntime->state.posX >> 3));
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
     if (D_00324510[0x27] < 0 || (D_00324510[0x27] & 2)) {
         previousIndex = sdfActiveCounterRuntime->state.channel->index;
         if (mnuAdvanceListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
-            index = sdfActiveCounterRuntime->state.channel->index;
+            channelIndex = sdfActiveCounterRuntime->state.channel->index;
             sdfCounterSetMode(previousIndex);
             sndSetSequenceVolumePan(0, 127, 63);
             sdfCounterStartTimerPositionTransition(0,
-                index * (sdfActiveCounterRuntime->state.posX >> 3));
+                channelIndex * (sdfActiveCounterRuntime->state.posX >> 3));
         }
     }
     if (D_00324510[0x23] < 0) {
         sdfCounterSetMode(sdfActiveCounterRuntime->state.channel->index);
-        index = sdfActiveCounterRuntime->state.channel->index;
-        if (D_003BD240 != index) {
+        channelIndex = sdfActiveCounterRuntime->state.channel->index;
+        if (D_003BD240 != channelIndex) {
             sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime,
                 D_003BD240);
         }
