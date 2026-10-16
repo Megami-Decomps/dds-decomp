@@ -315,7 +315,7 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
     data->entryId = 0;
     data->ownerKind = 0;
     handle = effObjGetObjectHandle((EffWorldNode *)obj);
-    handle->resourceState = 2;
+    handle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         handle->slots[5] = id;
@@ -380,7 +380,7 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -442,7 +442,7 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -495,7 +495,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -544,7 +544,7 @@ EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     data->vector = sdfAllocSizeClassBlock(sizeof(parameters));
     memcpy(data->vector, &parameters, sizeof(parameters));
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -618,7 +618,7 @@ EffectObj *effObjCreateNamedScaledEffectObject(const char *name, void *firstVect
     data->ownerKind = 0;
     ((EffWorldNode *)obj)->value = name;
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -685,7 +685,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
         break;
     }
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_STATE_2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
