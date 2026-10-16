@@ -7499,7 +7499,7 @@ extern s32 btlGetTrackedTaskHandle(s32);
 
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 
-extern s32 btlCreateTargetSelectionWork(s32);
+extern SceneAiWork *btlCreateTargetSelectionWork(s32);
 
 extern SceneAiWork *btlGetTargetSelectionWork(void);
 
@@ -8942,7 +8942,7 @@ extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexLis
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
-s32 btlCreateTargetSelectionWork(s32 source) {
+SceneAiWork *btlCreateTargetSelectionWork(s32 source) {
     SceneAiWork *work;
     BattleSceneObject *object;
     BattleActorPanelWork *other;
@@ -8980,7 +8980,7 @@ s32 btlCreateTargetSelectionWork(s32 source) {
     }
     work->source = (ActionStateLink *)source;
     work->state = 1;
-    return (s32)work;
+    return work;
 }
 
 void btlReleaseTargetSelectionWork(SceneAiWork *work) {
@@ -9028,7 +9028,7 @@ void btlCreateTargetSelectionTask(s32 sourceTask) {
     }
     scene = (BtlState *)btlGetRuntime();
     task = kwlnTaskCreate(D_004367B8, 0x2B0E, 1, 1, btlUpdateTargetSelectionTask,
-                          btlReleaseTargetSelectionTask, btlCreateTargetSelectionWork(sourceTask));
+                          btlReleaseTargetSelectionTask, (u32)btlCreateTargetSelectionWork(sourceTask));
     kwlnTaskAddChild(scene->scriptOwner, task);
     scene->spriteObject = task;
 }
