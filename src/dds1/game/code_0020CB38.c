@@ -102,7 +102,158 @@ s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
 void btlHaritiUpdateCallback(void) {
     btlRestoreHaritiFormation();
 }
-INCLUDE_ASM(const s32, "game/code_0020CB38", btlUpdateBossUnitScaleTransition);
+#include "mdl.h"
+#include "eff_transform.h"
+extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
+void btlUpdateBossUnitScaleTransition(void) {
+    /* Same 0x24-byte transition layout declared by the following initializer. */
+    typedef struct {
+        u32 unitId;
+        s32 modelValue;
+        u16 active;
+        u8 pad0A[2];
+        f32 scale;
+        BtlScalarRange range;
+    } BtlUnitScaleTransition;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnitScaleTransition *transition;
+    BtlUnit *unit;
+
+    if ((battle->battleFlags & 0x80000) == 0) {
+        return;
+    }
+    transition = (BtlUnitScaleTransition *)battle->effect;
+    if (battle->cameraCommand.actionCode == 0x1AD) {
+        for (unit = battle->units; unit != 0; unit = unit->next) {
+            u32 flags = unit->status.flags;
+            u32 row;
+
+            if ((flags & 1) != 0) {
+                if ((flags & 0x400) != 0) {
+                    if (unit->partyRecord.unitId != 0x11B) {
+                        row = (u32)unit->partyRecord.unitId - 0x13D;
+                        switch (row) {
+                        case 0:
+                            unit->currentPosition[0] += 20.0f;
+                            unit->currentPosition[1] -= 20.0f;
+                            break;
+                        case 1:
+                            unit->currentPosition[0] -= 20.0f;
+                            unit->currentPosition[1] -= 20.0f;
+                            break;
+                        case 2:
+                            unit->currentPosition[0] += 37.5f;
+                            break;
+                        case 3:
+                            unit->currentPosition[0] -= 37.5f;
+                            break;
+                        case 4:
+                            unit->currentPosition[0] -= 15.0f;
+                            unit->currentPosition[1] += 15.0f;
+                            break;
+                        case 5:
+                            unit->currentPosition[0] += 15.0f;
+                            unit->currentPosition[1] += 15.0f;
+                            break;
+                        }
+                        btlSetUnitPosition(unit, unit->currentPosition);
+                    }
+                }
+            }
+        }
+        return;
+    }
+    for (unit = battle->units; unit != 0; unit = unit->next) {
+        u32 flags = unit->status.flags;
+
+        if ((flags & 1) != 0) {
+            if ((flags & 0x400) != 0) {
+                if ((flags & 2) != 0) {
+                    if (unit->partyRecord.unitId == transition->unitId) {
+                        BtlUnit *effectActor = battle->units;
+                        f32 effectPosition[4] __attribute__((aligned(16)));
+                        f32 *position;
+                        f32 progress;
+                        f32 nextScale;
+                        ObjectTransform *inner;
+
+                        while (effectActor != 0) {
+                            u32 effectFlags = effectActor->status.flags;
+                            if ((effectFlags & 1) != 0) {
+                                if ((effectFlags & 0x400) != 0) {
+                                    if (effectActor->partyRecord.unitId == 0x11B) {
+                                        break;
+                                    }
+                                }
+                            }
+                            effectActor = effectActor->next;
+                        }
+                        if (effectActor == 0) {
+                            return;
+                        }
+                        btlSetActorEffectParameterOrMuzzlePosition(effectActor, 0x1F);
+                        VU0_STORE_VF(vf10, effectPosition);
+
+                        switch (transition->active) {
+                        case 0:
+                            if (transition->unitId != 0) {
+                                PCP_COPY_VECTOR(unit->currentPosition, unit->position);
+                                unit->scale = 1.0f;
+                                unit->overlayColor = (unit->baseColor & 0x00FFFFFF) | 0x80000000;
+                                transition->unitId = 0;
+                            }
+                            break;
+                        case 1:
+                            if (transition->modelValue >= 170) {
+                                u32 alpha = (u32)(((f32)(transition->modelValue - 170) * 128.0f) / 53.0f);
+                                unit->overlayColor = ((u32)alpha << 24) | (unit->baseColor & 0x00FFFFFF);
+                            } else {
+                                unit->overlayColor = 0;
+                            }
+                            PCP_COPY_VECTOR(unit->currentPosition, effectPosition);
+                            if (transition->modelValue >= 223) {
+                                transition->active = 2;
+                            }
+                            break;
+                        case 2:
+                            progress = btlScalarRangeStepQuadratic(&transition->range, 1.0f);
+                            VU0_LOAD_VF(vf10, unit->position);
+                            VU0_LOAD_VF(vf11, effectPosition);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_SCALE_VF(vf10, progress);
+                            VU0_ADD(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, unit->currentPosition);
+                            nextScale = transition->scale + (1.0f - transition->scale) * progress;
+                            unit->scale = nextScale;
+                            if (transition->modelValue >= 303) {
+                                transition->active = 0;
+                            }
+                            break;
+                        }
+
+                        position = unit->currentPosition;
+                        if (unit->overlayColor != 0) {
+                            unit->ext->owner->flags &= ~1;
+                            evtSetUnitAlphaTransition(unit->ext, 0, unit->overlayColor);
+                        } else {
+                            unit->ext->owner->flags |= 1;
+                            evtSetUnitAlphaTransition(unit->ext, 0, 0);
+                        }
+                        btlSetUnitPosition(unit, position);
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALE_VF(vf10, unit->scale);
+                        inner = unit->effectObject->inner;
+                        inner->flags = (inner->flags | 1) & ~2;
+                        VU0_STORE_VF(vf10, inner->scale);
+                        mdlStoreTertiaryVectorVU(unit->ext->owner);
+                        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->scale);
+                        transition->modelValue++;
+                    }
+                }
+            }
+        }
+    }
+}
 
 /* Mode 0x10E allocates this 0x24-byte transition, distinct from the
  * common BattleEffectState payload used by other modes. */
