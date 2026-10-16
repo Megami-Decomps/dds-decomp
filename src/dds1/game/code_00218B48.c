@@ -443,7 +443,7 @@ u16 mdlGetRecordPartIndex(MdlRecord *record) {
 
 /* Read the counted group record's number of following entity-slot packets. */
 u16 mdlGetRecordSlotCount(const MdlRecord *record) {
-    return record->tail.half.unk10;
+    return record->tail.half.slotCount;
 }
 
 extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];

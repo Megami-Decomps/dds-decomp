@@ -36,13 +36,15 @@ typedef struct MdlRecord {
     union {
         u32 word10; /* 0x10: kind-four stream parameter */
         struct {
-            u16 unk10;
+            u16 slotCount; /* Kind 1/2 group records: following entity-slot packets. */
             u16 unk12;
         } half;
     } tail;
 } MdlRecord;
 
 typedef char MdlRecord_size_must_be_0x14[(sizeof(MdlRecord) == 0x14) ? 1 : -1];
+typedef char MdlRecord_slotCount_offset_must_be_0x10[
+    ((u32)&((MdlRecord *)0)->tail.half.slotCount == 0x10) ? 1 : -1];
 struct SdfMapPositionRecord;
 struct SdfItemListRef;
 struct SdfTex;
