@@ -144,8 +144,8 @@ extern s32 sdfDevResolvePathForWorker(const char *, void **);
 
 extern void sdfDevEnqueueStateAndWakeWorker(DevState *state);
 
-extern DevState *sdfDevAllocState(void *, s32, s32,
-                                void (*)(DevState *, s32, s32, s32, s32), s32);
+extern DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
+                                void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
 extern u16 sdfDefaultDevRequestOptions;
 
