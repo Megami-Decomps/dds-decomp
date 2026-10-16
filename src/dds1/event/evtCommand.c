@@ -752,38 +752,38 @@ s32 evtCommandDestroyEffectUnitById(void)
 }
 
 s32 evtCommandSetEffectUnitPosition(void) {
-    void *unit;
-    f32 vec[4];
+    void *effectUnit;
+    f32 position[4];
 
-    memset(vec, 0, sizeof(vec));
+    memset(position, 0, sizeof(position));
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        effectUnit = (void *)fldGetPlayerSceneState();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
-    if (unit == NULL) {
+    if (effectUnit == NULL) {
         return 1;
     }
-    vec[0] = bfWaitReadArgFloat(1);
-    vec[1] = bfWaitReadArgFloat(2);
-    vec[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerPosition(unit, (u128 *)vec);
+    position[0] = bfWaitReadArgFloat(1);
+    position[1] = bfWaitReadArgFloat(2);
+    position[2] = bfWaitReadArgFloat(3);
+    effObjSetInnerPosition(effectUnit, (u128 *)position);
     return 1;
 }
 
 /* Convert the three degree inputs before composing and storing a quaternion. */
 s32 evtCommandSetEffectUnitEulerRotation(void) {
-    void *unit;
+    void *effectUnit;
     f32 quaternion[4];
     f32 degreesToRadians;
     f32 pitch;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        effectUnit = (void *)fldGetPlayerSceneState();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
-    if (unit == NULL) {
+    if (effectUnit == NULL) {
         return 1;
     }
     degreesToRadians = 0.017453293f;
@@ -793,27 +793,27 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
-    effObjSetInnerRotation(unit, (u128 *)quaternion);
+    effObjSetInnerRotation(effectUnit, (u128 *)quaternion);
     return 1;
 }
 
 s32 evtCommandSetEffectUnitQuaternionRotation(void) {
-    void *unit;
-    f32 vec[4];
+    void *effectUnit;
+    f32 quaternion[4];
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)fldGetPlayerSceneState();
+        effectUnit = (void *)fldGetPlayerSceneState();
     } else {
-        unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
-    if (unit == NULL) {
+    if (effectUnit == NULL) {
         return 1;
     }
-    vec[0] = bfWaitReadArgFloat(1);
-    vec[1] = bfWaitReadArgFloat(2);
-    vec[2] = bfWaitReadArgFloat(3);
-    vec[3] = bfWaitReadArgFloat(4);
-    effObjSetInnerRotation(unit, (u128 *)vec);
+    quaternion[0] = bfWaitReadArgFloat(1);
+    quaternion[1] = bfWaitReadArgFloat(2);
+    quaternion[2] = bfWaitReadArgFloat(3);
+    quaternion[3] = bfWaitReadArgFloat(4);
+    effObjSetInnerRotation(effectUnit, (u128 *)quaternion);
     return 1;
 }
 
