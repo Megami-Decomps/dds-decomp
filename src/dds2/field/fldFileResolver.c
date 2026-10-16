@@ -554,7 +554,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void *sdfConsAllocateColumnPacket(s32);
 
 
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
