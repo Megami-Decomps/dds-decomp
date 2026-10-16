@@ -8,9 +8,9 @@
 extern SdfPoolNode D_003805A8;
 
 /* Emit one filled rectangle into a fresh packet list. */
-void l2dDrawColoredRect(void *owner)
+void l2dDrawColoredRect(void *rectangleData)
 {
-    Dds3L2dRectangle *rect = owner;
+    Dds3L2dRectangle *rect = rectangleData;
     SdfListHead *list;
 
     list = (SdfListHead *)sdfAllocatePacketList(0);
