@@ -9350,7 +9350,6 @@ evtEventViewerHandleKeyEditCommand = 0x00230A68; // type:func
 evtViewerStoreMenuValueInPendingKey = 0x00231950; // type:func
 evtViewCmdNoOp = 0x00231CC0; // type:func
 evtEventViewerCommitGroupSelection = 0x00231D18; // type:func
-func_00232108 = 0x00232108; // type:func
 evtEventViewerCopyEffectSetupPayload = 0x00232438; // type:func
 evtEventViewerDestroyActive = 0x00232D08; // type:func
 evtEventViewerDestroyActiveAlternate = 0x00232D28; // type:func
