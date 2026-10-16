@@ -617,7 +617,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 }
 
 /* Copy the destination's declared number of 16-byte object entries. */
-void sdfModelCopyData(DevRequest *destination, DevRequest *source) {
+void sdfModelCopyData(DevRequest *destination, const DevRequest *source) {
     s16 count;
 
     if (destination == NULL) {
