@@ -589,8 +589,8 @@ s32 btlChooseEligibleSkill(s32 object) {
     return choices[effMiscRandMod(0, count)];
 }
 
-f32 btlGetActionCategoryMultiplier(BtlUnit *unit, s32 unused, s32 index) {
-    s32 mode = datCommandRecords[index].hpType;
+f32 btlGetActionCategoryMultiplier(BtlUnit *unit, s32 unused, s32 command) {
+    s32 mode = datCommandRecords[command].hpType;
     f32 rate;
     if (mode < 0xE) {
         rate = 1.0f;
@@ -598,7 +598,7 @@ f32 btlGetActionCategoryMultiplier(BtlUnit *unit, s32 unused, s32 index) {
             return rate;
         }
     }
-    if (index == 0 && btlCheckSpecialAbility(&unit->partyRecord, 0x23D) != 0) {
+    if (command == 0 && btlCheckSpecialAbility(&unit->partyRecord, 0x23D) != 0) {
         rate = datAbilityParameters[0x23D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     } else {
         rate = 0.0f;
