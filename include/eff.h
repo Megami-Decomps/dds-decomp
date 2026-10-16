@@ -859,7 +859,7 @@ extern void effReleaseOptionalResource(EffResourceWork *);
 extern void effReleaseAttachedResources(EffResourceWork *);
 extern void effSetResourceEntryPosition(EffResourceWork *, s32, f32 *);
 extern void effGetResourceEntryPosition(EffResourceWork *, s32, f32 *);
-extern void effSetResourceEntryValue(EffResourceWork *, s32, u32);
+extern void effSetResourceEntryValue(EffResourceWork *work, s32 index, u32 color);
 extern void effDrawInstancedResourceTrianglesVU(EffResourceWork *);
 extern void effBuildRadialFanStreams(EffResourceWork *, u32, u32, u32, f32, f32);
 
