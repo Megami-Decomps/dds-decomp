@@ -698,7 +698,7 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 isAppended) {
     f32 position[4];
     f32 rotation[4];
     const f32 *transform;
@@ -715,7 +715,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
     s32 room;
     u32 id;
 
-    if (appended == 0) {
+    if (isAppended == 0) {
         D_003BD7B8 = NULL;
         D_003BD7BC = 0;
     }
@@ -731,7 +731,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
         case 11:
             break;
         case 3:
-            if (appended != 0) {
+            if (isAppended != 0) {
                 break;
             }
             D_003BD7B8 = resource;
@@ -751,7 +751,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             break;
         case 6:
             for (i = 0; i < resourceCount; i++, resource++) {
-                if (appended != 0) {
+                if (isAppended != 0) {
                     resource->id |= 0x800000;
                 } else {
                     D_003BAC10++;
@@ -763,7 +763,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             break;
         case 9:
             for (i = 0; i < resourceCount; i++, resource++) {
-                if (appended != 0) {
+                if (isAppended != 0) {
                     resource->id |= 0x800000;
                 }
                 evtSpawnActionObj10(resource->id, resource->data, resource->name);
@@ -771,7 +771,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             break;
         case 10:
             for (i = 0; i < resourceCount; i++, resource++) {
-                if (appended != 0) {
+                if (isAppended != 0) {
                     resource->id |= 0x800000;
                 }
                 transform = resource->transform;
@@ -782,13 +782,13 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
                     switch (point->kind) {
                     case 1:
                         func_00148FF0(0, point->id, rotation, position[0], position[1], position[2]);
-                        if (appended == 0) {
+                        if (isAppended == 0) {
                             D_003BAC10++;
                         }
                         break;
                     case 2:
                         func_00148FF0(1, point->id, rotation, position[0], position[1], position[2]);
-                        if (appended == 0) {
+                        if (isAppended == 0) {
                             D_003BAC10++;
                         }
                         break;
@@ -811,7 +811,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
                     parameters = ((FldPlacementData *)resource->data)->payload.words;
                     id = parameters[0];
                     room = fldParseRoomNumberFromName(resource->name);
-                    if (appended != 0) {
+                    if (isAppended != 0) {
                         FldPlacementData *placement = resource->data;
                         func_001480D0(id, rotation, position[0], position[1], position[2],
                                       room, resource->name, placement->event + D_003BAC10);
@@ -824,7 +824,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
                 case 3:
                     parameters = ((FldPlacementData *)resource->data)->payload.words;
                     func_001486D0(parameters[0], rotation, position[0], position[1], position[2]);
-                    if (appended == 0) {
+                    if (isAppended == 0) {
                         D_003BAC10++;
                     }
                     break;
@@ -838,7 +838,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             break;
         case 4:
             for (i = 0; i < resourceCount; i++, resource++) {
-                if (appended != 0) {
+                if (isAppended != 0) {
                     resource->id |= 0x800000;
                 }
                 fldCopySpawnTransform(position, rotation, resource->transform);
