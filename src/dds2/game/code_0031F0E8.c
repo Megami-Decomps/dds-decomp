@@ -353,7 +353,7 @@ s32 dds3WritePackedReferenceFile(u32 *object, s32 arg1, s32 arg2) {
     char buffer[0x100];
     u32 record[2];
     SdkFileStream *handle;
-    u32 *pending;
+    u32 *pendingValues;
 
     sprintf(buffer, D_00438968, arg1, arg2);
     handle = sdfOpenFileStream(buffer, D_00438970);
@@ -361,12 +361,12 @@ s32 dds3WritePackedReferenceFile(u32 *object, s32 arg1, s32 arg2) {
         return 0;
     }
     dds3ApplyNamedRelocations(object);
-    pending = (u32 *)dds3WritePendingNamedReferenceValues((u32)object);
+    pendingValues = (u32 *)dds3WritePendingNamedReferenceValues((u32)object);
     record[0] = object[0];
-    record[1] = pending[0];
+    record[1] = pendingValues[0];
     sdfWriteFileStream(record, 8, 1, handle);
     dds3RegisterPendingNamedReferences(object, handle);
-    dds3RegisterPendingNamedReferences(pending, handle);
+    dds3RegisterPendingNamedReferences(pendingValues, handle);
     sdfCloseFileStream(handle);
     return 1;
 }
