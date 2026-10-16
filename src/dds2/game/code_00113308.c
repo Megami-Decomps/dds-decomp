@@ -248,9 +248,9 @@ extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effObjInnerVecBackup(ObjectTransform *inner);
-extern void effUpdateValueTransitionProximity(EffWorldNode *);
-extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
-extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
+extern void effUpdateValueTransitionProximity(EffWorldNode *object);
+extern void effObjStepFollowAngleTowardZero(EffWorldNode *object);
+extern void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPosition);
 extern void *dds3GetWorldNodeData(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
