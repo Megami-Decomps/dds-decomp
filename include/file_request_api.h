@@ -28,8 +28,8 @@ void fileQueueFlaggedDispatchRequest(const char *requestName);
 struct FileRequest *fileQueueDefaultCallbackRequest(const char *requestName);
 struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName);
 
-s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
-s32 fileRequestIsReady(struct FileRequest *request);
+s32 fileIsRequestReadyInCurrentMode(const struct FileRequest *request);
+s32 fileRequestIsReady(const struct FileRequest *request);
 void fileWaitReady(struct FileRequest *request);
 void fileWaitForRequestReady(struct FileRequest *request);
 void fileReqStartCardDetection(u32 port);
