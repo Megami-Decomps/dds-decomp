@@ -703,7 +703,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
     f32 rotation[4];
     const f32 *transform;
     FldFileResource *resource;
-    u32 count;
+    u32 resourceCount;
     u32 i;
     u32 batchIndex;
     u32 pathState;
@@ -721,7 +721,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
     }
     for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
         resource = batch->entries;
-        count = batch->count;
+        resourceCount = batch->count;
         switch (batch->kind) {
         case 0:
         case 1:
@@ -735,9 +735,9 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
                 break;
             }
             D_003BD7B8 = resource;
-            D_003BD7BC = count;
+            D_003BD7BC = resourceCount;
             pathState = 1;
-            for (i = 0; i < count; i++, resource++, pathState++) {
+            for (i = 0; i < resourceCount; i++, resource++, pathState++) {
                 resource->id |= 0x10000;
                 fldCopySpawnTransform(position, rotation, resource->transform);
                 if (((FldSpawnCollision *)resource->data)->kind == 0) {
@@ -750,7 +750,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             }
             break;
         case 6:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 if (appended != 0) {
                     resource->id |= 0x800000;
                 } else {
@@ -762,7 +762,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             }
             break;
         case 9:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 if (appended != 0) {
                     resource->id |= 0x800000;
                 }
@@ -770,7 +770,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             }
             break;
         case 10:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 if (appended != 0) {
                     resource->id |= 0x800000;
                 }
@@ -837,7 +837,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s
             }
             break;
         case 4:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 if (appended != 0) {
                     resource->id |= 0x800000;
                 }
