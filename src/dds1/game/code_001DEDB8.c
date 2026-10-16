@@ -6651,8 +6651,8 @@ extern char D_003A4BF8[]; /* "btl:floor load end 0\n" */
 
 extern char D_003A4C10[]; /* "btl:floor load end 1\n" */
 
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
-                                            const SdfTextureOffsetListHeader *, s32);
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+                                            const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 
 extern char D_003A4B50[]; /* "%sf%03d_%03d.LB" */
 

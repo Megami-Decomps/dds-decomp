@@ -28,8 +28,8 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
-                                            const SdfTextureOffsetListHeader *, s32);
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+                                            const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 
