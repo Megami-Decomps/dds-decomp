@@ -67,29 +67,29 @@ void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
 }
 
 void effInitializeBillResourceOwners(void) {
-    u32 i;
+    u32 billboardIndex;
     BillObj *billboard;
     BillChildPayload *payload;
 
     billPendingChildList = 0;
-    i = 0;
+    billboardIndex = 0;
     do {
-        billboard = billCreateFromResource(effBillResourceInitTable[i].billboardKind,
-                                           (const char *)(u32)effBillResourceInitTable[i].word00);
+        billboard = billCreateFromResource(effBillResourceInitTable[billboardIndex].billboardKind,
+                                           (const char *)(u32)effBillResourceInitTable[billboardIndex].word00);
         payload = billboard->child;
-        effBillResourceOwners[i] = billboard;
-        payload->halfWidth *= effBillResourceInitTable[i].scale;
-        payload->halfHeight *= effBillResourceInitTable[i].scale;
-        i++;
-    } while (i < 15);
+        effBillResourceOwners[billboardIndex] = billboard;
+        payload->halfWidth *= effBillResourceInitTable[billboardIndex].scale;
+        payload->halfHeight *= effBillResourceInitTable[billboardIndex].scale;
+        billboardIndex++;
+    } while (billboardIndex < 15);
 }
 
 void effBillDispatchAll(void) {
-    u32 i;
+    u32 billboardIndex;
 
     billPendingChildList = 0;
-    for (i = 0; i < 15; i++) {
-        billDispatchByKind(effBillResourceOwners[i]);
+    for (billboardIndex = 0; billboardIndex < 15; billboardIndex++) {
+        billDispatchByKind(effBillResourceOwners[billboardIndex]);
     }
 }
 
