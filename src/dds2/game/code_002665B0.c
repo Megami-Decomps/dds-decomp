@@ -1272,16 +1272,16 @@ void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
 /* Map a command index to the native five-slot table, then configure its effect.
  * Mode-one index one remaps to three; -2 clears only the previous slot.
  * Other negative indices retain both slots. Nonnegative indices require caller bounds. */
-void mnuTerminalSelectSlot(s32 mode, s32 index, MenuSlotState *state) {
+void mnuTerminalSelectSlot(s32 mode, s32 commandIndex, MenuSlotState *state) {
     s32 table[5] = {3, 1, 2, 0x2D, 0x52};
 
-    if (state->mode == 1 && index == state->mode) {
-        index = 3;
+    if (state->mode == 1 && commandIndex == state->mode) {
+        commandIndex = 3;
     }
-    if (index >= 0) {
+    if (commandIndex >= 0) {
         state->selectedSlots[1] = state->selectedSlots[0];
-        state->selectedSlots[0] = table[index];
-    } else if (index == -2) {
+        state->selectedSlots[0] = table[commandIndex];
+    } else if (commandIndex == -2) {
         state->selectedSlots[1] = -1;
     }
     mnuTerminalConfigureEffects(mode, state);

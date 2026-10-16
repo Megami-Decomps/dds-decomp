@@ -1187,18 +1187,18 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF678);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF688);
 
-void mnuTerminalSelectSlot(u32 mode, s32 index, MenuTerminalWork *state) {
+void mnuTerminalSelectSlot(u32 mode, s32 commandIndex, MenuTerminalWork *state) {
     s32 table[4] = {3, 1, 2, 0x2D};
 
     if (state->reduced == 1) {
-        if (index == state->reduced) {
-            index = 3;
+        if (commandIndex == state->reduced) {
+            commandIndex = 3;
         }
     }
-    if (index >= 0) {
+    if (commandIndex >= 0) {
         state->cursor[1] = state->cursor[0];
-        state->cursor[0] = table[index];
-    } else if (index == -2) {
+        state->cursor[0] = table[commandIndex];
+    } else if (commandIndex == -2) {
         state->cursor[1] = -1;
     }
     mnuTerminalConfigureEffects(mode, state);
