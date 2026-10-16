@@ -50,7 +50,7 @@ s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 s32 evtCreateFrameVariableTask(void);
-void *evtViewerScheduleFrameVariableTask(s32 arg0);
+void *evtViewerScheduleFrameVariableTask(s32 task);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
@@ -1009,7 +1009,7 @@ s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 s32 evtCreateFrameVariableTask(void);
-void *evtViewerScheduleFrameVariableTask(s32 arg0);
+void *evtViewerScheduleFrameVariableTask(s32 task);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
