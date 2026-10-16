@@ -269,9 +269,11 @@ u32 scrCommand_SCR_GET_TIMER()
 
 s32 scrCommandSetupFadeFrames(void)
 {
-    s32 mode;
-    mode = scrReadIntParameter(0);
-    kwlnFadeSetupFrames(mode, scrReadIntParameter(1));
+    s32 fadeMode;
+    s32 durationFrames;
+    fadeMode = scrReadIntParameter(0);
+    durationFrames = scrReadIntParameter(1);
+    kwlnFadeSetupFrames(fadeMode, durationFrames);
     return 1;
 }
 
