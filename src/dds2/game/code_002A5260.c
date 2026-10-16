@@ -1148,7 +1148,75 @@ void mnuUpdateStaffRollStreamState(void)
 
 extern s32 mnuUpdateStaffRoll(KwlnTask *);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", mnuUpdateStaffRoll);
+extern s32 mnuUpdateStaffMoviePresentation(void);
+extern void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task);
+extern char D_00437AC8[];
+s32 mnuUpdateStaffRoll(KwlnTask *task) {
+    char text[128];
+    s32 i;
+    s32 y;
+    MnuStaffTextRow *entry;
+    s32 result;
+
+    switch (mnuMovieWork->state) {
+    case 0:
+        mnuMovieWork->state = 1;
+        mnuMovieWork->frame = 0;
+        break;
+    case 1:
+        mnuPrepareStaffRollText();
+        mnuInitializeMovieRollViewport();
+        kwlnTaskCreate(D_00429938, 0x2B19, 0, 0, mnuUpdateStaffMoviePresentation,
+                       mnuReleaseMovieResourceAfterPendingWork, 0);
+        kwlnFadeOutStart(0, 0, 0, 0x1E);
+        mnuMovieWork->state = 3;
+        mnuMovieWork->frame = 0;
+        break;
+    case 2:
+    case 3:
+        mnuUpdateStaffRollStreamState();
+        if (mnuMovieWork->scrollPaused == 0) {
+            for (i = 0; i < 0x111; i++) {
+                y = D_003E3970[i].offsetY - mnuMovieWork->frame + 0xE0;
+                if (0x111 - i == 1) {
+                    y = y < 0xE0 ? 0xE0 : y;
+                }
+                if ((u32)(y + 0x1E) < 0x1DF) {
+                    entry = &D_003E3970[i];
+                    if (entry->leftText != 0 && D_003E3970[i].rightText == 0) {
+                        sprintf(text, D_00437AC8, entry->leftText);
+                        mnuDrawStaffRollText(52.0f, (f32)y, entry->leftFont, 0x80808080, text);
+                    } else if (D_003E3970[i].rightText != 0) {
+                        sprintf(text, D_00437AC8, D_003E3970[i].rightText);
+                        mnuDrawStaffRollText(62.0f, (f32)y, D_003E3970[i].rightFont, 0x80808080, text);
+                    }
+                }
+            }
+            mnuMovieWork->frame++;
+            if (mnuMovieWork->frame == D_003E3970[0x110].offsetY / 60 * 60 + 0x12C) {
+                kwlnFadeInStart(0, 0, 0, 0x28);
+            }
+            /* Retail evaluates this test, but nothing in this build depends on it. */
+            if (mnuMovieWork->frame / 60 == D_003E3970[0x110].offsetY / 60 + 5) {
+            }
+        }
+        if (mnuMovieWork->frame / 60 > D_003E3970[0x110].offsetY / 60 + 6) {
+            result = mnuStaffImageProc();
+            if (result != 0) {
+                return 0;
+            }
+            if (D_00437AB8 == 4 || D_00437AB8 == 5) {
+                dds3AdminSubmitModeRequest(4, 0, 0, 0);
+                return 0;
+            }
+            return result;
+        }
+        break;
+    default:
+        return 0;
+    }
+    return 0;
+}
 
 extern MnuStaffImageRecord mnuStaffRollImageRecords[19];
 extern s32 D_00437AB4;
