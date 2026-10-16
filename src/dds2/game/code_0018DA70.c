@@ -242,7 +242,7 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
     SdfListHead *list;
     void *tag;
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
-    void *drawPacket;
+    SdfDrawPacket *drawPacket;
 
     if (fldIsUpdateInhibited() == 0) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -373,7 +373,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 
 /* Build the two draw packets for `source` and append them to `list`. */
 void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixedPointCoordinates) {
-    void *packet;
+    SdfDrawPacket *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
     effBuildBlurUnitTextureQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix(packet), fixedPointCoordinates);

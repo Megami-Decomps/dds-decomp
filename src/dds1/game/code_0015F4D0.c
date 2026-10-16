@@ -172,8 +172,8 @@ void *billGetWorkTransformMatrix(void *packet) {
     return (u8 *)packet + 0x20;
 }
 
-void *effCreateSizedDrawPacket(s32 height, s32 flags) {
-    void *packet = (void *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
+SdfDrawPacket *effCreateSizedDrawPacket(s32 height, s32 flags) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
 
     sdfConsInitPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
     return packet;

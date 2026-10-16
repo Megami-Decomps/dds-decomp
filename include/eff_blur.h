@@ -2,6 +2,7 @@
 #define EFF_BLUR_H
 
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 
 struct SdfTex;
 
@@ -125,7 +126,7 @@ typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots 
  * corner coordinates remain for the slot's updater to recompute. */
 void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
 /* Allocate the native effect draw packet from its height and GS flags. */
-void *effCreateSizedDrawPacket(s32 height, s32 flags);
+SdfDrawPacket *effCreateSizedDrawPacket(s32 height, s32 flags);
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params);

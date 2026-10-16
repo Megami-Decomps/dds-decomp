@@ -13,7 +13,7 @@ extern SdfPoolNode D_003803C8;
 void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8 gsCoordinates) {
     SdfListHead *list;
     u64 *packet;
-    void *drawPacket;
+    SdfDrawPacket *drawPacket;
     BlurPacketQuad *quad;
 
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
