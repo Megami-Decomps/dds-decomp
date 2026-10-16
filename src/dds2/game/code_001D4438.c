@@ -1475,7 +1475,7 @@ extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
 extern u32 btlGetIndexListCount(BtlIndexList *list);
 extern void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
-extern s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern s32 btlGetSlotRateKind(u8 *unit, s32 index);
 extern s32 btlMapActionCode(s32 unused, u32 id);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);

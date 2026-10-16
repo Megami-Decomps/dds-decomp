@@ -187,7 +187,7 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
 

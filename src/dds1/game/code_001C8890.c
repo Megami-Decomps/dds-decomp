@@ -148,7 +148,7 @@ extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
