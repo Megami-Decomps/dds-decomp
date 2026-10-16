@@ -3364,7 +3364,7 @@ extern void fileDrawConfigurationMenuEntry();
 extern char D_003BC8E0[];
 
 /* Allocate the save/config task, its five-row list and its effect resource slots. */
-s32 fileCreateConfigTask(s32 mode) {
+FileConfigTask *fileCreateConfigTask(s32 mode) {
     char *names[4] = {
         "/camp/spr/n_con/n_con01.spr",
         "/camp/spr/n_con/n_con02.spr",
@@ -3411,7 +3411,7 @@ s32 fileCreateConfigTask(s32 mode) {
         }
         break;
     }
-    return (s32)task;
+    return task;
 }
 
 extern void mnuReleaseEffectResource(MenuResourceWork *);
@@ -3448,7 +3448,7 @@ void fileConfigTaskDestroy(KwlnTask *task) {
     }
 }
 
-extern s32 fileCreateConfigTask(s32 mode);
+extern FileConfigTask *fileCreateConfigTask(s32 mode);
 extern s32 fileUpdateConfigurationMenu(KwlnTask *task);
 
 extern s32 fileStartQueuedLoad(KwlnTask *task);
@@ -3457,7 +3457,7 @@ extern void fileConfigTaskDestroy(KwlnTask *task);
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
-        fileConfigTaskWork = (FileConfigTask *)(u32)fileCreateConfigTask(mode);
+        fileConfigTaskWork = fileCreateConfigTask(mode);
         kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
