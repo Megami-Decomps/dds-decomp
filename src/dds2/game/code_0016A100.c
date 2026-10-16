@@ -313,8 +313,8 @@ BillObj *effParamCreateAnimatedBillboard(void *resourceData) {
 }
 
 /* Use the same floating value for both billboard child-scale components. */
-void effParamDispatchFloat(void *payload, f32 value) {
-    billSetChildScaleComponents((BillObj *)payload, value, value);
+void effParamDispatchFloat(void *payload, f32 scale) {
+    billSetChildScaleComponents((BillObj *)payload, scale, scale);
 }
 
 /* Load the default primary/rotation/tertiary vectors and packed broadcast value.
