@@ -121,7 +121,7 @@ typedef struct MdlViewState {
     s16 selectedRecordIndex; /* 0x42: index across the shared and active-entry record lists */
     s16 effectListScroll; /* 0x44: first visible effect row */
     s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
-    s16 unk48;
+    s16 workspaceSetupPhase; /* 0x48: capture workspace setup advances through phases 0, 1, 2. */
     s16 captureScale; /* 0x4A: model capture scale setting */
     s16 captureDivX;  /* 0x4C: model capture horizontal division setting */
     s16 captureDivY;  /* 0x4E: model capture vertical division setting */
@@ -138,6 +138,8 @@ typedef char MdlViewState_selectedResourceId_offset_check[
 typedef char MdlViewState_selectedResourceGroup_offset_check[
     ((u32)&((MdlViewState *)0)->selectedResourceGroup == 0x1C) ? 1 : -1];
 typedef char MdlViewState_size_check[sizeof(MdlViewState) == 0xD0 ? 1 : -1];
+typedef char MdlViewState_workspaceSetupPhase_offset_check[
+    ((u32)&((MdlViewState *)0)->workspaceSetupPhase == 0x48) ? 1 : -1];
 typedef char MdlViewState_selectionCursor_offset_check[
     ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
 typedef struct MdlPadState {
@@ -1876,7 +1878,7 @@ extern f32 D_003BD370;
 void mdlUpdateViewerWorkspaceSetup(void) {
     s32 initialPhase = 1;
 
-    switch (mdlViewerState.unk48) {
+    switch (mdlViewerState.workspaceSetupPhase) {
     case 0:
         if (D_00398629[0] < 0) {
             f32 scale = mdlViewerState.captureScale;
@@ -1889,7 +1891,7 @@ void mdlUpdateViewerWorkspaceSetup(void) {
             mdlViewerState.unitStepMode = initialPhase;
             D_003BD360 = initialPhase;
             D_003BD368 = D_003BD364 = scale;
-            mdlViewerState.unk48 = initialPhase;
+            mdlViewerState.workspaceSetupPhase = initialPhase;
         }
         break;
     case 1:
@@ -1897,7 +1899,7 @@ void mdlUpdateViewerWorkspaceSetup(void) {
                    mdlViewerState.unk50 * 0x200 - 0x100;
         D_003BD370 = mdlViewerState.captureDivY * 0x70 -
                    mdlViewerState.unk52 * 0xE0 - 0x70;
-        mdlViewerState.unk48 = 2;
+        mdlViewerState.workspaceSetupPhase = 2;
         break;
     case 2:
         /* 0x0021C218..0x0021C228: completed phase retained in retail dispatch. */
@@ -2727,7 +2729,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.scrollPage = 0;
     mdlViewerState.unitStepMode = 0;
     mdlViewerState.unk0E = 0;
-    mdlViewerState.unk48 = 0;
+    mdlViewerState.workspaceSetupPhase = 0;
     mdlResetViewerBasisVectors();
     sdfSceneProjectionParameters.camera.fov = 0.4363323f;
     PCP_COPY_VECTOR(&D_003246C0, &D_00367CD0);
