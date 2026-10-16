@@ -295,7 +295,7 @@ extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 

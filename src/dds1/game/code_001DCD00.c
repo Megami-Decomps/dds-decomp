@@ -95,7 +95,7 @@ extern s8 effSharedRandomState[];
 
 extern s8 effSharedRandomState[];
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern void btlUnitGetBodyPosVU(u8 *);
 
 extern char D_003BB5F8[];
