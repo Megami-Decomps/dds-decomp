@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "mnu.h"
 #include "brs_level_progress_api.h"
+#include "evt_stage_test_api.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -1296,8 +1297,6 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
 }
 
 extern s32 evtStageTestHasPendingMotion();
-extern u32 evtStageTestCountFlags(s32);
-extern void evtStageTestQueueMotion(s32, u32);
 
 typedef struct MenuIdleVoiceState {
     u8 pad00[0x28];
