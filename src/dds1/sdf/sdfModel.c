@@ -328,13 +328,13 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
 }
 
 /* Compose each draw node's VU transform and visit its circular child list. */
-void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
+void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, const f32 (*parentMatrix)[4], s32 frame) {
     f32 *xAxis = drawNode->localMatrix[0];
     f32 *yAxis;
     f32 *zAxis;
     f32 *scale;
     f32 *translation;
-    f32 (*transformed)[4];
+    const f32 (*transformed)[4];
     u8 *workspace;
     SdfDrawNode *child;
 
@@ -350,7 +350,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     VU0_LOAD_VF_MEMORY(vf31, translation);
     VU0_LOAD_MATRIX_B(parentMatrix);
     sdfMultiplyVuMatrixInPlace();
-    transformed = drawNode->worldMatrix;
+    transformed = (const f32 (*)[4])drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
     workspace = drawNode->workspace;
     if (workspace != NULL) {
@@ -379,7 +379,7 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     VU0_MUL_MATRIX_ROWS_VF10();
     VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
-    sdfModelUpdateDrawNodeTransforms(((SdfDrawNode **)list->buffer)[0], rootMatrix, frame);
+    sdfModelUpdateDrawNodeTransforms(((SdfDrawNode **)list->buffer)[0], (const f32 (*)[4])rootMatrix, frame);
 }
 
 /* Update the model with the engine's current signed frame index. */
