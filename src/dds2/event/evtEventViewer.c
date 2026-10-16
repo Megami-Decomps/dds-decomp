@@ -2410,16 +2410,16 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
     }
 }
 
-s32 evtViewerTestIndexedCondition(u32 encodedId) {
-    u32 idx;
-    u32 lo;
+s32 evtViewerTestIndexedCondition(u32 encodedCondition) {
+    u32 conditionIndex;
+    u32 expectedValue;
 
-    idx = (encodedId << 16) >> 28;
-    lo = encodedId & 0xfff;
-    if (idx == 0) {
+    conditionIndex = (encodedCondition << 16) >> 28;
+    expectedValue = encodedCondition & 0xfff;
+    if (conditionIndex == 0) {
         return 1;
     }
-    return (datGameState->script.ints[199 + idx] ^ lo) == 0;
+    return (datGameState->script.ints[199 + conditionIndex] ^ expectedValue) == 0;
 }
 
 u32 func_0024B078(void) {
