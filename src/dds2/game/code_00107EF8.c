@@ -1584,7 +1584,7 @@ void evtToggleDebugTimeGraphTask(s8 mode) {
 extern u32 D_00435D4C;
 /* Render an allocation span as partial rows and complete heap-map rows. */
 void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
-                   u32 heapBase, u32 address, s32 remainingBytes, u8 kind) {
+                   u32 heapBase, u32 blockAddress, s32 blockSize, u8 state) {
     s32 color;
     u32 byteOffset;
     s32 rowIndex;
@@ -1594,7 +1594,7 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     u32 bytesPerRow;
     u32 bytesPerCell;
 
-    switch (kind) {
+    switch (state) {
     case 0:
         color = 0x80000000;
         break;
@@ -1608,12 +1608,12 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
         color = 0x80800000;
         break;
     }
-    byteOffset = address - heapBase;
+    byteOffset = blockAddress - heapBase;
     bytesPerRow = D_00435D4C >> 8;
     bytesPerCell = D_00435D4C >> 14;
     rowIndex = byteOffset / bytesPerRow;
     columnIndex = (byteOffset % bytesPerRow) / bytesPerCell;
-    if (D_00435D4C < remainingBytes || remainingBytes < 0) {
+    if (D_00435D4C < blockSize || blockSize < 0) {
         return;
     }
 
@@ -1622,33 +1622,33 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     if (columnIndex > 0) {
         s32 remainingCells = 64 - columnIndex;
 
-        if (remainingBytes >= remainingCells / bytesPerCell) {
+        if (blockSize >= remainingCells / bytesPerCell) {
             sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
                                          leftX + remainingCells * 16, topY + 8,
                                          0x0FFFFF80, NULL);
-            remainingBytes -= remainingCells / (D_00435D4C >> 14);
+            blockSize -= remainingCells / (D_00435D4C >> 14);
         } else {
-            s32 cellCount = remainingBytes / bytesPerCell;
+            s32 cellCount = blockSize / bytesPerCell;
 
-            if (cellCount == 0 && remainingBytes > 0) {
+            if (cellCount == 0 && blockSize > 0) {
                 cellCount = 1;
             }
             sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
                                          leftX + cellCount * 16, topY + 8,
                                          0x0FFFFF80, NULL);
-            remainingBytes = 0;
+            blockSize = 0;
         }
         topY += 8;
     }
-    while (remainingBytes >= (D_00435D4C >> 8)) {
+    while (blockSize >= (D_00435D4C >> 8)) {
         sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
                                      x + 0x400, topY + 8, 0x0FFFFF80, NULL);
-        remainingBytes -= D_00435D4C >> 8;
+        blockSize -= D_00435D4C >> 8;
         topY += 8;
     }
-    if (remainingBytes > 0) {
+    if (blockSize > 0) {
         sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
-                                     x + (remainingBytes / (D_00435D4C >> 14)) * 16,
+                                     x + (blockSize / (D_00435D4C >> 14)) * 16,
                                      topY + 8, 0x0FFFFF80, NULL);
     }
 }
