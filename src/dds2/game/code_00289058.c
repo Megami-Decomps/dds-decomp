@@ -470,34 +470,34 @@ extern s32 mnuUpdateMantraPanelVisualState(s32, s32, s32, s32, MnuStatusResource
 extern s32 func_00293DB0(MnuStatusResource *);
 extern s32 mnuUpdateMantraPanelStatusFromFlags(s32, s32, s32, s32, MnuStatusResource *, s32);
 
-s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
+s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *resource) {
     MantraMenuWork *work;
     f32 ratio;
 
-    dspRequestMessageWindowModeOne(object);
-    work = &object->menu;
+    dspRequestMessageWindowModeOne(resource);
+    work = &resource->menu;
     switch (work->drawBits.mode) {
     case 2:
         ratio = (f32)work->frame / 10.0f;
-        mnuUpdateMantraPanelVisualState(0, 0, 0, (s32)(ratio * 128.0f), object, 0x53);
+        mnuUpdateMantraPanelVisualState(0, 0, 0, (s32)(ratio * 128.0f), resource, 0x53);
         break;
     case 3:
         ratio = (f32)work->frame / 10.0f;
-        mnuUpdateMantraPanelVisualState(0, 0, 0, (s32)((1.0f - ratio) * 128.0f), object, 0x53);
+        mnuUpdateMantraPanelVisualState(0, 0, 0, (s32)((1.0f - ratio) * 128.0f), resource, 0x53);
         break;
     case 5:
     case 12:
     case 13:
     case 18:
-        mnuUpdateMantraPanelVisualState(0, 0, 0, 0x80, object, 0x53);
+        mnuUpdateMantraPanelVisualState(0, 0, 0, 0x80, resource, 0x53);
         break;
     case 25:
-        func_00293DB0(object);
+        func_00293DB0(resource);
         break;
     case 19:
     case 20:
     case 21:
-        mnuUpdateMantraPanelStatusFromFlags(0, 0, 0, 0x80, object, 0x52);
+        mnuUpdateMantraPanelStatusFromFlags(0, 0, 0, 0x80, resource, 0x52);
         break;
     case 1:
         break;
