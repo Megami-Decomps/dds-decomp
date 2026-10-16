@@ -50,7 +50,7 @@ extern s32 sceDclose(s32 directory);
 extern s32 sprintf(char *destination, const char *format, ...);
 extern s32 sceDopen(void *arg0);
 extern s32 sdfConsMeasurePacketWithHeader(s32 arg0);
-extern void *sdfConsAllocateColumnPacket(s32 arg0);
+extern void *sdfConsAllocateColumnPacket(s32 loopCount);
 
 
 extern EffCreateHandler D_00355730[];
