@@ -1911,15 +1911,15 @@ u8 mnuCampChooseWeightedTableValue(void) {
     s32 chance = effMiscRand(0) & 0xFF;
     s32 total = 0;
     u8 *item = D_003CD8D0;
-    u32 index = 0;
+    u32 entryIndex = 0;
     do {
         total += item[1];
         if (total >= chance) {
             return item[0];
         }
-        index++;
+        entryIndex++;
         item += 2;
-    } while (index < 3);
+    } while (entryIndex < 3);
     return 1;
 }
 
