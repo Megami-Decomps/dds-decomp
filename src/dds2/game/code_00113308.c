@@ -241,7 +241,7 @@ extern EffVec4 D_004128A0;
 extern EffVec4 D_004128B0;
 extern u8 dds3TestObjectFlags(void *object, u32 mask);
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
-extern void effObjInnerVecInit(ObjectTransform *);
+extern void effObjInnerVecInit(ObjectTransform *transform);
 extern s32 func_0023DA70(ObjectTransform *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
