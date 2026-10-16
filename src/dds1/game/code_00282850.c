@@ -928,7 +928,41 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     return color;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawRatioPanelContents);
+extern char D_003BC788[];
+extern char D_003BC790[];
+
+void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
+                  s32 value, s32 total, const MenuEffectPair *style,
+                  u32 drawFlags) {
+    s32 drawY;
+    char text[16];
+    u32 separatorColor;
+    struct FrFontGlyph *glyph;
+
+    color = uiBlendColors(color, color & ~0xFF, fade);
+    separatorColor = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    if (value >= 0) {
+        if (total >= 0) {
+            drawY = y - 16;
+            effDrawSpriteWithCornerFade(x + 0x8D0, drawY, depth, fade, 1,
+                                        style->resourceSets[6], 0, drawFlags);
+            sprintf(text, D_003BC788, value);
+            glyph = itfCreateFont2TextGlyph(x + 0x490, drawY, depth, color, text, 0);
+            glyph = itfCreateFont2TextGlyph(x + 0x650, drawY, depth, separatorColor,
+                                  D_003BC790, glyph);
+            sprintf(text, D_003BC788, total);
+            glyph = itfCreateFont2TextGlyph(x + 0x6F0, drawY, depth, color, text, glyph);
+        } else {
+            drawY = y - 16;
+            effDrawSpriteWithCornerFade(x + 0x670, drawY, depth, fade, 1,
+                                        style->resourceSets[6], 0, drawFlags);
+            sprintf(text, D_003BC788, value);
+            glyph = itfCreateFont2TextGlyph(x + 0x490, drawY, depth, color, text, 0);
+        }
+        frFontDrawGlyphChain(glyph, 1, drawFlags);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvanceRatioPanel);
 
