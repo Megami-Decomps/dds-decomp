@@ -16,7 +16,7 @@ extern SdfQuad fldLocalMapSecondCameraVector;
 
 
 
-extern void effObjSetInnerFloat(s32, f32);
+extern void effObjSetInnerFloat(s32 object, f32 value);
 
 
 extern s32 dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
