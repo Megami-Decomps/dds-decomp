@@ -133,7 +133,7 @@ extern s32 D_0032E474[];
 
 extern s32 D_0033EB78[];
 
-extern void sndReleaseTrackHandle(s32 arg0);
+extern void sndReleaseTrackHandle(s32 trackHandle);
 
 
 
@@ -628,7 +628,7 @@ extern s32 fldCurrentBgmMode;
 
 extern s32 D_0033EAE8[];
 
-extern void sndReleaseTrackHandle();
+extern void sndReleaseTrackHandle(s32 trackHandle);
 
 void fldSetBgmMode(s32 mode) {
     switch (mode) {

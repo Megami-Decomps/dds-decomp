@@ -305,7 +305,7 @@ extern FldClear18 fldPendingSounds[];
 
 
 
-extern void sndReleaseTrackHandle(s32 arg0);
+extern void sndReleaseTrackHandle(s32 trackHandle);
 
 extern s32 fldCurrentBgmId[];
 
