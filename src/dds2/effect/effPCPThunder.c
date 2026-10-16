@@ -2095,7 +2095,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
 }
 
 extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions);
-extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
+extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *history, u32 *gradientColors);
 
 EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
 {
@@ -2256,8 +2256,8 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
-extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
+extern void effResetFragmentHistory(EffPcpThunderFragmentResources *history);
+extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u128 *source);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
