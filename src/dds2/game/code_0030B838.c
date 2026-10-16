@@ -136,7 +136,56 @@ void sdfInitInnerVectors(void) {
     ((EffWorldNode *)fldLocalMapCameraObject)->ops->update((EffWorldNode *)fldLocalMapCameraObject);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", sdfLoadMapCounterCameraVectorsForMask);
+#include "pcp_vu0.h"
+s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
+    f32 position[4];
+    f32 rotation[4];
+    char name[16];
+    EffWorldNode *world;
+    EffWorldNode *node;
+    s8 count;
+    s8 i;
+
+    world = dds3GetWorldSecondaryObject();
+    count = 0;
+    for (i = 0; i != 13; i++) {
+        if (i < 10) {
+            if ((mask >> i) & 1) {
+                sprintf(name, "01cam_%02d", i + 1);
+                node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
+                effObjFetchInnerPosition(node);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                D_004009B0[count].v[0] = position[0];
+                D_004009B0[count].v[1] = position[1];
+                D_004009B0[count].v[2] = position[2];
+                D_004009B0[count].v[3] = position[3];
+                effObjFetchInnerRotationNormalized(node);
+                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                D_00400A50[count].v[0] = rotation[0];
+                D_00400A50[count].v[1] = rotation[1];
+                D_00400A50[count].v[2] = rotation[2];
+                D_00400A50[count].v[3] = rotation[3];
+                count++;
+            }
+        } else {
+            sprintf(name, "01cam_%02d", i + 1);
+            node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
+            effObjFetchInnerPosition(node);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            D_004008E0[i - 10][0] = position[0];
+            D_004008E0[i - 10][1] = position[1];
+            D_004008E0[i - 10][2] = position[2];
+            D_004008E0[i - 10][3] = position[3];
+            effObjFetchInnerRotationNormalized(node);
+            VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+            D_00400920[i - 10][0] = rotation[0];
+            D_00400920[i - 10][1] = rotation[1];
+            D_00400920[i - 10][2] = rotation[2];
+            D_00400920[i - 10][3] = rotation[3];
+        }
+    }
+    return count;
+}
 
 void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     fldLocalMapFirstCameraVector = D_004009B0[index];
