@@ -788,11 +788,11 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
 }
 
 /* Fill all four words with value without assigning a corner or channel order. */
-void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
-    quad->unk00[0] = value;
-    quad->unk00[1] = value;
-    quad->unk00[2] = value;
-    quad->unk00[3] = value;
+void uiFillQuadColorWords(UiQuadWords *quad, u32 colorWord) {
+    quad->unk00[0] = colorWord;
+    quad->unk00[1] = colorWord;
+    quad->unk00[2] = colorWord;
+    quad->unk00[3] = colorWord;
 }
 
 void itfDrawVertexColoredTriangle();
