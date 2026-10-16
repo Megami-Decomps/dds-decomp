@@ -135,7 +135,7 @@ extern s32 D_00436AF0;
 extern s32 D_00438F6C;
 
 
-extern void btlPickCommandElementCheckedTarget(s32, s32);
+extern void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action);
 extern void btlPickCommandTargetExcludingActor(s32, s32);
 
 extern void btlPickCommandLowestHpBlockTarget(s32, u16);
