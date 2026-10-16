@@ -145,15 +145,15 @@ void mnuSelectNextMantraUnit(MnuStatusResource *object) {
     mnuRefreshNodeTransitionIcons(object, work, value);
 }
 
-void mnuSelectMantraUnitByIndex(MnuStatusResource *object, s8 target) {
-    MantraMenuWork *work = &object->menu;
+void mnuSelectMantraUnitByIndex(MnuStatusResource *resource, s8 targetIndex) {
+    MantraMenuWork *work = &resource->menu;
 
-    if (mnuQueueUnitPanelSelection(object->menu.selectionController, target) != 0) {
-        mnuMoveNodeCursorToTargetIndex(object, target);
-        work->defaultSelector = mnuFindNodePosition(object->list->cursor->userValue);
+    if (mnuQueueUnitPanelSelection(resource->menu.selectionController, targetIndex) != 0) {
+        mnuMoveNodeCursorToTargetIndex(resource, targetIndex);
+        work->defaultSelector = mnuFindNodePosition(resource->list->cursor->userValue);
         mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 0);
-        mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 5, 1);
-        mnuRefreshNodeTransitionIcons(object, work, mnuGetSelectedNodeValue(object));
+        mnuSpawnMantraPanelsFromSelectedUnitFlags(resource, 5, 1);
+        mnuRefreshNodeTransitionIcons(resource, work, mnuGetSelectedNodeValue(resource));
     }
 }
 
