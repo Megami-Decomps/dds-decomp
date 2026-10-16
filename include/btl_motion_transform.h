@@ -15,8 +15,8 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state);
 
 /* Both vector inputs contain four floats; direction supplies a quaternion.
  * Initializes the camera pose and clears the runtime motion-update flag. */
-void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin,
-                                       f32 *direction);
+void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin,
+                                       const f32 *direction);
 /* The final input is a field-of-view angle in degrees. */
 void btlInitMotionTransformFromComponents(BtlCamState *object,
     f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, f32 vw, f32 fovDegrees);

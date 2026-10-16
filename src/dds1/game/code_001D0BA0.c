@@ -5852,7 +5852,7 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_0037E110[];
 
-void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin, f32 *direction) {
+void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin, const f32 *direction) {
     VU0_LOAD_VF(vf10, direction);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E110);
