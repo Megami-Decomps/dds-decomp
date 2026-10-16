@@ -8461,10 +8461,10 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
 }
 
 u8 sndIsStreamStatusTwoOrThree(void) {
-    s32 temp_v0;
+    s32 status;
 
-    temp_v0 = mnuPollTitleStreamStateLocked();
-    return temp_v0 - 2U < 2;
+    status = mnuPollTitleStreamStateLocked();
+    return status - 2U < 2;
 }
 
 void btlResetTitleStreamOnBattleFlag(void) {
