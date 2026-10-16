@@ -419,7 +419,7 @@ extern f32 D_00438A48, D_00438A4C;
 extern f32 D_0040B620[16];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfVuSetGlobalScale(f32);
-extern u32 func_003396D0(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
+extern u32 sdfModelBuildKind3CommandPacket(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
 typedef struct {
     SdfModelPacket address;
     u64 firstHeader;
@@ -588,7 +588,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
                 u32 packet;
                 sdfVuSelectTransformMatrix((u32)lighting);
                 sdfVuCacheObjectVector((u8 *)secondaryLighting);
-                packet = func_003396D0(node, entry->payload, nodeFlags, color,
+                packet = sdfModelBuildKind3CommandPacket(node, entry->payload, nodeFlags, color,
                                        firstScalar, secondScalar,
                                        frame, skipCommands);
                 if (packet != 0) {

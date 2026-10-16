@@ -9742,3 +9742,4 @@
 0x0045C7A0	fldMapTargetPos	inferred	confidence=medium; s32[3] recomputed from D_00400700 each step; copied to fldMapPrevTargetPos in sdfCommitPendingVectorAndMarkChanged. Pair in code_0030E390.c.
 0x0045C7B0	fldMapPrevTargetPos	inferred	confidence=medium; s32[3] copy of fldMapTargetPos taken before recompute; feeds the pulse request advance. Pair in code_0030E390.c.
 0x004377D8	evtNextCameraSlotViewerKey	inferred	evtCreateModelFromPackResource passes this counter to mdlLoadViewerPackage and mdlSpawnCameraSlotViewerObject, increments it, and wraps 0x7D0 to 0x3E8; paired data address 0x003BC368.
+0x003396D0	sdfModelBuildKind3CommandPacket	inferred	Builds a packet for a model command-list entry with kind 3; caller supplies the node, payload, render state, frame and skip flag, and appends the returned packet when nonzero.

@@ -147,7 +147,7 @@ extern s32 D_003BDA20;
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void sdfPremultiplyVuMatrixFromMemory(void *matrix);
 
-INCLUDE_ASM(const s32, "game/code_002E0820", func_002E0820);
+INCLUDE_ASM(const s32, "game/code_002E0820", sdfModelBuildKind3CommandPacket);
 
 void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source) {
     SdfDrawNode **objects = model->list->buffer;
