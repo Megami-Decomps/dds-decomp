@@ -2240,7 +2240,86 @@ const char *fldGetTaskRecordValue(u32 task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013EB30);
+/* The compact state header follows the room geometry. */
+typedef struct FldRoomStateHeader {
+    s16 unk130;
+    s16 roomId;
+    s16 unk134;
+    s16 mode;
+    s16 entryIndex;
+    s16 axisMode;
+    s32 shapeKind;
+} FldRoomStateHeader;
+#include "fld_trigger_shape.h"
+typedef struct FldActionTransform {
+    f32 position[4];
+    f32 rotation[4];
+    f32 scale[4];
+} FldActionTransform;
+/* Serialized sphere/task prefix, transform and paired resources. */
+typedef struct FldActionRow {
+    union {
+        struct { FldTriggerSphere shape; FldTaskInfo info; } task;
+        FldTriggerShape shape;
+    } prefix;
+    FldActionTransform transform;
+    FldFileResource childResource;
+    FldFileResource displayResource;
+} FldActionRow;
+extern FldActionRow D_0038BE50[];
+extern u8 D_0038BC00[];
+extern u8 D_0038BC10[];
+extern u8 D_0038BC20[];
+static inline void fldInitializeActionTransform(FldActionTransform *transform, f32 x, f32 y, f32 z) {
+    transform->position[3] = 1.0f;
+    transform->scale[0] = 1.0f;
+    transform->scale[1] = 1.0f;
+    transform->scale[2] = 1.0f;
+    transform->scale[3] = 1.0f;
+    transform->position[0] = x;
+    transform->position[1] = y;
+    transform->position[2] = z;
+    transform->rotation[0] = 0.0f;
+    transform->rotation[1] = 0.0f;
+    transform->rotation[2] = 0.0f;
+    transform->rotation[3] = 0.0f;
+}
+extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
+void func_0013EB30(s32 roomValue, f32 x, f32 y, f32 z, f32 value) {
+    FldActionTransform *transform;
+    EffWorldNode *object;
+    EffWorldNode *child;
+    s32 index;
+    s32 roomIndex;
+    FldRoomStateHeader *state;
+    u32 counter;
+    s32 slot;
+
+    index = D_004361C4;
+    counter = dds3AdvanceWorldCounter();
+    object = evtSpawnActionObjD(counter, D_0038BC20, (s32)D_0038BC00);
+    D_0038BE50[index].displayResource.id = counter;
+    slot = fldPushDisplayValue((u32)&D_0038BE50[index].displayResource, object);
+    D_0038BE50[index].prefix.task.shape.radius = value;
+    D_0038BE50[index].prefix.shape.kind = 0;
+    D_0038BE50[index].prefix.task.info.unk0 = 1;
+    D_0038BE50[index].prefix.task.info.slot = slot;
+    D_0038BE50[index].prefix.task.info.unk08 = 1;
+    D_0038BE50[index].prefix.task.info.shape = &D_0038BE50[index].prefix.shape;
+    transform = &D_0038BE50[index].transform;
+    fldInitializeActionTransform(transform, x, y, z);
+    D_0038BE50[index].childResource.transform = transform->position;
+    D_0038BE50[index].childResource.data = &D_0038BE50[index].prefix.task.info;
+    D_0038BE50[index].childResource.id = dds3AdvanceWorldCounter();
+    D_0038BE50[index].childResource.name = (const char *)D_0038BC00;
+    child = evtSpawnActionObj11((s32)D_0038BE50[index].childResource.id, (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform, (s32)D_0038BC10);
+    roomIndex = func_0013BAB8(&D_0038BE50[index].childResource, child);
+    state = (FldRoomStateHeader *)&fldRoomRecords[roomIndex].unk130;
+    state->roomId = roomValue;
+    state->mode = 2;
+    state->entryIndex = -1;
+    D_004361C4++;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013ED20);
 
