@@ -2533,7 +2533,7 @@ extern SdfPoolNode D_003805A8;
 extern const s32 D_00414E20[7][4];
 extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);
-void func_001A7C08(s32 mode) {
+void itfMesDrawWindowBackground(s32 mode) {
     DrawVertex borderRect[2];
     DrawColorRec borderColor;
     s32 rectangleData[12][4];
