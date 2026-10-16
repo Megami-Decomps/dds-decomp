@@ -1476,7 +1476,7 @@ void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
 
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern void itfConfigureSurfaceAlphaBlendMode(s32, s32);
+extern void itfConfigureSurfaceAlphaBlendMode(s32 mode, s32 surface);
 void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;
