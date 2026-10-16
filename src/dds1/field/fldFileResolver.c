@@ -2966,15 +2966,15 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     }
 }
 
-void fldDrawConvertedTextGlyph(x, y, first, second)
+void fldDrawConvertedTextGlyph(x, y, colors, text)
 s32 x;
 s32 y;
-u32 first;
-const u8 *second;
+u32 colors;
+const u8 *text;
 {
     struct FrFontGlyph *object;
 
-    object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, first, second, 0);
+    object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, colors, text, 0);
     frFontDrawGlyphInDefaultMode(object);
     frFontQueueGlyphForCurrentDrawBuffer(object);
 }

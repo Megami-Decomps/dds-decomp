@@ -2504,7 +2504,7 @@ void fldClearAllAreaFloorFlags(void) {
 
 extern f32 D_003BAEE8;
 extern s32 frFontMeasureTextAdvance(const u8 *, u8, u8);
-extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
 void func_00147188(s32 unused) {
     FldAreaWork *work;
     s32 mode;
