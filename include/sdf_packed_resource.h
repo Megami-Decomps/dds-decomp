@@ -24,7 +24,7 @@ void *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource);
 void *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource);
 
 struct SdfMemBlock;
-struct SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, s32 *outPayloadAddress);
-struct SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, s32 *outPayloadAddress);
+struct SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayloadAddress);
+struct SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayloadAddress);
 
 #endif /* SDF_PACKED_RESOURCE_H */
