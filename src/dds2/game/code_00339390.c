@@ -67,7 +67,7 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-extern void sdfVuEmitSelectedNodePacket(s32 workAddress);
+extern void sdfVuEmitSelectedNodePacket(VuWork *work);
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(u32 workAddress);
 
@@ -79,7 +79,7 @@ void sdfVuApplySelectedWorkFlags(u32 workAddress) {
     s32 signedWorkAddress;
 
     signedWorkAddress = (s32)workAddress;
-    sdfVuEmitSelectedNodePacket(signedWorkAddress);
+    sdfVuEmitSelectedNodePacket((VuWork *)signedWorkAddress);
     selectedFlags = *(u32 *)(signedWorkAddress + 0x44);
     if ((selectedFlags & 0x1000) != 0) {
         sdfVuUpdateSelectedNodeGeometry(workAddress);
