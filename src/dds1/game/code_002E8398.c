@@ -47,13 +47,13 @@ void effMiscSeedRandom(EffRandState *state, u32 seed) {
 /* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
 void effMiscSeedRandomFromClock(EffRandState *state) {
     ClockTime now;
-    s32 t;
+    s32 secondsSinceEpoch;
 
     effMiscReadCachedClockTime(&now);
-    t = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
-    t = t * 0x18 + now.hour;
-    t = t * 0x3C + now.min;
-    effMiscSeedRandom(state, t * 0x3C + now.sec);
+    secondsSinceEpoch = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
+    secondsSinceEpoch = secondsSinceEpoch * 0x18 + now.hour;
+    secondsSinceEpoch = secondsSinceEpoch * 0x3C + now.min;
+    effMiscSeedRandom(state, secondsSinceEpoch * 0x3C + now.sec);
 }
 
 extern s32 sceCdReadClock(SdfCdClock *);
