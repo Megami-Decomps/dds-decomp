@@ -169,9 +169,14 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
 
 typedef struct FileRequestCallbackWork {
     u8 pad00[3];
-    u8 unk03;
+    u8 callbackMode;
     u8 pad04[0x2C];
 } FileRequestCallbackWork;
+
+typedef char FileRequestCallbackWork_size_must_be_0x30[
+    (sizeof(FileRequestCallbackWork) == 0x30) ? 1 : -1];
+typedef char FileRequestCallbackWork_callbackMode_offset_check[
+    ((u32)&((FileRequestCallbackWork *)0)->callbackMode == 0x03) ? 1 : -1];
 
 /* Clear kind-zero request work and narrow callbackMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
@@ -179,7 +184,7 @@ typedef struct FileRequestCallbackWork {
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, u32 callbackMode, u32 callbackAddress, u32 userData) {
     FileRequestCallbackWork *requestWork = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
 
-    requestWork->unk03 = callbackMode;
+    requestWork->callbackMode = callbackMode;
     fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
                              (void *)callbackAddress, (void *)userData);
     return (struct FileRequest *)requestWork;

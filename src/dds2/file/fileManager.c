@@ -27,6 +27,7 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 #define FILE_PAC_REQUEST_BYTES 0x70
 #define FILE_PAC_PACKET_OFFSET 0x30
 #define FILE_VALUE_PAIR_REQUEST_BYTES 0x30
+#define FILE_CALLBACK_REQUEST_BYTES 0x30
 
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
  * then release any device state, duplicated name and entry, returning zero.
@@ -166,17 +167,26 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
     fileCreatePacLoadWork(requestName, 1, 0, 0, 0);
 }
 
-#define FILE_CALLBACK_REQUEST_BYTES 0x30
+typedef struct FileRequestCallbackWork {
+    u8 pad00[3];
+    u8 callbackMode;
+    u8 pad04[0x2C];
+} FileRequestCallbackWork;
+
+typedef char FileRequestCallbackWork_size_must_be_0x30[
+    (sizeof(FileRequestCallbackWork) == FILE_CALLBACK_REQUEST_BYTES) ? 1 : -1];
+typedef char FileRequestCallbackWork_callbackMode_offset_check[
+    ((u32)&((FileRequestCallbackWork *)0)->callbackMode == 0x03) ? 1 : -1];
 
 /* Clear kind-zero request work and narrow callbackMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Keep the raw byte store and existing provider parameter types. */
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
-    u8 *requestWork;
+    FileRequestCallbackWork *requestWork;
 
     sdfDebugPrintf("file load %s\n", requestName);
-    requestWork = sdfAllocAndClearQuadwords(FILE_CALLBACK_REQUEST_BYTES);
-    requestWork[3] = callbackMode;
+    requestWork = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
+    requestWork->callbackMode = callbackMode;
     fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
                              (void *)callbackAddress, (void *)userData);
     return (struct FileRequest *)requestWork;
