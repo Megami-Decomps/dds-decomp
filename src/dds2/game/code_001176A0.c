@@ -126,8 +126,8 @@ s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path) {
     return result;
 }
 
-void sdfSetFloatCounterDirection(u32 *destination, u32 value) {
-    *destination = value;
+void sdfSetFloatCounterDirection(u32 *destination, u32 direction) {
+    *destination = direction;
 }
 
 u32 sdfGetFloatCounterDirection(u32 *source) {

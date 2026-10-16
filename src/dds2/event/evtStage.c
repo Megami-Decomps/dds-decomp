@@ -12,7 +12,7 @@
 #include "kwln_task_state.h"
 #include "sdf_texture_offset_list.h"
 
-extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
+extern void sdfSetFloatCounterDirection(u32 *destination, u32 direction);
 
 
 extern void dds3ReplaceObjectResource(EffWorldNode *object);

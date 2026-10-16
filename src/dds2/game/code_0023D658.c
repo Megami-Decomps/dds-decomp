@@ -71,7 +71,7 @@ typedef char Entry270_size_check[(sizeof(Entry270) == 0x270) ? 1 : -1];
 extern Entry270 *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
-extern void sdfSetFloatCounterDirection(s32, s32);
+extern void sdfSetFloatCounterDirection(s32 destination, s32 direction);
 
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 
