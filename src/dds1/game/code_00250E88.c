@@ -340,7 +340,32 @@ INCLUDE_ASM(const s32, "game/code_00250E88", mnuUpdateMantraSceneTaskState);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawMantraSceneFrame);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuSelectMantraGridLeftCell);
+extern u8 D_0036B410[17][15];
+s32 mnuSelectMantraGridLeftCell(SdfGrid *grid, s32 x, s32 y, u32 from) {
+    if (from != 0 && sdfGridSelectFilledCell(grid, x, y) != NULL) {
+        return 1;
+    }
+    if (D_0036B410[y][x] & 0x20) {
+        if (mnuSelectMantraGridLeftCell(grid, x - 1, y, 0x20) != 0) {
+            return 1;
+        }
+    } else if ((D_0036B410[y][x] & 0x8) || (D_0036B410[y][x] & 0x4)) {
+        if (mnuSelectMantraGridLeftCell(grid, x - 1, y, 0x20) != 0) {
+            return 1;
+        }
+    }
+    if ((D_0036B410[y][x] & 0x80) && (from & 0x40) == 0) {
+        if (mnuSelectMantraGridLeftCell(grid, x, y - 1, 0x80) != 0) {
+            return 1;
+        }
+    }
+    if ((D_0036B410[y][x] & 0x40) && (from & 0x80) == 0) {
+        if (mnuSelectMantraGridLeftCell(grid, x, y + 1, 0x40) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 extern u8 D_0036B410[17][15];
 s32 mnuSelectMantraGridRightCell(SdfGrid *grid, s32 x, s32 y, u32 from) {
