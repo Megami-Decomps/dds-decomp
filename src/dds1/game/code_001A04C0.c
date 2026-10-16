@@ -333,11 +333,11 @@ extern char D_003A1598[]; /* "battle_draw" */
 
 
 void btlCreateDrawTasks(void) {
-    s32 state = btlRuntime;
+    BtlState *battle = (BtlState *)btlRuntime;
     KwlnTask *mainTask;
     KwlnTask *drawTask;
     mainTask = kwlnTaskCreate(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
-    *(u32 *)(state + 0x29C) = (u32)mainTask;
+    battle->scriptOwner = mainTask;
     drawTask = kwlnTaskCreate(D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
     kwlnTaskAddChild(mainTask, drawTask);
 }
@@ -347,7 +347,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
     task = kwlnTaskFindByPriority(0x3f9);
     if (task != NULL) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)*(u32 *)(btlRuntime + 0x29c), 1);
+        kwlnTaskDestroyWithHierarchy(((BtlState *)btlRuntime)->scriptOwner, 1);
         return;
     }
 }
