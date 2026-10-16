@@ -8010,14 +8010,14 @@ s32 sndHasFlaggedActiveNode(void) {
 
 s32 sndPlaySkillSeTask(u32 *taskArgs) {
     u8 *taskData = (u8 *)taskArgs;
-    s32 context = (s32)(u32)btlGetRuntime();
+    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     u32 value;
 
-    if (*(u16 *)(taskData + 4) == 2 && *(u32 *)(context + 0x268) < 6) {
-        btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", *(u32 *)(context + 0x268));
+    if (*(u16 *)(taskData + 4) == 2 && work->skillSeLoadFrame < 6) {
+        btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", work->skillSeLoadFrame);
         return 1;
     }
-    *(u32 *)(context + 0x268) = 0;
+    work->skillSeLoadFrame = 0;
     if (sndFindPackedTrackLoadStatus(*(u32 *)taskData) != 0) {
         switch (*(u16 *)(taskData + 4)) {
         case 1:
@@ -8541,7 +8541,7 @@ void btlResetMotionSoundFrameCounters(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
     work->motionSeLoadFrame = -1;
-    work->unk268 = -1;
+    work->skillSeLoadFrame = -1;
 }
 
 void sndLoadBattleBank(void) {

@@ -20,7 +20,7 @@ typedef struct BtlActorWork {
     struct SoundSlotOwner *soundSlotOwners; /* Shared category/id owners. */
     u8 pad240[0x24];
     u32 motionSeLoadFrame; /* 0x264: shared with BtlState; -1 disables frame counting. */
-    s32 unk268;
+    u32 skillSeLoadFrame; /* 0x268: -1 disables the skill-SE frame gate. */
     u8 pad26C[0x38];
     s32 unk2A4;
     u8 pad2A8[0x210];
@@ -56,5 +56,7 @@ typedef char BtlActorWorkHookOffset[((unsigned int)&((BtlActorWork *)0)->hook5E4
 typedef char BtlActorWorkFallbackHookOffset[((unsigned int)&((BtlActorWork *)0)->hook5E8 == 0x5E8) ? 1 : -1];
 typedef char BtlActorWorkMotionSeLoadFrameOffset[
     ((unsigned int)&((BtlActorWork *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
+typedef char BtlActorWorkSkillSeLoadFrameOffset[
+    ((unsigned int)&((BtlActorWork *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];
 
 #endif
