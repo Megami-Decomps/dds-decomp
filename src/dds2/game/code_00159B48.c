@@ -47,7 +47,7 @@ extern void effDestroyResources(EffEmitterHead *owner);
 
 /* Particle-style effect object and its per-record buffer entry. */
 
-extern u32 effParModulateColors(u32, u32);
+extern u32 effParModulateColors(u32 color, u32 mask);
 
 typedef struct EffInstance {
     f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
