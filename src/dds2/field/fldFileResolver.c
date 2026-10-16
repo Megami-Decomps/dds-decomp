@@ -5048,11 +5048,11 @@ void fldClearCameraHeadingRequest(void) {
     D_00389910[0] = 0;
 }
 
-void fldQueueCameraXYOverride(f32 first, f32 second) {
+void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
     FldAreaWork *camera = &fldAreaState;
 
-    camera->facingPointX = first;
-    camera->facingPointZ = second;
+    camera->facingPointX = targetX;
+    camera->facingPointZ = targetZ;
     camera->pointState = 1;
 }
 
