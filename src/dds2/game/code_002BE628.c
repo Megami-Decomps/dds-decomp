@@ -2488,23 +2488,23 @@ DatPartyRecord *mnuFindReserveSlotByCurrentId(u32 id) {
     return 0;
 }
 
-void mnuMarkEntryBlocked(s32 index) {
-    if (index != 0) {
-        datGameState->itemBlockedFlags[index - 0xC0] |= 1;
+void mnuMarkEntryBlocked(s32 itemId) {
+    if (itemId != 0) {
+        datGameState->itemBlockedFlags[itemId - 0xC0] |= 1;
     }
 }
 
-void mnuClearEntryBlocked(s32 index) {
-    if (index != 0) {
-        datGameState->itemBlockedFlags[index - 0xC0] &= ~1;
+void mnuClearEntryBlocked(s32 itemId) {
+    if (itemId != 0) {
+        datGameState->itemBlockedFlags[itemId - 0xC0] &= ~1;
     }
 }
 
-s32 mnuIsEntryBlocked(s32 index) {
-    if (index == 0) {
+s32 mnuIsEntryBlocked(s32 itemId) {
+    if (itemId == 0) {
         return 1;
     }
-    return datGameState->itemBlockedFlags[index - 0xC0] & 1;
+    return datGameState->itemBlockedFlags[itemId - 0xC0] & 1;
 }
 
 s32 mnuHasOwnedUnblockedItem(void) {
