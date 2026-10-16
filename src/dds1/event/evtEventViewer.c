@@ -1233,7 +1233,7 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
         EvtRuntimeChild *current = NULL;
         EvtRuntimeChild *next;
         s8 kind;
-        f32 t;
+        f32 interpolationFactor;
         s32 startFrame;
         s32 endFrame;
 
@@ -1266,18 +1266,18 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
             startFrame = current->frame;
             endFrame = next->frame;
             if (endFrame != startFrame) {
-                t = (f32)(time - startFrame) / (f32)(endFrame - startFrame);
+                interpolationFactor = (f32)(time - startFrame) / (f32)(endFrame - startFrame);
             } else {
-                t = 0.0f;
+                interpolationFactor = 0.0f;
             }
             if (next->p0C.sb[0] == 0 || next->p0C.sb[0] == 2) {
-                t = 0.0f;
+                interpolationFactor = 0.0f;
             }
-            unit->shadowLevel = evtMovieInterpolateIntIfEnabled(0, t, current->p0C.b[1], next->p0C.b[1]);
+            unit->shadowLevel = evtMovieInterpolateIntIfEnabled(0, interpolationFactor, current->p0C.b[1], next->p0C.b[1]);
             if (next->p0C.b[0] < 2) {
-                t = 0.0f;
+                interpolationFactor = 0.0f;
             }
-            unit->shadowY = evtMovieInterpolateFloatIfEnabled(0, t, current->p14.f, next->p14.f);
+            unit->shadowY = evtMovieInterpolateFloatIfEnabled(0, interpolationFactor, current->p14.f, next->p14.f);
         }
         if (current->p0C.sb[0] == 1 || current->p0C.sb[0] == 3) {
             setFlags |= 0x4000;
