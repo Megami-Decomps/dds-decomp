@@ -563,7 +563,7 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *actor) {
     }
 }
 
-extern void func_001E0B68(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
@@ -610,7 +610,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
-                        func_001E0B68(action, &action->frontCamera, &action->backCamera);
+                        btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                     } else {
                         btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
                     }
@@ -683,7 +683,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
                         ((effMiscRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
-                func_001E0B68(action, &action->frontCamera, &action->backCamera);
+                btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
@@ -1175,7 +1175,7 @@ extern s32 datActionAnimationRecords;
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlInitializeActionCamera(BtlLinkedCommand *);
-extern void func_001E0B68(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
+extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlSelectLinkageSkillCameraPreset();
 
 void btlSelectActionCameraPose(BtlLinkedCommand *action) {
@@ -1214,7 +1214,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
             return;
         }
         if ((action->task->unit->status.flags & 0x400) && hasFlag200 == 0 && hasFlag400 == 1) {
-            func_001E0B68(action, &action->frontCamera, &action->backCamera);
+            btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
             action->flags |= 0x10000;
             return;
         }

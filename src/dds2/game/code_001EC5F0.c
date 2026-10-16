@@ -1239,7 +1239,65 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
     action->motionParameter = parameter;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EE458);
+extern void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
+
+void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back) {
+    f32 position[4] __attribute__((aligned(16)));
+    BtlState *runtime;
+    ActionStateLink *task;
+    BtlUnit *unit;
+    BtlUnit *user;
+    u32 groups = 0;
+    u32 i;
+    u32 count;
+    u8 mode;
+    f32 blend;
+
+    runtime = (BtlState *)btlGetRuntime();
+    count = btlGetIndexListCount(command->targetList);
+    for (i = 0; i < count; i++) {
+        unit = (BtlUnit *)btlGetIndexListEntry(command->targetList, (s32)i);
+        groups |= unit->status.flags & 0x600;
+    }
+
+    count = 0;
+    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->status.flags;
+        if (!(flags & 1)) continue;
+        if (flags & 0xC0) continue;
+        if (flags & groups) count++;
+    }
+
+    if (count == 1) {
+        func_001EDC38(command, &command->frontCamera, &command->backCamera);
+        command->motionParameter = 30.0f;
+        command->flags |= 0x41;
+        return;
+    }
+
+    task = command->link;
+    user = task->unit;
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(user->status.flags & 0x600);
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF_PTR(vf10, position);
+    if (user->status.flags & 0x200) {
+        mode = position[0] < 0.0f ? 2 : 3;
+        btlFrameTargetExtremesCameraPose(command, front, mode, 60.0f, 0.1499999911f);
+        btlFrameTargetExtremesCameraPose(command, back, mode, 5.0f, 0.0f);
+        front->distance += 100.0f;
+    } else {
+        mode = 0.0f < position[0] ? 2 : 3;
+        blend = 0.1999999881f;
+        btlFrameTargetExtremesCameraPose(command, front, mode, 75.0f, blend);
+        btlFrameTargetExtremesCameraPose(command, back, mode, 35.0f, blend);
+        back->distance += 100.0f;
+    }
+    command->motionParameter = 40.0f;
+    command->flags |= 0x41;
+}
 
 
 void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
