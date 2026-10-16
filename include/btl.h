@@ -171,14 +171,12 @@ typedef struct BtlUnit {
     s32 transparencyBuffer; /* 0x32C: mirror pass's 512x224 transfer image. */
     s32 transparencyBufferAllocation; /* 0x330: general allocation released with the image. */
     u8 pad334[8];
-    struct SdfMemBlock *allocation; /* 0x33C: general-heap owner for this unit. */
+    u32 handle; /* 0x33C */
     struct BtlUnit *previousActor; /* 0x340 */
     struct BtlUnit *next; /* 0x344: actor-list link, not a task-chain link */
 } BtlUnit;
 typedef char BtlUnitRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
 typedef char BtlUnitRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2C4) ? 1 : -1];
-typedef char BtlUnitAllocationOffsetCheck[
-    ((u32)&((BtlUnit *)0)->allocation == 0x33C) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x348) ? 1 : -1];
@@ -259,7 +257,7 @@ typedef struct BtlUnit {
     s32 transparencyBuffer; /* 0x34C: mirror pass's 512x224 transfer image. */
     s32 transparencyBufferAllocation; /* 0x350: general allocation released with the image. */
     u8 pad354[8];
-    struct SdfMemBlock *allocation; /* 0x35C: general-heap owner for this unit. */
+    u32 handle; /* 0x35C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x360 */
     struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
@@ -268,8 +266,6 @@ typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2
 typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
 typedef char BtlUnitSoundSlotOwnerOffsetCheck[
     ((u32)&((BtlUnit *)0)->soundSlotOwner == 0x328) ? 1 : -1];
-typedef char BtlUnitAllocationOffsetCheck[
-    ((u32)&((BtlUnit *)0)->allocation == 0x35C) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
