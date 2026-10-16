@@ -3640,7 +3640,7 @@ extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 void fldUpdateCameraViewFromPlayer(void) {
     f32 nearPoint[4];
     f32 farPoint[4];
-    s32 *world = fldGetPlayerSceneStateAddress();
+    u32 *world = fldGetPlayerSceneStateAddress();
     EffWorldNode *node;
     f32 angle;
 
