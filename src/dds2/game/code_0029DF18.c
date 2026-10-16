@@ -117,8 +117,8 @@ extern void btlDrawIconAtSize(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32, 
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428590);
 
 void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *row, s32 context, s32 index) {
-    DatPartyRecord *unit = row->unit;
+                   BrsProgressRow *progressRow, s32 context, s32 rowIndex) {
+    DatPartyRecord *unit = progressRow->unit;
     DatPartyRecord *tintUnit;
     u32 color[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
     s32 iconWidth;
@@ -139,21 +139,21 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         iconHeight = 0x2F;
     }
 
-    iconX += work->fadeAnimation[index].portraitPosition[0];
-    iconY += work->fadeAnimation[index].portraitPosition[1];
+    iconX += work->fadeAnimation[rowIndex].portraitPosition[0];
+    iconY += work->fadeAnimation[rowIndex].portraitPosition[1];
     evtSetDrawSurfaceIndex(context);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
 
-    tintUnit = row->unit;
+    tintUnit = progressRow->unit;
     if (tintUnit->hp != 0 && !(tintUnit->status & 0x4000)) {
-        packed = (work->fadeAnimation[index].portraitOpacity << 24) | 0x00808080;
+        packed = (work->fadeAnimation[rowIndex].portraitOpacity << 24) | 0x00808080;
         color[0] = packed;
         color[1] = packed;
         color[2] = packed;
         color[3] = packed;
     } else {
-        color[0] = (work->fadeAnimation[index].portraitOpacity << 24) | 0x00282222;
-        packed = (work->fadeAnimation[index].portraitOpacity << 24) | 0x002C242A;
+        color[0] = (work->fadeAnimation[rowIndex].portraitOpacity << 24) | 0x00282222;
+        packed = (work->fadeAnimation[rowIndex].portraitOpacity << 24) | 0x002C242A;
         color[1] = packed;
         color[2] = packed;
         color[3] = packed;
@@ -172,7 +172,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
             iconY = 0x16;
         }
 
-        packed = (work->fadeAnimation[index].portraitOpacity + 0x20) | 0x80808000;
+        packed = (work->fadeAnimation[rowIndex].portraitOpacity + 0x20) | 0x80808000;
         color[0] = packed;
         color[1] = packed;
         color[2] = packed;
