@@ -324,10 +324,10 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     return batch->count;
 }
 
-s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *entry) {
-    s32 step = ptyCalcLevelUps(entry);
-    entry->level += step;
-    ptyRecomputeMaxHpMp(entry);
+s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *unit) {
+    s32 step = ptyCalcLevelUps(unit);
+    unit->level += step;
+    ptyRecomputeMaxHpMp(unit);
     return step;
 }
 
