@@ -4,11 +4,7 @@
 #include "snd_command_packet.h"
 #include "snd_midi_state_views.h"
 
-u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 size);
-
 void sndEnsureMidiBankResident(s32 trackId);
-
-u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
 extern SndTrackSlot sndTrackBalanceEntries[];
 
