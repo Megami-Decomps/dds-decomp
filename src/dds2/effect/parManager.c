@@ -147,7 +147,6 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
 /* Age tag of a packet waiting for parInitializeRadialParticle. */
 #define PAR_PACKET_INITIAL_TAG 0xF0000001
 
-extern u32 parEvaluateColorRampAtAge(void *fade, u32 color, s32 age);
 extern u32 effParModulateColors(u32 colorA, u32 colorB);
 extern void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
                                        ParHistoryTable *source, f32 scale);
