@@ -144,13 +144,13 @@ void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width,
 }
 
 /* Restore four saved palette words in the native packed work-record buffer. */
-void itfGridCopyEntryQuad(s32 owner, s32 index) {
+void itfGridCopyEntryQuad(s32 resource, s32 entryIndex) {
     u32 *destination;
     s32 remaining;
 
     remaining = 3;
-    destination = (u32 *)(index * sizeof(BdWork)
-                         + (u32)((EffectSlotSet *)owner)->workEntries) + 5;
+    destination = (u32 *)(entryIndex * sizeof(BdWork)
+                         + (u32)((EffectSlotSet *)resource)->workEntries) + 5;
     do {
         remaining = remaining - 1;
         *destination = destination[0x1C];

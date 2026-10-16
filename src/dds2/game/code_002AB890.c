@@ -236,7 +236,7 @@ extern s32 mnuHasOwnedUnblockedItem(void);
 extern s32 mnuIsEntryBlocked(s32 index);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
 
 /* Draw one ordered staff item row. The head row advances the shared pulse
  * and marks an owned unblocked item; the first row is the header bar; other
@@ -426,7 +426,7 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
 }
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
 
 void mnuDrawOwnedCatalogListNode(s32 x, s32 y, s32 depth, struct MenuList *list,
                    struct MenuListNode *node, s32 drawArg) {
