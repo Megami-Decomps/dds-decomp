@@ -1,15 +1,9 @@
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
+#include "sdf_sprite_record.h"
 #include "sdf_word_array_record.h"
 #include "sdf_resource.h"
-
-typedef struct SdfVec4 {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} SdfVec4;
 
 extern f32 sdfVec3Normalize(f32 *);
 
@@ -31,12 +25,6 @@ typedef struct SdfResourceVectorRecord1C {
     u8 opaque00[0x1C];
 } SdfResourceVectorRecord1C;
 
-/* The packer and clone path establish a relocated vector pointer at +0x18. */
-typedef struct SdfResourceVectorView1C {
-    u8 opaque00[0x18];
-    SdfVec4 *vector;
-} SdfResourceVectorView1C;
-
 /* The extended record keeps its unknown 0x2C-byte prefix opaque. */
 typedef struct SdfResourceVectorRecord30 {
     u8 opaque00[0x2C];
@@ -44,8 +32,6 @@ typedef struct SdfResourceVectorRecord30 {
 } SdfResourceVectorRecord30;
 
 typedef char SdfResourceVectorRecord1CSizeCheck[(sizeof(SdfResourceVectorRecord1C) == 0x1C) ? 1 : -1];
-typedef char SdfResourceVectorView1CSizeCheck[(sizeof(SdfResourceVectorView1C) == 0x1C) ? 1 : -1];
-typedef char SdfResourceVectorView1CVectorOffsetCheck[((u32)&((SdfResourceVectorView1C *)0)->vector == 0x18) ? 1 : -1];
 typedef char SdfResourceVectorRecord30SizeCheck[(sizeof(SdfResourceVectorRecord30) == 0x30) ? 1 : -1];
 typedef char SdfResourceVectorRecord30VectorOffsetCheck[((u32)&((SdfResourceVectorRecord30 *)0)->vector == 0x2C) ? 1 : -1];
 
@@ -401,8 +387,8 @@ MnuCallbackListPair *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *sour
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
         *copy = *source;
         vector = (SdfVec4 *)(copy + 1);
-        ((SdfResourceVectorView1C *)copy)->vector = vector;
-        *vector = *((SdfResourceVectorView1C *)source)->vector;
+        ((SdfSpriteVectorRecord *)copy)->vector = vector;
+        *vector = *((SdfSpriteVectorRecord *)source)->vector;
         dds3AppendFirstResourceListValue(owner, (u32)copy);
         source++;
         count--;
