@@ -2705,8 +2705,8 @@ typedef struct BattleDebugWindow {
     s32 y;
 } BattleDebugWindow;
 
-extern BattleDebugSelector D_00361A38;
-extern BattleDebugWindow D_00361D68;
+extern BattleDebugSelector btlDebugEncounterIndexSelectorView;
+extern BattleDebugWindow btlDebugEncounterWindowView;
 extern u8 D_003BBB0F;
 extern u32 D_003BBB14, D_003BBB18;
 extern u16 D_003BBB1C, D_003BBB1E, D_003BBB20;
@@ -2792,14 +2792,14 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_003BBB0F ^= 1;
     }
     if (D_003BBB0F != 0) {
-        D_00361A38.title = D_003BBB30;
-        D_00361A38.index = &D_003BBB14;
+        btlDebugEncounterIndexSelectorView.title = D_003BBB30;
+        btlDebugEncounterIndexSelectorView.index = &D_003BBB14;
     } else {
-        D_00361A38.title = D_003BBB2C;
-        D_00361A38.index = &D_003BBB18;
+        btlDebugEncounterIndexSelectorView.title = D_003BBB2C;
+        btlDebugEncounterIndexSelectorView.index = &D_003BBB18;
     }
     {
-        BattleDebugWindow *window = &D_00361D68;
+        BattleDebugWindow *window = &btlDebugEncounterWindowView;
         D_003BBB28 = state->unk_1FC;
         D_003BBB24 = state->battleFlags;
         btlDebugMenuSetupNoOp(window);
@@ -2814,8 +2814,8 @@ s32 btlUpdateDebugEncounterSelector(void) {
             for (i = 0; i < 8; i++) {
                 enemy = datBattleSceneRecords[D_003BBB18].unitModes[i];
                 if (enemy - 1u < 0x17F) {
-                    glyph = itfCreateConvertedTextGlyph((D_00361D68.x + 185) << 4,
-                        (D_00361D68.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                    glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
+                        (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         D_003BAA74 + enemy * 17, NULL);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
                     frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -2823,7 +2823,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
             }
         }
     } else {
-        btlBossDebugPrintfN(D_00361D68.x + 185, D_00361D68.y + 4, 0,
+        btlBossDebugPrintfN(btlDebugEncounterWindowView.x + 185, btlDebugEncounterWindowView.y + 4, 0,
             D_003BBB50, datGameState->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_003BBB14));
     }
     if (sdfPadButtonStates[1] < 0) {
@@ -2861,9 +2861,9 @@ extern u8 D_003BBB10;
 
 extern u8 D_003BBB58;
 
-extern DatPartyRecord D_00361DA0[5];
+extern DatPartyRecord btlDebugPartyPresets[5];
 
-extern s32 D_003625D8[5][24];
+extern s32 btlDebugPartyEffectDataOverrides[5][24];
 
 /* Apply the debug party preset/overrides, refreshed HP/MP and inventory flags. */
 void btlApplyDebugEncounterPartySelection(void) {
@@ -2875,10 +2875,10 @@ void btlApplyDebugEncounterPartySelection(void) {
         datGameState->partyCount = 5;
         for (i = 0; i < datGameState->partyCount; i++) {
             if (D_003BBB58 != 0) {
-                memcpy(&datGameState->party[i], &D_00361DA0[i],
+                memcpy(&datGameState->party[i], &btlDebugPartyPresets[i],
                        sizeof(DatPartyRecord));
-                for (n = 0; D_003625D8[i][n] >= 0; n++) {
-                    datGameState->party[i].effectData[n] = D_003625D8[i][n];
+                for (n = 0; btlDebugPartyEffectDataOverrides[i][n] >= 0; n++) {
+                    datGameState->party[i].effectData[n] = btlDebugPartyEffectDataOverrides[i][n];
                 }
                 for (; n < 24; n++) {
                     datGameState->party[i].effectData[n] = 0;
