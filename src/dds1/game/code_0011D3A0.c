@@ -635,7 +635,7 @@ static inline char *fldNumberGlyphText(s32 index) {
     return table + index * 4;
 }
 
-void func_0011E6C0(s32 x, s32 y, s32 value) {
+void fldDrawPercentValue(s32 x, s32 y, s32 value) {
     char text[32];
     s32 digit;
 
