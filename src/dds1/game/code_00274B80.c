@@ -236,7 +236,7 @@ extern s32 D_003BAA70;
 extern void mnuDestroyWindowContainer(u32);
 
 extern u8 mnuCampPartySelectionReturnPopupEntry[];
-extern struct MenuPanelState *mnuCreatePanelState(s32, s32);
+extern struct MenuPanelState *mnuCreatePanelState(s32 width, s32 height);
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuGetIndexedNonzeroEffect(s32);
