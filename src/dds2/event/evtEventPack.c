@@ -242,7 +242,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
 
     if (state->pendingRequest != NULL) {
         if (fileIsRequestReadyInCurrentMode(state->pendingRequest) != 0) {
-            state->resourceAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)state->pendingRequest);
+            state->resourceAllocation = fileGetResourceHandle((struct FileRequest *)state->pendingRequest);
             filePollEntryCleanup(state->pendingRequest);
             state->pendingRequest = NULL;
             header = (EvtPackHeader *)sdfResourceRetainAddress(state->resourceAllocation);
