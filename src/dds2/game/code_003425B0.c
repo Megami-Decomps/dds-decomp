@@ -120,7 +120,7 @@ extern s32 sceIpuSync(s32, s32);
 
 extern s32 DIntr(void);
 
-extern void sdfDispatchNextStreamNode(s32);
+extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
 
