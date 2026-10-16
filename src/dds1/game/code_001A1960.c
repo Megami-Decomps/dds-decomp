@@ -743,7 +743,7 @@ u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 un
         mask = -1;
         break;
     }
-    if (battle->unk_1FC & 0x800) {
+    if (battle->unk_1FC & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         mode = 3;
         flags &= ~0xB;
         mask = 0;

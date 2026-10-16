@@ -1125,7 +1125,7 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
-    if (*(u32 *)((u8 *)btlGetRuntime() + 0x220) & 0x800) {
+    if (*(u32 *)((u8 *)btlGetRuntime() + 0x220) & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
         return 0;
     }
     if (commandId <= 0) {
