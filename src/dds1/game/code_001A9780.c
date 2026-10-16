@@ -468,7 +468,142 @@ s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
     return result != 0 ? result : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AA130);
+/* Roster detail table entries are 0x14 bytes; the leading halfword is the ranking value. */
+typedef struct {s16 base; u8 data[0x12];} BattleRosterDetail;
+void func_001AA130(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third)
+{
+  BtlUnit *sources[3];
+  u32 i;
+  u32 n;
+  u32 count;
+  BtlUnit *src;
+  s32 currentScore;
+  s32 incomingScore;
+  sources[0] = first;
+  sources[1] = second;
+  sources[2] = third;
+  memset(dst, 0, sizeof(BtlUnit));
+  dst->status.flags = (first->status.flags & 0x600) | 1;
+  if ((&dst->partyRecord) != (&first->partyRecord))
+  {
+    memcpy(&dst->partyRecord, &first->partyRecord, sizeof(DatPartyRecord));
+  }
+  dst->partyRecord.level = 0;
+  dst->partyRecord.menuValue = 0xA1;
+  dst->partyRecord.hp = 0;
+  dst->partyRecord.mp = 0;
+  dst->partyRecord.maxHp = 0;
+  dst->partyRecord.maxMp = 0;
+  for (i = 0; i < 5; i++)
+  {
+    dst->partyRecord.baseStats[i] = 0;
+  }
+
+  dst->partyRecord.status = 0;
+  btlClearAllActorEntrySlots(dst);
+  for (i = 0; i < 7; i++)
+  {
+    if (dst->entrySlots[i].code < first->entrySlots[i].code)
+    {
+      dst->entrySlots[i].code = first->entrySlots[i].code;
+    }
+  }
+
+  btlClearActorEntrySlot(dst, 5);
+  btlClearActorEntrySlot(dst, 6);
+  count = 0;
+  for (n = 0; n < 3; n++)
+  {
+    src = sources[n];
+    if (src == ((void *) 0))
+    {
+      continue;
+    }
+    if (dst->partyRecord.level < src->partyRecord.level)
+    {
+      dst->partyRecord.level = src->partyRecord.level;
+    }
+    if (dst->partyRecord.hp < src->partyRecord.hp)
+    {
+      dst->partyRecord.hp = src->partyRecord.hp;
+    }
+    if (dst->partyRecord.mp < src->partyRecord.mp)
+    {
+      dst->partyRecord.mp = src->partyRecord.mp;
+    }
+    if (dst->partyRecord.maxHp < src->partyRecord.maxHp)
+    {
+      dst->partyRecord.maxHp = src->partyRecord.maxHp;
+    }
+    if (dst->partyRecord.maxMp < src->partyRecord.maxMp)
+    {
+      dst->partyRecord.maxMp = src->partyRecord.maxMp;
+    }
+    for (i = 0; i < 5; i++)
+    {
+      s8 stat = datGetStatWithStatusOverride(&src->partyRecord, i);
+      if (dst->partyRecord.baseStats[i] < stat)
+      {
+        dst->partyRecord.baseStats[i] = stat;
+      }
+    }
+
+    for (i = 0; i < 24; i++)
+    {
+      if (src->partyRecord.effectData[i] != 0)
+      {
+        if (src->partyRecord.effectData[i] < 0x260)
+        {
+          u16 effect = src->partyRecord.effectData[i];
+          if (datCommandSelectors[effect].kind != 4)
+          {
+            dst->partyRecord.effectData[count] = effect;
+            count++;
+          }
+        }
+      }
+    }
+
+    dst->partyRecord.status |= src->partyRecord.status & 0x10;
+    if (((btlUnitStatusPair(src) & 0x1200) == 0x200) && (src->partyRecord.menuValue != 0))
+    {
+      currentScore = ((BattleRosterDetail *) datRosterDetails)[dst->partyRecord.unitId].base;
+      incomingScore = ((BattleRosterDetail *) datRosterDetails)[src->partyRecord.unitId].base;
+      if (currentScore < incomingScore)
+      {
+        dst->partyRecord.unitId = src->partyRecord.unitId;
+      }
+      if (dst->status.flags & 0x1000)
+      {
+        dst->status.flags &= ~0x1000;
+        dst->partyRecord.menuValue = src->partyRecord.menuValue;
+      }
+      else
+      {
+        currentScore = datItemSkillRecords[dst->partyRecord.menuValue].commandIndex;
+        incomingScore = datItemSkillRecords[src->partyRecord.menuValue].commandIndex;
+        if (datCommandRecords[currentScore].hpPower < datCommandRecords[incomingScore].hpPower)
+        {
+          dst->partyRecord.menuValue = src->partyRecord.menuValue;
+        }
+      }
+    }
+  }
+
+  if (dst->partyRecord.maxHp < dst->partyRecord.hp)
+  {
+    dst->partyRecord.hp = dst->partyRecord.maxHp;
+  }
+  if (dst->partyRecord.maxMp < dst->partyRecord.mp)
+  {
+    dst->partyRecord.mp = dst->partyRecord.maxMp;
+  }
+  for (n = count; n < 24; n++)
+  {
+    dst->partyRecord.effectData[n] = 0;
+  }
+
+}
 
 typedef struct BattleStartVoiceRow {
     s32 flagId;       /* negative, or a model flag that must be set */
