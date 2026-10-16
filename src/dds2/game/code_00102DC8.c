@@ -69,7 +69,7 @@ extern void kwlnPadStartMotor(u32, u8, s32);
 #include "sdf_packet_alloc.h"
 
 
-extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
+extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
 
 extern u32 kwlnTextureGetPageIndex(void);
 
