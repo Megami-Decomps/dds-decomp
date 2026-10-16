@@ -406,8 +406,8 @@ typedef struct GridColorTargetTable {
 } GridColorTargetTable;
 
 /* Blend each saved corner color toward the table's target color. */
-s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
-    GridColorTargetTable *table = (GridColorTargetTable *)owner->source->status;
+s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+    GridColorTargetTable *table = (GridColorTargetTable *)timedState->source->status;
     u32 *destColor = out->geometry.cornerColors;
     u32 *sourceColor = rectangle->savedColors;
     s32 i;
@@ -420,17 +420,17 @@ s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTi
         s32 red = *(u8 *)sourceColor;
         s32 alphaTarget = table->alpha;
 
-        blue = (blue + (table->blue - blue) * owner->value / 0x10000) & 0xFF;
-        green = (green + (table->green - green) * owner->value / 0x10000) & 0xFF;
-        red = (red + (table->red - red) * owner->value / 0x10000) & 0xFF;
-        *destColor = ((alpha + (alphaTarget - alpha) * owner->value / 0x10000) << 24) | (blue << 16)
+        blue = (blue + (table->blue - blue) * timedState->value / 0x10000) & 0xFF;
+        green = (green + (table->green - green) * timedState->value / 0x10000) & 0xFF;
+        red = (red + (table->red - red) * timedState->value / 0x10000) & 0xFF;
+        *destColor = ((alpha + (alphaTarget - alpha) * timedState->value / 0x10000) << 24) | (blue << 16)
             | (green << 8) | red;
     }
     return 0x10000 / table->divisor;
 }
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
@@ -446,12 +446,12 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     s32 fractionalMask;
     s32 i;
 
-    table = (GridAngleTable *)owner->source->status;
+    table = (GridAngleTable *)timedState->source->status;
     colorMask = -0x100;
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
     deltas[1] = (((table->mirrored << 12) / 640) * rectangle->sourceHeight) / rectangle->sourceWidth;
-    angle = owner->value;
+    angle = timedState->value;
     previous[0] = out->geometry.bounds[0];
     previous[1] = out->geometry.bounds[1];
     scaledWidth = deltas[0] * angle;
@@ -478,7 +478,7 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     for (; i >= 0; i--, sourceColor++, destColor++) {
         u32 color = *sourceColor;
         s32 alpha = *(u8 *)sourceColor;
-        s32 colorProduct = alpha * owner->value;
+        s32 colorProduct = alpha * timedState->value;
         s32 negative = 0;
 
         if (colorProduct < 0) {
