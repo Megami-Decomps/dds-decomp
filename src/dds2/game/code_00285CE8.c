@@ -52,13 +52,18 @@ typedef struct MtrGrid {
     s16 unk16;
     s16 remainingDelay;
     s16 delayRange;
-    s16 unk1C;
-    s16 unk1E;
+    s16 cellWidth;
+    s16 cellHeight;
     s16 depthStep;
     u8 initialDepth;
     s8 axisSwap;
     void (*draw)(s32, s32, s32, s32, struct MtrGrid *, s32, s32);
 } MtrGrid;
+
+typedef char MtrGrid_cellWidth_offset_must_be_0x1C[
+    ((u32)&((MtrGrid *)0)->cellWidth == 0x1C) ? 1 : -1];
+typedef char MtrGrid_cellHeight_offset_must_be_0x1E[
+    ((u32)&((MtrGrid *)0)->cellHeight == 0x1E) ? 1 : -1];
 
 extern void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode);
 extern void mtrAdvanceGridCellPropagation(MtrGrid *grid);
@@ -117,11 +122,11 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
                 direction -= 6;
             }
             if (grid->axisSwap == 0) {
-                cell->x = source->x + (s8)directionTable.offsets[direction][0] * grid->unk1C;
-                cell->y = source->y + (s8)directionTable.offsets[direction][1] * grid->unk1E;
+                cell->x = source->x + (s8)directionTable.offsets[direction][0] * grid->cellWidth;
+                cell->y = source->y + (s8)directionTable.offsets[direction][1] * grid->cellHeight;
             } else {
-                cell->x = source->x + (s8)directionTable.offsets[direction][1] * grid->unk1C;
-                cell->y = source->y + (s8)directionTable.offsets[direction][0] * grid->unk1E;
+                cell->x = source->x + (s8)directionTable.offsets[direction][1] * grid->cellWidth;
+                cell->y = source->y + (s8)directionTable.offsets[direction][0] * grid->cellHeight;
             }
             cell->remainingDepth = source->remainingDepth - 1;
             cell->direction = direction;
@@ -130,9 +135,9 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
         } else {
             s32 countdown;
             f32 random = effMiscRandUnitFloat(NULL);
-            cell->x = grid->originX + (s32)((f32)(grid->width / grid->unk1C) * random) * grid->unk1C;
+            cell->x = grid->originX + (s32)((f32)(grid->width / grid->cellWidth) * random) * grid->cellWidth;
             random = effMiscRandUnitFloat(NULL);
-            cell->y = grid->originY + (s32)((f32)(grid->height / grid->unk1E) * random) * grid->unk1E;
+            cell->y = grid->originY + (s32)((f32)(grid->height / grid->cellHeight) * random) * grid->cellHeight;
             cell->remainingDepth = grid->initialDepth;
             cell->direction = 0;
             countdown = (u16)grid->delayRange;
@@ -193,7 +198,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
 }
 
 void mnuDrawCellScaledGrid(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
-    uiDrawUniformColorRect(x << 4, y << 3, z, grid->unk1C << 4, grid->unk1E << 3, alpha | 0x80808000, context);
+    uiDrawUniformColorRect(x << 4, y << 3, z, grid->cellWidth << 4, grid->cellHeight << 3, alpha | 0x80808000, context);
 }
 
 void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
