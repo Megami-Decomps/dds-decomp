@@ -2305,6 +2305,9 @@ s32 mnuDrawMantraInfoPanel(s32 unused, MantraDrawItem *item) {
         break;
     case 3:
     case 5:
+        /* The one-pass block adds one loop note (cc1probe -da dumps: 67 vs 66);
+         * with it the 21 - timer subtraction issues one slot earlier, as in
+         * retail. */
         do {
             remaining = 21 - pulse->timer;
             clock = remaining;
