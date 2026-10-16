@@ -1409,17 +1409,17 @@ u32 evtOpBuiltin359NoOp(void) {
 u32 evtUnitCheckModelCut(void) {
     s32 worldObjectKey;
     void *unit;
-    u32 param1;
+    u32 entryId;
 
     worldObjectKey = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, worldObjectKey);
     if (unit != NULL) {
-        param1 = scrReadIntParameter(1);
-        if (param1 >= 3U) {
-            evtPrintDeveloperConsoleMessage(D_003AC588, param1);
+        entryId = scrReadIntParameter(1);
+        if (entryId >= 3U) {
+            evtPrintDeveloperConsoleMessage(D_003AC588, entryId);
             return 1;
         } else {
-            effObjReplaceActiveEventNode(unit, param1);
+            effObjReplaceActiveEventNode(unit, entryId);
         }
     }
     return 1;
@@ -1443,13 +1443,13 @@ u32 evtOpSetModelCutAndScale(void) {
 
     unit = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (unit != NULL) {
-        s32 mode = scrReadIntParameter(1);
+        s32 entryId = scrReadIntParameter(1);
         s32 modelRecordIndex;
-        if ((u32)mode >= 3) {
-            evtPrintDeveloperConsoleMessage(D_003AC588, mode);
+        if ((u32)entryId >= 3) {
+            evtPrintDeveloperConsoleMessage(D_003AC588, entryId);
             return 1;
         }
-        effObjReplaceActiveEventNode(unit, mode);
+        effObjReplaceActiveEventNode(unit, entryId);
         modelRecordIndex = scrReadIntParameter(2);
         if (modelRecordIndex >= 0) {
             f32 value = evtComputeClampedModelScale(modelRecordIndex);
