@@ -4249,7 +4249,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 extern f32 fldSnapAngleToCompassPoint(f32);
 extern f32 fldSnapAngleToCompassOctant(f32);
 extern f32 fldSnapAngleToCardinalDirection(f32);
-extern s32 fldIsNearSpark(f32, f32, f32);
+extern s32 fldIsNearSpark(f32 x, f32 y, f32 z);
 extern void fldClassifyMovementAgainstZoneFaces(f32 *);
 extern void fldRestoreCameraModelColor(void);
 extern void fldClearCameraModelColor(void);
