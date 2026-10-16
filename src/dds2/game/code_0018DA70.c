@@ -101,7 +101,7 @@ struct SdfDmaNode;
 extern SdfPoolNode D_003803E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 extern u32 fldIsUpdateInhibited(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
@@ -305,7 +305,7 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
     }
 }
 
-extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 {
@@ -315,7 +315,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     void *tag;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], framePacket, 1);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, framePacket, 1);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -342,7 +342,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     sdfAppendPacket(list, (u32)blendPacket);
 
     tag = (void *)sdfAllocPacketAligned(0x20);
-    sdfAppendDmaPrimary(list, (u32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], tag);
+    sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, tag);
 
     samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
     samplingPacket[0] = 2;
@@ -397,7 +397,7 @@ void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixe
 void effDrawBlurListWithFramePacket(void *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
 
-    sdfBuildFrameRegisterReference((s32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, packet, 1);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
     D_003803E8.append(&D_003803E8, list);
 }
