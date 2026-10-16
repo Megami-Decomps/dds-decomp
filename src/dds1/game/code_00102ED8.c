@@ -1659,8 +1659,8 @@ void kwlnDrawBackgroundFadeBands(void) {
     evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
 }
 
-void sdfSetViewFieldOfView(f32 value) {
-    D_003245EC[0] = value;
+void sdfSetViewFieldOfView(f32 fieldOfView) {
+    D_003245EC[0] = fieldOfView;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E170);
