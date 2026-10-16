@@ -2239,13 +2239,13 @@ u32 btlCompleteTaskImmediately(void) {
     return 1;
 }
 
-void *btlCreateImmediateCompletionTask(void) {
-    u8 *task = btlAllocTask(0);
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(void **)(task + 0x4C) = btlCompleteTaskImmediately;
-    *(u16 *)(task + 0x20) = 0x63;
-    *(u32 *)(task + 0x48) = 0;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
+BtlRuntimeTask *btlCreateImmediateCompletionTask(void) {
+    BtlRuntimeTask *task = btlAllocTask(0);
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->callback = btlCompleteTaskImmediately;
+    task->taskId = 0x63;
+    task->onStart = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     return task;
 }
 
