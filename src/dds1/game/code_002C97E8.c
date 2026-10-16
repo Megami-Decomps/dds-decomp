@@ -882,33 +882,33 @@ void sdfCallbackWorkOnRemove(s32 key, SdfTaskEntry *work) {
  * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
 s32 sdfTaskWorkStepEntry(TaskWork *work) {
     SdfListNode *node = work->currentNode;
-    SdfTaskEntry *entry;
+    SdfTaskEntry *taskEntry;
     u32 flags;
 
     if (node == NULL) {
         work->currentNode = work->list->head;
         return 0;
     }
-    entry = (SdfTaskEntry *)node->value;
-    flags = entry->flags;
+    taskEntry = (SdfTaskEntry *)node->value;
+    flags = taskEntry->flags;
     work->currentNode = node->next;
     switch (flags & SDF_TASK_ENTRY_STATE_MASK) {
     case SDF_TASK_ENTRY_PENDING_ACTIVATION:
         /* DDS1 activates this pending mode in the update pass and falls through. */
-        flags = entry->flags =
+        flags = taskEntry->flags =
             (flags & ~SDF_TASK_ENTRY_PENDING_ACTIVATION) | SDF_TASK_ENTRY_ACTIVE;
     case SDF_TASK_ENTRY_ACTIVE:
         if (flags & SDF_TASK_ENTRY_INITIALIZE_ONCE) {
-            entry->initResult = entry->init();
-            flags = entry->flags &= ~SDF_TASK_ENTRY_INITIALIZE_ONCE;
+            taskEntry->initResult = taskEntry->init();
+            flags = taskEntry->flags &= ~SDF_TASK_ENTRY_INITIALIZE_ONCE;
         }
         if (flags & SDF_TASK_ENTRY_REMOVE_PENDING) {
-            sdfRemoveTaskItem(work, entry->key);
+            sdfRemoveTaskItem(work, taskEntry->key);
             return 1;
         }
         if (flags & SDF_TASK_ENTRY_UPDATE_ENABLED) {
-            if (entry->update(entry->key, entry->initResult) == -1) {
-                entry->flags |= SDF_TASK_ENTRY_REMOVE_PENDING;
+            if (taskEntry->update(taskEntry->key, taskEntry->initResult) == -1) {
+                taskEntry->flags |= SDF_TASK_ENTRY_REMOVE_PENDING;
             }
         }
         break;
