@@ -341,6 +341,6 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
 /* Per-glyph texture byte, one 12-byte entry per glyph. */
 
 
-u8 mnuGetIndexedFadeTexture(s32 index) {
-    return D_0040B088[index].glyph;
+u8 mnuGetIndexedFadeTexture(s32 glyphIndex) {
+    return D_0040B088[glyphIndex].glyph;
 }
