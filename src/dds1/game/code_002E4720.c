@@ -616,7 +616,8 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
     u8 *destination = buffer;
     s32 bytes;
     s32 transferBytes;
-    s32 t;
+    s32 sectorCount;
+    s32 trailingBytes;
 
     if (available <= 0) {
         return 0;
@@ -643,17 +644,17 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
     if (bytes > 0) {
         transferBytes = bytes;
         if (((u32)destination & SDF_DEV_DISC_ALIGNMENT_MASK) == 0) {
-            t = transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT;
-            t = transferBytes - t * SDF_DEV_DISC_SECTOR_BYTES;
-            transferBytes -= t;
+            sectorCount = transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT;
+            trailingBytes = transferBytes - sectorCount * SDF_DEV_DISC_SECTOR_BYTES;
+            transferBytes -= trailingBytes;
             if (transferBytes > 0) {
                 sdfDevReadDiscUntilComplete(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, (s32)destination);
             }
-            if (t > 0) {
+            if (trailingBytes > 0) {
                 sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
-                memcpy(destination + transferBytes, sdfDevReadSectorBuffer, t);
-                sdfDevReadSectorCursor = sdfDevReadSectorBuffer + t;
-                sdfDevReadSectorBytesAvailable = SDF_DEV_DISC_SECTOR_BYTES - t;
+                memcpy(destination + transferBytes, sdfDevReadSectorBuffer, trailingBytes);
+                sdfDevReadSectorCursor = sdfDevReadSectorBuffer + trailingBytes;
+                sdfDevReadSectorBytesAvailable = SDF_DEV_DISC_SECTOR_BYTES - trailingBytes;
             }
         } else {
             while (transferBytes >= SDF_DEV_DISC_SECTOR_BYTES) {
@@ -782,19 +783,19 @@ extern char sdfDiscPathPrefix[];
 
 /* Convert a relative disc path to the drive's uppercase backslash form with ;1 suffix. */
 void sdfDevMakeDiscPath(char *dst, char *src) {
-    s32 c;
+    s32 character;
     memcpy(dst, sdfDiscPathPrefix, 8);
     dst += 7;
-    c = *src++;
-    while (c != 0) {
-        if (c == '/') {
-            c = '\\';
+    character = *src++;
+    while (character != 0) {
+        if (character == '/') {
+            character = '\\';
         }
-        if (c >= 'a' && c <= 'z') {
-            c -= 0x20;
+        if (character >= 'a' && character <= 'z') {
+            character -= 0x20;
         }
-        *dst++ = c;
-        c = *src++;
+        *dst++ = character;
+        character = *src++;
     }
     dst[0] = ';';
     dst[1] = '1';
