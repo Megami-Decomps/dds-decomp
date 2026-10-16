@@ -129,8 +129,8 @@ struct SdfMemBlock;
 typedef struct {
     EffWorldNode *firstNode;
     EffWorldNode *lastNode;
-    EffWorldNode *primaryObject;   /* 0x08: selected primary world node */
-    EffWorldNode *secondaryObject; /* 0x0C: selected secondary world node */
+    void *primaryObject;   /* 0x08: selected world node */
+    void *secondaryObject; /* 0x0C: selected world node */
     struct SdfMemBlock *entryAllocation; /* 0x10: descriptor, distinct from its data */
     WorldValueEntry *entries;           /* 0x14: retained allocation address */
     u16 entryCapacity;                  /* 0x18: initial entry count */
