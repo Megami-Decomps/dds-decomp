@@ -440,7 +440,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
     s32 frame;
     s32 nodeIndex;
     u32 modelColor;
-    u32 nodeMask;
+    u32 modelDrawFlags;
     s32 nodeFlags;
     void *lighting;
     s32 appended;
@@ -481,7 +481,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
     }
     globalByte = D_00438A34;
     modelColor = model->color;
-    nodeMask = model->drawFlags;
+    modelDrawFlags = model->drawFlags;
     if (model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) {
         firstScalar = model->scalarOverrideFirst;
         secondScalar = model->scalarOverrideSecond;
@@ -525,7 +525,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         if (node->flags & SDF_DRAW_NODE_FLAG_USE_NODE_COLOR) {
             color = node->color;
         }
-        nodeFlags = nodeMask & (u16)node->unk16;
+        nodeFlags = modelDrawFlags & (u16)node->unk16;
         for (variant = 0; variant != 4; variant++) {
             variantLists[variant] = NULL;
         }
