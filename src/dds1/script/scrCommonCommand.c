@@ -686,10 +686,10 @@ s32 scrCmdBeginRectangleBlurDeactivation(void)
 
 s32 scrCmdSetIndexedDrawMode(void)
 {
-    s32 p0;
+    s32 blendMode;
     s32 blendControl;
-    p0 = scrReadIntParameter(0);
-    switch (p0)
+    blendMode = scrReadIntParameter(0);
+    switch (blendMode)
     {
     case 1:
         blendControl = 0x48;
@@ -747,10 +747,10 @@ s32 scrCmdBeginColorRectangleDeactivation(void)
 
 s32 scrCmdSetTexturedSquareDrawMode(void)
 {
-    s32 p0;
+    s32 blendMode;
     s32 blendControl;
-    p0 = scrReadIntParameter(0);
-    switch (p0)
+    blendMode = scrReadIntParameter(0);
+    switch (blendMode)
     {
     case 1:
         blendControl = 0x48;
