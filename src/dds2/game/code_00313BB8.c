@@ -1091,11 +1091,11 @@ s32 mnuIsResourceCategoryAvailable(s32 requirementId) {
 }
 
 /* Test the shared mantra-category enable table; out-of-range indices are disabled. */
-s32 prfIsMantraCategoryEnabled(u32 index) {
-    if (index >= 17) {
+s32 prfIsMantraCategoryEnabled(u32 categoryIndex) {
+    if (categoryIndex >= 17) {
         return 0;
     }
-    return D_0045C828[index] != 0;
+    return D_0045C828[categoryIndex] != 0;
 }
 
 /* The evaluator masks its incoming requirement ID to the lower sixteen bits. */
