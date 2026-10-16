@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+typedef u8 SdfDevOperationCode;
+typedef s8 SdfDevStateCode;
+
 /* Complete 0x40-byte owner allocated by sdfDevAllocState. */
 typedef struct DevState {
     struct DevState *next; /* 0x00 */
@@ -11,8 +15,8 @@ typedef struct DevState {
     struct DevState *workerPrev; /* 0x0C */
     char *resolvedPath; /* 0x10 */
     u8 workerIndex; /* 0x14 */
-    u8 operation; /* 0x15 */
-    s8 state; /* 0x16 */
+    SdfDevOperationCode operation; /* 0x15 */
+    SdfDevStateCode state; /* 0x16 */
     u8 pad17; /* 0x17 */
     s32 operationArg; /* 0x18 */
     s32 requestExtra; /* 0x1C */
@@ -27,6 +31,14 @@ typedef struct DevState {
 } DevState;
 
 typedef char DevState_size_must_be_0x40[(sizeof(DevState) == 0x40) ? 1 : -1];
+typedef char DevState_operation_size_must_be_1[
+    (sizeof(((DevState *)0)->operation) == 1) ? 1 : -1];
+typedef char DevState_operation_offset_must_be_0x15[
+    ((u32)&((DevState *)0)->operation == 0x15) ? 1 : -1];
+typedef char DevState_state_size_must_be_1[
+    (sizeof(((DevState *)0)->state) == 1) ? 1 : -1];
+typedef char DevState_state_offset_must_be_0x16[
+    ((u32)&((DevState *)0)->state == 0x16) ? 1 : -1];
 typedef char DevState_resolvedPath_offset_must_be_0x10[
     ((u32)&((DevState *)0)->resolvedPath == 0x10) ? 1 : -1];
 typedef char DevState_result_offset_must_be_0x2C[
@@ -44,6 +56,7 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 byteCount);
 s32 sdfDevQueueWrite(DevState *state, const void *data, s32 byteCount);
 s32 sdfDevQueueReleaseState(DevState *state);
 s32 sdfDevReactivate(DevState *state);
+s32 sdfDevQueueActiveOperation(DevState *request);
 void sdfDevQueueReadAndWait(DevState *state, void *buffer, s32 byteCount);
 u32 sdfDevQueueControlAndWait(DevState *state);
 void sdfDevWaitThenReleaseCommandState(DevState *state);

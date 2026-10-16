@@ -109,7 +109,6 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
                                         sdfMoviePacStreamReadCallback, owner, descriptor->source);
 }
 
-extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 extern void sdfSoundStopMoviePlayback(void);

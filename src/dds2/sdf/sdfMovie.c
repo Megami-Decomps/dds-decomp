@@ -8,7 +8,6 @@
 #include "sdf_dev_state.h"
 
 s32 sdfDevQueueControlRequest(DevState *state);
-s32 sdfDevQueueActiveOperation(DevState *state);
 s32 WaitSema(s32 semaphore);
 s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);

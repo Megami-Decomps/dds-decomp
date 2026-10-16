@@ -916,7 +916,7 @@ s32 sdfPathExists(char *path) {
 }
 
 void sdfDevWaitThenReleaseCommandState(DevState *state) {
-    sdfDevQueueActiveOperation();
+    sdfDevQueueActiveOperation(state);
     WaitSema(sdfDevReplySemaphore);
     sdfDevQueueReleaseState(state);
 }
@@ -1648,7 +1648,7 @@ s32 sdfDevReactivate(DevState *state) {
 
 /* Active state and close operation share an ID; retain the original byte assignment. */
 s32 sdfDevQueueActiveOperation(DevState *request) {
-    s8 requestState = request->state;
+    SdfDevStateCode requestState = request->state;
 
     if (requestState != SDF_DEV_STATE_ACTIVE) {
         return -1;
