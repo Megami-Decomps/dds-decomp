@@ -33,10 +33,11 @@ s32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #else
 u32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #endif
-/* Serialized source bytes are borrowed; callback output slots retain their word ABI. */
+/* Serialized source bytes are borrowed; async mapped-resource outputs hold typed pointers. */
 struct EffMappedResource *effCreateMappedResource(const u8 *source);
 struct EffMappedResource *effLoadMappedResource(const char *base, const char *name);
-void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource);
+void effRequestMappedResource(const char *base, const char *name,
+                              struct EffMappedResource **outMappedResource);
 
 
 #ifdef VERSION_DDS2

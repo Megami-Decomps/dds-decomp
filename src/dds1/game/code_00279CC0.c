@@ -575,7 +575,7 @@ void mnuRequestBaseAssets(MenuAssets *assets) {
                              (u32 *)&assets->sprites[0]);
     effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[0], 0,
                              (u32 *)&assets->sprites[4]);
-    effRequestMappedResource(D_003B2348, mnuCampBackdropAnimationResourceNames[0], (u32 *)&assets->material);
+    effRequestMappedResource(D_003B2348, mnuCampBackdropAnimationResourceNames[0], &assets->material);
 }
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
