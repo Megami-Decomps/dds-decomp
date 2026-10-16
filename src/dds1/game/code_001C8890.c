@@ -929,7 +929,7 @@ void btlEnterAttackActionState(void) {
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
 extern s32 datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern void *btlCreateTargetedCommandSoundTask(s32, s32, u32);
 extern u8 *btlAllocateApproachTargetTask(u8 *, s32, f32);
 extern s32 btlIsBattleRecordEligible(u8 *, u8 *, s32, s32);
