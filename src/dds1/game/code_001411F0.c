@@ -1113,7 +1113,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
 extern s32 fldTestStageExplorationCell(s32, f32, f32);
-extern s32 fldGetFloorFlag(s32, s32, s32);
+extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
 extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
