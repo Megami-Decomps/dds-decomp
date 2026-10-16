@@ -3,6 +3,7 @@
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fld_area_work.h"
+#include "fld_npc_palette.h"
 #include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -3667,28 +3668,6 @@ void fldFireRoomEffects(void) {
 
 
 
-typedef struct FldNpcPaletteEntry {
-    u8 colorA[3];
-    u8 colorB[3];
-    u8 textPair;
-    u8 phase;
-} FldNpcPaletteEntry;
-
-typedef char FldNpcPaletteEntry_size_check[
-    (sizeof(FldNpcPaletteEntry) == 8 &&
-     (u32)&((FldNpcPaletteEntry *)0)->colorA == 0 &&
-     (u32)&((FldNpcPaletteEntry *)0)->colorB == 3 &&
-     (u32)&((FldNpcPaletteEntry *)0)->textPair == 6 &&
-     (u32)&((FldNpcPaletteEntry *)0)->phase == 7) ? 1 : -1];
-
-typedef struct FldNpcPalette {
-    FldNpcPaletteEntry entries[0x40];
-} FldNpcPalette;
-
-typedef char FldNpcPalette_size_check[
-    (sizeof(FldNpcPalette) == 0x200 &&
-     (u32)&((FldNpcPalette *)0)->entries == 0) ? 1 : -1];
-
 extern FldNpcPalette D_0044FD90;
 
 void fldLoadNpcPalette(s32 field) {
@@ -3713,7 +3692,7 @@ void fldLoadNpcPalette(s32 field) {
     }
 }
 
-void fldSetNpcPalette(FldNpcPalette *src) {
+void fldSetNpcPalette(const FldNpcPalette *src) {
     D_0044FD90 = *src;
 }
 

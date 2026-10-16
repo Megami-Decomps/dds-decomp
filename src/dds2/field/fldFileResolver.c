@@ -126,6 +126,7 @@ EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *resourceEntry
 
 #include "eff_light.h"
 #include "fld_area_work.h"
+#include "fld_npc_palette.h"
 #include "fld_collision_geometry.h"
 #include "fld_spawn_collision.h"
 
@@ -1430,9 +1431,6 @@ u8 fldHasAreaResourceNameChanged(void) {
 
 extern void fldCopyInfoTable(FldInfTable *);
 
-struct FldNpcPalette;
-extern void fldSetNpcPalette(struct FldNpcPalette *source);
-
 extern void fldCopyActorWaypointTable(FldWaypointBlock *source);
 
 
@@ -1459,7 +1457,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
-                fldSetNpcPalette((struct FldNpcPalette *)work->dataCursor);
+                fldSetNpcPalette((const FldNpcPalette *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
