@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_work.h"
 #include "eff_blur.h"
 #include "sdf_packet_header.h"
 #include "kwln_draw_buffer.h"
@@ -54,15 +55,6 @@ extern s8 D_00436408;
 extern u32 D_0043640C;
 extern u32 D_00436410;
 
-typedef struct BillWork {
-    u8 pad00[0x64];
-    u8 currentValue;
-    u8 pad65[0x4B];
-    u16 pendingCount;
-    u16 queuedCount;
-    u8 padB4[0xC];
-    u8 stagedValue;
-} BillWork;
 
 
 
