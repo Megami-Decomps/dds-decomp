@@ -84,7 +84,7 @@ typedef enum MdlViewerRecordKind {
 typedef struct MdlViewState {
     s32 unk00;
     s32 viewerTask;
-    s8 unk08;
+    s8 exitCleanupStarted; /* 0x08: one-shot guard for viewer task/resource teardown. */
     s8 unk09;
     s8 taskPhase; /* 0x0A: one-based index into D_00367A40 */
     s8 unk0B;
@@ -138,6 +138,8 @@ typedef char MdlViewState_selectedResourceId_offset_check[
 typedef char MdlViewState_selectedResourceGroup_offset_check[
     ((u32)&((MdlViewState *)0)->selectedResourceGroup == 0x1C) ? 1 : -1];
 typedef char MdlViewState_size_check[sizeof(MdlViewState) == 0xD0 ? 1 : -1];
+typedef char MdlViewState_exitCleanupStarted_offset_check[
+    ((u32)&((MdlViewState *)0)->exitCleanupStarted == 0x08) ? 1 : -1];
 typedef char MdlViewState_workspaceSetupPhase_offset_check[
     ((u32)&((MdlViewState *)0)->workspaceSetupPhase == 0x48) ? 1 : -1];
 typedef char MdlViewState_assetDisplayMode_offset_check[
@@ -2503,8 +2505,8 @@ u32 mdlRunViewerEffectEditorTask(void) {
 }
 
 s32 mdlRequestViewerExitOnce(void) {
-    if (mdlViewerState.unk08 == 0) {
-        mdlViewerState.unk08 = 1;
+    if (mdlViewerState.exitCleanupStarted == 0) {
+        mdlViewerState.exitCleanupStarted = 1;
         mdlCleanupViewerTasksAndResources();
         dds3AdminSetControlFlag();
     }
@@ -2722,7 +2724,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = 2;
     mdlViewerState.resourceId = 0;
     mdlViewerState.selectedResourceId = 0;
-    mdlViewerState.unk08 = 0;
+    mdlViewerState.exitCleanupStarted = 0;
     mdlViewerState.unk09 = 0;
     mdlViewerState.selectionCursor = 0;
     mdlViewerState.entryHeight = 0;
