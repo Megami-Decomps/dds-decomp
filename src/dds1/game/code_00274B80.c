@@ -255,8 +255,8 @@ void mnuSelectPartySelectionVisuals(u32 context) {
 void mnuNoOpPartySelectionCleanup(s32 context) {
 }
 
-s32 mnuIsFinalItemIndex(s32 index, s32 item) {
-    if (index < (((MenuItemCount *)item)->count - 1)) {
+s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 item) {
+    if (nodeIndex < (((MenuItemCount *)item)->count - 1)) {
         return 0;
     }
     return 1;
