@@ -1208,7 +1208,87 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     effBlurDrawFramebufferQuad(out);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002DF6C8);
+extern f32 atan2f(f32, f32);
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewMatrix[4][4];
+extern f32 sdfProjectionMatrix[4][4];
+extern f32 D_004582A0[4];
+void func_002DF6C8(EffKindWork *work) {
+    EffRateConfig *config = (EffRateConfig *)work->payload;
+    s32 duration = config->duration;
+    s32 frame = 0;
+    EffBlurQuad *out = &config->out;
+    f32 delta[4];
+    f32 ahead[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+    f32 stretch;
+    f32 length;
+    f32 zero;
+
+    if (duration != 0) {
+        frame = work->frame;
+    }
+    if (duration < frame) {
+        return;
+    }
+    out->position[0] = 0;
+    out->position[1] = 0;
+    out->corners[0][0] = 0;
+    out->corners[0][1] = 0;
+    out->corners[1][0] = 0x200;
+    out->corners[1][1] = 0x1C0;
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
+    color1[0] = work->color;
+    {
+        s32 *src = color1;
+
+        unit = 0x3C000000;
+        EE_MMI_RGBA_UNPACK(src, unit);
+    }
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed);
+    blended[0] = packed;
+    out->color = blended[0];
+    stretch = effSampleScalarCurve(&config->blendB, frame, duration);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(100.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, ahead);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfPostmultiplyVuMatrixFromMemory(sdfProjectionMatrix);
+    VU0_LOAD_VF(vf10, ahead);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_004582A0);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_SUB(vf10, vf10, vf11);
+    do {
+        VU0_STORE_VF(vf10, delta);
+    } while (0);
+    zero = 0.0f;
+    length = fsqrtf(delta[0] * delta[0] + delta[1] * delta[1]);
+    if (delta[0] != zero || delta[1] != zero) {
+        out->angle = atan2f(delta[0], delta[1]) * 57.29577637f;
+    }
+    out->displacement = stretch * length * 10.0f + 1.0f;
+    PCP_COPY_VECTOR(D_004582A0, ahead);
+    out->blendControl = work->mode;
+    effBlurDrawFramebufferQuad(out);
+}
 
 /* Draw the color-only fade from the copied payload's curves.
  * Its output uses fixed rectangle bounds and the kind work's packed color and mode. */
