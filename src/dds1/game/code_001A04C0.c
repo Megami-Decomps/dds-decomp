@@ -673,7 +673,7 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
 
 extern EncBgRow *D_003BAA44;
 
-extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
+extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];
