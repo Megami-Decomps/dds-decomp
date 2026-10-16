@@ -1218,30 +1218,25 @@ void mnuFreeListValueCallback(u32 unused, u32 ptr) {
 }
 
 
-typedef struct MnuCallbackPair8 {
-    MnuCallbackList *first;
-    MnuCallbackList *second;
-} MnuCallbackPair8;
-
-typedef char MnuCallbackPair8_size_check[(sizeof(MnuCallbackPair8) == 8) ? 1 : -1];
-
 /* Create two callback lists; removing a value from the second list releases it. */
-u32 *mnuCreateCallbackPair(void) {
-    MnuCallbackPair8 *pair = (MnuCallbackPair8 *)sdfAllocHeapMemory(sizeof(*pair));
+MnuCallbackListPair *mnuCreateCallbackPair(void) {
+    MnuCallbackListPair *pair = (MnuCallbackListPair *)sdfAllocHeapMemory(sizeof(*pair));
 
     memset(pair, 0, sizeof(*pair));
     pair->first = mnuCreateCallbackNode(0);
     pair->second = mnuCreateCallbackNode(0);
     pair->second->onRemove = mnuFreeListValueCallback;
-    return (u32 *)pair;
+    return pair;
 }
 
 
 void mnuReleaseEffectPairAndNode(u32 node) {
-    if (node != 0) {
-        dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)*(u32 *)node);
-        dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)*(u32 *)(node + 4));
-        sdfFreeHeapMemory(node);
+    MnuCallbackListPair *pair = (MnuCallbackListPair *)node;
+
+    if (pair != NULL) {
+        dds3DestroyCallbackNodeAfterLastNotification(pair->first);
+        dds3DestroyCallbackNodeAfterLastNotification(pair->second);
+        sdfFreeHeapMemory(pair);
     }
 }
 
