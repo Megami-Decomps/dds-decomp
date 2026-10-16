@@ -433,9 +433,9 @@ extern char brsStatAssignmentPopupEntry[];
 extern char brsLevelChangePopupEntry[];
 
 /* Advance the selected party member, apply its gains, and choose the next popup. */
-s32 brsProcessNextPrimaryReward(KwlnTask *request) {
+s32 brsProcessNextPrimaryReward(KwlnTask *task) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     s32 *dispatchStatus;
     s32 *slots;
     DatPartyRecord *item;
@@ -445,7 +445,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, request);
+    result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, task);
     if (result != 0) {
         return result;
     }
@@ -464,7 +464,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);
             item = scene->selectedRewardRow->unit;
             if (mnuKindIsSelectable(item->unitId) != 0) {
-                mnuResetSelectionWidthsFromConfig(request);
+                mnuResetSelectionWidthsFromConfig(task);
                 if (scene->extentExhausted == 0) {
                     mnuSetPopupEntry(dispatchStatus, brsStatAssignmentPopupEntry);
                     return 0;

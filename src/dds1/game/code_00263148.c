@@ -271,9 +271,9 @@ extern void sndReleaseTrackHandle(u32);
 extern char brsStatAssignmentPopupEntry[];
 extern char brsLevelChangePopupEntry[];
 
-s32 brsProcessNextPrimaryReward(KwlnTask *request) {
+s32 brsProcessNextPrimaryReward(KwlnTask *task) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     s32 *dispatchStatus;
     s32 *slots;
 
@@ -282,7 +282,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, request);
+    result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, task);
     if (result != 0) {
         return result;
     }
@@ -301,7 +301,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);
 
             if (scene->selectedRewardRow->unit->unitId == 1) {
-                mnuInitializeItemSelectionExtent(request);
+                mnuInitializeItemSelectionExtent(task);
                 if (scene->extentExhausted == 0) {
                     mnuSetPopupEntry(dispatchStatus, brsStatAssignmentPopupEntry);
                     return 0;
