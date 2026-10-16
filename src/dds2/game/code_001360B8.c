@@ -24,11 +24,11 @@ extern void *D_004360F0;
 
 extern void kwlnSetDrawColorTarget(s32, f32 *);
 
-extern s32 kwlnSetLightColorTarget(s32, s32, void *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
 
-extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 
