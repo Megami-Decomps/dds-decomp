@@ -449,7 +449,7 @@ void kwlnDrawSetupC70B(s32 duration) {
 
 /* Stage filter-blur parameters, counting/clamping only counts above 100.
  * The secondary values are forwarded into the shared effect parameter body. */
-void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 unknownWord,
+void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 blendControl,
                            f32 angleStep, f32 secondFloat, f32 thirdFloat) {
     if (count >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
         kwlnDistanceBlurErrorCount++;
@@ -461,7 +461,7 @@ void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 unknownWord
     kwlnFilterBlurParameters.angleStep = angleStep;
     kwlnFilterBlurParameters.uvDisplacementAngleDegrees = secondFloat;
     kwlnFilterBlurParameters.uvDisplacementAmplitude = thirdFloat;
-    kwlnFilterBlurParameters.blendControl = unknownWord;
+    kwlnFilterBlurParameters.blendControl = blendControl;
 }
 
 /* Stage the filter blur's packed RGBA color. */
@@ -529,7 +529,7 @@ void kwlnDrawEnableCd0(s32 duration) {
 
 /* Stage staggered-blur parameters, counting/clamping only counts above 40.
  * The opaque word and two remaining float fields keep neutral argument names. */
-void kwlnDrawSetD30Clamped(s32 count, s32 unknownWord, f32 phaseStep, f32 spacing,
+void kwlnDrawSetD30Clamped(s32 count, s32 blendControl, f32 phaseStep, f32 spacing,
                            f32 thirdFloat, f32 fourthFloat, f32 angleStep) {
     if (count >= KWLN_DRAW_STAGGERED_COUNT_LIMIT) {
         kwlnRippleBlurErrorCount++;
@@ -541,7 +541,7 @@ void kwlnDrawSetD30Clamped(s32 count, s32 unknownWord, f32 phaseStep, f32 spacin
     kwlnStaggeredBlurParameters.uvDisplacementAngleDegrees = thirdFloat;
     kwlnStaggeredBlurParameters.uvDisplacementAmplitude = fourthFloat;
     kwlnStaggeredBlurParameters.angleStep = angleStep;
-    kwlnStaggeredBlurParameters.blendControl = unknownWord;
+    kwlnStaggeredBlurParameters.blendControl = blendControl;
 }
 
 /* Stage the staggered blur's packed RGBA color. */
