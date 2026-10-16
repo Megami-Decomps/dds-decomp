@@ -302,13 +302,13 @@ void dds3RemoveWorldObjectNode(EffWorldNode *node) {
 }
 
 
-EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *object, EffWorldNode *value) {
+EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *object, EffWorldNode *cameraObject) {
     EvtWorldTable *data;
     EffWorldNode *previous;
 
     data = ((EvtWorldTable *)object->data);
     previous = dds3GetWorldCameraObject(object);
-    data->cameraObject = value;
+    data->cameraObject = cameraObject;
     return previous;
 }
 
@@ -317,13 +317,13 @@ EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *object) {
 }
 
 
-EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value) {
+EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *playerObject) {
     EvtWorldTable *data;
     EffWorldNode *previous;
 
     data = ((EvtWorldTable *)object->data);
     previous = dds3GetWorldPlayerObject(object);
-    data->playerObject = value;
+    data->playerObject = playerObject;
     return previous;
 }
 
