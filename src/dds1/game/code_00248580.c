@@ -273,10 +273,10 @@ void mnuUpdateGroupResources(u8 *scene) {
 }
 
 /* Release each progress node's child panel, leaving the nodes/list intact. */
-void mnuDestroyThresholdNodePanels(s32 owner) {
+void mnuDestroyThresholdNodePanels(s32 hostAddress) {
     s32 entry;
 
-    for (entry = (s32)((MenuTerminalWork *)owner)->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
+    for (entry = (s32)((MenuTerminalWork *)hostAddress)->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
         mnuReleaseDualPercentPanel(((struct MenuListNode *)entry)->childPanel);
     }
 }
