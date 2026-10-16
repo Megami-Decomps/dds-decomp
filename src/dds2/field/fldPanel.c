@@ -11,10 +11,10 @@ extern KwlnTask *fldInputPanelTaskHandle;
 
 
 void fldReleasePanelState(KwlnTask *task) {
-    void *state;
+    void *panelState;
 
-    state = (void *)kwlnTaskGetUserValue(task);
-    sdfReleaseChipBlock(state);
+    panelState = (void *)kwlnTaskGetUserValue(task);
+    sdfReleaseChipBlock(panelState);
     fldInputPanelTaskHandle = 0;
 }
 
