@@ -23,19 +23,19 @@ ScrData *scrOpenProcessFromResource(const char *path, s32 option)
     u32 resourceInfo[4];
     SdfMemBlock *handle;
     u32 resourceAddress;
-    ScrData *task;
+    ScrData *process;
     handle = sdfReadNamedResource(path, resourceInfo, 0);
     resourceAddress = resourceInfo[0];
     if (resourceAddress == 0)
     {
         return 0;
     }
-    task = bfParseFLW0((void *)resourceAddress, option);
-    if (task != NULL)
+    process = bfParseFLW0((void *)resourceAddress, option);
+    if (process != NULL)
     {
-        task->scriptHandle = handle;
+        process->scriptHandle = handle;
     }
-    return task;
+    return process;
 }
 
 KwlnTask *scrProcCreateTask(u32 priority, ScrData *process)
