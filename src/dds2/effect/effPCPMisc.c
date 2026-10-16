@@ -1013,7 +1013,7 @@ void effPcpSpawnOnceSetColor(EffPCPSpawnOnceWork *work, u32 value) {
     work->color = value;
 }
 
-/* Shared scratch parameter block handed to the particle spawner (D_003B1670)
+/* Shared scratch parameter block handed to the particle spawner (effSharedSpawnParams)
  * and the shared spawn origin vector at +0x10 (D_003B1680, separate symbol). */
 typedef struct EffSpawnParams {
     f32 pos[4];
@@ -1041,7 +1041,7 @@ typedef struct EffPCPThunderGroup {
 
 #define EFF_DEG2RAD 0.017453292f
 
-extern EffSpawnParams D_003B1670[];
+extern EffSpawnParams effSharedSpawnParams[];
 extern u8 D_003B1680[];
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
@@ -1070,12 +1070,12 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
             angle += 60.0f * EFF_DEG2RAD;
         }
         spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-        D_003B1670->unk44 = spread * 1.25f;
-        D_003B1670->unk4C = spread * 12.5f;
+        effSharedSpawnParams->unk44 = spread * 1.25f;
+        effSharedSpawnParams->unk4C = spread * 12.5f;
         radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
-        D_003B1670->vel[1] = 0;
-        D_003B1670->vel[0] = sinv * radius;
-        D_003B1670->vel[2] = cosv * radius;
+        effSharedSpawnParams->vel[1] = 0;
+        effSharedSpawnParams->vel[0] = sinv * radius;
+        effSharedSpawnParams->vel[2] = cosv * radius;
         dir[0] = sinv;
         dir[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
@@ -1091,7 +1091,7 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
         VU0_MUL(vf10, vf10, vf11);
         VU0_LOAD_VF($vf11, D_003B1680);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF($vf10, D_003B1670);
+        VU0_STORE_VF($vf10, effSharedSpawnParams);
         if (scale[0] < 250.0f) {
             speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1099,9 +1099,9 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
             speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        D_003B1670->lifetime = life;
-        D_003B1670->speed = speed;
-        *out = effThunderFragCreate((EffThunderFragmentParams *)D_003B1670);
+        effSharedSpawnParams->lifetime = life;
+        effSharedSpawnParams->speed = speed;
+        *out = effThunderFragCreate((EffThunderFragmentParams *)effSharedSpawnParams);
         out++;
         i++;
     } while (i < 12);

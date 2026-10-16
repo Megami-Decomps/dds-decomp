@@ -447,7 +447,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
 
 extern SdfAsset *D_00436458;
 extern f32 D_0043645C;
-extern f32 D_00452200[4][4];
+extern f32 effTriangleVertexScratch[4][4];
 extern u32 D_003B21A0[4];
 extern SdfPoolNode D_00380028;
 extern void *effCreateVertexDrawPacket(EffPacketParams *params);
@@ -472,22 +472,22 @@ void func_001969B8(f32 *position) {
     sdfConsAppendVuPacket(list, NULL);
     memset(&packet, 0, 0x2C);
     packet.primitive = 0x4000;
-    D_00452200[2][2] = 0.0f;
+    effTriangleVertexScratch[2][2] = 0.0f;
     packet.colors = D_003B21A0;
     packet.color = 0x80808080;
 
-    D_00452200[0][0] = 0.0f;
-    D_00452200[0][1] = 0.0f;
-    D_00452200[0][2] = 0.0f;
-    D_00452200[1][0] = 15.0f;
-    D_00452200[1][1] = -30.0f;
-    D_00452200[1][2] = 0.0f;
-    D_00452200[2][0] = -15.0f;
-    D_00452200[2][1] = -30.0f;
+    effTriangleVertexScratch[0][0] = 0.0f;
+    effTriangleVertexScratch[0][1] = 0.0f;
+    effTriangleVertexScratch[0][2] = 0.0f;
+    effTriangleVertexScratch[1][0] = 15.0f;
+    effTriangleVertexScratch[1][1] = -30.0f;
+    effTriangleVertexScratch[1][2] = 0.0f;
+    effTriangleVertexScratch[2][0] = -15.0f;
+    effTriangleVertexScratch[2][1] = -30.0f;
 
     packet.parameterCount = 1;
     packet.vertexCount = 3;
-    packet.positions = (u128 *)D_00452200;
+    packet.positions = (u128 *)effTriangleVertexScratch;
     packet.texcoords = NULL;
     sdfConsAppendAssetPacket(list, D_00436458, NULL);
     sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&packet));

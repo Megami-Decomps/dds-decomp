@@ -517,7 +517,7 @@ s32 btlHasAnyOperandLowFlag(s32 unused, BattleIndexWork *state) {
     return 0;
 }
 
-extern void func_001AA130(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
+extern void btlBuildCombinedActorUnit(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
 extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 
@@ -667,7 +667,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     if (datCommandSelectors[command].kind != 1) {
         source = action->unit;
     } else {
-        func_001AA130(&combinedUnit, action->unit, action->indexWork.companionA,
+        btlBuildCombinedActorUnit(&combinedUnit, action->unit, action->indexWork.companionA,
                      action->indexWork.companionB);
         source = &combinedUnit;
     }
@@ -728,15 +728,15 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         counterCommand = 0;
     }
     if (command == 0) {
-        work->unk20 = 8;
+        work->precedence = 8;
     } else {
         if (helperResult >= 21) {
-            work->unk20 = helperResult;
+            work->precedence = helperResult;
         } else {
-            work->unk20 = 20;
+            work->precedence = 20;
         }
-        work->unk20 -= 8;
-        btlBossDebugPrintf("btl:precede=%d\n", work->unk20);
+        work->precedence -= 8;
+        btlBossDebugPrintf("btl:precede=%d\n", work->precedence);
     }
     combinedKinds = 0;
     combinedPress = 0;
@@ -1185,7 +1185,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->linkedUnit = 0;
     work->summonId = -1;
     work->stageValue = 0;
-    work->unk20 = 8;
+    work->precedence = 8;
     work->stage = 0;
     work->parameter = 0;
     work->wait = -1;

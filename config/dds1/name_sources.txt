@@ -9699,6 +9699,9 @@
 0x0034E640	polyTimedTintStartColor	inferred	confidence=high; constant f32[4] start colour vector blended by polyTimed tint. Identifier-only; twin 0x003AAF70 in DDS2. [PurC data b15; matched-C evidence]
 0x003D6490	parSharedViewDelta	inferred	confidence=high; f32[] view-delta vector written by parUpdateSharedScaleAndDelta and read by billboard cross-axis updates. Identifier-only; twin 0x00451F30 in DDS2. [PurC data b15; matched-C evidence]
 0x003D64A0	parSharedCrossScale	inferred	confidence=high; f32[] cross-axis scale vector written by parUpdateSharedScaleAndDelta and read by billboard cross-axis updates. Identifier-only; twin 0x00451F40 in DDS2. [PurC data b15; matched-C evidence]
+0x00354D40	effSharedSpawnParams	inferred	confidence=high; EffSpawnParams shared scratch block filled by the thunder-spawn loop (pos/vel/lifetime/speed) before effThunderFragCreate. Identifier-only; twin 0x003B1670 in DDS2. [PurC data b16; matched-C evidence]
+0x003D6760	effTriangleVertexScratch	inferred	confidence=high; f32[4][4] scratch read as the 3-vertex triangle position block by func_0018ED80 (packet.positions). Identifier-only; twin 0x00452200 in DDS2. [PurC data b16; matched-C evidence]
+0x003D7F30	evtWindowShadePackets	inferred	confidence=high; EvtWindowShadePacket[] window-shade DMA packet ring filled by evtViewerUpdateWindowShadeFade and appended to the SDF list. Identifier-only; twin 0x00453AF0 in DDS2 (28 refs each, same shape). [PurC data b16; matched-C evidence]
 0x003BD824	itfTestOverlayPhase	inferred	battle overlay color/phase data renamed from D_003BD824; referenced from the battle overlay unit code_001A04C0.c.
 0x003BD828	itfTestOverlayPhaseStep	inferred	battle overlay color/phase data renamed from D_003BD828; referenced from the battle overlay unit code_001A04C0.c.
 0x003D73E0	itfOverlayColorEditorWork	inferred	battle overlay color/phase data renamed from D_003D73E0; referenced from the battle overlay unit code_001A04C0.c.
@@ -9706,3 +9709,4 @@
 0x00358360	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_00358360; referenced from the battle overlay unit code_001A04C0.c.
 0x003BB16C	itfTextLipsUnitId	inferred	confidence=high; Unit id returned by itfGetTextLipsUnitId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x0043655C. [PurD readability data; identifier-only]
 0x003BB170	itfTextLipsMotionId	inferred	confidence=high; Motion id returned by itfGetTextLipsMotionId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x00436560. [PurD readability data; identifier-only]
+0x001AA130	btlBuildCombinedActorUnit	inferred	confidence=medium; Builds the combined actor from the acting unit and companionA/companionB; renamed from func_001AA130, called from code_001D0BA0.c when datCommandSelectors[command].kind == 1. [PurA readability data; identifier-only]
