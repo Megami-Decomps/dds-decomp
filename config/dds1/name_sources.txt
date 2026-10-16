@@ -9713,3 +9713,4 @@
 0x003BC368	evtNextCameraSlotViewerKey	inferred	evtCreateModelFromPackResource passes this counter to mdlLoadViewerPackage and mdlSpawnCameraSlotViewerObject, increments it, and wraps 0x7D0 to 0x3E8; paired data address 0x004377D8.
 0x002E0820	sdfModelBuildKind3CommandPacket	inferred	Builds a packet for a model command-list entry with kind 3; caller supplies the node, payload, render state, frame and skip flag, and appends the returned packet when nonzero.
 0x0018ED80	effDrawRotatingTriangleAtPosition	inferred	Builds and queues a three-vertex draw packet at the supplied position; each call advances its cached rotation angle by six degrees. DDS1 rotates around Z; paired with DDS2 0x001969B8.
+0x00232108	evtViewCmdSetObjectTarget	inferred	Stores selected world-object targets and resolved name indices in the pending event-viewer command entry; paired title implementation.

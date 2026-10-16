@@ -3672,7 +3672,7 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     return handled ? -1 : 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0024CE18);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewCmdSetObjectTarget);
 
 u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     if (evtEventViewerGetPendingNode(viewer) != 0) {
