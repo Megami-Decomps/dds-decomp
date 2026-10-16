@@ -1,4 +1,5 @@
 #include "btl_command.h"
+#include "btl_ui.h"
 #include "btl_motion_transform.h"
 #include "dds3_world_primary.h"
 #include "scr_integer_return_value_api.h"
@@ -158,7 +159,7 @@ extern u64 btlCreateSecondaryCommandSoundTask(void);
 
 extern u64 btlCreateCommandSoundTask(u64, u64);
 
-extern s32 btlTrackedTaskHandles;
+extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern u32 btlGetEventEffectValue(void);
 
@@ -2338,14 +2339,14 @@ u32 btlScriptSetBattleCommand(void) {
 }
 
 u32 btlResetCommandContextAndSetStateFlag(void) {
-    s32 state;
+    BattleTrackedTaskWork *state;
     void *context;
 
     context = scrGetCurrentCommandWork();
     state = btlTrackedTaskHandles;
     ((BtlCmdCtx *)context)->commandMode = 0x10;
     ((BtlCmdCtx *)context)->commandValue = 0;
-    *(u8 *)(state + 0x54) = 1;
+    state->phaseGate = 1;
     return 1;
 }
 
