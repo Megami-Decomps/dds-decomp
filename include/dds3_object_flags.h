@@ -3,7 +3,9 @@
 
 #include "common.h"
 
+struct EffWorldNode;
+
 /* Test whether any requested object flag bit is set. */
-u8 dds3TestObjectFlags(void *object, u32 mask);
+u8 dds3TestObjectFlags(struct EffWorldNode *object, u32 mask);
 
 #endif

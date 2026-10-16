@@ -231,7 +231,7 @@ s32 effObjUpdateDependencies(EffectObj *obj) {
     if ((data->flags & 1) == 0) {
         return 1;
     }
-    if (dds3TestObjectFlags(obj, 1)) {
+    if (dds3TestObjectFlags((EffWorldNode *)obj, 1)) {
         return 1;
     }
 
