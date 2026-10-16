@@ -458,7 +458,7 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
     glyph->contextModeEnabled = 0;
 }
 
-extern void frFontFillGlyphMetrics(void *, s32);
+extern void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex);
 
 FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
     FrFontChildGlyph *glyph;
