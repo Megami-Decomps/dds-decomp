@@ -306,7 +306,7 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, E
 }
 
 void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRectParams *b, EffResourceRectParams *out) {
-    s32 i;
+    s32 centerCoordinateIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -318,8 +318,9 @@ void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRec
         b = &evtMovieDefaultResourceRect;
     }
     out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
-    for (i = 0; i < 2; i++) {
-        out->center[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->center[i], b->center[i]);
+    for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
+        out->center[centerCoordinateIndex] = evtMovieInterpolateIntIfEnabled(
+            enable, t, a->center[centerCoordinateIndex], b->center[centerCoordinateIndex]);
     }
     out->draw.rgba = evtPolygonMovieBlendColor(enable, t, a->draw.rgba, b->draw.rgba);
     out->draw.blendControl = a->draw.blendControl;
