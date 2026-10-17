@@ -550,13 +550,13 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
 
 KwlnTask* kwlnTaskFindByPriority(u32 prio)
 {
-    s32 idx;
+    s32 taskListIndex;
     KwlnTask* node;
     node = 0;
-    idx = 0;
-    for (; idx < 3; idx++)
+    taskListIndex = 0;
+    for (; taskListIndex < 3; taskListIndex++)
     {
-        switch (idx)
+        switch (taskListIndex)
         {
         case 0:
             node = kwlnDelayedStartTaskHead;
