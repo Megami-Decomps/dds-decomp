@@ -3609,7 +3609,114 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2988);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2998);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B2AC8);
+extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
+extern s32 D_003A2998[2][4];
+
+/* Command-option layout: two rows of position, extent, size and 12.4 fixed-point size. */
+typedef struct BattleCommandLayoutWork {
+    s32 state;
+    s32 positions[2][4];
+    s32 extents[2][2];
+    s16 selectedPositions[4];
+    s32 dimensions[2][4];
+    s32 fixedDimensions[2][4];
+    u8 pad7C[8];
+} BattleCommandLayoutWork;
+
+extern s32 fileTestSavedSlotFlags(u32);
+
+void func_001B2AC8(BattleSceneObject *object) {
+    enum {
+        LAYOUT_ROW = (s32)&((BattleCommandLayoutWork *)0)->fixedDimensions[0][3],
+        LAYOUT_POSITION = (s32)&((BattleCommandLayoutWork *)0)->positions[0] - LAYOUT_ROW,
+        LAYOUT_WIDTH = (s32)&((BattleCommandLayoutWork *)0)->dimensions[0][0] - LAYOUT_ROW,
+        LAYOUT_HEIGHT = (s32)&((BattleCommandLayoutWork *)0)->dimensions[0][1] - LAYOUT_ROW,
+        LAYOUT_INNER_WIDTH = (s32)&((BattleCommandLayoutWork *)0)->dimensions[0][2] - LAYOUT_ROW,
+        LAYOUT_INNER_HEIGHT = (s32)&((BattleCommandLayoutWork *)0)->dimensions[0][3] - LAYOUT_ROW,
+        LAYOUT_FIXED_WIDTH = (s32)&((BattleCommandLayoutWork *)0)->fixedDimensions[0][0] - LAYOUT_ROW,
+        LAYOUT_FIXED_HEIGHT = (s32)&((BattleCommandLayoutWork *)0)->fixedDimensions[0][1] - LAYOUT_ROW,
+        LAYOUT_FIXED_INNER_WIDTH = (s32)&((BattleCommandLayoutWork *)0)->fixedDimensions[0][2] - LAYOUT_ROW,
+        LAYOUT_FIXED_INNER_HEIGHT = 0
+    };
+    s32 initialRows[2][4];
+    s16 count;
+    BattleCommandLayoutWork *work;
+    BdWork *slot;
+    s32 row;
+    u8 *cursor;
+    s32 extent;
+
+    memcpy(initialRows, D_003A2998, sizeof(initialRows));
+    D_003BD834 = sdfAllocAndClearQuadwords(0x38);
+    work = sdfAllocAndClearQuadwords(sizeof(BattleCommandLayoutWork));
+    extent = 180;
+    btlCommandOptionAnimationWork = (u32)work;
+    slot = &btlResourceBlock->resA->workEntries[0x10];
+    /* One row pointer walks the three parallel row arrays, as retail does: indexed
+     * named fields give each array its own induction register (their field offsets
+     * differ modulo the 16-byte offset alignment, so loop cannot combine them). */
+    cursor = (u8 *)work + LAYOUT_ROW;
+    for (row = 0; row < 2; ++row, ++slot, cursor += sizeof(work->dimensions[0])) {
+        ((s32 *)(cursor + LAYOUT_POSITION))[0] = initialRows[row][0];
+        ((s32 *)(cursor + LAYOUT_POSITION))[1] = initialRows[row][1];
+        ((s32 *)(cursor + LAYOUT_POSITION))[2] = initialRows[row][2];
+        ((s32 *)(cursor + LAYOUT_POSITION))[3] = initialRows[row][3];
+        work->extents[row][0] = extent;
+        work->extents[row][1] = extent;
+        *(s32 *)(cursor + LAYOUT_WIDTH) = slot->sourceWidth;
+        *(s32 *)(cursor + LAYOUT_FIXED_WIDTH) = *(s32 *)(cursor + LAYOUT_WIDTH) << 4;
+        *(s32 *)(cursor + LAYOUT_HEIGHT) = slot->sourceHeight;
+        *(s32 *)(cursor + LAYOUT_FIXED_HEIGHT) = *(s32 *)(cursor + LAYOUT_HEIGHT) << 3;
+        *(s32 *)(cursor + LAYOUT_INNER_WIDTH) = slot->sourceWidth;
+        *(s32 *)(cursor + LAYOUT_FIXED_INNER_WIDTH) = *(s32 *)(cursor + LAYOUT_INNER_WIDTH) << 4;
+        *(s32 *)(cursor + LAYOUT_INNER_HEIGHT) = slot->sourceHeight;
+        *(s32 *)(cursor + LAYOUT_FIXED_INNER_HEIGHT) = *(s32 *)(cursor + LAYOUT_INNER_HEIGHT) << 3;
+    }
+    if (fileTestSavedSlotFlags(1) == 0) {
+        return;
+    }
+    switch ((s16)object->owner->unit->partyRecord.savedCommandPhase) {
+    case 0:
+    case 1:
+        object->selections[0].entry = 0;
+        object->selections[0].cursor = 0;
+        break;
+    case 2:
+        object->selections[0].entry = object->owner->unit->partyRecord.unk18E;
+        btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
+        if (count - 1 < object->selections[0].entry) {
+            object->selections[0].entry = 0;
+            object->selections[0].cursor = 0;
+        } else if (object->selections[0].entry >= 3) {
+            object->selections[0].cursor = object->selections[0].entry - 2;
+        }
+        break;
+    case 3:
+        object->selections[4].entry = object->owner->unit->partyRecord.unk18E;
+        btlGetActorLinkageSkillList(object, (u16 *)&count);
+        if (count - 1 < object->selections[4].entry) {
+            object->selections[4].entry = 0;
+            object->selections[4].cursor = 0;
+        } else if (count == object->selections[4].entry) {
+            if (object->selections[4].entry >= 3) {
+                object->selections[4].cursor = object->selections[4].entry - 3;
+            }
+        } else if (object->selections[4].entry >= 3) {
+            object->selections[4].cursor = object->selections[4].entry - 2;
+        }
+        break;
+    case 10:
+        object->selections[0].entry = object->owner->unit->partyRecord.unk18E;
+        btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
+        object->selections[0].entry = (u16)count;
+        if ((u16)count >= 3) {
+            object->selections[0].cursor = (u16)count - 3;
+        } else {
+            object->selections[0].cursor = 0;
+        }
+        break;
+    }
+}
 
 void btlReleaseBattleScratchBlocks(void) {
     sdfReleaseChipBlock(D_003BD834);
