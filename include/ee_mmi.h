@@ -429,6 +429,21 @@ static inline u32 eePackRGBAWord(f32 unit) {
 #define EE_MMI_PLZCW(out, in) __asm__ volatile ("plzcw %0, %1" : "=r"(out) : "r"(in))
 
 /*
+ * Encode a GS dimension after subtracting one: value becomes
+ * 31 - (plzcw(value) & 0xFF). This pure SDK value calculation uses $2
+ * as its scratch register and has no memory side effects.
+ * Retail: DDS2 sdfGetOrCreateTextureForReference at 002DDE84/002DDE94,
+ * DDS1 func_0029C048 at 0029C16C/0029C17C, and the texture-state packet
+ * builders at DDS1 002D2D50/002D2D6C and DDS2 0032BC00/0032BC1C.
+ * Plain C counting emits a loop; ordinary C subtraction emits ADDIU,
+ * not the native trapping ADDI used to materialize 31.
+ */
+#define EE_MMI_BIT_LENGTH(value) __asm__ ( \
+    ".set noreorder\n\tplzcw $2, %0\n\tandi $2, $2, 0xff\n\t" \
+    "addi %0, $0, 31\n\tsubu %0, %0, $2\n\t.set reorder" \
+    : "+r"(value) : : "$2")
+
+/*
  * Bare `sync` (sync.l): orders the preceding stores before the next access.
  * Retail: the DMA channel kick in DDS1 sdfDevConsKickPacketDma / DDS2 sdfDevConsKickPacketDma
  * (`*chcr |= 0x40; sync;` before sceDmaSendN), as in Sony's libkernel
