@@ -213,14 +213,14 @@ void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
 
 /* Reset a draw node's command lists and initialize both buffered passes. */
 void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSelector) {
-    s32 i;
+    s32 passIndex;
 
     node->sourceItem = commandList;
     sdfFreeNodeLists(node);
     sdfEnsureFreeRootWorkspace(node);
     sdfDrawNodeBuildMatrix(node);
-    for (i = 0; i != 2; i++) {
-        sdfDrawNodeBuildCommandList(node, commandList, packetSelector, 0, i);
+    for (passIndex = 0; passIndex != 2; passIndex++) {
+        sdfDrawNodeBuildCommandList(node, commandList, packetSelector, 0, passIndex);
     }
 }
 
@@ -229,17 +229,17 @@ void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSe
 void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     DevRequest *buf;
     SdfSlotEntry *entries;
-    s32 i;
-    s32 j;
+    s32 slotIndex;
+    s32 pairIndex;
 
     if (count > 0) {
         buf = sdfDevCreateBufferedRequest(count, 0x10, 1);
         model->slotPairs = buf;
         entries = buf->buffer;
-        for (i = 0; i != count; i++) {
-            for (j = 0; j != 2; j++) {
-                entries[i].pair[j].index = 0;
-                entries[i].pair[j].weight = 0.0f;
+        for (slotIndex = 0; slotIndex != count; slotIndex++) {
+            for (pairIndex = 0; pairIndex != 2; pairIndex++) {
+                entries[slotIndex].pair[pairIndex].index = 0;
+                entries[slotIndex].pair[pairIndex].weight = 0.0f;
             }
         }
         buf->usedCount = count;
