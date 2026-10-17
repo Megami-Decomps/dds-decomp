@@ -12048,31 +12048,151 @@ void effResetCurveEditorSelection(void) {
     D_003BD124 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002BB188);
+typedef struct EffMappingRow {
+    u8 pad00[8];
+    void *value;
+    u8 pad0C[12];
+} EffMappingRow;
+
+extern SdfAlphaTrack D_003DFA68;
+extern u8 D_0038FB38[];
+extern s32 D_003BD960;
+extern s32 D_003BD964;
+extern char D_003BD150[];
+extern void btlDebugDrawMappingColorSpan(s32, s32, s32, s32, u32, u32);
+
+/* Edit the alpha fade interval and its four-breakpoint graph. */
+s32 func_002BB188(SdfAlphaTrack *range, s32 frames) {
+    u32 shades[8];
+    f32 marks[8];
+    u32 *shade;
+    f32 *mark;
+    f32 step = 1.0f / frames;
+    s32 flags = 0x400001;
+    s32 graphY;
+    s32 x0;
+    s32 x1;
+    u32 c0;
+    u32 c1;
+    u32 i;
+
+    D_003DFA68 = *range;
+    btlDebugMenuSetupNoOp(D_0038FB38);
+    if (sdfPadButtonStates[0xB] & 2) {
+        if (D_003BD124 == 1) {
+            D_003DFA68.fadeInFraction += step * 10.0f;
+        } else {
+            D_003DFA68.fadeOutFraction += step * 10.0f;
+        }
+        flags = 0x400003;
+    } else if (sdfPadButtonStates[9] & 2) {
+        if (D_003BD124 == 1) {
+            D_003DFA68.fadeInFraction -= step * 10.0f;
+        } else {
+            D_003DFA68.fadeOutFraction -= step * 10.0f;
+        }
+        flags = 0x400003;
+    } else if (sdfPadButtonStates[5] & 2) {
+        if (D_003BD124 == 1) {
+            D_003DFA68.fadeInFraction += step;
+        } else {
+            D_003DFA68.fadeOutFraction += step;
+        }
+        flags = 0x400003;
+    } else if (sdfPadButtonStates[4] & 2) {
+        if (D_003BD124 == 1) {
+            D_003DFA68.fadeInFraction -= step;
+        } else {
+            D_003DFA68.fadeOutFraction -= step;
+        }
+        flags = 0x400003;
+    } else if ((sdfPadButtonStates[6] & 2) || (sdfPadButtonStates[7] & 2)) {
+        if (D_003BD124 == 1) {
+            D_003BD124 = 2;
+        } else {
+            D_003BD124 = 1;
+        }
+    }
+    if (D_003DFA68.fadeInFraction < 0.0f) {
+        D_003DFA68.fadeInFraction = 0.0f;
+    } else if (1.0f < D_003DFA68.fadeInFraction) {
+        D_003DFA68.fadeInFraction = 1.0f;
+    }
+    if (D_003DFA68.fadeOutFraction < 0.0f) {
+        D_003DFA68.fadeOutFraction = 0.0f;
+    } else if (1.0f < D_003DFA68.fadeOutFraction) {
+        D_003DFA68.fadeOutFraction = 1.0f;
+    }
+    if (D_003DFA68.fadeInFraction > D_003DFA68.fadeOutFraction) {
+        if (((EffMappingRow *)effMappingState.table)[effMappingState.field0C].value == &D_003DFA68.fadeInFraction ||
+            (D_003BD128 == 1 && D_003BD124 == D_003BD128)) {
+            D_003DFA68.fadeOutFraction = D_003DFA68.fadeInFraction;
+        } else {
+            D_003DFA68.fadeInFraction = D_003DFA68.fadeOutFraction;
+        }
+    }
+    D_003BD960 = D_003DFA68.fadeInFraction * frames;
+    D_003BD964 = D_003DFA68.fadeOutFraction * frames;
+    *range = D_003DFA68;
+    btlDebugDrawRectangle(8, 0x164, 0xDC, 0x4C);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(D_0038FB38);
+    btlDebugMenuAfterRecordNoOp();
+    shades[0] = 0;
+    marks[0] = 0.0f;
+    shades[1] = 0x80;
+    marks[1] = range->fadeInFraction;
+    shades[2] = 0x80;
+    marks[2] = range->fadeOutFraction;
+    shades[3] = 0;
+    marks[3] = 1.0f;
+    graphY = 364;
+    btlDebugDrawTwoColorRectangle(0x10, graphY, 0xB8, 0x10, 0x40404040, 0x80000000);
+    for (i = 0, shade = shades, mark = marks; i < 3; i++, shade++, mark++) {
+        x0 = mark[0] * 184.0f;
+        x1 = mark[1] * 184.0f;
+        c0 = shade[0];
+        c1 = shade[1];
+        btlDebugDrawMappingColorSpan(x0 + 0x10, graphY, x1 - x0, 0x10, (c0 << 16) | (c0 | (c0 << 8)) | 0x80000000,
+                      (c1 << 16) | (c1 | (c1 << 8)) | 0x80000000);
+        if (i == D_003BD124) {
+            btlDebugDrawLine2D(x0 + 0xF, graphY - 4, x0 + 0xF, graphY + 20, 0x8000FF00);
+            btlDebugDrawLine2D(x0 + 0x10, graphY - 4, x0 + 0x10, graphY + 20, 0x8000FF00);
+        } else {
+            btlDebugDrawLine2D(x0 + 0x10, graphY - 4, x0 + 0x10, graphY + 20, 0x80808080);
+        }
+    }
+    btlDebugDrawLine2D(0xC8, graphY - 4, 0xC8, graphY + 20, 0x80808080);
+    btlBossDebugPrintfN(0xC, graphY + 24, 8, D_003BD150, frames);
+    if (sdfPadButtonStates[3] < 0) {
+        flags &= ~1;
+    }
+    return flags;
+}
 
 /* ALPHA callback for POLYGON children of the native S-family descriptors. */
 void effEditSPolygonAlphaTrack(s32 work) {
-    func_002BB188((s32)((BaObj *)work)->x0C + 0x3c, ((EffMappingObject *)((BaObj *)work)->x0C)->value4C);
+    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x3c), ((EffMappingObject *)((BaObj *)work)->x0C)->value4C);
 }
 
 /* D-family POLYGON FADE callback, shared with O in DDS2; retain bound plus one. */
 void effEditDoPolygonFadeTrack(s32 work) {
-    func_002BB188((s32)((BaObj *)work)->x0C + 0x60, ((EffMappingObject *)((BaObj *)work)->x0C)->value3C + 1);
+    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value3C + 1);
 }
 
 /* FADE callback for N-family POLYGON children; preserve bound plus one. */
 void effEditNPolygonFadeTrack(s32 work) {
-    func_002BB188((s32)((BaObj *)work)->x0C + 0x70, ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
+    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
 }
 
 /* FADE callback for the native U-CYLND POLYGON child. */
 void effEditUCylinderPolygonFadeTrack(s32 work) {
-    func_002BB188((s32)((BaObj *)work)->x0C + 0x70, ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
+    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
 }
 
 /* FADE callback for the native U-SPHRE POLYGON child. */
 void effEditUSpherePolygonFadeTrack(s32 work) {
-    func_002BB188((s32)((BaObj *)work)->x0C + 0x60, ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
+    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
 }
 
 
