@@ -17,7 +17,6 @@ enum {
     PAC_ENCODING_RAW = 0,
     PAC_ENCODING_COMPRESSED = 1,
     PAC_HEADER_BYTES = 0x10,
-    PAC_WORK_BASE_BYTES = 0x20,
     PAC_EXTENSION_BYTES_MASK = 0xF0,
     PAC_ENCODING_MASK = 0xF,
     PAC_STATE_USE_PACKET_MEMORY = 1,
@@ -96,7 +95,7 @@ s32 sdfPacFeedInput(PacState *state, const u8 *input, s32 inputByteCount) {
 /* Queue a private copy of the packet header and any extension bytes. */
 PacWork *sdfPacEnqueuePacket(PacState *state, const SdfPacStreamPacketHeader *packet) {
     s32 extensionBytes = packet->flags & PAC_EXTENSION_BYTES_MASK;
-    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + PAC_WORK_BASE_BYTES);
+    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + sizeof(PacWork) + PAC_HEADER_BYTES);
     node->owner = state;
     memcpy(node->packet, packet, extensionBytes + PAC_HEADER_BYTES);
     if (state->queueTail == NULL) {

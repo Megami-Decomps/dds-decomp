@@ -18,6 +18,9 @@
 #include "kwln_task_lifecycle.h"
 #include "file_pac.h"
 #include "file_request_api.h"
+#include "pcp_vu0.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
 
 
 
@@ -1344,7 +1347,171 @@ create:
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
+
+extern MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *, s32, s32, u8,
+                                                s32, s32, s32, s16, s16, f32);
+extern void itfProjectScreenPointToViewPlane(f32 *, s32, s32);
+extern void mnuSetNodePairValue(u8 *, s32);
+extern void mnuSetNodePosition(u8 *, f32, f32, f32);
+extern void itfSetModelInstanceValuePair(ModelInstance *, s32);
+extern void itfSetModelInstanceSecondaryVector(ModelInstance *, f32, f32, f32);
+
+/* Finish/deactivate a shooting entry. Keep the timed coordinate distinct from
+ * its two screen-space consumers, and retain fresh reads after callbacks. */
+void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
+    f32 position[4] __attribute__((aligned(16)));
+    MnuEffectPositionStep step __attribute__((aligned(16)));
+    MenuRegistry *registry;
+    MenuRegistryParameters *parameters;
+    MenuProgressParameters *origin;
+    MenuRuntimeList *runtime;
+    MnuEffectList *effects;
+    void *object;
+    s32 originX;
+    s32 originY;
+    s32 timedY;
+    f32 angle;
+
+    memset(&step, 0, sizeof(step));
+    registry = mnuGetMenuRecordRegistryEntry(entry->tag);
+    parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
+    origin = mnuGetResourceProgressParameters();
+    originX = origin->x;
+    originY = origin->y;
+
+    if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE) {
+        work->completed = 0;
+        work->progress = 0;
+        entry->remaining = 0;
+        mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
+        mnuRequestTimedEntryEffectStop();
+        entry->object.modelNode->model->flags |= 1;
+        if (--work->frameDisplayValue < 0) {
+            mnuClampPendingScoreToPeak(work);
+            work->playerResetState = 4;
+            work->phase = 8;
+        }
+        if (entry->flagsBits.mode >= 2) {
+            runtime = mnuGetRuntimeHitTargetList();
+            angle = ((effMiscRandUnitFloat(NULL) * 90.0f + 135.0f) *
+                     3.141592503f) / 180.0f;
+            mnuCreateRuntimeRecord(runtime, (s32)entry->currentX,
+                                   (s32)entry->currentY, 0x33, 0, 0, 0, 1, 0,
+                                   angle);
+        }
+        dds3ClaimSoundSlot(0x01E00006, 0);
+    }
+
+    if (entry->flagsBits.finished != 0) {
+        timedY = (s32)mnuEvaluateTimedValue(entry);
+        if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE &&
+            (entry->flagsBits.unk20 & 1) == 0) {
+            itfClaimWideSlotWithTaggedPayload((s32)(entry->currentX + (f32)originX),
+                                              timedY + originY, registry->score,
+                                              (s8)work->step, work->spriteWork);
+        }
+        itfProjectScreenPointToViewPlane(position,
+                                         (s32)entry->currentX + originX, timedY + originY);
+        effects = work->effectWork->lists;
+        if (entry->movementEffectScale != 0) {
+            step.x = sdfEvaluateCosineViaSinePhaseShift(
+                         entry->currentAngleRadians + 1.5707963f) * 0.0f +
+                     sdfSinPoly(entry->currentAngleRadians + 1.5707963f);
+            step.y = sdfEvaluateCosineViaSinePhaseShift(
+                         entry->currentAngleRadians + 1.5707963f) -
+                     sdfSinPoly(entry->currentAngleRadians + 1.5707963f) * 0.0f;
+            VU0_LOAD_VF(vf10, &step);
+            VU0_SCALE_VF(vf10, (f32)entry->movementEffectScale / 3.5f);
+            VU0_STORE_VF(vf10, &step);
+        } else {
+            step.x = 0.0f;
+            step.y = 1.0f;
+            VU0_LOAD_VF(vf10, &step);
+            VU0_SCALE_VF(vf10, 4.0f);
+            VU0_STORE_VF(vf10, &step);
+        }
+        if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
+            mnuStartPositionedEffectBurst(effects, &step, 0,
+                                          position[0], position[1], position[2], parameters->minor);
+        } else {
+            mnuStartPositionedEffectRecord(&effects[1], 0,
+                                           position[0], position[1], position[2]);
+        }
+        if (entry->tag == 0x0201000F || entry->tag == 0x02010010) {
+            evtPrintDeveloperConsoleMessage("======================================= ADD ITEM !!!!!!!!!!\n");
+            runtime = mnuGetRuntimeHitTargetList();
+            angle = ((effMiscRandUnitFloat(NULL) * 90.0f + 135.0f) *
+                     3.141592503f) / 180.0f;
+            mnuCreateRuntimeRecord(runtime, (s32)entry->currentX,
+                                   (s32)entry->currentY, 0x33, 0, 0, 0, 1, 0,
+                                   angle);
+        }
+        if (registry->parameterIndex == 0x22 && work->playerResetState != 4) {
+            D_0040ABF8.remaining = 0;
+            work->phase = 3;
+        }
+    }
+
+    object = entry->object.modelNode;
+    if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
+        if (object != NULL) {
+            switch (parameters->kind) {
+            case 3: {
+                MnuModelNode *node = object;
+                if (registry->parameterIndex == 0x22) {
+                    switch (work->round) {
+                    case 0:
+                        mnuBroadcastNodeModelState((u8 *)node, 0x80000080);
+                        node->model->first->frameStep = 0.5f;
+                        node->savedModelValue = 0.5f;
+                        mdlAddEntryFlaggedEx(node->model, 0, 1, 0.0f, 30.0f);
+                        mnuSetNodePairValue((u8 *)node, 160);
+                        mnuSetNodePosition((u8 *)node, 0.0f, -0.5f, 0.0f);
+                        break;
+                    case 1:
+                        mnuBroadcastNodeModelState((u8 *)node, 0x80000080);
+                        node->model->first->frameStep = 0.5f;
+                        node->savedModelValue = 0.5f;
+                        mdlAddEntryFlaggedEx(node->model, 0, 11, 0.0f, 30.0f);
+                        mnuSetNodePairValue((u8 *)node, 180);
+                        mnuSetNodePosition((u8 *)node, 0.0f, -0.5f, 0.0f);
+                        break;
+                    case 2:
+                        mnuBroadcastNodeModelState((u8 *)node, 0x80000080);
+                        node->model->first->frameStep = 0.3f;
+                        node->savedModelValue = 0.3f;
+                        mdlAddEntryFlaggedEx(node->model, 0, 5, 0.0f, 30.0f);
+                        mnuSetNodePairValue((u8 *)node, 140);
+                        mnuSetNodePosition((u8 *)node, 0.0f, -0.5f, 0.0f);
+                        break;
+                    }
+                } else {
+                    mnuSetNodePairValue((u8 *)node, 10);
+                    mnuSetNodePosition((u8 *)node,
+                                       step.x / 3.0f, step.y / 3.0f, step.z / 3.0f);
+                }
+                entry->object.modelNode = NULL;
+                object = NULL;
+                break;
+            }
+            case 1:
+                itfSetModelInstanceValuePair((ModelInstance *)object, 30);
+                itfSetModelInstanceSecondaryVector(entry->object.modelInstance,
+                                                   step.x / 3.0f, step.y / 3.0f,
+                                                   step.z / 3.0f);
+                entry->object.modelInstance = NULL;
+                object = NULL;
+                break;
+            }
+        }
+        work->targets--;
+    }
+    if (object == NULL) {
+        evtPrintDeveloperConsoleMessage("---------------------delete!! OBJECT INDEX %d\n",
+                                         (u16)entry->tag);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 

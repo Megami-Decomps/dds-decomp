@@ -373,7 +373,7 @@ typedef struct MnuEffectBurstPreset {
 extern MnuEffectBurstPreset D_0040AC50[];
 
 /* Start a burst of positioned effect records with random offsets and a sound each. */
-s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *step, s32 baseDelay, s32 id, f32 x, f32 y, f32 z) {
+s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *step, s32 baseDelay, f32 x, f32 y, f32 z, s32 id) {
     s32 presetIndex = id - 0xA0;
     MnuEffectBurstPreset *preset = &D_0040AC50[presetIndex];
     f32 scale = preset->scale;

@@ -27,9 +27,9 @@ extern char mnuTerminalPopupEntries[];
 
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
-extern s32 D_00435E5C;
+extern u8 *D_00435E5C;
 extern DspMantraName *D_00435E50;
-extern s32 D_00435E4C;
+extern u8 *D_00435E4C;
 extern DspUnitName *D_00435E48;
 
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(void *context);

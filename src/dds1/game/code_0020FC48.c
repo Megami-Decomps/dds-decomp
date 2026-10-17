@@ -2137,11 +2137,11 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, BtlDebugMenuCursor *
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern s32 D_003BAA70;
+extern u8 *D_003BAA70;
 
 extern const u8 *D_003BAA74;
 
-extern s32 D_003BAA84;
+extern u8 *D_003BAA84;
 
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();

@@ -6,17 +6,16 @@
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_draw.h"
 
-/* Packet storage for one held-texture render-target frame. */
+/* The held texture's packets in one frame bank (KwlnFrameDrawBank::heldTexture). */
 typedef struct KwlnTextureBank {
     SdfListHead list;
     SdfSceneDrawPacket scene;
     ConsMatrixPacket matrix;
     SdfLightingPacketStorage lighting;
-    u8 pad[0x1F40 - 0x260 - sizeof(SdfLightingPacketStorage)];
 } KwlnTextureBank;
 
-typedef char KwlnTextureBank_size_must_be_0x1F40[
-    (sizeof(KwlnTextureBank) == 0x1F40) ? 1 : -1];
+typedef char KwlnTextureBank_size_must_be_0x340[
+    (sizeof(KwlnTextureBank) == 0x340) ? 1 : -1];
 typedef char KwlnTextureBank_scene_offset_must_be_0x20[
     ((u32)&((KwlnTextureBank *)0)->scene == 0x20) ? 1 : -1];
 typedef char KwlnTextureBank_matrix_offset_must_be_0x190[

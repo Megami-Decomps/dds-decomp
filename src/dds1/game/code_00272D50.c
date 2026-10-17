@@ -365,7 +365,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 mnuCampItemCommandHelpTextBank[];
-extern s32 D_003BAA9C;
+extern u8 *D_003BAA9C;
 
 s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);

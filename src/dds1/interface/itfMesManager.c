@@ -733,12 +733,12 @@ u8 *itfMesGetWindowTableValue(s32 window, s32 slotIndex) {
     return (u8 *)itfWindowSlots[window].mes->textSlots.addresses[slotIndex];
 }
 
-extern s32 D_003BAA70;
-extern s32 D_003BAA74;
-extern s32 D_003BAA84;
-extern s32 D_003BAA88;
-extern s32 D_003BAA8C;
-extern s32 D_003BAA90;
+extern u8 *D_003BAA70;
+extern u8 *D_003BAA74;
+extern u8 *D_003BAA84;
+extern u8 *D_003BAA88;
+extern u8 *D_003BAA8C;
+extern u8 *D_003BAA90;
 extern char D_00347C68[][0x20];
 extern char D_003482A8[][0x20];
 extern s32 D_0032ACA8[128];

@@ -81,18 +81,18 @@ extern u64 D_004366E8;
 
 extern s32 btlRuntime;
 
-extern s32 D_00435DE0;
+extern u8 *D_00435DE0;
 
-extern s32 D_00435DF0;
+extern u8 *D_00435DF0;
 
-extern s32 D_00435DE4;
+extern u8 *D_00435DE4;
 
-extern s32 D_00435DF8;
+extern u8 *D_00435DF8;
 extern s8 D_0037F530[];
 
 extern u8 btlSharedActorTransformParameters[];
 
-extern s32 D_00435E00;
+extern u8 *D_00435E00;
 
 extern void *btlPartyUnitGunTypeNames[];
 
@@ -1919,7 +1919,7 @@ nextUnit:
 
 extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);

@@ -24,7 +24,7 @@ typedef struct MenuList MenuList;
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 
-extern s32 D_003BAA98;
+extern u8 *D_003BAA98;
 
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);

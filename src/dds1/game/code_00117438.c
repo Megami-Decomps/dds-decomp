@@ -406,18 +406,18 @@ u8 scrIsCurrentWorkTask(struct ScrData *expectedValue) {
 extern void sdfDebugPrintf(const char *, ...);
 
 /* Channel table row: a file name, then {destination slot, unused} pairs ending with a null slot. */
-typedef struct SdfResourceTable {
+typedef struct SdfChannel {
     const char *path;
     struct {
         void **slot;
         u32 unused;
-    } entries[1];
-} SdfResourceTable;
+    } entries[20];
+} SdfChannel;
 
 const char D_0039F930[] = "sys:[%s]\n";
 
 /* Load a table's file and copy each size-prefixed segment into its own block. */
-void sdfReloadChannelSegments(SdfResourceTable *table) {
+void sdfReloadChannelSegments(SdfChannel *table) {
     DevState *command;
     struct SdfMemBlock *block;
     s32 size;
@@ -461,18 +461,15 @@ void sdfReloadChannelSegments(SdfResourceTable *table) {
     sdfDebugPrintf(D_0039F930, table->path);
 }
 
-extern u8 D_0032A6F0[];
+extern SdfChannel D_0032A6F0[];
 
 
 void sdfResetChannels(void) {
-    u8 *entry;
     u32 i;
 
     sdfFirePendingCallback();
-    entry = D_0032A6F0;
     for (i = 0; i < 8; i++) {
-        sdfReloadChannelSegments((SdfResourceTable *)entry);
-        entry += 0xA4;
+        sdfReloadChannelSegments(&D_0032A6F0[i]);
     }
     evtInitializeWorkScriptTask();
 }

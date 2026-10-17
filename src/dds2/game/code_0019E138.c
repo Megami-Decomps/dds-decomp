@@ -51,8 +51,8 @@ extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
-extern s32 D_00435E6C;
-extern s32 D_00435E70;
+extern u8 *D_00435E6C;
+extern u8 *D_00435E70;
 extern void itfSetTextDrawLimit(s32);
 extern FrFontGlyph *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);

@@ -93,7 +93,7 @@ u8 mnuGetItemRequirementCount(s32 itemId) {
     return datGameState->itemRequirementCounts[itemId - 0xC0];
 }
 
-extern s32 D_00435E3C;
+extern u8 *D_00435E3C;
 
 s8 mnuGetItemRequirementValue(s32 itemId) {
     s32 index = itemId - 0xC0;

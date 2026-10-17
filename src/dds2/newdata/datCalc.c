@@ -466,7 +466,7 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
 
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 
 
 

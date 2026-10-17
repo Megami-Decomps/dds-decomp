@@ -140,7 +140,7 @@ extern s32 sndPlaySkillSeTask(u32 *);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern s32 datActionAnimationRecords;
+extern u8 *datActionAnimationRecords;
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -6595,9 +6595,9 @@ void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
     u32 color;
 
     if ((work->battleFlags & 0x30000000) == 0) {
-        /* The record table is stored as an integer address. */
+        /* Index the record table by integer address arithmetic, as retail does. */
         action = (BtlActionTableEntry *)(skillIndex * sizeof(BtlActionTableEntry) +
-                                        datActionAnimationRecords);
+                                        (u32)datActionAnimationRecords);
         if (action->lightColorMode != 0.0f) {
             light->color[0] = action->lightColor[0];
             light->color[1] = action->lightColor[1];
@@ -8341,21 +8341,21 @@ INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00419170);
 
 void sndLoadSysEffLb(void) {
     const char *path = "/battle/SYSEFF.LB";
-    s32 archive = (s32)fileQueuePlainDispatchRequest(path);
-    s32 node;
+    FilePacRequest *archive = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
+    PacWork *node;
     u32 i;
 
     fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf("btl:[%s]\n", path);
-    node = *(s32 *)(archive + 0x60);
+    node = archive->packet.queueHead;
     i = 0;
-    while (node != 0) {
+    while (node != NULL) {
         if (D_003BDE18[i].enabled != 0) {
-            u32 unk08 = *(u32 *)(node + 8);
-            u32 unk0C = *(u32 *)(node + 0xC);
+            u32 unk08 = (u32)node->resourceHandle;
+            u32 unk0C = (u32)node->dataCursor;
             D_003BDE18[i].opaque08 = unk08;
             D_003BDE18[i].archiveData = unk0C;
-            node = *(s32 *)node;
+            node = node->next;
         } else {
             D_003BDE18[i].archiveData = 0;
             D_003BDE18[i].opaque08 = 0;
@@ -8366,7 +8366,7 @@ void sndLoadSysEffLb(void) {
         D_003BDE18[i].archiveData = 0;
         D_003BDE18[i].opaque08 = 0;
     }
-    btlStageTaskCleanupCallback((void *)archive);
+    btlStageTaskCleanupCallback(archive);
 }
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */

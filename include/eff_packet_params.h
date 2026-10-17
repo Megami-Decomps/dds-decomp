@@ -9,10 +9,10 @@ typedef struct EffPacketParams {
     u16 primitive;
     u16 mask;
     u32 color;
-    u32 *parameters;
+    const u32 *parameters;
     u128 *positions;
     u128 *normals;
-    u32 *texcoords;
+    f32 *texcoords;
     u32 *extraTexcoords;
     u32 *colors;
     void *(*allocate)(s32);

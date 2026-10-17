@@ -334,10 +334,10 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     return 1;
 }
 
-extern void effObjApplyTransformParameters(void *, EffWorldNode *);
+extern void effObjApplyTransformParameters(SdfPoolNode **, EffWorldNode *);
 extern void func_00120B88(EffWorldNode *);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
-extern u8 D_00380788[];
+extern SdfPoolNode *D_00380788[13][4];
 
 s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     f32 vec[4];
@@ -356,9 +356,9 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
         func_00120B88(obj);
     }
     if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
-        effObjApplyTransformParameters(D_00380788, obj);
+        effObjApplyTransformParameters(D_00380788[0], obj);
     } else {
-        effObjApplyTransformParameters(D_00380788 + (s32)((EffectObjectData *)obj->data)->followParameterIndex * 0x10, obj);
+        effObjApplyTransformParameters(D_00380788[(s32)((EffectObjectData *)obj->data)->followParameterIndex], obj);
     }
     if (!dds3TestObjectFlags(obj, 0x400)) {
         return 1;
@@ -746,7 +746,7 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
     if (data->activeId == -1) {
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x60, 1, 0, 0, 1, 2);
-        effObjApplyTransformParameters(D_00380788, object);
+        effObjApplyTransformParameters(D_00380788[0], object);
         fldSelectDisplayBuffer(0x27);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     } else {
@@ -760,17 +760,17 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
                         u32 savedColor = object->color;
 
                         object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
-                        effObjApplyTransformParameters(D_00380788 + data->activeId * 0x10, object);
+                        effObjApplyTransformParameters(D_00380788[data->activeId], object);
                         object->color = savedColor;
                     } else {
                         effObjApplyTransformParameters(D_00380808, object);
                     }
                 } else {
-                    effObjApplyTransformParameters(D_00380788 + data->activeId * 0x10, object);
+                    effObjApplyTransformParameters(D_00380788[data->activeId], object);
                 }
             }
         }
-        effObjApplyTransformParameters(D_00380788 + data->activeId * 0x10, object);
+        effObjApplyTransformParameters(D_00380788[data->activeId], object);
         fldSelectDisplayBuffer(0x22);
         fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     }
