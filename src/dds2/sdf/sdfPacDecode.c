@@ -59,7 +59,6 @@ void sdfPacResetOutputToAllocationEntry(PacState *state);
 
 
 
-void sdfRelocatePackedResourceWords(void *words, void *relocationBase, void *table, s32 tableBytes);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
@@ -276,7 +275,7 @@ void sdfPacRelocateQueuedPayload(PacState *state) {
     s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
     if (tableBytes != 0) {
-        sdfRelocatePackedResourceWords(payload, payload, payload + record->tableOffset, tableBytes);
+        sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);
@@ -296,7 +295,7 @@ void sdfPacFinalizeRelocatedPayload(PacState *state) {
     s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
     if (tableBytes != 0) {
-        sdfRelocatePackedResourceWords(payload, payload, payload + record->tableOffset, tableBytes);
+        sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);

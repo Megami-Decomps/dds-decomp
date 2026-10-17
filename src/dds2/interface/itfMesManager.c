@@ -4,6 +4,7 @@
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
+#include "sdf_pac_reloc.h"
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
@@ -34,7 +35,6 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 
-void sdfRelocatePackedResourceWords(int *words, int relocationBase, u8 *table, int tableBytes);
 
 extern u32 itfMessageFlags;
 
@@ -1148,7 +1148,7 @@ void itfMesRelocate(ItfMesRelocHeader *resource)
         payload = resource->payload;
         fixupTable = (u8 *)resource + resource->fixupTableOffset;
         fixupSize = resource->fixupTableBytes;
-        sdfRelocatePackedResourceWords((int *)payload, (int)payload, fixupTable, fixupSize);
+        sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, fixupTable, fixupSize);
         resource->relocated = 1;
     }
 }
