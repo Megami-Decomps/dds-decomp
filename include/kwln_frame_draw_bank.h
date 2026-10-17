@@ -7,6 +7,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_draw.h"
+#include "kwln_texture_bank.h"
 
 /* Two frame banks for the main scene and overlay packet chains. */
 typedef struct KwlnFrameDrawBank {
@@ -17,7 +18,8 @@ typedef struct KwlnFrameDrawBank {
     SdfLinkedPacketList linkedList;       /* 0x1650 */
     SdfSceneNode scene;                  /* 0x1660 */
     ConsMatrixPacket sceneMatrix;         /* 0x1880 */
-    u8 scenePacketStorage[0x420];         /* 0x1950: opaque packet storage */
+    u8 scenePacketStorage[0xE0];          /* 0x1950: opaque packet storage */
+    KwlnTextureBank heldTexture;          /* 0x1A30: the held texture's packets */
     SdfListHead thirdList;               /* 0x1D70 */
     ConsMatrixPacket thirdMatrix;        /* 0x1D90 */
     SdfLightingPacketStorage overlayLightPacket; /* 0x1E60 */
@@ -41,6 +43,8 @@ typedef char KwlnFrameDrawBank_sceneMatrix_offset_must_be_0x1880[
     ((u32)&((KwlnFrameDrawBank *)0)->sceneMatrix == 0x1880) ? 1 : -1];
 typedef char KwlnFrameDrawBank_scenePacketStorage_offset_must_be_0x1950[
     ((u32)&((KwlnFrameDrawBank *)0)->scenePacketStorage == 0x1950) ? 1 : -1];
+typedef char KwlnFrameDrawBank_heldTexture_offset_must_be_0x1A30[
+    ((u32)&((KwlnFrameDrawBank *)0)->heldTexture == 0x1A30) ? 1 : -1];
 typedef char KwlnFrameDrawBank_thirdList_offset_must_be_0x1D70[
     ((u32)&((KwlnFrameDrawBank *)0)->thirdList == 0x1D70) ? 1 : -1];
 typedef char KwlnFrameDrawBank_thirdMatrix_offset_must_be_0x1D90[
