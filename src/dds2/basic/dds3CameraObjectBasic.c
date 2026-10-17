@@ -15,12 +15,12 @@ extern void dds3DestroyObjectBase(ObjBase *base);
 
 /* Release the camera's inner node, base handle, and owned data block. */
 void dds3DestroyCameraData(EffWorldNode *camera) {
-    CameraData *data;
+    CameraData *cameraData;
 
     effObjFreeInner(camera);
-    data = ((CameraData *)camera->data);
-    dds3DestroyObjectBase(data->handle);
-    sdfReleaseChipBlock(data);
+    cameraData = ((CameraData *)camera->data);
+    dds3DestroyObjectBase(cameraData->handle);
+    sdfReleaseChipBlock(cameraData);
 }
 #include "dds3_world_secondary.h"
 u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
