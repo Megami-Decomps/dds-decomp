@@ -126,7 +126,7 @@ s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enab
 
 
 
-void evtSetWorldSlotValue(void *unit, u32 direction);
+void evtSetWorldSlotValue(void *worldNode, u32 direction);
 
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
