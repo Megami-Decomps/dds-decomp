@@ -2,6 +2,8 @@
 btlInitializeActorClearanceCameraPair = 0x001F3888; // type:func
 btlSetActorPanelYForMode = 0x001C16B0; // type:func
 _start = 0x00100008; // type:func
+// newlib's _ctype_ character-class table (EOF slot plus 256 entries); ctype macros index it from _ctype_ + 1
+_ctype_ = 0x00431AD0; // type:u8 size:0x101
 // $gp-relative byte spimdisasm leaves unsymbolized (emits an absolute %lo that encodes wrong)
 D_00435CF3 = 0x00435CF3; // type:u8
 // Pad port table in .sdata (pad init reads it as its own 4-byte object)
