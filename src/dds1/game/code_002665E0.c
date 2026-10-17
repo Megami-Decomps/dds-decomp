@@ -64,7 +64,7 @@ typedef struct BrsCornerColors {
 extern const BrsCornerColors D_003AFC40;
 
 void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *progressRow, s32 context, s32 rowIndex) {
+                   BrsProgressRow *progressRow, s32 surfaceIndex, s32 rowIndex) {
     DatPartyRecord *unit = progressRow->unit;
     DatPartyRecord *tintUnit;
     BrsCornerColors color = D_003AFC40;
@@ -79,7 +79,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
     iconX += work->fadeAnimation[rowIndex].portraitPosition[0];
     iconY = work->fadeAnimation[rowIndex].portraitPosition[1] - 0x14;
-    evtSetDrawSurfaceIndex(context);
+    evtSetDrawSurfaceIndex(surfaceIndex);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
 
     tintUnit = progressRow->unit;
@@ -97,7 +97,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         color.rgba[3] = packed;
     }
 
-    btlDrawButtonIconFixed64(&kwlnDrawSurfaces[context], iconX + (x >> 4),
+    btlDrawButtonIconFixed64(&kwlnDrawSurfaces[surfaceIndex], iconX + (x >> 4),
                              iconY + (y >> 3), color.rgba[0], color.rgba[1], color.rgba[2],
                              color.rgba[3], unit->unitId);
 
@@ -118,7 +118,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
         if (work->teardownResource != NULL) {
             effDrawSpriteWithCornerColors(x + (iconX << 4), y + (iconY << 3), z,
-                          color.rgba, 0, work->teardownResource, 0xF, context);
+                          color.rgba, 0, work->teardownResource, 0xF, surfaceIndex);
         }
     }
 }

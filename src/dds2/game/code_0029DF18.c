@@ -117,7 +117,7 @@ extern void btlDrawIconAtSize(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32, 
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428590);
 
 void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *progressRow, s32 context, s32 rowIndex) {
+                   BrsProgressRow *progressRow, s32 surfaceIndex, s32 rowIndex) {
     DatPartyRecord *unit = progressRow->unit;
     DatPartyRecord *tintUnit;
     u32 color[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
@@ -141,7 +141,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
     iconX += work->fadeAnimation[rowIndex].portraitPosition[0];
     iconY += work->fadeAnimation[rowIndex].portraitPosition[1];
-    evtSetDrawSurfaceIndex(context);
+    evtSetDrawSurfaceIndex(surfaceIndex);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
 
     tintUnit = progressRow->unit;
@@ -159,7 +159,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         color[3] = packed;
     }
 
-    btlDrawIconAtSize(&kwlnDrawSurfaces[context], iconX + (x >> 4),
+    btlDrawIconAtSize(&kwlnDrawSurfaces[surfaceIndex], iconX + (x >> 4),
                       iconY + (y >> 3), iconWidth, iconHeight, color[0],
                       color[1], color[2], color[3], unit->unitId);
 
@@ -180,7 +180,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
         if (work->teardownResource != NULL) {
             effDrawSpriteWithCornerColors(x + (iconX << 4), y + (iconY << 3), z,
-                          color, 0, work->teardownResource, 0x1C, context);
+                          color, 0, work->teardownResource, 0x1C, surfaceIndex);
         }
     }
 }
