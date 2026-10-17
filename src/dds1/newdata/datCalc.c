@@ -1719,17 +1719,17 @@ void evtPushLevelValueCCommand18E(void) {
 }
 
 void evtScriptSelectRandomValue(void) {
-    s32 value;
+    s32 resultCode;
     s32 roll;
 
     if ((((DatPartyRecord *)evtWorkScriptContextSecondArgument[0])->flags & 0x20) == 0) {
         roll = effMiscRandMod(0, 0x20);
-        value = roll != 0 ? 10 : 0x80;
+        resultCode = roll != 0 ? 10 : 0x80;
     } else {
         roll = effMiscRandMod(0, 0x30);
-        value = roll != 0 ? 0 : 0x80;
+        resultCode = roll != 0 ? 0 : 0x80;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(resultCode);
 }
 
 void evtPushRosterBaseValue(void) {
