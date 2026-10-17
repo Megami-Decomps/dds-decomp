@@ -52,7 +52,6 @@ extern ParSystem *D_00436404;
 
 extern void (*D_003AAF10[])(void *, void *, void *);
 
-extern BillDispatch D_003AAB88[];
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
@@ -182,7 +181,7 @@ ParObj *parInstantiateKind(ParObj *source) {
 }
 
 void parObjDispatch(ParObj *object) {
-    D_003AAB88[object->dispatchIndex].func();
+    parKindConstructorEntries[object->dispatchIndex].destroy(object);
 }
 
 extern void billInvokeCallback(BillObj *);
