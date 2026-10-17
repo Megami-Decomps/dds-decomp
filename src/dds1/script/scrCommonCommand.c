@@ -11,7 +11,7 @@
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
-s32 kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, f32 angleStep,
+s32 kwlnDrawSetCd0Clamped(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                           s32 blendControl);
 s32 kwlnDrawSetD30Clamped(s32 count, f32 phaseStep, f32 spacing,
@@ -461,7 +461,7 @@ s32 scrCmdConfigureFilterBlur(void)
 {
     s32 delaySpread;
     s32 size;
-    s32 count;
+    s32 filterCount;
     s32 sel;
     s32 kind;
     f32 f4;
@@ -482,13 +482,13 @@ s32 scrCmdConfigureFilterBlur(void)
         kind = 0x44;
         break;
     }
-    count = scrReadIntParameter(0);
+    filterCount = scrReadIntParameter(0);
     size = scrReadIntParameter(1);
     delaySpread = scrReadIntParameter(2);
     f3 = bfWaitReadArgFloat(3);
     f4 = bfWaitReadArgFloat(4);
     f5 = bfWaitReadArgFloat(5);
-    kwlnDrawSetCd0Clamped(count, size, delaySpread, f3, f4, f5, kind);
+    kwlnDrawSetCd0Clamped(filterCount, size, delaySpread, f3, f4, f5, kind);
     return 1;
 }
 
