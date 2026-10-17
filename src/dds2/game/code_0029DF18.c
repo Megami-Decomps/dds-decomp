@@ -40,7 +40,7 @@ void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
 }
 
 void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, BrsProgressRow *row,
-                   BrsActiveProgressList *list, s32 context, s32 index) {
+                   BrsActiveProgressList *list, s32 context, s32 progressRowIndex) {
     u32 color[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
     const s32 enemyPos[3] = { 0x19, 0x10, 2 };
     s32 allyPos[3] = { 0x38, 5, 3 };
@@ -50,7 +50,7 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, B
     const s32 *enemy;
     s32 *ally;
 
-    packed = work->fadeAnimation[index].backgroundOpacity | 0x80808000;
+    packed = work->fadeAnimation[progressRowIndex].backgroundOpacity | 0x80808000;
     unit = row->unit;
     color[0] = packed;
     color[1] = packed;
@@ -68,14 +68,14 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, B
 
         if (unit->flags & 2) {
             effDrawTextureSlotWithBlendedCornerColors(x - 0x1D0, y + 0x60, z,
-                          (work->fadeAnimation[index].backgroundOpacity << 8) >> 7, 0,
+                          (work->fadeAnimation[progressRowIndex].backgroundOpacity << 8) >> 7, 0,
                           work->teardownResource, 0x1F, context);
-            brsDrawProgressRowOverlays(x, y, z, work, &list->rows[index], context, index);
+            brsDrawProgressRowOverlays(x, y, z, work, &list->rows[progressRowIndex], context, progressRowIndex);
             px = enemy[0];
             py = enemy[1];
             slot = enemy[2];
         } else {
-            brsDrawProgressRowOverlays(x, y, z, work, &list->rows[index], context, index);
+            brsDrawProgressRowOverlays(x, y, z, work, &list->rows[progressRowIndex], context, progressRowIndex);
             px = ally[0];
             py = ally[1];
             slot = ally[2];
