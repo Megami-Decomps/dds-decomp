@@ -724,7 +724,7 @@ MdlPartEntry *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
 }
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 motionSlotIndex, s32 type, void *(*createPart)(MdlPartEntry *)) {
+void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
@@ -741,7 +741,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 motionS
             SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
 
             if (chunkRecord != NULL) {
-                MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, motionSlotIndex);
+                MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, resourceType, motionSlotIndex);
 
                 resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
