@@ -13,8 +13,14 @@
 #define IPU_CMD ((volatile u32 *)0x10002000)
 #define IPU_CTRL ((volatile u32 *)0x10002010)
 
+#define GIF_CTRL ((volatile u32 *)0x10003000)
+#define GIF_STAT ((volatile u32 *)0x10003020)
+#define VIF1_STAT ((volatile u32 *)0x10003C00)
+
 /* D1 is the VIF1 DMA channel, D3 fromIPU and D4 toIPU. */
 #define D1_CHCR ((volatile u32 *)0x10009000)
+#define D1_MADR ((volatile u32 *)0x10009010)
+#define D1_TADR ((volatile u32 *)0x10009030)
 #define D3_CHCR ((volatile u32 *)0x1000B000)
 #define D3_MADR ((volatile u32 *)0x1000B010)
 #define D3_QWC ((volatile u32 *)0x1000B020)

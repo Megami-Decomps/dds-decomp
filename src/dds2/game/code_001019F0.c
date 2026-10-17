@@ -85,7 +85,7 @@ extern const char D_00411178[];
 extern const s32 D_00435C0C;
 extern u32 sdfDiscType;
 extern u8 D_00438A8C;
-extern u32 D_00438D80;
+extern SdfThreadNode kwlnMainLoopThreadNode;
 extern u8 D_00439410[];
 s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     func_00356F58();
@@ -119,8 +119,7 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     sdfEnsureDeviceWorkerThreadStarted(0);
     sdfLoadModulesAndBindNamedResourceRpc(D_00411158, D_00411178);
     sdfStartAndSuspendWorkerThread();
-    sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_00438D80 + 8),
-                         kwlnRunMainLoop, D_00439410, 0x4000, 0x60, 0);
+    sdfStartTrackedThread(&kwlnMainLoopThreadNode, kwlnRunMainLoop, D_00439410, 0x4000, 0x60, 0);
     sdfThreadSleepSelf();
     return 0;
 }
