@@ -286,12 +286,12 @@ s32 kwlnTaskGetStateList(u32 state)
     }
 }
 
-KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index)
+KwlnTask *kwlnTaskGetByStateAndIndex(u32 taskState, s32 taskIndex)
 {
     KwlnTask *node = kwlnDelayedStartTaskHead;
     s32 i;
 
-    switch (state & KWLN_TASK_STATE_MASK) {
+    switch (taskState & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
         break;
     case KWLN_TASK_ACTIVE:
@@ -304,7 +304,7 @@ KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index)
     default:
         return NULL;
     }
-    for (i = 0; i < index && node != NULL; i++) {
+    for (i = 0; i < taskIndex && node != NULL; i++) {
         node = node->listNext;
     }
     return node;
