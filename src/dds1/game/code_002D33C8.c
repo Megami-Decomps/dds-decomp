@@ -106,7 +106,7 @@ extern volatile s8 sdfPacketSlotIndex;
 extern s32 D_003BD338;
 extern SdfPacketSlot D_00398158[];
 
-extern SdfTexResource *sdfPacketResourceEntries[];
+extern SdfGraphObj D_003980E0;
 
 void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
@@ -296,7 +296,7 @@ void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sour
 void sdfPatchPacketResourceField(SdfPatchableResourcePacket *packet, s32 entryIndex) {
     packet->resourcePacket.transfer.bitbltbuf.value =
         (packet->resourcePacket.transfer.bitbltbuf.value & ~0x3FFF) |
-        (u64)(u32)(sdfPacketResourceEntries[entryIndex]->word >> 6);
+        (u64)(u32)(D_003980E0.buffers[entryIndex]->word >> 6);
 }
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
@@ -312,7 +312,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
     packet = (SdfPatchableResourcePacket *)allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     packet->link.patch = sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket(&packet->resourcePacket,
-        sdfPacketResourceEntries[0], sourceX, sourceY, width, height,
+        D_003980E0.buffers[0], sourceX, sourceY, width, height,
         resourceAddress, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
@@ -1344,10 +1344,9 @@ void sdfCreateExtendedPacket(s32 packetList, u32 destinationBufferAddress, s32 d
 void sdfPatchPacketResourceReference(SdfGraphCopyPacket *packet, s32 entryIndex) {
     packet->draw.transfer.bitbltbuf.value =
         (packet->draw.transfer.bitbltbuf.value & ~0x3FFF) |
-        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->word >> 6);
+        (u64)(u32)(D_003980E0.buffers[entryIndex ^ packet->resourceIndexXor]->word >> 6);
 }
 
-extern SdfGraphObj D_003980E0;
 
 /* Build a local-to-local GS copy from graph buffer zero into destination. */
 void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *linkedList,

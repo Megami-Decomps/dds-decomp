@@ -1159,7 +1159,6 @@ extern SdfGraphObj kwlnHeldTextureDrawTarget;
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
 extern u32 D_003BA900;
-extern u32 D_003980F0[];
 extern SdfLightSources kwlnHeldTextureLightSources;
 extern f32 kwlnHeldTextureAmbientColor[4];
 extern u8 kwlnHeldTextureViewMatrix[0x40];
@@ -1175,7 +1174,7 @@ void kwlnInitHeldTextureScenePackets(void) {
     kwlnHeldTextureDrawTarget.auxiliaryFormat = 0x30;
     kwlnHeldTextureDrawTarget.buffers[0] = D_003BA8F4;
     kwlnHeldTextureDrawTarget.buffers[1] = 0;
-    kwlnHeldTextureDrawTarget.buffers[2] = (SdfTexResource *)D_003980F0[0];
+    kwlnHeldTextureDrawTarget.buffers[2] = D_003980E0.buffers[2];
     sdfCameraBuildProjection(&D_003247B0.camera);
     for (i = 0; i != 2; i++) {
         sdfInitPacketList(&D_00325870[i].heldTexture.list);
