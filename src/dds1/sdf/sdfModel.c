@@ -11,6 +11,7 @@
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
+#include "sdf_key_pool.h"
 #include "sdf_model_command_views.h"
 #include "sdf_packet_alloc.h"
 
@@ -388,13 +389,15 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
     sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
-/* Store the message words and install release callbacks on its work pointer. */
-void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, u32 *work, s32 thirdWord, s32 fourthWord) {
-    message->fourthWord = fourthWord;
-    message->firstWord = firstWord;
-    message->thirdWord = thirdWord;
-    message->work = work;
-    sdfInstallPoolNodeReleaseCallbacks(work);
+/* Store a provider's four draw surfaces and make the second a key-sorted pool. */
+void sdfStoreMessageWordsAndNotifyConsumer(struct SdfPoolNode **surfaces, struct SdfPoolNode *first,
+                                           struct SdfPoolNode *pool, struct SdfPoolNode *third,
+                                           struct SdfPoolNode *fourth) {
+    surfaces[3] = fourth;
+    surfaces[0] = first;
+    surfaces[2] = third;
+    surfaces[1] = pool;
+    sdfInstallPoolNodeReleaseCallbacks((SdfPool *)pool);
 }
 
 /* Nonzero when the bounds box lies entirely outside one clip plane: each

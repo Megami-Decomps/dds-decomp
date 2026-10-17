@@ -318,9 +318,9 @@ extern char D_00412EC0[]; /* "PLAYER_UNIT" */
 
 extern s32 D_00435F30;
 
-extern u8 D_0037FF88[];
+extern SdfPoolNode D_0037FF88[];
 
-extern u8 D_003807F8[];
+extern SdfPoolNode *D_00380788[13][4];
 
 
 #include "fld_encounter_roll_entry.h"
@@ -1742,7 +1742,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003807F8, (s32)D_0037FF88, (u32 *)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer(D_00380788[7], &D_0037FF88[0], &D_0037FF88[6], &D_0037FF88[8], &D_0037FF88[7]);
 }
 
 enum {

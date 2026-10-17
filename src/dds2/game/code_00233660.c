@@ -2883,7 +2883,7 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
 }
 
 extern SdfPoolNode D_003805A8;
-extern SdfPoolNode *D_00380788[];
+extern SdfPoolNode *D_00380788[13][4];
 s32 mdlViewerEnd(KwlnTask *task)
 {
   f32 step = mdlViewerState.viewerScale;
@@ -2922,7 +2922,7 @@ s32 mdlViewerEnd(KwlnTask *task)
             }
           }
         }
-        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], D_00380788);
+        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], D_00380788[0]);
         if (((s8) mdlViewerState.unk0E) != 0)
         {
           mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
@@ -2943,7 +2943,7 @@ s32 mdlViewerEnd(KwlnTask *task)
         {
           mdlViewerState.resources[i]->first->frameStep = step;
         }
-        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], D_00380788);
+        mdlProcessContextNodesAndTransforms(mdlViewerState.resources[i], D_00380788[0]);
         if (((s8) mdlViewerState.unk0E) != 0)
         {
           mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
