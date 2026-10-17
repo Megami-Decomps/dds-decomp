@@ -128,7 +128,7 @@ void kwlnDebugTaskCreate(void) {
     s32 i;
 
     if (kwlnTaskGetTaskByName(dds3AdminTaskName) == NULL) {
-        work = sdfAllocSizeClassBlock(0x24);
+        work = sdfAllocSizeClassBlock(sizeof(AdminWork));
         work->flags = 0;
         work->value = 0;
         work->activeMode = -1;

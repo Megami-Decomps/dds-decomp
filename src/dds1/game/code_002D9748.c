@@ -38,7 +38,6 @@
 #define SDF_ASSET_ALL_STATE_DIRTY 0xFF
 #define SDF_ASSET_ENTRY_COUNT 2
 #define SDF_SUBPARAM_BYTES 0x18
-#define SDF_ASSET_BYTES 0x48
 #define SDF_ASSET_DRAW_ENTRY_BYTES 0xA0
 #define SDF_RESOURCE_LIST_ITEM_BYTES 4
 #define SDF_RESOURCE_LIST_GROWTH 4
@@ -650,7 +649,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     s32 entryIndex;
 
     sdfLiveAssetCount++;
-    asset = sdfAllocAndClearQuadwords(SDF_ASSET_BYTES);
+    asset = sdfAllocAndClearQuadwords(sizeof(SdfAsset));
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
         entryWords = sdfAllocSizeClassBlock(SDF_ASSET_DRAW_ENTRY_BYTES);

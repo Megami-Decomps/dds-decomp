@@ -110,7 +110,7 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
 s32 dds3AllocateWorldObjectEntry(EffWorldNode *object) {
     WorldInfo *entry;
 
-    entry = (WorldInfo *)sdfAllocSizeClassBlock(0x28);
+    entry = (WorldInfo *)sdfAllocSizeClassBlock(sizeof(WorldInfo));
     if (entry == NULL) {
         return 0;
     }

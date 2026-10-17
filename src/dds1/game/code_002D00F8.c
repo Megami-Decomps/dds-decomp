@@ -126,7 +126,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
 
     heap->base = (u32)func_002FF538(heapSize);
     heap->size = heapSize;
-    freeBlock = sdfAllocSizeClassBlock(0x10);
+    freeBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
     alignedStart = (heap->base + SDF_MEM_ALIGNMENT_MASK) & ~SDF_MEM_ALIGNMENT_MASK;
     alignedEnd = (heap->base + heapSize) & ~SDF_MEM_ALIGNMENT_MASK;
     heap->head.prev = NULL;

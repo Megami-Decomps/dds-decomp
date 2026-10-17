@@ -379,7 +379,7 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry) {
         WaitSema(sdfPendingQueueSemaphore);
         pendingNode = owner->pending;
         if (pendingNode == NULL) {
-            pendingNode = (SdfPendingNode *)sdfAllocSizeClassBlock(SDF_PENDING_NODE_BYTES);
+            pendingNode = (SdfPendingNode *)sdfAllocSizeClassBlock(sizeof(SdfPendingNode));
             pendingNode->remaining = 0;
             pendingNode->next = sdfPendingQueueHead;
             pendingNode->buffer = NULL;
@@ -390,7 +390,7 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry) {
         freeEntries = pendingNode->remaining;
         entryBuffer = pendingNode->buffer;
         if (freeEntries == 0) {
-            SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfAllocSizeClassBlock(SDF_PENDING_BUFFER_BYTES);
+            SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfAllocSizeClassBlock(sizeof(SdfPendingBuffer));
             newBuffer->next = entryBuffer;
             pendingNode->buffer = newBuffer;
             entryBuffer = newBuffer;
@@ -1750,7 +1750,7 @@ void sdfInitializeObjectListRequest(void) {
 
 
 SdfDrawNode *sdfCreateDrawNode(void) {
-    SdfDrawNode *node = sdfAllocAndClearQuadwords(0x100);
+    SdfDrawNode *node = sdfAllocAndClearQuadwords(sizeof(SdfDrawNode));
 
     node->color = 0x80808080;
     node->unk16 = -1;

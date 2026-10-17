@@ -12,7 +12,6 @@ void dds3ReleaseWorldValueEntries(WorldValueIndices *object);
 void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *iterator);
 
 #define DDS3_WORLD_NODE_KIND 1
-#define DDS3_WORLD_INDEX_NODE_BYTES 0x10
 #define DDS3_WORLD_INVALID_ENTRY_INDEX (-1)
 
 /* Destroy the active world if present; clear the global only after destruction. */
@@ -128,7 +127,7 @@ WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount) {
     if (worldInfo->freeEntryCount < initialCount) {
         return NULL;
     }
-    indexNode = sdfAllocSizeClassBlock(DDS3_WORLD_INDEX_NODE_BYTES);
+    indexNode = sdfAllocSizeClassBlock(sizeof(WorldIndexNode));
     if (indexNode == NULL) {
         return NULL;
     }

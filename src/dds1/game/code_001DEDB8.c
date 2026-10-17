@@ -9187,7 +9187,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
 #include "btl_sound_handle_node.h"
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
-    SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
+    SoundHandleNode *node = sdfAllocAndClearQuadwords(sizeof(SoundHandleNode));
     BattleSoundArchiveEntry *entry = &D_0035F748[index];
     node->actor = actor;
     node->queue = fileCloneQueueEntries((struct FileQueue *)entry->archiveData);
@@ -9593,7 +9593,7 @@ s32 sndMapResourceType(s32 sound, s32 index) {
 
 /* Allocate a cleared active-sound node and prepend it to its independent list. */
 ActiveSoundNode *sndAllocListNode(void) {
-    ActiveSoundNode *node = sdfAllocAndClearQuadwords(0x14);
+    ActiveSoundNode *node = sdfAllocAndClearQuadwords(sizeof(ActiveSoundNode));
     BtlActorWork *state = (BtlActorWork *)btlGetRuntime();
     ActiveSoundNode *first;
 
@@ -9727,7 +9727,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
         node->work.refCount++;
         return node;
     }
-    node = sdfAllocAndClearQuadwords(0x108);
+    node = sdfAllocAndClearQuadwords(sizeof(SoundSlotOwner));
     node->category = category;
     node->work.id = id;
     node->work.refCount = 1;

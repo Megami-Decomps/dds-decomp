@@ -3212,7 +3212,7 @@ void btlAppendEntry(BtlResourceEntryList *list, const char *name, s32 category, 
 /* Initialize a browser descriptor at the first entry of the borrowed list.
  * The native constructor leaves textureCategory untouched. */
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
-    BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(BTL_RESOURCE_DESCRIPTOR_BYTES);
+    BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(sizeof(BtlResourceDescriptor));
 
     descriptor->originX = 8;
     descriptor->originY = 8;

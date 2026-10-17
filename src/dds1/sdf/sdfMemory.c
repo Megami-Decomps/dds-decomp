@@ -7,7 +7,6 @@
 #define SDF_HEAP_BLOCK_USED 1
 #define SDF_HEAP_BLOCK_END 2
 #define SDF_HEAP_ALIGNMENT_MASK 0x7F
-#define SDF_HEAP_BLOCK_DESCRIPTOR_BYTES 0x10
 
 SdfMemHeap sdfGeneralHeap __attribute__((section(".bss"), aligned(8)));
 
@@ -69,7 +68,7 @@ SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
+                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;
@@ -110,7 +109,7 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
+                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + (availableBytes - alignedBytes);
@@ -154,7 +153,7 @@ SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(SDF_HEAP_BLOCK_DESCRIPTOR_BYTES);
+                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;

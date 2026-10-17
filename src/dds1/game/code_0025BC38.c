@@ -642,7 +642,7 @@ s32 mnuUpdateMantraCostNotification(MnuSceneListNode *node, s32 index, s32 drawA
 }
 
 MnuSceneListNode *mnuAllocateMenuListNode(void) {
-    MnuSceneListNode *node = sdfAllocSizeClassBlock(0x14);
+    MnuSceneListNode *node = sdfAllocSizeClassBlock(sizeof(MnuSceneListNode));
 
     memset(node, 0, 0x14);
     return node;

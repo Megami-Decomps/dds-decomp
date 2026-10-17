@@ -66,7 +66,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     soundFormat.playbackCadenceStep = descriptor->playbackCadenceStep;
 
     if (!isPac) {
-        stream = sdfAllocAndClearQuadwords(0x14);
+        stream = sdfAllocAndClearQuadwords(sizeof(MovLinearStream));
         owner->stream.linear = stream;
         allocation = sdfAllocGeneralBlock(0x20000);
         stream->allocation = allocation;
@@ -88,7 +88,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         sdfMoviePacRingSemaphore = sdfCreateSemaphore(1, 1, 0);
     }
     D_003BDABC = -1;
-    pacWork = sdfAllocAndClearQuadwords(0x78);
+    pacWork = sdfAllocAndClearQuadwords(sizeof(MovPacStream));
     owner->stream.pac = pacWork;
     allocation = sdfAllocGeneralBlock(0x24000);
     pacWork->allocation = allocation;

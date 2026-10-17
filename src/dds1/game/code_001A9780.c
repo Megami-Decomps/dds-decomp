@@ -7881,7 +7881,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     BtlState *battle;
 
     battle = (BtlState *)btlGetRuntime();
-    work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
+    work = (SceneAiWork *)sdfAllocAndClearQuadwords(sizeof(SceneAiWork));
     object = (BattleSceneObject *)kwlnTaskGetUserValue(
         kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
     work->listA = btlAllocateIndexList(0xD);

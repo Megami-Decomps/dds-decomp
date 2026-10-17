@@ -71,7 +71,6 @@
 
 #define SDF_CONSOLE_CELL_BYTES 2
 
-#define SDF_CONSOLE_NODE_BYTES 0x20
 
 #define SDF_DMA_QWORD_SHIFT 4
 
@@ -1609,7 +1608,7 @@ ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns
     struct SdfMemBlock *bufferAllocation;
 
     sdfDevConsInit();
-    node = sdfAllocSizeClassBlock(SDF_CONSOLE_NODE_BYTES);
+    node = sdfAllocSizeClassBlock(sizeof(ConsNode));
     node->screenOriginX = screenOriginX;
     node->screenOriginY = screenOriginY;
     node->columns = columns;

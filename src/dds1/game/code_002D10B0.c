@@ -543,7 +543,7 @@ void sdfTexQueuePendingWork(SdfTexResource *texture) {
 void sdfTexInitializeLists(void) {
     SdfTexResource *head;
 
-    head = sdfAllocSizeClassBlock(0x1C);
+    head = sdfAllocSizeClassBlock(sizeof(SdfTexResource));
     head->size = 0x100000;
     head->next = NULL;
     head->prev = NULL;
@@ -1034,8 +1034,8 @@ void sdfTexListInsert(SdfTex *texture) {
 }
 
 SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary) {
-    SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
-    SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
+    SdfTex *tex = sdfAllocAndClearQuadwords(sizeof(SdfTex));
+    SdfTexRef *ref = sdfAllocAndClearQuadwords(sizeof(SdfTexRef));
 
     ref->refCount = 1;
     tex->paletteCount = paletteCount;
