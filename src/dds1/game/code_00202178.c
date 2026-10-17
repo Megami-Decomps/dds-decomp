@@ -3315,7 +3315,7 @@ s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command) {
     return (unit->status.flags & 0x200) < 1;
 }
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 
 extern char D_003A5D78[];
 

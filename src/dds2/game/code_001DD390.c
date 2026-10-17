@@ -126,7 +126,7 @@ extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 datActionAnimationRecords;
+extern u8 *datActionAnimationRecords;
 
 extern s32 btlCountTasksForOwner(s64);
 

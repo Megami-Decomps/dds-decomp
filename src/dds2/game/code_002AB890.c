@@ -781,7 +781,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
     return 0;
 }
 
-extern s32 D_00435E70;
+extern u8 *D_00435E70;
 extern void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
                                     s32 drawOption, s32 textOption, s32 layer);
 

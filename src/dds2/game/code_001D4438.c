@@ -126,9 +126,9 @@ extern void btlSyncPlayerWork(BtlUnit *);
 
 extern void fldInitializeSceneGroups(void);
 
-extern u32 D_00435E64;
+extern u8 *D_00435E64;
 
-extern u32 D_00435E5C;
+extern u8 *D_00435E5C;
 
 extern SceneSlotFadeWork *D_00438F54;
 
@@ -1442,7 +1442,7 @@ void btlEnterAttackActionState(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
 struct SoundMixer;
 extern const char D_00417348[];

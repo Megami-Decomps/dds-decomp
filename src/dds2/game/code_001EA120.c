@@ -53,7 +53,7 @@ extern void btlSetDefaultActionCameraPose();
 typedef struct BtlUnit BtlUnit;
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
-extern s32 datActionAnimationRecords;
+extern u8 *datActionAnimationRecords;
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
@@ -1288,7 +1288,7 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *unit) {
     }
 }
 
-extern s32 datActionAnimationRecords;
+extern u8 *datActionAnimationRecords;
 extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlSelectLinkageSkillCameraPreset();
 

@@ -2643,7 +2643,7 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
     return 1;
 }
 
-extern s32 D_003BAAA8;
+extern u8 *D_003BAAA8;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {

@@ -3468,7 +3468,7 @@ void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
 }
 
 
-extern s32 D_00435DF0;
+extern u8 *D_00435DF0;
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
 f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
