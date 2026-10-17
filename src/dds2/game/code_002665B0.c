@@ -884,8 +884,8 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
 }
 
 /* Apply the supplied terminal track mode with enable fixed to one. */
-void mnuEnableTerminalTrackMode(s8 index) {
-    mnuTerminalSetTrack(index, 1);
+void mnuEnableTerminalTrackMode(s8 mode) {
+    mnuTerminalSetTrack(mode, 1);
 }
 
 /* Allocate seven effect batches and seed their two opaque parameter words.
