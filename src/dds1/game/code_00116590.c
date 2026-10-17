@@ -39,27 +39,27 @@ void evtReleaseActionWorldNode(EffWorldNode *object) {
     dds3RemoveWorldObjectNode(object);
 }
 
-void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 blendFrames) {
-    EffLightData *state = object->data;
+void evtBeginUnitValueColorTransition(EffWorldNode *lightNode, s32 blendFrames) {
+    EffLightData *lightData = lightNode->data;
     s32 color1[4];
     s32 color2[4];
     u32 packed1;
     u32 packed2;
 
-    state->flags |= EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS;
+    lightData->flags |= EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS;
     if (blendFrames == 0) {
-        state->flags &= ~EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
+        lightData->flags &= ~EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
     } else {
-        state->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
-        state->blendFrames = blendFrames;
+        lightData->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
+        lightData->blendFrames = blendFrames;
         VU0_LOAD_VF(vf10, D_00324770[0]);
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;
-        state->packedColorA = color1[0];
+        lightData->packedColorA = color1[0];
         VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
         EE_MMI_RGBA_PACK(packed2);
         color2[0] = packed2;
-        state->packedColorB = color2[0];
+        lightData->packedColorB = color2[0];
     }
 }
 
