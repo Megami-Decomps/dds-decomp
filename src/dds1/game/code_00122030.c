@@ -84,9 +84,9 @@ extern s32 D_003BAB20;
 
 extern s32 D_0032E4DC[];
 
-extern u8 D_00324F88[];
+extern SdfPoolNode D_00324F88[];
 
-extern u8 D_003257F8[];
+extern SdfPoolNode *D_00325788[13][4];
 
 extern u8 D_00324530[];
 
@@ -1566,7 +1566,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (u32 *)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer(D_00325788[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
 }
 
 #include "fld_encounter_roll_entry.h"

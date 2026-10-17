@@ -30,13 +30,16 @@ typedef struct SdfKeyTreeNode {
     s32 balance;                  /* 0x0C */
 } SdfKeyTreeNode;
 
+/* A key-sorted draw-surface pool: an SdfPoolNode whose append and prepend
+ * callbacks release a node into the pool and update its free list. */
 typedef struct SdfPool {
-    u8 unk0[4];                    /* 0x00 */
-    SdfKeyPoolNode *head;          /* 0x04: first node in the emitted chain */
-    SdfKeyPoolNode *tail;          /* 0x08: last node in the emitted chain */
-    SdfKeyPoolNode *freeHead;      /* 0x0C */
-    u8 unk10[8];                   /* 0x10 */
-    SdfKeyTreeNode *keyTree[1];    /* 0x18: first root; allocation continues */
+    void *link;                                                /* 0x00: the pool entry's link */
+    SdfKeyPoolNode *head;                                      /* 0x04: first node in the emitted chain */
+    SdfKeyPoolNode *tail;                                      /* 0x08: last node in the emitted chain */
+    SdfKeyPoolNode *freeHead;                                  /* 0x0C */
+    void (*release)(struct SdfPool *, SdfKeyPoolNode *);       /* 0x10: the entry's append */
+    void (*update)(struct SdfPool *, s32, SdfKeyPoolNode *);   /* 0x14: the entry's prepend */
+    SdfKeyTreeNode *keyTree[1];                                /* 0x18: first root; allocation continues */
 } SdfPool;
 
 void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item);
@@ -52,5 +55,6 @@ typedef char SdfPool_size_must_be_0x1C[(sizeof(SdfPool) == 0x1C) ? 1 : -1];
 
 void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node);
 void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *node);
+void sdfInstallPoolNodeReleaseCallbacks(SdfPool *pool);
 
 #endif
