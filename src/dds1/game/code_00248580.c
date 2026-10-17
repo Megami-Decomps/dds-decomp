@@ -997,27 +997,27 @@ s32 fldPollSceneState(void) {
 extern char mnuTerminalPreparationPopupEntry[];
 
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
-s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
-    s32 context = kwlnTaskGetUserValue(value);
+s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuTerminalWork *work = (MenuTerminalWork *)context;
     s32 *state = &work->popupState;
 
     mnuSetPopupEntry(state, mnuTerminalPreparationPopupEntry);
-    return menuRunPanel((void *)context, 0, (void *)value);
+    return menuRunPanel((void *)context, 0, (void *)task);
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
-s32 evtRunTerminalPanel(KwlnTask *value) {
-    s32 context = kwlnTaskGetUserValue(value);
+s32 evtRunTerminalPanel(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
-    return menuRunPanel((void *)context, 1, (void *)value);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
-s32 evtRunTerminalPanelSync(KwlnTask *value) {
-    s32 context = kwlnTaskGetUserValue(value);
+s32 evtRunTerminalPanelSync(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
-    return menuRunPanel((void *)context, 2, (void *)value);
+    return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 /* Require the fade to be inactive before testing message-window control for idle. */
