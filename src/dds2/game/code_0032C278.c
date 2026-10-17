@@ -1780,11 +1780,11 @@ SdfDrawNode *sdfCreateDrawNode(void) {
     return node;
 }
 
-void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
-    void *workspace = root->workspace;
+u8 *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
+    u8 *workspace = root->workspace;
 
     if (workspace == NULL) {
-        workspace = (void *)sdfAllocSizeClassBlock(0x100);
+        workspace = (u8 *)sdfAllocSizeClassBlock(0x100);
         root->workspace = workspace;
     }
     return workspace;
