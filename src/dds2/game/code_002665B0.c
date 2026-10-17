@@ -324,7 +324,7 @@ extern MenuTextEntry D_003A47E8[];
 
 /* Select an encoded text row, draw it at the supplied grid cell, and queue the glyph.
  * The signed-byte slot is not bounds checked; DDS2 subtracts 0x120 from gridX. */
-void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
+void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
     FrFontGlyph *handle;
 
@@ -333,7 +333,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     } else {
         text = D_003A47E8[slot].encodedText;
     }
-    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
+    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, colors, text, 0);
     frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
