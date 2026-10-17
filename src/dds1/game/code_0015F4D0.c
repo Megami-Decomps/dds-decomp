@@ -159,8 +159,8 @@ void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 
-void *billGetWorkTransformMatrix(void *packet) {
-    return (u8 *)packet + 0x20;
+BlurPacketQuad *billGetWorkTransformMatrix(void *packet) {
+    return (BlurPacketQuad *)((u8 *)packet + 0x20);
 }
 
 SdfDrawPacket *effCreateSizedDrawPacket(s32 height, s32 flags) {

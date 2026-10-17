@@ -61,7 +61,6 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern s32 fldIsUpdateInhibited();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
-extern void *billGetWorkTransformMatrix(void *packet);
 
 extern void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource);
 extern void effDrawBlurListWithFramePacket(void *);
