@@ -123,7 +123,7 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 isRestoringHistory;
-    void (*entry)(s32, void *);
+    void (*modeEntryCallback)(s32, void *);
 
     if ((flags & 1) != 0 && work->requestedMode >= 0) {
         if (work->modeTransitionDelay != 0) {
@@ -153,9 +153,9 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
         }
         work->signedHistory[work->historyIndex] = work->activeMode;
         work->unsignedHistory[work->historyIndex] = 0;
-        entry = ddsAdminModeCallbacks[work->activeMode].entry;
-        if (entry != NULL) {
-            entry(isRestoringHistory, work->requestData);
+        modeEntryCallback = ddsAdminModeCallbacks[work->activeMode].entry;
+        if (modeEntryCallback != NULL) {
+            modeEntryCallback(isRestoringHistory, work->requestData);
         }
     }
     return (s32)dds3AdminPollModeCompletion;
