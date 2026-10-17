@@ -25,10 +25,12 @@ typedef struct FilePacRequest {
     PacState packet;
     u16 readinessEnabled;
     u16 slot;
-    u8 pad6C[4];
+    struct FilePacRequest *callbackNext; /* 0x6C: PAC completion callback queue link */
 } FilePacRequest;
 
 typedef char FilePacRequest_size_must_be_0x70[(sizeof(FilePacRequest) == 0x70) ? 1 : -1];
 typedef char FilePacRequest_queue_must_be_at_0x60[
     ((u32)&((FilePacRequest *)0)->packet.queueHead == 0x60) ? 1 : -1];
+typedef char FilePacRequest_callback_next_must_be_at_0x6C[
+    ((u32)&((FilePacRequest *)0)->callbackNext == 0x6C) ? 1 : -1];
 #endif /* FILE_PAC_H */

@@ -195,7 +195,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     const char *modelName;
     SdfModel *inner;
     s32 family;
-    s32 index;
+    s32 chunkIndex;
     s32 chunkId;
     s32 subtype;
     s32 *slot;
@@ -204,12 +204,12 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     modelName = sdfNamedChunkGetNameById(model->inner, 0);
     for (family = 0; family < 5; family++) {
         if (strcmp(modelName, dds3BipedModelNames[family]) == 0) {
-            for (index = 0; index < 17; index++) {
+            for (chunkIndex = 0; chunkIndex < 17; chunkIndex++) {
                 inner = model->inner;
-                chunkId = sdfNamedChunkFindId(inner, dds3BipedChunkNames[index]);
+                chunkId = sdfNamedChunkFindId(inner, dds3BipedChunkNames[chunkIndex]);
                 if (chunkId > 0) {
                     base->resourceSlotCount = 17;
-                    base->resourceSlots[index] = chunkId;
+                    base->resourceSlots[chunkIndex] = chunkId;
                     base->resourceSlotFamily = family;
                 }
             }
@@ -220,12 +220,12 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     for (family = 0; family < 9; family++) {
         if (strcmp(modelName, dds3ExtendedBipedModelNames[family]) == 0) {
             subtype = family + 0x1000;
-            for (index = 0; index < 18; index++) {
+            for (chunkIndex = 0; chunkIndex < 18; chunkIndex++) {
                 inner = model->inner;
-                chunkId = sdfNamedChunkFindId(inner, dds3ExtendedBipedChunkNames[index]);
+                chunkId = sdfNamedChunkFindId(inner, dds3ExtendedBipedChunkNames[chunkIndex]);
                 if (chunkId > 0) {
                     base->resourceSlotCount = 18;
-                    base->resourceSlots[index] = chunkId;
+                    base->resourceSlots[chunkIndex] = chunkId;
                     base->resourceSlotFamily = subtype;
                 }
             }
@@ -234,12 +234,12 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     }
 
     if (strcmp(modelName, dds3PlayerModelName) == 0) {
-        for (index = 0; index < 17; index++) {
+        for (chunkIndex = 0; chunkIndex < 17; chunkIndex++) {
             inner = model->inner;
-            chunkId = sdfNamedChunkFindId(inner, dds3PlayerChunkNames[index]);
+            chunkId = sdfNamedChunkFindId(inner, dds3PlayerChunkNames[chunkIndex]);
             if (chunkId > 0) {
                 base->resourceSlotCount = 17;
-                base->resourceSlots[index] = chunkId;
+                base->resourceSlots[chunkIndex] = chunkId;
                 base->resourceSlotFamily = 0x2000;
             }
         }
@@ -251,7 +251,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
         s32 category = 0x3000;
         slot = base->resourceSlots;
         boneNameRow = dds3Pc013ChunkNames;
-        for (index = count - 1; index >= 0; index--, slot++, boneNameRow++) {
+        for (chunkIndex = count - 1; chunkIndex >= 0; chunkIndex--, slot++, boneNameRow++) {
             inner = model->inner;
             chunkId = sdfNamedChunkFindId(inner, *boneNameRow);
             if (chunkId > 0) {

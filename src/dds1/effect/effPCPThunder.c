@@ -336,7 +336,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
 EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
     SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
     EffThunderVectorWork *work = (EffThunderVectorWork *)sdfResourceRetainAddress(allocationHandle);
-    u32 i;
+    u32 cellIndex;
 
     work->head.vector = *parameters;
     work->cells = (EffThunderVectorCell *)(work + 1);
@@ -346,10 +346,10 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
     work->cellSystem = parAllocateCellSystem(work->head.vector.cellCount, work->head.vector.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->cellSystem, 2, work->head.vector.dispatchArg, work->head.vector.dispatchArg);
     parSetCellDrawBucket(work->cellSystem, work->head.vector.systemParam);
-    for (i = 0; i < work->head.vector.cellCount; i++) {
-        work->cells[i].delayFrames = 0;
-        work->cells[i].activeFrames = 0;
-        work->cells[i].color = 0;
+    for (cellIndex = 0; cellIndex < work->head.vector.cellCount; cellIndex++) {
+        work->cells[cellIndex].delayFrames = 0;
+        work->cells[cellIndex].activeFrames = 0;
+        work->cells[cellIndex].color = 0;
     }
     work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
     return work;

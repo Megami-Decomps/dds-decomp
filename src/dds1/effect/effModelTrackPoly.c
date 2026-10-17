@@ -81,24 +81,24 @@ void effTrackPolyUpdate(EffTrackPolyWork *work) {
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
     SdfMemBlock *handle = sdfAllocGeneralBlock(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
     EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
-    u32 i;
+    u32 workIndex;
 
     list->handle = handle;
     list->items = (EffTrackPolyWork **)(list + 1);
     list->count = count;
-    for (i = 0; i < count; i++) {
-        list->items[i] = effTrackPolyCreateWork(params);
+    for (workIndex = 0; workIndex < count; workIndex++) {
+        list->items[workIndex] = effTrackPolyCreateWork(params);
     }
     return list;
 }
 
 void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list) {
     u32 count = list->count;
-    u32 i = 0;
+    u32 workIndex = 0;
 
-    while (i < count) {
-        effTrackPolyRelease(list->items[i]);
-        i++;
+    while (workIndex < count) {
+        effTrackPolyRelease(list->items[workIndex]);
+        workIndex++;
     }
     sdfReleaseResourceAllocation(list->handle);
 }
@@ -117,11 +117,11 @@ void effTrackPolySetIndexedColor(EffTrackPolyList *list, s32 index, u32 color) {
 
 void effTrackPolyDrawModelWorkList(EffTrackPolyList *list) {
     u32 count = list->count;
-    u32 i = 0;
+    u32 workIndex = 0;
 
-    while (i < count) {
-        effTrackPolyDrawWork(list->items[i]);
-        i++;
+    while (workIndex < count) {
+        effTrackPolyDrawWork(list->items[workIndex]);
+        workIndex++;
     }
 }
 

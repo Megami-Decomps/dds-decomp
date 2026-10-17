@@ -363,9 +363,9 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
     u32 historyCount = work->historyCount;
     u32 *paletteEntry = work->colorTable;
     f32 blendStep = 1.0f / historyCount;
-    u32 i;
+    u32 paletteEntryIndex;
 
-    for (i = 0; i < historyCount; i++) {
+    for (paletteEntryIndex = 0; paletteEntryIndex < historyCount; paletteEntryIndex++) {
         *paletteEntry++ = effBlendColor(colorA, colorB, blendFraction);
         blendFraction += blendStep;
     }
@@ -391,7 +391,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(allocation);
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
-    u32 i;
+    u32 particleIndex;
 
     work->head = *src;
     work->allocationHandle = allocation;
@@ -402,7 +402,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.delaySpread;
-    for (i = 0; i < count; i++) {
+    for (particleIndex = 0; particleIndex < count; particleIndex++) {
         particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
@@ -738,17 +738,17 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 fade;
     s32 frame;
-    u32 i;
+    u32 particleIndex;
 
     /* Retain the native slot lookup even though its returned address is unused. */
     effMathGetSlotAt(slots, 0);
-    for (i = 0; i < count; i++) {
+    for (particleIndex = 0; particleIndex < count; particleIndex++) {
         frame = *delays;
         if (frame == 0) {
-            effMagatuhiBuildBezierControlPointsVU(work, i);
+            effMagatuhiBuildBezierControlPointsVU(work, particleIndex);
         }
         if (frame > 0 && frame <= life) {
-            effMathStepBezierSlot(slots, i, out);
+            effMathStepBezierSlot(slots, particleIndex, out);
             if (fadeIn > frame) {
                 fade = (f32)frame / (f32)fadeIn;
             } else if (life - frame <= fadeOut) {
@@ -756,8 +756,8 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
             } else {
                 fade = 1.0f;
             }
-            effMagatuhiSetValue(valueWork, i, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
-            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
+            effMagatuhiSetValue(valueWork, particleIndex, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
+            effMagatuhiUpdateValueHistorySlot(valueWork, particleIndex, out);
         }
         if (frame >= life && respawn) {
             *delays = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
@@ -772,13 +772,13 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
 void effMagatuhiSetControlPointParams(EffMagatuhiCallback *work, EffMagatuhiRowsSrc *src) {
     EffMagatuhiWideSecond *dst = effGetHandlerArg(work->effect);
-    u32 i;
+    u32 controlPointIndex;
 
-    for (i = 0; i < EFF_MAGATUHI_CONTROL_POINT_COUNT; i++) {
-        dst->head.controlPoints[i][0] = src->controlPoints[i][0];
-        dst->head.controlPoints[i][1] = src->controlPoints[i][1];
-        dst->head.controlPoints[i][2] = src->controlPoints[i][2];
-        dst->head.jitterScales[i] = src->jitterScales[i];
+    for (controlPointIndex = 0; controlPointIndex < EFF_MAGATUHI_CONTROL_POINT_COUNT; controlPointIndex++) {
+        dst->head.controlPoints[controlPointIndex][0] = src->controlPoints[controlPointIndex][0];
+        dst->head.controlPoints[controlPointIndex][1] = src->controlPoints[controlPointIndex][1];
+        dst->head.controlPoints[controlPointIndex][2] = src->controlPoints[controlPointIndex][2];
+        dst->head.jitterScales[controlPointIndex] = src->jitterScales[controlPointIndex];
     }
 }
 
@@ -796,15 +796,15 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *callback) {
     f32 endPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 blendFraction;
     f32 blendStep;
-    u32 i;
-    u32 j;
+    u32 particleIndex;
+    u32 sampleIndex;
     s32 sampleSpan;
     EffCubicBezierSlot *slot;
 
-    for (i = 0; i < count; i += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
-        effMagatuhiBuildBezierControlPointsVU(work, i);
+    for (particleIndex = 0; particleIndex < count; particleIndex += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
+        effMagatuhiBuildBezierControlPointsVU(work, particleIndex);
         *ages = effMiscRand((EffRandState *)effDefaultRandomState) % lifetimeFrames;
-        slot = effMathGetSlotAt(work->mathResource, i);
+        slot = effMathGetSlotAt(work->mathResource, particleIndex);
         if (historyFrames < *ages) {
             slot->t = slot->step * (f32)(*ages - historyFrames);
             sampleSpan = historyFrames;
@@ -813,16 +813,16 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *callback) {
             sampleSpan = historyFrames - *ages;
         }
         blendFraction = 0.0f;
-        effMathStepBezierSlot(work->mathResource, i, startPosition);
+        effMathStepBezierSlot(work->mathResource, particleIndex, startPosition);
         slot->t = slot->step * (f32)*ages;
-        effMathStepBezierSlot(work->mathResource, i, endPosition);
+        effMathStepBezierSlot(work->mathResource, particleIndex, endPosition);
         blendStep = 1.0f / (f32)sampleSpan;
-        for (j = 0; j < sampleSpan; j++) {
+        for (sampleIndex = 0; sampleIndex < sampleSpan; sampleIndex++) {
             VU0_LOAD_VF(vf10, startPosition);
             VU0_LOAD_VF(vf11, endPosition);
             VU0_LERP_VF10(blendFraction);
             VU0_STORE_VF(vf10, samplePosition);
-            effMagatuhiUpdateValueHistorySlot(valueWork, i, samplePosition);
+            effMagatuhiUpdateValueHistorySlot(valueWork, particleIndex, samplePosition);
             blendFraction += blendStep;
         }
         (*ages)++;

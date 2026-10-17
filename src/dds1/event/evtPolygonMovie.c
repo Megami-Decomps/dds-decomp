@@ -238,8 +238,8 @@ void evtBlendParamsC(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *b
 
 void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
 {
-    s32 i;
-    s32 j;
+    s32 positionOrCornerIndex;
+    s32 coordinateIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -254,20 +254,20 @@ void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQ
     out->blendControl = a->blendControl;
     out->angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->angle, b->angle);
     out->displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->displacement, b->displacement);
-    for (i = 0; i < 2; i++) {
-        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
+    for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
+        out->position[positionOrCornerIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
     }
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 2; j++) {
-            out->corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[i][j], b->corners[i][j]);
+    for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
+        for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
+            out->corners[positionOrCornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
 
 void evtBlendParamsB(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateBody *b, EffBlurTemplateBody *out)
 {
-    s32 i;
-    s32 j;
+    s32 positionOrCornerIndex;
+    s32 coordinateIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -283,20 +283,20 @@ void evtBlendParamsB(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateB
     out->source.blendControl = a->source.blendControl;
     out->source.angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->source.angle, b->source.angle);
     out->source.displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->source.displacement, b->source.displacement);
-    for (i = 0; i < 2; i++) {
-        out->source.position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.position[i], b->source.position[i]);
+    for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
+        out->source.position[positionOrCornerIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.position[positionOrCornerIndex], b->source.position[positionOrCornerIndex]);
     }
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 2; j++) {
-            out->source.corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.corners[i][j], b->source.corners[i][j]);
+    for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
+        for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
+            out->source.corners[positionOrCornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.corners[positionOrCornerIndex][coordinateIndex], b->source.corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
 
 void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, EffSolidRectParams *b, EffSolidRectParams *out)
 {
-    s32 i;
-    s32 j;
+    s32 cornerIndex;
+    s32 coordinateIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -307,9 +307,9 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, E
     if (b == NULL) {
         b = &evtMovieDefaultSolidRect;
     }
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 2; j++) {
-            out->corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[i][j], b->corners[i][j]);
+    for (cornerIndex = 0; cornerIndex < 2; cornerIndex++) {
+        for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
+            out->corners[cornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[cornerIndex][coordinateIndex], b->corners[cornerIndex][coordinateIndex]);
         }
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
@@ -318,7 +318,7 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, E
 
 void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRectParams *b, EffResourceRectParams *out)
 {
-    s32 i;
+    s32 centerCoordinateIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -330,8 +330,9 @@ void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRec
         b = &evtMovieDefaultResourceRect;
     }
     out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
-    for (i = 0; i < 2; i++) {
-        out->center[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->center[i], b->center[i]);
+    for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
+        out->center[centerCoordinateIndex] = evtMovieInterpolateIntIfEnabled(
+            enable, t, a->center[centerCoordinateIndex], b->center[centerCoordinateIndex]);
     }
     out->draw.rgba = evtPolygonMovieBlendColor(enable, t, a->draw.rgba, b->draw.rgba);
     out->draw.blendControl = a->draw.blendControl;
@@ -339,7 +340,7 @@ void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRec
 
 void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterParams *b, EffBlurScatterParams *out)
 {
-    s32 i;
+    s32 positionAxisIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -358,15 +359,15 @@ void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterP
     out->uvDisplacementAngleDegrees = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
     out->uvDisplacementAmplitude = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
     out->positionSpread = evtMovieInterpolateUintIfEnabled(enable, t, a->positionSpread, b->positionSpread);
-    for (i = 0; i < 2; i++) {
-        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
+    for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
+        out->position[positionAxisIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
     }
     out->size = evtMovieInterpolateUintIfEnabled(enable, t, a->size, b->size);
 }
 
 void evtBlendParamsF(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParams *b, EffBlurScaleParams *out)
 {
-    s32 i;
+    s32 positionAxisIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -385,16 +386,16 @@ void evtBlendParamsF(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParam
     out->uvDisplacementAngleDegrees = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
     out->uvDisplacementAmplitude = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
     out->angleStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->angleStep, b->angleStep);
-    for (i = 0; i < 2; i++) {
-        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
+    for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
+        out->position[positionAxisIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
     }
     out->size = evtMovieInterpolateUintIfEnabled(enable, t, a->size, b->size);
 }
 
 void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
 {
-    s32 i;
-    s32 j;
+    s32 positionOrCornerIndex;
+    s32 coordinateIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -409,12 +410,12 @@ void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQ
     out->blendControl = a->blendControl;
     out->angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->angle, b->angle);
     out->displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->displacement, b->displacement);
-    for (i = 0; i < 2; i++) {
-        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
+    for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
+        out->position[positionOrCornerIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
     }
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < 2; j++) {
-            out->corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[i][j], b->corners[i][j]);
+    for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
+        for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
+            out->corners[positionOrCornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }

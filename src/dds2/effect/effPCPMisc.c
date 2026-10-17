@@ -2923,7 +2923,7 @@ void effPcpUpdateCameraRelativeTripleGroups(EffPCPTripleWork *work) {
     s32 frame = work->frame;
     u32 color = work->color;
     u32 group;
-    u32 index;
+    u32 handleIndex;
 
     sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     VU0_STORE_MATRIX(basis);
@@ -2940,11 +2940,11 @@ void effPcpUpdateCameraRelativeTripleGroups(EffPCPTripleWork *work) {
             VU0_APPLY_MATRIX(vf10, vf10);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, position);
-            for (index = 0; index < 7; index++) {
-                if (frame >= (s32)((u32)work->head.handleDelay[index] + (u32)start)) {
-                    effSetNodeParameterValue((struct EffNode *)work->handles[group * 7 + index], color);
-                    effCopyVectorToNodeInstance((struct EffNode *)work->handles[group * 7 + index], position);
-                    effUpdateNode((struct EffNode *)work->handles[group * 7 + index]);
+            for (handleIndex = 0; handleIndex < 7; handleIndex++) {
+                if (frame >= (s32)((u32)work->head.handleDelay[handleIndex] + (u32)start)) {
+                    effSetNodeParameterValue((struct EffNode *)work->handles[group * 7 + handleIndex], color);
+                    effCopyVectorToNodeInstance((struct EffNode *)work->handles[group * 7 + handleIndex], position);
+                    effUpdateNode((struct EffNode *)work->handles[group * 7 + handleIndex]);
                 }
             }
         }

@@ -377,29 +377,29 @@ void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origi
     ParHistory *history;
     ParSlot *slot;
     f32 (*destination)[4];
-    s32 count;
-    s32 capacity;
-    s32 index;
+    s32 pointCount;
+    s32 pointCapacity;
+    s32 pointIndex;
 
     PCP_COPY_VECTOR(localOrigin, origin);
     history = &source->records[slotIndex];
     slot = &table->slots[slotIndex];
-    count = history->count;
-    capacity = source->capacity;
-    slot->pointCount = count;
+    pointCount = history->count;
+    pointCapacity = source->capacity;
+    slot->pointCount = pointCount;
     destination = (f32 (*)[4])slot->points;
-    index = history->nextIndex;
-    if (count > 0) {
+    pointIndex = history->nextIndex;
+    if (pointCount > 0) {
         f32 (*points)[3] = history->points;
-        s32 lastIndex = capacity - 1;
-        s32 remaining = count;
+        s32 lastIndex = pointCapacity - 1;
+        s32 remaining = pointCount;
 
         do {
             --remaining;
-            index = index == 0 ? lastIndex : index - 1;
-            (*destination)[0] = localOrigin[0] + points[index][0];
-            (*destination)[1] = localOrigin[1] + points[index][1];
-            (*destination)[2] = localOrigin[2] + points[index][2];
+            pointIndex = pointIndex == 0 ? lastIndex : pointIndex - 1;
+            (*destination)[0] = localOrigin[0] + points[pointIndex][0];
+            (*destination)[1] = localOrigin[1] + points[pointIndex][1];
+            (*destination)[2] = localOrigin[2] + points[pointIndex][2];
             ++destination;
         } while (remaining != 0);
     }
@@ -472,7 +472,7 @@ void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin,
 
     if (count >= 2) {
         s32 segments;
-        s32 i;
+        s32 segmentIndex;
         s32 lastIndex;
         s32 ring;
 
@@ -486,7 +486,7 @@ void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin,
         point[1] = localOrigin[1] + history->points[ring][1];
         point[2] = localOrigin[2] + history->points[ring][2];
         point[3] = 0;
-        for (i = 0; i < segments; i++) {
+        for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
             VU0_LOAD_VF(vf10, point);
             ring = ring == 0 ? lastIndex : ring - 1;
             point[0] = localOrigin[0] + history->points[ring][0];
@@ -529,7 +529,7 @@ void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *orig
 
     if (count >= 2) {
         s32 segments;
-        s32 i;
+        s32 segmentIndex;
         s32 lastIndex;
         s32 ring;
 
@@ -543,7 +543,7 @@ void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *orig
         point[1] = localOrigin[1] + history->points[ring][1];
         point[2] = localOrigin[2] + history->points[ring][2];
         point[3] = 0;
-        for (i = 0; i < segments; i++) {
+        for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
             VU0_LOAD_VF(vf10, point);
             ring = ring == 0 ? lastIndex : ring - 1;
             point[0] = localOrigin[0] + history->points[ring][0];

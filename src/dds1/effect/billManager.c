@@ -156,7 +156,7 @@ void billFlushPendingChildPackets(void) {
         do {
             BillPacketWork *work = node->work;
             s32 count = work->count;
-            s32 i;
+            s32 listIndex;
 
             if (count > 0) {
                 u32 *vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors, work->uv,
@@ -165,12 +165,12 @@ void billFlushPendingChildPackets(void) {
                 work->count = 0;
             }
 
-            for (i = 0; i < 5; i++) {
-                SdfListHead *value = node->pendingLists[i];
+            for (listIndex = 0; listIndex < 5; listIndex++) {
+                SdfListHead *value = node->pendingLists[listIndex];
 
                 if (value != NULL) {
-                    D_0034E030[i]->append(D_0034E030[i], value);
-                    node->pendingLists[i] = 0;
+                    D_0034E030[listIndex]->append(D_0034E030[listIndex], value);
+                    node->pendingLists[listIndex] = 0;
                 }
             }
 
@@ -353,30 +353,30 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
     u16 uv[7][4][4];
     BillPacketWork *data[2];
     s32 count;
-    s32 i;
+    s32 quadIndex;
 
     data[0] = pair->children[0]->work;
     data[1] = pair->children[1]->work;
     count = data[1]->count;
-    for (i = 0; i < count; i++) {
-        colors[i][0] = data[0]->colors[i];
-        colors[i][1] = data[1]->colors[i];
-        uv[i][0][0] = data[0]->uv[i].components[0];
-        uv[i][0][1] = data[0]->uv[i].components[1];
-        uv[i][1][0] = data[0]->uv[i].components[2];
-        uv[i][1][1] = data[0]->uv[i].components[3];
-        uv[i][2][0] = data[0]->uv[i].components[4];
-        uv[i][2][1] = data[0]->uv[i].components[5];
-        uv[i][3][0] = data[0]->uv[i].components[6];
-        uv[i][3][1] = data[0]->uv[i].components[7];
-        uv[i][0][2] = data[1]->uv[i].components[0];
-        uv[i][0][3] = data[1]->uv[i].components[1];
-        uv[i][1][2] = data[1]->uv[i].components[2];
-        uv[i][1][3] = data[1]->uv[i].components[3];
-        uv[i][2][2] = data[1]->uv[i].components[4];
-        uv[i][2][3] = data[1]->uv[i].components[5];
-        uv[i][3][2] = data[1]->uv[i].components[6];
-        uv[i][3][3] = data[1]->uv[i].components[7];
+    for (quadIndex = 0; quadIndex < count; quadIndex++) {
+        colors[quadIndex][0] = data[0]->colors[quadIndex];
+        colors[quadIndex][1] = data[1]->colors[quadIndex];
+        uv[quadIndex][0][0] = data[0]->uv[quadIndex].components[0];
+        uv[quadIndex][0][1] = data[0]->uv[quadIndex].components[1];
+        uv[quadIndex][1][0] = data[0]->uv[quadIndex].components[2];
+        uv[quadIndex][1][1] = data[0]->uv[quadIndex].components[3];
+        uv[quadIndex][2][0] = data[0]->uv[quadIndex].components[4];
+        uv[quadIndex][2][1] = data[0]->uv[quadIndex].components[5];
+        uv[quadIndex][3][0] = data[0]->uv[quadIndex].components[6];
+        uv[quadIndex][3][1] = data[0]->uv[quadIndex].components[7];
+        uv[quadIndex][0][2] = data[1]->uv[quadIndex].components[0];
+        uv[quadIndex][0][3] = data[1]->uv[quadIndex].components[1];
+        uv[quadIndex][1][2] = data[1]->uv[quadIndex].components[2];
+        uv[quadIndex][1][3] = data[1]->uv[quadIndex].components[3];
+        uv[quadIndex][2][2] = data[1]->uv[quadIndex].components[4];
+        uv[quadIndex][2][3] = data[1]->uv[quadIndex].components[5];
+        uv[quadIndex][3][2] = data[1]->uv[quadIndex].components[6];
+        uv[quadIndex][3][3] = data[1]->uv[quadIndex].components[7];
     }
     sdfAppendPacket(pair->packetList,
         (u32)sdfBuildPairedQuadVifPacket((u128 *)data[1]->positions, colors, uv,
@@ -791,14 +791,14 @@ BillData *billCreateAnimationDataFromResource(void *resourceData) {
 
 /* Drop one reference; the last one releases every entry and the block itself. */
 void billReleaseSharedEntryBlock(BillData *block) {
-    s32 i;
+    s32 childIndex;
 
     block->listRefCount--;
     if (block->listRefCount == 0) {
-        i = 0;
-        while (i < block->childCount) {
-            effReleaseSharedTextureRecord(block->children[i]);
-            i++;
+        childIndex = 0;
+        while (childIndex < block->childCount) {
+            effReleaseSharedTextureRecord(block->children[childIndex]);
+            childIndex++;
         }
         sdfReleaseResourceAllocation(block->allocation);
     }
