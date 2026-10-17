@@ -4,6 +4,7 @@
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_draw_packet_groups.h"
+#include "kwln_frame_draw_bank.h"
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
 #include "kwln.h"
@@ -126,18 +127,15 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
 
 #define KWLN_FRAME_POOL_NODE_COUNT 0x62
 
-extern u8 D_003808B0[];
 extern SdfPoolNode kwlnDrawSurfaces[KWLN_FRAME_POOL_NODE_COUNT];
 extern u8 D_00380860[];
-extern u8 D_00380870[];
+extern KwlnFrameDrawBank D_00380870[2];
 extern void sdfWaitAndSelectBuffer(void);
 extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
 extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
-extern void sdfInitializeDrawPacketGroups(u8 *);
 
 #define KWLN_FRAME_BUFFER_BYTES 0x1F40
 #define KWLN_FRAME_LAST_GROUP_INDEX 12
-#define KWLN_FRAME_GROUP_BYTES 0x1B0
 #define KWLN_FRAME_PACKET_LIST_BYTES 0x20
 #define KWLN_FRAME_GS_PACKET_BYTES 0x40
 #define KWLN_FRAME_GIF_AD_REGISTER 0xE
@@ -167,20 +165,20 @@ extern void sdfInitializeDrawPacketGroups(u8 *);
 s32 kwlnPrepareFrameDrawPackets(KwlnTask *task) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     s32 groupIndex;
-    u8 *packetGroups;
+    SdfDrawPacketGroups *packetGroups;
     SdfPoolNode *drawSink;
 
     sdfWaitAndSelectBuffer();
     sdfInitPacketPoolNodeChain(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
     sdfClearPacketChain((SdfPacketChain *)D_00380860);
     kwlnInitializeFrameDrawPackets(bufferIndex);
-    packetGroups = D_003808B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
+    packetGroups = D_00380870[bufferIndex].packetGroups;
     for (groupIndex = KWLN_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
         sdfInitializeDrawPacketGroups(packetGroups);
-        packetGroups += KWLN_FRAME_GROUP_BYTES;
+        packetGroups++;
     }
     drawSink = kwlnDrawSurfaces;
-    drawSink->append(drawSink, (SdfListHead *)(D_00380870 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+    drawSink->append(drawSink, &D_00380870[bufferIndex].initialList);
     return 0;
 }
 
@@ -401,7 +399,7 @@ extern s8 D_00438A20;
 s32 kwlnRenderFrame(KwlnTask *task) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     SdfPoolNode *(*groupHeads)[4];
-    u8 *packetGroups;
+    SdfDrawPacketGroups *packetGroups;
     SdfListHead *packetList;
     u64 *texturePacket;
     u64 *blendPacket;
@@ -418,11 +416,11 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     kwlnQueueBackgroundFadeOverlayPacket();
     kwlnAdvanceDrawFadesAndTransitions();
     groupHeads = D_00380788;
-    packetGroups = D_003808B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
+    packetGroups = D_00380870[bufferIndex].packetGroups;
     for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
         sdfSubmitDrawPacketGroups(*groupHeads, packetGroups);
         groupHeads++;
-        packetGroups += KWLN_FRAME_GROUP_BYTES;
+        packetGroups++;
     }
     if (kwlnDrawOverlayEnabled != 0 && fldIsUpdateInhibited() == 0) {
         packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
