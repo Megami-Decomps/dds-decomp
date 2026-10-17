@@ -521,11 +521,11 @@ char *scrReadStringParameter(s32 parameterIndex)
 {
     ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - parameterIndex - 1;
-    s32 type = (s8)scr->stackTypes[stackIndex];
+    s32 stackType = (s8)scr->stackTypes[stackIndex];
 
-    if (type >= 0) {
-        if (type >= SCR_STACK_TYPE_STRING) {
-            if (type == SCR_STACK_TYPE_STRING) {
+    if (stackType >= 0) {
+        if (stackType >= SCR_STACK_TYPE_STRING) {
+            if (stackType == SCR_STACK_TYPE_STRING) {
                 return scr->stackValues[stackIndex].s;
             }
         }
