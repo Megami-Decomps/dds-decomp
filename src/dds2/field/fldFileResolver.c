@@ -4407,7 +4407,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     MdlCtx *model;
 
     if (work->unk190 > 0) {
-        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+        if (work->terrainAttritionKind == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
             fldPlayMenuSound(0x22);
             kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
             kwlnPadStartMotor(0, 1, 6);

@@ -4288,7 +4288,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     MdlCtx *model;
 
     if (work->unk184 > 0) {
-        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+        if (work->terrainAttritionKind == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
             kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
             kwlnPadStartMotor(0, 1, 6);
             kwlnPadStartMotor(1, 0x96, 6);
@@ -7153,7 +7153,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
     }
 }
 
-/* Non-owning native alias of fldAreaState.unk11C (FldAreaWork + 0x11C). */
+/* Non-owning native alias of fldAreaState.terrainAttritionKind (FldAreaWork + 0x11C). */
 extern s32 D_0032E4CC[];
 
 /* Classify flagged zone faces after checking the current movement. */
@@ -7259,7 +7259,7 @@ void fldClassifyMovementAgainstZoneFaces(f32 *position) {
                             accepted = 1;
                         }
                         if (accepted == 1) {
-                            areaState->unk11C = accepted;
+                            areaState->terrainAttritionKind = accepted;
                         }
                     }
                 }

@@ -893,7 +893,7 @@ void fldResetFieldRuntimeState(s32 mode) {
     area->cameraTargetAngle = 0.0f;
     area->dist = 0.0f;
     memset(area->pad124, 0, sizeof(area->pad124));
-    area->unk11C = 0;
+    area->terrainAttritionKind = 0;
     area->sceneCommand = 0;
     area->colorEffectSuppressed = 0;
     area->defaultEncounterId = 0;
@@ -1017,7 +1017,7 @@ void fldInitializeAreaWork(void) {
     area->overlayMode = 1;
     area->overlayCounter = 0;
     area->unkD8 = -1;
-    area->unk11C = 0;
+    area->terrainAttritionKind = 0;
     area->unk184 = 0;
     area->cameraTiltActive = 0;
     area->nextArea = -1;
