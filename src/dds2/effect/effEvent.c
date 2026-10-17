@@ -1172,7 +1172,7 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
     f32 rotationMatrix[4][4];
     f32 matrix[4][4];
     f32 scale;
-    s32 i;
+    s32 entryIndex;
     u32 frame;
     u32 color;
     u16 count;
@@ -1188,25 +1188,25 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
     count = list->count;
     entry = list->entries;
     color = work->init.color;
-    for (i = 0; i < count; i++, entry++) {
-        if (entry->zeroKindCount < frame && effect->parameterWorks[i] != NULL) {
+    for (entryIndex = 0; entryIndex < count; entryIndex++, entry++) {
+        if (entry->zeroKindCount < frame && effect->parameterWorks[entryIndex] != NULL) {
             if (entry->aimParams.scaleKind != 5 || work->actor == NULL) {
                 effEventLoadSelectedAimPositionVu(&work->init, &entry->aimParams);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
-                effParamWorkCallback0(effect->parameterWorks[i], position);
-                effParamWorkCallback2(effect->parameterWorks[i], rotationMatrix);
+                effParamWorkCallback0(effect->parameterWorks[entryIndex], position);
+                effParamWorkCallback2(effect->parameterWorks[entryIndex], rotationMatrix);
             } else {
                 model = work->actor->owner->inner;
                 sdfLoadMapRecordPositionVector(model, entry->aimParams.aimMode);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
-                effParamWorkCallback0(effect->parameterWorks[i], position);
+                effParamWorkCallback0(effect->parameterWorks[entryIndex], position);
                 /* The callback can change the entry's scale kind. */
                 if (entry->aimParams.scaleKind == 5) {
                     sdfLoadMapRecordLookAtBasis(model, entry->aimParams.aimMode);
                     VU0_LOAD_MATRIX_B(rotationMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
-                    effParamWorkCallback2(effect->parameterWorks[i], matrix);
+                    effParamWorkCallback2(effect->parameterWorks[entryIndex], matrix);
                 } else {
                     mdlLoadTertiaryVectorVU(work->actor->owner);
                     VU0_GET_VF10_X(scale);
@@ -1217,11 +1217,11 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
-                    effParamWorkCallback2(effect->parameterWorks[i], matrix);
+                    effParamWorkCallback2(effect->parameterWorks[entryIndex], matrix);
                 }
             }
-            effParamWorkCallback3(effect->parameterWorks[i], color);
-            effParamWorkInvokeCallback(effect->parameterWorks[i]);
+            effParamWorkCallback3(effect->parameterWorks[entryIndex], color);
+            effParamWorkInvokeCallback(effect->parameterWorks[entryIndex]);
         }
     }
     if (effect->triggerFrame == frame && effect->triggerFrameCallback != NULL) {
