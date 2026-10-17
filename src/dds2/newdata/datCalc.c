@@ -2234,11 +2234,11 @@ s32 evtTestSolarPhaseOrModelFlag(u32 condition) {
 /* Three conditional encounter groups follow the record's condition header. */
 u8 btlSelectConditionalEncounterGroup(s32 encounterIndex) {
     s8 enabled[3];
-    s32 i;
+    s32 conditionIndex;
     u8 code;
 
-    for (i = 0; i < 3; i++) {
-        enabled[i] = evtTestSolarPhaseOrModelFlag(D_00435E0C[encounterIndex].conditions[i]);
+    for (conditionIndex = 0; conditionIndex < 3; conditionIndex++) {
+        enabled[conditionIndex] = evtTestSolarPhaseOrModelFlag(D_00435E0C[encounterIndex].conditions[conditionIndex]);
     }
     code = D_00435E0C[encounterIndex].variantCodes[0];
     if (enabled[0] && enabled[1] && enabled[2]) {
