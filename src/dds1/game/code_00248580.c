@@ -26,6 +26,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "mnu_effect_pair.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PERCENT_PAIR_BYTES 0xA8
@@ -136,11 +137,6 @@ extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s
 extern char mnuNumberSpriteFormat[];
 
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
-typedef struct EffectPair {
-    s32 firstValue;
-    s32 secondValue;
-} EffectPair;
-
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
