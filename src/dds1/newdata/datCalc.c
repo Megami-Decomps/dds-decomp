@@ -1071,7 +1071,7 @@ extern DatSkillList *D_003BAA58;
 s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex) {
     DatAffinityRecord *record;
     s32 requirement;
-    s32 value;
+    s32 requirementValue;
     u32 i;
 
     if (unit == NULL) {
@@ -1092,16 +1092,16 @@ s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 req
         }
         break;
     case 0x10000000:
-        value = requirement & 0x0FFFFFFF;
+        requirementValue = requirement & 0x0FFFFFFF;
         for (i = 0; i < 24; i++) {
-            if (unit->effectData[i] != 0 && (1 << datCommandSelectors[unit->effectData[i]].stat) == value) {
+            if (unit->effectData[i] != 0 && (1 << datCommandSelectors[unit->effectData[i]].stat) == requirementValue) {
                 return 1;
             }
         }
         break;
     case 0x20000000:
-        value = requirement & 0x0FFFFFFF;
-        if (value == 0 || value == (1 << unit->unitId)) {
+        requirementValue = requirement & 0x0FFFFFFF;
+        if (requirementValue == 0 || requirementValue == (1 << unit->unitId)) {
             return 1;
         }
         break;
