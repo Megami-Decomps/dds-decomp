@@ -4478,7 +4478,135 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BC8A8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416498);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BCFB0);
+/* Draw the phase-change panels and their trailing echoes.
+ * The first pair retains four converted source bounds across its echo draws;
+ * each draw still reads the current coordinates and texture reference. */
+extern const s32 D_00416498[4];
+extern const s32 D_004164A8[4];
+extern const s32 D_004164B8[4];
+extern s32 btlDrawGouraudTexturedPanelQuad(s32, s32, s32, s32, s32, s32, s32, s32,
+                                         s32, s32, s32, s32, const s32 *, s32);
+void func_001BCFB0(BattlePhasePanelWork *work) {
+    f32 bounds[4];
+    s32 modeOneSlots[4];
+    s32 modeZeroSlots[4];
+    s32 colors[4];
+    s32 panel;
+    s32 channel;
+    s32 echo;
+    s32 *slots;
+    s32 cropX;
+    s32 cropY;
+
+    memcpy(modeOneSlots, D_00416498, sizeof(modeOneSlots));
+    memcpy(modeZeroSlots, D_004164A8, sizeof(modeZeroSlots));
+    memcpy(colors, D_004164B8, sizeof(colors));
+    if (work->secondaryPhase >= 7) {
+        return;
+    }
+    if (work->secondaryPhase < 0) {
+        return;
+    }
+    slots = modeZeroSlots;
+    if (work->mode != 0) {
+        slots = modeOneSlots;
+    }
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    for (panel = 0; panel < 2; panel++) {
+        for (channel = 0; channel < 4; channel++) {
+            u32 color = btlSetSlotLowByteClamped(btlResourceBlock->resC, slots[panel],
+                                               channel, work->fade[panel + 3][channel]);
+            {
+                u32 alphaRed = ((color & 0xFF000000) >> 24) | (color << 24);
+                u32 greenBlue = ((color & 0xFF00) << 8) | ((color & 0xFF0000) >> 8);
+                colors[channel] = alphaRed | greenBlue;
+            }
+        }
+        bounds[0] = btlResourceBlock->resC->descriptions[slots[panel]].colors[0];
+        bounds[1] = btlResourceBlock->resC->descriptions[slots[panel]].colors[1];
+        bounds[2] = btlResourceBlock->resC->descriptions[slots[panel]].colors[2];
+        bounds[3] = btlResourceBlock->resC->descriptions[slots[panel]].colors[3];
+        cropX = btlResourceBlock->resC->workEntries[slots[panel]].geometry.bounds[2] >> 4;
+        cropY = btlResourceBlock->resC->workEntries[slots[panel]].geometry.bounds[3] >> 3;
+        btlDrawGouraudTexturedPanelQuad(
+            work->current[panel + 3][0], work->current[panel + 3][1],
+            work->current[panel + 3][0] + cropX, work->current[panel + 3][1],
+            work->current[panel + 3][0] + work->saved[panel + 3][0],
+            work->current[panel + 3][1] + work->saved[panel + 3][1] + cropY,
+            work->current[panel + 3][0] + work->saved[panel + 3][0] + cropX,
+            work->current[panel + 3][1] + work->saved[panel + 3][1] + cropY,
+            bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1],
+            colors, (s32)btlResourceBlock->resC->textureReferences[
+                    btlResourceBlock->resC->descriptions[slots[panel]].textureIndex]);
+        if (work->echoCount > 0) {
+            for (echo = 0; echo < work->echoCount; echo++) {
+                s32 x;
+                for (channel = 0; channel < 4; channel++) {
+                    u32 color = btlSetSlotLowByteClamped(btlResourceBlock->resC, slots[panel],
+                                                       channel, work->echoCount * 6);
+                    {
+                        u32 alphaRed = ((color & 0xFF000000) >> 24) | (color << 24);
+                        u32 greenBlue = ((color & 0xFF00) << 8) | ((color & 0xFF0000) >> 8);
+                        colors[channel] = alphaRed | greenBlue;
+                    }
+                }
+                x = work->current[panel + 3][0] + (work->echoCount - echo) * 5;
+                btlDrawGouraudTexturedPanelQuad(
+                    x, work->current[panel + 3][1],
+                    x + cropX, work->current[panel + 3][1],
+                    x + work->saved[panel + 3][0],
+                    work->current[panel + 3][1] + work->saved[panel + 3][1] + cropY,
+                    x + work->saved[panel + 3][0] + cropX,
+                    work->current[panel + 3][1] + work->saved[panel + 3][1] + cropY,
+                    bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1],
+                    colors, (s32)btlResourceBlock->resC->textureReferences[
+                            btlResourceBlock->resC->descriptions[slots[panel]].textureIndex]);
+            }
+        }
+    }
+    for (panel = 2; panel < 4; panel++) {
+        for (channel = 0; channel < 4; channel++) {
+            u32 fade;
+            u32 red;
+            u32 green;
+            u32 blue;
+            u32 rgb;
+            colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, slots[panel],
+                                                       channel, work->fade[panel + 3][channel]);
+            fade = work->fade[panel + 3][channel];
+            red = (fade << 24) | 0x80000000;
+            green = (fade << 16) | 0x00800000;
+            blue = (fade << 8) | 0x00008000;
+            rgb = (red | green) | blue;
+            colors[channel] |= rgb;
+        }
+        if (work->flags[panel - 2] != 0) {
+            bounds[0] = btlResourceBlock->resC->descriptions[slots[panel]].colors[0];
+            bounds[1] = btlResourceBlock->resC->descriptions[slots[panel]].colors[1];
+            bounds[2] = btlResourceBlock->resC->descriptions[slots[panel]].colors[2];
+            bounds[3] = btlResourceBlock->resC->descriptions[slots[panel]].colors[3];
+            cropX = btlResourceBlock->resC->workEntries[slots[panel]].geometry.bounds[2] >> 4;
+            cropY = btlResourceBlock->resC->workEntries[slots[panel]].geometry.bounds[3] >> 3;
+            btlDrawGouraudTexturedPanelQuad(
+                work->current[panel + 1][0], work->current[panel + 1][1],
+                work->current[panel + 1][0] + cropX, work->current[panel + 1][1],
+                work->current[panel + 1][0] + work->saved[panel + 1][0],
+                work->current[panel + 1][1] + work->saved[panel + 1][1] + cropY,
+                work->current[panel + 1][0] + work->saved[panel + 1][0] + cropX,
+                work->current[panel + 1][1] + work->saved[panel + 1][1] + cropY,
+                bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1],
+                colors, (s32)btlResourceBlock->resC->textureReferences[
+                        btlResourceBlock->resC->descriptions[slots[panel]].textureIndex]);
+        }
+    }
+}
+
+/* The quad renderer owns this complete four-slot mode-zero bank. */
+const s32 D_004164A8[4] = {0x21, 0x22, 0x2C, 0x2D};
+
+
 
 extern s32 btlGetNamedTaskPairStatusOrUnavailable();
 
