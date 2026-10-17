@@ -284,6 +284,34 @@ s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
 that genuinely recurs. Wrapping a one-off call in an inline just to get
 `jal` is a codegen lever, not source.
 
+### A per-file no-sibling-call flag can be a stand-in for this helper
+
+The sound TU `game/code_002E87A8` (DDS2 `game/code_00341650`) once carried
+`-fno-optimize-sibling-calls` on its first and last thirds and the default
+flags on the middle third. The callers needed the sender
+`sndSendCommandPacket` defined above them in the same TU (a callee defined
+earlier carries `REG_EH_REGION 0`, which turns `func_002E9450`'s
+`BLEZL` into the retail `BLEZ`), so the three thirds are one TU, and one TU
+has one flag set. Under the default flags the whole 40-function extent
+matches with two ordinary changes:
+
+- the four `jal; ld $31` tails (`sndSendFilenameCommand`,
+  `sndSendChannelControlCommand`, `sndSendChannelGroupCommand140/150`) go
+  through `static inline u32 sndSendCommand(u32 command, const void *packet,
+  u32 size) { return sndSendCommandPacket(command, 0, packet, size); }` and
+  are `u32` functions returning it. A `void` caller or a `void` helper still
+  sibcalls (`j`); `u8`/`u16` callers add an `andi`; `s64`/`u64` callers grow;
+  a fall-off-the-end or a result local still sibcalls;
+- `sndCopyToIopAndWait`'s `goto retry/submit` form was only a layout
+  produced by the flag. The loops
+  `while ((dmaId = sceSifSetDma(...)) == 0) { delay = 0x186A0; while
+  (delay != 0) { delay -= 0x271; ... } } while (sceSifDmaStat(dmaId) >= 0) {}`
+  give the retail block order with or without the flag.
+
+A flag inferred from "all tails in this run are `jal`" is therefore weaker
+than it looks: test the helper form (3+ sites) and natural loops before
+assigning a per-file flag, and re-test existing flag entries the same way.
+
 ## Narrow return types and `jal` tails
 
 A function whose recovered return type is narrow can return a narrow callee's
