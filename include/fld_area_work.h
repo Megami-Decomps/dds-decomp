@@ -64,7 +64,7 @@ typedef struct FldAreaWork {
     f32 unkB4;
     f32 cameraTilt;              /* 0xB8 */
     s32 flagNumber;
-    s32 unkC0;
+    s32 flagStage;                /* 0xC0: one-based stage associated with the current floor flag. */
     s32 unkC4;                  /* -1 means no primary label selection. */
     s32 unkC8;                  /* -1 means no alternate label selection. */
     s32 overlayMode;
@@ -168,6 +168,7 @@ typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[
     (FLD_AREA_OFFSET(cameraTargetGraceTicks) == 0xE8) ? 1 : -1];
 typedef char FldAreaWork_transitionMode_offset_check[(FLD_AREA_OFFSET(transitionMode) == 0x104) ? 1 : -1];
 typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
+typedef char FldAreaWork_flagStage_offset_check[(FLD_AREA_OFFSET(flagStage) == 0xC0) ? 1 : -1];
 typedef char FldAreaWork_playerModelAlternate_offset_check[(FLD_AREA_OFFSET(playerModelAlternate) == 0x118) ? 1 : -1];
 typedef char FldAreaWork_unk11C_offset_check[(FLD_AREA_OFFSET(unk11C) == 0x11C) ? 1 : -1];
 typedef char FldAreaWork_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(colorEffectSuppressed) == 0x12A) ? 1 : -1];
