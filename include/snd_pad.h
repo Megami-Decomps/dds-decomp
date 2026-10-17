@@ -13,8 +13,8 @@ typedef struct SndPad {
             s8 confirm;
             s8 primaryTriangle;
             s8 primaryCancel;
-            s8 unk24;
-            s8 unk25;
+            s8 alternatePrev; /* +0x24: battle panels use as an alternate previous input. */
+            s8 alternateNext; /* +0x25: battle panels use as an alternate next input. */
             s8 prev;
             s8 next;
             u8 pad28[9];
@@ -37,6 +37,8 @@ typedef char SndPadSizeCheck[(sizeof(SndPad) == 0x40) ? 1 : -1];
 typedef char SndPadButtonsOffsetCheck[((u32)&((SndPad *)0)->buttons == 0x20) ? 1 : -1];
 typedef char SndPadConfirmOffsetCheck[((u32)&((SndPad *)0)->confirm == 0x21) ? 1 : -1];
 typedef char SndPadPrimaryCancelOffsetCheck[((u32)&((SndPad *)0)->primaryCancel == 0x23) ? 1 : -1];
+typedef char SndPadAlternatePrevOffsetCheck[((u32)&((SndPad *)0)->alternatePrev == 0x24) ? 1 : -1];
+typedef char SndPadAlternateNextOffsetCheck[((u32)&((SndPad *)0)->alternateNext == 0x25) ? 1 : -1];
 typedef char SndPadPrevOffsetCheck[((u32)&((SndPad *)0)->prev == 0x26) ? 1 : -1];
 typedef char SndPadNextOffsetCheck[((u32)&((SndPad *)0)->next == 0x27) ? 1 : -1];
 typedef char SndPadSecondaryCancelOffsetCheck[((u32)&((SndPad *)0)->secondaryCancel == 0x33) ? 1 : -1];

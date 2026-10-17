@@ -1860,9 +1860,9 @@ void func_001B5A20(BattleSceneObject *object) {
     case 1:
     case 2: {
         if (D_0037F510.confirm >= 0 && D_0037F510.primaryCancel >= 0) {
-            if ((D_0037F510.unk25 & 2) != 0) {
+            if ((D_0037F510.alternateNext & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 5 || D_0037F510.unk25 < 0) {
+                    if (btlCommandPanelWork->classIndex != 5 || D_0037F510.alternateNext < 0) {
                         btlCommandPanelWork->classIndex++;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -1883,9 +1883,9 @@ void func_001B5A20(BattleSceneObject *object) {
                         changed = 1;
                     }
                 }
-            } else if ((D_0037F510.unk24 & 2) != 0) {
+            } else if ((D_0037F510.alternatePrev & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 0 || D_0037F510.unk24 < 0) {
+                    if (btlCommandPanelWork->classIndex != 0 || D_0037F510.alternatePrev < 0) {
                         btlCommandPanelWork->classIndex--;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -5815,8 +5815,8 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(0xA);
                 btlSetActionActorPanelPresentation(command->owner, 0, 0);
             } else {
-                if (D_0037F510.unk25 & 2) {
-                    if (work->selectedReserveIndex != count - 1 || D_0037F510.unk25 < 0) {
+                if (D_0037F510.alternateNext & 2) {
+                    if (work->selectedReserveIndex != count - 1 || D_0037F510.alternateNext < 0) {
                         work->selectedReserveIndex++;
                         if (work->selectedReserveIndex >= count) {
                             work->selectedReserveIndex = 0;
@@ -5825,8 +5825,8 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                         btlSlotBankPromoteStates(work);
                         work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
                     }
-                } else if (D_0037F510.unk24 & 2) {
-                    if (work->selectedReserveIndex != 0 || D_0037F510.unk24 < 0) {
+                } else if (D_0037F510.alternatePrev & 2) {
+                    if (work->selectedReserveIndex != 0 || D_0037F510.alternatePrev < 0) {
                         work->selectedReserveIndex--;
                         if (work->selectedReserveIndex < 0) {
                             work->selectedReserveIndex = count - 1;
@@ -8843,16 +8843,16 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
 
     switch (mode) {
     case 0:
-        if ((D_0037F510.unk25 & 2) != 0) {
+        if ((D_0037F510.alternateNext & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.unk24 & 2) != 0) {
+        } else if ((D_0037F510.alternatePrev & 2) != 0) {
             direction = 2;
         }
         break;
     case 1:
-        if ((D_0037F510.unk24 & 2) != 0) {
+        if ((D_0037F510.alternatePrev & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.unk25 & 2) != 0) {
+        } else if ((D_0037F510.alternateNext & 2) != 0) {
             direction = 2;
         }
         break;
@@ -8871,16 +8871,16 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         }
         break;
     case 4:
-        if ((D_0037F510.prev & 2) != 0 || (D_0037F510.unk25 & 2) != 0) {
+        if ((D_0037F510.prev & 2) != 0 || (D_0037F510.alternateNext & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.next & 2) != 0 || (D_0037F510.unk24 & 2) != 0) {
+        } else if ((D_0037F510.next & 2) != 0 || (D_0037F510.alternatePrev & 2) != 0) {
             direction = 2;
         }
         break;
     case 5:
-        if ((D_0037F510.next & 2) != 0 || (D_0037F510.unk24 & 2) != 0) {
+        if ((D_0037F510.next & 2) != 0 || (D_0037F510.alternatePrev & 2) != 0) {
             direction = 1;
-        } else if ((D_0037F510.prev & 2) != 0 || (D_0037F510.unk25 & 2) != 0) {
+        } else if ((D_0037F510.prev & 2) != 0 || (D_0037F510.alternateNext & 2) != 0) {
             direction = 2;
         }
         break;
