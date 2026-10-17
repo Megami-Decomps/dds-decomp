@@ -6946,7 +6946,7 @@ s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margi
     f32 dist;
     f32 slack;
     s32 inside = 0;
-    s32 i;
+    s32 planeIndex;
 
     if (mode == 0) {
         probe[0] = 0.0f;
@@ -6967,8 +6967,8 @@ s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margi
         planar[0] = pos[0];
         planar[1] = pos[1];
     }
-    for (i = 0; i < count; i++) {
-        dist = fldDotVector(probe, zone->plane[i]) - zone->limit[i];
+    for (planeIndex = 0; planeIndex < count; planeIndex++) {
+        dist = fldDotVector(probe, zone->plane[planeIndex]) - zone->limit[planeIndex];
         slack = dist + margin;
         if (slack < 0.0f) {
             *out = -1.0f;
