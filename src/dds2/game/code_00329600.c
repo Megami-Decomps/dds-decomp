@@ -260,7 +260,7 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
     }
     /* Align the two-word reply within the stack scratch buffer to 64 bytes. */
     replyWords = (u32 *)(((u32)replyScratch + SDF_RPC_REPLY_ALIGNMENT_MASK) & ~SDF_RPC_REPLY_ALIGNMENT_MASK);
-    result = func_0034DE68(&sdfNamedResourceRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, NULL, NULL);
+    result = sceSifMCallRpc(&sdfNamedResourceRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, NULL, NULL);
     if (result >= 0) {
         if (outSize != NULL) {
             *outSize = replyWords[1];

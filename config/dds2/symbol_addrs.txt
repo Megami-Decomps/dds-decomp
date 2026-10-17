@@ -8979,6 +8979,8 @@ sdfStreamSendChunk = 0x00348278; // type:func  // dds1 0x002EF3D0
 sdfReleasePoolNode = 0x003489D8; // type:func  // dds1 0x002EFB30
 sceGsExecStoreImage = 0x00349AA8; // type:func  // dds1 0x002F0C00
 sceSdRemoteInit = 0x0034E6E0; // type:func  // dds1 0x002F5850
+// libmrpc's call function; its buffer alignment diagnostics name it
+sceSifMCallRpc = 0x0034DE68; // type:func  // dds1 0x002F4FD8
 dds3SlotRingEntries = 0x00384A80;   // dds1 0x00329A68
 fldMirroredSolarThresholds = 0x003AA720;   // dds1 0x0034DDF0
 billObjectCallbacks = 0x003AAF88;   // dds1 0x0034E658
@@ -11545,7 +11547,6 @@ func_0034DA80 = 0x0034DA80; // type:func
 sceSifMBindRpc = 0x0034DB88; // type:func
 func_0034DBB0 = 0x0034DBB0; // type:func
 func_0034DD48 = 0x0034DD48; // type:func
-func_0034DE68 = 0x0034DE68; // type:func
 func_0034E0D0 = 0x0034E0D0; // type:func
 func_0034E138 = 0x0034E138; // type:func
 sceIpuStopDMA = 0x0034E1A0; // type:func
