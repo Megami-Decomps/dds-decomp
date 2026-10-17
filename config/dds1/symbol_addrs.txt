@@ -1,5 +1,7 @@
 // Hand-curated symbols (win over the generated block below)
 _start = 0x00100008; // type:func
+// newlib's _ctype_ character-class table (EOF slot plus 256 entries); ctype macros index it from _ctype_ + 1
+_ctype_ = 0x003B7990; // type:u8 size:0x101
 // Pad port table in .sdata (pad init reads it as its own 4-byte object)
 // "FREE CAMERA" follows func_00287258's last vector constant in .rodata; its own item (D_003BC7B8 points at it)
 D_003B2560 = 0x003B2560; // type:asciz

@@ -8378,6 +8378,8 @@ INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0138);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0150);
 
+extern u8 *fldFindActorEntryByName(const char *);
+
 s32 fldResolveEventSelectorTarget(s32 selector) {
     s32 target;
     s32 index;

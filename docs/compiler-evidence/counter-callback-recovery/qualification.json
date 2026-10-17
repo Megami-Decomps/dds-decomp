@@ -1,0 +1,31 @@
+{
+  "base": "b0e5c2241ac11cc5eab004b5e91425083e6920d8",
+  "functions": 2,
+  "native_bytes": 2232,
+  "source_sha256": {
+    "src/dds1/game/code_001FC7D8.c": "48e99973dd671102e6e32c9749c3125cd00f2e1d8710e38cbd5a714dc96fd969",
+    "src/dds2/game/code_0020E850.c": "fbba8faee2cbb05c4925eab881462022c75266802ceb7edb157c2711e8207363"
+  },
+  "whole_owner_matches": {
+    "dds1": 59,
+    "dds2": 65
+  },
+  "differing_functions": 0,
+  "retail_sha1": {
+    "dds1": "6d18898e2724bf1d145392766e8ba1e678487419",
+    "dds2": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add"
+  },
+  "development_changed_payload_words": {
+    "dds1": 0,
+    "dds2": 0
+  },
+  "four_target_noop": true,
+  "log_sha256": {
+    "check-revision2-dds1.log": "e1c4f2b676040e243cab3136d92ca65cbab2d69f5b637db7b1d8a6166d4d7ed2",
+    "check-revision2-dds2.log": "e25b46895421d70b3ccc69e024227146e0f5cf2e56c3ad6ca3cf93e3943d680b",
+    "check-owner-dds1.log": "76b09c34cfca498534096d64d0e034802603e22ab23c5a209ff157e9c46f69e4",
+    "check-owner-dds2.log": "a08faae9f02cc457eae8812eed1e5d077b5f698032bd559e7f71fac8bfdf1457",
+    "build-final.log": "50ff66e08e1fa32785c0f573494303eb995de14270f846b8913edab2e4751c80",
+    "noop.log": "8c35b1682f73592d30612d7b0fabdb384fcfff35cb5a076cb48b85b1368aa794"
+  }
+}

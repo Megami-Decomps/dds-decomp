@@ -166,7 +166,7 @@ EffWorldNode *dds3CreateWorldNodeForKind(u32 kind) {
     if (kind >= EFF_WORLD_KIND_COUNT) {
         return NULL;
     }
-    node = sdfAllocSizeClassBlock(0x44);
+    node = sdfAllocSizeClassBlock(sizeof(EffWorldNode));
     if (node == NULL) {
         return NULL;
     }

@@ -18,9 +18,7 @@ typedef struct BattleSceneSelection {
  * the state word alone is not a complete scene-object allocation. */
 typedef struct BattleSceneObject {
     s32 state;
-    BattleSceneSelection selections[7]; /* +0x04: indexed by scene kind 0..6. */
-    BattleSceneSelection auxiliarySelection; /* +0x20: additional command selection. */
-    u8 pad24[4];
+    BattleSceneSelection selections[9]; /* +0x04: command classes include kind 8. */
     struct BattleIndexWork *commandData; /* +0x28: owning actor's complete +0x20 work. */
 #ifdef VERSION_DDS1
     struct BtlTask *owner; /* +0x2C: the 0x170-byte DDS1 actor */
@@ -28,6 +26,10 @@ typedef struct BattleSceneObject {
     struct ActionStateLink *owner; /* +0x2C: the 0x180-byte DDS2 actor */
 #endif
 } BattleSceneObject;
+
+typedef char BattleSceneObjectSizeCheck[sizeof(BattleSceneObject) == 0x30 ? 1 : -1];
+typedef char BattleSceneObjectCommandDataOffsetCheck[((u32)&((BattleSceneObject *)0)->commandData == 0x28) ? 1 : -1];
+typedef char BattleSceneObjectOwnerOffsetCheck[((u32)&((BattleSceneObject *)0)->owner == 0x2C) ? 1 : -1];
 
 /* Both scene scratch constructors allocate and clear 0x38 bytes. */
 typedef struct SceneKindTable {
@@ -37,8 +39,7 @@ typedef struct SceneKindTable {
     s32 entry;
     s32 cursor;
     s32 row;
-    u32 value[8];
-    u8 pad34[4];
+    u32 value[9]; /* +0x14..0x37: command classes include kind 8. */
 } SceneKindTable;
 
 typedef char SceneKindTable_size_must_be_0x38[(sizeof(SceneKindTable) == 0x38) ? 1 : -1];

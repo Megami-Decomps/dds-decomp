@@ -833,7 +833,7 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
 }
 
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
-    SdfTaskEntry *work = sdfAllocSizeClassBlock(0x1C);
+    SdfTaskEntry *work = sdfAllocSizeClassBlock(sizeof(SdfTaskEntry));
 
     memset(work, 0, 0x1C);
     work->flags = SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_UPDATE_ENABLED |

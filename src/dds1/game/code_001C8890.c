@@ -1964,6 +1964,9 @@ void btlMarkLinkedActorStatusFlag(s32 task) {
     ;
 }
 
+extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
+
 /* State-handler table entry (0x359BEC); the table holds s32 handlers (btlCommandStateSelectB) and this one
  * returns without a value, as retail's missing sibling calls show (DDS1 twin of dds2 func_001DA210).
  * Gun-change command (slot 0x11): once no blocking tasks remain, swap the unit to its gun model, refresh linked
@@ -2302,6 +2305,8 @@ void btlCommandTaskStartEffects(u8 *task) {
         btlDispatchStateHandler(task, 0x1A);
     }
 }
+
+extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
 
 u64 btlCommandTaskReturnStart(u8 *task) {
     BtlUnit *linked = *(BtlUnit **)(task + 0x34);
@@ -2653,6 +2658,8 @@ extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 extern void btlResetUnitLinks(BtlUnit *);
 
 extern void btlReleaseUnitResources(BtlUnit *);
+
+extern BtlTask *btlFindUnitByActor(BtlUnit *target);
 
 void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     BtlUnit *unit = task->indexWork.linkedUnit;

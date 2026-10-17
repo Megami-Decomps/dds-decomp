@@ -344,6 +344,8 @@ void itfMesClearFlags(u32 mask) {
     itfMessageFlags &= ~mask;
 }
 
+extern ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub);
+
 s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesPoolNode *node = itfAcquirePoolNode(&itfMesWork.pool);
     s32 window = node->index;

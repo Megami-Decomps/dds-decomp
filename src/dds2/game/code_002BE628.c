@@ -360,7 +360,89 @@ typedef char MenuQueuedRenderContext_size_check[
 
 extern void uiDrawSurfaceAtNearDepth(u32);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF000);
+void func_002BF000(s32 x, s32 y, s32 z, MenuQueuedCommand *command,
+                   MenuQueuedRenderContext *context, s32 surface) {
+    enum {
+        MOTION_ROW = (s32)&((MenuQueuedCommand *)0)->motion +
+                     (s32)&((MenuCommandMotion *)0)->phase,
+        STEP = (s32)&((MenuCommandMotion *)0)->value -
+               (s32)&((MenuCommandMotion *)0)->phase,
+        DELAY = (s32)&((MenuCommandMotion *)0)->delay -
+                (s32)&((MenuCommandMotion *)0)->phase,
+        PHASE = 0,
+        SCALE = (s32)&((MenuCommandMotion *)0)->scale -
+                (s32)&((MenuCommandMotion *)0)->phase,
+        POSITION_X = (s32)&((MenuQueuedCommand *)0)->positions[0].x - MOTION_ROW,
+        POSITION_Y = (s32)&((MenuQueuedCommand *)0)->positions[0].y - MOTION_ROW
+    };
+    u32 cornerColors[4];
+    u32 color;
+    s32 i;
+    s32 done;
+    s32 horizontal;
+    s32 rectY;
+    s32 rectHeight;
+    s32 width = 0x138;
+    u8 *row;
+
+    done = 1;
+    color = uiBlendColors(0x372D804D, 0x372D8000, command->initialValue);
+    i = 0;
+    if (command->particleCount > 0) {
+        s32 phaseLimit = 0x200;
+        /* One row pointer walks the motion records and their paired position rows. */
+        row = (u8 *)command + MOTION_ROW;
+        do {
+            s32 delay = *(s32 *)(row + DELAY);
+
+            if (delay > 0) {
+                *(s32 *)(row + DELAY) = delay - 1;
+                done = 0;
+            } else {
+                s32 alpha = *(s32 *)(row + PHASE);
+
+                if (alpha >= 0x101) {
+                    alpha = phaseLimit - alpha;
+                }
+                horizontal = *(s32 *)(row + POSITION_X);
+                effDrawTextureSlotWithBlendedCornerColors(x + horizontal,
+                              y + *(s32 *)(row + POSITION_Y), z,
+                              alpha * *(s32 *)(row + SCALE) / 128, 0,
+                              command->resources, 0x34, surface);
+                *(s32 *)(row + PHASE) += *(s32 *)(row + STEP);
+                if (*(s32 *)(row + PHASE) >= phaseLimit) {
+                    *(s32 *)(row + PHASE) = phaseLimit;
+                } else {
+                    done = 0;
+                }
+            }
+            i++;
+            row += sizeof(MenuCommandMotion);
+        } while (i < command->particleCount);
+    }
+    if (done) {
+        command->keepActive = 0;
+    }
+    if (command->option == 0) {
+        horizontal = x + 0x710;
+        rectY = y + 0x170;
+        rectHeight = 0x140;
+    } else {
+        horizontal = x + 0x3C0;
+        rectY = y + 0x68;
+        rectHeight = 0x100;
+    }
+    panelSetVec4(cornerColors, color, color & ~0xFF, color, color & ~0xFF);
+    uiDrawGradientColorRect(horizontal, rectY, z,
+                  ((width * (0x200 - command->initialValue)) / 0x200 + 0x40) << 4,
+                  rectHeight, cornerColors, surface);
+    uiDrawSurfaceAtNearDepth(surface);
+    if (command->option == 0) {
+        effDrawTextureSlotWithBlendedCornerColors(x + context->origin.x, y + context->origin.y, z,
+                      command->initialValue, 0,
+                      context->menu->slots[context->panelIndex].frame[2], 0, surface);
+    }
+}
 
 /* Draw queued random lines and their cropped panel. */
 void mnuDrawQueuedCommandLineEffect(s32 x, s32 y, s32 z, MenuQueuedCommand *command,

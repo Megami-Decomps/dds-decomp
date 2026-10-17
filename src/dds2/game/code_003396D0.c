@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "eeregs.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
@@ -223,7 +224,7 @@ void sdfVuClearTransformCache(void) {
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     u32 *dmaChannel = sceDmaGetChan(0);
-    *dmaChannel &= ~SDF_DMA_CHCR_TTE;
+    HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, D_0037B080, (D_0037B610 - D_0037B080) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_00438A40);

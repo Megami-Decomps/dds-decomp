@@ -39,6 +39,82 @@ from check_unit import (
 )
 
 
+class FocusedFunctionTests(unittest.TestCase):
+    def run_checker(self, requested, emitted="target", full_emitted=None):
+        """Exercise the CLI with synthetic objects, without invoking a compiler."""
+        code = struct.pack("<II", 0x03E00008, 0)
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root / "src/dds1/game/unit.c"
+            unit.parent.mkdir(parents=True)
+            unit.write_text("void target(void) {}\n")
+            config = root / "config/dds1"
+            config.mkdir(parents=True)
+            (config / "symbol_addrs.txt").write_text(
+                "target = 0x1000; // type:func\nalias = 0x1000; // type:func\n")
+            (config / "SLUS_209.74.yaml").write_text("")
+            original = root / check_unit.RETAIL["dds1"]
+            original.parent.mkdir(parents=True)
+            original.write_bytes(code)
+            argv = ["check_unit.py", str(unit)]
+            if requested is not None:
+                argv.extend(["--func", requested])
+            stack.enter_context(patch.object(check_unit, "ROOT", root))
+            stack.enter_context(patch.object(check_unit.sys, "argv", argv))
+            stack.enter_context(patch("eeas_compat.lit4_range", return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
+            stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
+            stack.enter_context(patch.object(check_unit, "text_section", return_value=code))
+            stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
+            stack.enter_context(patch.object(check_unit, "relocations", return_value={".text": {}, ".rodata": {}, ".sdata": {}}))
+
+            def object_output(*args):
+                if "-S" not in args:
+                    return ""
+                names = full_emitted if str(args[-1]).endswith("full.o") and full_emitted is not None else emitted
+                return "".join(f"0 8 T {name}\n" for name in names.split())
+
+            stack.enter_context(patch.object(check_unit, "run", side_effect=object_output))
+            stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code, output.getvalue()
+
+    def test_missing_requested_name_fails_even_at_an_emitted_address(self):
+        for requested in ("typo", "func_00001000", "alias"):
+            with self.subTest(requested=requested):
+                status, report = self.run_checker(requested)
+                self.assertEqual(status, 1)
+                self.assertIn(f"MISSING {requested}: requested function not emitted", report)
+                self.assertIn("0 match, 1 differ", report)
+
+    def test_empty_skip_asm_object_cannot_pass_a_focused_check(self):
+        status, report = self.run_checker("target", emitted="")
+        self.assertEqual(status, 1)
+        self.assertIn("MISSING target", report)
+
+    def test_asm_only_function_does_not_count_as_emitted_c(self):
+        status, report = self.run_checker("target", emitted="", full_emitted="target")
+        self.assertEqual(status, 1)
+        self.assertIn("0 match, 1 differ", report)
+
+    def test_present_requested_name_and_emitted_alias_still_pass(self):
+        for requested in ("target", "alias"):
+            with self.subTest(requested=requested):
+                status, report = self.run_checker(requested, emitted="target alias")
+                self.assertEqual(status, 0)
+                self.assertIn(f"OK   {requested}", report)
+                self.assertIn("1 match, 0 differ", report)
+
+    def test_whole_unit_keeps_existing_empty_and_nonempty_behavior(self):
+        for emitted, matches in (("", 0), ("target", 1), ("target alias", 2)):
+            with self.subTest(emitted=emitted):
+                status, report = self.run_checker(None, emitted=emitted)
+                self.assertEqual(status, 0)
+                self.assertIn(f"{matches} match, 0 differ", report)
+
+
 class TextResidualTests(unittest.TestCase):
     def test_agreeing_overrun_prefix_still_fails_the_complete_checker(self):
         compiled = struct.pack("<III", 0x03E00008, 0, 0x24020001)

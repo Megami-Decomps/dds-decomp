@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "eeregs.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
@@ -71,7 +72,6 @@
 
 #define SDF_CONSOLE_CELL_BYTES 2
 
-#define SDF_CONSOLE_NODE_BYTES 0x20
 
 #define SDF_DMA_QWORD_SHIFT 4
 
@@ -204,7 +204,7 @@ extern s32 sceDmaSync(void *, s32, s32);
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     u32 *dmaChannel = sceDmaGetChan(0);
-    *dmaChannel &= ~SDF_DMA_CHCR_TTE;
+    HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_003BD350);
@@ -1609,7 +1609,7 @@ ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns
     struct SdfMemBlock *bufferAllocation;
 
     sdfDevConsInit();
-    node = sdfAllocSizeClassBlock(SDF_CONSOLE_NODE_BYTES);
+    node = sdfAllocSizeClassBlock(sizeof(ConsNode));
     node->screenOriginX = screenOriginX;
     node->screenOriginY = screenOriginY;
     node->columns = columns;

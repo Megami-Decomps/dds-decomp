@@ -662,7 +662,7 @@ void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
 
 
 MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing) {
-    MenuList *item = (MenuList *)sdfAllocAndClearQuadwords(0x40);
+    MenuList *item = (MenuList *)sdfAllocAndClearQuadwords(sizeof(MenuList));
     item->id = id;
     item->visibleCount = visibleCount;
     item->rowStep = rowSpacing * 8;
@@ -713,7 +713,7 @@ MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
     const void *value;
 {
-    MenuListNode *node = sdfAllocAndClearQuadwords(0x74);
+    MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
     s32 index = list->count;
     MenuListNode *last;
 

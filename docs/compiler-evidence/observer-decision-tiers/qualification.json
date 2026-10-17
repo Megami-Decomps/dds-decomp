@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "qualification_scope": "Fresh current-source public observer; artifact non-interference and ordinary code/relocation parity only",
+  "qualified": true,
+  "audit_compiler_executed": false,
+  "function": "mnuDrawAnimatedMovieRollEntry",
+  "public_tool_hashes": {
+    "ee_gcc_observe.py": "655b85c68035e71fe71836b9ba04a639b06f14c1cec5577ce761e7b23db201c3",
+    "_ee_gcc_observer.py": "8da4f739b039b9f22762b3b0d433d88b635e32f17de159f14af68912e3af0a11",
+    "ee_gcc_qemu_loopback.py": "ad9ac3edafbc2112cae5c52d97f529f4c6c3466ce191d99f1079bb1ca2b785b6"
+  },
+  "source_sha256": "bb85a201c34142da10ea775cf8316623746057e722b7da7b733937e26c1caf31",
+  "observer": {
+    "completed": true,
+    "exit_status": "W00",
+    "events": 16712,
+    "artifacts": 28,
+    "inventories_and_raw_hashes_independently_rechecked": true,
+    "all_equal": true,
+    "inputs_rechecked": 11218,
+    "same_cwd_environment_and_compiler_argv": true
+  },
+  "ordinary": {
+    "cc1_succeeded": true,
+    "assembled": true,
+    "wrapper_returncode": 0,
+    "manifest_artifacts_rehashed": true,
+    "assembly_raw_equal": false,
+    "assembly_equal_except_exact_first_file_directive": true,
+    "ordinary_first_file_directive": "\t.file\t1 \".33/dds1/game/code_0026EC90.c\"",
+    "observed_first_file_directive": "\t.file\t1 \".31/dds1/game/code_0026EC90.c\"",
+    "assembly_exception": "Only these exact first directives differ; all bytes after the first newline are equal. No other normalization.",
+    "allocated_sections_equal": true,
+    "allocated_sections": {
+      ".text": {
+        "type": 1,
+        "flags": 6,
+        "address": 0,
+        "size": 5124,
+        "alignment": 8,
+        "entry_size": 0,
+        "data_sha256": "ddb47ddf84c608e093d4177e24f4907aac29df15794bd3d7d735cb630c803670"
+      },
+      ".data": {
+        "type": 1,
+        "flags": 3,
+        "address": 0,
+        "size": 0,
+        "alignment": 1,
+        "entry_size": 0,
+        "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      ".bss": {
+        "type": 8,
+        "flags": 3,
+        "address": 0,
+        "size": 0,
+        "alignment": 1,
+        "entry_size": 0,
+        "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      ".lit4": {
+        "type": 1,
+        "flags": 268435459,
+        "address": 0,
+        "size": 20,
+        "alignment": 4,
+        "entry_size": 0,
+        "data_sha256": "14bda058efebb55e06adb51c01fc4fc90056094327e0b812dbec0703cd7c2c71"
+      },
+      ".rodata": {
+        "type": 1,
+        "flags": 2,
+        "address": 0,
+        "size": 2376,
+        "alignment": 16,
+        "entry_size": 0,
+        "data_sha256": "75a9fe7de95e619980612a536f1235710dec7dea4f0a59ae2679e04a53ef81cd"
+      },
+      ".sdata": {
+        "type": 1,
+        "flags": 268435459,
+        "address": 0,
+        "size": 28,
+        "alignment": 4,
+        "entry_size": 0,
+        "data_sha256": "90e17d5234aca83271fd0e3ba96309b9f95ae8efeed99470aad92af906ae50ff"
+      }
+    },
+    "raw_relocation_sections_equal": true,
+    "raw_relocation_sections": {
+      ".rel.text": {
+        "type": 9,
+        "target_section": ".text",
+        "symbol_table": ".symtab",
+        "size": 1872,
+        "entry_size": 8,
+        "data_sha256": "53631939f9d5723c77704daf35e9ffb898506a9e3df3738fc710a9391d0a5c1d"
+      },
+      ".rela.text": {
+        "type": 4,
+        "target_section": ".text",
+        "symbol_table": ".symtab",
+        "size": 0,
+        "entry_size": 12,
+        "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      ".rel.rodata": {
+        "type": 9,
+        "target_section": ".rodata",
+        "symbol_table": ".symtab",
+        "size": 40,
+        "entry_size": 8,
+        "data_sha256": "1c56648e3630903e9440dbb8d0e122e15e0244cce0869c656c3db29f646a9bc3"
+      },
+      ".rela.rodata": {
+        "type": 4,
+        "target_section": ".rodata",
+        "symbol_table": ".symtab",
+        "size": 0,
+        "entry_size": 12,
+        "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "resolved_relocations_equal": true,
+    "resolved_relocation_definition": "Each REL/RELA reference resolved to symbol name, section, value, size, info and visibility; includes target section/offset/type, symbol index, explicit RELA addend or unchanged REL target word. This is object-level symbol resolution, not retail-link execution.",
+    "relocation_count": 239,
+    "resolved_relocations_sha256": "5c2f33bf5ac60c921fd160e837056d76c1775c5df9cad39dc8af9dcf74f609f8",
+    "ordinary_object_sha256": "558bd2f99b4b0a7427faa285a595ee3ef17fe2f9265bf1e1afc26e79cf29a52b",
+    "observed_object_sha256": "ae71d5cf060a7f2c3bbcf90d20607b118bf943184c6689be549f5663cc3346bd",
+    "ordinary_assembly_sha256": "a0283bd2279bfa55d9c46ce77bc54aa391ec66c9137c4f648969a153bc145431",
+    "observed_assembly_sha256": "b25e02d248bb3d3a209f1268c735118ccecfdc0afba3281ffb05cf05ee2c3743",
+    "target_symbols": [
+      {
+        "name": "mnuDrawAnimatedMovieRollEntry",
+        "value": 0,
+        "size": 1156,
+        "info": 18,
+        "other": 0,
+        "section": ".text"
+      }
+    ]
+  },
+  "event_interpretation": {
+    "sequence_and_nested_call_associations_checked": true,
+    "event_counts": {
+      "pass_enter": 4,
+      "rank_enter": 1957,
+      "rank_exit": 1957,
+      "rank_stage": 6395,
+      "schedule_insn": 419,
+      "pass_exit": 4,
+      "allocation_order": 1,
+      "combine_regs_enter": 145,
+      "combine_death_note": 55,
+      "combine_class": 35,
+      "combine_regs_exit": 145,
+      "qty_compare_enter": 104,
+      "qty_compare_exit": 104,
+      "find_free_reg_enter": 53,
+      "fpr_live_intervals": 53,
+      "find_free_reg_masks": 53,
+      "find_free_reg_candidate": 973,
+      "find_free_reg_exit": 53,
+      "allocation_before_global": 1,
+      "preference_enter": 158,
+      "preference_exit": 158,
+      "expand_preferences_enter": 1,
+      "expand_preferences_exit": 1,
+      "allocno_compare_enter": 565,
+      "allocno_compare_priorities": 565,
+      "allocno_compare_exit": 565,
+      "prune_preferences_enter": 1,
+      "prune_preferences_exit": 1,
+      "global_find_enter": 22,
+      "global_candidate": 2118,
+      "global_commit": 22,
+      "global_find_exit": 22,
+      "global_preference_candidate": 1,
+      "exit": 1
+    },
+    "allocno_deciding_tiers": {
+      "priority": 454,
+      "allocno_number": 111
+    },
+    "rank_deciding_tiers_by_phase": {
+      "schedule_prereload": {
+        "priority": 203,
+        "reg_weight": 109,
+        "luid": 196,
+        "dependents": 15
+      },
+      "schedule_postreload": {
+        "priority": 361,
+        "luid": 972,
+        "dependents": 83,
+        "last_insn_class": 18
+      }
+    },
+    "rank_stage_hit_counts": {
+      "1": 1393,
+      "2": 1284,
+      "5": 1284,
+      "6": 1266,
+      "7": 1168
+    },
+    "new_hook_coverage": {
+      "allocno_compare_enter": {
+        "address": "0x814100c",
+        "verified_on_hit": true
+      },
+      "allocno_compare_priorities": {
+        "address": "0x81410f5",
+        "verified_on_hit": true
+      },
+      "allocno_compare_exit": {
+        "address": "0x8141106",
+        "verified_on_hit": true
+      },
+      "rank_stage_1": {
+        "address": "0x816c702",
+        "verified_on_hit": true
+      },
+      "rank_stage_2": {
+        "address": "0x816c723",
+        "verified_on_hit": true
+      },
+      "rank_stage_3": {
+        "address": "0x816c784",
+        "verified_on_hit": false
+      },
+      "rank_stage_4": {
+        "address": "0x816c7d1",
+        "verified_on_hit": false
+      },
+      "rank_stage_5": {
+        "address": "0x816c7f0",
+        "verified_on_hit": true
+      },
+      "rank_stage_6": {
+        "address": "0x816ca55",
+        "verified_on_hit": true
+      },
+      "rank_stage_7": {
+        "address": "0x816caae",
+        "verified_on_hit": true
+      }
+    },
+    "coverage_limits": [
+      "rank_stage_3 and rank_stage_4 were not hit",
+      "No allocno range_copy deciding exit was observed",
+      "Synthetic tests, not this live target, cover bypassed branches"
+    ]
+  },
+  "harness_tail_error": {
+    "shell_exit_status": 127,
+    "shell_exit_status_source": "Invoking shell result",
+    "log": "root-live.log",
+    "error": "commands.sh: line 5: ode: command not found",
+    "occurred_after_observer_completion_in_log": true,
+    "cause": "The command script comment was rewritten while the invoking shell was reading the file; this produced a stray trailing shell command after observation completed.",
+    "script_success_claimed": false,
+    "compiler_rerun_required_by_current_evidence": false,
+    "basis": "Successful ordinary manifest and observer exit are preserved; artifact hashes, frozen inputs, code/relocation parity, event associations and tool hashes were independently rechecked."
+  },
+  "limits": [
+    "This does not restore the missing former public helper, test files, or documentation bytes",
+    "This is not a retail-match or original-C uniqueness proof",
+    "The original historical fixture has not been reconstructed"
+  ],
+  "evidence_sha256": {
+    "observer-case.json": "742bbfd65fad2210330ecbd084be99f842d54ec1dbbfd6db07a61710c81b0320",
+    "preparation.json": "0b72e2612a81721ecaf4708a663f3dfc687c17bb48ecbda4dc5c58f171cb4ae0",
+    "root-live.log": "20a02c1b98745ebf7fe226b5251bf16acb602dad820e5148514f4325141a2cc3",
+    "probe-current/manifest.json": "37ca1b88e70b405a487fb0721a45e5325a0053ef151ee73d0220706bc0ceecb3",
+    "observed-public/equivalence.json": "b4f2c3693037a8bd376723027ed5237de5590cf7cee786abe890f82bff0bae49",
+    "observed-public/events.jsonl": "bab0e4eb3ba79e77f79f6165b4f1fd25a714b8fb05136bbb3a01ddc2c6dc1c53",
+    "observed-public/tool-hashes.json": "49b9af42f277288200ba12680f5dfda11b6e75d1627a0d12571e157beafab341",
+    "observed-public/hook-checks.json": "f418488f4d12b8aff40975504aa4ed33aea5a7f93f3c71b2e70f09502e3fcec0",
+    "observed-public/listener-owner.json": "a8d917094e7b73dc0d892b2ca811d942399dadfc60b094435e29c616574ad229"
+  }
+}

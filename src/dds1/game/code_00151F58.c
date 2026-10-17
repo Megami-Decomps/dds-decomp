@@ -404,7 +404,7 @@ f32 effCalcViewAxisWidthFactor(void *self, f32 *axis) {
 
 /* Create the indexed billboard and render asset; only the second matrix is initialized. */
 u8 *billCreateUnitObject(s32 entryIndex) {
-    EffUnitObject *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
+    EffUnitObject *instance = sdfAllocSizeClassBlock(sizeof(EffUnitObject));
 
     instance->billboard = billCreateIndexed(1, entryIndex);
     instance->resource = sdfCreateAssetWithDrawEntries();
@@ -415,7 +415,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 
 /* Retain a cloned billboard's shared data, create a fresh render asset, and reset both matrices. */
 u8 *billCloneUnitObject(u8 *source) {
-    EffUnitObject *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
+    EffUnitObject *instance = sdfAllocSizeClassBlock(sizeof(EffUnitObject));
 
     instance->billboard = billCloneObjectRetainingSharedData(
         ((EffUnitObject *)source)->billboard);

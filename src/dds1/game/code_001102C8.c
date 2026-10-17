@@ -130,7 +130,7 @@ s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32)) 
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */
 u32 dds3CreateWorldObjectData(EffWorldNode *object) {
-    EvtWorldTable *data = sdfAllocSizeClassBlock(0x40);
+    EvtWorldTable *data = sdfAllocSizeClassBlock(sizeof(EvtWorldTable));
     EvtWorldSlot *lists;
     s32 listIndex;
 

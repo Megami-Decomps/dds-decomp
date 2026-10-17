@@ -46,7 +46,6 @@
 #define EFF_SCATTER_POOL_CONTROL_BYTES 0x34
 #define EFF_SCATTER_RECORD_BYTES 0x60
 #define EFF_SCATTER_AUX_RECORD_BYTES 0x18
-#define EFF_SCATTER_RES_BYTES 8
 #define EFF_SCATTER_DRAW_TEMPLATE_BYTES 0x2C
 #define EFF_SCATTER_PARAM_BLOCK 0
 #define EFF_SCATTER_RESOURCE_BLOCK 1
@@ -1145,7 +1144,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 {
     PcpScatterRes *res;
 
-    res = sdfAllocSizeClassBlock(EFF_SCATTER_RES_BYTES);
+    res = sdfAllocSizeClassBlock(sizeof(PcpScatterRes));
     res->textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resId));
     res->refCount = 1;
     return res;

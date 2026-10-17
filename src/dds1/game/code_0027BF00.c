@@ -38,7 +38,6 @@ enum MenuPanelKind {
 #define MNU_WINDOW_TRANSITION_FLAG 4
 #define MNU_WINDOW_TRANSITION_CLEAR_MASK 0xFFFFFFFB
 #define MNU_LIST_SELECTION_FLAG 8
-#define MNU_WINDOW_CONTAINER_BYTES 0x8C
 #define MNU_PANEL_LAYOUT_BYTES 0x38
 #define MNU_WINDOW_RESOURCE_SPRITES 7
 #define MNU_SORT_KEY_COUNT 3
@@ -274,7 +273,7 @@ extern MenuPanelPositionTable2 D_003B23A0;
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
-    MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(MNU_WINDOW_CONTAINER_BYTES);
+    MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(sizeof(MenuWindowContainer));
     MenuList *list;
     window->width = width;
     window->height = height;
@@ -1189,7 +1188,7 @@ MenuScrollPanel *mnuCreateScrollPanel(u32 startX, u32 startY, u32 endX, u32 endY
     s32 position;
     s32 remaining;
 
-    panel = (MenuScrollPanel *)sdfAllocSizeClassBlock(0x4c);
+    panel = (MenuScrollPanel *)sdfAllocSizeClassBlock(sizeof(MenuScrollPanel));
     memset(panel, 0, 0x4c);
     panel->firstSprite = 0;
     panel->secondSprite = 0;
@@ -1332,7 +1331,7 @@ typedef struct MenuPageResources {
 /* Create a ten-sprite page bundle; the caller chooses its last two slots. */
 MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondaryResource, s32 extraResource, s32 extraIndex,
                      s32 finalResource, s32 finalIndex) {
-    MenuPageResources *item = (MenuPageResources *)sdfAllocSizeClassBlock(0x3C);
+    MenuPageResources *item = (MenuPageResources *)sdfAllocSizeClassBlock(sizeof(MenuPageResources));
 
     memset(item, 0, 0x3C);
     item->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
@@ -1508,7 +1507,7 @@ void mnuSetPageParams(MenuSprites *page, s32 pageTransitionMode) {
 
 MenuSprites *mnuCreatePageSpriteSet(s32 value, EffectSlotSet *mainResource,
                             EffectSlotSet *secondaryResource) {
-    MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(0x50);
+    MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(sizeof(MenuSprites));
 
     memset(page, 0, 0x50);
     page->profileLabelOverride = value;
@@ -1595,7 +1594,7 @@ void mnuClearEntries(MenuPageWindow *menu) {
 }
 
 MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
-    MenuIconBundle *item = (MenuIconBundle *)sdfAllocSizeClassBlock(0x24);
+    MenuIconBundle *item = (MenuIconBundle *)sdfAllocSizeClassBlock(sizeof(MenuIconBundle));
     EffectSlotSet *sprite;
 
     memset(item, 0, 0x24);
