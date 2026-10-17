@@ -4,7 +4,7 @@
 #include "dsp_entry_api.h"
 #include "fld_area_work.h"
 #include "fld_npc_palette.h"
-#include "fld_mix_lb.h"
+#include "file_pac.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
@@ -3195,8 +3195,8 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
 void fldParseMixLb(void) {
-    FldMixLbHeaderView *lb;
-    FldMixLbNodeView *node;
+    FilePacRequest *lb;
+    PacWork *node;
     u32 index;
 
     fldAreaState.fieldTextures[0].allocation = sdfReadNamedResource("/fld/f/bin/d2_fild1.tmx", &fldAreaState.fieldTextures[0].resourceAddress, 0);
@@ -3221,9 +3221,9 @@ void fldParseMixLb(void) {
     D_00438EDC = sdfReadNamedResource("/fld/f/bin/DAMAGE_1.D3P", &D_00438EE0, 0);
     D_00438EE4 = sdfReadNamedResource("/fld/f/bin/DAMAGE_2.D3P", &D_00438EE8, 0);
     D_00438EEC = sdfReadNamedResource("/fld/f/bin/DAMAGE_3.D3P", &D_00438EF0, 0);
-    lb = (FldMixLbHeaderView *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    lb = (FilePacRequest *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     fileWaitForRequestReady((struct FileRequest *)lb);
-    for (node = lb->nodes; node != NULL; node = node->next, index++) {
+    for (node = lb->packet.queueHead; node != NULL; node = node->next, index++) {
         switch (index) {
         case 5:
             D_00436338 = (s32)(u32)node->resourceHandle;
