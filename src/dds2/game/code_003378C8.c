@@ -180,14 +180,7 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
             ((clipA | clipB | clipC) & 0x30) != 0) {
             continue;
         }
-        VU0_LOAD_VF(vf2, a->position);
-        VU0_LOAD_VF(vf3, b->position);
-        VU0_LOAD_VF(vf4, c->position);
-        VU0_SUB_LANES(xyz, vf2, vf2, vf3);
-        VU0_SUB_LANES(xyz, vf4, vf4, vf3);
-        VU0_SUB_LANES(xyz, vf3, vf21, vf3);
-        VU0_CROSS_XYZ(vf2, vf2, vf4);
-        VU0_DOT_XYZ_ACC(facing, vf2, vf3);
+        VU0_TRIANGLE_FACING(facing, a->position, b->position, c->position);
         facing *= scale;
         if (facing < 0.0f) {
             D_00474210[rejected++] = i;
@@ -303,7 +296,159 @@ void sdfVuBuildClippedTriangleRefs(VuWork *work) {
     *work->ringEnd = NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuBuildRingTriangleRefs);
+/* vu0 routine: native clip projection and ordinary triangle fans. */
+void sdfVuBuildRingTriangleRefs(VuWork *work) {
+    s32 triangleCount;
+    u16 *triangles;
+    VuBlendNode *nodes;
+    s32 acceptAll;
+    VuGeomRef *out;
+    f32 scale = work->depth;
+    f32 clipBias = D_00439190;
+    const f32 *clipPlane = D_0040B6A0;
+    const u8 *projection = D_0040B580;
+
+    VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
+    if (work->selectedFlags & 0x4000) {
+        sdfVuBuildClippedTriangleRefs(work);
+    }
+    triangleCount = (s16)work->param0;
+    acceptAll = D_00438A34;
+    out = D_00468210;
+    triangles = (u16 *)work->strip;
+    nodes = (VuBlendNode *)work->ringSrc;
+    for (; triangleCount != 0; triangleCount--) {
+        u16 *triangle = triangles;
+        VuBlendNode *a = nodes + triangle[0];
+        VuBlendNode *b = nodes + triangle[1];
+        VuBlendNode *c = nodes + triangle[2];
+        u32 bRegion;
+        u32 aRegion;
+        u32 cRegion;
+        VuBlendNode *d, *e, *f, *g;
+        f32 facing;
+        u32 clipA = a->clipFlags;
+        u32 clipB = b->clipFlags;
+        u32 clipC = c->clipFlags;
+
+        triangles += 3;
+        if ((clipA & clipB & clipC & 0x3F) != 0 ||
+            ((clipA | clipB | clipC) & 0x30) != 0) {
+            continue;
+        }
+        VU0_TRIANGLE_FACING(facing, a->position, b->position, c->position);
+        facing *= scale;
+        if (facing < 0.0f) {
+            continue;
+        }
+        aRegion = a->region;
+        bRegion = b->region;
+        cRegion = c->region;
+
+        if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
+            out[0].a = (u128 *)a;
+            out[0].b = (u128 *)b;
+            out[0].c = (u128 *)c;
+            out++;
+            continue;
+        }
+        for (;;) {
+            VuBlendNode *firstVertex;
+            u32 firstCode;
+
+            if (bRegion == cRegion) {
+                d = sdfVuAllocClipNode(work);
+                e = sdfVuAllocClipNode(work);
+                if (aRegion == 0) {
+                    sdfVuInterpolateClipVertex(d, b, a);
+                    sdfVuInterpolateClipVertex(e, c, a);
+                    out[0].a = (u128 *)a;
+                    out[0].b = (u128 *)d;
+                    out[0].c = (u128 *)e;
+                    out[1].a = (u128 *)e;
+                    out[1].b = (u128 *)d;
+                    out[1].c = (u128 *)b;
+                    out[2].a = (u128 *)e;
+                    out[2].b = (u128 *)b;
+                    out[2].c = (u128 *)c;
+                    out += 3;
+                    break;
+                }
+                sdfVuInterpolateClipVertex(d, a, b);
+                sdfVuInterpolateClipVertex(e, a, c);
+                out[0].a = (u128 *)a;
+                out[0].b = (u128 *)d;
+                out[0].c = (u128 *)e;
+                out++;
+                if (bRegion == 0) {
+                    out[0].a = (u128 *)b;
+                    out[0].b = (u128 *)e;
+                    out[0].c = (u128 *)d;
+                    out[1].a = (u128 *)b;
+                    out[1].b = (u128 *)c;
+                    out[1].c = (u128 *)e;
+                    out += 2;
+                } else {
+                    f = sdfVuAllocClipNode(work);
+                    g = sdfVuAllocClipNode(work);
+                    sdfVuInterpolateClipVertex(f, b, a);
+                    sdfVuInterpolateClipVertex(g, c, a);
+                    out[0].a = (u128 *)e;
+                    out[0].b = (u128 *)d;
+                    out[0].c = (u128 *)f;
+                    out[1].a = (u128 *)e;
+                    out[1].b = (u128 *)f;
+                    out[1].c = (u128 *)g;
+                    out[2].a = (u128 *)g;
+                    out[2].b = (u128 *)f;
+                    out[2].c = (u128 *)b;
+                    out[3].a = (u128 *)g;
+                    out[3].b = (u128 *)b;
+                    out[3].c = (u128 *)c;
+                    out += 4;
+                }
+                break;
+            }
+            if (aRegion == 0 && (bRegion ^ cRegion) == 3) {
+                d = sdfVuAllocClipNode(work);
+                e = sdfVuAllocClipNode(work);
+                f = sdfVuAllocClipNode(work);
+                g = sdfVuAllocClipNode(work);
+                sdfVuInterpolateClipVertex(d, b, a);
+                sdfVuInterpolateClipVertex(e, c, a);
+                sdfVuInterpolateClipVertex(f, b, c);
+                sdfVuInterpolateClipVertex(g, c, b);
+                out[0].a = (u128 *)a;
+                out[0].b = (u128 *)d;
+                out[0].c = (u128 *)e;
+                out[1].a = (u128 *)d;
+                out[1].b = (u128 *)b;
+                out[1].c = (u128 *)f;
+                out[2].a = (u128 *)e;
+                out[2].b = (u128 *)d;
+                out[2].c = (u128 *)f;
+                out[3].a = (u128 *)e;
+                out[3].b = (u128 *)f;
+                out[3].c = (u128 *)g;
+                out[4].a = (u128 *)e;
+                out[4].b = (u128 *)g;
+                out[4].c = (u128 *)c;
+                out += 5;
+                break;
+            }
+            firstVertex = a;
+            firstCode = aRegion;
+            a = b;
+            aRegion = bRegion;
+            b = c;
+            bRegion = cRegion;
+            c = firstVertex;
+            cRegion = firstCode;
+        }
+    }
+    work->nodeCount = out - D_00468210;
+    *work->ringEnd = NULL;
+}
 
 
 /* vu0 routine: native projection setup with ordinary C clipping. */
@@ -318,11 +463,7 @@ void sdfVuBuildIndexedTriangleRefs(VuWork *work) {
     const f32 *clipPlane = D_0040B6A0;
     const u8 *projection = D_0040B580;
 
-    VU0_SET_VF2X(scale);
-    VU0_LOAD_VF(vf21, clipPlane);
-    VU0_LOAD_VF_AT(vf22, 0x70, projection);
-    VU0_LOAD_VF_AT(vf23, 0x80, projection);
-    VU0_ADD_VF2Z_TO_VF23X();
+    VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = D_00438A34;
     remaining = work->selectedTriangleCount;
     indices = D_00474210;
