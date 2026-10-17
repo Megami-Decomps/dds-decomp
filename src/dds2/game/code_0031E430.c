@@ -180,7 +180,89 @@ void itfSetFadeGaugeDisplayValue(FadeGauge *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E8F0);
+/* Draw the shooting progress segments, decay overlay, and completion pulse. */
+void func_0031E8F0(FadeGauge *entry) {
+    s32 segmentSize, remainder, rowCount;
+    s32 texture, opacity, row, x;
+    s32 cropWidth, rightCrop;
+    BdWork *work;
+
+    if (itfIsFadeActive(&entry->fade) == 0) return;
+    mnuDrawIndexedFadeGlyph(0, 0, entry->fade.extent, 0x15, 0x54);
+    if (entry->displayValue == 0) {
+        entry->phase = 0;
+    } else {
+        entry->phase += 32;
+        if (entry->phase > 512) entry->phase = 512;
+    }
+    segmentSize = entry->parameter >> 2;
+    rowCount = entry->secondaryParameter / segmentSize;
+    /* Keep the trailing partial segment even at an exact boundary. */
+    rowCount++;
+    remainder = entry->secondaryParameter % segmentSize;
+    texture = mnuGetIndexedFadeTexture(0x16);
+    opacity = 128;
+    if (entry->phase > 256) opacity = (512 - entry->phase) / 2;
+    opacity = opacity * entry->fade.extent / 128;
+    x = 0;
+    for (row = 0; row < rowCount; row++) {
+        if (row < rowCount - 1) {
+            BdWork *rowWork = (BdWork *)(texture * sizeof(BdWork) +
+                                       (u32)itfFadeTint->workEntries);
+            rowWork->parameters[0] = 0;
+            rowWork->parameters[2] = 0;
+            rowWork->geometry.bounds[2] = rowWork->sourceWidth * 16;
+            mnuDrawIndexedFadeGlyph(x, 0, opacity, 0x16, 0x54);
+            entry->filled[row] = 1;
+        } else {
+            BdWork *partialWork;
+
+            cropWidth = remainder * 40 / segmentSize;
+            partialWork = (BdWork *)(texture * sizeof(BdWork) +
+                                    (u32)itfFadeTint->workEntries);
+            partialWork->parameters[0] = 1;
+            rightCrop = 40 - cropWidth;
+            partialWork->geometry.bounds[2] = cropWidth * 16;
+            partialWork->parameters[2] = -1 - rightCrop;
+            mnuDrawIndexedFadeGlyph(x + 16, 0, opacity, 0x16, 0x54);
+        }
+        x += 0x300;
+    }
+    if (entry->displayValue == 0) {
+        for (row = rowCount - 1; row < 4; row++) entry->filled[row] = 0;
+    }
+    x = 0;
+    for (row = 0; row < 4; row++) {
+        mnuDrawIndexedFadeGlyph(x, 0,
+            entry->decay[row] * entry->fade.extent / 128, 0x17, 0x54);
+        x += 0x300;
+        if (entry->filled[row] != 0) {
+            if (entry->decay[row] < 128) entry->decay[row] += 16;
+            if (entry->decay[row] > 128) entry->decay[row] = 128;
+        } else {
+            if (entry->decay[row] > 0) entry->decay[row] -= 16;
+            if (entry->decay[row] < 0) entry->decay[row] = 0;
+        }
+    }
+    if (entry->phase < 256) opacity = entry->phase / 2;
+    else opacity = (512 - entry->phase) / 2;
+    mnuDrawIndexedFadeGlyph(0, 0, opacity * entry->fade.extent / 128, 0x18, 0x54);
+    segmentSize = entry->parameter;
+    remainder = entry->secondaryParameter % segmentSize;
+    texture = mnuGetIndexedFadeTexture(0x19);
+    opacity = 0;
+    if (entry->phase > 256) opacity = entry->phase / 2 - 128;
+    opacity = opacity * entry->fade.extent / 128;
+    cropWidth = remainder * 195 / segmentSize;
+    work = (BdWork *)(texture * sizeof(BdWork) +
+                     (u32)itfFadeTint->workEntries);
+    work->parameters[0] = 5;
+    rightCrop = 195 - cropWidth;
+    work->geometry.bounds[2] = cropWidth * 16;
+    work->parameters[2] = -6 - rightCrop;
+    mnuDrawIndexedFadeGlyph(80, 0, opacity, 0x19, 0x54);
+    itfUpdateFade(&entry->fade);
+}
 
 void mnuSetPauseFadeChoice(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
