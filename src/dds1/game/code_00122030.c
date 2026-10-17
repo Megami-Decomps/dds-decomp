@@ -1675,12 +1675,12 @@ s32 fldUpdateTravelAndEncounters(void) {
             return 0;
         }
     }
-    if (fldAreaState.unk11C || ptyAnyUnitFlagMatch(0x80, 1)) {
+    if (fldAreaState.terrainAttritionKind || ptyAnyUnitFlagMatch(0x80, 1)) {
         fldAreaState.attritionDistance += distance;
         interval = 450.0f;
-        if (!fldAreaState.unk11C && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
+        if (!fldAreaState.terrainAttritionKind && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
         if (fldAreaState.attritionDistance > interval) {
-            if (fldAreaState.unk11C) {
+            if (fldAreaState.terrainAttritionKind) {
                 if (datGameState->world.fieldFlags & 4) {
                     fldAreaState.unk184 = 0;
                     fldAreaState.attritionDistance = 0.0f;
