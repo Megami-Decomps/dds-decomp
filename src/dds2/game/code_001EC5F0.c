@@ -5,6 +5,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_action_camera_preset.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
@@ -1013,16 +1014,6 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
-/* Eight action-filtered preset rows; the final word is a category mask. */
-typedef struct BtlActionCameraPreset {
-    f32 frontQuaternion[4];
-    f32 backQuaternion[4];
-    f32 frontDistanceScale;
-    f32 backDistanceScale;
-    f32 parameter;
-    u32 actionMask;
-} BtlActionCameraPreset;
-
 extern const BtlActionCameraPreset D_00417F30[8];
 
 /* Frame the first listed target from an action-filtered pair preset: both
@@ -1079,7 +1070,7 @@ void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *fro
     VU0_STORE_VF(vf10, to->position);
     fov *= 0.5f;
     height *= 0.5f;
-    from->position[1] *= presets[selected].parameter;
+    from->position[1] *= presets[selected].frontCameraYScale;
     if (height < reach) {
         distance = reach / tanf(fov * 0x1.555554p+0f);
     } else {
@@ -1231,7 +1222,7 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
     VU0_STORE_VF(vf10, to->direction);
     btlAdjustCameraDirectionForDefaultPlane(from);
     btlAdjustCameraDirectionForDefaultPlane(to);
-    parameter = presets[selected].parameter;
+    parameter = presets[selected].frontCameraYScale;
     action->flags |= 0x41;
     action->motionParameter = parameter;
 }
