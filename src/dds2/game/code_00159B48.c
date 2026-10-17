@@ -67,7 +67,7 @@ typedef char EffInstance_billboard_offset_check[
 typedef char EffInstance_renderState_offset_check[
     ((u32)&((EffInstance *)0)->renderState == 0x84) ? 1 : -1];
 
-extern s32 effBillResourceOwners[];
+extern BillObj *effBillResourceOwners[];
 
 #include "sdf_packet_alloc.h"
 
@@ -97,7 +97,7 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
  * resource stores the reference count; the BillObj payload is not an emitter. */
 BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
     BillObj *effect = billCreateIndexed(D_003AA884[index].billboardKind, 0);
-    BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
+    BillChildPayload *resource = effBillResourceOwners[index]->child;
     s32 references = resource->refCount;
 
     effect->child = resource;
@@ -110,7 +110,7 @@ u32 effGetGeneralResourceCount(void) {
 }
 
 SdfTex *effGetBillResourceTexture(s32 index) {
-    return ((BillObj *)effBillResourceOwners[index])->child->texture;
+    return effBillResourceOwners[index]->child->texture;
 }
 
 void effCopyVector(void *dst, const void *src) {
