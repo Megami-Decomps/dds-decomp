@@ -506,7 +506,7 @@ extern void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelIt
 
 /* Draw the five stat panels of a group (values from the party record, if any), then ramp the
  * group's fade value up to 0x100. */
-void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry, MenuPanelGroup *group, s32 drawFlags) {
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *partyRecord, MenuPanelGroup *group, s32 drawFlags) {
     s32 index;
     s32 mode;
     s32 value;
@@ -514,8 +514,8 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
 
     for (index = 0; index < 5; index++) {
         value = 0;
-        if (entry != NULL) {
-            value = entry->baseStats[index];
+        if (partyRecord != NULL) {
+            value = partyRecord->baseStats[index];
         }
         mnuSetPanelItemValueAndOption(group->children[index], value, group->children[index]->option);
         if (group->selection == index) {
