@@ -85,7 +85,7 @@ extern char D_0039DFF8[]; /* "cdrom0:\IRX\MSIFRPC.IRX;1" */
 extern const s32 D_003BA83C;
 extern u32 sdfDiscType;
 extern u8 D_003BD39C;
-extern u32 D_003BD680;
+extern SdfThreadNode kwlnMainLoopThreadNode;
 extern u8 D_003BDC90[];
 
 s32 sdfInitializeRuntimeAndStartMainLoop(void) {
@@ -120,8 +120,7 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     sdfEnsureDeviceWorkerThreadStarted(0);
     sdfLoadModulesAndBindNamedResourceRpc(D_0039DFD8, D_0039DFF8);
     sdfStartAndSuspendWorkerThread();
-    sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_003BD680 + 8),
-                          kwlnRunMainLoop, D_003BDC90, 0x4000, 0x60, 0);
+    sdfStartTrackedThread(&kwlnMainLoopThreadNode, kwlnRunMainLoop, D_003BDC90, 0x4000, 0x60, 0);
     sdfThreadSleepSelf();
     return 0;
 }
