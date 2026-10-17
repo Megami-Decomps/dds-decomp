@@ -142,6 +142,12 @@ after two hazard nops that retail doesn't have. Use `fsqrtf()` from
 return fsqrtf(dx * dx + dy * dy + dz * dz);   /* func_00122BB0 */
 ```
 
+Retail also uses the EE `rsqrt.s fd, fs, ft` (fs / sqrt(ft)) form, which gcc
+never emits: `fsqrtf` followed by a division stays two instructions. Use
+`frsqrtf(numerator, x)` from `include/fpu.h`. The quaternion normalizers DDS1
+`func_002E8038` / DDS2 `func_00340EE0` are the reference (sites 002E80DC/002E8148
+and 00340F84/00340FF0).
+
 ## Absolute values: `ffabsf` versus builtin `fabsf`
 
 An `abs.s` instruction alone does not distinguish the builtin from an asm
