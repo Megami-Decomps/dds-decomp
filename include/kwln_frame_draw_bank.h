@@ -8,12 +8,13 @@
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_draw.h"
 #include "kwln_texture_bank.h"
+#include "sdf_draw_packet_groups.h"
 
 /* Two frame banks for the main scene and overlay packet chains. */
 typedef struct KwlnFrameDrawBank {
     SdfListHead initialList;             /* 0x0000 */
     DmaPacketHeader programReference;    /* 0x0020 */
-    u8 packetGroups[13][0x1B0];          /* 0x0040: opaque draw groups */
+    SdfDrawPacketGroups packetGroups[13]; /* 0x0040 */
     SdfListHead sceneList;               /* 0x1630 */
     SdfLinkedPacketList linkedList;       /* 0x1650 */
     SdfSceneNode scene;                  /* 0x1660 */

@@ -146,9 +146,8 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     }
 }
 
-/* Initialize one draw-group record in the kernel's byte-buffer storage. */
-void sdfInitializeDrawPacketGroups(u8 *memory) {
-    SdfDrawPacketGroups *ctx = (SdfDrawPacketGroups *)memory;
+/* Initialize one draw-group record of a frame draw bank. */
+void sdfInitializeDrawPacketGroups(SdfDrawPacketGroups *ctx) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
@@ -170,8 +169,7 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
-void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, u8 *memory) {
-    SdfDrawPacketGroups *packets = (SdfDrawPacketGroups *)memory;
+void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, SdfDrawPacketGroups *packets) {
     s32 i;
 
     for (i = 0; i != 4; i++) {
