@@ -14,7 +14,7 @@
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
-#include "btl_stage_test_task.h"
+#include "file_pac.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -89,7 +89,7 @@ extern char D_003BC7A0[];
 #define EVT_STAGE_PROJECTION_BIAS 2048.0f
 #define EVT_STAGE_DEFAULT_TARGET_Z -400.0f
 #define EVT_STAGE_SCREEN_WORK_BYTES 0x20
-#define EVT_STAGE_RESOURCE_TASK_KIND 6
+#define FILE_REQUEST_COMPLETE_STATE 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
 extern void evtStageTestQueueMotionSegment(s32, f32, f32);
@@ -2969,19 +2969,21 @@ void btlCreateStageTestTask(void) {
     kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
-/* Clean up kind-6 task resources, then free its allocation and task work.
- * Return zero when handled, or one for another task kind; retain the K&R definition. */
-s32 btlDestroyStageTask(taskWork)
-    StageTestTaskWork *taskWork;
+/* A PAC file request's cleanup (filePollEntryCleanup delegates it): once the
+ * request is complete, release its device state, packet queue nodes, name and
+ * the request itself, returning zero; return one while it is pending. Retain
+ * the K&R definition. */
+s32 btlDestroyStageTask(request)
+    FilePacRequest *request;
 {
-    if (taskWork->kind == EVT_STAGE_RESOURCE_TASK_KIND) {
-        s32 resource = taskWork->resource;
-        if (resource != 0) {
-            sdfDevQueueReleaseState((DevState *)resource);
+    if (request->state == FILE_REQUEST_COMPLETE_STATE) {
+        void *deviceRequest = request->deviceRequest;
+        if (deviceRequest != NULL) {
+            sdfDevQueueReleaseState((DevState *)deviceRequest);
         }
-        sdfPacReleasePacketQueueNodes((PacState *)taskWork->payload);
-        sdfReleaseChipBlock(taskWork->allocation);
-        sdfReleaseChipBlock((void *)taskWork);
+        sdfPacReleasePacketQueueNodes(&request->packet);
+        sdfReleaseChipBlock(request->name);
+        sdfReleaseChipBlock((void *)request);
         return 0;
     }
     return 1;
