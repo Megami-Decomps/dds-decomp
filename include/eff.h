@@ -855,7 +855,7 @@ typedef char EffPCPNeedleWorkSizeCheck[sizeof(EffPCPNeedleWork) == 0x74 ? 1 : -1
 
 #ifdef VERSION_DDS2
 extern EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *);
-extern EffResourceWork *effCreateResourceEntryWork(s32);
+extern EffResourceWork *effCreateResourceEntryWork(u32);
 #else
 extern EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *);
 extern EffResourceWork *effCreateResourceEntryWork(u32);
