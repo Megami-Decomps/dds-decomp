@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_title_banner_menu.h"
 #include "fld_activation_entry.h"
 #include "scr_integer_return_value_api.h"
 #include "fld_scene_record.h"
@@ -24,12 +25,6 @@ extern void func_00140BC8(const char *name);
 struct EvtUnit;
 
 struct SdfTex;
-
-
-extern void fldSetTitleBannerChoice(s32);
-
-extern void fldSetTitleBannerPending(s32);
-
 
 
 extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
@@ -450,10 +445,6 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     scrSetIntegerReturnValue(0);
     return 1;
 }
-
-extern void fldSetTitleBannerChoice(s32);
-
-extern void fldSetTitleBannerPending(s32);
 
 s32 fldCmdReadSceneStatus(void) {
     s32 result;
