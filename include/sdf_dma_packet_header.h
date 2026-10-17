@@ -14,7 +14,7 @@ typedef struct DmaPacketHeader {
     u8 opaque12[6]; /* 0x12 */
     u32 unknown18; /* 0x18 */
     u32 unknown1C; /* 0x1C */
-} DmaPacketHeader;
+} QWORD_ALIGNED DmaPacketHeader;
 
 typedef char DmaPacketHeader_size_must_be_0x20[
     (sizeof(DmaPacketHeader) == 0x20) ? 1 : -1];
