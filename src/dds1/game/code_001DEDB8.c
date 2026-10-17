@@ -9115,21 +9115,21 @@ extern char D_003A5020[];
 /* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
 void sndLoadSysEffLb(void) {
     const char *path = D_003A5008;
-    s32 archive = (s32)fileQueuePlainDispatchRequest(path);
-    s32 node;
+    FilePacRequest *archive = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
+    PacWork *node;
     u32 i;
 
     fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf(D_003A5020, path);
-    node = *(s32 *)(archive + 0x60);
+    node = archive->packet.queueHead;
     i = 0;
-    while (node != 0) {
+    while (node != NULL) {
         if (D_0035F748[i].enabled != 0) {
-            u32 unk08 = *(u32 *)(node + 8);
-            u32 unk0C = *(u32 *)(node + 0xC);
+            u32 unk08 = (u32)node->resourceHandle;
+            u32 unk0C = (u32)node->dataCursor;
             D_0035F748[i].opaque08 = unk08;
             D_0035F748[i].archiveData = unk0C;
-            node = *(s32 *)node;
+            node = node->next;
         } else {
             D_0035F748[i].archiveData = 0;
             D_0035F748[i].opaque08 = 0;
@@ -9140,7 +9140,7 @@ void sndLoadSysEffLb(void) {
         D_0035F748[i].archiveData = 0;
         D_0035F748[i].opaque08 = 0;
     }
-    btlStageTaskCleanupCallback((void *)archive);
+    btlStageTaskCleanupCallback(archive);
 }
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */

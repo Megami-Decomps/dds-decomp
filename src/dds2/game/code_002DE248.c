@@ -27,7 +27,7 @@
 #include "eff_span_work.h"
 #include "common.h"
 #include "sdf_vu_rotation_axes.h"
-#include "eff_resource_list_request.h"
+#include "file_pac.h"
 #include "eff_resource_bank_slot.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
@@ -15362,7 +15362,7 @@ u32 effRemoveListEntry(EffectList *list) {
  * finished job's buffer to the entry's destination. Returns the remaining entry count. */
 s32 effPollResourceList(EffectList *list) {
     EffectListNode *node = list->first;
-    EffLoadedItem *item;
+    PacWork *item;
     struct SdfMemBlock *allocation;
 
     if (node != NULL) {
@@ -15381,16 +15381,16 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     btlStageTaskCleanupCallback(list->request);
                 }
-                list->request = (EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
+                list->request = (FilePacRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
                     fileWaitForRequestReady((struct FileRequest *)list->request);
                 }
                 node->state = 1;
             } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {
-                for (item = list->request->items; item != NULL; item = item->next) {
-                    if (item->kind == 1) {
+                for (item = list->request->packet.queueHead; item != NULL; item = item->next) {
+                    if (((SdfPacStreamPacketHeader *)item->packet)->command == 1) {
                         node = list->first;
-                        allocation = item->allocationHandle;
+                        allocation = (struct SdfMemBlock *)item->resourceHandle;
                         *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
                         if (node->kind == 0) {
                             sdfReleaseResourceAllocation(allocation);
