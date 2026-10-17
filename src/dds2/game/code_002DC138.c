@@ -751,7 +751,61 @@ RefObj *effRetainSharedReference(RefObj *obj) {
 }
 
 extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
-INCLUDE_ASM(const s32, "game/code_002DC138", sdfGetOrCreateTextureForReference);
+#include "sdf_packet_builders.h"
+
+SdfTex *sdfGetOrCreateTextureForReference(void *target, RefObj *source) {
+    SdfPoolNode *surface = target;
+    SdfListHead *list;
+    u16 width;
+    u16 height;
+    s32 widthLog2;
+    s32 heightLog2;
+    SdfTex *texture;
+    u32 primary;
+    u32 secondary;
+    u8 clutFormat;
+    u8 pixelFormat;
+
+    if (source->index != -1 && D_00437E38 == source->index &&
+        D_00437E3C == (u32)surface) {
+        return D_00437E40;
+    }
+    D_00437E38 = source->index;
+    D_00437E3C = (u32)surface;
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfCreateDescriptorPacket(list, D_00437E40->secondaryResource, 0, 0,
+        source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
+    sdfCreateDescriptorPacket(list, D_00437E40->primaryResource, 0, 0,
+        ((SdfTextureFileHeader *)source->base)->width,
+        ((SdfTextureFileHeader *)source->base)->height, (s32)source->pixels, 0);
+    surface->append(surface, list);
+    texture = D_00437E40;
+    width = ((SdfTextureFileHeader *)source->base)->width;
+    texture->width = width;
+    widthLog2 = (s16)width - 1;
+    primary = texture->primaryResource->word >> 6;
+    height = ((SdfTextureFileHeader *)source->base)->height;
+    texture->height = height;
+    clutFormat = texture->clutFormat;
+    secondary = texture->secondaryResource->word;
+    pixelFormat = texture->pixelFormat;
+    heightLog2 = (s16)height - 1;
+    EE_MMI_BIT_LENGTH(heightLog2);
+    EE_MMI_BIT_LENGTH(widthLog2);
+    secondary >>= 6;
+    texture->primaryBuffer->textureState =
+        ((u64)2 << 61) |
+        ((u64)clutFormat << 51) |
+        ((u64)secondary << 37) |
+        ((u64)1 << 34) |
+        ((u64)heightLog2 << 30) |
+        (widthLog2 << 26) |
+        ((u64)pixelFormat << 20) |
+        (4 << 14) |
+        (u64)primary;
+    return D_00437E40;
+}
 
 s32 effCountExpandedEntries(const EffExpandedList *list) {
     u32 count = list->count;
