@@ -55,8 +55,8 @@ void effBossInitializeModelGroups(EffBossWork *work)
     MdlCtx *model = effParamWorkGetData(work->paramWork);
     EffBossGroup *group;
     EffBossCell *nextCells;
-    u32 i;
-    u32 j;
+    u32 groupIndex;
+    u32 cellIndex;
 
     if ((s32)work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -74,7 +74,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
         nextCells = (EffBossCell *)sdfResourceRetainAddress(work->groupsHandle);
         work->groups = (EffBossGroup *)nextCells;
         nextCells = (EffBossCell *)((u8 *)nextCells + work->groupCount * sizeof(EffBossGroup));
-        for (i = 0, group = work->groups; i < work->groupCount; i++, group++) {
+        for (groupIndex = 0, group = work->groups; groupIndex < work->groupCount; groupIndex++, group++) {
             EffBossCell *cell;
 
             group->drawPool = effRecordPoolCreateFiveVertexGroups(work->cellCount);
@@ -89,9 +89,9 @@ void effBossInitializeModelGroups(EffBossWork *work)
             }
             group->angularSpeed = (0.1f * (3.14159265f / 180.0f));
             group->rotationAngle = 0.0f;
-            for (j = 0; j < work->cellCount; j++) {
-                f32 *vertices = (f32 *)effGetIndexedEffectGroupRecord(group->drawPool, j);
-                EffBossColorSlot *colors = effGetIndexedEffectGroupIndexEntry(group->drawPool, j);
+            for (cellIndex = 0; cellIndex < work->cellCount; cellIndex++) {
+                f32 *vertices = (f32 *)effGetIndexedEffectGroupRecord(group->drawPool, cellIndex);
+                EffBossColorSlot *colors = effGetIndexedEffectGroupIndexEntry(group->drawPool, cellIndex);
 
                 colors->color[0] = 0;
                 colors->color[1] = 0;
@@ -108,7 +108,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
             effSetVectorIncrementBits(group->drawPool, work->head.incrementBits);
             group->cells = nextCells;
             nextCells += work->cellCount;
-            for (j = 0, cell = group->cells; j < work->cellCount; j++, cell++) {
+            for (cellIndex = 0, cell = group->cells; cellIndex < work->cellCount; cellIndex++, cell++) {
                 effBossCellRandomize(work, cell);
             }
         }
@@ -153,11 +153,11 @@ EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src) {
 
 /* Release group draw pools, the shared cell system, model resource and owner. */
 void effBossDestroy(EffBossWork *work) {
-    u32 i;
+    u32 groupIndex;
 
     if (work->groupsHandle != 0) {
-        for (i = 0; i < work->groupCount; i++) {
-            effReleaseRecordGroupAssetAndHandle(work->groups[i].drawPool);
+        for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
+            effReleaseRecordGroupAssetAndHandle(work->groups[groupIndex].drawPool);
         }
         sdfReleaseResourceAllocation(work->groupsHandle);
     }
@@ -457,13 +457,13 @@ void func_0018D6A0(void) {
 /* Apply per-cell rotation onset and speed after creating the trail groups. */
 EffBossWork *effBossCreateWithGroups(EffBossParams *bossParams, void *effectParams) {
     EffBossWork *work;
-    u32 i;
+    u32 groupIndex;
 
     work = effBossCreate(bossParams, effectParams);
-    for (i = 0; i < work->groupCount; i++) {
-        work->groups[i].rotationStartAge = bossParams->rotationStartAge;
-        work->groups[i].rotationAngle = 0.0f;
-        work->groups[i].angularSpeed = bossParams->angularSpeed;
+    for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
+        work->groups[groupIndex].rotationStartAge = bossParams->rotationStartAge;
+        work->groups[groupIndex].rotationAngle = 0.0f;
+        work->groups[groupIndex].angularSpeed = bossParams->angularSpeed;
     }
     return work;
 }
@@ -480,13 +480,13 @@ void effBossCreateGroupsFromPackedParams(void *data) {
 /* Preserve rotation settings, but restart every group's accumulated angle. */
 EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     EffBossWork *work;
-    u32 i;
+    u32 groupIndex;
 
     work = effBossCloneWorkAndParameters(src);
-    for (i = 0; i < work->groupCount; i++) {
-        work->groups[i].rotationStartAge = src->groups[i].rotationStartAge;
-        work->groups[i].rotationAngle = 0.0f;
-        work->groups[i].angularSpeed = src->groups[i].angularSpeed;
+    for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
+        work->groups[groupIndex].rotationStartAge = src->groups[groupIndex].rotationStartAge;
+        work->groups[groupIndex].rotationAngle = 0.0f;
+        work->groups[groupIndex].angularSpeed = src->groups[groupIndex].angularSpeed;
     }
     return work;
 }
