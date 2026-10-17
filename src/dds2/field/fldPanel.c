@@ -28,7 +28,7 @@ void fldDestroyPanelTaskIfPresent(void) {
     }
 }
 
-void *fldSetTitleBannerPending(s32 isPending) {
+FldTitleBannerMenu *fldSetTitleBannerPending(s32 isPending) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
@@ -36,7 +36,7 @@ void *fldSetTitleBannerPending(s32 isPending) {
     return menu;
 }
 
-void *fldSetTitleBannerChoice(s32 choice) {
+FldTitleBannerMenu *fldSetTitleBannerChoice(s32 choice) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
