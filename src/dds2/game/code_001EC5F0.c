@@ -5184,7 +5184,172 @@ f32 func_001FE5C0(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
     return radius;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001FEC00);
+f32 func_001FEC00(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
+                  f32 *outMaxHeight, f32 *outMinHeight, const f32 *from, const f32 *to, s8 keepSide) {
+    f32 center[4] __attribute__((aligned(16)));
+    f32 rotated[4] __attribute__((aligned(16)));
+    f32 anchor[4] __attribute__((aligned(16)));
+    f32 endpoint[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    BtlState *state;
+    BtlUnit *unit;
+    s32 first;
+    f32 maxHeight, minHeight;
+    f32 maxX, minX, maxZ, minZ;
+    /* Retail retains this unused radius maximum beside the live extrema
+     * at 001FEE80, as in the adjacent func_001FE5C0 bounds loop. */
+    f32 actorRadius;
+    f32 verticalOffset;
+    f32 radius;
+    f32 length;
+
+    memset(anchor, 0, sizeof(anchor));
+    state = (BtlState *)btlGetRuntime();
+    if (from == 0 || to == 0) {
+        VU0_LOAD_VF(vf10, anchor);
+        VU0_STORE_VF(vf10, endpoint);
+    } else {
+        VU0_LOAD_VF(vf10, from);
+        VU0_STORE_VF(vf10, anchor);
+        VU0_LOAD_VF(vf10, to);
+        VU0_STORE_VF(vf10, endpoint);
+        VU0_LOAD_VF(vf10, to);
+        VU0_LOAD_VF(vf11, from);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(length);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, direction);
+    }
+    maxHeight = 0.0f;
+    actorRadius = 0.0f;
+    minHeight = 0.0f;
+    maxX = 0.0f;
+    minX = 0.0f;
+    maxZ = 0.0f;
+    minZ = 0.0f;
+    first = 1;
+    unit = state->units;
+    for (; unit != 0; unit = unit->nextActor) {
+        s32 flags = unit->status.flags;
+        f32 lowerX, upperX, lowerZ, upperZ;
+        if (!(flags & 1)) continue;
+        if (flags & 0xC0) continue;
+        if (included != 0) {
+            if (!(flags & mask) && unit->owner != included->owner) {
+                continue;
+            }
+        } else if (!(flags & mask)) {
+            continue;
+        }
+        if (excluded != 0 && unit->owner == excluded->owner) {
+            continue;
+        }
+        if (mode == 1) {
+            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            VU0_STORE_VF(vf10, center);
+            radius = unit->cameraRadius * unit->scale;
+            verticalOffset = radius * 0.5f;
+        } else {
+            btlUnitGetMuzzlePosVU(unit);
+            VU0_STORE_VF(vf10, center);
+            verticalOffset = (unit->height * unit->scale) * 0.5f;
+            radius = unit->reach * unit->scale;
+        }
+        upperX = center[0] + radius;
+        upperZ = center[2] + radius;
+        lowerX = center[0] - radius;
+        lowerZ = center[2] - radius;
+        verticalOffset -= center[1];
+        if (first) {
+            actorRadius = radius;
+            if (lowerX < upperX) {
+                maxX = upperX;
+                minX = lowerX;
+            } else {
+                maxX = lowerX;
+                minX = upperX;
+            }
+            if (lowerZ < upperZ) {
+                maxZ = upperZ;
+                minZ = lowerZ;
+            } else {
+                maxZ = lowerZ;
+                minZ = upperZ;
+            }
+            minHeight = maxHeight = verticalOffset;
+            first = 0;
+        } else {
+            if (actorRadius < radius) actorRadius = radius;
+            if (maxX < upperX) maxX = upperX;
+            if (upperX < minX) minX = upperX;
+            if (maxX < lowerX) maxX = lowerX;
+            if (lowerX < minX) minX = lowerX;
+            if (maxZ < upperZ) maxZ = upperZ;
+            if (upperZ < minZ) minZ = upperZ;
+            if (maxZ < lowerZ) maxZ = lowerZ;
+            if (lowerZ < minZ) minZ = lowerZ;
+            if (maxHeight < verticalOffset) maxHeight = verticalOffset;
+            if (verticalOffset < minHeight) minHeight = verticalOffset;
+        }
+    }
+    {
+        f32 halfHeight = maxHeight * 0.5f;
+        f32 halfX;
+        f32 halfZ;
+        center[0] = (maxX + minX) * 0.5f;
+        center[1] = -maxHeight * 0.5f;
+        halfX = (maxX - minX) * 0.5f;
+        center[2] = (maxZ + minZ) * 0.5f;
+        halfZ = (maxZ - minZ) * 0.5f;
+        center[3] = 0.0f;
+        if (halfZ < halfX) {
+            radius = halfHeight;
+            if (radius < halfX) radius = halfX;
+        } else {
+            radius = halfZ;
+            if (!(halfHeight < radius)) radius = halfHeight;
+        }
+    }
+    VU0_LOAD_VF(vf10, center);
+    if (from != 0) {
+        f32 value;
+        f32 x;
+        f32 z;
+        f32 shift;
+        sdfVuLoadRotationMatrixY(0x1.2d958p+2f);
+        VU0_LOAD_VF(vf10, direction);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
+        value = rotated[1];
+        if (!keepSide) {
+            if (direction[0] >= 0.0f) {
+                if (direction[2] >= 0.0f) {
+                    VU0_LOAD_VF(vf10, rotated);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
+                }
+            } else if (direction[2] < 0.0f) {
+                VU0_LOAD_VF(vf10, rotated);
+                VU0_NEGATE_XYZ(vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
+            }
+        }
+        z = ffabsf(rotated[2]);
+        x = ffabsf(rotated[0]);
+        rotated[1] = value;
+        if (x < z) value = x / z;
+        else value = z / x;
+        shift = (radius * 0x1.333332p-2f) * value;
+        VU0_LOAD_VF(vf10, rotated);
+        VU0_SCALE_VF(vf10, shift);
+        VU0_LOAD_VF(vf11, center);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, center);
+    }
+    if (outMaxHeight != 0) *outMaxHeight = maxHeight;
+    if (outMinHeight != 0) *outMinHeight = minHeight;
+    return radius;
+}
 
 extern void sdfDebugPrintf(const char *, ...);
 
