@@ -7911,6 +7911,8 @@ u32 effClampSlotCount(FileKeyBlock *grid) {
     return n > 200 ? 200 : n;
 }
 
+extern u32 effRetainScalyTextureReference(void);
+
 EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 8 + 0x10);
     EffAnimationState *state = (EffAnimationState *)sdfResourceRetainAddress(allocation);
@@ -10629,6 +10631,8 @@ u32 effCloneSelectedFileJob(void) {
     return 0x800000;
 }
 
+
+extern u32 effSelectLinkedFileState();
 
 u32 effFlagFileQueueActive(void) {
     D_003BD955 = 1;

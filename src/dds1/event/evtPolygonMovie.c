@@ -544,7 +544,7 @@ PolyMovieWork *evtPolygonMovieAllocWork(void)
 {
     PolyMovieWork *work;
 
-    work = sdfAllocSizeClassBlock(0x11C);
+    work = sdfAllocSizeClassBlock(sizeof(PolyMovieWork));
     if (work == NULL) {
         return work;
     }
@@ -978,7 +978,7 @@ void evtDestroyTaskHierarchy(u32 taskHandle) {
 
 /* Allocate the picture task's flag and texture state. */
 EvtPictureWork *evtAllocateContext(void) {
-    EvtPictureWork *context = sdfAllocSizeClassBlock(8);
+    EvtPictureWork *context = sdfAllocSizeClassBlock(sizeof(EvtPictureWork));
     context->flags = 0;
     context->texture = NULL;
     return context;

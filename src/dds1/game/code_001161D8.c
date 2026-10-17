@@ -31,7 +31,7 @@ u32 dds3InitializeInnerVectorEffectObject(EffWorldNode *object) {
     EffLightData *obj;
 
     effObjInnerCreate(object);
-    obj = (EffLightData *)sdfAllocSizeClassBlock(0x7C);
+    obj = (EffLightData *)sdfAllocSizeClassBlock(sizeof(EffLightData));
     object->data = obj;
     obj->resourceState = dds3CreateSlotResourceState(object);
     dds3SetObjectFlags(object, 0x62);

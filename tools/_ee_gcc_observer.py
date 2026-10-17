@@ -7,6 +7,35 @@ GCC vendor rtunion fields occupy eight bytes; this is not host pointer width.
 import json
 import struct
 
+# Stages are the furthest reached tier, not a count: branches can skip tiers.
+RANK_DECIDING_TIERS = (
+    'priority', 'reg_weight', 'interblock_bb', 'spec_val', 'prob_val',
+    'last_insn_class', 'dependents', 'luid',
+)
+RANK_STAGE_HOOKS = (
+    (0x0816c702, 'rank_stage_1'),
+    (0x0816c723, 'rank_stage_2'),
+    (0x0816c784, 'rank_stage_3'),
+    (0x0816c7d1, 'rank_stage_4'),
+    (0x0816c7f0, 'rank_stage_5'),
+    (0x0816ca55, 'rank_stage_6'),
+    (0x0816caae, 'rank_stage_7'),
+)
+RANK_STAGE_NUMBERS = {name: stage for stage, (_, name) in enumerate(RANK_STAGE_HOOKS, 1)}
+ALLOCNO_COMPARE_HOOKS = (
+    (0x0814100c, 'allocno_compare_enter'),
+    (0x081410f5, 'allocno_compare_priorities'),
+    (0x08141106, 'allocno_compare_exit'),
+)
+
+# Pinned i386 reg_info pointer array and the range_copy bit in each entry.
+REG_INFO_TABLE_ADDRESS = 0x08269fb0
+REG_INFO_ARRAY_OFFSET = 16
+I386_POINTER_SIZE = 4
+REG_INFO_FLAGS_OFFSET = 0x24
+RANGE_COPY_SHIFT = 1
+RANGE_COPY_MASK = 1 << RANGE_COPY_SHIFT
+
 # First eight text bytes at every static hook; verified on its first trap.
 HOOK_BYTES = {
     0x08075764: bytes.fromhex('5589e583ec285756'),
@@ -28,6 +57,9 @@ HOOK_BYTES = {
     0x0813f9ed: bytes.fromhex('a8010f8526010000'),
     0x0813fbfd: bytes.fromhex('8d65985b5e5f89ec'),
     0x08140060: bytes.fromhex('5589e583ec0c5756'),
+    0x0814100c: bytes.fromhex('5589e583ec185756'),
+    0x081410f5: bytes.fromhex('39d8750b8b45ec29'),
+    0x08141106: bytes.fromhex('8d65dc5b5e5f89ec'),
     0x08141e54: bytes.fromhex('5589e583ec305756'),
     0x081420c4: bytes.fromhex('8d65c45b5e5f89ec'),
     0x081420d0: bytes.fromhex('5589e581ec800000'),
@@ -41,6 +73,13 @@ HOOK_BYTES = {
     0x08144144: bytes.fromhex('5589e583ec345756'),
     0x0814461b: bytes.fromhex('5b5e5f89ec5dc389'),
     0x0816c6ac: bytes.fromhex('5589e583ec205756'),
+    0x0816c702: bytes.fromhex('833da41427080075'),
+    0x0816c723: bytes.fromhex('8b55fca1c89f2608'),
+    0x0816c784: bytes.fromhex('8b55e083c2108b04'),
+    0x0816c7d1: bytes.fromhex('8b4433048b5c1304'),
+    0x0816c7f0: bytes.fromhex('8b0de8e22408894d'),
+    0x0816ca55: bytes.fromhex('8b45fc8b155ce224'),
+    0x0816caae: bytes.fromhex('8b4df08d04b68d14'),
     0x0816cac1: bytes.fromhex('8d65d45b5e5f89ec'),
     0x0816cacc: bytes.fromhex('5589e583ec2c5756'),
     0x0817160c: bytes.fromhex('5589e583ec405756'),
@@ -195,6 +234,8 @@ class Tracer:
         self.bp(ret, 'pass_exit')
         self.log('pass_enter', function=self.function, return_pc=hex(ret), reload_completed=self.r.u32(136778916))
         if phase.startswith('schedule'):
+            for address, name in RANK_STAGE_HOOKS:
+                self.bp(address, name)
             for a, n in [(135710380, 'rank_enter'), (135711425, 'rank_exit'), (135711436, 'schedule_insn')]:
                 self.bp(a, n)
         elif phase == 'local_alloc':
@@ -274,6 +315,15 @@ class Tracer:
             ctx = self.compare.pop()
             self.log('qty_compare_exit', call_id=ctx['call_id'], result=signed(r['eax']), cost_difference=signed(r['ecx']))
             return
+        if name in RANK_STAGE_NUMBERS:
+            if not self.rank:
+                raise RuntimeError(f'{name} without an active rank call')
+            stage = RANK_STAGE_NUMBERS[name]
+            ctx = self.rank[-1]
+            ctx['stage'] = max(ctx.get('stage', 0), stage)
+            self.log('rank_stage', call_id=ctx['call_id'], stage=stage,
+                     left_uid=ctx['left']['uid'], right_uid=ctx['right']['uid'])
+            return
         if name == 'rank_enter':
             a = self.args(r, 2)
             ctx = {'left': self.insn(self.r.u32(a[0])), 'right': self.insn(self.r.u32(a[1])), 'last': self.insn(self.r.u32(136635112)), 'call_id': self.seq + 1}
@@ -281,8 +331,12 @@ class Tracer:
             self.log('rank_enter', **ctx)
             return
         if name == 'rank_exit':
+            if not self.rank:
+                raise RuntimeError('rank_exit without an active rank call')
             ctx = self.rank.pop()
-            self.log('rank_exit', call_id=ctx['call_id'], result=signed(r['eax']))
+            stage = ctx.get('stage', 0)
+            self.log('rank_exit', call_id=ctx['call_id'], result=signed(r['eax']),
+                     stage=stage, deciding_tier=RANK_DECIDING_TIERS[stage])
             return
         if name == 'schedule_insn':
             a = self.args(r, 4)
@@ -327,6 +381,7 @@ class GlobalTracer(Tracer):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.global_calls = []
+        self.allocno_comparisons = []
         self.pref_calls = []
         self.transforms = []
 
@@ -349,11 +404,49 @@ class GlobalTracer(Tracer):
     def setup_pass(self, phase, r):
         super().setup_pass(phase, r)
         if phase == 'global_alloc':
+            for address, name in ALLOCNO_COMPARE_HOOKS:
+                self.bp(address, name)
             hooks = [(135537884, 'global_find_enter'), (135539054, 'global_candidate'), (135539635, 'global_copy_preference_candidate'), (135540387, 'global_preference_candidate'), (135542039, 'global_commit'), (135542854, 'global_find_exit'), (135545156, 'preference_enter'), (135546395, 'preference_exit'), (135536212, 'expand_preferences_enter'), (135536836, 'expand_preferences_exit'), (135536848, 'prune_preferences_enter'), (135537870, 'prune_preferences_exit')]
             for a, n in hooks:
                 self.bp(a, n)
 
     def handle(self, name, r):
+        if name == 'allocno_compare_enter':
+            pointers = self.args(r, 2)
+            ids = [signed(self.r.u32(pointer)) for pointer in pointers]
+            snapshot = self.allocnos()
+            pair = [dict(snapshot[allocno]) for allocno in ids]
+            for item in pair:
+                table = self.r.u32(REG_INFO_TABLE_ADDRESS)
+                info = self.r.u32(table + REG_INFO_ARRAY_OFFSET
+                                  + I386_POINTER_SIZE * item['pseudo'])
+                flags = self.r.mem(info + REG_INFO_FLAGS_OFFSET, 1)[0]
+                item['range_copy'] = (flags & RANGE_COPY_MASK) >> RANGE_COPY_SHIFT
+            ctx = {'call_id': self.seq + 1, 'pair': pair, 'priorities': None}
+            self.allocno_comparisons.append(ctx)
+            self.log(name, **ctx)
+            return
+        if name in ('allocno_compare_priorities', 'allocno_compare_exit'):
+            if not self.allocno_comparisons:
+                raise RuntimeError(f'{name} without an active allocno comparison')
+            ctx = self.allocno_comparisons[-1]
+            if name == 'allocno_compare_priorities':
+                # At this checkpoint EBX/EAX hold the left/right signed scores.
+                ctx['priorities'] = [signed(r['ebx']), signed(r['eax'])]
+                self.log(name, call_id=ctx['call_id'], priorities=ctx['priorities'])
+                return
+            self.allocno_comparisons.pop()
+            priorities = ctx['priorities']
+            if priorities is None:
+                tier = 'range_copy'
+            elif priorities[0] != priorities[1]:
+                tier = 'priority'
+            else:
+                tier = 'allocno_number'
+            self.log(name, call_id=ctx['call_id'], pair=ctx['pair'],
+                     priorities=priorities, result=signed(r['eax']),
+                     deciding_tier=tier)
+            return
         if name == 'global_find_enter':
             a = self.args(r, 5)
             snap = self.allocnos()

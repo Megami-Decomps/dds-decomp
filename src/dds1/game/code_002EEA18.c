@@ -58,7 +58,7 @@ void sdfPacReadListAllocationCount(PacState *state) {
 void sdfQueueAndResetPacketWork(PacState *state,
                                 SdfPacStreamPacketHeader *packet) {
     sdfPacEnqueuePacket(state, packet);
-    state->slot.list = sdfAllocSizeClassBlock(0x30);
+    state->slot.list = sdfAllocSizeClassBlock(sizeof(PacListAllocation));
     state->onInput = sdfPacReadListAllocationCount;
 }
 

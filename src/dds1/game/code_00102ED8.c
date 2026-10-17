@@ -128,7 +128,7 @@ void kwlnDebugTaskCreate(void) {
     s32 i;
 
     if (kwlnTaskGetTaskByName(dds3AdminTaskName) == NULL) {
-        work = sdfAllocSizeClassBlock(0x24);
+        work = sdfAllocSizeClassBlock(sizeof(AdminWork));
         work->flags = 0;
         work->value = 0;
         work->activeMode = -1;
@@ -764,6 +764,8 @@ void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
     sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
                                 width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
+
+extern u32 kwlnTextureGetPageIndex(void);
 
 /* Append the zero-based viewer page and final page index; an empty list prints -1. */
 void kwlnTextureDrawPageCounter(SdfListHead *packetList) {

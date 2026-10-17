@@ -1407,7 +1407,7 @@ extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
  * here; otherwise the completion callback path owns cleanup. Always return zero.
  * Preserve the generic callback and user-data word parameters. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
-    MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
+    MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(sizeof(MdlDoneJob));
     FilePacRequest *requestSlot;
 
     completionJob->group = group;

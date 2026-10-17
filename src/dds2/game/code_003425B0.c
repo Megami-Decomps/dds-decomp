@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eeregs.h"
 #include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
 #include "sdf_resource.h"
@@ -44,17 +45,9 @@ extern s32 iWakeupThread(s32 threadId);
 #define SDF_STREAM_PSMCT16 2
 #define SDF_EE_PHYSICAL_MASK 0x0FFFFFFF
 #define SDF_EE_UNCACHED_BASE 0x20000000
-#define SDF_IPU_OUTPUT_DMA_ADDRESS 0x1000B010
-#define SDF_IPU_OUTPUT_DMA_QWC 0x1000B020
-#define SDF_IPU_OUTPUT_DMA_CTRL 0x1000B000
-#define SDF_IPU_INPUT_DMA_ADDRESS 0x1000B410
-#define SDF_IPU_INPUT_DMA_QWC 0x1000B420
-#define SDF_IPU_INPUT_DMA_TAG_ADDRESS 0x1000B430
-#define SDF_IPU_INPUT_DMA_CTRL 0x1000B400
 #define SDF_IPU_DMA_START 0x100
 #define SDF_IPU_DMA_NORMAL_START 0x101
 #define SDF_IPU_DMA_CHAIN_START 0x105
-#define SDF_IPU_CMD_REGISTER 0x10002000
 #define SDF_IPU_FDEC 0x40000000
 #define SDF_IPU_FDEC_BYTE 0x40000008
 
@@ -1504,13 +1497,13 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     sdfSoundRemoveNode(node);
     sdfStreamNodeUnlink(node, 1);
     if (D_00439204 == node) {
-        *(volatile u32 *)0x10002010 = 0x40000000;
+        HW_WRITE(IPU_CTRL, 0x40000000);
         sceIpuSync(0, 0);
-        dmaEnable = *(volatile u32 *)0x1000F520;
-        *(volatile u32 *)0x1000F520 = 0x10000;
-        *(volatile u32 *)0x1000B400 = 1;
-        *(volatile u32 *)0x1000B000 = 0;
-        *(volatile u32 *)0x1000F520 = dmaEnable;
+        dmaEnable = HW_READ(D_ENABLER);
+        HW_WRITE(D_ENABLER, 0x10000);
+        HW_WRITE(D4_CHCR, 1);
+        HW_WRITE(D3_CHCR, 0);
+        HW_WRITE(D_ENABLER, dmaEnable);
         D_00439204 = NULL;
         wasActive = 1;
     }
@@ -1592,9 +1585,9 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
     if (stream->active == 0) {
         D_00439208 = stream;
-        *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK;
-        *(vu32 *)SDF_IPU_INPUT_DMA_QWC = 0;
-        *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_CHAIN_START;
+        HW_WRITE(D4_TADR, (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK);
+        HW_WRITE(D4_QWC, 0);
+        HW_WRITE(D4_CHCR, SDF_IPU_DMA_CHAIN_START);
     } else {
         if (stream->filledSlots == 0) {
             stream->inputDmaStartPending = 1;
@@ -1602,35 +1595,31 @@ void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
         }
         D_00439208 = stream;
         stream->inputFeedDmaInFlight = 1;
-        *(vu32 *)SDF_IPU_INPUT_DMA_ADDRESS = ((u32)stream->scratchBuffer +
-            (stream->firstSlot << SDF_STREAM_SLOT_SHIFT)) & SDF_EE_PHYSICAL_MASK;
-        *(vu32 *)SDF_IPU_INPUT_DMA_QWC = SDF_STREAM_SLOT_BYTES / SDF_STREAM_QWORD_BYTES;
-        *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_NORMAL_START;
+        HW_WRITE(D4_MADR, ((u32)stream->scratchBuffer + (stream->firstSlot << SDF_STREAM_SLOT_SHIFT)) &
+                              SDF_EE_PHYSICAL_MASK);
+        HW_WRITE(D4_QWC, SDF_STREAM_SLOT_BYTES / SDF_STREAM_QWORD_BYTES);
+        HW_WRITE(D4_CHCR, SDF_IPU_DMA_NORMAL_START);
     }
     stream->inputDmaStartPending = 0;
 }
 
 /* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
 void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
-    vu32 *dmaAddress = (vu32 *)SDF_IPU_OUTPUT_DMA_ADDRESS;
-    vu32 *dmaQwords = (vu32 *)SDF_IPU_OUTPUT_DMA_QWC;
-    vu32 *dmaControl = (vu32 *)SDF_IPU_OUTPUT_DMA_CTRL;
     u8 bufferIndex = stream->bufferIndex;
-    *dmaAddress = (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
-    *dmaQwords = stream->bufferSize / SDF_STREAM_QWORD_BYTES;
-    *dmaControl = SDF_IPU_DMA_START;
+    HW_WRITE(D3_MADR, (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK);
+    HW_WRITE(D3_QWC, stream->bufferSize / SDF_STREAM_QWORD_BYTES);
+    HW_WRITE(D3_CHCR, SDF_IPU_DMA_START);
     stream->bufferIndex = bufferIndex ^ 1;
 }
 
 /* Read the FDEC result, then issue FDEC with an eight-bit advance; return the earlier result. */
 s32 sdfSoundSyncIpu(void) {
-    vu32 *ipuCommand = (vu32 *)SDF_IPU_CMD_REGISTER;
     s32 decodedBits;
-    *ipuCommand = SDF_IPU_FDEC;
+    HW_WRITE(IPU_CMD, SDF_IPU_FDEC);
     sceIpuSync(0, 0);
-    decodedBits = *ipuCommand;
+    decodedBits = HW_READ(IPU_CMD);
     sceIpuSync(0, 0);
-    *ipuCommand = SDF_IPU_FDEC_BYTE;
+    HW_WRITE(IPU_CMD, SDF_IPU_FDEC_BYTE);
     sceIpuSync(0, 0);
     return decodedBits;
 }
@@ -1885,7 +1874,7 @@ extern void sdfIpuDmaCompletionWorker();
 
 void sdfSoundInitIpuStream(void) {
     sceIpuInit();
-    *(vu32 *)0x10002000 = 0x90000000;
+    HW_WRITE(IPU_CMD, 0x90000000);
     sdfSoundNodeHead = 0;
     D_00439204 = NULL;
     D_004391FC = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);

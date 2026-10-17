@@ -9,7 +9,8 @@ bytes are compared with the retail ELF at the symbol's address. Words with a
 relocation are compared by resolved target when the symbol has a known address
 (func_/D_XXXXXXXX, config/<v>/symbol_addrs.txt); relocations against local
 sections (.rodata/.data of this unit) are masked. `ninja` remains the final proof.
-Exit status 0 only if every compiled function matches.
+Exit status 0 only if every compiled function matches and any requested --func
+name is emitted by the SKIP_ASM compile.
 """
 import argparse
 import os
@@ -922,6 +923,9 @@ def main():
             sys.stderr.write(rf.stderr[-2000:])
 
     ok = bad = 0
+    if args.func and not any(name == args.func for _, _, name in funcs):
+        bad += 1
+        print(f"MISSING {args.func}: requested function not emitted by the SKIP_ASM compile")
     if "(unit)" in context:
         bad += 1
         print("NOASM the unit does not compile with its asm included (missing asm file? "

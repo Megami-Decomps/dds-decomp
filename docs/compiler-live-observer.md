@@ -14,9 +14,11 @@ The compiler must have SHA-256:
 d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1
 ```
 
-The decoder is specific to this little-endian i386 executable. Its fixed hooks
-and layouts are in [ee-gcc-observer-hooks.json](ee-gcc-observer-hooks.json).
-All 35 static hooks also verify eight original instruction bytes on their
+The decoder is specific to this little-endian i386 executable. The original
+hook/layout inventory is in [ee-gcc-observer-hooks.json](ee-gcc-observer-hooks.json);
+the current guards, including ten comparator-tier hooks, are in
+[`tools/_ee_gcc_observer.py`](../tools/_ee_gcc_observer.py).
+All 45 static hooks verify eight original instruction bytes on their
 first actual breakpoint hit, before decoding state. The initial QEMU stop can
 be inside the loader, before the compiler text is mapped. Executable symbols, STABS records and disassembly
 identify the hook locations; corresponding vendor C source is unavailable.
@@ -32,6 +34,50 @@ The `allocation` mode gates observation to one named function and records:
 - local quantity comparisons, live exclusions and physical-register choices;
 - global `set_preference`, expansion and pruning changes;
 - global candidate exclusions, preference choices and the committed register.
+
+### Comparator decision tiers
+
+Allocation traces also identify the branch that returned from the global
+allocno comparator and the scheduler's rank comparator. Each call retains its
+own stack context. Join entry, checkpoint and exit events by `call_id` within
+the trace; `seq` is the ordered event number, and `phase` identifies the pass.
+Comparator results are signed 32-bit return values, not physical-register
+assignments or final instruction selections.
+
+The three global hooks emit:
+
+- `allocno_compare_enter`: `pair` contains the two allocno snapshots in argument
+  order, including their existing allocation fields and a `range_copy` bit
+  decoded from the corresponding pseudo's register info. `priorities` starts
+  as JSON `null`.
+- `allocno_compare_priorities`: `priorities` records the signed left and right
+  scores held in EBX and EAX at the comparison checkpoint.
+- `allocno_compare_exit`: repeats the entry `pair`, records the observed
+  `priorities` and signed `result`, and adds `deciding_tier`. The tier is
+  `range_copy` when the priority checkpoint was bypassed, `priority` when the
+  scores differ, and `allocno_number` when the scores tie. `null` means the
+  score checkpoint was not reached, not that both scores were zero.
+
+The seven scheduler checkpoints emit `rank_stage` with `call_id`, `stage`,
+`left_uid` and `right_uid`. `rank_exit` adds the greatest stage reached and its
+`deciding_tier` to the existing signed `result`:
+
+- 0: `priority` (no checkpoint reached)
+- 1: `reg_weight`
+- 2: `interblock_bb`
+- 3: `spec_val`
+- 4: `prob_val`
+- 5: `last_insn_class`
+- 6: `dependents`
+- 7: `luid`
+
+Stages describe control-flow checkpoints, not the number of comparisons made.
+Branches can skip checkpoints, so a later stage means preceding tiers did not
+decide that call; it does not prove every preceding tier was evaluated and tied.
+Use the matching `rank_enter` instruction snapshots and `schedule_insn` issue
+events to interpret the comparison. Reaching `luid` establishes the final
+ordering tie-break for that comparator call; it does not alone identify the
+source expression responsible for the instruction order.
 
 The `operands` mode records early single-precision (`SF`) `expand_binop` inputs,
 actual canonicalization swaps, operand/target identity and results. It tracks
@@ -203,6 +249,7 @@ Only the QEMU process spawned by this invocation is killed on error.
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_ee_gcc_observe.py'
+python3 -m unittest discover -s tests -p 'test_ee_gcc_observer_tiers.py'
 ```
 
 These tests need no vendor inputs or live debugger. They cover protocol
@@ -212,6 +259,12 @@ mismatches, stale-file recovery, socket denial/ownership and fail-closed QEMU
 patching. Mocked patch tests check the byte recipe; a real supported QEMU is
 still required for a live qualification.
 
+The focused tier tests use synthetic i386 memory and register state to cover
+all eight scheduler tiers, skipped checkpoints, signed values, range-copy and
+allocno-number decisions, nested call association, opcode guards and orphan
+events. Synthetic coverage does not establish live coverage of any branch or
+replace the frozen-case equality checks.
+
 This is diagnostic evidence about a candidate compilation. Byte equality proves
 that the observer did not change the declared artifacts of that frozen case;
 it does not prove the candidate matches retail or uniquely recovers the
@@ -219,3 +272,7 @@ original C source. Keep the project's normal whole-unit and retail build checks.
 Use the [decision atlas](compiler-decision-atlas.md) to choose a supported source
 hypothesis, and stop when the needed lifetime, preference or expression would
 invent behavior. This tool does not search compiler flags or source permutations.
+
+## Decision-tier qualification (2026-10-15)
+
+The reconstructed public implementation passes 56 tests (17 new and 39 existing). A fresh staff-renderer fixture produced 16,712 events with all 28 observed/baseline artifacts byte-identical. Independent ordinary output agrees in all six allocated sections and 239 relocations; assembly differs only in the exact first source `.file` directive. Live coverage includes allocator-number and scheduler LUID decisions; range-copy decisions and scheduler stages 3/4 remain synthetic-test coverage only. The invoking shell had a post-observation script-edit error, separately recorded rather than treated as a successful shell run. See [qualification receipt](compiler-evidence/observer-decision-tiers/qualification.json).

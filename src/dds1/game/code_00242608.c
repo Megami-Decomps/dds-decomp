@@ -110,7 +110,7 @@ KwlnTask *mnuCampCreateTask(s32 taskId) {
     task = evtFindTaskById(taskId);
     if (task == 0) {
         evtFormatTaskName(taskId, taskName);
-        taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
+        taskData = sdfAllocSizeClassBlock(sizeof(EvtPackLoadState));
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
         taskData->eventId = taskId;
         taskData->loaded = 0;

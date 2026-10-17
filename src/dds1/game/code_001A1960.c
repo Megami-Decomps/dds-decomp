@@ -2095,6 +2095,8 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
     return result;
 }
 
+extern u32 btlRollAiBucket(void);
+
 s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     s32 ratio;
     if ((((BtlState *)btlGetRuntime())->unk_1FC & 0x80) != 0) return 0;
@@ -2108,7 +2110,7 @@ s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
         ratio = 40;
     }
     btlBossDebugPrintf("btl:fear ratio[%d]\n", ratio);
-    return btlRollAiBucket() < ratio;
+    return (s32)btlRollAiBucket() < ratio;
 }
 
 s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
@@ -2151,7 +2153,7 @@ s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
     }
     threshold = statusThreshold < actionThreshold ? actionThreshold : statusThreshold;
     btlBossDebugPrintf(D_003A1A40, threshold);
-    return btlRollAiBucket() < threshold;
+    return (s32)btlRollAiBucket() < threshold;
 }
 
 f32 func_001A6958(void) {

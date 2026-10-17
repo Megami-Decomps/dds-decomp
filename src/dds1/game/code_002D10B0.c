@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eeregs.h"
 #include "sdf_timer.h"
 #include "sdf_texture_queue.h"
 #include "sdf_image_upload.h"
@@ -203,12 +204,12 @@ void sdfRunGraphicsTransferWorker(void) {
         D_003BD32D = 0;
         if (D_003BD32C != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
-            u32 enabledChannels = *(volatile u32 *)0x1000F520;
-            *(volatile u32 *)0x1000F590 = 0x10000;
-            *(volatile u32 *)0x10009000 = 0;
-            *(volatile u32 *)0x1000F590 = enabledChannels;
+            u32 enabledChannels = HW_READ(D_ENABLER);
+            HW_WRITE(D_ENABLEW, 0x10000);
+            HW_WRITE(D1_CHCR, 0);
+            HW_WRITE(D_ENABLEW, enabledChannels);
             sceGsResetPath();
-            *(volatile u64 *)0x12001040 = 0;
+            HW_WRITE(GS_BUSDIR, 0);
             D_003BD32C = 1;
         } else {
             sdfCaptureDeferredGsImage();
@@ -241,7 +242,7 @@ void sdfServiceGraphicsBuffers(void) {
         if ((D_003BD2E1 & 1) == 0) {
             sdfDevSignalPendingSemaphore();
         }
-        invertedField = (~*(volatile u64 *)0x12001000 >> SDF_GS_CSR_FIELD_SHIFT) & 1;
+        invertedField = (~HW_READ(GS_CSR) >> SDF_GS_CSR_FIELD_SHIFT) & 1;
         D_003BD2E1 = invertedField ^ 1;
         if (D_003BD2F1 == 1) {
             D_003BD2F1 = 2;
@@ -542,7 +543,7 @@ void sdfTexQueuePendingWork(SdfTexResource *texture) {
 void sdfTexInitializeLists(void) {
     SdfTexResource *head;
 
-    head = sdfAllocSizeClassBlock(0x1C);
+    head = sdfAllocSizeClassBlock(sizeof(SdfTexResource));
     head->size = 0x100000;
     head->next = NULL;
     head->prev = NULL;
@@ -809,7 +810,7 @@ void sdfFlushImageUploadQueue(void) {
         packet->vifCodes = 0;
         packet->tag = tag;
         channel = (u32 *)sceDmaGetChan(1);
-        channel[0] |= 0x40;
+        HW_WRITE(channel, HW_READ(channel) | 0x40);
         FlushCache(0);
         sceDmaSend((void *)channel, (void *)dmaPacketAddress);
         SleepThread();
@@ -1033,8 +1034,8 @@ void sdfTexListInsert(SdfTex *texture) {
 }
 
 SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary) {
-    SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
-    SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
+    SdfTex *tex = sdfAllocAndClearQuadwords(sizeof(SdfTex));
+    SdfTexRef *ref = sdfAllocAndClearQuadwords(sizeof(SdfTexRef));
 
     ref->refCount = 1;
     tex->paletteCount = paletteCount;

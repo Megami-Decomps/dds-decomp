@@ -416,7 +416,7 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
 s32 evtCreateSolarOverlayWork(KwlnTask *owner) {
     SolarOverlayWork *overlay;
 
-    overlay = sdfAllocSizeClassBlock(0x104);
+    overlay = sdfAllocSizeClassBlock(sizeof(SolarOverlayWork));
     evtInitializeVisualData(overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
     kwlnTaskSetUserValue(owner, (u32)overlay);

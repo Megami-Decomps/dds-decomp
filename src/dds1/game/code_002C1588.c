@@ -105,7 +105,7 @@ s32 itfSetWidgetFlagsAndActivateChild(GridTextWidget *widget, u32 flags) {
 /* Own a NUL-terminated text copy; store X scaled by 16 and Y scaled by 8. */
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                u32 reference) {
-    GridTextWidget *widget = (GridTextWidget *)sdfAllocSizeClassBlock(0x40);
+    GridTextWidget *widget = (GridTextWidget *)sdfAllocSizeClassBlock(sizeof(GridTextWidget));
     u32 textBytes;
     char *textCopy;
 
@@ -213,7 +213,7 @@ u32 itfGetGridListLinkFlags(GridTextWidget *owner) {
 }
 
 GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text, u32 value) {
-    GridTextListItem *item = (GridTextListItem *)sdfAllocSizeClassBlock(0x2C);
+    GridTextListItem *item = (GridTextListItem *)sdfAllocSizeClassBlock(sizeof(GridTextListItem));
     GridTextListItem *tail;
     s32 length;
     s32 allocation;

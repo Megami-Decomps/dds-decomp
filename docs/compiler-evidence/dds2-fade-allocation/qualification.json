@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "status": "qualified_observation_nonmatching",
+  "new_exact_functions": 0,
+  "new_exact_bytes": 0,
+  "qualification_revision": "ddd60d4a549cdca0f821cbde0ceb8c63449f655b",
+  "target": "func_001FC5E0",
+  "owner": "src/dds2/game/code_001EC5F0.c",
+  "native_bytes": 3616,
+  "emitted_bytes": 3616,
+  "frame_bytes": 48,
+  "differing_words": 5,
+  "total_words": 904,
+  "word_differences": [
+    {
+      "offset": "0xA2C",
+      "candidate": "000519C0",
+      "native": "000511C0",
+      "relocated": false
+    },
+    {
+      "offset": "0xCEC",
+      "candidate": "000519C0",
+      "native": "000511C0",
+      "relocated": false
+    },
+    {
+      "offset": "0xCF0",
+      "candidate": "00734021",
+      "native": "00534021",
+      "relocated": false
+    },
+    {
+      "offset": "0xCF4",
+      "candidate": "91020020",
+      "native": "91030020",
+      "relocated": false
+    },
+    {
+      "offset": "0xCF8",
+      "candidate": "30420080",
+      "native": "30620080",
+      "relocated": false
+    }
+  ],
+  "sha256": {
+    "base_owner": "516f26db5c1d37a2a10cdaadb238f49ad81d7d1ef3b855e60f411359b1880a93",
+    "complete_candidate_owner": "ee5c75a5e851831d6a3bcc74fcf9bbb239235d19e64d286f3871168233898c33",
+    "preferred_body": "686fb8443c46ac1400c9f6b8ceb505ab806a22b3609860dc042c2d53124d9d8b",
+    "compiler": "d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1",
+    "production_context_object": "5869d474f5b39566486c4877a4c035229cca5d1f3978ba9f0cef8bbc44eeaa39",
+    "observed_object": "fe27d56715b0824c39c548ea0cf75c23f66b38d62895bc544badc3e804a13c45",
+    "observed_assembly": "2332c35a283bb28452f99b7a5e844c369b765c20f4485a6873dd40560447d0aa",
+    "events": "e10440761fd79c55a11550252caa4e83d2a47201230d3f401e2abcd420f9f5b7"
+  },
+  "observer_tools_sha256": {
+    "ee_gcc_observe.py": "655b85c68035e71fe71836b9ba04a639b06f14c1cec5577ce761e7b23db201c3",
+    "_ee_gcc_observer.py": "8da4f739b039b9f22762b3b0d433d88b635e32f17de159f14af68912e3af0a11",
+    "ee_gcc_qemu_loopback.py": "ad9ac3edafbc2112cae5c52d97f529f4c6c3466ce191d99f1079bb1ca2b785b6"
+  },
+  "provenance": {
+    "donor-proof.json": {
+      "sha256": "16836d325172a4818482fa4d9b364bd9d17632142c885ecb4984bff17f7ead53",
+      "git_blob": "dec020ddf272ab63ea70a8631d9b0b953aa43754",
+      "url": "https://github.com/Megami-Decomps/dds-collab/blob/28b781620d97456a87cbbf765b192e25909fc6ca/handoffs/harbor-maple-retirement-20261015/proof.json"
+    },
+    "dds2_preferred.c": {
+      "sha256": "686fb8443c46ac1400c9f6b8ceb505ab806a22b3609860dc042c2d53124d9d8b",
+      "git_blob": "6b8c58adf08f8bc6767d29d39d15fd6c6028bc15",
+      "url": "https://github.com/Megami-Decomps/dds-collab/blob/a7c4049cd235892a9e03c9714c981e2f905bd2de/drafts/pim-paired-fade-20261011/checkpoint005/source/dds2_preferred.c"
+    },
+    "fade-allocator-decisions.txt": {
+      "sha256": "a71a7970e810f49a5d00175b70cb7eb874d2621c3e7aa2da2695a7b51aea875c",
+      "git_blob": "36754aee73cbb2ae0bd54e16b3265a23a7bc7bb1",
+      "url": "https://github.com/Megami-Decomps/dds-collab/blob/28b781620d97456a87cbbf765b192e25909fc6ca/handoffs/harbor-maple-retirement-20261015/fade-allocator-decisions.txt"
+    },
+    "permuter-assembler-debug-flag.patch": {
+      "sha256": "f80ff11f8712dac9e91acff95c03e1b1bf750b8f6a11f6bb48c9cc7def7f28c7",
+      "git_blob": "ece3bab7f158e331c499e3e71a8e38fe3fa03764",
+      "url": "https://github.com/Megami-Decomps/dds-collab/blob/28b781620d97456a87cbbf765b192e25909fc6ca/handoffs/harbor-maple-retirement-20261015/permuter-assembler-debug-flag.patch"
+    }
+  },
+  "qualification": {
+    "events": 28726,
+    "artifacts": 28,
+    "all_artifacts_equal": true,
+    "production_target_bytes_equal": true,
+    "target_relocation_contracts_equal": 48,
+    "whole_literal_sections_equal": true,
+    "assembler_flags": [
+      "-EL",
+      "-G8",
+      "-g"
+    ],
+    "whole_image_qualified": false
+  },
+  "gate_controls": [
+    {
+      "mask": "0x10",
+      "shift_pseudo": 538,
+      "address_pseudo": 539,
+      "byte_pseudo": 540,
+      "mask_pseudo": 542,
+      "mask_uid": 1144,
+      "combine_call_event": 6897,
+      "flags_allocation_call_event": 6901,
+      "shift_allocation_call_event": 6908
+    },
+    {
+      "mask": "0x20",
+      "shift_pseudo": 731,
+      "address_pseudo": 732,
+      "byte_pseudo": 733,
+      "mask_pseudo": 735,
+      "mask_uid": 1617,
+      "combine_call_event": 9054,
+      "flags_allocation_call_event": 9058,
+      "shift_allocation_call_event": 9065
+    },
+    {
+      "mask": "0x80",
+      "shift_pseudo": 925,
+      "address_pseudo": 926,
+      "byte_pseudo": 927,
+      "mask_pseudo": 928,
+      "mask_uid": 2090,
+      "combine_call_event": 11304,
+      "flags_allocation_call_event": 11308,
+      "shift_allocation_call_event": 11315
+    }
+  ],
+  "shared_result": {
+    "flags_mask_coalesced": true,
+    "flags_mask_register": 2,
+    "shift_register": 3,
+    "flags_quantity_refs": 4,
+    "flags_quantity_lifetime": [
+      8,
+      12
+    ],
+    "shift_quantity_refs": 2,
+    "shift_quantity_lifetime": [
+      4,
+      6
+    ],
+    "shift_allocation_v0_blocked_indices": [
+      6,
+      7
+    ],
+    "flags_allocation_range_half_open": [
+      6,
+      13
+    ],
+    "shift_allocation_range_half_open": [
+      2,
+      8
+    ]
+  },
+  "delay_copy": {
+    "dump": "rtl.29.dbr",
+    "sequence_uid": 2682,
+    "branch_uid": 1650,
+    "shift_uid": 2084,
+    "common_tail_label_uid": 2681
+  },
+  "falsified_distinguishing_hypothesis": "Final gate alone lacks QI byte REG_DEAD or has different local coalescing eligibility.",
+  "missing_evidence": "A real source-backed use or ownership constraint requiring final byte/mask separation.",
+  "credits": {
+    "Iron": "algorithm",
+    "Copper": "canonical owner/interface",
+    "Slate": "flags/callback",
+    "PiM": "complete reconstruction and paired qualification",
+    "Harbor": "allocator diagnosis and negative controls",
+    "Luna": "importer diagnosis"
+  }
+}
