@@ -7937,6 +7937,25 @@ consumer with a cast or an extra temporary. Retiring the redundant unsigned
 selector casts and using the real party-record pointer arguments preserves
 all 31 command-record user gates and closes the 752-byte body.
 
+The INF branch dispatchers, DDS1 `func_0013CEB0` and DDS2 `func_0013FA98`,
+provide a paired field example. Keeping the preceding field hook in their
+same C file gives its call `REG_EH_REGION 0` and changes only the branch at
+`+0x20c`: plain `bne` rather than retail's `bnel`, with the same `v0 = 2`
+slot. A controlled visibility diagnostic preserves all 314 real pass-28
+instruction patterns and notes after removing just that EH note. Reorg then
+stops at the external call, keeps `v0` in the opposite path's needed set,
+and requires annulment. This is not a reason to turn the hook back into ASM.
+
+The recovered boundaries are after the real C hooks: DDS1 `0x00138c30` and
+DDS2 `0x0013b818`. The new `game/code_*` units keep their callers separate
+from the still-C providers. Native data ownership independently gives each
+suffix `0x310` bytes of `.rodata`, `0x24` of `.lit4`, and `0x70` of `.sdata`
+in both games. Repartition all of those sections, including the small-data
+leaves; moving only the function would not recover the translation unit.
+The INF records retain one primary layout, with the clear/set flag subarray
+and four fixed extra-action parameter fields rather than parallel views.
+
+
 ### Initialize the heap-overlay count in its collection phase
 
 `sdfDrawHeapMapOverlay` in both games first copies heap metadata

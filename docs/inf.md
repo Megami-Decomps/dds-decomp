@@ -29,8 +29,11 @@ fixed arrays:
 A pack row begins with a signed 32-bit set index followed by five hits. Each
 hit is an area byte and a 15-byte, zero-padded event name. A view row contains
 two signed 32-bit values followed by 12-byte player-position and camera names.
-An `ex` row contains five signed 32-bit values: its action ID and four
-parameters.
+An `ex` row contains five signed 32-bit values: its encoded action and four
+parameters. Runtime dispatch consumes the action's low signed halfword. The
+primary C owner exposes the four fixed fields as `parameter0` through
+`parameter3`, at offsets `0x04`, `0x08`, `0x0c`, and `0x10`; the editable
+`params=` list retains the same order and wire representation.
 
 Each interaction set contains:
 
@@ -48,7 +51,9 @@ for the four possible selection outcomes. Values `10..29` address message rows
 numeric because their full meanings vary by interaction.
 
 The two signed flag fields on a destination row are applied as off/on
-mutations. A nonzero view selector applies the corresponding view row. A
+mutations. In `FldInfMessageRow` these form `flags[2]`: index `0` clears a flag
+and index `1` sets one, at row offsets `0x08` and `0x0a`. A nonzero view
+selector applies the corresponding view row using its low seven bits. A
 nonzero `ex` selector applies its extra-action row. DDS stores the view
 selector in one byte; values with the high bit set are preserved numerically.
 

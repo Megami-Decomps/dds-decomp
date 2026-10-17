@@ -28,7 +28,10 @@ typedef struct FldInfView {
 
 typedef struct FldInfExtraAction {
     s32 action;
-    s32 parameters[4];
+    s32 parameter0;
+    s32 parameter1;
+    s32 parameter2;
+    s32 parameter3;
 } FldInfExtraAction;
 
 typedef struct FldInfFlagSelector {
@@ -41,8 +44,7 @@ typedef struct FldInfMessageRow {
     s16 kind;
     s16 message;
     u8 targets[4];
-    s16 flagOff;
-    s16 flagOn;
+    s16 flags[2]; /* Flag to clear, then flag to set. */
     u8 view;
     u8 extraAction;
 } FldInfMessageRow;
