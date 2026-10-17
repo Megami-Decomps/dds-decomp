@@ -14,7 +14,8 @@
 #include "sdf_packet_header.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
+#include "sdf_primitive_packet_api.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_request.h"
@@ -689,7 +690,7 @@ extern f32 D_003BD35C;
 extern u32 D_00398500[];
 
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
-void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
+u32 *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
     s32 stripWords = request->stripWordCount;
     s32 count = request->vertexCount;
     s32 headerWords = 18;

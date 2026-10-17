@@ -22,13 +22,12 @@
 #include "sdf_draw.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
 #include "sdf_packet_append.h"
 #include "grid_packed_vertex.h"
 #include "itf_grid_status_records.h"
 
 #include "sdf_packet_alloc.h"
-extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 

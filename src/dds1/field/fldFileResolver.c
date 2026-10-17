@@ -374,7 +374,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "field_stage.h"
 #include "sdf_pac_work.h"
 extern FldInfTable D_00332E30;
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
@@ -2624,7 +2624,6 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     descriptor->append(descriptor, list);
 }
 
-extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
                          f32 x0, f32 y0, f32 z0,
                          f32 x1, f32 y1, f32 z1,
