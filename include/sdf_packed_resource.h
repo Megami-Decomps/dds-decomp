@@ -20,8 +20,8 @@ typedef char SdfPackedRelocationHeader_offset_offset_must_be_0x10[
 typedef char SdfPackedRelocationHeader_byteCount_offset_must_be_0x14[
     ((u32)&((SdfPackedRelocationHeader *)0)->relocationByteCount == 0x14) ? 1 : -1];
 
-void *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource);
-void *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource);
+u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource);
+u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource);
 
 struct SdfMemBlock;
 struct SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayloadAddress);

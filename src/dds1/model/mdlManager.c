@@ -396,7 +396,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
  * entry. Execute the group job now only when the command is not deferred. */
 void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestAllocation = fileGetResourceHandle(resource);
-    request->payload.itemList = sdfRelocatePackedResourcePayload(
+    request->payload.itemList = (struct SdfItemListRef *)sdfRelocatePackedResourcePayload(
         (SdfPackedRelocationHeader *)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     if (request->deferred == 0) {
@@ -408,7 +408,7 @@ void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
  * the group job. This callback completes the additional file request. */
 void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.motionResource = fileGetResourceHandle(resource);
-    request->payload.motionTable = sdfRelocatePackedResourceWordsFromHeader(
+    request->payload.motionTable = (struct MotionTable *)sdfRelocatePackedResourceWordsFromHeader(
         (SdfPackedRelocationHeader *)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
