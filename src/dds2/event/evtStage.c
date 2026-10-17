@@ -186,10 +186,10 @@ void evtScaleSlotByClampedMultiplier(void *worldNode, f32 multiplier) {
     }
 }
 
-void evtSetWorldSlotValue(void *object, u32 direction) {
+void evtSetWorldSlotValue(void *worldNode, u32 direction) {
     Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data(object);
+    slotData = dds3GetSlot1Data(worldNode);
     if (slotData != 0) {
         sdfSetFloatCounterDirection((u32 *)&slotData->direction, direction);
     }
