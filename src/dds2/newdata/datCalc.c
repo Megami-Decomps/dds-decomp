@@ -830,9 +830,9 @@ void ptyApplySkillRecovery(DatPartyRecord *unit, u32 skillId) {
 
 /* Apply the two selected recovery skills to occupied frontline entries. */
 void evtUpdateFlaggedStats(void) {
-    s32 index;
-    for (index = 0; index < PTY_ACTIVE_ROSTER_COUNT; index++) {
-        DatPartyRecord *entry = &datGameState->party[index];
+    s32 slotIndex;
+    for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
+        DatPartyRecord *entry = &datGameState->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 ptyApplySkillRecovery(entry, 0x24C);
