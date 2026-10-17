@@ -359,7 +359,7 @@ void sdfDevPrintText(const char *text) {
         if (length != 0) {
             alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
             memcpy(alignedBuffer, text, length);
-            func_0034DE68(&sdfDevRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+            sceSifMCallRpc(&sdfDevRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
         func_00367B60(D_00438AC0, text);
