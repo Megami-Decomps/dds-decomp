@@ -81,14 +81,14 @@ EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer) {
     EvtRuntimeGroup *queue;
     EvtRuntimeChild *node;
-    s32 i;
+    s32 pendingNodeOffset;
 
     queue = viewer->frameGroup;
     if (queue == NULL) {
         return NULL;
     }
     node = queue->children;
-    for (i = 0; i < viewer->frameCursor + viewer->frameFirst && node != NULL; i++) {
+    for (pendingNodeOffset = 0; pendingNodeOffset < viewer->frameCursor + viewer->frameFirst && node != NULL; pendingNodeOffset++) {
         node = node->next;
     }
     return node;
@@ -366,11 +366,11 @@ void evtEventViewerShutdown(EvtRuntime *viewer) {
 
 /* Destroy every grouped entity listed in the viewer's table. */
 void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
-    s32 i;
+    s32 groupIndex;
 
     if (viewer->windowContext != NULL) {
-        for (i = 0; i < (s32)viewer->windowContext->mainEntry3Count; i++) {
-            btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
+        for (groupIndex = 0; groupIndex < (s32)viewer->windowContext->mainEntry3Count; groupIndex++) {
+            btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[groupIndex].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[groupIndex].type);
         }
     }
 }
