@@ -4474,7 +4474,120 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416458);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416468);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BC8A8);
+extern const s32 D_00436830[];
+extern const s32 D_00436838[];
+extern const s32 D_00416458[2][2];
+extern const s32 D_00416468[2][2];
+
+void func_001BC8A8(BattlePhasePanelWork *work) {
+    s32 modeOneSlots[2];
+    s32 modeZeroSlots[2];
+    s32 modeOneBounds[2][2];
+    s32 modeZeroBounds[2][2];
+    s32 *slots;
+    s32 (*bounds)[2];
+    s32 i, j;
+
+    memcpy(modeOneSlots, D_00436830, sizeof(modeOneSlots));
+    memcpy(modeZeroSlots, D_00436838, sizeof(modeZeroSlots));
+    memcpy(modeOneBounds, D_00416458, sizeof(modeOneBounds));
+    memcpy(modeZeroBounds, D_00416468, sizeof(modeZeroBounds));
+    if (work->mode == 0) {
+        bounds = modeZeroBounds;
+        slots = modeZeroSlots;
+    } else {
+        bounds = modeOneBounds;
+        slots = modeOneSlots;
+    }
+    switch (work->secondaryPhase) {
+    case 0:
+        work->counter++;
+        work->counter = work->counter <= 0 ? 0 : work->counter > 10 ? 10 : work->counter;
+        if (work->counter >= 3) {
+            work->echoCount++;
+            work->saved[3][0] = 0;
+            work->saved[4][0] = 0;
+            for (i = 3; i < 5; i++) {
+                work->current[i][0] -= 10;
+                work->current[i][0] = work->current[i][0] <= bounds[i - 3][0] ? bounds[i - 3][0] :
+                    work->current[i][0] < bounds[i - 3][1] ? work->current[i][0] : bounds[i - 3][1];
+                for (j = 0; j < 4; j++) {
+                    work->fade[i][j] += 16;
+                    work->fade[i][j] = work->fade[i][j] <= 0 ? 0 : work->fade[i][j] > 128 ? 128 : work->fade[i][j];
+                }
+            }
+            if (work->fade[3][0] >= 128) {
+                work->secondaryPhase++;
+                work->echoCount = 0;
+                work->counter = 0;
+            }
+        }
+        break;
+    case 1:
+        for (i = 5; i < 7; i++) {
+            work->flags[i - 5] = 1;
+            for (j = 3; j >= 0; j--) work->fade[i][j] = 255;
+        }
+        work->counter++;
+        work->counter = work->counter <= 0 ? 0 : work->counter > 10 ? 10 : work->counter;
+        if (work->counter >= 4) work->secondaryPhase++;
+        break;
+    case 2:
+        for (i = 5; i < 7; i++) {
+            work->fade[i][2] -= 16;
+            work->fade[i][2] = work->fade[i][2] <= 0 ? 0 : work->fade[i][2] > 255 ? 255 : work->fade[i][2];
+            work->fade[i][3] -= 16;
+            work->fade[i][3] = work->fade[i][3] <= 0 ? 0 : work->fade[i][3] > 255 ? 255 : work->fade[i][3];
+            work->fade[i][1] -= 16;
+            work->fade[i][1] = work->fade[i][1] <= 0 ? 0 : work->fade[i][1] > 255 ? 255 : work->fade[i][1];
+            work->fade[i][0] -= 16;
+            work->fade[i][0] = work->fade[i][0] <= 0 ? 0 : work->fade[i][0] > 255 ? 255 : work->fade[i][0];
+        }
+        if (work->fade[6][3] <= 0) {
+            work->flags[1] = 0;
+            work->flags[0] = 0;
+            work->secondaryPhase++;
+        }
+        break;
+    case 3:
+        work->current[3][0] -= 28;
+        work->saved[3][0] += 2;
+        work->saved[3][0] = work->saved[3][0] <= 0 ? 0 : work->saved[3][0] > 32 ? 32 : work->saved[3][0];
+        if (work->current[3][0] <= 384) {
+            work->secondaryPhase++;
+            work->angle = 0;
+        }
+        break;
+    case 4:
+        work->current[3][0] -= 28;
+        work->saved[3][0] += 2;
+        work->saved[3][0] = work->saved[3][0] <= 0 ? 0 : work->saved[3][0] > 32 ? 32 : work->saved[3][0];
+        work->saved[4][0] += 2;
+        work->saved[4][0] = work->saved[4][0] <= 0 ? 0 : work->saved[4][0] > 32 ? 32 : work->saved[4][0];
+        work->angle = (work->angle + 8) % 360;
+        work->current[4][0] = (s32)((sdfSinPoly((f32)((work->angle + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 392.0f + 0.0f);
+        if (work->current[3][0] <= 256) work->secondaryPhase++;
+        break;
+    case 5:
+        for (i = 3; i < 5; i++) {
+            s32 height = btlResourceBlock->resC->workEntries[slots[i - 3]].sourceHeight;
+            work->saved[i][1] -= 2;
+            work->saved[i][1] = work->saved[i][1] <= -height ? -height :
+                work->saved[i][1] > 0 ? 0 : work->saved[i][1];
+        }
+        work->current[3][0] -= 28;
+        work->angle = (work->angle + 8) % 360;
+        work->angle = work->angle <= 0 ? 0 : work->angle > 180 ? 180 : work->angle;
+        work->current[4][0] = (s32)((sdfSinPoly((f32)((work->angle + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 392.0f + 0.0f);
+        for (j = 0; j < 4; j++) {
+            work->fade[3][j] -= 28;
+            work->fade[3][j] = work->fade[3][j] <= 0 ? 0 : work->fade[3][j] > 128 ? 128 : work->fade[3][j];
+            work->fade[4][j] -= 20;
+            work->fade[4][j] = work->fade[4][j] <= 0 ? 0 : work->fade[4][j] > 128 ? 128 : work->fade[4][j];
+        }
+        break;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416498);
 
