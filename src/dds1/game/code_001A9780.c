@@ -943,9 +943,9 @@ void func_001AADF8(BattleSceneObject *object) {
     case 1:
     case 2: {
         if (D_00324510.confirm >= 0 && D_00324510.primaryCancel >= 0) {
-            if ((D_00324510.unk25 & 2) != 0) {
+            if ((D_00324510.alternateNext & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 5 || D_00324510.unk25 < 0) {
+                    if (btlCommandPanelWork->classIndex != 5 || D_00324510.alternateNext < 0) {
                         btlCommandPanelWork->classIndex++;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -966,9 +966,9 @@ void func_001AADF8(BattleSceneObject *object) {
                         changed = 1;
                     }
                 }
-            } else if ((D_00324510.unk24 & 2) != 0) {
+            } else if ((D_00324510.alternatePrev & 2) != 0) {
                 for (; changed == 0;) {
-                    if (btlCommandPanelWork->classIndex != 0 || D_00324510.unk24 < 0) {
+                    if (btlCommandPanelWork->classIndex != 0 || D_00324510.alternatePrev < 0) {
                         btlCommandPanelWork->classIndex--;
                         btlCommandPanelWork->labelFade = 0xF0;
                         btlLinkedSelectionTaskBuffer->backdropFade = 0;
@@ -4788,8 +4788,8 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(0xA);
                 btlSetActionActorPanelPresentation(command->owner, 0, 0);
             } else {
-                if (D_00324510.unk25 & 2) {
-                    if (work->selectedReserveIndex != count - 1 || D_00324510.unk25 < 0) {
+                if (D_00324510.alternateNext & 2) {
+                    if (work->selectedReserveIndex != count - 1 || D_00324510.alternateNext < 0) {
                         work->selectedReserveIndex++;
                         if (work->selectedReserveIndex >= count) {
                             work->selectedReserveIndex = 0;
@@ -4798,8 +4798,8 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                         btlSlotBankPromoteStates(work);
                         work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
                     }
-                } else if (D_00324510.unk24 & 2) {
-                    if (work->selectedReserveIndex != 0 || D_00324510.unk24 < 0) {
+                } else if (D_00324510.alternatePrev & 2) {
+                    if (work->selectedReserveIndex != 0 || D_00324510.alternatePrev < 0) {
                         work->selectedReserveIndex--;
                         if (work->selectedReserveIndex < 0) {
                             work->selectedReserveIndex = count - 1;
@@ -7511,12 +7511,12 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
 
     switch (mode) {
     case 0:
-        if ((D_00324510.unk25 & 2) != 0) selection = 1;
-        else if ((D_00324510.unk24 & 2) != 0) selection = 2;
+        if ((D_00324510.alternateNext & 2) != 0) selection = 1;
+        else if ((D_00324510.alternatePrev & 2) != 0) selection = 2;
         break;
     case 1:
-        if ((D_00324510.unk24 & 2) != 0) selection = 1;
-        else if ((D_00324510.unk25 & 2) != 0) selection = 2;
+        if ((D_00324510.alternatePrev & 2) != 0) selection = 1;
+        else if ((D_00324510.alternateNext & 2) != 0) selection = 2;
         break;
     case 2:
         if (((u8)D_00324510.prev & 2) != 0) selection = 1;
@@ -7530,12 +7530,12 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         if (battle->battleMode == 0x10E) {
             if (((u8)D_00324510.next & 2) != 0) selection = 1;
             else if (((u8)D_00324510.prev & 2) != 0) selection = 2;
-            else if ((D_00324510.unk25 & 2) != 0) selection = 3;
-            else if ((D_00324510.unk24 & 2) != 0) selection = 4;
+            else if ((D_00324510.alternateNext & 2) != 0) selection = 3;
+            else if ((D_00324510.alternatePrev & 2) != 0) selection = 4;
         } else {
-            if (((u8)D_00324510.prev & 2) != 0 || (D_00324510.unk25 & 2) != 0) {
+            if (((u8)D_00324510.prev & 2) != 0 || (D_00324510.alternateNext & 2) != 0) {
                 selection = 1;
-            } else if (((u8)D_00324510.next & 2) != 0 || (D_00324510.unk24 & 2) != 0) {
+            } else if (((u8)D_00324510.next & 2) != 0 || (D_00324510.alternatePrev & 2) != 0) {
                 selection = 2;
             }
         }
@@ -7544,12 +7544,12 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         if (battle->battleMode == 0x10E) {
             if (((u8)D_00324510.prev & 2) != 0) selection = 1;
             else if (((u8)D_00324510.next & 2) != 0) selection = 2;
-            else if ((D_00324510.unk24 & 2) != 0) selection = 3;
-            else if ((D_00324510.unk25 & 2) != 0) selection = 4;
+            else if ((D_00324510.alternatePrev & 2) != 0) selection = 3;
+            else if ((D_00324510.alternateNext & 2) != 0) selection = 4;
         } else {
-            if (((u8)D_00324510.next & 2) != 0 || (D_00324510.unk24 & 2) != 0) {
+            if (((u8)D_00324510.next & 2) != 0 || (D_00324510.alternatePrev & 2) != 0) {
                 selection = 1;
-            } else if (((u8)D_00324510.prev & 2) != 0 || (D_00324510.unk25 & 2) != 0) {
+            } else if (((u8)D_00324510.prev & 2) != 0 || (D_00324510.alternateNext & 2) != 0) {
                 selection = 2;
             }
         }

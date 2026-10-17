@@ -576,7 +576,7 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     f32 scale0;
     f32 scale1;
     u32 flags = unit->flags;
-    s32 i;
+    s32 colorChannelIndex;
 
     if (flags & EVT_UNIT_FLAG_VALUE_CHANGED) {
         return;
@@ -599,9 +599,9 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     EE_MMI_RGBA_UNPACK(packed1, scale1);
     VU0_STORE_VF(vf10, color);
     color[3] = 1.0f;
-    for (i = 0; i < 3; i++) {
-        if (color[i] > 1.0f) {
-            color[i] = 1.0f;
+    for (colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
+        if (color[colorChannelIndex] > 1.0f) {
+            color[colorChannelIndex] = 1.0f;
         }
     }
     sdfBuildLightingPacket(unit->endpointWork, desc, color);

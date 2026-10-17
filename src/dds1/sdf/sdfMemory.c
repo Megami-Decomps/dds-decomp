@@ -41,8 +41,8 @@ s32 sdfMemoryGetBlockSize(const SdfMemBlock *block) {
 }
 
 /* Return the represented address, not the allocation descriptor's address. */
-void *sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
-    return (void *)(u32)block->address;
+u8 *sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
+    return (u8 *)(u32)block->address;
 }
 
 /* Low-end first-fit with 128-byte rounding; returns an allocation handle.

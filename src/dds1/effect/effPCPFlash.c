@@ -149,9 +149,9 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
 }
 void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     f32 axis[4];
-    s32 index;
+    s32 particleIndex;
     s32 lifetime;
-    s32 count;
+    s32 particleCount;
     s32 half;
     s32 ramp;
     f32 maxScale;
@@ -166,21 +166,21 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
         VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, axis);
     lifetime = work->lifetime;
-    count = work->particleCount;
+    particleCount = work->particleCount;
     part = work->parts;
     half = lifetime >> 1;
     ramp = work->scaleRampTime;
     maxScale = work->maxScale;
     restart = work->restartRandomly;
     tintColor = work->tintColor;
-    for (index = 0; index < count; index++, part++) {
+    for (particleIndex = 0; particleIndex < particleCount; particleIndex++, part++) {
         s32 age = part->age;
         s32 color;
         f32 blend;
 
         if (part->age == 0) {
-            effFlashTrianglePulseWriteCorners(work, index, axis);
-            effFlashTrianglePulseSetParticleColors(work, index, 0);
+            effFlashTrianglePulseWriteCorners(work, particleIndex, axis);
+            effFlashTrianglePulseSetParticleColors(work, particleIndex, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
             } else {
@@ -193,7 +193,7 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
                     part->age = 0;
                 }
                 color = 0;
-                effFlashTrianglePulseSetParticleColors(work, index, color);
+                effFlashTrianglePulseSetParticleColors(work, particleIndex, color);
             } else if (part->age > 0) {
                 if (ramp == 0) {
                     part->scale = maxScale;
@@ -203,14 +203,14 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
                         part->scale = maxScale;
                     }
                 }
-                effFlashTrianglePulseWriteCorners(work, index, axis);
+                effFlashTrianglePulseWriteCorners(work, particleIndex, axis);
                 if (part->age < half) {
                     blend = (f32)age / (f32)half;
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
                 color = effMultiplyPackedColors(effBlendColor(0, part->color, blend), tintColor);
-                effFlashTrianglePulseSetParticleColors(work, index, color);
+                effFlashTrianglePulseSetParticleColors(work, particleIndex, color);
             }
         }
         part->age = part->age + 1;

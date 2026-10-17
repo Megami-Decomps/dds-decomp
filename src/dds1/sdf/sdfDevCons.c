@@ -48,8 +48,8 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
 
 /* Store one character/attribute cell, interpreting cursor controls and row wrap. */
 void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute) {
-    s32 count;
-    s32 remainder;
+    s32 tabCellsRemaining;
+    s32 cursorColumnRemainder;
     s32 tabWidth;
     s32 offset;
 
@@ -57,8 +57,8 @@ void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribut
     case 9:
         offset = (console->cursorRow * console->columns + console->cursorColumn) * SDF_DEVCONS_CELL_BYTES;
         tabWidth = console->tabWidth;
-        remainder = console->cursorColumn % tabWidth;
-        count = remainder ? remainder : tabWidth;
+        cursorColumnRemainder = console->cursorColumn % tabWidth;
+        tabCellsRemaining = cursorColumnRemainder ? cursorColumnRemainder : tabWidth;
         do {
             console->cells[offset] = 0;
             console->cells[offset + 1] = attribute;
@@ -68,7 +68,7 @@ void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribut
                 sdfDevConsAdvanceRow(console);
                 break;
             }
-        } while (--count != 0);
+        } while (--tabCellsRemaining != 0);
         break;
     case 10:
         sdfDevConsAdvanceRow(console);

@@ -358,18 +358,6 @@ void fileManDispatchDone(void) {
 
 extern void fileManCancelRequest(struct FileNode *request);
 
-/* This one-word overlay is used only for the PAC callback chain; the shared
- * request view keeps its otherwise unobserved trailing bytes opaque. */
-typedef struct FilePacCallbackLinkView {
-    u8 pad00[0x6C];
-    FilePacRequest *next;
-} FilePacCallbackLinkView;
-
-typedef char FilePacCallbackLinkView_size_check[
-    (sizeof(FilePacCallbackLinkView) == 0x70) ? 1 : -1];
-typedef char FilePacCallbackLinkView_next_offset_check[
-    ((u32)&((FilePacCallbackLinkView *)0)->next == 0x6C) ? 1 : -1];
-
 /* Deliver callbacks queued after PAC input completes. */
 s32 fileManUpdate(void) {
     FileManWork *work = &fileManagerWork;
@@ -396,7 +384,7 @@ s32 fileManUpdate(void) {
                     FilePacRequest *next;
 
                     while ((next = *append) != NULL) {
-                        append = &((FilePacCallbackLinkView *)next)->next;
+                        append = &next->callbackNext;
                     }
                     *append = request;
                 }
@@ -417,10 +405,10 @@ s32 fileManUpdate(void) {
     link = &work->pacCallbackHead;
     while ((request = *link) != NULL) {
         if (request->state == 6) {
-            *link = ((FilePacCallbackLinkView *)request)->next;
+            *link = request->callbackNext;
             ((void (*)(FilePacRequest *, void *))request->callback)(request, request->userData);
         } else {
-            link = &((FilePacCallbackLinkView *)request)->next;
+            link = &request->callbackNext;
         }
     }
     return work->head != NULL;

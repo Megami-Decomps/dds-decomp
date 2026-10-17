@@ -6,6 +6,7 @@
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "fr_font_glyph_measure.h"
+#include "fr_font_clone_entry_resource.h"
 #include "fr_font_glyph_chain_count.h"
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
@@ -388,9 +389,9 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
 
 /* Decode one packed font-resource entry into a fixed-size clone.
  * Neither allocation nor entry index is checked. */
-void *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
+u8 *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
-    void *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
+    u8 *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
     ItfPackedResourceSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);
@@ -405,7 +406,7 @@ extern u16 frFontGetSlotCellHeight(s32 index);
 FrFontRecord *frFontRetainOrCreateCachedItem(FrFontChildGlyph *glyph, s32 itemIndex) {
     FrFontEntry *entry = &frFontWork.entries[glyph->renderValueOrSetupOrShade.setupBytes.fontIndex];
     FrFontRecord *cachedItem = entry->slots[itemIndex];
-    void *clonedResource;
+    u8 *clonedResource;
 
     if (cachedItem != NULL) {
         cachedItem->refs++;
@@ -1198,7 +1199,7 @@ extern s8 frFontEncodedTextGlyphSpacing;
 void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     char glyphText[3];
     const char *textData;
-    s32 index;
+    s32 textByteOffset;
     s32 textLength;
     s8 previousMode;
     s8 mode;
@@ -1213,9 +1214,9 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
 
     textLength = strlen(textData);
     previousMode = ctx->fontIndex;
-    for (index = 0; index < textLength; ) {
-        glyphText[0] = textData[index++];
-        glyphText[1] = textData[index++];
+    for (textByteOffset = 0; textByteOffset < textLength; ) {
+        glyphText[0] = textData[textByteOffset++];
+        glyphText[1] = textData[textByteOffset++];
         mode = ctx->fontIndex;
 
         if (mode != previousMode) {
