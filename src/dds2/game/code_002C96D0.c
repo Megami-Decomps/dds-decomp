@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file_job_type.h"
 #include "eff_emitter_type.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
@@ -264,27 +265,6 @@ extern s32 D_003E8008[];
 
 extern SdfPoolNode *effPacketSubmissionSurfaces[6];
 
-/* Callback table at fileJobTypeCallbacks (0x28 bytes per entry). */
-typedef struct Cb3714C {
-    void (*cb)(void *arg); /* 0x00 */
-    u8 pad4[8];            /* 0x04 */
-    void (*cbC)(void *, void *); /* 0x0C */
-    u8 pad10[0x18];        /* 0x10 */
-} Cb3714C;
-
-extern Cb3714C fileJobTypeCallbacks[];
-
-typedef struct FileTypeCallbacks {
-    void *(*create)(void *);
-    void (*unk4)(void *);
-    void (*destroy)(void *);
-    void *(*createChild)(void *, u16);
-    u8 unk10[4];
-    void (*reset)(void *);
-    u8 unk18[0x10];
-} FileTypeCallbacks;
-
-extern FileTypeCallbacks fileJobTypeOperations[];
 
 extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
@@ -324,13 +304,9 @@ typedef struct EffDispatchColor {
 } EffDispatchColor;
 
 
-extern EffDispatchExtra fileJobTypePositionCallbackView[];
 
-extern EffDispatchExtra fileJobTypeRotationCallbackView[];
 
-extern EffDispatchScale fileJobTypeScaleCallbackView[];
 
-extern EffDispatchColor fileJobTypeColorCallbackView[];
 
 extern s8 fileConfigTaskState;
 
@@ -4736,7 +4712,7 @@ FileJobPayload *fileJobCreateChild(FileJobPayload *request) {
 }
 
 void fileJobNotifyPair(FileJobPayload *left, FileJobPayload *right) {
-    void (*cb)(void *, void *) = fileJobTypeCallbacks[right->type].cbC;
+    void (*cb)(void *, void *) = fileJobTypeOperations[right->type].notifyPair;
 
     if (cb != NULL) {
         cb(left->data, right->data);
@@ -4755,38 +4731,38 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     u16 idx = job->type;
     void *data = job->data;
 
-    fileJobTypeCallbacks[idx].cb(data);
+    fileJobTypeOperations[idx].invoke(data);
 }
 
 void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 id = job->type;
 
-    if (fileJobTypePositionCallbackView[id].func != NULL) {
-        fileJobTypePositionCallbackView[id].func(job->data, position);
+    if (fileJobTypeOperations[id].setPosition != NULL) {
+        fileJobTypeOperations[id].setPosition(job->data, position);
     }
 }
 
 void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 id = job->type;
 
-    if (fileJobTypeRotationCallbackView[id].func != NULL) {
-        fileJobTypeRotationCallbackView[id].func(job->data, rotation);
+    if (fileJobTypeOperations[id].setRotation != NULL) {
+        fileJobTypeOperations[id].setRotation(job->data, rotation);
     }
 }
 
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale) {
     u16 id = job->type;
 
-    if (fileJobTypeScaleCallbackView[id].func != NULL) {
-        fileJobTypeScaleCallbackView[id].func(job->data, scale);
+    if (fileJobTypeOperations[id].setScale != NULL) {
+        fileJobTypeOperations[id].setScale(job->data, scale);
     }
 }
 
 void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color) {
     u16 id = job->type;
 
-    if (fileJobTypeColorCallbackView[id].func != NULL) {
-        fileJobTypeColorCallbackView[id].func(job->data, color);
+    if (fileJobTypeOperations[id].setColor != NULL) {
+        fileJobTypeOperations[id].setColor(job->data, color);
     }
 }
 
