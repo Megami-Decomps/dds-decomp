@@ -3107,7 +3107,172 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpBlockSetUpdate);
+extern f32 D_003B1AE0[];
+
+void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
+    f32 matrix[16];
+    f32 step[4];
+    f32 side[4];
+    f32 scatter[4];
+    f32 position[4];
+    f32 muzzle[4];
+    EffPCPBlockSetWork *source = work->source;
+    s32 count;
+    s32 frame = work->frame;
+    u32 color;
+    MdlCtx *model;
+    u32 i;
+    u32 j;
+    u32 base;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 fade;
+    f32 scale;
+    f32 randomScale;
+    f32 randomOffset;
+
+    /* Duplication may change live count; retain both entry snapshots. */
+    count = work->count;
+    if (source != NULL) {
+        effPcpDuplicateBlockSetHandles(work, source);
+        work->source = NULL;
+    }
+    if (frame == 0) {
+        for (i = 0; i < 5; i++) {
+            effParamWorkCallback1(work->handleA[i], work->params.scale);
+        }
+    }
+    fadeIn = work->params.fadeInFrames;
+    fadeOut = work->params.fadeOutFrames;
+    if (frame < fadeIn && fadeIn != 0) {
+        fade = (f32)frame / fadeIn;
+    } else if (count - frame <= fadeOut && fadeOut != 0) {
+        fade = (f32)(count - frame) / fadeOut;
+    } else {
+        fade = 1.0f;
+    }
+    color = work->color;
+    color = effBlendColor(color & 0xFFFFFF, color, fade);
+    model = effParamWorkGetData(work->headHandle);
+    if (work->mode == 0) {
+        effParamWorkCallback0(work->headHandle, work->params.position);
+        if (effBTLFieldColorUsesActorSelectors()) {
+            btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+            VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+            sdfVuBuildLookAtBasis(work->params.position, muzzle, D_003B1AE0);
+            sdfInvertRigidVuTransform();
+            VU0_MOVE_VF(vf31, vf0);
+            VU0_STORE_MATRIX(matrix);
+        } else {
+            /* Keep the VU source load and destination store as separate stages. */
+            VU0_LOAD_MATRIX_MEMORY(work->matrix);
+            VU0_STORE_MATRIX(matrix);
+        }
+    }
+    effParamWorkCallback2(work->headHandle, matrix);
+    effParamWorkCallback3(work->headHandle, color);
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    PCP_COPY_VECTOR(work->previousPosition, work->currentPosition);
+    sdfLoadMapRecordPositionVector(model->inner, 1);
+    VU0_STORE_VF(vf10, work->currentPosition);
+    if (frame < count && frame > 0) {
+        for (i = 0; i < 5; i++) {
+            if (i == 4) {
+                if (work->mode == 1 || work->mode == 2) {
+                    effParamWorkCallback2(work->handleA[i], matrix);
+                }
+                effParamWorkCallback0(work->handleA[i], work->previousPosition);
+            } else {
+                effParamWorkCallback0(work->handleA[i], work->currentPosition);
+            }
+            effParamWorkCallback3(work->handleA[i], color);
+            effParamWorkInvokeCallback(work->handleA[i]);
+        }
+    }
+    if (frame >= 0) {
+        if (frame == 0) {
+            for (i = 0; i < 5; i++) {
+                effParamWorkCallback0(work->handleB[i], work->currentPosition);
+                effParamWorkCallback2(work->handleB[i], work->matrix);
+            }
+        }
+        for (i = 0; i < 5; i++) {
+            effParamWorkCallback3(work->handleB[i], work->color);
+            effParamWorkInvokeCallback(work->handleB[i]);
+        }
+    }
+    if (frame >= work->params.tailStartFrame) {
+        if (frame == work->params.tailStartFrame) {
+            effParamWorkCallback0(work->tailHandle, work->currentPosition);
+            effParamWorkCallback2(work->tailHandle, matrix);
+        }
+        effParamWorkCallback3(work->tailHandle, work->color);
+        effParamWorkInvokeCallback(work->tailHandle);
+    }
+    if (frame > 0) {
+        for (j = 0; j < 3; j++) {
+            if (work->params.groupSize[j] > 0) {
+                if (frame < count) {
+                    base = (work->frame - 1) * work->params.groupSize[j];
+                    VU0_LOAD_VF(vf10, work->currentPosition);
+                    VU0_LOAD_VF(vf11, work->previousPosition);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_MOVE_VF(vf12, vf10);
+                    VEC3_SPLAT(step, 1.0f / work->params.groupSize[j]);
+                    VU0_LOAD_VF(vf11, step);
+                    VU0_MUL(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, step);
+                    PCP_COPY_VECTOR(position, work->previousPosition);
+                    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+                    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_MOVE_VF(vf11, vf12);
+                    VU0_CROSS_XYZ(vf10, vf10, vf11);
+                    VU0_NORMALIZE_VF10();
+                    VU0_STORE_VF(vf10, side);
+                    for (i = 0; i < work->params.groupSize[j]; i++) {
+                        if (work->list[j][base + i] == 0) {
+                            work->list[j][base + i] = effParamWorkDuplicate(work->list[j][0]);
+                            scale = work->params.scale * work->params.groupScale[j];
+                            randomScale = work->params.groupRandomScale[j];
+                            effParamWorkCallback1(work->list[j][base + i], scale *
+                                (effMiscRandUnitFloat(effDefaultRandomState) * randomScale + (1.0f - randomScale)));
+                        }
+                        VU0_LOAD_VF(vf10, position);
+                        VU0_LOAD_VF(vf11, step);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_MOVE_VF(vf12, vf10);
+                        randomOffset = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
+                        randomOffset = randomOffset + randomOffset;
+                        VEC3_SPLAT(scatter, work->params.groupScatter[j] * randomOffset);
+                        VU0_LOAD_VF(vf10, side);
+                        VU0_LOAD_VF(vf11, scatter);
+                        VU0_MUL(vf10, vf10, vf11);
+                        VU0_ADD(vf10, vf10, vf12);
+                        /* Fully written here, then consumed by VU loads and callbacks. */
+                        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                        effParamWorkCallback0(work->list[j][base + i], position);
+                        effParamWorkCallback3(work->list[j][base + i], work->color);
+                    }
+                } else {
+                    base = (count - 1) * work->params.groupSize[j];
+                }
+                for (i = 0; i < base; i++) {
+                    if (work->list[j][i] == 0) {
+                        work->list[j][i] = effParamWorkDuplicate(work->list[j][0]);
+                        scale = work->params.scale * work->params.groupScale[j];
+                        randomScale = work->params.groupRandomScale[j];
+                        effParamWorkCallback1(work->list[j][i], scale *
+                            (effMiscRandUnitFloat(effDefaultRandomState) * randomScale + (1.0f - randomScale)));
+                    }
+                    effParamWorkCallback2(work->list[j][i], work->matrix);
+                    effParamWorkInvokeCallback(work->list[j][i]);
+                }
+            }
+        }
+    }
+    work->frame++;
+}
 
 void effPcpCopyVector60(EffPCPBlockSetWork *work, const void *src) {
     PCP_COPY_VECTOR(work->params.position, src);
@@ -3271,7 +3436,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     frame = work->frame;
     do {
         if (work->params.startFrame[i] <= frame) {
-            effPcpBlockSetUpdate((u32)work->blockSets[i]);
+            effPcpBlockSetUpdate(work->blockSets[i]);
             frame = work->frame;
         }
         i = i + 1;
