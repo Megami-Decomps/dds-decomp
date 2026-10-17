@@ -8374,6 +8374,12 @@ u32 effAllocateStripFromWorkAndRetainTexture(u8 *work) {
     return strip;
 }
 
+/* Port of DDS2 func_002F3F70, matched by redthing1 in 8e07bae59.
+ * The 1,536-byte retail bodies differ only in real address relocations. */
+#include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
+#include "sdf_gs_header.h"
+
 /* Two GS register writes carried by one complete four-qword packet. */
 typedef struct EffGsPairPacket {
     u64 dmaTag;
@@ -8388,14 +8394,9 @@ typedef struct EffGsPairPacket {
 
 extern SdfPoolNode *D_0037EE20[];
 extern vu8 sdfCurrentBufferIndex;
-extern u8 kwlnFrameDrawPacketRecords[];
-extern s32 kwlnGetDrawBufferIndex(void);
-extern void sdfAssetApplyEntryChanges(SdfAsset *, s32);
-extern void *sdfInitAssetDrawEntryReferenceNode(u32 *, void *, s32);
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
-extern void sdfBuildMaskedFrameRegisterReference(s32, u32, s32);
-extern void sdfBuildFrameRegisterReference(s32, u32, s32);
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void func_002B0B70(u8 *owner, void *matrix) {
     f32 normalizedColor[4];
@@ -8407,7 +8408,7 @@ void func_002B0B70(u8 *owner, void *matrix) {
     SdfTex *texture;
     SdfAssetEntry *entry;
     u128 *referencePacket;
-    void *dmaPacket;
+    SdfDmaReferenceChainPacket *dmaPacket;
     EffGsPairPacket *packet;
     u32 row;
     u32 count;
@@ -8471,11 +8472,12 @@ void func_002B0B70(u8 *owner, void *matrix) {
     entry->secondaryMode = mode;
     entry->alphaState = registerId;
     referencePacket = sdfAllocPacketAligned(0x20);
-    sdfInitAssetDrawEntryReferenceNode((u32 *)work->handle, referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitAssetDrawEntryReferenceNode((SdfAsset *)work->handle, (SdfDmaTagHeader *)referencePacket,
+                                       (s8)sdfCurrentBufferIndex);
     referencePacket[1] = 0;
     sdfAppendReferencePacket(list, (u32)referencePacket);
     dmaPacket = sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), (u32)dmaPacket, 0);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, dmaPacket, 0);
     sdfAppendDmaTagToList(list, (u32)dmaPacket);
     packet = sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;
@@ -8542,7 +8544,7 @@ void func_002B0B70(u8 *owner, void *matrix) {
         colors++;
     }
     dmaPacket = sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), (u32)dmaPacket, 0);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, dmaPacket, 0);
     sdfAppendDmaTagToList(list, (u32)dmaPacket);
     packet = sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;
