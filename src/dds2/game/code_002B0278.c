@@ -102,7 +102,7 @@ extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *
 extern char D_00437BF8[];
 
 
-extern s32 D_00435E5C;
+extern u8 *D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -124,10 +124,10 @@ extern void mnuClearEntries(MenuPageWindow *);
 extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
-extern s32 D_00435E54;
+extern u8 *D_00435E54;
 
 
-extern s32 D_00435E48;
+extern u8 *D_00435E48;
 
 
 extern void mnuDrawPanelItemValueMeter();
@@ -186,7 +186,7 @@ extern char mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
-extern s32 D_00435E6C;
+extern u8 *D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task);
 
@@ -371,7 +371,7 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
 extern void mnuDrawStaffPartySelectionPanel(KwlnTask *task);
 
 extern const char *D_003E78D0[];
-extern s32 D_00435E70;
+extern u8 *D_00435E70;
 extern void mnuDrawStaffValueGrid(s32, s32, s32, MenuContext *);
 extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
 extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);

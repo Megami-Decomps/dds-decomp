@@ -7,7 +7,7 @@
 struct EffNode;
 struct EffMappedRecord;
 
-struct EffRequest;
+struct FilePacRequest;
 struct SdfMemBlock;
 
 /* Packed position/basis query; the final word is a signed extent override. */
@@ -36,7 +36,7 @@ typedef struct EffectList {
     s32 count;
     EffectListNode *first;
     EffectListNode *last;
-    struct EffRequest *request;
+    struct FilePacRequest *request;
 } EffectList;
 
 typedef char EffectListNode_size_must_be_0x18[(sizeof(EffectListNode) == 0x18) ? 1 : -1];

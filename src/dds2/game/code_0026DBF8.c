@@ -1,3 +1,4 @@
+#include "file_pac.h"
 #include "sdf_gs_alpha_register_api.h"
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
@@ -338,18 +339,6 @@ typedef struct MantraListState {
 
 MantraDisplayNode *mnuAppendDisplayListNode(MantraListState *state);
 
-typedef struct MantraFileEntry {
-    struct MantraFileEntry *next;
-    u8 pad04[4];
-    void *handle;
-    u8 pad0C[4];
-    u8 kind;
-} MantraFileEntry;
-
-typedef struct MantraFileRequest {
-    u8 pad00[0x60];
-    MantraFileEntry *entries;
-} MantraFileRequest;
 
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
@@ -563,15 +552,15 @@ void mnuReleaseMantraSpriteSlots(void) {
 }
 
 s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
-    MantraFileRequest *request = (MantraFileRequest *)kwlnTaskGetUserValue(task);
+    FilePacRequest *request = (FilePacRequest *)kwlnTaskGetUserValue(task);
     s32 result = fileRequestIsReady((struct FileRequest *)request);
     if (result != 0) {
-        MantraFileEntry *entry = request->entries;
+        PacWork *entry = request->packet.queueHead;
         s32 i;
         for (i = 4; entry != 0; entry = entry->next, i++) {
-            if (entry->kind == 1) {
-                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)entry->handle, 0);
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)entry->handle));
+            if (((SdfPacStreamPacketHeader *)entry->packet)->command == 1) {
+                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)entry->resourceHandle, 0);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)entry->resourceHandle));
             }
         }
         btlStageTaskCleanupCallback(request);

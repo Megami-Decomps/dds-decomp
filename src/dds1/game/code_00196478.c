@@ -118,8 +118,8 @@ u32 itfReadEncodedCode(FrFontCtx *args) {
 extern u32 D_003BB15C;
 
 extern FrFontSystem frFontWork;
-extern s32 D_003BAA98;
-extern s32 D_003BAA9C;
+extern u8 *D_003BAA98;
+extern u8 *D_003BAA9C;
 
 s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;

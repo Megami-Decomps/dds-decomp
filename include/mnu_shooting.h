@@ -131,6 +131,10 @@ typedef char MnuEffectLayoutsAssert[
 MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *, f32, f32, f32,
     MnuEffectPositionStep *, f32, s32);
 MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *, s32, f32, f32, f32);
+/* Integer and float parameters occupy separate EE argument banks. The preset
+ * selector follows the position, as recovered from the shooting callback. */
+s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *step,
+                                   s32 baseDelay, f32 x, f32 y, f32 z, s32 id);
 struct WideSlot *itfClaimWideSlotWithTaggedPayload(u32 x, u32 y, u32 value, s8 tag,
     struct WideSlotPool *pool);
 

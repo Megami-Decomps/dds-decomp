@@ -13,7 +13,7 @@
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
 #include "eff_track_poly_data.h"
-#include "eff_vertex_draw_request.h"
+#include "eff_packet_params.h"
 
 /* Release both owned resources before freeing this track. */
 void effTrackPolyRelease(EffTrackPolyWork *work) {
@@ -178,7 +178,7 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
 }
-extern EffVertexDrawRequest effTrackPolyDrawParams;
+extern EffPacketParams effTrackPolyDrawParams;
 extern const u32 effTrackPolyTriangleIndices[];
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
@@ -201,8 +201,8 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
     data->nodeHandle = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat((struct SdfAsset *)data->nodeHandle, 1.0f);
     memset(&effTrackPolyDrawParams, 0, sizeof(effTrackPolyDrawParams));
-    effTrackPolyDrawParams.flags = 0x4000;
-    effTrackPolyDrawParams.indices = effTrackPolyTriangleIndices;
+    effTrackPolyDrawParams.primitive = 0x4000;
+    effTrackPolyDrawParams.parameters = effTrackPolyTriangleIndices;
     return data;
 }
 
@@ -408,7 +408,7 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src) {
 extern SdfPoolNode *effTrackPolyDrawSurfaces[];
 extern SdfPoolNode D_00380248;
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffVertexDrawRequest *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with
  * two additional vertices overlapping the next strip (18 inputs total). */
@@ -416,7 +416,7 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 runStart[4];
     s32 runPointCount[2];
-    EffVertexDrawRequest *draw;
+    EffPacketParams *draw;
     s32 runIndex;
     s32 pointsRemaining;
     s32 wrappedStartOffset;
@@ -444,8 +444,8 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         draw = &effTrackPolyDrawParams;
         draw->positions = &data->points[runStart[runIndex]];
         draw->color = data->color;
-        draw->width = 0x10;
-        draw->height = 0x12;
+        draw->parameterCount = 0x10;
+        draw->vertexCount = 0x12;
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
@@ -454,8 +454,8 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
             effTrackPolyDrawParams.colors += 0x10;
         }
         if (pointsRemaining >= 4) {
-            draw->height = pointsRemaining;
-            draw->width = pointsRemaining - 2;
+            draw->vertexCount = pointsRemaining;
+            draw->parameterCount = pointsRemaining - 2;
             sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(draw));
             draw->colors += pointsRemaining;
         }

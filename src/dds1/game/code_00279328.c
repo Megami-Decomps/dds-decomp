@@ -18,7 +18,7 @@ extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
-extern s32 D_003BAA98;
+extern u8 *D_003BAA98;
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char mnuSkillMenuPagePopupEntry[];

@@ -1737,7 +1737,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         btlCapturedScreenTileDrawParams.color = 0x80808080;
         btlCapturedScreenTileDrawParams.positions = (u128 *)positions;
         btlCapturedScreenTileDrawParams.normals = (u128 *)normals;
-        btlCapturedScreenTileDrawParams.texcoords = (u32 *)coordinates;
+        btlCapturedScreenTileDrawParams.texcoords = coordinates[0];
         height = tanf(D_0037F980.camera.fov * 0.5f) * 1000.0f;
         width = height * 1.333333254f;
         packet = (u64 *)sdfAllocPacketAligned(0x40);
@@ -2414,9 +2414,9 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, 
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern s32 D_00435E48;
-extern s32 D_00435E4C;
-extern s32 D_00435E5C;
+extern u8 *D_00435E48;
+extern u8 *D_00435E4C;
+extern u8 *D_00435E5C;
 /* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();

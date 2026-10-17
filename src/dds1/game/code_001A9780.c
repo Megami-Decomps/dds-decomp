@@ -126,7 +126,7 @@ extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 extern char D_003BB450[];
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 
 extern s32 effMiscRandMod(s32, s32);
 
@@ -8912,6 +8912,8 @@ void func_001C4278(void)
   fading = btlFadeStaleSceneSlots(lastIndex);
   if (fading == 0)
   {
+    s32 currentScene;
+
     fade = scene->fading;
     fldInitSceneFadeRecords();
     lastIndex = 0;
@@ -8923,8 +8925,11 @@ void func_001C4278(void)
       }
       while ((u32) lastIndex < 8 && fade[lastIndex].slot.group != 0);
     }
+    /* Native 001C4304 snapshots scene kind before publishing the decremented
+     * last index at 001C4314. Keep that read distinct from the count update. */
+    currentScene = scene->currentScene;
     lastIndex--;
-    if (scene->currentScene == 7)
+    if (currentScene == 7)
     {
       panel = (BattleActorPanelWork *) kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3B0));
       btlRetireActorSlotPresentationChannels(panel, 0);

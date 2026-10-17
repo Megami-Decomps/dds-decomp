@@ -764,7 +764,7 @@ BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
 extern void btlCreateSkillNamePanel(s32);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern void *btlGetIndexedUiResource();
-extern s32 D_003BAA8C;
+extern u8 *D_003BAA8C;
 extern s32 D_00360458[];
 extern s32 D_00360460[];
 
@@ -819,7 +819,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
     return task;
 }
 
-extern s32 D_003BAA84;
+extern u8 *D_003BAA84;
 extern void btlCreateSkillNamePanel(s32);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 

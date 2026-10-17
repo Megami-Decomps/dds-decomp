@@ -811,9 +811,9 @@ void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNo
     }
 }
 
-void sdfInstallPoolNodeReleaseCallbacks(u32 *work) {
-    work[4] = (u32)sdfReleasePoolNode;
-    work[5] = (u32)sdfUpdatePoolFreeListByMode;
+void sdfInstallPoolNodeReleaseCallbacks(SdfPool *pool) {
+    pool->release = sdfReleasePoolNode;
+    pool->update = sdfUpdatePoolFreeListByMode;
 }
 
 INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EDD0);

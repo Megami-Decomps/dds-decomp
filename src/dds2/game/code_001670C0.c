@@ -365,7 +365,7 @@ void *effCreateVertexDrawPacket(EffPacketParams *params) {
         } while (i != vertexCount);
         offset += vertexCount;
     }
-    stream = params->texcoords;
+    stream = (u32 *)params->texcoords;
     if (stream != NULL) {
         stream2 = params->extraTexcoords;
         if (stream2 == NULL) {

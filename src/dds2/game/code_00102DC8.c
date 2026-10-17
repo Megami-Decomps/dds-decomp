@@ -1180,7 +1180,6 @@ void evtResetDisplayProjectionAndVectorState(void) {
 /* One 0x1F40-byte draw bank of the held-texture render target. */
 #include "kwln_texture_bank.h"
 
-extern KwlnTextureBank kwlnHeldTexturePacketBanks[2];
 extern SdfGraphObj kwlnHeldTextureDrawTarget;
 extern u16 D_00435CCC;
 extern u16 D_00435CCE;
@@ -1204,14 +1203,14 @@ void kwlnInitHeldTextureScenePackets(void) {
     kwlnHeldTextureDrawTarget.buffers[2] = (SdfTexResource *)D_0040B2A0[0];
     sdfCameraBuildProjection(&D_0037F7B0.camera);
     for (i = 0; i != 2; i++) {
-        sdfInitPacketList(&kwlnHeldTexturePacketBanks[i].list);
-        sdfBuildTextureScenePacket(&kwlnHeldTexturePacketBanks[i].scene, &kwlnHeldTextureDrawTarget, 0);
-        *(u32 *)&kwlnHeldTexturePacketBanks[i].scene.centeredBounds.rgbaq.value = D_00435CD0;
-        sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].scene);
-        sdfConsBuildMatrixPacket(&kwlnHeldTexturePacketBanks[i].matrix, &D_0037F7B0, kwlnHeldTextureViewMatrix);
-        sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].matrix);
-        sdfBuildLightingPacket(&kwlnHeldTexturePacketBanks[i].lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
-        sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].lighting);
+        sdfInitPacketList(&D_00380870[i].heldTexture.list);
+        sdfBuildTextureScenePacket(&D_00380870[i].heldTexture.scene, &kwlnHeldTextureDrawTarget, 0);
+        *(u32 *)&D_00380870[i].heldTexture.scene.centeredBounds.rgbaq.value = D_00435CD0;
+        sdfAppendPacket(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.scene);
+        sdfConsBuildMatrixPacket(&D_00380870[i].heldTexture.matrix, &D_0037F7B0, kwlnHeldTextureViewMatrix);
+        sdfAppendPacket(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.matrix);
+        sdfBuildLightingPacket(&D_00380870[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
+        sdfAppendPacket(&D_00380870[i].heldTexture.list, (u32)&D_00380870[i].heldTexture.lighting);
     }
 }
 

@@ -104,7 +104,7 @@ typedef struct BtlPackedCtx {
     s32 context;
     s32 unk4;
 } BtlPackedCtx;
-extern s32 D_00435E5C;
+extern u8 *D_00435E5C;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 extern void btlCreateSkillNamePanel(s32);
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
@@ -113,7 +113,7 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
 extern s32 sprintf(char *, const char *, ...);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
-extern s32 D_00435E64;
+extern u8 *D_00435E64;
 extern u8 btlActionPassLabel[];
 extern u8 btlActionRetreatLabel[];
 extern s32 D_003BEB38[];
