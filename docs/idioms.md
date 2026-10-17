@@ -312,6 +312,46 @@ A flag inferred from "all tails in this run are `jal`" is therefore weaker
 than it looks: test the helper form (3+ sites) and natural loops before
 assigning a per-file flag, and re-test existing flag entries the same way.
 
+### The rule behind these `jal` tails: the callee is not a direct function declaration
+
+`expand_call` only builds a sibling alternative when `get_callee_fndecl`
+returns the callee's `FUNCTION_DECL` (the vendor gate "missing direct callee
+declaration", read from the pinned cc1 by EHFlag). A call through a pointer
+VARIABLE or a pointer function-PARAMETER has no such decl, so it gets no
+sibling alternative; if cse/inlining later folds the pointer to a constant
+address the call is still emitted as a direct `jal sym` with an epilogue
+after it, never `j`. This is why an inlined callback helper keeps `jal`
+(see "Expansion provenance: an inlined indirect call can remain `jal`"), and it is the mechanism to check first
+when a run of otherwise ordinary void wrappers all end in `jal`.
+
+Measured on DDS1 `game/code_00253E58` / `code_00250E88` (default flags; each
+form applied to the last call of `mnuDrawMantraScenePlacementSprite`):
+
+| form of the last call | result |
+|---|---|
+| `void (*draw)(...) = f; draw(...);` (local pointer) | `jal` (retail) |
+| `static inline void via(void (*draw)(...), ...) { draw(...); }` called as `via(f, ...)` | `jal` (retail) |
+| `do { f(...); } while (0);` (stmt loop nest gate) | `jal` (retail) |
+| plain call, K&R/unprototyped callee, `(*f)(...)`, `((T)f)(...)`, implicit declaration | `j` |
+| callee declared with another return type (`f32`, `double`, `s64`, `u8`, `s16`) | `j` |
+| caller returns a value but falls off the end, no join | `j`; after a join (`if (p) f(p);` in an `s32`/implicit-int caller) `jal` |
+
+Only the inline-callback helper is acceptable source, and only when it
+genuinely recurs (3+ sites: `mnuDrawPlacedSpriteFromTable` has 19 in
+`code_00253E58`); a local function pointer is a dummy variable and a
+`do { } while (0)` around one call is the whole-body tail-blocker lever.
+The four `code_00250E88` tails (`mnuReleaseSceneContext`,
+`mnuReinitializeSceneGrid`, `mnuFinishMantraProfileSelection`,
+`mnuCopySceneCoordinatesAndReleaseNodeList`) have four different callees
+and no shared helper, so the unit keeps its inferred no-sibling flag and
+is not merged with `code_00253D40`/`code_00253E58` (which would need one flag
+set: `mnuBeginTransitionAlt` there is a real sibling `j`). With those tails
+as pointer calls the merged three-unit extent matches under default flags,
+and `mnuHandleMantraSceneInput` (3/240 words alone) is exact once
+`mnuSelectMantraGridLeftNeighbor`, `mnuSelectMantraGridRightNeighbor` and
+`mnuBeginTransitionAlt` are defined above it, which is the boundary evidence
+for a future landing.
+
 ## Narrow return types and `jal` tails
 
 A function whose recovered return type is narrow can return a narrow callee's
