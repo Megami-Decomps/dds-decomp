@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "dds3_path.h"
 #include "sdf_request.h"
 #include "kwln.h"
@@ -2543,7 +2544,6 @@ extern f32 D_003C8A00[][4];
 extern u32 D_003C8A60[];
 
 
-extern void *sdfDrawPostmultipliedLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 extern f32 D_003C8930[][4];
 

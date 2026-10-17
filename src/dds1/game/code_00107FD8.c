@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_dev_cons.h"
@@ -815,7 +816,6 @@ extern f32 D_003245B0[][4];
 
 extern u32 D_003245D0[];
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     void *list;
