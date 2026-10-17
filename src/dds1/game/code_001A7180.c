@@ -924,7 +924,7 @@ s32 btlChooseEligibleSkill(s32 object) {
                 s32 category = datCommandSelectors[id].kind;
                 if (category != 2) {
                     if (category != 4) {
-                        if ((datCommandRecords[id].unk_01 & 2) != 0) {
+                        if ((datCommandRecords[id].menuFlags & 2) != 0) {
                             if (id < 0xAB || (id >= 0xAD && id != 0xBF)) {
                                 choices[count++] = id;
                             }

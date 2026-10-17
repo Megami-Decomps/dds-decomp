@@ -2344,7 +2344,7 @@ s32 mnuCanAffordEntryCost(u16 commandId, DatPartyRecord *actorEntry) {
 /* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
 s32 mnuGetEntryUseStatus(DatPartyRecord *actorEntry, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorEntry) == 0) return -1;
-    if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->unk_01 & 1) == 0) return 1;
+    if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->menuFlags & 1) == 0) return 1;
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
     return 1;
 }

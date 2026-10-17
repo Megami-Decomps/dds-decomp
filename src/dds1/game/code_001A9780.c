@@ -6719,7 +6719,7 @@ u16 *btlGatherActorCommandsByKind(s32 address, s16 *outCount, u16 firstKind, u16
         if (wanted == 2 && id == 0xE0) {
             continue;
         }
-        if (!(records[id].unk_01 & 2)) {
+        if (!(records[id].menuFlags & 2)) {
             continue;
         }
         if (btlUnitStatusPair(object->owner->unit) & 0x1400) {
@@ -6776,7 +6776,7 @@ u16 *btlGatherEnemyCommands(BtlUnit *actor, s16 *outCount) {
     gathered = 0;
     for (i = 0; i < 8; i++) {
         u16 id = enemy->skills[i];
-        if ((records[id].unk_01 & 2) != 0 && id != 0) {
+        if ((records[id].menuFlags & 2) != 0 && id != 0) {
             *out++ = id;
             gathered++;
         }

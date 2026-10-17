@@ -1833,7 +1833,7 @@ s32 mnuGetEntryUseStatus(DatPartyRecord *actorEntry, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorEntry) == 0) {
         return -1;
     }
-    if (!(datCommandRecords[commandId].unk_01 & 1)) {
+    if (!(datCommandRecords[commandId].menuFlags & 1)) {
         return 1;
     }
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) {

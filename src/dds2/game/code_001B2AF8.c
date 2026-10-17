@@ -573,7 +573,7 @@ s32 btlChooseEligibleSkill(s32 object) {
                 s32 category = datCommandSelectors[id].kind;
                 if (category != 2) {
                     if (category != 4) {
-                        if ((datCommandRecords[id].unk_01 & 2) != 0) {
+                        if ((datCommandRecords[id].menuFlags & 2) != 0) {
                             if (id < 0xAB || (id >= 0xAD && id != 0xBF)) {
                                 choices[count++] = id;
                             }
@@ -7928,7 +7928,7 @@ u16 *btlGatherActorCommandsByKind(s32 address, s16 *outCount, u16 firstKind, u16
         if (wanted == 2 && id == 0xE0) {
             continue;
         }
-        if (!(records[id].unk_01 & 2)) {
+        if (!(records[id].menuFlags & 2)) {
             continue;
         }
         if ((btlUnitStatusPair(object->owner->unit) & 0x1400) || (object->owner->unit->partyRecord.flags & 0x10)) {

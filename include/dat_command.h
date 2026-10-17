@@ -38,7 +38,7 @@ typedef union DatCommandAttribute {
 
 typedef struct DatCommandRecord {
     u8 flags;                     /* 0x00 */
-    u8 unk_01;
+    u8 menuFlags;                 /* 0x01: bit 0 affects use status; bit 1 enables battle-list inclusion. */
     u8 effectType;                /* 0x02 */
     u8 costMode;                  /* 0x03 */
     u16 costPercentage;            /* 0x04 */
@@ -74,6 +74,7 @@ typedef char DatCommandAttributeSizeCheck[sizeof(DatCommandAttribute) == 4 ? 1 :
 typedef char DatCommandRecordSizeCheck[sizeof(DatCommandRecord) == 0x38 ? 1 : -1];
 
 typedef char DatCommandCostOffsetCheck[((u32)&((DatCommandRecord *)0)->costMode == 3) ? 1 : -1];
+typedef char DatCommandMenuFlagsOffsetCheck[((u32)&((DatCommandRecord *)0)->menuFlags == 1) ? 1 : -1];
 typedef char DatCommandAttributeOffsetCheck[((u32)&((DatCommandRecord *)0)->attribute == 0x24) ? 1 : -1];
 typedef char DatCommandRequirementOffsetCheck[((u32)&((DatCommandRecord *)0)->requirementBits == 0x28) ? 1 : -1];
 typedef char DatCommandLastStatOffsetCheck[((u32)&((DatCommandRecord *)0)->stat36 == 0x36) ? 1 : -1];
