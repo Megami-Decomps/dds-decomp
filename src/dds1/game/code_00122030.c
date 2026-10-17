@@ -801,7 +801,7 @@ u32 fldGetSceneStatusCode(void) {
 extern FieldAreaEncounterTable *D_003BAA38;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
 
-extern void *dds3GetTransformSourceData(EffWorldNode *node);
+extern f32 *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void fldPreparePlayerAndCameraScene(u128 *transform);
