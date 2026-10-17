@@ -5207,9 +5207,89 @@ void effCopyRingFrameVectors(EffSurfaceGridNode *node, u128 *destination, s32 fr
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7568);
+/* data holds two vector addresses: the ring head, then the input frame.
+ * ring_mirror_pointer_epochs_probe (hooked==unhooked): GCSE preserves the
+ * head-to-mirror copy; separate append/mirror lifetimes keep native allocation. */
+void func_002A7568(EffSurfaceGridNode *work, const f32 (*source)[4]) {
+    s32 index = work->field_18;
+    const u128 *data = work->buffer;
+    u128 *destination = (u128 *)data + index;
+    s32 capacity;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7610);
+    for (i = 0; i < 3; i++) {
+        PCP_COPY_VECTOR(destination + i, source + i);
+    }
+    capacity = work->rows;
+    work->field_18 = index + 3;
+    if (work->field_18 == capacity) {
+        u128 *mirror = (u128 *)data;
+        data = (const u128 *)source;
+        for (i = 0; i < 3; i++) {
+            PCP_COPY_VECTOR(mirror + i, data + i);
+        }
+        work->field_18 = 3;
+    }
+    if (work->field_14 < capacity - 3) {
+        work->field_14 += 3;
+    }
+}
+
+extern void vuCatmullRomPoint(f32 (*)[4], f32);
+
+/* vu0 routine: interpolate three-vector ring frames with SDK spline and lerp operations. */
+void func_002A7610(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
+    f32 frames[4][3][4];
+    f32 controlVectors[4][4];
+    f32 output[3][4];
+    s32 count = work->columns;
+    s32 retainedVectors = work->field_14;
+    s32 i;
+    s32 j;
+    f32 step;
+    f32 t;
+
+    if (count == 1 || retainedVectors == 0) {
+        func_002A7568(work, vectors);
+        return;
+    }
+    if (retainedVectors >= count * 6) {
+        effCopyRingFrameVectors(work, (u128 *)frames[0], 2);
+        effCopyRingFrameVectors(work, (u128 *)frames[1], 1);
+        for (j = 0; j < 3; j++) {
+            PCP_COPY_VECTOR(frames[2][j], vectors[j]);
+            PCP_COPY_VECTOR(frames[3][j], vectors[j]);
+        }
+        step = 1.0f / count;
+        t = 0.0f;
+        for (i = 0; i < count; i++) {
+            t += step;
+            for (j = 0; j < 3; j++) {
+                PCP_COPY_VECTOR(controlVectors[0], frames[0][j]);
+                PCP_COPY_VECTOR(controlVectors[1], frames[1][j]);
+                PCP_COPY_VECTOR(controlVectors[2], frames[2][j]);
+                PCP_COPY_VECTOR(controlVectors[3], frames[3][j]);
+                vuCatmullRomPoint(controlVectors, t);
+                VU0_STORE_VF(vf10, output[j]);
+            }
+            func_002A7568(work, output);
+        }
+    } else {
+        effCopyRingFrameVectors(work, (u128 *)controlVectors, 1);
+        step = 1.0f / count;
+        t = 0.0f;
+        for (i = 0; i < count; i++) {
+            t += step;
+            for (j = 0; j < 3; j++) {
+                VU0_LOAD_VF(vf10, controlVectors[j]);
+                VU0_LOAD_VF(vf11, vectors[j]);
+                VU0_LERP_VF10(t);
+                VU0_STORE_VF(vf10, output[j]);
+            }
+            func_002A7568(work, output);
+        }
+    }
+}
 
 void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
     struct SdfListHead *work = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
