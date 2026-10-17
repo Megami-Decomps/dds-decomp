@@ -7920,7 +7920,119 @@ u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002AFE68);
+void func_002AFE68(u32 *buffer, EffBillQuantizedConfig *config) {
+    f32 radii[4];
+    f32 heights[4];
+    s32 segment;
+    s32 segmentCount;
+    f32 rowStep;
+    f32 angleStep;
+    f32 rowScaleB;
+    f32 rowScaleA;
+    s32 fadeOutLimit;
+    s32 vertexCount;
+    u32 *colors;
+    s32 rowCount;
+    s32 fadeInLimit;
+    EffStripWork *strip;
+    f32 *positions;
+    u32 *vertexColors;
+    f32 *uvA;
+    f32 *uvB;
+    f32 sampleStep;
+    f32 radius;
+    f32 vertexScaleB;
+    f32 vertexScaleA;
+    f32 segmentAngle;
+    f32 angle;
+    f32 rowAngle;
+    s32 row;
+    s32 sample;
+    f32 cosine;
+    f32 sine;
+    f32 fraction;
+    f32 fractionStep;
+    f32 rowFraction;
+    f32 alpha;
+
+    segmentCount = (s32)buffer[0];
+    vertexCount = segmentCount * 4;
+    angle = config->angularSpanDegrees * 0.017453292f;
+    angleStep = angle / segmentCount;
+    rowCount = config->samples.signedRows;
+    rowStep = 6.2831852f / rowCount;
+    rowCount++;
+    strip = (EffStripWork *)buffer[1];
+    vertexColors = (u32 *)strip->extra;
+    uvA = (f32 *)strip->uvsA;
+    uvB = (f32 *)strip->uvsB;
+    colors = strip->colors;
+    positions = (f32 *)strip->positions;
+    sampleStep = angleStep / 3.0f;
+    radius = config->radius;
+    rowScaleB = config->fadeInEnd;
+    vertexScaleB = config->fadeOutStart;
+    rowScaleA = config->uvARowScale;
+    vertexScaleA = config->uvBVertexScale;
+    fadeInLimit = config->alphaFadeInFraction * vertexCount;
+    fadeOutLimit = config->alphaFadeOutFraction * vertexCount;
+    segmentAngle = 0.0f;
+
+    for (segment = 0; segment < segmentCount; segment++) {
+        angle = segmentAngle;
+        for (sample = 0; sample < 4; sample++) {
+            radii[sample] = radius * sdfSinPoly(angle);
+            heights[sample] = -radius * sdfEvaluateCosineViaSinePhaseShift(angle);
+            angle += sampleStep;
+        }
+        segmentAngle += angleStep;
+        rowAngle = 0.0f;
+        /* Retail keeps this unused sample (DDS1 002B0008 / DDS2 002F33F8). */
+        sdfSinPoly(segmentAngle);
+        for (row = 0; row < rowCount; row++) {
+            f32 *position;
+            f32 *texA;
+            f32 *texB;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(rowAngle);
+            sine = sdfSinPoly(rowAngle);
+            rowFraction = (f32)row / rowCount;
+            fraction = (f32)segment / segmentCount;
+            fractionStep = (1.0f / segmentCount) / 3.0f;
+            texB = uvB;
+            texA = uvA;
+            position = positions;
+            for (sample = 0; sample < 4; sample++) {
+                s32 index;
+                position[0] = cosine * radii[sample];
+                position[1] = heights[sample];
+                position[2] = sine * radii[sample];
+                position += 4;
+                texA[1] = fraction * vertexScaleA;
+                texA[0] = rowFraction * rowScaleA;
+                texA += 2;
+                texB[1] = fraction * vertexScaleB;
+                texB[0] = rowFraction * rowScaleB;
+                texB += 2;
+                fraction += fractionStep;
+                index = segment * 4 + sample;
+                if (index < fadeInLimit) {
+                    alpha = (f32)index / fadeInLimit;
+                } else if (index > fadeOutLimit) {
+                    alpha = (f32)(vertexCount - index) / (vertexCount - fadeOutLimit);
+                } else {
+                    alpha = 1.0f;
+                }
+                vertexColors[sample] = 0x00808080 | ((u32)(alpha * 128.0f) << 24);
+            }
+            rowAngle += rowStep;
+            positions += 16;
+            vertexColors += 4;
+            uvA += 8;
+            uvB += 8;
+        }
+        *colors++ = 0x80808080;
+    }
+}
 
 extern void func_002AFE68(u32 *, EffBillQuantizedConfig *);
 
