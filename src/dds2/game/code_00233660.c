@@ -1024,7 +1024,7 @@ void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     }
 }
 
-void *mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
+u64 *mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
     return sdfCreateBorderedRectanglePacket(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
