@@ -4044,7 +4044,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
         }
     }
 
-    if (fldAreaState.unk118 == 1) {
+    if (fldAreaState.playerModelAlternate == 1) {
         sequenceCategory = (D_004360D4 % 2) + 0x19;
         if (selector != 1) {
             return;
@@ -4671,7 +4671,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             fldAreaState.movementSoundActive = 1;
         } else {
             fldAreaState.movementSoundActive = 0;
-            if (fldAreaState.unk118 != 0) {
+            if (fldAreaState.playerModelAlternate != 0) {
                 distance = 32.0f;
             } else {
                 distance = 25.0f;
@@ -4965,7 +4965,7 @@ s32 fldUpdateCameraFrame(void) {
         fldUpdateModeOneCameraPose();
         node = fldPlayerModelContext->current.h.motionIndex;
         fldDispatchCameraModelFrameEvents(node, node);
-        if (fldAreaState.unk118 == 1) {
+        if (fldAreaState.playerModelAlternate == 1) {
             fldUpdateCameraModelMotion(0, 0, 6.0f);
         }
         fldSyncObjectFlagsB();

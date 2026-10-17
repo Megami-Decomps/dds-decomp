@@ -902,7 +902,7 @@ void fldResetFieldRuntimeState(s32 mode) {
     area->transitionCount = 0;
     area->frameTravelDistance = 0.0f;
     area->titleFade = 0;
-    area->unk118 = 0;
+    area->playerModelAlternate = 0;
     area->cameraTiltActive = 0;
     area->unkB4 = 0;
     area->cameraTilt = 0.0f;

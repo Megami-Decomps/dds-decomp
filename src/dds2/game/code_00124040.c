@@ -1133,7 +1133,7 @@ void fldLoadPlayerModel(void) {
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x20) {
         model = 2;
     } else {
-        model = fldAreaState.unk118 != 0;
+        model = fldAreaState.playerModelAlternate != 0;
     }
     if (fldAreaState.playerModelVariant != model || fldPlayerModelResource == 0) {
         if (fldPlayerModelResource != 0) {
@@ -1232,7 +1232,7 @@ void fldTogglePlayerModel(void) {
          * real phase uses; the resulting two-definition pseudo stays global,
          * rather than merging snapshot HIGH/base/+16 in local-alloc. */
         sceneWork = &D_0038A640;
-        fldAreaState.unk118 ^= 1;
+        fldAreaState.playerModelAlternate ^= 1;
         VU0_LOAD_VF(vf10, &axis);
         effMiscAxisAngleToQuaternionVU(3.1415926f);
         VU0_LOAD_VF(vf11, &sceneWork->rotation);
@@ -1468,7 +1468,7 @@ void fldSpawnPlayerUnits(f32 *input) {
         fldPlayerModelContext = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
         effObjSetInnerFloat((EffWorldNode *)fldPlayerObject, 90.0f);
 
-        if (fldAreaState.unk118 == 0) {
+        if (fldAreaState.playerModelAlternate == 0) {
             mdlAddEntryFlagged(fldPlayerModelContext, 0, 2);
         } else {
             mdlAddEntryFlagged(fldPlayerModelContext, 0, 2);
