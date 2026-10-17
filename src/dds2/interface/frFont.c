@@ -1231,7 +1231,7 @@ extern s8 frFontEncodedTextGlyphSpacing;
 void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     char glyphText[3];
     const char *textData;
-    s32 index;
+    s32 textByteOffset;
     s32 textLength;
     s8 previousMode;
     s8 mode;
@@ -1246,9 +1246,9 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
 
     textLength = strlen(textData);
     previousMode = ctx->fontIndex;
-    for (index = 0; index < textLength; ) {
-        glyphText[0] = textData[index++];
-        glyphText[1] = textData[index++];
+    for (textByteOffset = 0; textByteOffset < textLength; ) {
+        glyphText[0] = textData[textByteOffset++];
+        glyphText[1] = textData[textByteOffset++];
         mode = ctx->fontIndex;
 
         if (mode != previousMode) {
