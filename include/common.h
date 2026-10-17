@@ -12,6 +12,14 @@ typedef signed long long s64;
 typedef unsigned long long u64;
 typedef int s128 __attribute__((mode(TI)));
 typedef unsigned int u128 __attribute__((mode(TI)));
+
+/* Marks a DMA tag or packet type: the DMAC reads it at a quadword (16-byte)
+ * boundary. The PS2 layouts already place these types there, so this build
+ * adds nothing. A build whose layouts differ (8-byte pointers, say) defines
+ * QWORD_ALIGNED as __attribute__((aligned(16))). */
+#ifndef QWORD_ALIGNED
+#define QWORD_ALIGNED
+#endif
 typedef float f32;
 typedef double f64;
 
