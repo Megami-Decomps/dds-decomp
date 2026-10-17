@@ -658,7 +658,7 @@ s32 mnuCampFindMatchingEntryIndex(CampNameLookup *lookup, EvtRuntime *scene, s32
 }
 
 /* Return the first track with this fixed-width name, or NULL when absent. */
-void *mnuCampFindEntryByName(EvtRuntime *scene, const char *name) {
+EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
         if (strcmp(scene->entryName[track->entryHeader], name) == 0) {
@@ -700,12 +700,12 @@ void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue) {
                     scene->selectedEntry = 0;
                     return;
                 }
-                scene->selectedEntry = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[linkedEntryCode - CAMP_ENTRY_NAME_CODE_BASE]))->texture;
+                scene->selectedEntry = (s32)mnuCampFindEntryByName(scene, scene->entryName[linkedEntryCode - CAMP_ENTRY_NAME_CODE_BASE])->texture;
                 return;
             }
         }
     } else {
-        scene->selectedEntry = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[(s16)entryCodeBits - CAMP_ENTRY_NAME_CODE_BASE]))->texture;
+        scene->selectedEntry = (s32)mnuCampFindEntryByName(scene, scene->entryName[(s16)entryCodeBits - CAMP_ENTRY_NAME_CODE_BASE])->texture;
     }
 }
 

@@ -969,7 +969,7 @@ extern void effSetCh71Id(SdfTex *texture);
 extern void effSetCh72Id(SdfTex *sourceHandle);
 extern void effSetCh75Id(SdfTex *texture);
 extern void effSetCh76Id(SdfTex *sourceHandle);
-extern void *mnuCampFindEntryByName(void *scene, const char *name);
+
 
 
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
@@ -1942,8 +1942,8 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
                     if (key->p10.sh[0] != 0) {
                         value = 0;
                         if (key->p10.sh[0] != 1) {
-                            value = ((EvtRuntimeGroup *)mnuCampFindEntryByName(
-                                         viewer, (char *)viewer->entryName[key->p10.sh[0] - 2]))->texture;
+                            value = mnuCampFindEntryByName(
+                                         viewer, (char *)viewer->entryName[key->p10.sh[0] - 2])->texture;
                         }
                     }
                 }
