@@ -433,6 +433,8 @@ void mnuCopyResourceProgressParameters(MenuProgressParameters *);
 void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
 MenuRegistryRecord *mnuResolveTaggedRegistryRecord(MenuWorkEntry *work);
+/* Native shooting visitor forwards its context; motion lookup does not use it. */
+s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *, struct MnuShootingWork *);
 MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list);
 MenuShortRecord *mnuFindFrameKeyedMotionRecord(MenuShortRecordList *list);
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);

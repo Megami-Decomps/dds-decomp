@@ -160,7 +160,7 @@ void func_0031B3B8(s32 objectAddress) {
 void func_0031B3C8(void) {
 }
 
-s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
+s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work, MnuShootingWork *unusedContext) {
     MenuRegistryRecord *registry;
     MenuShortRecordList *list;
     MenuShortRecord *record;
