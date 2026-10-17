@@ -422,7 +422,7 @@ void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQ
 
 void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey *b, EvtBlendKey *out)
 {
-    s32 i;
+    s32 colorChannelIndex;
 
     if (enable == 0) {
         t = 0.0f;
@@ -433,9 +433,9 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     out->w[2] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[2], b->w[2]);
     out->w[3] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[3], b->w[3]);
     out->flagWord = a->flagWord;
-    for (i = 0; i < 3; i++) {
-        out->y[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->y[i], b->y[i]);
-        out->z[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->z[i], b->z[i]);
+    for (colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
+        out->y[colorChannelIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->y[colorChannelIndex], b->y[colorChannelIndex]);
+        out->z[colorChannelIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->z[colorChannelIndex], b->z[colorChannelIndex]);
     }
 }
 
