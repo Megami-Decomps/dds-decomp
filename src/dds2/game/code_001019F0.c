@@ -124,8 +124,10 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     return 0;
 }
 
+#define KWLN_FRAME_POOL_NODE_COUNT 0x62
+
 extern u8 D_003808B0[];
-extern SdfPoolNode kwlnDrawSurfaces[];
+extern SdfPoolNode kwlnDrawSurfaces[KWLN_FRAME_POOL_NODE_COUNT];
 extern u8 D_00380860[];
 extern u8 D_00380870[];
 extern void sdfWaitAndSelectBuffer(void);
@@ -134,7 +136,6 @@ extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
 #define KWLN_FRAME_BUFFER_BYTES 0x1F40
-#define KWLN_FRAME_POOL_NODE_COUNT 0x62
 #define KWLN_FRAME_LAST_GROUP_INDEX 12
 #define KWLN_FRAME_GROUP_BYTES 0x1B0
 #define KWLN_FRAME_PACKET_LIST_BYTES 0x20
