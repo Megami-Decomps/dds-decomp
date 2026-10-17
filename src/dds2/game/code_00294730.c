@@ -278,7 +278,94 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
 
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawMenuItemListRow);
 
-INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawCampItemListRow);
+extern s32 itfSetTextDrawLimit(s32);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern char D_00437970[];
+
+void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
+                            struct MenuListNode *node, s32 mode) {
+    MenuTerminalWindowState *context = list->context;
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    s32 headIndex = list->head->index;
+    s32 value = node->index;
+    s32 row = value - headIndex;
+    f32 alpha = 1.0f;
+    f32 pulseAlpha;
+    struct FrFontGlyph *glyph;
+    char text[16];
+    s32 selected = 0;
+    u32 color;
+
+    switch (context->command.mode) {
+    case 1: {
+        f32 position = (f32)row / (f32)list->visibleCount;
+        f32 progress = (f32)context->command.value / 10.0f;
+
+        position = position * 0.5f + 0.5f;
+        alpha = progress + progress;
+        alpha *= position;
+        if (alpha > 1.0f) {
+            alpha = 1.0f;
+        }
+        alpha = 1.0f - alpha;
+        break;
+    }
+    case 2:
+        alpha = (f32)context->command.value * 0.25f;
+        break;
+    }
+
+    if (node == list->cursor) {
+        context->pulseFrame++;
+        if (context->pulseFrame >= 0x3D) {
+            context->pulseFrame = 0;
+        }
+        pulseAlpha = sdfSinPoly(((f32)context->pulseFrame / 60.0f) * 3.1415926f) * alpha;
+        value = list->cursor->index;
+        row = value - headIndex;
+
+        effDrawTextureSlotWithBlendedCornerColors(
+            0x420, (row * 22 + 0x98) << 3, 0,
+            (u32)(alpha * 256.0f), 0, texture, 0x20, mode);
+        effDrawTextureSlotWithBlendedCornerColors(
+            0xCE0, (row * 22 + 0x98) << 3, 0,
+            (u32)(alpha * 256.0f), 0, texture, 0x21, mode);
+        effDrawTextureSlotWithBlendedCornerColors(
+            (mnuCommonIconPlacements[19][MENU_ICON_X] + 8) << 4,
+            (mnuCommonIconPlacements[19][MENU_ICON_Y] + row * 22) << 3,
+            0, (u32)(alpha * 256.0f), 0, texture,
+            mnuCommonIconPlacements[19][MENU_ICON_FRAME], mode);
+        effDrawTextureSlotWithBlendedCornerColors(
+            (mnuCommonIconPlacements[19][MENU_ICON_X] + 8) << 4,
+            (mnuCommonIconPlacements[19][MENU_ICON_Y] + row * 22) << 3,
+            0, (u32)(pulseAlpha * 256.0f), 0, texture,
+            mnuCommonIconPlacements[19][MENU_ICON_FRAME], mode);
+        selected = 1;
+    }
+
+    color = 0xA09DC300;
+    itfSetTextDrawLimit(0x13);
+    value = node->flags48;
+    value &= 1;
+    color |= (s32)(value ? alpha * 64.0f : alpha * 128.0f);
+    glyph = itfCreateConvertedTextGlyph(
+        0x420, (row * 22 + 0x87) << 3, z, color,
+        (const u8 *)node->value, NULL);
+    itfSetTextDrawLimit(-1);
+    if (selected) {
+        frFontSetChildChainFirstOption(glyph, 4);
+    }
+    if (list->id & 1) {
+        sprintf(text, D_00437970, node->camp.value);
+        glyph = itfCreateFont2TextGlyph(
+            0xFF0, (row * 22 + 0x8A) << 3, z, color, text, glyph);
+        if (selected) {
+            frFontSetChildChainFirstOption(glyph, 4);
+        }
+    }
+    frFontDrawGlyphChain(glyph, 1, mode);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 
 /* Shop list draw context: row-fade countdown and mode (same 0x10-byte buffer as DDS1). */
 typedef struct MnuShopListContext {
@@ -288,10 +375,6 @@ typedef struct MnuShopListContext {
     u16 extraOption;
     s16 pendingSelection;
 } MnuShopListContext;
-
-extern s32 itfSetTextDrawLimit(s32);
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
-extern char D_00437970[];
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
 void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
