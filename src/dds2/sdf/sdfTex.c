@@ -134,13 +134,13 @@ void sdfTexRelease(SdfTex *texture) {
 /* Release a texture when the final ordinary reference is dropped. */
 void sdfTexReleaseReference(SdfTex *texture) {
     SdfTexRef *ref;
-    s32 count;
+    s32 remainingReferenceCount;
 
     if (texture != NULL) {
         ref = texture->reference;
-        count = ref->refCount - 1;
-        ref->refCount = count;
-        if (count == 0) {
+        remainingReferenceCount = ref->refCount - 1;
+        ref->refCount = remainingReferenceCount;
+        if (remainingReferenceCount == 0) {
             texture->resourceKey = 0;
             sdfTexRelease(texture);
         }
@@ -150,13 +150,13 @@ void sdfTexReleaseReference(SdfTex *texture) {
 /* Hand the last reference to sdfPendingQueuePush rather than releasing it here. */
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     SdfTexRef *ref;
-    s32 count;
+    s32 remainingReferenceCount;
 
     if (texture != NULL) {
         ref = texture->reference;
-        count = ref->refCount - 1;
-        ref->refCount = count;
-        if (count == 0) {
+        remainingReferenceCount = ref->refCount - 1;
+        ref->refCount = remainingReferenceCount;
+        if (remainingReferenceCount == 0) {
             texture->resourceKey = 0;
             sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
         }
