@@ -410,6 +410,10 @@ typedef struct {
  * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
 #define VU0_SUB(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+/* Selected-lane subtraction: DDS1 002DEC44..002DEC4C / 002DF264..002DF26C
+ * and DDS2 00337AF4..00337AFC / 00338114..0033811C preserve the W lanes. */
+#define VU0_SUB_LANES(lanes, dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvsub." #lanes " " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_ADD(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_MUL(dst, a, b) __asm__ volatile ( \
@@ -469,6 +473,15 @@ typedef struct {
     ".set noreorder\n\tvmul.xyz vf2, " #a ", " #b "\n\tvaddy.x vf2, vf2, vf2y\n\t" \
     "vaddz.x vf2, vf2, vf2z\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
+/* Facing-test dot fold, with vf1.x already equal to one:
+ * DDS1 002DEC58..002DEC68 / 002DF278..002DF288 and DDS2
+ * 00337B08..00337B18 / 00338128..00338138. ACC and vf2 are SDK scratch.
+ * Return the low float bits in a compiler-owned GPR; C emits their MTC1. */
+#define VU0_DOT_XYZ_ACC(out, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, " #a ", " #b "\n\t" \
+    "vadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
+    "qmfc2.ni %0, vf2\n\t.set reorder" \
+    : "=r" (out))
 
 
 /* ---- shared idioms for the remaining hand-written COP2 blocks ----

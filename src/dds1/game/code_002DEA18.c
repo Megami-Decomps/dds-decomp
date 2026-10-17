@@ -37,7 +37,8 @@ extern u128 *D_003EB860[][3];
 extern u16 D_003BDA24;
 
 typedef struct VuBlendNode {
-    u8 pad00[0x20];
+    f32 position[4];       /* 0x00: native VU position */
+    u8 pad10[0x10];
     f32 color[4];
     u8 result[0x10];
     struct VuBlendNode *next;
@@ -54,7 +55,7 @@ typedef struct {
     u32 nextParam;         /* 0x48 */
     u32 flags;             /* 0x4C */
     s16 nodeCount;         /* 0x50 */
-    u8 pad52[2];
+    s16 selectedTriangleCount; /* 0x52: rejected-triangle index count */
     SdfAssetEntry *node;   /* 0x54 */
     u32 packedColor;       /* 0x58: packed RGBA word */
     f32 offsetX;           /* 0x5C */
@@ -114,22 +115,8 @@ void sdfVuInterpolateClipVertex(VuBlendNode *out, VuBlendNode *first, VuBlendNod
     VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DEB40);
-
-INCLUDE_ASM(const s32, "game/code_002DEA18", sdfVuBuildVisibleTriangleList);
-
-extern f32 D_003BDA30;
-extern f32 D_003984F0[4];
-extern u8 D_003983D0[];
 extern u8 D_003BD344;
 extern u16 D_003F7860[];
-/* Indexed triangle count occupies the two bytes following nodeCount. */
-typedef struct {
-    u8 pad00[0x52];
-    s16 indexedTriangleCount;
-} VuIndexedTriangleCount;
-/* Stand-in for ring field types: unit fix = VuWork.dmaAddrA/dmaAddrB -> VuBlendNode *, dmaEnd -> VuBlendNode **
- * (pointer-typed accesses are what keep the u32 count loads free of the tail store). */
 static inline VuBlendNode *vuAllocNode(VuWork *work) {
     VuBlendNode *node = work->dmaAddrA;
 
@@ -143,6 +130,176 @@ static inline VuBlendNode *vuAllocNode(VuWork *work) {
     work->dmaEnd = &node->next;
     return node;
 }
+/* vu0 routine: native clip facing and ordinary triangle fans. */
+void func_002DEB40(VuWork *work) {
+    s32 triangleCount;
+    s32 i;
+    u16 *triangles;
+    VuBlendNode *nodes;
+    s32 rejected;
+    s32 acceptAll;
+    u128 *(*out)[3];
+    f32 scale;
+
+    out = D_003EB860;
+    triangleCount = (s16)work->param0;
+    rejected = 0;
+    scale = work->depth;
+    acceptAll = D_003BD344;
+    triangles = (u16 *)work->strip;
+    nodes = (VuBlendNode *)work->dmaBase;
+    for (i = 0; i != triangleCount; i++) {
+        u16 *triangle = triangles;
+        VuBlendNode *a = nodes + triangle[0];
+        VuBlendNode *b = nodes + triangle[1];
+        VuBlendNode *c = nodes + triangle[2];
+        u32 bRegion;
+        u32 aRegion;
+        u32 cRegion;
+        VuBlendNode *d, *e, *f, *g;
+        f32 facing;
+        u32 clipA = a->pad4C[5];
+        u32 clipB = b->pad4C[5];
+        u32 clipC = c->pad4C[5];
+
+        triangles += 3;
+        if ((clipA & clipB & clipC & 0x3F) != 0 ||
+            ((clipA | clipB | clipC) & 0x30) != 0) {
+            continue;
+        }
+        VU0_LOAD_VF(vf2, a->position);
+        VU0_LOAD_VF(vf3, b->position);
+        VU0_LOAD_VF(vf4, c->position);
+        VU0_SUB_LANES(xyz, vf2, vf2, vf3);
+        VU0_SUB_LANES(xyz, vf4, vf4, vf3);
+        VU0_SUB_LANES(xyz, vf3, vf21, vf3);
+        VU0_CROSS_XYZ(vf2, vf2, vf4);
+        VU0_DOT_XYZ_ACC(facing, vf2, vf3);
+        facing *= scale;
+        if (facing < 0.0f) {
+            D_003F7860[rejected++] = i;
+            continue;
+        }
+        aRegion = a->pad4C[4];
+        bRegion = b->pad4C[4];
+        cRegion = c->pad4C[4];
+
+        if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
+            out[0][0] = (u128 *)a;
+            out[0][1] = (u128 *)b;
+            out[0][2] = (u128 *)c;
+            out++;
+            continue;
+        }
+        for (;;) {
+            VuBlendNode *firstVertex;
+            u32 firstCode;
+
+            if (bRegion == cRegion) {
+                d = vuAllocNode(work);
+                e = vuAllocNode(work);
+                if (aRegion == 0) {
+                    sdfVuInterpolateClipVertex(d, b, a);
+                    sdfVuInterpolateClipVertex(e, c, a);
+                    out[0][0] = (u128 *)a;
+                    out[0][1] = (u128 *)d;
+                    out[0][2] = (u128 *)e;
+                    out[1][0] = (u128 *)e;
+                    out[1][1] = (u128 *)d;
+                    out[1][2] = (u128 *)b;
+                    out[2][0] = (u128 *)e;
+                    out[2][1] = (u128 *)b;
+                    out[2][2] = (u128 *)c;
+                    out += 3;
+                    break;
+                }
+                sdfVuInterpolateClipVertex(d, a, b);
+                sdfVuInterpolateClipVertex(e, a, c);
+                out[0][0] = (u128 *)a;
+                out[0][1] = (u128 *)d;
+                out[0][2] = (u128 *)e;
+                out++;
+                if (bRegion == 0) {
+                    out[0][0] = (u128 *)b;
+                    out[0][1] = (u128 *)e;
+                    out[0][2] = (u128 *)d;
+                    out[1][0] = (u128 *)b;
+                    out[1][1] = (u128 *)c;
+                    out[1][2] = (u128 *)e;
+                    out += 2;
+                } else {
+                    f = vuAllocNode(work);
+                    g = vuAllocNode(work);
+                    sdfVuInterpolateClipVertex(f, b, a);
+                    sdfVuInterpolateClipVertex(g, c, a);
+                    out[0][0] = (u128 *)e;
+                    out[0][1] = (u128 *)d;
+                    out[0][2] = (u128 *)f;
+                    out[1][0] = (u128 *)e;
+                    out[1][1] = (u128 *)f;
+                    out[1][2] = (u128 *)g;
+                    out[2][0] = (u128 *)g;
+                    out[2][1] = (u128 *)f;
+                    out[2][2] = (u128 *)b;
+                    out[3][0] = (u128 *)g;
+                    out[3][1] = (u128 *)b;
+                    out[3][2] = (u128 *)c;
+                    out += 4;
+                }
+                break;
+            }
+            if (aRegion == 0 && (bRegion ^ cRegion) == 3) {
+                d = vuAllocNode(work);
+                e = vuAllocNode(work);
+                f = vuAllocNode(work);
+                g = vuAllocNode(work);
+                sdfVuInterpolateClipVertex(d, b, a);
+                sdfVuInterpolateClipVertex(e, c, a);
+                sdfVuInterpolateClipVertex(f, b, c);
+                sdfVuInterpolateClipVertex(g, c, b);
+                out[0][0] = (u128 *)a;
+                out[0][1] = (u128 *)d;
+                out[0][2] = (u128 *)e;
+                out[1][0] = (u128 *)d;
+                out[1][1] = (u128 *)b;
+                out[1][2] = (u128 *)f;
+                out[2][0] = (u128 *)e;
+                out[2][1] = (u128 *)d;
+                out[2][2] = (u128 *)f;
+                out[3][0] = (u128 *)e;
+                out[3][1] = (u128 *)f;
+                out[3][2] = (u128 *)g;
+                out[4][0] = (u128 *)e;
+                out[4][1] = (u128 *)g;
+                out[4][2] = (u128 *)c;
+                out += 5;
+                break;
+            }
+            firstVertex = a;
+            firstCode = aRegion;
+            a = b;
+            aRegion = bRegion;
+            b = c;
+            bRegion = cRegion;
+            c = firstVertex;
+            cRegion = firstCode;
+        }
+    }
+    work->selectedTriangleCount = rejected;
+    work->nodeCount = out - D_003EB860;
+    *work->dmaEnd = NULL;
+}
+
+INCLUDE_ASM(const s32, "game/code_002DEA18", sdfVuBuildVisibleTriangleList);
+
+extern f32 D_003BDA30;
+extern f32 D_003984F0[4];
+extern u8 D_003983D0[];
+/* Indexed triangle count occupies the two bytes following nodeCount. */
+typedef struct {
+    u8 pad00[0x52];
+    s16 indexedTriangleCount;
+} VuIndexedTriangleCount;
 void func_002DF710(VuWork *work) {
     /* DDS1 node region is the existing tail byte +0x50 (pad4C[4]). */
     f32 scale = D_003BDA30;
