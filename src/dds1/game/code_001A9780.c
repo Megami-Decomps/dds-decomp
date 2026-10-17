@@ -922,6 +922,8 @@ static inline s32 btlRefreshCommandRow(BattleSceneObject *object) {
         btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
     return btlLinkedSelectionTaskBuffer->selectedRow != 0;
 }
+extern s32 btlGetActorCommandClass(BattleSceneObject *, s8);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DD8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DF8);
@@ -941,8 +943,6 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FC0);
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorIdsByClass);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorClassPairs);
-
-extern s32 btlGetActorCommandClass(BattleSceneObject *, s8);
 
 void func_001AADF8(BattleSceneObject *object) {
     s32 changed = 0;
@@ -3633,11 +3633,11 @@ typedef struct BattleCommandLayoutWork {
 
 extern s32 fileTestSavedSlotFlags(u32);
 
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2988);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2998);
-
-extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
 
 void func_001B2AC8(BattleSceneObject *object) {
     enum {
