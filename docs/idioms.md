@@ -1119,6 +1119,27 @@ fake barriers, `volatile`, or register/lifetime manipulation. If the supported
 form fails to change the predicted early input and later edges, stop rather
 than manufacture effects. Whole-unit and complete-build acceptance still apply.
 
+## Shared text submission and declarations before first use
+
+DDS1 `func_001BDF60` (`0x001BDF60`, 1584 bytes) shares the sequence
+`frFontDrawGlyphWithSharedFlags(glyph, 1)` followed by
+`frFontQueueGlyphForCurrentDrawBuffer(glyph)` with nine other native sites.
+A plain `btlSubmitSharedTextGlyph` static inline is used at all ten sites,
+across seven functions in `game/code_001A9780.c`; this is a recurring text
+submission operation, not a one-off register-allocation wrapper. Eight sites
+were already C; the other two belong to this selector. None of the nine
+other sites exposes an additional ASM-only owner to convert.
+
+That shared helper reduced the selector's remaining difference from four
+instructions to two. The last two were the loop-entry `slti`/`beq` predicate
+using V1 instead of retail V0. The existing `itfSetTextDrawLimit` declaration
+was below those calls. Its provider (`game/code_00196478.c`) really returns
+`void`; moving that same declaration before first use fixes the two words.
+The loop backedge retains its distinct native V1 predicate. The complete
+unit then gates at **225 match, 0 differ**, including all existing consumers.
+Keep the actual return contract visible rather than perturbing loop locals
+or inventing a return type to influence allocation.
+
 ## Other GCC patterns (Decompedia; check each on ee-gcc 2.96)
 
 These are documented for GCC 2.8–2.9x projects (Paper Mario, Twisted Metal
