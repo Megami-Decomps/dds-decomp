@@ -4768,7 +4768,7 @@ void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
         case 18:
             continue;
         }
-        if (!(datCommandRecords[skillId].unk_01 & 2)) continue;
+        if (!(datCommandRecords[skillId].menuFlags & 2)) continue;
         switch (skillId) {
         case 0x09:
         case 0x12:
