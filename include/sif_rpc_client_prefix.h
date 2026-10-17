@@ -32,14 +32,12 @@ typedef char SifRpcClientContextView_server_at_0x24[
 typedef void (*SifMRpcEnd)(void *argument);
 
 s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
+s32 sceSifMCallRpc(SifRpcClientDataPrefix *client, s32 function, s32 mode, void *send, s32 sendSize,
+                   void *receive, s32 receiveSize, SifMRpcEnd end, void *endArgument);
 #if defined(VERSION_DDS1)
 void func_002F4A38(s32 mode);
-s32 func_002F4FD8(SifRpcClientDataPrefix *client, s32 function, s32 mode, void *send, s32 sendSize,
-                  void *receive, s32 receiveSize, SifMRpcEnd end, void *endArgument);
 #elif defined(VERSION_DDS2)
 void func_0034D8E0(s32 mode);
-s32 func_0034DE68(SifRpcClientDataPrefix *client, s32 function, s32 mode, void *send, s32 sendSize,
-                  void *receive, s32 receiveSize, SifMRpcEnd end, void *endArgument);
 #endif
 
 #endif

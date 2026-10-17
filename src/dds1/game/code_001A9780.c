@@ -357,6 +357,8 @@ void btlClearUnitStatusMask(void) {
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
+extern u32 btlRollAiBucket(void);
+
 s32 btlRollStoneDeathChance(BtlUnit *actor, s32 index) {
     DatPartyRecord *record;
     s32 chance;
@@ -849,6 +851,8 @@ extern const BattleCmdPanelSlotTable D_003A1FA8;
 
 extern const BattleCmdPanelSlotTable D_003A1FC0;
 
+extern s16 btlGetActorIdForClass(s8 classId);
+
 void btlInitializeCommandPanelSlotTables(void) {
     BattleCmdPanelSlotTable tableA = D_003A1FA8;
     BattleCmdPanelSlotTable tableB = D_003A1FC0;
@@ -911,11 +915,15 @@ void btlUpdateCommandPanelRowFades(void);
 void btlUpdateCommandPanelFades(void);
 void btlDrawCommandPanelClassLabel(void);
 
+extern u32 btlGetCommandOptionCount(s32, s8, s8);
+
 static inline s32 btlRefreshCommandRow(BattleSceneObject *object) {
     btlLinkedSelectionTaskBuffer->selectedRow =
         btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
     return btlLinkedSelectionTaskBuffer->selectedRow != 0;
 }
+extern s32 btlGetActorCommandClass(BattleSceneObject *, s8);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DD8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DF8);
@@ -1572,6 +1580,8 @@ s32 btlCountSceneSlots(void) {
     return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
+extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
+
 s32 btlSyncEligibleActorPanelHpMp(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 eligibleCount = btlCountEligibleLinkedActors(battle);
@@ -1875,6 +1885,8 @@ extern s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *);
 extern void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *);
 
 /* Create the analysis panel, replacing any panel task already registered. */
+extern u32 btlHasRegisteredAnalysisPanelTask(void);
+
 s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
@@ -3620,6 +3632,8 @@ typedef struct BattleCommandLayoutWork {
 } BattleCommandLayoutWork;
 
 extern s32 fileTestSavedSlotFlags(u32);
+
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2988);
 
@@ -7094,6 +7108,8 @@ void btlDrawItemCommandRows(BattleSceneObject *object) {
         fldSubmitSceneObjectAtCoordinates(0xA0, countY, color, text);
     }
 }
+
+extern void itfSetTextDrawLimit(s32 limit);
 
 void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];

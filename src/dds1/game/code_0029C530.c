@@ -8374,7 +8374,188 @@ u32 effAllocateStripFromWorkAndRetainTexture(u8 *work) {
     return strip;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B0B70);
+/* Two GS register writes carried by one complete four-qword packet. */
+typedef struct EffGsPairPacket {
+    u64 dmaTag;
+    u64 vifTag;
+    u64 gifTag;
+    u64 registerList;
+    u64 firstValue;
+    u64 firstAddress;
+    u64 secondValue;
+    u64 secondAddress;
+} EffGsPairPacket;
+
+extern SdfPoolNode *D_0037EE20[];
+extern vu8 sdfCurrentBufferIndex;
+extern u8 kwlnFrameDrawPacketRecords[];
+extern s32 kwlnGetDrawBufferIndex(void);
+extern void sdfAssetApplyEntryChanges(SdfAsset *, s32);
+extern void *sdfInitAssetDrawEntryReferenceNode(u32 *, void *, s32);
+extern void sdfAppendReferencePacket(SdfListHead *, u32);
+extern void sdfAppendDmaTagToList(SdfListHead *, u32);
+extern void sdfBuildMaskedFrameRegisterReference(s32, u32, s32);
+extern void sdfBuildFrameRegisterReference(s32, u32, s32);
+
+void func_002B0B70(u8 *owner, void *matrix) {
+    f32 normalizedColor[4];
+    s32 baseColor[4];
+    u32 packedColor;
+    EffStripWork *work = (EffStripWork *)owner;
+    SdfPoolNode *surface;
+    void *list;
+    SdfTex *texture;
+    SdfAssetEntry *entry;
+    u128 *referencePacket;
+    void *dmaPacket;
+    EffGsPairPacket *packet;
+    u32 row;
+    u32 count;
+    u128 *positions;
+    f32 (*uvsA)[2];
+    f32 (*uvsB)[2];
+    u32 *extra;
+    u32 *colors;
+    s32 stride;
+    s32 remaining;
+    u32 mode;
+    u32 registerId;
+    u64 restoreValue;
+    u64 restoreAddress;
+
+    count = work->count;
+    if (count == 0) {
+        return;
+    }
+    if ((work->color & 0xFF000000) == 0) {
+        return;
+    }
+    mode = 0;
+    registerId = 0;
+    restoreValue = 0;
+    restoreAddress = 0;
+    surface = D_0037EE20[work->type];
+    switch (work->type) {
+    case 2:
+        registerId = 0x58; restoreValue = 0x48; restoreAddress = 0x71801; mode = 1;
+        break;
+    case 3:
+    case 4:
+        registerId = 0x52; restoreValue = 0x42; restoreAddress = 0x71801; mode = 2;
+        break;
+    case 0:
+    case 1:
+        registerId = 0x54; restoreValue = 0x44; restoreAddress = 0x717FB; mode = 0;
+        break;
+    }
+    baseColor[0] = work->color;
+    EE_MMI_RGBA_UNPACK(baseColor, 1.0f / 128.0f);
+    VU0_STORE_VF(vf10, normalizedColor);
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    if (matrix == NULL) {
+        VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    } else {
+        VU0_LOAD_MATRIX(matrix);
+    }
+    sdfConsAppendVuPacket(list, 0);
+    texture = func_0029C048(surface, (RefObj *)effSharedScalyStripResource);
+    sdfSetAssetPrimaryTextureAddress((SdfAsset *)work->handle, texture);
+    sdfSetAssetSecondaryTextureAddress((SdfAsset *)work->handle, texture);
+    sdfSetAssetSecondaryMode((SdfAsset *)work->handle, mode);
+    row = 0;
+    sdfAssetApplyEntryChanges((SdfAsset *)work->handle, (s8)sdfCurrentBufferIndex);
+    entry = (SdfAssetEntry *)((SdfAsset *)work->handle)->drawEntries[(s8)sdfCurrentBufferIndex];
+    entry->secondaryTextureState.clamp = 0x7F000FFF;
+    entry->primaryTextureState.clamp = 0x02007F000FFFULL;
+    entry->secondaryMode = mode;
+    entry->alphaState = registerId;
+    referencePacket = sdfAllocPacketAligned(0x20);
+    sdfInitAssetDrawEntryReferenceNode((u32 *)work->handle, referencePacket, (s8)sdfCurrentBufferIndex);
+    referencePacket[1] = 0;
+    sdfAppendReferencePacket(list, (u32)referencePacket);
+    dmaPacket = sdfAllocPacketAligned(0x40);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), (u32)dmaPacket, 0);
+    sdfAppendDmaTagToList(list, (u32)dmaPacket);
+    packet = sdfAllocPacketAligned(0x40);
+    packet->dmaTag = 3;
+    packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->registerList = 0xE;
+    packet->firstValue = 0x51001;
+    packet->firstAddress = 0x47;
+    packet->secondValue = 0x44;
+    packet->secondAddress = 0x42;
+    sdfAppendPacket(list, packet);
+    packet = sdfAllocPacketAligned(0x40);
+    packet->dmaTag = 3;
+    packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->registerList = 0xE;
+    packet->firstValue = 0x51001;
+    packet->firstAddress = 0x48;
+    packet->secondValue = registerId;
+    packet->secondAddress = 0x43;
+    sdfAppendPacket(list, packet);
+    positions = (u128 *)work->positions;
+    uvsA = (f32 (*)[2])work->uvsA;
+    uvsB = (f32 (*)[2])work->uvsB;
+    extra = (u32 *)work->extra;
+    colors = work->colors;
+    stride = work->rowStride;
+    for (; row < count; row++) {
+        if (*colors & 0xFF000000) {
+            f32 unit;
+            remaining = stride;
+            D_003DCB30.colors = extra;
+            D_003DCB30.positions = positions;
+            D_003DCB30.texcoords = (u32 *)uvsA;
+            D_003DCB30.extraTexcoords = (u32 *)uvsB;
+            unit = 1.0f / 128.0f;
+            eeUnpackRGBAWordFloat(*colors, unit);
+            VU0_LOAD_VF(vf11, normalizedColor);
+            VU0_MUL(vf10, vf10, vf11);
+            unit = 128.0f;
+            packedColor = eePackRGBAWord(unit);
+            D_003DCB30.color = packedColor;
+            D_003DCB30.parameterCount = 12;
+            D_003DCB30.vertexCount = 12;
+            D_003DCB30.parameters = D_0037EB30;
+            while (remaining >= 12) {
+                remaining -= 8;
+                sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCB30));
+                D_003DCB30.positions += 8;
+                D_003DCB30.colors += 8;
+                D_003DCB30.texcoords += 16;
+                D_003DCB30.extraTexcoords += 16;
+            }
+            if (remaining >= 8) {
+                D_003DCB30.vertexCount = remaining;
+                D_003DCB30.parameterCount = 6;
+                sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DCB30));
+            }
+        }
+        positions += stride;
+        uvsA += stride;
+        extra += stride;
+        uvsB += stride;
+        colors++;
+    }
+    dmaPacket = sdfAllocPacketAligned(0x40);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), (u32)dmaPacket, 0);
+    sdfAppendDmaTagToList(list, (u32)dmaPacket);
+    packet = sdfAllocPacketAligned(0x40);
+    packet->dmaTag = 3;
+    packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->registerList = 0xE;
+    packet->firstValue = restoreAddress;
+    packet->firstAddress = 0x47;
+    packet->secondValue = restoreValue;
+    packet->secondAddress = 0x42;
+    sdfAppendPacket(list, packet);
+    surface->append((SdfListHead *)surface, list);
+}
 
 void effLoadScalyTexture(void) {
     D_003BC994 = (u32)sdfReadNamedResource("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
