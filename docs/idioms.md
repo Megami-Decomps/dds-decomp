@@ -1140,6 +1140,24 @@ unit then gates at **225 match, 0 differ**, including all existing consumers.
 Keep the actual return contract visible rather than perturbing loop locals
 or inventing a return type to influence allocation.
 
+### DDS2 retains a corroborated inherited declaration context
+
+The same ten-site helper matches DDS2 `func_001C92A0` (1608 bytes) and
+leaves its complete `game/code_001B2AF8.c` at **265 match, 0 differ**.
+Keep DDS2's native font-limit epochs: its header and Pass paths restore the
+limit, while its normal-row loop has no final reset.
+
+Unlike the DDS1 closure above, this TU has no visible `itfSetTextDrawLimit`
+prototype. The actual provider (`game/code_0019B840.c:59`) returns `void`,
+but introducing that declaration makes the previously matched
+`btlDrawItemCommandRows` grow to492 bytes against its480-byte native extent
+(93/120 words differ, OVER). Setter-only and helper-only controls isolate
+the cause: the helper alone leaves every existing consumer exact.
+Main approved preserving this inherited absence of a prototype, supported
+by the existing native caller. No false integer prototype or block-scope
+declaration is introduced; do not generalize this into choosing signatures
+to steer allocation.
+
 ## Other GCC patterns (Decompedia; check each on ee-gcc 2.96)
 
 These are documented for GCC 2.8–2.9x projects (Paper Mario, Twisted Metal
