@@ -5,7 +5,7 @@
 
 void mcChangeCurrentDirectory(u32 context, const char *path);
 void mcMakeDirectory(u32 context, const char *path);
-void mcReadDirectoryEntries(u32 context, const char *path, void *entries, s32 entryLimit);
+void mcReadDirectoryEntries(u32 context, const char *path, void *directoryEntries, s32 entryLimit);
 void mcDeleteFilePath(u32 context, const char *path);
 void mcOpenFilePath(u32 context, const char *path, s32 openFlags);
 
