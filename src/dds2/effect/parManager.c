@@ -472,7 +472,7 @@ void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin,
 
     if (count >= 2) {
         s32 segments;
-        s32 i;
+        s32 segmentIndex;
         s32 lastIndex;
         s32 ring;
 
@@ -486,7 +486,7 @@ void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin,
         point[1] = localOrigin[1] + history->points[ring][1];
         point[2] = localOrigin[2] + history->points[ring][2];
         point[3] = 0;
-        for (i = 0; i < segments; i++) {
+        for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
             VU0_LOAD_VF(vf10, point);
             ring = ring == 0 ? lastIndex : ring - 1;
             point[0] = localOrigin[0] + history->points[ring][0];
@@ -529,7 +529,7 @@ void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *orig
 
     if (count >= 2) {
         s32 segments;
-        s32 i;
+        s32 segmentIndex;
         s32 lastIndex;
         s32 ring;
 
@@ -543,7 +543,7 @@ void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *orig
         point[1] = localOrigin[1] + history->points[ring][1];
         point[2] = localOrigin[2] + history->points[ring][2];
         point[3] = 0;
-        for (i = 0; i < segments; i++) {
+        for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
             VU0_LOAD_VF(vf10, point);
             ring = ring == 0 ? lastIndex : ring - 1;
             point[0] = localOrigin[0] + history->points[ring][0];
