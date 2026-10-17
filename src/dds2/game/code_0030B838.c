@@ -43,21 +43,6 @@ extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s3
 extern u32 sdfSelectedCounterIndex;
 
 
-typedef struct SdfCounterRuntime {
-    u32 stateFlags;                 /* 0x00 */
-    u32 flags;                       /* 0x04 */
-    s32 id;                          /* 0x08 */
-    SdfCounterRuntimeState state;   /* 0x0C */
-    s32 categoryIndex;              /* 0x34 */
-    u32 categoryMarkerEnabled;      /* 0x38 */
-    s32 scale;                      /* 0x3C */
-} SdfCounterRuntime;
-
-typedef char SdfCounterRuntimeSizeCheck[(sizeof(SdfCounterRuntime) == 0x40) ? 1 : -1];
-typedef char SdfCounterRuntimeState_at_0x0C[
-    ((u32)&((SdfCounterRuntime *)0)->state == 0x0C) ? 1 : -1
-];
-
 extern u32 sdfCounterAnimationValue;
 
 extern s32 D_0043909C;

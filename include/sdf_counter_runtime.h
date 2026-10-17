@@ -119,4 +119,40 @@ typedef char SdfCounterRuntimeState_timer_at_0x24[
     ((u32)&((SdfCounterRuntimeState *)0)->timer == 0x24) ? 1 : -1
 ];
 
+/* Counter-owned list prefix plus the shared menu-list category tail. */
+typedef struct SdfCounterRuntime {
+    u32 stateFlags;                        /* 0x00: generic list state */
+    u32 flags;                             /* 0x04: generic list flags */
+    s32 id;                                /* 0x08: list owner identifier */
+    SdfCounterRuntimeState state;          /* 0x0C: counter channel state */
+    s32 categoryIndex;                     /* 0x34: menu-list category */
+    u32 categoryMarkerEnabled;             /* 0x38: menu-list category marker */
+    s32 scale;                             /* 0x3C: menu-list fixed-point scale */
+} SdfCounterRuntime;
+
+typedef char SdfCounterRuntime_size_must_be_0x40[
+    (sizeof(SdfCounterRuntime) == 0x40) ? 1 : -1
+];
+typedef char SdfCounterRuntime_stateFlags_at_0x00[
+    ((u32)&((SdfCounterRuntime *)0)->stateFlags == 0x00) ? 1 : -1
+];
+typedef char SdfCounterRuntime_flags_at_0x04[
+    ((u32)&((SdfCounterRuntime *)0)->flags == 0x04) ? 1 : -1
+];
+typedef char SdfCounterRuntime_id_at_0x08[
+    ((u32)&((SdfCounterRuntime *)0)->id == 0x08) ? 1 : -1
+];
+typedef char SdfCounterRuntime_state_at_0x0C[
+    ((u32)&((SdfCounterRuntime *)0)->state == 0x0C) ? 1 : -1
+];
+typedef char SdfCounterRuntime_categoryIndex_at_0x34[
+    ((u32)&((SdfCounterRuntime *)0)->categoryIndex == 0x34) ? 1 : -1
+];
+typedef char SdfCounterRuntime_categoryMarkerEnabled_at_0x38[
+    ((u32)&((SdfCounterRuntime *)0)->categoryMarkerEnabled == 0x38) ? 1 : -1
+];
+typedef char SdfCounterRuntime_scale_at_0x3C[
+    ((u32)&((SdfCounterRuntime *)0)->scale == 0x3C) ? 1 : -1
+];
+
 #endif /* SDF_COUNTER_RUNTIME_H */
