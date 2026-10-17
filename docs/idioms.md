@@ -899,6 +899,30 @@ The component type still matters for this old compiler's alias analysis;
 a record containing bytes does not automatically inherit the universal
 alias behavior of a direct character access.
 
+### Mirrored ring frames: distinct destinations and vector-address epochs
+
+The three-vector ring publishers DDS1 `func_002A7568` and DDS2
+`func_002E9B20` keep an append destination and a separately scoped mirror
+destination. A neutral `const u128 *data` first holds the ring head; after
+the writable mirror address is captured, it holds the incoming vector frame.
+Both values are quadword-vector addresses used by the existing SDK copy
+macro, not C quadword loads through float storage.
+
+This is an application of the one-temporary/two-values rule, with an actual
+qualified trace: `sandbox_BtlSlot/ring_mirror_pointer_epochs_probe`
+(`hooked==unhooked`). At GCSE, the input-address copy propagates into the
+second loop, but the earlier head-to-mirror copy survives. Global allocation
+keeps the append and mirror destinations in separate live ranges, with both
+receiving the native destination register. Reusing one destination across
+both loops instead gave a work/destination register swap; an unchanging head
+local let GCSE delete the native head-reset move entirely.
+
+Each publisher matches all 168 native bytes. With its real C publisher
+visible earlier in the unit, each 636-byte interpolation caller
+(`func_002A7610` / `func_002E9BC8`) also retains the ordinary native inner-loop
+branch. No visibility attribute or substitute callee definition is needed.
+
+
 ## `memset` as a builtin or a library call
 
 gcc 2.96 keeps `memset` a builtin under an implicit declaration, `extern int
@@ -1277,16 +1301,18 @@ Spimdisasm's `Handwritten function` flag alone is not enough: the `plzcw` +
 functions (prologue, scheduling, `movz`/`movn`, `jalr` callbacks).
 
 Functions of that shape (DDS1 `func_0029C048`, `func_002ECA80`, `func_002ECCF8`,
-`sdfBuildTextureStatePacket`; DDS2 `func_002A7B28`, `func_002DDD60`,
-`func_00345928`, `func_00345BA0`, `sdfBuildTextureStatePacket`) stay `INCLUDE_ASM`
-C targets. Their only non-gcc words are the two `plzcw $2,$n` / `andi $2,$2,0xFF` /
+`sdfBuildTextureStatePacket`; DDS2 `func_002A7B28`, `sdfGetOrCreateTextureForReference`,
+`func_00345928`, `func_00345BA0`, `sdfBuildTextureStatePacket`) are C decompilation
+targets, not handwritten assembly segments. Their only non-gcc words are the two
+`plzcw $2,$n` / `andi $2,$2,0xFF` /
 `addi $n,$0,0x1F` / `subu $n,$n,$2` runs (a log2 of two sizes), which sit
 uninterrupted inside gcc prologues (`sd $16..$18,$31`, `ld`, `jr $31` with the `addiu $29`
-in its delay slot), delay-slot fills, `%gp_rel` loads and `movn`. One
-`__asm__ volatile ("plzcw $2,%0; andi $2,$2,0xFF; addi %0,$0,0x1F; subu %0,%0,$2" : "+r"(v) : : "$2")`
-statement in C compiled with ee-gcc 2.96 emits exactly that run (the `addi` is the
-asm text; plain C and `EE_MMI_PLZCW` give `li` = `addiu`), so the function around it is
-compiler output and the run is an inline-asm macro, not a handwritten function.
+in its delay slot), delay-slot fills, `%gp_rel` loads and `movn`.
+`EE_MMI_BIT_LENGTH(v)` in `include/ee_mmi.h` emits that exact run using its real
+input/output value and the native `$2` scratch register. Plain C and
+`EE_MMI_PLZCW` give `li` = `addiu`, not the trapping `addi` in the SDK idiom.
+The macro is a pure value calculation; the surrounding control flow, addressing
+and packet construction remain ordinary C.
 
 | Segment | DDS1 | DDS2 | Contents |
 |---|---|---|---|
@@ -1315,6 +1341,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `EE_MMI_RGBA_PACK_UNIT(out, unit)` | `qmtc2.ni unit,vf2; vmulx vf10,vf10,vf2x; vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach; ppacb`: the pack with the 128.0f scale (0x43000000) kept in a GPR across several packs; `out` is earlyclobber (event colour opcodes, two colours) |
 | `EE_MMI_RGBA_PACK_F128(out)` | `mfc1 $2,128.0f; qmtc2.ni $2,vf2; vmulx; vftoi0; qmfc2.ni out,vf10; ppach; ppacb`: same pack through `$2` (`EE_MMI_RGBA_PACK` uses `$3`); event colour opcodes, one colour |
 | `EE_MMI_STORE_VEC3_VALUE(dst, value)` | `pcpyud $2,value,$0; sdr value,0(dst); sdl value,7(dst); sw $2,8(dst)` | loaded `u128` to packed XYZ; aligned `lq` stays ordinary C (F024 compact/wide packet builders) |
+| `EE_MMI_BIT_LENGTH(value)` | `plzcw $2,value; andi $2,$2,0xFF; addi value,$0,31; subu value,value,$2` | GS dimension-minus-one to texture exponent; pure SDK idiom at DDS1 `0029C16C/0029C17C`, `002D2D50/002D2D6C`, DDS2 `002DDE84/002DDE94`, `0032BC00/0032BC1C` |
 
 `include/pcp_vu0.h` (COP2 and 128-bit copies):
 
