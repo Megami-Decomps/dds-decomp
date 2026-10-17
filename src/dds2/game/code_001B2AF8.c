@@ -2157,7 +2157,83 @@ void btlReleaseAndClearChipBlock(void) {
     btlCommandPanelWork = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B6CA8);
+extern const BattlePanelColors D_00415CD8;
+
+/* Draw each digit and its enlarged faded layers, then restore the current sprite bounds. */
+void func_001B6CA8(s32 x, s32 y, u32 color, const char *digits, s32 scale) {
+    BattlePanelColors colors = D_00415CD8;
+    s32 length = strlen(digits);
+    s32 opacity = color >> 24;
+    s32 index;
+    s32 remaining;
+    s32 advance = 0;
+    u32 green;
+    u32 blue;
+    s32 layerShift;
+    s32 vertical;
+    s32 thirdXOffset;
+    s32 thirdY;
+
+    index = 0;
+    if (length <= 0) {
+        return;
+    }
+    layerShift = scale >> 8;
+    vertical = y - ((opacity - 0x80) >> 4);
+    green = (color & 0xFF00) << 8;
+    blue = (color >> 8) & 0xFF00;
+    thirdXOffset = layerShift * 3;
+    thirdY = vertical - 1;
+    remaining = length;
+    do {
+        s32 character = (s8)digits[index];
+        if (character < ':') {
+            if (character >= '0') {
+                u32 alpha = color & 0xFF000000;
+                u32 red = color << 24;
+                u32 channels = green | blue;
+                s32 glyph = character - 0x11;
+                s32 drawX = x + advance;
+                u32 packed = (alpha >> 24) | red | channels;
+
+                colors.values[0] = packed;
+                colors.values[1] = packed;
+                colors.values[2] = packed;
+                colors.values[3] = packed;
+                effDrawSpriteWithCornerColors(drawX << 4, y << 3, 0, colors.values, 0,
+                             btlResourceBlock->resA, glyph, 0x53);
+                if (color > 0x80 && scale > 0x100) {
+                    packed = (((alpha >> 3) & 0xFF000000) >> 24) | red | channels;
+                    {
+                        s32 scaledWidth = btlResourceBlock->resA->workEntries[glyph].sourceWidth * scale;
+                        s32 scaledHeight = btlResourceBlock->resA->workEntries[glyph].sourceHeight * scale;
+                        scaledWidth *= 3;
+                        scaledHeight *= 3;
+                        btlResourceBlock->resA->workEntries[glyph].geometry.bounds[2] = (scaledWidth / 4) >> 4;
+                        btlResourceBlock->resA->workEntries[glyph].geometry.bounds[3] = (scaledHeight / 4) >> 4;
+                    }
+                    colors.values[0] = packed;
+                    colors.values[1] = packed;
+                    colors.values[2] = packed;
+                    colors.values[3] = packed;
+                    effDrawSpriteWithCornerColors((drawX + layerShift * 4) << 4, vertical << 3,
+                                 0, colors.values, 0, btlResourceBlock->resA, glyph, 0x53);
+                    effDrawSpriteWithCornerColors((drawX + thirdXOffset) << 4, thirdY << 3,
+                                 0, colors.values, 0, btlResourceBlock->resA, glyph, 0x53);
+                    btlResourceBlock->resA->workEntries[glyph].geometry.bounds[2] =
+                        btlResourceBlock->resA->workEntries[glyph].sourceWidth << 4;
+                    btlResourceBlock->resA->workEntries[glyph].geometry.bounds[3] =
+                        btlResourceBlock->resA->workEntries[glyph].sourceHeight << 3;
+                }
+                index++;
+                advance += 9;
+                continue;
+            }
+        }
+        index++;
+        advance += 9;
+    } while (--remaining != 0);
+}
 
 /* Initialize scaled sprite bounds, then shrink active mirrored records until hidden. */
 void btlUpdateShrinkingMirroredSprites(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
