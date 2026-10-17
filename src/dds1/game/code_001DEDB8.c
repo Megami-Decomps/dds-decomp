@@ -87,7 +87,7 @@ extern const BtlCameraTimedInstruction *D_0035DA08[];
 
 extern void func_001E9DE0(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *);
 
-extern void func_001EB368(BtlLinkedCommand *, BtlCamState *);
+extern s32 func_001EB368(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
@@ -5612,7 +5612,342 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
+s32 func_001EB368(BtlLinkedCommand *action, BtlCamState *pose) {
+    f32 point[4];
+    f32 delta[4];
+    f32 endpoint[4];
+    f32 axis[4];
+    f32 position[4];
+    f32 distance;
+    f32 progress;
+
+    if (CURSOR->busy != 0) {
+        return 0;
+    }
+
+    switch (CURSOR->kind) {
+    case 0:
+    case 2:
+    default:
+        break;
+
+    case 6: {
+        u16 actorCameraMode;
+        BtlUnit *actor;
+
+        BtlUnit *targetUnit = btlGetIndexListEntry(action->targetList, 0);
+        BtlUnit *sourceUnit = action->task->unit;
+        s8 mode40 = (s8)(s32)CURSOR->eyeFrom[0];
+        s8 mode50 = (s8)(s32)CURSOR->eyeTo[0];
+
+        distance = btlBuildProjectedActorPairBoundsVU(0x600, targetUnit, sourceUnit,
+                                 mode40, mode50, NULL, NULL, NULL, NULL);
+        VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+        distance /= tanf(CURSOR->fov);
+        CURSOR->distance = distance;
+
+        actor = action->task->unit;
+        actorCameraMode = actor->partyRecord.unitId;
+        switch (actorCameraMode) {
+        case 1:
+        case 3:
+        case 5: {
+            f32 desiredDistance;
+            BtlCameraCursorView *cursor;
+            s32 activePhase;
+            if (pose->position[1] < endpoint[1]) {
+                endpoint[1] = pose->position[1];
+            }
+            cursor = CURSOR;
+            desiredDistance = cursor->distance;
+            activePhase = 1;
+            if (cursor->phase == activePhase) {
+                if (desiredDistance <= pose->distance) {
+                    return 1;
+                }
+                endpoint[0] = pose->position[0];
+            }
+            if (pose->distance < desiredDistance) {
+                cursor->phase = activePhase;
+            }
+            if (desiredDistance <= 450.0f) {
+                cursor->distance = 450.0f;
+                desiredDistance = 450.0f;
+                endpoint[0] = pose->position[0];
+            }
+            pose->distance = desiredDistance;
+            VU0_LOAD_VF(vf10, endpoint);
+            VU0_STORE_VF(vf10, pose->position);
+
+            break;
+        }
+        case 4: {
+            if (CURSOR->phase == 0) {
+                CURSOR->counter++;
+                CURSOR->counter = CURSOR->counter <= 0 ? 0 :
+                                     CURSOR->counter >= 0x21 ? 0x20 : CURSOR->counter;
+                if (CURSOR->counter >= 0x1A) {
+                    CURSOR->phase = 2;
+                }
+            }
+            if (pose->position[1] < endpoint[1]) {
+                endpoint[1] = pose->position[1];
+                if (CURSOR->phase == 0) {
+                    CURSOR->phase = 1;
+                }
+            }
+            if (CURSOR->phase == 2) {
+                CURSOR->distance = pose->distance;
+                endpoint[0] = pose->position[0];
+                endpoint[2] = pose->position[2];
+            }
+            if (CURSOR->phase == 1 && pose->position[1] > endpoint[1]) {
+                CURSOR->phase = 2;
+            }
+            pose->distance = CURSOR->distance;
+            VU0_LOAD_VF(vf10, endpoint);
+            VU0_STORE_VF(vf10, pose->position);
+            break;
+        }
+        }
+
+        break;
+    }
+
+    case 7: {
+        f32 focusDistance;
+        f32 motionParameter = CURSOR->blendRate;
+
+        action->motionParameter = motionParameter;
+        if (CURSOR->startFrame == (f32)CURSOR->frame) {
+            action->durationFrames = (s32)motionParameter;
+            btlScalarRangeInitQuadratic(&action->quadraticRange,
+                                        (f32)(action->durationFrames * 2));
+        }
+        progress = btlScalarRangeStepQuadratic(&action->quadraticRange, 1.0f);
+        if (progress >= 0.999999f) {
+            progress = 0.999999f;
+        }
+
+        VU0_LOAD_VF(vf10, CURSOR->focusTo);
+        VU0_LOAD_VF(vf11, CURSOR->focusFrom);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, axis);
+        VU0_LOAD_VF(vf10, CURSOR->focusFrom);
+        VU0_STORE_VF(vf10, point);
+        VU0_LOAD_VF(vf10, axis);
+        VU0_SCALAR_OP(distance * CURSOR->rangeStart, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, point);
+
+        distance *= (CURSOR->rangeEnd - CURSOR->rangeStart);
+        distance *= progress;
+        VU0_LOAD_VF(vf10, axis);
+        VU0_SCALAR_OP(distance, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, endpoint);
+        VU0_LOAD_VF(vf10, pose->position);
+        VU0_LOAD_VF(vf11, endpoint);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(focusDistance);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, pose->direction);
+        break;
+    }
+
+    case 1: {
+        f32 timedFraction;
+        f32 focusDistance;
+
+        f32 frame = (f32)CURSOR->frame;
+        if (CURSOR->startFrame <= frame &&
+            frame <= CURSOR->startFrame + CURSOR->duration) {
+            VU0_LOAD_VF(vf10, pose->direction);
+            VU0_NEGATE_XYZ(vf10);
+            VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, pose->position);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, endpoint);
+            VU0_LOAD_VF(vf10, CURSOR->pathStart);
+            VU0_LOAD_VF(vf11, endpoint);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(timedFraction);
+            VU0_STORE_VF(vf10, delta);
+            VU0_LOAD_VF(vf10, CURSOR->pathEnd);
+            VU0_LOAD_VF(vf11, endpoint);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(timedFraction);
+            VU0_STORE_VF(vf10, point);
+            VU0_LOAD_VF(vf10, delta);
+            VU0_LOAD_VF(vf11, point);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(distance);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+            distance = (distance / CURSOR->duration) *
+                    ((f32)CURSOR->frame - CURSOR->startFrame);
+            VU0_LOAD_VF(vf10, axis);
+            VU0_SCALAR_OP(distance, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, CURSOR->pathEnd);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            VU0_LOAD_VF(vf10, position);
+            VU0_STORE_VF(vf10, pose->position);
+            VU0_LOAD_VF(vf10, position);
+            VU0_LOAD_VF(vf11, endpoint);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(focusDistance);
+            pose->distance = focusDistance;
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, pose->direction);
+        }
+        break;
+    }
+
+    case 3:
+    case 4:
+    case 5: {
+        u16 phaseMode;
+        f32 pathLength;
+        f32 focusDistance;
+
+        VU0_LOAD_VF(vf10, pose->direction);
+        VU0_NEGATE_XYZ(vf10);
+        VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, pose->position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, endpoint);
+        VU0_LOAD_VF(vf10, CURSOR->eyeTo);
+        VU0_LOAD_VF(vf11, CURSOR->eyeFrom);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(pathLength);
+        distance = pathLength;
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, axis);
+
+        progress = CURSOR->blendRate;
+        action->motionParameter = progress;
+        VU0_LOAD_VF(vf10, CURSOR->eyeFrom);
+        VU0_STORE_VF(vf10, point);
+        phaseMode = CURSOR->kind;
+        if (phaseMode == 5) {
+            VU0_LOAD_VF(vf10, axis);
+            VU0_SCALAR_OP(pathLength * CURSOR->rangeStart,
+                          "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, point);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, point);
+            distance = pathLength * (CURSOR->rangeEnd - CURSOR->rangeStart);
+        }
+
+        if (phaseMode == 4) {
+            if (CURSOR->startFrame == (f32)CURSOR->frame) {
+                action->durationFrames = (s32)progress;
+                btlScalarRangeInitQuadratic(&action->quadraticRange,
+                                            (f32)(action->durationFrames * 2));
+            }
+            progress = btlScalarRangeStepQuadratic(&action->quadraticRange, 1.0f);
+        } else {
+            if (CURSOR->startFrame == (f32)CURSOR->frame) {
+                btlScalarRangeSetStartClearEnd(&action->exponentialRange,
+                                               action->motionParameter);
+            }
+            progress = btlScalarRangeStepExponential(&action->exponentialRange);
+        }
+        if (progress >= 0.999999f) {
+            progress = 0.999999f;
+        }
+        distance *= progress;
+        VU0_LOAD_VF(vf10, axis);
+        VU0_SCALE_VF(vf10, distance);
+        VU0_LOAD_VF(vf11, point);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, pose->position);
+        if (CURSOR->kind == 5) {
+            VU0_LOAD_VF(vf10, CURSOR->focusTo);
+            VU0_LOAD_VF(vf11, CURSOR->focusFrom);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(distance);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, axis);
+            VU0_LOAD_VF(vf10, CURSOR->focusFrom);
+            VU0_STORE_VF(vf10, point);
+            VU0_LOAD_VF(vf10, axis);
+            VU0_SCALAR_OP(distance * CURSOR->rangeStart, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, point);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, point);
+            distance *= (CURSOR->rangeEnd - CURSOR->rangeStart);
+            distance *= progress;
+            VU0_LOAD_VF(vf10, axis);
+            VU0_SCALAR_OP(distance, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, point);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, endpoint);
+        }
+        VU0_LOAD_VF(vf10, pose->position);
+        VU0_LOAD_VF(vf11, endpoint);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(focusDistance);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, pose->direction);
+        if (CURSOR->kind == 4) {
+            pose->distance = focusDistance;
+        }
+        break;
+    }
+
+    case 8: {
+        f32 focusDistance;
+
+        f32 frame = (f32)CURSOR->frame;
+        if (CURSOR->startFrame <= frame) {
+            VU0_LOAD_VF(vf10, pose->direction);
+            VU0_NEGATE_XYZ(vf10);
+            VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, pose->position);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, endpoint);
+            VU0_LOAD_VF(vf10, CURSOR->eyeTo);
+            VU0_LOAD_VF(vf11, CURSOR->eyeFrom);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(distance);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, axis);
+            progress = CURSOR->blendRate;
+            action->motionParameter = progress;
+            VU0_LOAD_VF(vf10, CURSOR->eyeFrom);
+            VU0_STORE_VF(vf10, point);
+            if (CURSOR->startFrame == (f32)CURSOR->frame) {
+                btlScalarRangeSetStartClearEnd(&action->exponentialRange,
+                                               action->motionParameter);
+            }
+            progress = btlScalarRangeStepExponential(&action->exponentialRange);
+            if (progress >= 0.999999f) {
+                progress = 0.999999f;
+            }
+            distance *= progress;
+            VU0_LOAD_VF(vf10, axis);
+            VU0_SCALAR_OP(distance, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, point);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, pose->position);
+            VU0_LOAD_VF(vf10, pose->position);
+            VU0_LOAD_VF(vf11, endpoint);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(focusDistance);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, pose->direction);
+        }
+        break;
+    }
+    }
+    return 1;
+}
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
 

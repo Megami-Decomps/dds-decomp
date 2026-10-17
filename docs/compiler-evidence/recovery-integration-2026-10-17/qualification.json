@@ -1,0 +1,54 @@
+{
+  "upstream_base": "5d04a1d5c438c95106286ad1dc723201bb3e390b",
+  "tested_parent": "b3278b7e1a07a48de23d064eebdd61c29dabcb00",
+  "new_functions": 4,
+  "new_native_bytes": 9616,
+  "owners": {
+    "dds1_camera": 269,
+    "dds2_camera": 252,
+    "dds1_pcp": 368,
+    "dds2_pcp": 368
+  },
+  "owner_differences": 0,
+  "retail_sha1": {
+    "dds1": "6d18898e2724bf1d145392766e8ba1e678487419",
+    "dds2": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add"
+  },
+  "dev_changed_payload_words": {
+    "dds1": 0,
+    "dds2": 0
+  },
+  "build_exit": 0,
+  "immediate_noop": true,
+  "python_tests": 115,
+  "source_sha256": {
+    "src/dds1/game/code_001DEDB8.c": "5847bf4805c75721223b988186d4a8c3734940c79941eff0a76c3371cc89a8fe",
+    "src/dds2/game/code_001EC5F0.c": "629fbab01b4482aef0038715e3834286d25c16d41acae42fc4839a3dc14e77c5",
+    "src/dds1/effect/effPCPMisc.c": "029ac70179428c6b8763b5a4b080e9e6999dee01038a11aaea67deb5876c3b22",
+    "src/dds2/effect/effPCPMisc.c": "7cc607fe2da94129363218c9b189db570212fe32c1cd0e3df297fd8f4784a79e",
+    "include/btl_ui.h": "8e36be2eb78193e636de0215d7c78dbf0ee7f0d3ac40f1bd1aaa08a830e2006c",
+    "tools/check_unit.py": "eb9908311081696412c937d141fe4eb84ee6148fa949574b9547e940b8f7304e",
+    "tools/_ee_gcc_observer.py": "8da4f739b039b9f22762b3b0d433d88b635e32f17de159f14af68912e3af0a11"
+  },
+  "log_sha256": {
+    "noop.log": "8c35b1682f73592d30612d7b0fabdb384fcfff35cb5a076cb48b85b1368aa794",
+    "src_dds2_game_code_001EC5F0.c.log": "a6081b5f8be394089da17788ee4b20a50e4e16e395a611bae5ceaa9e6d1e555e",
+    "src_dds2_effect_effPCPMisc.c.log": "31a97859e2e9618232fdcb08a075273e3a76b843f8a42df585a09abad246a888",
+    "tests.log": "991417b306beb35863f3f184c069959799cacadf2ab73844355f4b4a19cfa385",
+    "camera-dds2-final.log": "44d1a128c38e51820e39ea615a420765a6f78631b34502e975d8dde83413c792",
+    "build.log": "fd1c9ba6c4437f8db7c994d677228742bae96a80ae535c815e46dbd54c6f1f79",
+    "src_dds1_effect_effPCPMisc.c.log": "05f78aa5f1caf3a10f98fd1233773c600916c0a1d92efdfd8cdb9cfb09f1e741",
+    "configure.log": "55a84f19fdb83442fe759fc24304a5a635205edb9090309fa8327837625feec8",
+    "camera-dds1-final.log": "59de1cdc2a07c5cada0944ddd26b5a73d0f31c3e58ae5a3b235699f718e2d96d",
+    "src_dds1_game_code_001DEDB8.c.log": "1e299d2ebc7127b830da400f79283e1870ac63289626ca38f402b3f2d12080c4",
+    "build-latest.log": "5ad6dfc481ab1f26993e51a763444026cd3d3e7d1bb03951878964ca9fe2a0b4",
+    "noop-latest.log": "8c35b1682f73592d30612d7b0fabdb384fcfff35cb5a076cb48b85b1368aa794",
+    "camera-dds1-latest.log": "59de1cdc2a07c5cada0944ddd26b5a73d0f31c3e58ae5a3b235699f718e2d96d",
+    "build-final.log": "b55102a26b1030279aa2de0be8ed7caf5ce3f63910a44fc75552d482f2e11635",
+    "build-restored.log": "91e1c402799c375530228b7ca4f33dbd94cd434c1c59b7e133458025940fb652",
+    "noop-final.log": "8c35b1682f73592d30612d7b0fabdb384fcfff35cb5a076cb48b85b1368aa794"
+  },
+  "gameplay_tested": false,
+  "field_archive_limit": "Default targets exclude unavailable retail base archives: DDS1 32, DDS2 26.",
+  "initial_upstream_base": "7411c3a5018c05ea3d34eb7a3e4ef25800c78102"
+}
