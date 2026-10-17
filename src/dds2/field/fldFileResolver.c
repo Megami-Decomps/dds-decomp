@@ -365,7 +365,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "fld_inf.h"
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
 #include "dds3obj.h"
 #include "fld.h"
 #include "fld_waypoint.h"
@@ -586,7 +586,6 @@ extern void *memset(void *s, s32 c, u32 n);
 
 
 
-extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
 
