@@ -153,10 +153,10 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
 void effPcpScatterReleaseParticleGroup(PcpScatterRadialWork *work) {
     if (work->duplicateAllocation != 0) {
         u32 count = work->duplicateGroupCount;
-        u32 i;
+        u32 duplicatedHandleIndex;
 
-        for (i = 0; i < count; i++) {
-            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
+        for (duplicatedHandleIndex = 0; duplicatedHandleIndex < count; duplicatedHandleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[duplicatedHandleIndex]);
         }
         sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
@@ -485,10 +485,10 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
 void effPcpScatterReleaseSharedParticles(PcpScatterSpinWork *work) {
     if (work->duplicateAllocation != 0) {
         u32 count = work->duplicateGroupCount;
-        u32 i;
+        u32 duplicatedHandleIndex;
 
-        for (i = 0; i < count; i++) {
-            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
+        for (duplicatedHandleIndex = 0; duplicatedHandleIndex < count; duplicatedHandleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[duplicatedHandleIndex]);
         }
         sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
@@ -819,10 +819,10 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
 void effPcpScatterReleaseLinkedParticles(PcpScatterRibbonWork *work) {
     if (work->duplicateAllocation != 0) {
         u32 count = work->duplicateGroupCount;
-        u32 i;
+        u32 duplicatedHandleIndex;
 
-        for (i = 0; i < count; i++) {
-            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
+        for (duplicatedHandleIndex = 0; duplicatedHandleIndex < count; duplicatedHandleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->duplicatedHandles[duplicatedHandleIndex]);
         }
         sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
