@@ -7,6 +7,7 @@ struct FrFontGlyph;
 struct MemNode;
 struct FrFontRecord;
 struct SdfMemBlock;
+struct ItfRelativeSegmentResourceView;
 
 /* Atlas-list nodes use a flattened index; index zero is the sentinel. */
 typedef struct FrFontUvRect {
@@ -69,7 +70,7 @@ typedef struct FrFontEntry {
     s8 *flagBytes;
     void *unk14;
     FrFontRecord **slots;
-    void *resource;
+    struct ItfRelativeSegmentResourceView *resource;
     u32 unk20;
 } FrFontEntry;
 
