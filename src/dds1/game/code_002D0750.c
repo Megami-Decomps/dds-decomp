@@ -242,7 +242,6 @@ SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
     }
 }
 
-extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
 extern SifRpcClientDataPrefix sdfNamedResourceRpcClient;
 
 /* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
@@ -262,7 +261,7 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
     }
     /* Align the two-word reply within the stack scratch buffer to 64 bytes. */
     replyWords = (u32 *)(((u32)replyScratch + SDF_RPC_REPLY_ALIGNMENT_MASK) & ~SDF_RPC_REPLY_ALIGNMENT_MASK);
-    result = func_002F4FD8(&sdfNamedResourceRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, 0, 0);
+    result = func_002F4FD8(&sdfNamedResourceRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, NULL, NULL);
     if (result >= 0) {
         if (outSize != NULL) {
             *outSize = replyWords[1];
@@ -273,8 +272,6 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
 }
 
 extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
-extern s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
-extern void func_002F4A38(s32 arg);
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
 void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath) {
     s32 retryStartTick;
