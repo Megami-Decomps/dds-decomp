@@ -188,7 +188,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);
-    s32 previous;
+    s32 previousHistoryIndex;
 
     if ((flags & 2) == 0) {
         if (work->activeMode >= 0) {
@@ -201,12 +201,12 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
         flags = work->flags;
     }
     if ((flags & 2) && work->activeMode >= 0) {
-        previous = (work->historyIndex + 7) & 7;
-        if (work->signedHistory[previous] >= 0 && (work->unsignedHistory[previous] & 1)) {
+        previousHistoryIndex = (work->historyIndex + 7) & 7;
+        if (work->signedHistory[previousHistoryIndex] >= 0 && (work->unsignedHistory[previousHistoryIndex] & 1)) {
             void *requestData = work->requestData;
 
             work->flags |= 0x10001;
-            work->requestedMode = work->signedHistory[previous];
+            work->requestedMode = work->signedHistory[previousHistoryIndex];
             work->modeTransitionDelay = 2;
             work->flags &= ~4;
             if (requestData != NULL) {
