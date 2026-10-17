@@ -20,7 +20,7 @@ enum {
 };
 
 s32 sdfMovieHandleLinearDeviceEvent(struct DevState *deviceState, s32 operation,
-                                    void *readBuffer, s32 bytesRead, struct MovObj *movie);
+                                    void *data, s32 bytesRead, struct MovObj *movie);
 s32 sdfMovieHandlePacDeviceEvent(struct DevState *deviceState, s32 operation,
                                  void *readBuffer, s32 bytesRead, struct MovObj *movie);
 
