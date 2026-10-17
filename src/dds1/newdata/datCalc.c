@@ -8,6 +8,7 @@
 #include "mdl_flag_api.h"
 #include "pty_roster_api.h"
 #include "dat_unit_has_skill_api.h"
+#include "pty_item_quantity_update_view.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -407,18 +408,8 @@ extern DatEnemyRecord *datEnemyRecords;
 extern s32 D_003BAAB8;
 extern DatPartyRecord *D_003BAA04;
 
-typedef struct PtyItemQuantityUpdate {
-    u16 itemId;         /* 0x0 */
-    u8 quantityDelta;   /* 0x2 */
-    u8 pad3; /* 0x3 */
-} PtyItemQuantityUpdate;
-
-
-
-
-
 extern PtyRosterValueRecord ptyRosterMenuValues[];
-extern PtyItemQuantityUpdate ptyItemQuantityUpdates[];
+extern PtyItemQuantityUpdateView ptyItemQuantityUpdates[];
 
 extern ScrData *evtWorkScriptTask;
 
@@ -1175,7 +1166,7 @@ void evtUpdateFlaggedEntries(void) {
 
 /* Apply the two configured count/flag updates; a zero index disables its record. */
 void dds3ForEachEntry(void) {
-    PtyItemQuantityUpdate *updates = ptyItemQuantityUpdates;
+    PtyItemQuantityUpdateView *updates = ptyItemQuantityUpdates;
     u32 updateIndex = 0;
 
     do {
