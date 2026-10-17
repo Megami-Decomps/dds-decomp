@@ -506,7 +506,7 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
     s32 nameLength;
     s32 nameSum;
     s32 queueIndex;
-    s32 i;
+    s32 nameCharacterIndex;
     KwlnTask* task;
 
     task = NULL;
@@ -533,11 +533,11 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
 
         while (task != NULL) {
             if (task->nameSum == nameSum) {
-                for (i = nameLength; ; i--) {
-                    if (name[i] != task->name[i]) {
+                for (nameCharacterIndex = nameLength; ; nameCharacterIndex--) {
+                    if (name[nameCharacterIndex] != task->name[nameCharacterIndex]) {
                         break;
                     }
-                    if (i == 0) {
+                    if (nameCharacterIndex == 0) {
                         return task;
                     }
                 }
