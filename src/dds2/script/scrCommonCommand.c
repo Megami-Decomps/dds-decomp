@@ -152,18 +152,18 @@ s32 scrCommandFadeBackgroundIn(void)
 s32 scrCommandJumpToIndexedLabel(void)
 {
     s32 argumentIndex;
-    s32 label;
+    s32 labelIndex;
     argumentIndex = scrReadIntParameter(0);
     if (argumentIndex < 0)
     {
         return 1;
     }
-    label = scrReadIntParameter(argumentIndex + 1);
-    if (label < 0)
+    labelIndex = scrReadIntParameter(argumentIndex + 1);
+    if (labelIndex < 0)
     {
         return 1;
     }
-    scrSetProgramCounter(scrGetLabelAddress(label));
+    scrSetProgramCounter(scrGetLabelAddress(labelIndex));
     return 1;
 }
 
