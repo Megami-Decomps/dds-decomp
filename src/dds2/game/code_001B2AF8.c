@@ -1436,11 +1436,7 @@ void func_001B4AA0(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third
 
 }
 
-typedef struct BattleStartVoiceRow {
-    s32 flagId;       /* negative, or a model flag that must be set */
-    s8 voice[2][3][3]; /* [alternate][state][choice]; -1 marks an empty choice */
-    u8 pad16[2];
-} BattleStartVoiceRow;
+#include "btl_start_voice_row.h"
 
 extern BattleStartVoiceRow btlStartVoiceRows[16];
 extern s8 btlMajinStartVoiceIds[16];
