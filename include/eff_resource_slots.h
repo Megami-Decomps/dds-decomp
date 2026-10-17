@@ -31,7 +31,7 @@ struct EffMappedResource *effCreateStatusBatch(u32 category);
 #ifdef VERSION_DDS2
 s32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #else
-u32 effDestroyPackedBatch(struct EffMappedResource *batch);
+s32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #endif
 /* Serialized source bytes are borrowed; async mapped-resource outputs hold typed pointers. */
 struct EffMappedResource *effCreateMappedResource(const u8 *source);
