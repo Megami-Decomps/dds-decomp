@@ -11,7 +11,7 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
-#include "eff_vertex_draw_request.h"
+#include "eff_packet_params.h"
 #include "par_kind_api.h"
 #include "par_kind_resource.h"
 #include "par_table.h"
@@ -34,7 +34,7 @@ extern ParReleaseRecord *parRecordListHead;
 
 #include "sdf_packet_alloc.h"
 struct SdfListHead;
-extern void *effCreateVertexDrawPacket(EffVertexDrawRequest *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 
 extern ParDispatch parKindConstructorEntries[];
@@ -60,7 +60,7 @@ extern u8 D_003D64B0[];
 
 extern u8 D_003D64B0[];
 
-extern EffVertexDrawRequest parDrawControl;
+extern EffPacketParams parDrawControl;
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
@@ -486,7 +486,7 @@ ParReleaseRecord *func_0015B258(s32 count, s16 flags, s16 options) {
     record->drawCount = 0;
     memset(&record->request, 0, sizeof(record->request));
     record->request.color = 0x80808080;
-    if (!(options & 1)) record->request.flags = 0x4000;
+    if (!(options & 1)) record->request.primitive = 0x4000;
     asset = sdfCreateAssetWithDrawEntries();
     record->asset = asset;
     if (!(options & 2)) sdfSetPrimaryStateFloat(asset, 1.0f);
@@ -513,7 +513,7 @@ void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
 
 void parControlInit(void) {
     memset(&parDrawControl, 0, 0x2C);
-    parDrawControl.flags = 0x4000;
+    parDrawControl.primitive = 0x4000;
 }
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -1524,11 +1524,11 @@ void parDrawPendingCellSystems(void) {
         sdfConsAppendAssetPacket(list, (SdfAsset *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
-            parDrawControl.indices = D_0034E360;
+            parDrawControl.parameters = D_0034E360;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.width = 16;
-                parDrawControl.height = 18;
+                parDrawControl.parameterCount = 16;
+                parDrawControl.vertexCount = 18;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
                 parDrawControl.colors = cell->colors;
@@ -1540,17 +1540,17 @@ void parDrawPendingCellSystems(void) {
                     parDrawControl.colors += 16;
                 }
                 if (remaining >= 4) {
-                    parDrawControl.width = remaining - 2;
-                    parDrawControl.height = remaining;
+                    parDrawControl.parameterCount = remaining - 2;
+                    parDrawControl.vertexCount = remaining;
                     sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
-            parDrawControl.indices = D_0034E3E0;
+            parDrawControl.parameters = D_0034E3E0;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.width = 16;
-                parDrawControl.height = 15;
+                parDrawControl.parameterCount = 16;
+                parDrawControl.vertexCount = 15;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
                 parDrawControl.colors = cell->colors;
@@ -1562,17 +1562,17 @@ void parDrawPendingCellSystems(void) {
                     parDrawControl.colors += 12;
                 }
                 if (remaining >= 6) {
-                    parDrawControl.width = (remaining / 3) * 4 - 4;
-                    parDrawControl.height = remaining;
+                    parDrawControl.parameterCount = (remaining / 3) * 4 - 4;
+                    parDrawControl.vertexCount = remaining;
                     sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
-            parDrawControl.indices = D_0034E520;
+            parDrawControl.parameters = D_0034E520;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.width = 8;
-                parDrawControl.height = 10;
+                parDrawControl.parameterCount = 8;
+                parDrawControl.vertexCount = 10;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
                 parDrawControl.colors = cell->colors;
@@ -1585,11 +1585,11 @@ void parDrawPendingCellSystems(void) {
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
-            parDrawControl.indices = D_0034E450;
+            parDrawControl.parameters = D_0034E450;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.width = 10;
-                parDrawControl.height = 12;
+                parDrawControl.parameterCount = 10;
+                parDrawControl.vertexCount = 12;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
                 parDrawControl.colors = cell->colors;
@@ -1602,11 +1602,11 @@ void parDrawPendingCellSystems(void) {
                 }
             }
         } else {
-            parDrawControl.indices = D_0034E4D0;
+            parDrawControl.parameters = D_0034E4D0;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.width = 12;
-                parDrawControl.height = 16;
+                parDrawControl.parameterCount = 12;
+                parDrawControl.vertexCount = 16;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
                 parDrawControl.colors = cell->colors;
@@ -1678,15 +1678,15 @@ void parReleaseDrawBlock(ParBlock *block) {
 
 void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    EffVertexDrawRequest state;
+    EffPacketParams state;
     s32 remaining;
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
-    state.width = 0x10;
-    state.height = 0x30;
-    state.flags = 0x4000;
+    state.parameterCount = 0x10;
+    state.vertexCount = 0x30;
+    state.primitive = 0x4000;
     state.positions = cmd->positions;
     state.colors = cmd->colors;
     state.color = cmd->color;
