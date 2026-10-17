@@ -2042,21 +2042,21 @@ s32 mnuCampGetCompactEntryId(s32 rewardRow, s32 column) {
     return *(s32 *)(mnuCampCompactEntries + rewardRow * 0x44 + column * 8);
 }
 
-s32 mnuCampCountRemainingUses(s32 itemMode, s32 id, MenuTerminalContext *record) {
+s32 mnuCampCountRemainingUses(s32 itemMode, s32 itemId, MenuTerminalContext *record) {
     s32 value = record->availableCount;
 
     if (itemMode == 1) {
-        value -= ptyCountBulletItem(id);
+        value -= ptyCountBulletItem(itemId);
     } else if (itemMode == 3) {
-        value = 1 - datGameState->inventory.counts[id];
+        value = 1 - datGameState->inventory.counts[itemId];
     } else if (itemMode == 2) {
-        value = 1 - datGameState->inventory.counts[id];
+        value = 1 - datGameState->inventory.counts[itemId];
     } else {
-        value = 99 - datGameState->inventory.counts[id];
+        value = 99 - datGameState->inventory.counts[itemId];
     }
-    if (mnuCampFindListedItemIndex(id) >= 0) {
+    if (mnuCampFindListedItemIndex(itemId) >= 0) {
         if (value >= 2) {
-            value = datGameState->inventory.counts[id] == 0;
+            value = datGameState->inventory.counts[itemId] == 0;
         }
     }
     return value < 0 ? 0 : value;
