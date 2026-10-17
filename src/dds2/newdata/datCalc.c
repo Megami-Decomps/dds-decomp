@@ -2144,8 +2144,8 @@ s32 evtRollFlagDependentResultCode(void) {
 }
 
 s32 evtPushRosterBaseValue(void) {
-    u16 index = ((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId;
-    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[index].base);
+    u16 unitId = ((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId;
+    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[unitId].base);
     return 1;
 }
 
