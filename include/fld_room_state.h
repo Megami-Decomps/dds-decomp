@@ -3,14 +3,24 @@
 
 #include "common.h"
 
+/* Capacities shared by field-record allocation and reset code. */
+enum {
+    FIELD_VALUE_RECORD_STORAGE_SIZE = 0x72000,
+    FIELD_AUX_RECORD_STORAGE_SIZE = 0x4A00,
+    FIELD_ROOM_RECORD_COUNT = 64,
+    FIELD_ROOM_CORNER_COUNT = 8,
+    FIELD_ROOM_PLANE_COUNT = 6,
+    FIELD_ACTOR_SLOT_COUNT = 256
+};
+
 /* Shared room geometry/runtime record. DDS1 and DDS2 use the same 0x140-byte
  * layout; unclassified state words and the intervening gap retain their raw
  * widths and positions. */
 typedef struct FldRoomState {
-    f32 corner[8][4]; /* 0x00 */
+    f32 corner[FIELD_ROOM_CORNER_COUNT][4]; /* 0x00 */
     f32 center[4];    /* 0x80 */
-    f32 plane[6][4];  /* 0x90 */
-    f32 limit[6];     /* 0xF0 */
+    f32 plane[FIELD_ROOM_PLANE_COUNT][4];  /* 0x90 */
+    f32 limit[FIELD_ROOM_PLANE_COUNT];     /* 0xF0 */
     s32 worldObjectKey; /* 0x108: compared with an EffWorldNode key */
     f32 unk10C;
     f32 unk110;
