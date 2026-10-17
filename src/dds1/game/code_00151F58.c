@@ -49,7 +49,7 @@ extern EffRandState effDefaultRandomState[];
 extern EffectConfig D_0034DF54[];
 
 
-extern s32 effBillResourceOwners[];
+extern BillObj *effBillResourceOwners[];
 
 extern s32 effEmitterDelayRandomState[];
 
@@ -81,7 +81,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
  * resource stores the reference count; the BillObj payload is not an emitter. */
 BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
     BillObj *effect = billCreateIndexed(D_0034DF54[index].billboardKind, 0);
-    BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
+    BillChildPayload *resource = effBillResourceOwners[index]->child;
     s32 references = resource->refCount;
 
     effect->child = resource;
@@ -94,7 +94,7 @@ u32 effGetGeneralResourceCount(void) {
 }
 
 SdfTex *effGetBillResourceTexture(s32 index) {
-    return ((BillObj *)effBillResourceOwners[index])->child->texture;
+    return effBillResourceOwners[index]->child->texture;
 }
 
 void effCopyVector(void *dst, const void *src) {
