@@ -1883,8 +1883,8 @@ s32 mnuCampGetWideRewardRowIndex(s32 listedItemIndex, s32 option) {
     return flatRewardIndex;
 }
 
-s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
-    return row * 2 + slot;
+s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 listedItemIndex) {
+    return listedItemIndex * 2 + slot;
 }
 
 u32 mnuCampChooseSolarWeightedOption(s32 listedItemIndex) {
