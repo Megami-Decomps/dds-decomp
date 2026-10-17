@@ -2102,7 +2102,7 @@ s32 fldUpdateNextFloorTransition(void) {
         if (fldGetSceneReadyOrPendingState() != 0) {
             return 0;
         }
-        fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
+        fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->flagStage, scene->x, scene->z, 50.0f);
         if (scene->sceneMode == 0) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
@@ -2304,7 +2304,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         fldFinishDeferredExit();
         if (fldAreaState.transitionMode != 0) {
             fldUpdateSparkEncounterScene();
-            fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
+            fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.flagStage,
                           fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_00389988[0] == 0) {
             fldUpdateCampMenuTransition();

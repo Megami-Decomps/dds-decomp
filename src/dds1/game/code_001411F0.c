@@ -1641,7 +1641,7 @@ void fldDrawAutomapScene(void) {
  * Continues inside the D_003BAF00 >= 128 block after the icon loops.
  * Function-scope locals and declarations are supplied by the prefix. */
 
-        if (D_003BAEF0 == fldAreaState.unkC0) {
+        if (D_003BAEF0 == fldAreaState.flagStage) {
             f32 worldX;
             f32 worldZ;
             f32 distanceX;
@@ -1935,8 +1935,8 @@ void func_00145B18(void) {
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     fldSceneReady = 1;
-    D_003BAEB8 = cam->unkC0;
-    D_003BAED0 = cam->unkC0;
+    D_003BAEB8 = cam->flagStage;
+    D_003BAED0 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
@@ -2061,8 +2061,8 @@ void fldEnterSceneCamera(void) {
     dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 1);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
-    D_003BAEB8 = cam->unkC0;
-    D_003BAED0 = cam->unkC0;
+    D_003BAEB8 = cam->flagStage;
+    D_003BAED0 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
@@ -2119,8 +2119,8 @@ void fldLoadSceneModelsAndCamera(void) {
     D_003D40A0[1] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
-    D_003BAEB8 = cam->unkC0;
-    D_003BAED0 = cam->unkC0;
+    D_003BAEB8 = cam->flagStage;
+    D_003BAED0 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
@@ -2334,8 +2334,8 @@ void fldCenterCameraOnEntry(void) {
     s32 iz;
 
     D_003BAEB4 = cam->floor;
-    D_003BAEB8 = cam->unkC0;
-    D_003BAED0 = cam->unkC0;
+    D_003BAEB8 = cam->flagStage;
+    D_003BAED0 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
@@ -2390,7 +2390,7 @@ void fldSetFlagAndFindRecord(s32 flagNumber) {
             fldAreaState.unk18 = bit;
             fldAreaState.flagNumber = flagNumber;
             datGameState->areaFlags[areaIndex][fldAreaState.floor] |= 1ULL << bit;
-            fldAreaState.unkC0 = fldFindRecordItem(fldAreaState.floor, bit);
+            fldAreaState.flagStage = fldFindRecordItem(fldAreaState.floor, bit);
         }
     }
 }
