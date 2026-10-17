@@ -41,23 +41,23 @@ const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %
 
 /* Decode one retained unit payload and return its new viewer-object key. */
 s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
-    EvtPackLoadState *data;
+    EvtPackLoadState *packState;
     EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
     u8 *modelPayload;
     s32 viewerObjectKey;
 
-    data = evtGetEventPackLoadState(eventId);
+    packState = evtGetEventPackLoadState(eventId);
     packEntryIndex = 0;
-    if (data->header->entryCount > 0) {
-        entry = data->entries;
+    if (packState->header->entryCount > 0) {
+        entry = packState->entries;
         do {
             if (entry->secondaryResourceId == resourceId) {
                 switch (entry->kind) {
                 case 5:
                     entrySize = entry->dataSize;
-                    modelPayload = data->data + entry->dataOffset;
+                    modelPayload = packState->data + entry->dataOffset;
                     sdfDebugPrintf(D_00424830, resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
@@ -80,7 +80,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 }
             }
             entry++;
-        } while (++packEntryIndex < data->header->entryCount);
+        } while (++packEntryIndex < packState->header->entryCount);
     }
     return -1;
 }
