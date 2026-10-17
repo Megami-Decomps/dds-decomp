@@ -213,7 +213,7 @@ extern s32 *D_003BAA0C;
 extern s32 *D_003BAA2C;
 
 s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
-    s32 value;
+    s32 calculatedValue;
     u16 unitId;
 
     switch (element) {
@@ -228,40 +228,40 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     unitId = unit->unitId;
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         if (unit->flags & 0x1000) {
-            value = D_003BAA08[unitId * 19 + element];
+            calculatedValue = D_003BAA08[unitId * 19 + element];
         } else {
-            value = D_003BAA0C[unitId * 19 + element];
+            calculatedValue = D_003BAA0C[unitId * 19 + element];
         }
     } else {
         if (unit->affinityTableIndex != 0) {
-            value = D_003BAA2C[unit->affinityTableIndex * 19 + element];
+            calculatedValue = D_003BAA2C[unit->affinityTableIndex * 19 + element];
         } else {
-            value = D_003BAA2C[datEnemyRecords[unitId].affinityTableIndex * 19 + element];
+            calculatedValue = D_003BAA2C[datEnemyRecords[unitId].affinityTableIndex * 19 + element];
         }
     }
 
     if (element == 15) {
-        value = datRaiseCalculatedValueFloor(unit, value);
+        calculatedValue = datRaiseCalculatedValueFloor(unit, calculatedValue);
     }
     if (unit->flags & 0x2000) {
-        value = D_003BAA2C[383 * 19 + element];
+        calculatedValue = D_003BAA2C[383 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
-        value = D_003BAA2C[382 * 19 + element];
+        calculatedValue = D_003BAA2C[382 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
-        value = D_003BAA2C[381 * 19 + element];
+        calculatedValue = D_003BAA2C[381 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 4) {
         if (element < 2) {
             if (element >= 0) {
-                if ((u16)value < 100) {
-                    value = (value & DAT_CALC_HIGH_MASK) | 100;
+                if ((u16)calculatedValue < 100) {
+                    calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 100;
                 }
             }
         }
     }
-    return value;
+    return calculatedValue;
 }
 
 u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *unit, s32 element) {
