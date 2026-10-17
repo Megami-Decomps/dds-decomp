@@ -55,10 +55,10 @@ void effTrackPolyDrawWork(EffTrackPolyWork *work) {
  * endFrame, and reset history before startFrame. */
 void effTrackPolyUpdate(EffTrackPolyWork *work) {
     MdlCtx *model = work->params.model;
-    f32 value = model->first->currentFrame;
+    f32 currentFrame = model->first->currentFrame;
 
-    if (work->params.startFrame <= value) {
-        if (value <= work->params.endFrame) {
+    if (work->params.startFrame <= currentFrame) {
+        if (currentFrame <= work->params.endFrame) {
             if (work->updateCount % work->params.sampleInterval == 0) {
                 effSampleTrackPolyEndpoints(work);
             }

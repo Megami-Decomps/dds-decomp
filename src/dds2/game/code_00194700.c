@@ -3,7 +3,7 @@
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "sdf_packet_list.h"
 #include "kwln_sprite.h"
 #include "eff_event_setup.h"
@@ -16,7 +16,6 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
-extern void *sdfConsAllocateColumnPacket(s32 count);
 extern s8 D_0043643D;
 
 #include "eff.h"

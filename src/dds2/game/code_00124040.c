@@ -1804,7 +1804,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     fldAreaState.frameTravelDistance = distance;
     previousPhase = evtGetSolarPhase();
     if (fldAreaState.cameraTargetGraceTicks > 0) {
-        if (fldAreaState.unk11C && D_00389988[0x60 / 4]) {
+        if (fldAreaState.terrainAttritionKind && D_00389988[0x60 / 4]) {
             fldAreaState.attritionDistance += distance;
         }
         effObjFetchInnerPosition(player);
@@ -1832,20 +1832,20 @@ s32 fldUpdateTravelAndEncounters(void) {
             return 0;
         }
     }
-    if (fldAreaState.unk11C || ptyAnyUnitFlagMatch(0x80, 1)) {
+    if (fldAreaState.terrainAttritionKind || ptyAnyUnitFlagMatch(0x80, 1)) {
         if (D_00389988[0x60 / 4]) fldAreaState.attritionDistance += distance;
         interval = 450.0f;
-        if (!fldAreaState.unk11C && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
+        if (!fldAreaState.terrainAttritionKind && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
         if (fldAreaState.attritionDistance > interval) {
-            if (fldAreaState.unk11C) {
-                if (fldAreaState.unk11C != 3 && (datGameState->world.fieldFlags & 4)) {
+            if (fldAreaState.terrainAttritionKind) {
+                if (fldAreaState.terrainAttritionKind != 3 && (datGameState->world.fieldFlags & 4)) {
                     fldAreaState.unk190 = 0;
                     fldAreaState.attritionDistance = 0.0f;
                 } else {
                     fldAreaState.unk190 = 60;
                     fldAreaState.attritionDistance = 0.0f;
-                    if (fldAreaState.unk11C == 3) ptyApplyFieldHpAttrition(3);
-                    else if (fldAreaState.unk11C == 2) ptyApplyFieldHpAttrition(4);
+                    if (fldAreaState.terrainAttritionKind == 3) ptyApplyFieldHpAttrition(3);
+                    else if (fldAreaState.terrainAttritionKind == 2) ptyApplyFieldHpAttrition(4);
                     else ptyApplyFieldHpAttrition(2);
                 }
             } else {
@@ -2102,7 +2102,7 @@ s32 fldUpdateNextFloorTransition(void) {
         if (fldGetSceneReadyOrPendingState() != 0) {
             return 0;
         }
-        fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
+        fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->flagStage, scene->x, scene->z, 50.0f);
         if (scene->sceneMode == 0) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
@@ -2304,7 +2304,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         fldFinishDeferredExit();
         if (fldAreaState.transitionMode != 0) {
             fldUpdateSparkEncounterScene();
-            fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
+            fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.flagStage,
                           fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_00389988[0] == 0) {
             fldUpdateCampMenuTransition();

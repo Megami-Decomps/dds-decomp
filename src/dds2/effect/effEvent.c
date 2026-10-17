@@ -304,7 +304,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-extern void *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
+extern u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
 
 /* Draw a GS line between two projected points, using the fixed marker color. */
 void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
@@ -1384,7 +1384,7 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
     SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(particleBytes + sizeof(EffEventBillSet));
     EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(allocationHandle);
     EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + particleBytes);
-    u32 i;
+    u32 particleIndex;
 
     work->head = *src;
     work->allocationHandle = allocationHandle;
@@ -1405,7 +1405,7 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
         D_00436538 = (u32)billCreateFromResource(0, "/efftool/bill/dbball02.tmx");
     }
     particleCount = work->head.particleCount;
-    for (i = 0; i < particleCount; i++) {
+    for (particleIndex = 0; particleIndex < particleCount; particleIndex++) {
         particle->age = 0;
         particle++;
     }

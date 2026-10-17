@@ -1274,7 +1274,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
     }
 }
 
-/* Non-owning native alias of fldAreaState.unk11C (FldAreaWork + 0x11C). */
+/* Non-owning native alias of fldAreaState.terrainAttritionKind (FldAreaWork + 0x11C). */
 extern s32 D_0038988C[];
 
 /* Classify flagged zone faces after checking the current movement. */
@@ -1383,11 +1383,11 @@ void fldClassifyMovementAgainstZoneFaces(f32 *position) {
                             FldCollisionFace *face = ((FldValueRecord *)fldValueRecords)[recordIndex].face;
                             s32 soundClass = face->sound & 0xF0;
                             if (soundClass == 0x20) {
-                                areaState->unk11C = 3;
+                                areaState->terrainAttritionKind = 3;
                             } else if (soundClass == 0x30) {
-                                areaState->unk11C = 2;
+                                areaState->terrainAttritionKind = 2;
                             } else {
-                                areaState->unk11C = accepted;
+                                areaState->terrainAttritionKind = accepted;
                             }
                         }
                     }
