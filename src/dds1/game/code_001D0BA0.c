@@ -26,6 +26,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
@@ -4611,13 +4612,6 @@ u8 *btlCreateStiffenDamageShakeTask(u8 *owner, f32 value) {
     return task;
 }
 
-typedef struct BtlPositionEffectArgs {
-    BtlUnit *unit;
-    s32 tick;
-    f32 amount;
-    f32 velocity;
-} BtlPositionEffectArgs;
-
 /* Request the position-effect motion or advance its fallback position curve. */
 u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
@@ -4693,7 +4687,7 @@ extern u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *);
 /* Queue the actor's position effect with its tick counter reset. */
 u8 *btlCreateActorPositionEffectTask(u8 *unit) {
     u8 *task = btlAllocTask(0x10);
-    u32 *data;
+    BtlPositionEffectArgs *args;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -4701,9 +4695,9 @@ u8 *btlCreateActorPositionEffectTask(u8 *unit) {
     *(u16 *)(task + 0x20) = 0x1E;
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     *(s32 *)(task + 0x48) = 0;
-    data = btlGetTaskArguments(task);
-    data[0] = (u32)unit;
-    data[1] = 0;
+    args = btlGetTaskArguments(task);
+    args->unit = (BtlUnit *)unit;
+    args->tick = 0;
     return task;
 }
 
