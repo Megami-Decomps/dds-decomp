@@ -3,6 +3,7 @@
 #include "eff_model_owner.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
@@ -685,8 +686,58 @@ RefObj *effRetainSharedReference(RefObj *obj) {
     return obj;
 }
 
-extern SdfTex *func_0029C048(void *, RefObj *);
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C048);
+/* Native GS dimension SDK calls: 0029C16C/0029C17C.
+ * Address normalization before TEX0 packing is also traced in
+ * texture_renew_secondary_epoch_probe (parity OK, local-alloc q14/q16). */
+SdfTex *func_0029C048(void *target, RefObj *source) {
+    SdfPoolNode *surface = target;
+    SdfListHead *list;
+    u16 width;
+    u16 height;
+    s32 widthLog2;
+    s32 heightLog2;
+    SdfTex *texture;
+    u32 primary;
+    u32 secondary;
+    u8 clutFormat;
+    u8 pixelFormat;
+
+    if (source->index != -1 && D_003BC950 == source->index && D_003BC954 == (u32)surface) {
+        return D_003BC958;
+    }
+    D_003BC950 = source->index;
+    D_003BC954 = (u32)surface;
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfCreateDescriptorPacket(list, D_003BC958->secondaryResource, 0, 0, source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
+    sdfCreateDescriptorPacket(list, D_003BC958->primaryResource, 0, 0, ((SdfTextureFileHeader *)source->base)->width, ((SdfTextureFileHeader *)source->base)->height, (s32)source->pixels, 0);
+    surface->append(surface, list);
+    texture = D_003BC958;
+    width = ((SdfTextureFileHeader *)source->base)->width;
+    texture->width = width;
+    widthLog2 = (s16)width - 1;
+    primary = texture->primaryResource->word >> 6;
+    height = ((SdfTextureFileHeader *)source->base)->height;
+    texture->height = height;
+    clutFormat = texture->clutFormat;
+    secondary = texture->secondaryResource->word;
+    pixelFormat = texture->pixelFormat;
+    heightLog2 = (s16)height - 1;
+    EE_MMI_BIT_LENGTH(heightLog2);
+    EE_MMI_BIT_LENGTH(widthLog2);
+    secondary >>= 6;
+    texture->primaryBuffer->textureState =
+        ((u64)2 << 61) |
+        ((u64)clutFormat << 51) |
+        ((u64)secondary << 37) |
+        ((u64)1 << 34) |
+        ((u64)heightLog2 << 30) |
+        (widthLog2 << 26) |
+        ((u64)pixelFormat << 20) |
+        (4 << 14) |
+        (u64)primary;
+    return D_003BC958;
+}
 
 s32 effCountExpandedEntries(const EffExpandedList *list) {
     u32 count = list->count;
