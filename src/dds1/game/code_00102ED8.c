@@ -99,7 +99,7 @@ extern void evtEnsureDrawVectorState(void);
 extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
 extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 typedef s32 (*KwlnTaskUpdateCallback)();
 typedef void (*KwlnTaskDestroyCallback)();

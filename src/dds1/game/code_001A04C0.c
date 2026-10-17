@@ -78,7 +78,7 @@ extern char D_003BB2C0[]; /* ">" */
 extern char D_003BB2C8[]; /* " %s" */
 extern char D_003BB2D0[]; /* "%3d" */
 extern char D_003BB2D8[]; /* "%4d" */
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 void itfDrawPulsingTestOverlay(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
