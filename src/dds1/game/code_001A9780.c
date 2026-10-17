@@ -1,4 +1,6 @@
 #include "common.h"
+
+extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_actor_status_table_api.h"
 #include "dsp_channel.h"
 #include "mdl_flag_api.h"
@@ -2567,6 +2569,12 @@ extern void func_001AFF78(BtlAnalysisPanelWork *, s32, s32, s32, s16);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+
+/* Shared text submission: choose the standard shared draw flags and enqueue. */
+static inline void btlSubmitSharedTextGlyph(struct FrFontGlyph *glyph) {
+    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
 extern const char D_003BB400[], D_003BB408[], D_003BB410[];
 extern u8 btlAnalysisTextScratch[];
@@ -2643,8 +2651,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         (work->x + xOffset - 6) << 4, (work->y - 8) << 3,
                         0xFF0000, 0x80808000 | (s32)work->alpha,
                         D_003BAA88 + datEnemyRecords[actor->partyRecord.unitId].pad04 * 7, 0);
-                    frFontDrawGlyphWithSharedFlags(glyph, 1);
-                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    btlSubmitSharedTextGlyph(glyph);
                     break;
                 }
                 case 2: {
@@ -2654,8 +2661,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         (work->x + xOffset + 2) << 4, (work->y - 7) << 3,
                         0xFF0000, 0x80808000 | (s32)work->alpha,
                         D_003BAA74 + actor->partyRecord.unitId * 17, 0);
-                    frFontDrawGlyphWithSharedFlags(glyph, 1);
-                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    btlSubmitSharedTextGlyph(glyph);
                     break;
                 }
                 case 3: {
@@ -2769,8 +2775,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                                 lineX << 4, lineY << 3,
                                 0xFF0000, 0x80808000 | (s32)work->alpha, (const u8 *)text, 0);
                         }
-                        frFontDrawGlyphWithSharedFlags(glyph, 1);
-                        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                        btlSubmitSharedTextGlyph(glyph);
                     }
                     break;
                 }
@@ -3860,8 +3865,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     width = work->width;
     glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
                                        work->fade | 0x80808000, work->text, 0);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    btlSubmitSharedTextGlyph(glyph);
     colors.values[0] = work->fadeLevels[0] | 0x80808000;
     colors.values[1] = work->fadeLevels[2] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
@@ -6698,8 +6702,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    btlSubmitSharedTextGlyph(handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -6709,8 +6712,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    btlSubmitSharedTextGlyph(handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -6959,10 +6961,12 @@ extern void btlDrawRetreatCommandLabel(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
+extern void func_001BDF60(BattleSceneObject *, u16, u16, u16);
+
 void btlDrawCommandClassRows(s32 sceneContext) {
     switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
-        func_001BDF60(sceneContext, 0, 2, 3);
+        func_001BDF60((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
         func_001BEB58(sceneContext);
@@ -6978,13 +6982,141 @@ void btlDrawCommandClassRows(s32 sceneContext) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BDF60);
+extern char *const D_003A2E60[3];
+extern const char D_003BB438[];
+extern const BattlePanelColors D_003A2E50;
+
+void func_001BDF60(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
+    char text[16];
+    BattlePanelColors colors = D_003A2E50;
+    char *labels[3];
+    char back[5];
+    u16 count;
+    s32 hasUp;
+    s16 highlight;
+    s16 top;
+    s32 row;
+    s32 y = 0x14C;
+    u16 *list;
+    u32 color;
+    struct FrFontGlyph *glyph;
+    s32 failure;
+    s32 cost;
+    u32 iconColor;
+
+    memcpy(labels, D_003A2E60, sizeof(labels));
+    memcpy(back, D_003BB438, sizeof(back));
+    btlGetRuntime();
+    hasUp = 0;
+    highlight = 0;
+    top = 0;
+    switch (kind) {
+    case 0:
+        top = ctx->selections[0].cursor;
+        highlight = ctx->selections[0].entry;
+        break;
+    case 2:
+        top = ctx->selections[5].cursor;
+        highlight = ctx->selections[5].entry;
+        break;
+    case 3:
+        top = ctx->selections[7].cursor;
+        highlight = ctx->selections[7].entry;
+        break;
+    }
+    itfSetTextDrawLimit(0x13);
+    if (top == 0) {
+        if (kind == 0) {
+            BtlUnit *unit = ctx->owner->unit;
+
+            color = (highlight == 0) ? 0x89FEFF80 : 0xA09DC380;
+            color = (color & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[0];
+            if (btlUnitStatusPair(unit) & 0x1400) {
+                glyph = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, (u8 *)labels[kind], 0);
+            } else {
+                glyph = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color,
+                                                    btlGetIndexedUiResource(unit), 0);
+            }
+            btlSubmitSharedTextGlyph(glyph);
+            hasUp = 1;
+            y = 0x163;
+        } else if (kind == 2) {
+            color = (highlight == 0) ? 0x89FEFF80 : 0xA09DC380;
+            color = (color & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[0];
+            hasUp = 1;
+            btlDrawIndexedBattleEntryGlyphs(0x1A, 0x14C, 0xFF0010, color, 0xE0);
+            y = 0x163;
+        }
+    }
+    list = btlGatherActorCommandsByKind((s32)ctx, (s16 *)&count, kind, page, columns);
+    switch (kind) {
+    case 0:
+        D_003BD834->value[0] = count + 1;
+        break;
+    case 2:
+        D_003BD834->value[5] = count + 1;
+        break;
+    case 3:
+        D_003BD834->value[7] = count;
+        break;
+    }
+    if (hasUp == 0 && kind != 3) {
+        top--;
+        highlight--;
+    }
+    list += top;
+    top += hasUp;
+    itfSetTextDrawLimit(0x13);
+    for (row = hasUp; row < 4 && top <= count; row++, y += 0x17, list++, top++) {
+        if (kind != 0 && kind != 2 && top >= count) {
+            break;
+        }
+        if (kind == 0 && top == count + hasUp - 1) {
+            itfSetTextDrawLimit(0x13);
+            color = (highlight == top) ? 0x89FEFF80 : 0xA09DC380;
+            color = (color & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[row];
+            glyph = itfCreateConvertedTextGlyph(0x1A0, y << 3, 0xFF0010, color, (u8 *)back, 0);
+            btlSubmitSharedTextGlyph(glyph);
+            break;
+        }
+        failure = btlGetCommandFailureReason(ctx->owner->unit, *list);
+        if (failure == 0) {
+            color = (highlight == top) ? 0x89FEFF80 : 0xA09DC380;
+        } else {
+            color = 0x504F6140;
+        }
+        color = (color & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[row];
+        btlDrawIndexedBattleEntryGlyphs(0x1A, y, 0xFF0010, color, *list);
+        cost = btlApplyCommandAbilityMultiplier(&ctx->owner->unit->partyRecord, *list);
+        if (cost != 0) {
+            sprintf(text, D_003BB400, cost);
+            fldSubmitSceneObjectAtCoordinates(0x86, y + 4, color, text);
+            iconColor = failure ? color : (btlLinkedSelectionTaskBuffer->rowFade[row] | 0x80808000);
+            colors.values[0] = iconColor;
+            colors.values[1] = iconColor;
+            colors.values[2] = iconColor;
+            colors.values[3] = iconColor;
+            switch (datCommandRecords[*list].costMode) {
+            case DAT_COMMAND_COST_MODE_HP:
+                effDrawSpriteWithCornerColors(0xA70, (y + 7) << 3, 0, colors.values, 0, btlResourceBlock->resA, 7, 0x53);
+                break;
+            case DAT_COMMAND_COST_MODE_MP:
+                /* Separate MP/default draw arms are present at001BE4B0/001BE4E8. */
+                effDrawSpriteWithCornerColors(0xA70, (y + 7) << 3, 0, colors.values, 0, btlResourceBlock->resA, 8, 0x53);
+                break;
+            default:
+                effDrawSpriteWithCornerColors(0xA70, (y + 7) << 3, 0, colors.values, 0, btlResourceBlock->resA, 8, 0x53);
+                break;
+            }
+        }
+    }
+    itfSetTextDrawLimit(-1);
+}
 
 /* BattleSelectionWork with its screen positions viewed as [row][x,y] pairs. */
 typedef struct SelView { s8 selectedRow; u8 pad01; s16 rowFade[4]; u8 pad0A[2]; s32 pos[4][2]; } SelView;
 void func_001BE590(BattleSceneObject *object) {
     extern u16 btlReadUnitStatusMask(DatPartyRecord *);
-    extern void itfSetTextDrawLimit(s32);
     extern const u32 D_003A2E70[3];
     extern const u32 D_003A2E80[3];
     typedef struct CommandLabelBank { const u8 *text[3]; } CommandLabelBank;
@@ -7063,8 +7195,7 @@ void func_001BE590(BattleSceneObject *object) {
             itfSetTextDrawLimit(0x13);
             glyph = itfCreateConvertedTextGlyph((x + 15) << 4, (y + 3) << 3,
                         0xFF0010, color, labels->text[cursor], 0);
-            frFontDrawGlyphWithSharedFlags(glyph, 1);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            btlSubmitSharedTextGlyph(glyph);
             itfSetTextDrawLimit(-1);
             cursor++;
         } while (row < shown && cursor < total);
@@ -7109,7 +7240,6 @@ void btlDrawItemCommandRows(BattleSceneObject *object) {
     }
 }
 
-extern void itfSetTextDrawLimit(s32 limit);
 
 void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];
@@ -7126,8 +7256,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     }
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    btlSubmitSharedTextGlyph(handle);
     itfSetTextDrawLimit(-1);
 }
 
