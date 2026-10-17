@@ -97,7 +97,7 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     struct SdfMemBlock *allocation;
     EffBlurScatterWork *work;
     EffBlurScatterSlot *slot;
-    s32 i;
+    s32 slotIndex;
 
     allocation = sdfAllocGeneralBlock(sizeof(EffBlurScatterWork) + 100 * sizeof(EffBlurScatterSlot));
     work = (EffBlurScatterWork *)sdfResourceRetainAddress(allocation);
@@ -106,7 +106,7 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     work->slots = (EffBlurScatterSlot *)(work + 1);
     work->texture = effGetBillResourceTexture(2);
     slot = work->slots;
-    for (i = 0; i < 100; i++, slot++) {
+    for (slotIndex = 0; slotIndex < 100; slotIndex++, slot++) {
         effBlurInitializeScatterSlot(work, slot);
         slot->angle = 3.14159265f + 1.0f;
     }
