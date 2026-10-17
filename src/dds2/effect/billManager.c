@@ -25,7 +25,6 @@ extern void billAppendPairedQuadEntry(BillObj *, BillRenderPair *);
 
 BillData *billCreateAnimationDataFromResource(void *resourceData);
 
-extern BillDispatch D_003AA998[];
 
 #include "sdf_packet_alloc.h"
 typedef struct DmaPacketHeader DmaPacketHeader;
@@ -884,7 +883,7 @@ BillObj *billCloneObjectRetainingSharedData(const BillObj *source) {
 }
 
 void billDispatchByKind(BillObj *obj) {
-    D_003AA998[obj->kind].func();
+    D_003AA990[obj->kind].destroy();
 }
 
 void billInvokeCallback(BillObj *obj) {
