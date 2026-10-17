@@ -131,12 +131,7 @@ extern s32 D_003BC814;
 extern s32 fileDrawMenuFrame(s32);
 
 
-typedef struct FileRecordType {
-    void (*acquire)(void *);
-    u32 unk4;
-    s32 slotBytes;
-    s32 dataBytes;
-} FileRecordType;
+#include "eff_emitter_type.h"
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
@@ -162,7 +157,6 @@ extern s32 fileUpdateWait(void);
 
 extern s32 fileSlotStatusPoll(void);
 
-extern FileRecordType effEmitterTypeDescriptors[];
 
 extern void fileResetSlotStates(FileSlotTable *record);
 
@@ -298,7 +292,6 @@ extern char D_003B2668[];
 
 
 
-extern void dds3DispatchIndexedCallback(void *callback);
 
 extern void fileDrawLoadObjectSlots(s32 object);
 
@@ -5824,7 +5817,7 @@ void fileSetRecordWordFour(s32 record, u32 value) {
 
 void fileSetLoadObjectScale(LoadObj *obj, f32 scale) {
     obj->scale = scale;
-    dds3DispatchIndexedCallback(obj->recordWork);
+    dds3DispatchIndexedCallback(obj->recordWork, scale);
 }
 
 void fileResetSlotStates(FileSlotTable *record) {
@@ -7425,7 +7418,7 @@ void fileAcquireRecord(FileSlotTable *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
-    effEmitterTypeDescriptors[record->type].acquire(record);
+    effEmitterTypeDescriptors[record->type].updateSlots(record);
     record->references++;
 }
 

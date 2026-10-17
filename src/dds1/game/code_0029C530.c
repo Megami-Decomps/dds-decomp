@@ -21,6 +21,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "eff_emitter_type.h"
 #include "sdf_vu_rotation_axes.h"
 #include "file_pac.h"
 #include "eff_resource_bank_slot.h"
@@ -464,7 +465,6 @@ typedef struct ValPtr44 {
 
 extern s32 effPollFileRecord(char *, s32);
 
-extern void dds3DispatchIndexedCallback(u16 *, float);
 
 
 

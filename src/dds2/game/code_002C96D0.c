@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_emitter_type.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
 #include "cam_aim_record.h"
@@ -6416,19 +6417,12 @@ void fileSetRecordWordFour(s32 record, u32 value) {
 
 void fileSetLoadObjectScale(EffectSurfaceNode *obj, f32 scale) {
     obj->scale = scale;
-    dds3DispatchIndexedCallback(obj->active);
+    dds3DispatchIndexedCallback(obj->active, scale);
 }
 
 
-typedef struct FileRecordType {
-    void (*acquire)(void *);
-    u32 unk4;
-    s32 slotBytes;
-    s32 dataBytes;
-} FileRecordType;
 
 
-extern FileRecordType effEmitterTypeDescriptors[];
 
 void fileResetSlotStates(FileSlotTable *table) {
     u32 count;
@@ -8604,7 +8598,7 @@ void fileAcquireRecord(FileSlotTable *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
-    effEmitterTypeDescriptors[record->type].acquire(record);
+    effEmitterTypeDescriptors[record->type].updateSlots(record);
     record->references++;
 }
 
