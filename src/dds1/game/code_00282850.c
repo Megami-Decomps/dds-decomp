@@ -170,17 +170,6 @@ extern u8 evtStageTestViewTargetVector[];
 /* Battle stage test viewer state. Retail addresses it partly through
  * D_003DC600 (= &evtStageTestState.queue.slot[0], hence the negative offsets), so the
  * D_003DC5EC..D_003DC654 symbols are all interior fields of this one object. */
-typedef struct StageTestState {
-    s32 mode;                /* 0x00 */
-    s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
-    MdlCtx *model;            /* 0x08 */
-    s8 flag;                 /* 0x0C */
-    StageTestEntry *entries; /* 0x10 */
-    StageTestQueue queue;    /* 0x14: flags followed by the two selection slots */
-    s32 effect;              /* 0x68 */
-    s32 pendingEffect;       /* 0x6C */
-} StageTestState;
-
 extern StageTestState evtStageTestState;
 
 extern void btlStopStage(void);

@@ -179,18 +179,6 @@ extern void mnuFreePanelItemWork(MenuPanelItem *);
 
 extern u16 D_003E78D8[];
 
-typedef struct StageTestState {
-    s32 mode;                /* 0x00 */
-    s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
-    MdlCtx *model;            /* 0x08 */
-    s8 flag;                 /* 0x0C */
-    StageTestEntry *entries; /* 0x10 */
-    StageTestQueue queue;    /* 0x14: flags followed by the two selection slots */
-    s32 effect;              /* 0x68 */
-    s32 pendingEffect;       /* 0x6C */
-    s32 modelUpdateStarted;  /* 0x70: DDS2 only, defers effect/motion work on the first update */
-} StageTestState;
-
 extern StageTestState evtStageTestState;
 
 
