@@ -20,24 +20,14 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_blend_node.h"
 
 extern u32 D_00439188;
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 extern u8 D_00476250[];
 
-typedef struct VuBlendNode {
-    f32 position[4];
-    u8 pad10[0x20];
-    u8 result[0x10];
-    struct VuBlendNode *next;
-    void *sourceA;
-    void *sourceB;
-    f32 weight;
-    u8 region;
-    u8 clipFlags;
-    u8 pad52[0xE];
-} VuBlendNode;
+
 
 extern u16 D_00439184;
 
