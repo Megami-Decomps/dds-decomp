@@ -338,9 +338,16 @@ typedef struct ItfMesPoolNode {
     struct ItfMesPoolNode *previous;
     struct ItfMesPoolNode *next;
     s32 index;
-    s32 stateAddress;
+    ItfMesState *state;
     SdfMemBlock *resourceHandle;
 } ItfMesPoolNode;
+
+/* State of the interactive message-layout inspector. */
+typedef struct ItfMesDebugState {
+    s32 selectedItem;
+    s32 mode;
+    ItfMesPoolNode *window;
+} ItfMesDebugState;
 
 typedef struct ItfMesPool {
     ItfMesPoolNode *activeHead;
@@ -375,7 +382,7 @@ typedef char ItfMesGlobals_pool_offset_must_be_0x10[
 typedef char ItfMesGlobals_nodes_offset_must_be_0x20[
     ((u32)&((ItfMesGlobals *)0)->nodes == 0x20) ? 1 : -1];
 typedef char ItfMesGlobals_firstStateAddress_offset_must_be_0x2C[
-    ((u32)&((ItfMesGlobals *)0)->nodes[0].stateAddress == 0x2C) ? 1 : -1];
+    ((u32)&((ItfMesGlobals *)0)->nodes[0].state == 0x2C) ? 1 : -1];
 
 
 /* Message-window pool operations move nodes between the free and active lists.
