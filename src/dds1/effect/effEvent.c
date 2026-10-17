@@ -295,7 +295,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     scene->append(scene, (SdfListHead *)list);
 }
 
-extern void *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
+extern u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
 
 /* Draw a GS line between two projected points, using the fixed marker color. */
 void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
