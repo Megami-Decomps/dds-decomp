@@ -326,13 +326,9 @@ extern s8 D_00438AB8;
 
 extern char D_00438AC0[];
 
-extern s32 func_0034DE68(SifRpcClientContextView *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
-
 extern s32 func_00367B60(const char *, ...);
 
 
-
-extern s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
 
 extern void _StartThread(s32, s32);
 
@@ -363,7 +359,7 @@ void sdfDevPrintText(const char *text) {
         if (length != 0) {
             alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
             memcpy(alignedBuffer, text, length);
-            func_0034DE68(&sdfDevRpcClient, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+            func_0034DE68(&sdfDevRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
         func_00367B60(D_00438AC0, text);
