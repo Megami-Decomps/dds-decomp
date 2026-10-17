@@ -2,22 +2,30 @@
 #define PAR_RELEASE_RECORD_H
 
 #include "common.h"
+#include "eff_vertex_draw_request.h"
 
 struct SdfMemBlock;
 struct SdfAsset;
 
-/* Shared particle resource-owner view. The release and texture accessors
- * evidence flags at +0, allocation at +0x10, and asset at +0x40; gaps remain
- * opaque. */
+/* The constructor appends this owner after its position and attribute streams. */
 typedef struct ParReleaseRecord {
-    u16 flags;
-    u8 opaque_02[0x0E];
+    s16 flags;
+    u8 opaque02[2];
+    s32 capacity;
+    s32 unk08;
+    s32 drawCount;
     struct SdfMemBlock *allocation;
-    u8 opaque_14[0x2C];
+    EffVertexDrawRequest request;
     struct SdfAsset *asset;
+    u128 *positions;
+    u32 (*texcoords)[2];
+    u128 *normals;
+    u32 *colors;
+    struct ParReleaseRecord *next;
+    s32 unk58;
 } ParReleaseRecord;
 
 typedef char ParReleaseRecordSizeCheck[
-    sizeof(ParReleaseRecord) == 0x44 ? 1 : -1];
+    sizeof(ParReleaseRecord) == 0x5C ? 1 : -1];
 
 #endif

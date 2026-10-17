@@ -2779,6 +2779,17 @@ fake when the reuse only reads correctly under a misleading name (a `column`
 counter holding a row bound), or when the variable exists only to steer
 register allocation.
 
+For example, DDS1 `func_0015B258` / DDS2 `func_00162E48` (380 bytes each)
+reuse `s32 bytes` for the total stream-allocation extent, then for the
+position-stream extent after placing the trailing owner. Both are consumed
+byte lengths, not an index alias or a count mixed with an address. In the
+qualified `sandbox_ClusterX/ctor_reentry_F4_probe/decisions.log:16561-16660`
+(all modes, hooked == unhooked), global allocation gives the saved position
+span priority 1250 instead of the separate-span form's 3846. It ties the
+earlier allocator handle, leaving the native count/flags/allocation/span
+register homes. Preserve the actual allocation and layout epochs; merely
+removing the explicit span cache had left the same 23-word register cycle.
+
 ## Pure two-word swaps: identify the decisive scheduler key
 
 A residual consisting of two exchanged instructions is a phenotype, not a

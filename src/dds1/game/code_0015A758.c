@@ -25,17 +25,11 @@
 #include "ee_mmi.h"
 
 
-typedef struct ParListNode ParListNode;
 
 extern ParSystem *D_003BB014;
 
-extern ParListNode *parRecordListHead;
+extern ParReleaseRecord *parRecordListHead;
 
-/* Free-list links mirror the DDS2 particle unit. */
-struct ParListNode {
-    u8 pad00[0x54];
-    ParListNode *next;
-};
 
 
 #include "sdf_packet_alloc.h"
@@ -455,7 +449,49 @@ void parSysReset(void) {
 void parInitializeParticleSubsystem(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
+ParReleaseRecord *func_0015B258(s32 count, s16 flags, s16 options) {
+    s32 vertexCount;
+    s32 bytes;
+    struct SdfMemBlock *allocation;
+    u8 *buffer;
+    ParReleaseRecord *record;
+    struct SdfAsset *asset;
+
+    if (flags & 8) vertexCount = count + 2;
+    else vertexCount = count * 3;
+    bytes = vertexCount * sizeof(u128);
+    if (flags & 1) bytes += vertexCount * sizeof(record->texcoords[0]);
+    if (flags & 2) bytes += vertexCount * sizeof(u128);
+    if (flags & 4) bytes += vertexCount * sizeof(u32);
+    allocation = sdfAllocGeneralBlock(bytes + sizeof(*record));
+    buffer = (u8 *)sdfResourceRetainAddress(allocation);
+    record = (ParReleaseRecord *)(buffer + bytes);
+    memset(record, 0, sizeof(*record));
+    record->positions = (u128 *)buffer;
+    /* Allocation and layout reuse one byte extent; qualified cc1probe:
+     * sandbox_ClusterX/ctor_reentry_F4_probe/decisions.log:16561-16660.
+     * The saved span ties allocation at 1250, below vertex count at 3500;
+     * a separate span instead has priority 3846 and takes the count's home. */
+    bytes = vertexCount * sizeof(u128);
+    buffer += bytes;
+    if (flags & 1) {
+        record->texcoords = (u32 (*)[2])buffer;
+        buffer += vertexCount * sizeof(record->texcoords[0]);
+    }
+    if (flags & 2) record->normals = (u128 *)buffer;
+    if (flags & 4) record->colors = (u32 *)buffer;
+    record->flags = flags;
+    record->capacity = vertexCount;
+    record->allocation = allocation;
+    record->drawCount = 0;
+    memset(&record->request, 0, sizeof(record->request));
+    record->request.color = 0x80808080;
+    if (!(options & 1)) record->request.flags = 0x4000;
+    asset = sdfCreateAssetWithDrawEntries();
+    record->asset = asset;
+    if (!(options & 2)) sdfSetPrimaryStateFloat(asset, 1.0f);
+    return record;
+}
 
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->flags = 1;
@@ -463,7 +499,7 @@ void parReleaseAssetRecord(ParReleaseRecord *record) {
     sdfReleaseResourceAllocation(record->allocation);
 }
 
-void parPrependRecordListNode(ParListNode *node) {
+void parPrependRecordListNode(ParReleaseRecord *node) {
     node->next = parRecordListHead;
     parRecordListHead = node;
 }
