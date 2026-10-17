@@ -17,15 +17,6 @@ s32 func_0034F7B8(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOu
 
 void fileReqInit(s32 request);
 
-/* Completion node drained by fileManDispatchDone. */
-typedef struct FileCbNode FileCbNode;
-struct FileCbNode {
-    u8 unk0[0x18];
-    void (*cb)(FileCbNode *node, u32 arg);
-    u32 arg;
-    u8 unk20[0xC];
-    FileCbNode *next;
-};
 
 /* The open device state retains the resolved path at +0x10. */
 s32 WaitSema(s32 sema);
@@ -48,8 +39,8 @@ s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern s32 sdfDevQueueControlRequest(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
-extern void filePrependNode(void *, void *);
-extern void fileUnlinkNode(void *, void *);
+extern void filePrependNode(FileManWork *work, FileRequest *job);
+extern void fileUnlinkNode(FileManWork *work, FileRequest *job);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
 extern DevState *sdfDevCreateModeState(const char *path,
@@ -75,14 +66,14 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
         break;
     case SDF_DEV_EVENT_READ_REPLY:
         WaitSema(work->sema);
-        if (job->stateRequired != 0) {
+        if (job->readinessEnabled != 0) {
             job->state = 5;
         } else {
             work->slots[job->slot].value = byteCount;
             job->transferBytes -= byteCount;
             if (job->transferBytes == 0) {
                 job->state = 5;
-                work->head = (struct FileNode *)job->next;
+                work->head = (struct FileRequest *)job->next;
                 if (job->next == NULL) {
                     work->tail = NULL;
                 }
@@ -92,7 +83,7 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
         }
         work->activeSlots++;
         if (job->state == 5) {
-            filePrependNode(work, job);
+            filePrependNode(work, (FileRequest *)job);
             SignalSema(work->sema);
             sdfDevQueueActiveOperation(deviceRequest);
         } else {
@@ -105,7 +96,7 @@ s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32
         break;
     case SDF_DEV_EVENT_CLOSED:
         WaitSema(work->sema);
-        fileUnlinkNode(work, job);
+        fileUnlinkNode(work, (FileRequest *)job);
         SignalSema(work->sema);
         sdfDevQueueReleaseState(deviceRequest);
         job->deviceRequest = NULL;
@@ -170,8 +161,8 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
         job->transferBytes -= byteCount;
         if (job->transferBytes == 0) {
             job->state = 5;
-            if (work->head == (struct FileNode *)job) {
-                work->head = (struct FileNode *)job->next;
+            if (work->head == (struct FileRequest *)job) {
+                work->head = (struct FileRequest *)job->next;
                 if (job->next == NULL) {
                     work->tail = NULL;
                 }
@@ -181,7 +172,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
             job->transferAddress += byteCount;
         }
         if (job->state == 5) {
-            filePrependNode(work, job);
+            filePrependNode(work, (FileRequest *)job);
             SignalSema(work->sema);
             sdfDevQueueActiveOperation(deviceRequest);
             saved = D_00437CC0;
@@ -198,9 +189,9 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
         job->deviceRequest = NULL;
         job->state = 6;
         WaitSema(work->sema);
-        fileUnlinkNode(work, job);
+        fileUnlinkNode(work, (FileRequest *)job);
         if (job->completionCallback != NULL) {
-            FileTransferJob **link = (FileTransferJob **)&work->done;
+            FileTransferJob **link = &work->done;
             FileTransferJob *next;
 
             while ((next = *link) != NULL) {
@@ -242,8 +233,8 @@ s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 
         job->transferBytes -= byteCount;
         if (job->transferBytes == 0) {
             job->state = 5;
-            if (work->head == (struct FileNode *)job) {
-                work->head = (struct FileNode *)job->next;
+            if (work->head == (struct FileRequest *)job) {
+                work->head = (struct FileRequest *)job->next;
                 if (job->next == NULL) {
                     work->tail = NULL;
                 }
@@ -252,7 +243,7 @@ s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 
             job->state = FILE_JOB_READY;
         }
         if (job->state == 5) {
-            filePrependNode(work, job);
+            filePrependNode(work, (FileRequest *)job);
             SignalSema(work->sema);
             sdfDevQueueActiveOperation(deviceRequest);
             saved = D_00437CC0;
@@ -269,9 +260,9 @@ s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 
         job->deviceRequest = NULL;
         job->state = 6;
         WaitSema(work->sema);
-        fileUnlinkNode(work, job);
+        fileUnlinkNode(work, (FileRequest *)job);
         if (job->completionCallback != NULL) {
-            FileTransferJob **link = (FileTransferJob **)&work->done;
+            FileTransferJob **link = &work->done;
             FileTransferJob *next;
 
             while ((next = *link) != NULL) {
@@ -355,19 +346,19 @@ void fileStartOrResumeQueuedJob(void) {
 
 void fileManDispatchDone(void) {
     FileManWork *work = &fileManagerWork;
-    FileCbNode *node;
+    FileTransferJob *node;
 
     WaitSema(work->sema);
     while ((node = work->done) != NULL) {
-        work->done = node->next;
+        work->done = node->completionNext;
         SignalSema(work->sema);
-        node->cb(node, node->arg);
+        node->completionCallback(node, (u32)node->completionArg);
         WaitSema(work->sema);
     }
     SignalSema(work->sema);
 }
 
-extern void fileManCancelRequest(struct FileNode *request);
+extern void fileManCancelRequest(FileRequest *request);
 
 /* Deliver callbacks queued after PAC input completes. */
 s32 fileManUpdate(void) {
@@ -388,9 +379,9 @@ s32 fileManUpdate(void) {
             FilePacRequest *request = (FilePacRequest *)job;
             if (request != NULL &&
                 sdfPacFeedInput(&request->packet, input, work->slots[slot].value) == -1) {
-                fileManCancelRequest((struct FileNode *)request);
+                fileManCancelRequest((FileRequest *)request);
                 request->readinessEnabled = kind;
-                if (request->callback != NULL) {
+                if (request->completionCallback != NULL) {
                     FilePacRequest **append = &work->pacCallbackHead;
                     FilePacRequest *next;
 
@@ -417,7 +408,7 @@ s32 fileManUpdate(void) {
     while ((request = *link) != NULL) {
         if (request->state == 6) {
             *link = request->callbackNext;
-            ((void (*)(FilePacRequest *, void *))request->callback)(request, request->userData);
+            ((void (*)(FilePacRequest *, void *))request->completionCallback)(request, request->completionArg);
         } else {
             link = &request->callbackNext;
         }

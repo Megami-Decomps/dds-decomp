@@ -5,14 +5,7 @@
 #include "file_request_api.h"
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
-#include "file_manager_views.h"
-#include "file_request_callback_work.h"
-
-/* Intrusive list node threaded through +0x4. */
-typedef struct FileNode {
-    u32 unk0;              /* 0x0 */
-    struct FileNode *next; /* 0x4 */
-} FileNode;
+#include "file_request.h"
 
 FileManWork fileManagerWork __attribute__((section(".bss")));
 
@@ -26,26 +19,20 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 #define FILE_LAST_READ_SLOT 3
 #define FILE_READ_SLOT_BYTES 0x10000
 #define FILE_READ_SLOT_SHIFT 16
-#define FILE_PAC_REQUEST_BYTES 0x70
-#define FILE_PAC_PACKET_OFFSET 0x30
-#define FILE_VALUE_PAIR_REQUEST_BYTES 0x30
 
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
  * then release any device state, duplicated name and entry, returning zero.
  * A pending non-PAC request returns one; request is required. */
 s32 filePollEntryCleanup(struct FileRequest *request) {
-    FileCleanup *entry;
-
-    entry = (FileCleanup *)request;
-    if (entry->kind == FILE_REQUEST_KIND_PAC) {
-        return btlDestroyStageTask(entry);
+    if (request->kind == FILE_REQUEST_KIND_PAC) {
+        return btlDestroyStageTask(request);
     }
-    if (entry->state == FILE_REQUEST_COMPLETE) {
-        if (entry->handle != 0) {
-            sdfDevQueueReleaseState((DevState *)entry->handle);
+    if (request->state == FILE_REQUEST_COMPLETE) {
+        if (request->deviceRequest != NULL) {
+            sdfDevQueueReleaseState((DevState *)request->deviceRequest);
         }
-        sdfReleaseChipBlock(entry->requestNameCopy);
-        sdfReleaseChipBlock(entry);
+        sdfReleaseChipBlock(request->name);
+        sdfReleaseChipBlock(request);
         return 0;
     }
     return 1;
@@ -58,7 +45,7 @@ extern s32 SignalSema(s32);
 /* Duplicate the request name, narrow kind to a byte and append under the
  * semaphore. Start processing only after an empty-to-nonempty transition.
  * The caller supplies initialized next linkage; this function does not clear it. */
-void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *requestName,
+void fileManQueueNamedRequest(FileRequest *request, s32 kind, const char *requestName,
                    void *callback, void *userData) {
     FileManWork *work;
     char *duplicatedName;
@@ -67,19 +54,19 @@ void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *req
     work = &fileManagerWork;
     request->kind = kind;
     duplicatedName = sdfStrDup(requestName);
-    request->callback = callback;
+    request->completionCallback = callback;
     request->name = duplicatedName;
-    request->userData = userData;
+    request->completionArg = userData;
 
     WaitSema(work->sema);
     if (work->tail == NULL) {
-        work->head = (FileNode *)request;
+        work->head = request;
         startsQueue = 1;
     } else {
-        work->tail->next = (FileNode *)request;
+        work->tail->next = request;
         startsQueue = 0;
     }
-    work->tail = (FileNode *)request;
+    work->tail = request;
     SignalSema(work->sema);
 
     if (startsQueue != 0) {
@@ -89,15 +76,15 @@ void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *req
 
 /* Clear every matching read slot and unlink the first queued occurrence under
  * the semaphore. No request/name memory is freed; absence from the queue is OK. */
-void fileManCancelRequest(FileNode *node) {
+void fileManCancelRequest(FileRequest *node) {
     FileManWork *work = &fileManagerWork;
-    FileNode *previousNode;
-    FileNode *currentNode;
+    FileRequest *previousNode;
+    FileRequest *currentNode;
     s32 slotIndex;
 
     WaitSema(work->sema);
     for (slotIndex = 0; slotIndex != FILE_READ_SLOT_COUNT; slotIndex++) {
-        if (work->slots[slotIndex].request == (FileRequest *)node) {
+        if (work->slots[slotIndex].request == node) {
             work->slots[slotIndex].request = NULL;
         }
     }
@@ -121,41 +108,40 @@ void fileManCancelRequest(FileNode *node) {
     SignalSema(work->sema);
 }
 
-/* Prepend without locking or allocation. Both list and node are required. */
-void filePrependNode(FileWork *list, FileNode *node) {
-    node->next = list->head;
-    list->head = node;
+/* Add a finished job to the jobs whose device state is still open, without
+ * locking or allocation. */
+void filePrependNode(FileManWork *work, FileRequest *job) {
+    job->next = work->closingJobs;
+    work->closingJobs = job;
 }
 
-/* Unlink without locking/freeing. The node must occur in the list: unlike
- * fileManCancelRequest, this walk has no end-of-list guard. */
-void fileUnlinkNode(FileWork *list, FileNode *node) {
-    FileNode **incomingLink = &list->head;
-    FileNode *currentNode;
+/* Remove a closed job without locking or freeing. The job must be in the
+ * list: unlike fileManCancelRequest, this walk has no end-of-list guard. */
+void fileUnlinkNode(FileManWork *work, FileRequest *job) {
+    FileRequest **incomingLink = &work->closingJobs;
+    FileRequest *currentJob;
 
-    while ((currentNode = *incomingLink) != node) {
-        incomingLink = &currentNode->next;
+    while ((currentJob = *incomingLink) != job) {
+        incomingLink = &currentJob->next;
     }
-    *incomingLink = node->next;
+    *incomingLink = job->next;
 }
 
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
 struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
-    u8 *requestWork;
-    PacState *dispatchPacket;
+    FilePacRequest *request;
 
     sdfDebugPrintf("pac load %s\n", requestName);
-    requestWork = sdfAllocAndClearQuadwords(FILE_PAC_REQUEST_BYTES);
-    dispatchPacket = (PacState *)(requestWork + FILE_PAC_PACKET_OFFSET);
-    sdfPacInitializeDispatchPacket(dispatchPacket, dispatchValue);
+    request = sdfAllocAndClearQuadwords(sizeof(FilePacRequest));
+    sdfPacInitializeDispatchPacket(&request->packet, dispatchValue);
     if (flags != 0) {
-        sdfPacUseHighAddressAllocator(dispatchPacket);
+        sdfPacUseHighAddressAllocator(&request->packet);
     }
-    fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_PAC, requestName,
+    fileManQueueNamedRequest((FileRequest *)request, FILE_REQUEST_KIND_PAC, requestName,
                              (void *)onComplete, (void *)userData);
-    return (struct FilePacRequest *)requestWork;
+    return request;
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
@@ -172,14 +158,14 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Keep the raw byte store and existing provider parameter types. */
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
-    FileRequestCallbackWork *requestWork;
+    FileRequest *request;
 
     sdfDebugPrintf("file load %s\n", requestName);
-    requestWork = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
-    requestWork->callbackMode = callbackMode;
-    fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
+    request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
+    request->allocationMode = callbackMode;
+    fileManQueueNamedRequest(request, FILE_REQUEST_KIND_CALLBACK, requestName,
                              (void *)callbackAddress, (void *)userData);
-    return (struct FileRequest *)requestWork;
+    return request;
 }
 
 /* Queue a callback-kind request with mode zero and no callback/context. */
@@ -194,25 +180,22 @@ struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
 
 /* Return the stored allocation descriptor without changing ownership; work is required. */
 struct SdfMemBlock *fileGetResourceHandle(const struct FileRequest *request) {
-    const FileWork *requestWork = (const FileWork *)request;
-    return requestWork->resourceHandle;
+    return request->allocationHandle;
 }
 
 /* Return the loaded payload address represented by the stored address word. */
 u8 *fileGetLoadedDataAddress(const struct FileRequest *request) {
-    const FileWork *requestWork = (const FileWork *)request;
-    return (u8 *)(u32)requestWork->loadedDataAddress;
+    return (u8 *)request->retainedAddress;
 }
 
 /* Return the recorded resource size; work is required. */
 u32 fileGetResourceSize(const struct FileRequest *request) {
-    const FileWork *requestWork = (const FileWork *)request;
-    return requestWork->size;
+    return request->totalBytes;
 }
 
-/* Return the still-unidentified work word at +0x10; do not infer its role. */
-u32 func_002C8120(FileWork *work) {
-    return work->unk10;
+/* Return the request's remaining transfer byte count. */
+u32 func_002C8120(FileRequest *request) {
+    return request->transferBytes;
 }
 
 /* Kind one additionally requires readinessEnabled; other kinds only require
@@ -260,27 +243,28 @@ void fileWaitForRequestReady(FileRequest *request) {
 void fileWaitIdle(void) {
     FileManWork *work = &fileManagerWork;
 
-    while (work->head != 0 || work->unk18 != 0) {
+    while (work->head != 0 || work->closingJobs != 0) {
         fileManUpdate();
     }
 }
 
 /* Create a kind-two request with the caller's source buffer and byte count.
  * Its address is stored in the existing value word at +0x24. */
-FileWindowSlot *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
-    FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
+FileRequest *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
+    FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
 
-    requestSlot->sourceData = sourceData;
-    requestSlot->sourceDataCopy = sourceData;
-    requestSlot->secondValue = sourceByteCount;
-    requestSlot->secondValueCopy = sourceByteCount;
-    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callbackAddress, userDataAddress);
-    return requestSlot;
+    request->retainedAddress = (u32)sourceData;
+    request->transferAddress = (u32)sourceData;
+    request->totalBytes = sourceByteCount;
+    request->transferBytes = sourceByteCount;
+    fileManQueueNamedRequest(request, FILE_REQUEST_KIND_VALUE_PAIR, requestName, (void *)callbackAddress,
+                             (void *)userDataAddress);
+    return request;
 }
 
 /* Queue the value-pair request and expose its opaque request handle. */
 struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, const void *sourceData, s32 sourceByteCount) {
-    return (struct FileRequest *)fileWindowSlotCreate(requestName, sourceData, sourceByteCount, 0, 0);
+    return fileWindowSlotCreate(requestName, sourceData, sourceByteCount, 0, 0);
 }
 
 
@@ -312,11 +296,11 @@ void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
     request->slot = slotIndex;
     work->freeSlots--;
     work->slots[slotIndex].request = request;
-    chunkBytes = request->size;
+    chunkBytes = request->transferBytes;
     if (chunkBytes > FILE_READ_SLOT_BYTES) {
         chunkBytes = FILE_READ_SLOT_BYTES;
     }
     SignalSema(work->sema);
-    sdfDevQueueRead((DevState *)request->handle,
+    sdfDevQueueRead((DevState *)request->deviceRequest,
                     work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }
