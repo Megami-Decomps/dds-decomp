@@ -239,40 +239,40 @@ extern EffRandState effDefaultRandomState[];
 
 /* Re-rolls slot `index`: random-angle rotation matrix pushed to both handles
  * of the pair, then a new random countdown. */
-void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
+void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 slotIndex) {
     u128 mtx[4];
 
     sdfVuLoadRotationMatrixZ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
-    effParamWorkCallback2(work->pair[index][0], mtx);
-    effParamWorkCallback2(work->pair[index][1], mtx);
-    mdlAddEntryPlain(effParamWorkGetData(work->pair[index][0]), 0, 0);
-    mdlAddEntryPlain(effParamWorkGetData(work->pair[index][1]), 0, 0);
-    work->counter[index] = effMiscRand((EffRandState *)effDefaultRandomState) % 10;
+    effParamWorkCallback2(work->pair[slotIndex][0], mtx);
+    effParamWorkCallback2(work->pair[slotIndex][1], mtx);
+    mdlAddEntryPlain(effParamWorkGetData(work->pair[slotIndex][0]), 0, 0);
+    mdlAddEntryPlain(effParamWorkGetData(work->pair[slotIndex][1]), 0, 0);
+    work->counter[slotIndex] = effMiscRand((EffRandState *)effDefaultRandomState) % 10;
 }
 
 EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
     EffPCPTwinWork *work = sdfAllocSizeClassBlock(0xBC);
-    s32 i;
+    s32 slotIndex;
 
-    for (i = 0; i < 8; i++) {
-        if (i == 0) {
+    for (slotIndex = 0; slotIndex < 8; slotIndex++) {
+        if (slotIndex == 0) {
             work->pair[0][0] = effParamCreateFromTable(src, 0);
             work->pair[0][1] = effParamCreateFromTable(src, 2);
-        } else if (i == 1) {
+        } else if (slotIndex == 1) {
             work->pair[1][0] = effParamCreateFromTable(src, 1);
             work->pair[1][1] = effParamWorkDuplicate(work->pair[0][1]);
         } else {
-            work->pair[i][0] = effParamWorkDuplicate(work->pair[i & 1][0]);
-            work->pair[i][1] = effParamWorkDuplicate(work->pair[i & 1][1]);
+            work->pair[slotIndex][0] = effParamWorkDuplicate(work->pair[slotIndex & 1][0]);
+            work->pair[slotIndex][1] = effParamWorkDuplicate(work->pair[slotIndex & 1][1]);
         }
-        effTwinEffectRerollSlot(work, i);
+        effTwinEffectRerollSlot(work, slotIndex);
     }
     work->shared[0] = effParamCreateFromTable(src, 3);
     work->state[0] = 0;
-    for (i = 1; i < 8; i++) {
-        work->shared[i] = effParamWorkDuplicate(work->shared[0]);
-        work->state[i] = 0;
+    for (slotIndex = 1; slotIndex < 8; slotIndex++) {
+        work->shared[slotIndex] = effParamWorkDuplicate(work->shared[0]);
+        work->state[slotIndex] = 0;
     }
     work->unk00 = 0;
     work->color = 0x80808080;
@@ -303,14 +303,14 @@ void effTwinEffectRelease(EffPCPTwinWork *work) {
 
 EffPCPTwinWork *effTwinEffectClone(EffPCPTwinWork *src) {
     EffPCPTwinWork *work = sdfAllocSizeClassBlock(0xBC);
-    s32 i;
+    s32 slotIndex;
 
-    for (i = 0; i < 8; i++) {
-        work->pair[i][0] = effParamWorkDuplicate(src->pair[i & 1][0]);
-        work->pair[i][1] = effParamWorkDuplicate(src->pair[i & 1][1]);
-        work->shared[i] = effParamWorkDuplicate(src->shared[0]);
-        work->state[i] = 0;
-        effTwinEffectRerollSlot(work, i);
+    for (slotIndex = 0; slotIndex < 8; slotIndex++) {
+        work->pair[slotIndex][0] = effParamWorkDuplicate(src->pair[slotIndex & 1][0]);
+        work->pair[slotIndex][1] = effParamWorkDuplicate(src->pair[slotIndex & 1][1]);
+        work->shared[slotIndex] = effParamWorkDuplicate(src->shared[0]);
+        work->state[slotIndex] = 0;
+        effTwinEffectRerollSlot(work, slotIndex);
     }
     work->unk00 = 0;
     work->color = 0x80808080;
@@ -329,19 +329,19 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
     MdlCtx *obj[2];
     u128 pos;
     u128 *posp;
-    s32 i;
+    s32 slotIndex;
 
-    for (i = 0; i < 8; i++) {
-        if (work->counter[i] != 0) {
-            work->counter[i]--;
+    for (slotIndex = 0; slotIndex < 8; slotIndex++) {
+        if (work->counter[slotIndex] != 0) {
+            work->counter[slotIndex]--;
             continue;
         }
-        obj[0] = effParamWorkGetData(work->pair[i][0]);
-        obj[1] = effParamWorkGetData(work->pair[i][1]);
+        obj[0] = effParamWorkGetData(work->pair[slotIndex][0]);
+        obj[1] = effParamWorkGetData(work->pair[slotIndex][1]);
         VU0_LOAD_VF(vf10, work);
         mdlStorePrimaryVectorVU(obj[0]);
-        effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
-        effParamWorkCallback1(work->pair[i][1], 1.75f);
+        effParamWorkCallback1(work->pair[slotIndex][0], work->scale * 1.5f);
+        effParamWorkCallback1(work->pair[slotIndex][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
         mdlProcessContextNodesAndTransforms(obj[0], D_00325828);
         sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
@@ -350,8 +350,8 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         mdlStorePrimaryVectorVU(obj[1]);
         mdlProcessContextNodesAndTransforms(obj[1], D_00325828);
         if (work->frame > 0x18) {
-            effParamWorkCallback0(work->shared[i], posp);
-            effParamWorkInvokeCallback(work->shared[i]);
+            effParamWorkCallback0(work->shared[slotIndex], posp);
+            effParamWorkInvokeCallback(work->shared[slotIndex]);
         }
     }
     work->frame++;

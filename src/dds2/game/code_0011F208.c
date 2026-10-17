@@ -168,7 +168,7 @@ u64 *sdfCreateBorderedRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 he
     return packet;
 }
 
-void *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x50);
 
     packet[0] = 4;
@@ -922,7 +922,7 @@ void fldResetFieldRuntimeState(s32 mode) {
     area->dist = 0.0f;
     memset(area->pad124, 0, sizeof(area->pad124));
     area->movementSoundActive = 0;
-    area->unk11C = 0;
+    area->terrainAttritionKind = 0;
     area->attritionDistance = 100.0f;
     area->sceneCommand = 0;
     area->colorEffectSuppressed = 0;
@@ -1056,7 +1056,7 @@ void fldInitializeAreaWork(void) {
     area->overlayMode = 1;
     area->overlayCounter = 0;
     area->unkD8 = -1;
-    area->unk11C = 0;
+    area->terrainAttritionKind = 0;
     area->unk190 = 0;
     area->cameraTiltActive = 0;
     area->targetGuideEnabled = 0;

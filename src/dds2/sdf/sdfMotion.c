@@ -372,15 +372,15 @@ s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval) {
 
 /* Interpolate exactly five scalar channels, retaining the retail arithmetic order. */
 void sdfMotionBlendFiveFloats(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
-    s32 i;
+    s32 channelIndex;
     f32 inverseWeight;
 
-    i = 0;
+    channelIndex = 0;
     inverseWeight = 1.0f - weight;
     do {
-        dst[i] = src1[i] * inverseWeight + src2[i] * weight;
-        i++;
-    } while (i != 5);
+        dst[channelIndex] = src1[channelIndex] * inverseWeight + src2[channelIndex] * weight;
+        channelIndex++;
+    } while (channelIndex != 5);
 }
 
 void sdfMotionBlendFiveKeyValues(SdfMotionKeyInterval *src, f32 *dst) {

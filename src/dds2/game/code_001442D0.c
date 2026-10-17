@@ -1877,7 +1877,7 @@ void fldDrawAutomapScene(void) {
                 }
             }
         }
-        if (D_00436288 == fldAreaState.unkC0) {
+        if (D_00436288 == fldAreaState.flagStage) {
             f32 worldX;
             f32 worldZ;
             f32 distanceX;
@@ -1908,7 +1908,7 @@ void fldDrawAutomapScene(void) {
     }
 
     /* DDS2's location-flag overlay also runs during the floor fade. */
-    if (D_00436288 == fldAreaState.unkC0 && fldAreaState.commandEnabled != 0
+    if (D_00436288 == fldAreaState.flagStage && fldAreaState.commandEnabled != 0
         && fldAreaState.sceneCommand == 0) {
         s32 maskX;
         s32 maskY;
@@ -2237,8 +2237,8 @@ void func_00149A00(void) {
     D_00436268 = 0;
     D_00436248 = cam->floor;
     fldSceneReady = 1;
-    D_0043624C = cam->unkC0;
-    D_00436264 = cam->unkC0;
+    D_0043624C = cam->flagStage;
+    D_00436264 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     cx = cam->x;
     cz = cam->z;
@@ -2396,8 +2396,8 @@ void fldEnterSceneCamera(void) {
     dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 1);
     D_00436268 = 0;
     D_00436248 = cam->floor;
-    D_0043624C = cam->unkC0;
-    D_00436264 = cam->unkC0;
+    D_0043624C = cam->flagStage;
+    D_00436264 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
@@ -2452,8 +2452,8 @@ void fldLoadSceneModelsAndCamera(void) {
     D_0044F7F0[9] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[7].resourceAddress));
     D_00436268 = 0;
     D_00436248 = cam->floor;
-    D_0043624C = cam->unkC0;
-    D_00436264 = cam->unkC0;
+    D_0043624C = cam->flagStage;
+    D_00436264 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
@@ -2665,8 +2665,8 @@ void fldCenterCameraOnEntry(void) {
     s32 iz;
 
     D_00436248 = cam->floor;
-    D_0043624C = cam->unkC0;
-    D_00436264 = cam->unkC0;
+    D_0043624C = cam->flagStage;
+    D_00436264 = cam->flagStage;
     fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
     ix = (f32)(s32)cam->x + entry[0];
     iz = (f32)(s32)cam->z + entry[1];
@@ -2723,7 +2723,7 @@ void fldSetCurrentFloorFlag(s32 flagNumber) {
             fldAreaState.unk18 = bit;
             fldAreaState.flagNumber = flagNumber;
             datGameState->areaFlags[areaIndex][fldAreaState.floor] |= 1ULL << bit;
-            fldAreaState.unkC0 = fldFindRecordItem(fldAreaState.floor, bit);
+            fldAreaState.flagStage = fldFindRecordItem(fldAreaState.floor, bit);
         }
     }
 }

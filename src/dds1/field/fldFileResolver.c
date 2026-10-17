@@ -357,7 +357,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "evt_world_source_transform.h"
 #include "common.h"
 #include "sdf_chip.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "sdf_packet_append.h"
 #include "sdf_packet_builders.h"
 #include "fr_font.h"
@@ -374,7 +374,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "field_stage.h"
 #include "sdf_pac_work.h"
 extern FldInfTable D_00332E30;
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
@@ -489,7 +489,6 @@ extern void btlActivateRuntime(s32 mode);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void *sdfConsAllocateColumnPacket(s32);
 
 extern s32 D_0032E3C0[];
 extern s8 D_0032C9A0[];
@@ -2625,7 +2624,6 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     descriptor->append(descriptor, list);
 }
 
-extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
                          f32 x0, f32 y0, f32 z0,
                          f32 x1, f32 y1, f32 z1,
@@ -4290,7 +4288,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     MdlCtx *model;
 
     if (work->unk184 > 0) {
-        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+        if (work->terrainAttritionKind == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
             kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
             kwlnPadStartMotor(0, 1, 6);
             kwlnPadStartMotor(1, 0x96, 6);
@@ -7155,7 +7153,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
     }
 }
 
-/* Non-owning native alias of fldAreaState.unk11C (FldAreaWork + 0x11C). */
+/* Non-owning native alias of fldAreaState.terrainAttritionKind (FldAreaWork + 0x11C). */
 extern s32 D_0032E4CC[];
 
 /* Classify flagged zone faces after checking the current movement. */
@@ -7261,7 +7259,7 @@ void fldClassifyMovementAgainstZoneFaces(f32 *position) {
                             accepted = 1;
                         }
                         if (accepted == 1) {
-                            areaState->unk11C = accepted;
+                            areaState->terrainAttritionKind = accepted;
                         }
                     }
                 }

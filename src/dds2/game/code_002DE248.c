@@ -79,7 +79,7 @@
 #include "eff_owner_records.h"
 #include "sdf.h"
 #include "sdf_draw.h"
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
@@ -10669,7 +10669,6 @@ extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32,
                                          s32, s32, s32, s32);
-extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 /* Draw a scaled radial cylinder, advancing its travel counter up to the payload limit. */
 void effDrawMovingRadialCylinder(EffActiveResource *work) {

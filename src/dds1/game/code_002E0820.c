@@ -14,7 +14,8 @@
 #include "sdf_packet_header.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
-#include "sdf_primitive.h"
+#include "sdf_primitive_packet_api.h"
+#include "sdf_primitive_packet_api.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_request.h"
@@ -25,6 +26,7 @@
 #include "ee_mmi.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "sdf_column_packet_api.h"
 #include "sdf_lookup_texture.h"
 #include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dev_console_node.h"
@@ -272,8 +274,8 @@ SdfDrawPacket *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags
 }
 
 /* Allocate loopCount sprite loops with RGBAQ, UV, XYZ2, UV, XYZ2 registers. */
-void *sdfConsAllocateColumnPacket(s32 loopCount) {
-    void *packet = (void *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
+SdfDrawPacket *sdfConsAllocateColumnPacket(s32 loopCount) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
     sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
     return packet;
 }
@@ -688,7 +690,7 @@ extern f32 D_003BD35C;
 extern u32 D_00398500[];
 
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
-void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
+u32 *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
     s32 stripWords = request->stripWordCount;
     s32 count = request->vertexCount;
     s32 headerWords = 18;

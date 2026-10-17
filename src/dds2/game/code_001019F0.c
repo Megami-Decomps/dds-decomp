@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_column_packet_api.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
@@ -385,7 +386,6 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     return 0;
 }
 
-extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
