@@ -97,7 +97,7 @@ void kwlnTaskAdvanceStartDelays(void)
 
 s32 kwlnTaskStep(KwlnTask *task) {
     s32 port;
-    s32 i;
+    s32 inputIndex;
     s32 nextUpdate;
 
     if (task->flags & 0x20) {
@@ -107,26 +107,26 @@ s32 kwlnTaskStep(KwlnTask *task) {
 
     if (task->flags & 0x10) {
         for (port = 0; port < 2; port++) {
-            for (i = 0; i < 16; i++) {
-                D_00324510[0][port][i] = 0;
-                D_00324510[1][port][i] = 0;
+            for (inputIndex = 0; inputIndex < 16; inputIndex++) {
+                D_00324510[0][port][inputIndex] = 0;
+                D_00324510[1][port][inputIndex] = 0;
             }
-            for (i = 0; i < 2; i++) {
-                D_003BA870[port][i][0] = 0;
-                D_003BA878[port][i] = 0;
-                D_003BA870[port][i][1] = 0;
+            for (inputIndex = 0; inputIndex < 2; inputIndex++) {
+                D_003BA870[port][inputIndex][0] = 0;
+                D_003BA878[port][inputIndex] = 0;
+                D_003BA870[port][inputIndex][1] = 0;
             }
         }
     } else {
         for (port = 0; port < 2; port++) {
-            for (i = 0; i < 16; i++) {
-                D_00324510[0][port][i] = kwlnPadButtonStates[0][port][i];
-                D_00324510[1][port][i] = kwlnPadButtonStates[1][port][i];
+            for (inputIndex = 0; inputIndex < 16; inputIndex++) {
+                D_00324510[0][port][inputIndex] = kwlnPadButtonStates[0][port][inputIndex];
+                D_00324510[1][port][inputIndex] = kwlnPadButtonStates[1][port][inputIndex];
             }
-            for (i = 0; i < 2; i++) {
-                D_003BA870[port][i][0] = D_003BA860[port][i][0];
-                D_003BA870[port][i][1] = D_003BA860[port][i][1];
-                D_003BA878[port][i] = D_003BA868[port][i];
+            for (inputIndex = 0; inputIndex < 2; inputIndex++) {
+                D_003BA870[port][inputIndex][0] = D_003BA860[port][inputIndex][0];
+                D_003BA870[port][inputIndex][1] = D_003BA860[port][inputIndex][1];
+                D_003BA878[port][inputIndex] = D_003BA868[port][inputIndex];
             }
         }
     }
