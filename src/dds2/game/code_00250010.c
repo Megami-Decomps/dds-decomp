@@ -243,7 +243,7 @@ extern char D_00437498[];
 
 /* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
  * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
-void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *data,
+void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *callbackContext,
                    EvtMenuHeaderFn header, EvtMenuRowFn row) {
     s32 i = 0;
     s32 textX;
@@ -254,7 +254,7 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
     textX = (x << 4) + 0x7000;
     textY = (y << 3) + 0x7900;
     if (header != NULL) {
-        s32 headerRows = header(list, textX, textY, data);
+        s32 headerRows = header(list, textX, textY, callbackContext);
 
         textY += headerRows * 96;
         i = headerRows;
@@ -262,7 +262,7 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
     index = first;
     for (; i < rows; i++) {
         if (row != NULL) {
-            row(list, textX, textY, index, data);
+            row(list, textX, textY, index, callbackContext);
             textY += 96;
             index++;
         }
