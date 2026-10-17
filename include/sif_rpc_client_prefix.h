@@ -26,4 +26,20 @@ typedef char SifRpcClientContextView_size_must_be_0x30[
 typedef char SifRpcClientContextView_server_at_0x24[
     ((u32)&((SifRpcClientContextView *)0)->client.server == 0x24) ? 1 : -1];
 
+/* The multi-RPC library (sdk/libmrpc) on these clients: initialize, bind to
+ * an IOP server, and call it. Calls take 64-byte-aligned buffers and an
+ * optional end function. */
+typedef void (*SifMRpcEnd)(void *argument);
+
+s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
+#if defined(VERSION_DDS1)
+void func_002F4A38(s32 mode);
+s32 func_002F4FD8(SifRpcClientDataPrefix *client, s32 function, s32 mode, void *send, s32 sendSize,
+                  void *receive, s32 receiveSize, SifMRpcEnd end, void *endArgument);
+#elif defined(VERSION_DDS2)
+void func_0034D8E0(s32 mode);
+s32 func_0034DE68(SifRpcClientDataPrefix *client, s32 function, s32 mode, void *send, s32 sendSize,
+                  void *receive, s32 receiveSize, SifMRpcEnd end, void *endArgument);
+#endif
+
 #endif
