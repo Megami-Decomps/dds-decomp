@@ -2,6 +2,7 @@
 #include "btl_effect_node.h"
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
+#include "btl_camera_path_preset.h"
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
@@ -4462,7 +4463,151 @@ BtlUnit *btlFindActorLinkByCategory(BtlLinkedCommand *command, s32 category) {
     return command->link->unit;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F5320);
+extern BtlCameraPathPreset D_003B7680[20];
+extern BtlCameraPathPreset D_003B7E00[3];
+extern BtlCameraPathPreset D_003B7F20[3];
+extern void btlUnitGetPosVU(BtlUnit *, u8);
+
+/* vu0 routine: initialize the selected battle-camera path preset. */
+void func_001F5320(BtlLinkedCommand *action, BtlCamState *camera,
+                   s32 bank, s32 presetIndex) {
+    BtlCameraPathPreset *preset;
+    BtlIndexList *indices;
+    struct ActionStateLink *task;
+    /* The endpoint output and scalar input use successive float-data addresses.
+     * camera_preset_float_data_probe (CSE1, r91) shows that the shared temporary
+     * expires the endpoint address before the cursor-root reload. */
+    f32 *data;
+    f32 endpoint[4] __attribute__((aligned(16)));
+    f32 angle;
+    f32 distance;
+    f32 extraDistance;
+    f32 savedDistance;
+    f32 span;
+    u32 count;
+
+    switch (bank) {
+    case 0:
+        preset = &D_003B7680[presetIndex];
+        break;
+    case 2:
+        preset = &D_003B7E00[presetIndex];
+        break;
+    case 4:
+        preset = &D_003B7F20[presetIndex];
+        break;
+    default:
+        preset = &D_003B7680[presetIndex];
+        break;
+    }
+
+    angle = preset->angleScale * 0x1.1df46ap-6f * 0x1.555554p+0f * 0.5f;
+    CURSOR->kind = preset->kind;
+
+    switch (preset->operation) {
+    case 1:
+        task = action->link;
+        indices = btlAllocateIndexList(13);
+        btlBuildUnitIndexList(task, indices, 1, 0, 0);
+        count = btlGetIndexListCount(indices);
+
+        btlUnitGetPosVU((BtlUnit *)indices->entries[0], 0);
+        VU0_STORE_VF(vf10, endpoint);
+        endpoint[0] += preset->firstOffset[0];
+        endpoint[1] += preset->firstOffset[1];
+        endpoint[2] += preset->firstOffset[2];
+        VU0_LOAD_VF(vf10, endpoint);
+        VU0_STORE_VF(vf10, CURSOR->pathEnd);
+
+        btlUnitGetPosVU((BtlUnit *)indices->entries[count - 1], 0);
+        VU0_STORE_VF(vf10, endpoint);
+        endpoint[0] += preset->secondOffset[0];
+        endpoint[1] += preset->secondOffset[1];
+        endpoint[2] += preset->secondOffset[2];
+        VU0_LOAD_VF(vf10, endpoint);
+        VU0_STORE_VF(vf10, CURSOR->pathStart);
+        btlFreeIndexList(indices);
+        break;
+
+    case 2:
+        span = btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
+        /* Retail retains this discarded vector subtraction before zero-offset
+         * framing: DDS1 001E6894..001E68B0, DDS2 001F554C..001F5568. */
+        VU0_STORE_VF(vf10, endpoint);
+        VU0_LOAD_VF(vf10, endpoint);
+        VU0_LOAD_VF(vf11, camera->position);
+        VU0_SUB(vf10, vf10, vf11);
+        extraDistance = 0.0f;
+        distance = (span + extraDistance) / tanf(angle);
+        VU0_LOAD_VF(vf10, camera->position);
+        VU0_STORE_VF(vf10, endpoint);
+        endpoint[0] += preset->firstOffset[0];
+        endpoint[1] += preset->firstOffset[1];
+        endpoint[2] += preset->firstOffset[2];
+        VU0_LOAD_VF(vf10, endpoint);
+        VU0_STORE_VF(vf10, CURSOR->pathEnd);
+        if (distance >= 1000.0f) {
+            extraDistance = distance - 1000.0f;
+            VU0_LOAD_VF(vf10, camera->direction);
+            VU0_NEGATE_XYZ(vf10);
+            VU0_SCALE_VF(vf10, extraDistance);
+            VU0_LOAD_VF(vf11, endpoint);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, endpoint);
+            camera->distance += extraDistance;
+            VU0_LOAD_VF(vf10, endpoint);
+            VU0_STORE_VF(vf10, CURSOR->pathEnd);
+            distance = 1000.0f;
+        }
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_NEGATE_XYZ(vf10);
+        VU0_SCALE_VF(vf10, distance);
+        VU0_LOAD_VF(vf11, endpoint);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, endpoint);
+        endpoint[0] += preset->secondOffset[0];
+        endpoint[1] += preset->secondOffset[1];
+        endpoint[2] += preset->secondOffset[2];
+        VU0_LOAD_VF(vf10, endpoint);
+        data = CURSOR->pathStart;
+        VU0_STORE_VF(vf10, data);
+        data = &camera->distance;
+        CURSOR->kind = 0;
+        CURSOR->distance = *data;
+        break;
+
+    case 3:
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_NEGATE_XYZ(vf10);
+        savedDistance = camera->distance;
+        VU0_SCALE_VF(vf10, savedDistance);
+        VU0_LOAD_VF(vf11, camera->position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, endpoint);
+        VU0_STORE_VF(vf10, CURSOR->pathEnd);
+
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_NEGATE_XYZ(vf10);
+        VU0_SCALE_VF(vf10, preset->firstOffset[0]);
+        VU0_LOAD_VF(vf11, CURSOR->pathEnd);
+        VU0_ADD(vf10, vf10, vf11);
+        data = CURSOR->pathStart;
+        VU0_STORE_VF(vf10, data);
+        data = &camera->distance;
+        CURSOR->distance = *data;
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_STORE_VF(vf10, CURSOR->direction);
+        break;
+    }
+
+    CURSOR->startFrame = preset->startFrame;
+    CURSOR->duration = preset->duration;
+    CURSOR->parameterD0 = preset->unk30;
+    CURSOR->parameterE0 = preset->unk40;
+    CURSOR->blendRate = preset->blendRate;
+    CURSOR->rangeStart = preset->firstOffset[0];
+    CURSOR->rangeEnd = preset->secondOffset[0];
+}
 
 /* Camera clearance for a unit: mode 1 is the scaled camera radius plus any
  * negative horizontal offset; mode 0 is the larger of the scaled reach plus the
