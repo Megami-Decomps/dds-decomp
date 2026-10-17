@@ -43,5 +43,6 @@ typedef char SdfPacStreamPacketHeader_decodedSize_offset_must_be_0x0C[
 struct PacState;
 s32 sdfPacDispatchPacket(struct PacState *state, s32 status,
                          SdfPacStreamPacketHeader *packet);
+u8 *sdfPacGetExtensionData(SdfPacStreamPacketHeader *header);
 
 #endif /* SDF_PAC_PACKET_H */
