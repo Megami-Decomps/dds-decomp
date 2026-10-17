@@ -19,6 +19,7 @@
 #include "prf_requirement_fallback.h"
 #include "mdl_flag_api.h"
 #include "script_flag_slot.h"
+#include "pty_preset_record.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -64,21 +65,6 @@
 #define SDF_FLAG_SLOT_COUNT 16
 
 extern void memset();
-/* DDS1 preset rows are 0xC0 bytes; the skill lists at +0x60/+0x70 belong
- * to the same row as its four script choices and four profile sets. */
-typedef struct PtyPresetScriptChoice {
-    u16 scriptId;
-    u16 initialValue;
-    u16 requiredProfiles[4];
-} PtyPresetScriptChoice;
-
-typedef struct PtyPresetRecord {
-    PtyPresetScriptChoice scriptChoices[4];
-    u8 profileIds[4][12];
-    u16 skillSlots[8];
-    u16 poolSkills[40];
-} PtyPresetRecord;
-
 extern PtyPresetRecord D_00393A80[];
 extern void ptyMergeStockSkills(DatPartyRecord *);
 

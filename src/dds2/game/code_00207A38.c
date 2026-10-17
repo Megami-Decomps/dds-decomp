@@ -11,7 +11,7 @@
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
-#include "btl_command_partner_output.h"
+#include "btl_command_affinity_api.h"
 #include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -1571,9 +1571,6 @@ u32 btlScriptSelectModeAValueOne(void) {
 }
 
 
-extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-extern s32 btlResolveCommandAffinityPartners(void *, s32, BtlCommandPartnerOutput *);
-
 /* Resolve a command-table entry through its probe, or store the direct command id. */
 u32 btlScriptSelectActionEntry(void) {
     BtlCommandCtx *context;
@@ -1583,8 +1580,8 @@ u32 btlScriptSelectActionEntry(void) {
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     commandId = scrReadIntParameter(0);
     if (datCommandSelectors[commandId].kind == 1) {
-        if (btlHasRequiredCommandAffinityPartners((void *)context->actor, commandId) != 0 &&
-            btlResolveCommandAffinityPartners((void *)context->actor, commandId, &probe) != 0) {
+        if (btlHasRequiredCommandAffinityPartners((BtlUnit *)context->actor, commandId) != 0 &&
+            btlResolveCommandAffinityPartners((BtlUnit *)context->actor, commandId, &probe) != 0) {
             context->actionProbeFirst = probe.firstPartner;
             context->commandMode = 3;
             context->commandValue = probe.commandId;

@@ -75,7 +75,7 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
 }
 
 extern s32 sprintf();
-extern void (*fileIdleUpdateCallback)(void);
+extern s32 (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
 void sndEnsureMidiBankResident(s32 packed) {
