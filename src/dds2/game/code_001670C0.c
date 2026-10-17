@@ -5,7 +5,7 @@
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_param.h"
@@ -19,7 +19,6 @@
 #include "eff_offset_triangle.h"
 #include "eff_packet_params.h"
 
-extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 extern SdfTex *kwlnTextureGetHeldReference(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];

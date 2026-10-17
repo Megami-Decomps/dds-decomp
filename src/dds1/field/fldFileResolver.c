@@ -357,7 +357,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "evt_world_source_transform.h"
 #include "common.h"
 #include "sdf_chip.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "sdf_packet_append.h"
 #include "sdf_packet_builders.h"
 #include "fr_font.h"
@@ -489,7 +489,6 @@ extern void btlActivateRuntime(s32 mode);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void *sdfConsAllocateColumnPacket(s32);
 
 extern s32 D_0032E3C0[];
 extern s8 D_0032C9A0[];

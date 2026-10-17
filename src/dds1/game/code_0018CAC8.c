@@ -5,7 +5,7 @@
 #include "sdf_chip.h"
 #include "kwln_sprite.h"
 #include "sdf_packet_list.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -51,7 +51,6 @@ extern s32 sceDclose(s32 directory);
 extern s32 sprintf(char *destination, const char *format, ...);
 extern s32 sceDopen(void *path);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
-extern void *sdfConsAllocateColumnPacket(s32 loopCount);
 
 
 extern EffCreateHandler D_00355730[];
