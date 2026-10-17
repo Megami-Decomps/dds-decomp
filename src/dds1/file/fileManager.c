@@ -197,9 +197,9 @@ struct SdfMemBlock *fileGetResourceHandle(const struct FileRequest *request) {
 }
 
 /* Return the loaded payload address represented by the stored address word. */
-void *fileGetLoadedDataAddress(const struct FileRequest *request) {
+u8 *fileGetLoadedDataAddress(const struct FileRequest *request) {
     const FileWork *requestWork = (const FileWork *)request;
-    return (void *)(u32)requestWork->loadedDataAddress;
+    return (u8 *)(u32)requestWork->loadedDataAddress;
 }
 
 /* Return the recorded resource size; work is required. */
