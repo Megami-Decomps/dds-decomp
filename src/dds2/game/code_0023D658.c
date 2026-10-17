@@ -15,6 +15,7 @@
 #include "evt_world_source_transform.h"
 #include "evt_model_header.h"
 #include "evt_unit.h"
+#include "evt_lips_link.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
@@ -35,18 +36,6 @@
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_004371F0;
-
-/* Slot-specific lip-sync node/model chain within the world's unit lists. */
-typedef struct EvtLipsMh {
-    u8 pad00[0x0C];
-    MdlCtx *model;      /* 0x0C */
-} EvtLipsMh;
-
-typedef struct EvtLipsLink {
-    u8 pad00[0x08];
-    void *unit;         /* 0x08 */
-    EvtLipsMh *mh;      /* 0x0C */
-} EvtLipsLink;
 
 extern u32 sdfGetLodChunkValue(SdfModel *model);
 
