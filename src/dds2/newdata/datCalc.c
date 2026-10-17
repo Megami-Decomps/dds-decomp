@@ -2133,13 +2133,13 @@ s32 evtPushLevelValueCCommand18E(void) {
 }
 
 s32 evtRollFlagDependentResultCode(void) {
-    s32 value;
+    s32 resultCode;
     if ((((DatPartyRecord *)evtWorkScriptContext.secondArgument)->flags & 0x20) == 0) {
-        value = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
+        resultCode = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
     } else {
-        value = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
+        resultCode = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(resultCode);
     return 1;
 }
 
