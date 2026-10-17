@@ -1342,8 +1342,8 @@ void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
 
 
 
-s32 mnuGetTerminalListSlotForCount(MenuTerminalWork *context) {
-    s32 value = context->listResource->count;
+s32 mnuGetTerminalListSlotForCount(MenuTerminalWork *terminalWork) {
+    s32 value = terminalWork->listResource->count;
 
     switch (value) {
     case 2:
