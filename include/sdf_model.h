@@ -79,7 +79,7 @@ void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 /* The draw node owns the lazily allocated workspace; callers receive a borrowed
  * pointer to it, and must not release it independently. */
-void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root);
+u8 *sdfEnsureFreeRootWorkspace(SdfDrawNode *root);
 /* Releases each allocation in both free-node lists. The list heads remain
  * stored on root and must not be traversed again after this call. */
 void sdfFreeNodeLists(SdfDrawNode *root);
