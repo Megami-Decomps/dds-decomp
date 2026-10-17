@@ -3164,19 +3164,19 @@ typedef struct MnuCampPanelOrigins {
 
 extern const MnuCampPanelOrigins D_0042AE48;
 
-void mnuDrawSkillMenuFrameIcons(MenuContext *context) {
+void mnuDrawSkillMenuFrameIcons(MenuContext *menuContext) {
     MnuCampPanelDrawRecord primaryRows[5] = {
-        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
-        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
-        {(EffectSlotSet *)context->labelHandle, 0x0C, 0x2A0, 0x38},
-        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
-        {(EffectSlotSet *)context->labelHandle, 0x10, 0x180, 0x138},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)menuContext->labelHandle, 0x0C, 0x2A0, 0x38},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x0F, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->labelHandle, 0x10, 0x180, 0x138},
     };
     MnuCampPanelDrawRecord secondaryRows[4] = {
-        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
-        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
-        {(EffectSlotSet *)context->resourceHandle, 0x0E, 0x2C0, 0x50},
-        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x0E, 0x2C0, 0x50},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x0F, 0x1E0, 0xC0},
     };
     MnuCampPanelOrigins origins = D_0042AE48;
     s32 i;
