@@ -47,12 +47,12 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
  * handle releases the old resource first, so failure does not restore it;
  * a NULL resolved address fails attachment without undoing the retain. */
 s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
-    s32 result = 0;
+    s32 notAttachedStatus = 0;
     u32 resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (resourceHandle == NULL) {
-        return result;
+        return notAttachedStatus;
     }
     if (worldData->sceneResourceHandle != 0) {
         evtReleaseSceneResource(worldNode);
@@ -63,7 +63,7 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
         worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
         return 1;
     }
-    return result;
+    return notAttachedStatus;
 }
 
 /* Release a stored allocation handle when present, then always clear both
