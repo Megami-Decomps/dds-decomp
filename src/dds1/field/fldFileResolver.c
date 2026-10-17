@@ -8374,11 +8374,11 @@ extern s32 fldGetActorStat0(s32 attribute);
 /* Follow the INF flag/message graph to its terminal event or actor action.
  * Linked selectors recurse in tail position; the native routine loops without
  * growing the stack. Targets and eventHit are signed serialized bytes. */
+extern u8 *fldFindActorEntryByName(const char *);
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0138);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0150);
-
-extern u8 *fldFindActorEntryByName(const char *);
 
 s32 fldResolveEventSelectorTarget(s32 selector) {
     s32 target;

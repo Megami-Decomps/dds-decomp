@@ -3605,10 +3605,6 @@ void btlReleasePsechgPanelWork(KwlnTask *task) {
     btlSetTrackedTaskHandle(6, 0);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2988);
-
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2998);
-
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 extern s32 D_003A2998[2][4];
 
@@ -3624,6 +3620,10 @@ typedef struct BattleCommandLayoutWork {
 } BattleCommandLayoutWork;
 
 extern s32 fileTestSavedSlotFlags(u32);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2988);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2998);
 
 void func_001B2AC8(BattleSceneObject *object) {
     enum {
