@@ -367,7 +367,23 @@ void parReleaseHistorySlotTable(ParTable *table) {
     sdfReleaseResourceAllocation(table->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", parPrependHistorySample);
+void parPrependHistorySample(ParTable *table, s32 slotIndex, u32 color, f32 billboardScale) {
+    ParSlot *slot = &table->slots[slotIndex];
+    s32 last = table->pointCapacity - 1;
+    u128 *point = slot->points + last;
+    s32 i;
+
+    for (i = 0; i < last; i++) {
+        point--;
+        PCP_COPY_VECTOR(point + 1, point);
+    }
+    if (slot->pointCount <= last) {
+        slot->pointCount++;
+    }
+    VU0_STORE_VF(vf12, point);
+    slot->color = color;
+    slot->billboardScale = billboardScale;
+}
 
 extern void billInvokeCallback(BillObj *billboard);
 
