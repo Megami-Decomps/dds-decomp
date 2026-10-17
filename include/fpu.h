@@ -18,6 +18,17 @@ static inline float fsqrtf(float x) {
 }
 
 /*
+ * EE numerator / sqrt(x) in one instruction; fsqrtf followed by division does
+ * not combine into this operation. Retail sites: DDS1 002E80DC/002E8148 and
+ * DDS2 00340F84/00340FF0.
+ */
+static inline float frsqrtf(float numerator, float x) {
+    float r;
+    __asm__(".set noreorder\n\trsqrt.s %0, %1, %2\n\t.set reorder" : "=f"(r) : "f"(numerator), "f"(x));
+    return r;
+}
+
+/*
  * Absolute value with a single abs.s, the counterpart of fsqrtf. Most of the
  * game code uses this form; the kwln kernel code uses the builtin fabsf.
  */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "pcp_vu0.h"
@@ -135,7 +136,70 @@ void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
     VU0_LOAD_VF(vf10, (f32 *)quaternion);
 }
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340EE0);
+extern f32 D_0040BAA0[4];
+extern f32 D_0040BAB0[4];
+extern f32 D_0040BAC0[4];
+
+/* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
+void func_00340EE0(f32 xOffset, f32 yOffset) {
+    f32 input[4];
+    f32 quaternion[4];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 horizontalSquared;
+    f32 horizontalLength;
+    f32 s;
+    f32 t;
+    f32 offsetSquared;
+    f32 adjustedZ;
+
+    VU0_STORE_VF(vf10, input);
+    t = 0.0f;
+    x = -input[0];
+    y = input[1];
+    if (yOffset < t) {
+        y = -y;
+    }
+    z = input[2];
+    horizontalSquared = x * x + z * z;
+    if (horizontalSquared < 0.000001f) {
+        if (y < t) {
+            VU0_LOAD_VF(vf10, D_0040BAA0);
+        } else {
+            VU0_LOAD_VF(vf10, D_0040BAB0);
+        }
+        return;
+    }
+    /* Pitch quaternion from the vertical and horizontal direction lengths. */
+    s = y * y;
+    horizontalLength = fsqrtf(horizontalSquared);
+    quaternion[1] = t;
+    quaternion[2] = t;
+    t = fsqrtf(horizontalSquared + s) + horizontalLength;
+    s = frsqrtf(1.0f, t * t + s);
+    quaternion[0] = y * s;
+    quaternion[3] = t * s;
+    VU0_LOAD_VF(vf10, quaternion);
+    /* Yaw quaternion from the normalized, offset-adjusted XZ direction. */
+    s = 1.0f / horizontalLength;
+    x *= s;
+    z *= s;
+    adjustedZ = z + yOffset;
+    t = x + xOffset;
+    offsetSquared = t * t + adjustedZ * adjustedZ;
+    if (offsetSquared < 0.000001f) {
+        VU0_LOAD_VF(vf11, D_0040BAC0);
+    } else {
+        s = frsqrtf(1.0f, offsetSquared);
+        quaternion[0] = 0.0f;
+        quaternion[1] = t * s;
+        quaternion[2] = 0.0f;
+        quaternion[3] = adjustedZ * s;
+        VU0_LOAD_VF(vf11, quaternion);
+    }
+    effMiscQuatMultiplyVU();
+}
 
 /* vu0 routine: blend vf10/vf11 along the shorter quaternion arc into vf10.
  * blendAmount is used without clamping; the final step normalizes either blend. */
