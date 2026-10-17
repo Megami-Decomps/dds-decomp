@@ -13,6 +13,7 @@
 #include "eff_transform.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "btl_command_affinity_api.h"
 #include "btl_model_record.h"
 #include "sdf_draw.h"
 #include "evt_unit.h"
@@ -195,12 +196,10 @@ s32 btlActionMatchesUnit(u8 *unit, s32 action) {
     return 0;
 }
 
-extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     btlGetRuntime();
     if ((btlUnitStatusPair(((BtlUnit *)unit)) & 0x421) == 0x401) {
-        if (btlHasRequiredCommandAffinityPartners(unit, action) != 0) {
+        if (btlHasRequiredCommandAffinityPartners((BtlUnit *)unit, action) != 0) {
             return 1;
         }
     }
