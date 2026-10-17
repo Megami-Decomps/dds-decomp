@@ -49,8 +49,8 @@ extern char D_00435D80[];
 
 /* Each transform section owns its row coordinate; see docs/idioms.md,
  * "Trace-justified diagnostic row coordinates". */
-s32 dds3DrawWorldNodeTransformDiagnostic(void *object, s32 x, s32 y, SdfListHead *list) {
-    EffWorldNode *node = object;
+s32 dds3DrawWorldNodeTransformDiagnostic(void *worldNode, s32 x, s32 y, SdfListHead *list) {
+    EffWorldNode *node = worldNode;
     ObjectTransform *transform;
     s32 labelX;
     s32 valueX;
@@ -98,11 +98,11 @@ s32 dds3DrawWorldNodeTransformDiagnostic(void *object, s32 x, s32 y, SdfListHead
 
 extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
-u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
+u32 dds3DrawObjectFlagDiagnostic(void *worldNode, s32 x, s32 y, void *list) {
     ObjBase *handle;
     void *command;
 
-    handle = dds3GetObjectOwnedHandle(object);
+    handle = dds3GetObjectOwnedHandle(worldNode);
     command = sdfCreateFormattedSifCommand((x * 3 << 6) + 0x7000,
                                            (y * 3 << 5) + 0x7900,
                                            0xFEFFFF,
