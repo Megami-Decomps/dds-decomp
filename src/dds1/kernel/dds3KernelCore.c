@@ -361,10 +361,10 @@ void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 void kwlnVisitTaskForestRoots(void)
 {
     KwlnTask* task;
-    s32 i;
+    s32 prefixByteIndex;
 
-    for (i = 0; i < 0x40; i++) {
-        kwlnTaskTreePrefix[i] = 0x20;
+    for (prefixByteIndex = 0; prefixByteIndex < 0x40; prefixByteIndex++) {
+        kwlnTaskTreePrefix[prefixByteIndex] = 0x20;
     }
     for (task = kwlnDelayedStartTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
