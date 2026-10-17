@@ -44,12 +44,12 @@ KwlnTask *scrProcCreateTask(u32 priority, ScrData *process)
 
 void scrClearProcessGlobals(void)
 {
-    s32 i;
+    s32 globalClearCountdown;
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
-    for (i = 255; i >= 0; i--)
+    for (globalClearCountdown = 255; globalClearCountdown >= 0; globalClearCountdown--)
     {
-        datGameState->integers[255 - i] = 0;
-        datGameState->floatBits[255 - i] = 0;
+        datGameState->integers[255 - globalClearCountdown] = 0;
+        datGameState->floatBits[255 - globalClearCountdown] = 0;
     }
 }
 
