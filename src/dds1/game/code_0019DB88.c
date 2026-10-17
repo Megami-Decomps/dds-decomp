@@ -11,6 +11,7 @@
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
+#include "ui_owner_ref.h"
 #include "pcp_vu0.h"
 #include "scr.h"
 #include "sdf_sif_command.h"
@@ -34,9 +35,6 @@ extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 extern s32 frFontMeasureGlyphStripWidth();
 
 extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
-
-/* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 
 extern SndPad D_00324510;
 

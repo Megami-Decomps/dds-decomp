@@ -8,6 +8,7 @@
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
+#include "ui_owner_ref.h"
 #include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
@@ -1590,8 +1591,6 @@ extern void sndSetSequenceVolumePan();
 extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *);
-
-typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
