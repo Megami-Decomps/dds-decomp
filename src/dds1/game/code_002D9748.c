@@ -20,6 +20,7 @@
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
 #include "sdf_draw_packet_groups.h"
+#include "sdf_motion.h"
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
@@ -973,8 +974,8 @@ void sdfCopyAssetListParameterState(DevRequest *destination, DevRequest *source)
 extern s32 (*D_003981A8[])(u32, u32);
 
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-void *sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
-    return (void *)D_003981A8[commandWord >> 16](context, commandWord);
+void *sdfDispatchAssetCommandWord(Motion *motion, u32 commandWord, s32 targetIndex) {
+    return (void *)D_003981A8[commandWord >> 16]((u32)motion, commandWord);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfLiveAssetCount);

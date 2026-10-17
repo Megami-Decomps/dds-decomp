@@ -16,6 +16,7 @@ typedef enum {
 } SdfMotionState;
 
 void sdfMotionInitializeAtZeroTime(struct Motion *motion, s32 motionIndex, s32 loopEnabled);
+void *sdfDispatchAssetCommandWord(struct Motion *motion, u32 commandWord, s32 targetIndex);
 struct Motion *sdfCreateMotion(struct SdfModel *model, struct MotionTable *table);
 void sdfDestroyMotion(struct Motion *motion);
 void sdfMotionInitialize(struct Motion *motion, s32 motionIndex, s32 loopEnabled,
