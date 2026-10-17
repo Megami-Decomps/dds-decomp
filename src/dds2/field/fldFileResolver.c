@@ -53,7 +53,7 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 #include "dds3_world_secondary.h"
 struct EffWorldNode;
-extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 extern s32 strcmp(const char *left, const char *right);
 
@@ -68,7 +68,7 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
     args[5] = 0;
     args[6] = 0;
     args[7] = 0;
-    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), (f32 *)args, args + 4);
+    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), (f32 *)args, (f32 *)(args + 4));
     dds3SetWorldNodeValue(matter, (u32)D_00412FF0);
     return matter;
 }
@@ -945,7 +945,7 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern struct DevRequest *D_00435FA4;
 struct EffWorldNode;
-extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
