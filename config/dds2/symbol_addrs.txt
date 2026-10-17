@@ -20,6 +20,8 @@ D_00435C54 = 0x00435C54; // type:u16 size:0x2
 D_00435C56 = 0x00435C56; // type:u16 size:0x2
 // Heap-usage graph peak-hold age halfword beside D_00435D40 in .sdata
 D_00435D42 = 0x00435D42; // type:u16
+// The main loop thread's tracked-thread node, after the frame parity word
+kwlnMainLoopThreadNode = 0x00438D88; // size:0x8  // dds1 0x003BD688
 // Saved DebugTimeGrph task handle.
 kwlnDebugGraphTask = 0x00438DA8;
 sdfSetModelChildChainVisibility = 0x00146150; // type:func
