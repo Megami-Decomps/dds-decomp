@@ -17,6 +17,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_blend_node.h"
 
 #define SDF_GIF_REGISTER_AD 0xE
 
@@ -32,19 +33,7 @@
 
 extern u32 D_00439188;
 
-typedef struct VuBlendNode {
-    f32 position[4];
-    u8 pad10[0x10];
-    f32 color[4];       /* 0x20: unpacked color */
-    f32 transformed[4]; /* 0x30: transformed position */
-    struct VuBlendNode *next;
-    void *sourceA;
-    void *sourceB;
-    f32 weight;
-    u8 region;
-    u8 clipFlags;
-    u8 pad52[0xE];
-} VuBlendNode;
+
 
 extern u16 D_00439184;
 
