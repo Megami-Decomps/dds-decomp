@@ -707,19 +707,19 @@ void mnuReleaseWorkResources(u8 *work) {
 
 /* Close via the native fade/script choice, including DDS2's extra party/flag gates.
  * All paths clear active flag zero and set display slot one. */
-void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
+void mnuTerminalFadeOrClose(s32 flag, MenuSlotState *state) {
     if (flag == 0) {
-        s32 state = ((MenuSlotState *)scene)->reduced;
+        s32 reducedMode = state->reduced;
 
-        if (state < 3) {
-            if (state > 0) {
+        if (reducedMode < 3) {
+            if (reducedMode > 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
-            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(scene) != 0) {
+            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
             } else {
                 evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
             }
-        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(scene) != 0) {
+        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
             kwlnFadeOutStart(0, 0, 0, 0xF);
         } else {
             evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
@@ -2529,19 +2529,19 @@ s32 evtBDispatchSyncB(KwlnTask *request) {
     return menuSetHandler(state, 2, (void *)request);
 }
 
-extern void mnuTerminalFadeOrClose(s32, s32);
+extern void mnuTerminalFadeOrClose(s32, MenuSlotState *);
 
 
 
 extern void mnuStartMantraSpriteLoad(void);
 
 s32 evtBCloseTerminalAndLoadMantraSprites(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
     s32 mode;
     mnuTerminalFadeOrClose(0, state);
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
-    mode = ((MenuSlotState *)state)->reduced;
+    mode = state->reduced;
     if (mode < 2) {
         if (mode >= 0) {
             mnuStartMantraSpriteLoad();
