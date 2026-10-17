@@ -752,21 +752,20 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
 /* Resolve the command's unmodified integer value for this entry.
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
- * value is intentionally reused: incoming command ID, then resolved result. */
-s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 value) {
-    s32 commandId = value;
+ * commandId selects the record; cost holds the resolved result. */
+s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 commandId) {
+    s32 cost = 0;
     DatCommandRecord *commands = datCommandRecords;
 
-    value = 0;
     switch (commands[commandId].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
         if (battler->flags & 0x20) {
             return 0;
         }
-        value = battler->maxHp * commands[commandId].costPercentage / 100 +
+        cost = battler->maxHp * commands[commandId].costPercentage / 100 +
                 commands[commandId].costBase;
-        if (value <= 0) {
-            value = 1;
+        if (cost <= 0) {
+            cost = 1;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
@@ -774,10 +773,10 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 value) {
             (datEnemyRecords[battler->unitId].flags & 0x10)) {
             return 0;
         }
-        value = commands[commandId].costPercentage;
+        cost = commands[commandId].costPercentage;
         break;
     }
-    return value;
+    return cost;
 }
 
 void ptyInitRuntime(void) {
