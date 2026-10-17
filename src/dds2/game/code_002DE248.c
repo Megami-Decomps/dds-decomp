@@ -13918,16 +13918,271 @@ void btlResetEffectWork(void) {
     D_004387B0 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", effEditScalarTrack);
+extern s8 sdfPadButtonStates[];
+extern EffScalarTrack D_0045C348;
+extern f32 D_004387B4;
+extern f32 D_004387B8;
+extern s32 D_004387BC;
+extern char D_004387E0[];
+extern void btlDebugDrawRectangle(s32, s32, s32, s32);
+extern void btlDebugDrawTwoColorRectangle();
+extern void btlDebugDrawLine2D();
+extern void btlDebugDrawPoint2DNoOp();
+s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void *subPanelWork) {
+    EffMappingState *panel = panelWork;
+    EffMappingState *subPanel = subPanelWork;
+    f32 values[8];
+    f32 positions[8];
+    f32 step;
+    f32 position;
+    f32 selectedValue;
+    f32 peak;
+    f32 magnitude;
+    f32 *sample;
+    f32 *value;
+    f32 *fraction;
+    f32 *firstFraction;
+    f32 *secondFraction;
+    f32 firstValue, secondValue;
+    f32 firstPosition, secondPosition;
+    u32 count;
+    u32 cursor;
+    u32 i;
+    s32 status = 0x400001;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+
+    step = 1.0f / (f32)frames;
+    count = 1;
+    values[0] = track->curve.initialValue;
+    positions[0] = 0.0f;
+    switch (track->curve.mode) {
+    case 1: {
+        f32 *keyFraction = positions + 1;
+        values[1] = track->curve.keys[0].value;
+        *keyFraction = track->curve.keys[0].fraction;
+        if (*keyFraction > 1.0f) {
+            *keyFraction = 1.0f;
+            track->curve.keys[0].fraction = 1.0f;
+        }
+        count = 2;
+        break;
+    }
+    case 2:
+        firstFraction = positions + 1;
+        secondFraction = positions + 2;
+        firstValue = track->curve.keys[0].value;
+        firstPosition = track->curve.keys[0].fraction;
+        secondValue = track->curve.keys[1].value;
+        secondPosition = track->curve.keys[1].fraction;
+        values[1] = firstValue;
+        *firstFraction = firstPosition;
+        values[2] = secondValue;
+        *secondFraction = secondPosition;
+        if (*firstFraction > 1.0f) {
+            *firstFraction = 1.0f;
+            track->curve.keys[0].fraction = 1.0f;
+        }
+        if (*secondFraction > 1.0f) {
+            *secondFraction = 1.0f;
+            track->curve.keys[1].fraction = 1.0f;
+        }
+        count = 3;
+        break;
+    default:
+        track->curve.mode = 0;
+        break;
+    }
+    values[count] = track->curve.finalValue;
+    positions[count] = 1.0f;
+    cursor = D_004387AC;
+    selectedValue = values[cursor];
+    position = positions[cursor];
+    D_0045C348 = *track;
+    D_004387B4 = selectedValue;
+    D_004387B8 = position;
+    btlReturnDebugMenuSetupWord((u32)panel);
+    if (D_004387A8 == 1) {
+        btlReturnDebugMenuSetupWord((u32)subPanel);
+    }
+    if (D_004387A8 == 0) {
+        switch (D_004387B0) {
+        case 0:
+            if (cursor != 0 && cursor != count) {
+                if (sdfPadButtonStates[0xB] & 2) {
+                    status = 0x400003;
+                    position = D_004387B8 + step * 10.0f;
+                    D_004387B8 = position;
+                } else if (sdfPadButtonStates[9] & 2) {
+                    status = 0x400003;
+                    position = D_004387B8 - step * 10.0f;
+                    D_004387B8 = position;
+                } else if (sdfPadButtonStates[5] & 2) {
+                    status = 0x400003;
+                    position = D_004387B8 + step;
+                    D_004387B8 = position;
+                } else if (sdfPadButtonStates[4] & 2) {
+                    status = 0x400003;
+                    position = D_004387B8 - step;
+                    D_004387B8 = position;
+                }
+            }
+            if (sdfPadButtonStates[6] & 2) {
+                if ((s32)D_004387AC > 0) {
+                    D_004387AC--;
+                }
+            } else if (sdfPadButtonStates[7] & 2) {
+                if (D_004387AC < count) {
+                    D_004387AC++;
+                } else {
+                    D_004387B0++;
+                    panel->flags &= ~0x10;
+                }
+            } else if (sdfPadButtonStates[1] < 0) {
+                D_004387A8 = 1;
+            }
+            break;
+        case 1:
+            if (sdfPadButtonStates[6] & 2) {
+                if (panel->flags & 0x20) {
+                    D_004387B0 = 0;
+                    panel->flags |= 0x10;
+                }
+            } else if (sdfPadButtonStates[7] & 2) {
+                if (panel->flags & 0x20) {
+                    D_004387B0 = 0;
+                    D_004387AC = 0;
+                    panel->flags |= 0x10;
+                }
+            }
+            break;
+        }
+    }
+    position = D_004387B8;
+    if (position < 0.0f) {
+        position = 0.0f;
+        D_004387B8 = position;
+    } else if (position > 1.0f) {
+        position = 1.0f;
+        D_004387B8 = position;
+    }
+    values[cursor] = D_004387B4;
+    positions[cursor] = position;
+    if (D_0045C348.curve.mode != count - 1) {
+        switch (D_0045C348.curve.mode) {
+        case 1:
+            D_0045C348.curve.keys[0].fraction = 0.5f;
+            break;
+        case 2:
+            D_0045C348.curve.keys[1].fraction = (1.0f - D_0045C348.curve.keys[0].fraction) * 0.5f;
+            break;
+        }
+    }
+    *track = D_0045C348;
+    if (cursor == 0) {
+        track->curve.initialValue = values[0];
+    } else if (cursor == count) {
+        track->curve.finalValue = values[cursor];
+    } else {
+        track->curve.keys[cursor - 1].value = values[cursor];
+        track->curve.keys[cursor - 1].fraction = positions[cursor];
+        if (count >= 3) {
+            if (cursor >= 2) {
+                if (positions[cursor] < track->curve.keys[cursor - 2].fraction) {
+                    track->curve.keys[cursor - 2].fraction = positions[cursor];
+                    positions[cursor - 1] = positions[cursor];
+                }
+            } else if (track->curve.keys[cursor].fraction < positions[cursor]) {
+                track->curve.keys[cursor].fraction = positions[cursor];
+                positions[cursor + 1] = positions[cursor];
+            }
+        }
+    }
+    D_004387BC = (s32)(positions[cursor] * (f32)frames);
+    btlDebugDrawRectangle(8, 0xF6, 0xDC, 0xBA);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)panel);
+    if (D_004387A8 == 1) {
+        btlDebugMenuRecordNoOp((u32)subPanel);
+    }
+    btlDebugMenuAfterRecordNoOp();
+    peak = 0.0f;
+    sample = values;
+    for (i = 0; i <= count; i++) {
+        magnitude = ffabsf(*sample++);
+        if (peak < magnitude) {
+            peak = magnitude;
+        }
+    }
+    if (peak == 0.0f) {
+        peak = 1.0f;
+    }
+    btlDebugDrawLine2D(0x10, 0xFE, 0x10, 0x158, 0x40404040);
+    btlDebugDrawLine2D(0x10, 0x12B, 0xDC, 0x12B, 0x80202020);
+    btlDebugDrawTwoColorRectangle(0x10, 0xFE, 0xCC, 0x5A, 0, 0x80000000);
+    x1 = 0x10;
+    y1 = 0xFE;
+    i = 0;
+    if (count != 0) {
+        fraction = positions;
+        value = values;
+        do {
+            x0 = (s32)(fraction[0] * 204.0f) + 0x10;
+            y0 = 0x12B - (s32)(value[0] / peak * 45.0f);
+            x1 = (s32)(fraction[1] * 204.0f) + 0x10;
+            y1 = 0x12B - (s32)(value[1] / peak * 45.0f);
+            value++;
+            fraction++;
+            btlDebugDrawLine2D(x0, y0, x1, y1, 0x80808080);
+            if (i == cursor && D_004387B0 == 0) {
+                btlDebugDrawPoint2DNoOp(x0, y0, 0x80008000);
+            } else {
+                btlDebugDrawPoint2DNoOp(x0, y0, 0x80008080);
+            }
+            i++;
+        } while (i < count);
+    }
+    if (count == cursor && D_004387B0 == 0) {
+        btlDebugDrawPoint2DNoOp(x1, y1, 0x80008000);
+    } else {
+        btlDebugDrawPoint2DNoOp(x1, y1, 0x80008080);
+    }
+    btlBossDebugPrintfN(0xC, 0x15C, 8, D_004387E0, frames);
+    if (sdfPadButtonStates[3] < 0) {
+        if (D_004387A8 == 0) {
+            status &= ~1;
+        } else {
+            D_004387A8 = 0;
+        }
+    }
+    if (D_004387A8 == 0) {
+        /* One-pass primary completion preserves the retail exit boundary
+         * (DDS1 002BADAC / DDS2 0030213C). Qualified cc1probe 22.ce2:
+         * scalar_tail_probe/decisions.log:269-271 hoists the unchanged-status
+         * return into the flags test; scalar_exact_probe:267-269 retains it. */
+        do {
+            if (panel->flags & 8) {
+                status |= 2;
+                break;
+            }
+            return status;
+        } while (0);
+    } else if (subPanel->flags & 8) {
+        status |= 2;
+    }
+    return status;
+}
 
 extern u8 D_00400068[];
 
-extern s32 effEditScalarTrack(void *, s32, void *, void *);
+extern s32 effEditScalarTrack(EffScalarTrack *, u32, void *, void *);
 
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
 void effEditPScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 extern u8 D_004001A0[];
@@ -13935,13 +14190,13 @@ extern u8 D_004001A0[];
 /* Edit the requested P-family ROTATE track with its independent editor state. */
 void effEditPRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x8C, ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
 void effEditGkScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
 extern u8 D_00400250[];
@@ -13949,49 +14204,49 @@ extern u8 D_00400250[];
 /* ROTATE property callback for native K-family descriptors. */
 void effEditKRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback for native B-family descriptors. */
 void effEditBScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
 void effEditBRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
 void effEditBfAreaTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x8C, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
 void effEditTBoardScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
 void effEditTBoardRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* SCALE property callback for native W-family descriptors. */
 void effEditWScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x80, ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x80), ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
 }
 
 /* ROTATE property callback for native W-family descriptors. */
 void effEditWRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0xAC, ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
+    effEditScalarTrack((EffScalarTrack *)(source + 0xAC), ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
 }
 
 extern u8 D_004000B8[];
@@ -13999,61 +14254,61 @@ extern u8 D_004000B8[];
 /* Edit the SCALE_UV curve in U-CYLND's POLYGON child; native callback is void. */
 void effEditUCylinderPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x90, ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x90), ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; native callback is void. */
 void effEditUSmokeSpiralScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x9C, ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x9C), ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; native callback is void. */
 void effEditUSmokeSpiralRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0xC8, ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
+    effEditScalarTrack((EffScalarTrack *)(source + 0xC8), ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
 }
 
 /* Edit SCALE_UV in their POLYGON children; preserve the native void callback. */
 void effEditUSmokeSpiralPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
+    effEditScalarTrack((EffScalarTrack *)source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
 }
 
 /* Edit the native U-SPHRE root SCALE curve; native callback is void. */
 void effEditUSphereScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
 }
 
 /* Edit the native 2D root SCALE curve; native callback is void. */
 void effEditTwoDimensionalScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* Edit the native 2D root ROTATE curve; native callback is void. */
 void effEditTwoDimensionalRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* SCALE editor for the native O-P2_TRK root descriptor. */
 void effEditOP2TrackScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
 /* ROTATE editor for the native O-P2_TRK root descriptor. */
 void effEditOP2TrackRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
 /* SCALE editor shared by the six native M-family descriptors. */
 void effEditMScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack(source + 0xB0, ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
+    effEditScalarTrack((EffScalarTrack *)(source + 0xB0), ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
 }
 
 /* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
