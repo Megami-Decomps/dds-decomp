@@ -134,17 +134,17 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
 /* Dispatch/free duplicated groups, then release their array, pool and main allocation. */
 void effPcpScatterReleaseParticleGroup(PcpScatterRadialWork *work)
 {
-    u32 i;
+    u32 duplicatedHandleIndex;
     u32 count;
 
     if (work->duplicateAllocation != 0) {
         count = work->duplicateGroupCount;
-        i = 0;
+        duplicatedHandleIndex = 0;
         if (count != 0) {
             do {
-                effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
-                i++;
-            } while (i < count);
+                effDispatchParameterDataAndFreeWork(work->duplicatedHandles[duplicatedHandleIndex]);
+                duplicatedHandleIndex++;
+            } while (duplicatedHandleIndex < count);
         }
         sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
@@ -466,17 +466,17 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
 /* Release spin child groups before their array, draw pool and main allocation. */
 void effPcpScatterReleaseSharedParticles(PcpScatterSpinWork *work)
 {
-    u32 i;
+    u32 duplicatedHandleIndex;
     u32 count;
 
     if (work->duplicateAllocation != 0) {
         count = work->duplicateGroupCount;
-        i = 0;
+        duplicatedHandleIndex = 0;
         if (count != 0) {
             do {
-                effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
-                i++;
-            } while (i < count);
+                effDispatchParameterDataAndFreeWork(work->duplicatedHandles[duplicatedHandleIndex]);
+                duplicatedHandleIndex++;
+            } while (duplicatedHandleIndex < count);
         }
         sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
@@ -801,17 +801,17 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
 /* Release ribbon child groups before their array, draw pool and main allocation. */
 void effPcpScatterReleaseLinkedParticles(PcpScatterRibbonWork *work)
 {
-    u32 i;
+    u32 duplicatedHandleIndex;
     u32 count;
 
     if (work->duplicateAllocation != 0) {
         count = work->duplicateGroupCount;
-        i = 0;
+        duplicatedHandleIndex = 0;
         if (count != 0) {
             do {
-                effDispatchParameterDataAndFreeWork(work->duplicatedHandles[i]);
-                i++;
-            } while (i < count);
+                effDispatchParameterDataAndFreeWork(work->duplicatedHandles[duplicatedHandleIndex]);
+                duplicatedHandleIndex++;
+            } while (duplicatedHandleIndex < count);
         }
         sdfReleaseResourceAllocation(work->duplicateAllocation);
     }
