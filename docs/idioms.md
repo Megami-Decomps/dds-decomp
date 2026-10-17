@@ -8986,6 +8986,64 @@ final branch. Keep commands, trace paths, and unsuccessful forms in
 the park/ledger; use `tools/cc1probe.sh ... --reorg --func <function>`
 with the correct canonical `--as-unit` and `--version`.
 
+### Preserve the actual owner before diagnosing an annul mismatch
+
+`--as-unit` selects build context and flags; it does not import preceding C
+definitions into a stand-alone function extraction. This distinction explains
+the prompt-dialog annul near miss without rewriting its conditions. DDS1
+`fileShowPromptDialog` (`0028FB98`, 2268 non-padding bytes) has exactly the same
+body in the Lite2 stand-alone draft and the credited EffMix whole-owner draft.
+In the current complete owner, the real earlier
+`fileDrawStatusDialogFrame` (`0028A5E8`) is already exact C. The prompt then has
+15/567 differing words, all in the choice-Y/pulse-base register allocation,
+and **no differing branch-annul bits**.
+
+A diagnostic keeps that provider's actual `s32 (void)` interface and complete
+C body, but defines it after the caller. After accounting for relocations, the
+only eight instruction changes in the prompt are `BNE` to `BNEL` at
+`+144,+1B4,+224,+280,+30C,+408,+520,+558`; all delay instructions remain the
+same next-phase constants in `$v0`. For example, branch uid119 still has
+`REG_BR_PROB 6001`, prediction 1, `likely=0`, target donor uid225 (`$v0=2`),
+and `own_thread=0` in both qualified probes:
+
+- With the actual earlier definition, opposite call uid129 has
+  `REG_EH_REGION 0`; its computed live set is `{$16,$29}`. Ordinary delay
+  eligibility accepts the donor.
+- With only the true declaration visible, `can_throw(uid129)` is true and
+  the opposite live set is `{$2,$3,$11,$16,$29}`. The same donor now needs
+  annulment. The final dbr record is `jump_insn/u` with `insn/s` in its slot.
+
+The converse applies to DDS2 `btlCalculateMpActionAmount` (`001AFF38`).
+Its `+2A0` donor is `$v0=source+0x120`, and the opposite call is the actual
+earlier C `btlCheckSpecialAbility`. Its current EH-zero call excludes `$v0`
+from the opposite live set, producing ordinary `BNE` where retail has `BNEL`.
+A later-definition diagnostic with the unchanged real provider restores that
+one native annul bit without changing the 6001 prediction. It is **not a
+landing**: the whole unit becomes 132/4 rather than 135/1, breaking the already
+matched `btlHasMappedSpecialAbilityForSlot`, `btlHasSpecialAbility274`, and
+`btlHasEnabledSpecialAbilityForSlot`. Do not reorder providers, hide their C,
+add a nothrow attribute, or invent a TU boundary to retain that diagnostic.
+
+The floating donors are a different case. DDS1 `func_001A5C40` and
+`func_001A6118` at `+B8`, and DDS2's MP function at `+D0`, already call the
+genuine earlier multiplier with EH-zero metadata. Their opposite-path query
+recursively **unions the shared join's live attack FPR** back into its result,
+despite the call arm overwriting that FPR. Consequently the target-thread
+default move still needs annulment in these candidates. A real preinitialization
+can change donor origin, but the qualified default-first controls also acquire
+the known constant-equivalence lifetime penalty and lose native allocation;
+macro loop notes alone do not remove it. Neither prediction 1 nor
+`own_thread` provides a universal source recipe.
+
+Reproduction evidence is in `sandbox_SdfModelVis/annul_research_summary.json`,
+the `annul_prompt_F0_whole_probe` / `annul_prompt_F2_frame_definition_later_probe`
+reorg and dbr dumps, `annul_mp2_F1_special_ability_later_probe`, and the retained
+`damage_oneword_{hp,mp}_F0_probe` join traces. Every new hooked/unhooked probe
+agrees. The prompt whole-owner gate remains 252/21, including twenty genuine
+undefined mutable-string labels; removing its extraction-only annul residuals
+does not make either its data ownership or its register allocation matching.
+
+
 ## Native effect-property owners: material choosers and remaining curves
 
 The remaining editor callbacks in `game/code_0029C530` (DDS1) and
