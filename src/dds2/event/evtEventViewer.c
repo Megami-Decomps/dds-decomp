@@ -517,7 +517,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
         if (key->p0C.sb[0] != 0) {
             effObjDispatchReadyState((EffWorldNode *)handle);
         }
-        if (track->metadata.extra1 == 0) {
+        if (track->metadata.option == 0) {
             evtViewerBindNamedOwner((EffWorldNode *)handle, key->p0C.sh[1], key->p0C.sb[1], key->frame, viewer);
         } else {
             evtViewerBindNamedOwner((EffWorldNode *)handle, key->p0C.sh[1], key->p0C.sb[1], 0, viewer);
@@ -801,7 +801,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     case 18:
         if (currentFrame == key->frame) {
             evtEventViewerFreeBuffer(key);
-            if (track->metadata.extra1 == 0) {
+            if (track->metadata.option == 0) {
                 key->payload = evtEventViewerCreateOriginEffect((void *)track->resourceData,
                     (s32)key->p0C.sb[0], key->p08.sh[1], -1, key->frame, viewer);
             } else {
@@ -2127,7 +2127,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
             while (key != NULL) {
                 switch (track->type) {
                 case 3: case 26:
-                    useTrackTime = track->metadata.extra1;
+                    useTrackTime = track->metadata.option;
                     /* These track kinds use the same indexed movie lookup. */
                 case 20: case 21:
                     if (key->p08.sb[0] < 0) {
@@ -2137,7 +2137,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
                     goto updateMovie;
                 case 18:
                     object = key->payload;
-                    useTrackTime = track->metadata.extra1;
+                    useTrackTime = track->metadata.option;
 updateMovie:
                     if (object != NULL) {
                         movie = dds3GetObjectOwnedHandle(object)->slots[1];
@@ -2532,7 +2532,7 @@ s32 evtViewerApplyCommandSelection(s32 unused0, s32 mode, EvtRuntime *viewer) {
         break;
     case 15:
         if (mnuGetSelectedTableValue(viewer) == 2) {
-            viewer->frameGroup->metadata.extra1 = (s8)viewer->cursor;
+            viewer->frameGroup->metadata.option = (s8)viewer->cursor;
             evtViewerPopHistory(viewer);
         }
         break;
@@ -2785,7 +2785,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     viewer->value = key->duration;
                     viewer->valueMin = 0;
                     viewer->valueMax = 10000;
-                    if (viewer->frameGroup->type == 10 && viewer->frameGroup->metadata.extra1 != 3) {
+                    if (viewer->frameGroup->type == 10 && viewer->frameGroup->metadata.option != 3) {
                         break;
                     }
                     evtViewerPushCommandHistory(7, 180, 120, viewer);
@@ -3521,13 +3521,13 @@ s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, EvtRuntime *vie
 
     selection = viewer->groupFirst + viewer->groupCursor;
     if (selection == 0) {
-        viewer->frameGroup->metadata.extra1 = 0;
+        viewer->frameGroup->metadata.option = 0;
     } else if (selection == 1) {
-        viewer->frameGroup->metadata.extra1 = 1;
+        viewer->frameGroup->metadata.option = 1;
     } else if (selection == 2) {
-        viewer->frameGroup->metadata.extra1 = 2;
+        viewer->frameGroup->metadata.option = 2;
     } else {
-        viewer->frameGroup->metadata.extra1 = 3;
+        viewer->frameGroup->metadata.option = 3;
         targetGroupIndex = viewer->groupFirst + viewer->groupCursor - 3;
         groupIndex = 0;
         group = viewer->groups;

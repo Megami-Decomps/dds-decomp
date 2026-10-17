@@ -57,7 +57,7 @@ typedef struct EvtGroupMetadata {
     u8 flag;
     s16 entry;
     s16 value;
-    s8 extra1;
+    s8 option; /* +0x06: type-specific group mode chosen by the viewer. */
     s8 extra2;
 } EvtGroupMetadata;
 
@@ -241,6 +241,8 @@ struct KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 typedef char EvtGroupMetadata_size[(sizeof(EvtGroupMetadata) == 8) ? 1 : -1];
+typedef char EvtGroupMetadata_option_offset[
+    ((u32)&((EvtGroupMetadata *)0)->option == 0x06) ? 1 : -1];
 typedef char EvtRuntimeGroup_metadata_offset[((u32)&((EvtRuntimeGroup *)0)->metadata == 0x18) ? 1 : -1];
 typedef char EvtRuntimeGroup_size[(sizeof(EvtRuntimeGroup) == 0x84) ? 1 : -1];
 #ifdef VERSION_DDS1
