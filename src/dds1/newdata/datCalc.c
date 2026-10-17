@@ -403,7 +403,7 @@ extern u8 ptyAffinityPermutationOrders[];
 extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex);
 
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
 extern s32 D_003BAAB8;
 extern DatPartyRecord *D_003BAA04;

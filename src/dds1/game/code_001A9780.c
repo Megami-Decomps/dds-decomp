@@ -126,7 +126,7 @@ extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 extern char D_003BB450[];
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 
 extern s32 effMiscRandMod(s32, s32);
 

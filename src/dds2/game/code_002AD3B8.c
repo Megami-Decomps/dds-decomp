@@ -47,8 +47,8 @@ extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern s32 D_00435E5C;
-extern s32 D_00435E48;
+extern u8 *D_00435E5C;
+extern u8 *D_00435E48;
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -73,7 +73,7 @@ extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task);
 extern void mnuDrawCampGridAndLabel(u32, u32, u32, u32, u32, u32, u32);
-extern s32 D_00435E70;
+extern u8 *D_00435E70;
 extern void mnuSetMenuPageFlags(MenuSprites *, u32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
@@ -1156,7 +1156,7 @@ typedef struct MenuRequirementRecord {
     s8 requiredCount;
 } MenuRequirementRecord;
 
-extern s32 D_00435E3C;
+extern u8 *D_00435E3C;
 
 /* A zero entry has no requirement. Keep the signed requiredCount comparison:
  * the available count comes from a byte-sized game-state entry. */

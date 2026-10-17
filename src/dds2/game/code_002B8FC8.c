@@ -93,7 +93,7 @@ typedef struct MenuIconState MenuIconState;
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key);
 
-extern s32 D_00435E5C;
+extern u8 *D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -112,10 +112,10 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 
 
-extern s32 D_00435E54;
+extern u8 *D_00435E54;
 
 
-extern s32 D_00435E48;
+extern u8 *D_00435E48;
 
 
 
@@ -174,7 +174,7 @@ extern char mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
-extern s32 D_00435E6C;
+extern u8 *D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind();
 

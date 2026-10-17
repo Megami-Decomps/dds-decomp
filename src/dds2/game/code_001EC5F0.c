@@ -140,7 +140,7 @@ extern s32 sndPlaySkillSeTask(u32 *);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern s32 datActionAnimationRecords;
+extern u8 *datActionAnimationRecords;
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -6595,9 +6595,9 @@ void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
     u32 color;
 
     if ((work->battleFlags & 0x30000000) == 0) {
-        /* The record table is stored as an integer address. */
+        /* Index the record table by integer address arithmetic, as retail does. */
         action = (BtlActionTableEntry *)(skillIndex * sizeof(BtlActionTableEntry) +
-                                        datActionAnimationRecords);
+                                        (u32)datActionAnimationRecords);
         if (action->lightColorMode != 0.0f) {
             light->color[0] = action->lightColor[0];
             light->color[1] = action->lightColor[1];

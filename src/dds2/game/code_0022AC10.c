@@ -2414,9 +2414,9 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, u8 *selectionState, 
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern s32 D_00435E48;
-extern s32 D_00435E4C;
-extern s32 D_00435E5C;
+extern u8 *D_00435E48;
+extern u8 *D_00435E4C;
+extern u8 *D_00435E5C;
 /* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();

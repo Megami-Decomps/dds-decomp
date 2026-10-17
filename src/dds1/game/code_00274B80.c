@@ -231,9 +231,9 @@ extern s32 evtStageTestPollModelRequest(void);
 
 
 
-extern s32 D_003BAA7C;
+extern u8 *D_003BAA7C;
 extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
-extern s32 D_003BAA70;
+extern u8 *D_003BAA70;
 extern void mnuDestroyWindowContainer(u32);
 
 extern u8 mnuCampPartySelectionReturnPopupEntry[];

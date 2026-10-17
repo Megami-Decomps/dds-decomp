@@ -110,17 +110,17 @@ extern DatEnemyRecord *datEnemyRecords;
 
 
 extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
-extern s32 D_003BAA14;
+extern u8 *D_003BAA14;
 
-extern s32 D_003BAA28;
+extern u8 *D_003BAA28;
 
-extern s32 D_003BAA10;
+extern u8 *D_003BAA10;
 
-extern s32 D_003BAA20;
+extern u8 *D_003BAA20;
 
-extern s32 D_003BAA30;
+extern u8 *D_003BAA30;
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 
 extern s32 fldCountSceneSlots(void);
 

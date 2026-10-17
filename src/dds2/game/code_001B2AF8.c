@@ -178,7 +178,7 @@ extern s32 btlRollAiBucket();
 
 extern s32 fldCountSceneSlots(void);
 
-extern s32 datRosterDetails;
+extern u8 *datRosterDetails;
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 

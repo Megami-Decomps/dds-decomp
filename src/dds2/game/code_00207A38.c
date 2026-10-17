@@ -246,7 +246,7 @@ typedef union BtlVec4 {
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
-extern s32 D_00435E7C;
+extern u8 *D_00435E7C;
 
 
 BtlRuntimeTask *btlCreateControlObject(void) {

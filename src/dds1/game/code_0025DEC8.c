@@ -5,7 +5,7 @@
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 
-extern s32 D_003BAA9C;
+extern u8 *D_003BAA9C;
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 

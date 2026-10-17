@@ -30,7 +30,7 @@ extern void mnuRefreshStaffWindowDescription(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_003BAA9C;
+extern u8 *D_003BAA9C;
 extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue);
 extern void mnuPlayInputSound(s32, s32, u32 *);

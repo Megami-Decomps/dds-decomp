@@ -5,7 +5,7 @@
 #include "fr_font.h"
 
 
-extern s32 D_00435E70;
+extern u8 *D_00435E70;
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 

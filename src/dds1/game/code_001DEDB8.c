@@ -186,7 +186,7 @@ extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *
 extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
-extern s32 datActionAnimationRecords;
+extern u8 *datActionAnimationRecords;
 
 extern s32 btlArrangeFormationSlots(s32 filter);
 
@@ -7382,9 +7382,9 @@ void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
     u32 color;
 
     if ((*(u32 *)(work + 0x1F4) & 0x30000000) == 0) {
-        /* The record table is stored as an integer address. */
+        /* Index the record table by integer address arithmetic, as retail does. */
         action = (BtlActionTableEntry *)(skillIndex * sizeof(BtlActionTableEntry) +
-                                        datActionAnimationRecords);
+                                        (u32)datActionAnimationRecords);
         if (action->lightColorMode != 0.0f) {
             light->color[0] = action->lightColor[0];
             light->color[1] = action->lightColor[1];
