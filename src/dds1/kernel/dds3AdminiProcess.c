@@ -166,12 +166,12 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
    as a signed scheduler control word, or zero on failure. */
 s32 dds3AdminPollModeDestruction(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
-    s32 mode = work->activeMode;
+    s32 activeMode = work->activeMode;
     s32 (*destroy)(void);
     s32 destroyResult;
 
-    if (mode >= 0) {
-        destroy = ddsAdminModeCallbacks[mode].destroy;
+    if (activeMode >= 0) {
+        destroy = ddsAdminModeCallbacks[activeMode].destroy;
         if (destroy != NULL) {
             destroyResult = destroy();
             if (destroyResult < 0) {
