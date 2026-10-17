@@ -32,16 +32,16 @@ void sdfReleaseChipBlock(void *memory) {
     SdfChipPage **link;
     s32 interrupts;
     s16 count;
-    s32 index;
+    s32 heapByteOffset;
 
     if (memory == NULL) {
         return;
     }
-    index = (s32)memory - (s32)sdfChipHeapStart;
-    if (index < 0) {
-        index += 0xFFF;
+    heapByteOffset = (s32)memory - (s32)sdfChipHeapStart;
+    if (heapByteOffset < 0) {
+        heapByteOffset += 0xFFF;
     }
-    page = (SdfChipPage *)((u8 *)sdfChipPages + (index >> 12) * sizeof(SdfChipPage));
+    page = (SdfChipPage *)((u8 *)sdfChipPages + (heapByteOffset >> 12) * sizeof(SdfChipPage));
     sizeClass = page->sizeClass;
     interrupts = DIntr();
     count = page->usedCells;
