@@ -1107,7 +1107,7 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
         case 1:
             if (type != 10) {
                 sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_004375A8, node->duration));
-            } else if (ctx->frameGroup->metadata.extra1 != 3) {
+            } else if (ctx->frameGroup->metadata.option != 3) {
                 sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_004375B0));
             } else {
                 sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_004375A8, node->duration));
@@ -1913,10 +1913,10 @@ void evtDrawGroupPropertyTable(SdfListHead *list, s32 x, s32 y, s32 hidden, EvtR
                 y + 0x80, 0xFEFFFF, style, D_004376F8, runtime->frameGroup->metadata.value));
             break;
         case 1:
-            if (runtime->frameGroup->metadata.extra1 < 3) {
+            if (runtime->frameGroup->metadata.option < 3) {
                 sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_004374D0,
-                    D_003C9890[runtime->frameGroup->metadata.extra1]));
+                    D_003C9890[runtime->frameGroup->metadata.option]));
             } else {
                 sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_004374D0,
@@ -1924,7 +1924,7 @@ void evtDrawGroupPropertyTable(SdfListHead *list, s32 x, s32 y, s32 hidden, EvtR
             }
             break;
         case 2:
-            if (runtime->frameGroup->metadata.extra1 == 0) {
+            if (runtime->frameGroup->metadata.option == 0) {
                 sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_00437700));
             } else {
@@ -1997,7 +1997,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
             evtViewerPushCommandHistory(17, 180, 120, runtime);
             break;
         case 2:
-            runtime->cursor = runtime->frameGroup->metadata.extra1;
+            runtime->cursor = runtime->frameGroup->metadata.option;
             runtime->itemCount = field;
             runtime->title = "PATH APPLY MODE";
             runtime->itemNames = D_003C98A0;
@@ -2677,7 +2677,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->horizontalOffset -= 8;
         }
 
-        switch (group->metadata.extra1) {
+        switch (group->metadata.option) {
         case 0:
             break;
         case 1: {
@@ -2700,7 +2700,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         }
 
         if (status == -1) {
-            switch (group->metadata.extra1) {
+            switch (group->metadata.option) {
             case 0:
                 break;
             case 1: {
@@ -4261,7 +4261,7 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
         record.flag = group->metadataFlag;
         record.entry = (u16)group->entryHeader;
         record.value = group->metadata.value;
-        record.extra1 = group->metadata.extra1;
+        record.option = group->metadata.option;
         record.extra2 = group->metadata.extra2;
         evtWriteOutputBytes(output, &record, 8);
     }
@@ -4422,7 +4422,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
     s32 i;
     EvtRuntimeGroup *group;
 
-    if (link->extra1 != 3) {
+    if (link->option != 3) {
         link->extra2 = 0;
     } else {
         for (i = 0; i < (s32)src->subEntry21Count; i++) {
@@ -4434,7 +4434,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
             }
         }
         sdfDebugPrintf("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
-        link->extra1 = 0;
+        link->option = 0;
         link->extra2 = 0;
     }
 }
@@ -5125,7 +5125,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                         } else {
                             group->metadata.value = ((EvtGroupMetadata *)work->subEntry21Data)[row].value;
                         }
-                        group->metadata.extra1 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra1;
+                        group->metadata.option = ((EvtGroupMetadata *)work->subEntry21Data)[row].option;
                         group->metadata.extra2 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra2;
                     }
                 }
@@ -5138,7 +5138,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                         group->metadata.flag = ((EvtGroupMetadata *)work->subEntry21Data)[row].flag;
                         group->metadata.entry = ((EvtGroupMetadata *)work->subEntry21Data)[row].entry;
                         group->metadata.value = ((EvtGroupMetadata *)work->subEntry21Data)[row].value;
-                        group->metadata.extra1 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra1;
+                        group->metadata.option = ((EvtGroupMetadata *)work->subEntry21Data)[row].option;
                         group->metadata.extra2 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra2;
                         evtResolveLinkGroupIndex(work, runtime, &group->metadata);
                         break;
