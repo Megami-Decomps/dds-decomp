@@ -274,10 +274,10 @@ u32 datReadHighHalfOfCalculatedValue(DatPartyRecord *unit, s32 element) {
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags
  * return -1; shared destination indices are intentional. */
-s32 datFlagToElementIndex(s32 flag) {
+s32 datFlagToElementIndex(s32 elementFlag) {
     s32 statIndex = -1;
 
-    switch (flag) {
+    switch (elementFlag) {
     case 1:
         statIndex = -1;
         break;
