@@ -510,7 +510,7 @@ FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
     FrFontChildGlyph *previous;
     FrFontChildGlyph *glyph;
     u32 length = 0;
-    u32 i;
+    u32 textByteOffset;
     u16 code;
 
     if (fontIndex >= 0) {
@@ -529,11 +529,11 @@ FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
     }
     previous = head->lastChild;
     glyph = NULL;
-    for (i = 0; i < length; i++) {
-        code = (u8)text[i];
+    for (textByteOffset = 0; textByteOffset < length; textByteOffset++) {
+        code = (u8)text[textByteOffset];
         if (code >= 0x80) {
-            i++;
-            code = (code << 8) | (u8)text[i];
+            textByteOffset++;
+            code = (code << 8) | (u8)text[textByteOffset];
         }
         glyph = frFontCreateGlyphFromCode(code, D_003BB17C, (u8)firstOption, (u8)secondOption);
         if (previous == NULL) {
