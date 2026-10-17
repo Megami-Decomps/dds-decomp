@@ -1045,7 +1045,7 @@ typedef struct ItfFovPanelWork {
 } ItfFovPanelWork;
 
 extern ItfFovPanelWork D_003D73C0;
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 btlEditCameraFieldOfView(void) {

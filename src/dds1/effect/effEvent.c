@@ -248,7 +248,7 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
     return &((EffSegmentedBezierSlot *)table->slots)[index];
 }
 
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {

@@ -43,7 +43,7 @@ extern char mnuMovieViewerTaskName[];
 
 extern MnuMovieList mnuMovieList;
 
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 
 extern s32 mnuMovieViewer();

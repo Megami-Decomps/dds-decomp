@@ -110,7 +110,7 @@ struct SdfListHead *sdfCreateResetPacketList(void) {
 }
 
 /* Build the 0x80-byte bordered rectangle packet: the rectangle with its two color words, then its outline corners. */
-void *sdfCreateBorderedRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
+u64 *sdfCreateBorderedRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
     u64 *packet;
     s32 right;
     s32 bottom;
@@ -397,7 +397,7 @@ void fldFormatSecondsText(char *text, f32 displayValue) {
     text[4] = 0;
 }
 
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
