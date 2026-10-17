@@ -51,7 +51,7 @@ s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 s32 evtCreateFrameVariableTask(void);
-void *evtViewerScheduleFrameVariableTask(s32 task);
+s32 evtViewerScheduleFrameVariableTask(KwlnTask *task);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
@@ -1008,7 +1008,7 @@ s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 s32 evtCreateFrameVariableTask(void);
-void *evtViewerScheduleFrameVariableTask(s32 task);
+s32 evtViewerScheduleFrameVariableTask(KwlnTask *task);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
@@ -3674,14 +3674,14 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
 }
 
 /* Update the active viewer, then switch to its frame-variable task. */
-void *evtViewerScheduleFrameVariableTask(s32 task) {
+s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
     void *viewer;
 
-    viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
+    viewer = (void *)kwlnTaskGetUserValue(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
     kwlnTaskAddChild(task, (KwlnTask *)evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
-    return (void *)evtViewerUpdateFrame;
+    return (s32)(u32)evtViewerUpdateFrame;
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
@@ -3696,7 +3696,7 @@ s32 evtViewerInitializeUpdateSequence(KwlnTask *task) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *evtViewerAdvanceUpdate(KwlnTask *task) {
+s32 evtViewerAdvanceUpdate(KwlnTask *task) {
     EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *window;
     s32 windowFlags;
@@ -3722,7 +3722,7 @@ void *evtViewerAdvanceUpdate(KwlnTask *task) {
         }
         evtPopulateViewerTimelineFromMovie(viewer->windowContext, viewer);
         kwlnDrawControlFlags |= 0x2000000;
-        return (void *)evtViewerScheduleFrameVariableTask;
+        return (s32)(u32)evtViewerScheduleFrameVariableTask;
     }
 }
 
