@@ -930,8 +930,8 @@ void brsMarkPartyRowsFromLists(BrsProgressRow *partyRows, BrsRewardBatch *primar
 }
 
 /* Latch whether the result task still has pending reward rows. */
-void brsTaskLatchPendingRows(BrsSkillPackageWork *context) {
-    if (context->primaryRewards.count == 0) {
+void brsTaskLatchPendingRows(BrsSkillPackageWork *work) {
+    if (work->primaryRewards.count == 0) {
         brsPendingRowsLatched = 0;
     } else {
         brsPendingRowsLatched = 1;
