@@ -24,7 +24,7 @@ void dds3ClearSceneObjectState(EffWorldNode *worldNode) {
 s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) {
     EvtWorldTable *worldData;
     struct SdfMemBlock *resourceHandle;
-    u32 resourceAddress;
+    u32 resolvedAddress;
 
     worldData = (EvtWorldTable *)worldNode->data;
     if (resourceName == NULL) {
@@ -33,12 +33,12 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
     if (worldData->sceneResourceHandle != 0) {
         evtReleaseSceneResource(worldNode);
     }
-    resourceHandle = sdfReadNamedResource(resourceName, &resourceAddress, 0);
-    if (resourceAddress == 0) {
+    resourceHandle = sdfReadNamedResource(resourceName, &resolvedAddress, 0);
+    if (resolvedAddress == 0) {
         return 0;
     }
     worldData->sceneResourceHandle = resourceHandle;
-    worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
+    worldData->sceneScript = (struct BfFlw0Header *)resolvedAddress;
     return 1;
 }
 
