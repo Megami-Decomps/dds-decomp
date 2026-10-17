@@ -552,6 +552,8 @@ void effInitializeSlotPhase(EffTimedState *effect) {
 
 extern s8 D_0038FB70[];
 
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entryData);
+
 /* Rebuild a slot's live work from its source description, then prime the timed states. */
 void effInitializeSlotWorkFromDescription(EffectSlotSet *owner, s32 slotIndex, void *payload) {
     BdWork *entry = (BdWork *)payload;
@@ -845,6 +847,8 @@ u32 effClampSlotPhaseAtStart(EffectSlotSet *owner, s32 index, EffTimedState *eff
     }
     return 1;
 }
+
+extern u32 effResetRecordRun(u8 *work, u32 first, u32 unused);
 
 EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entryData) {
     /* Alternate payloads may be only 0x6C bytes; direct access here is limited to timed states.

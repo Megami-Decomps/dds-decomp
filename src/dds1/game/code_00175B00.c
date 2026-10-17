@@ -126,6 +126,8 @@ extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 particleIndex);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 particleIndex);
 struct SdfAsset;
 
+extern u32 effGetScatterEntry(PcpScatterDraw *object, s32 particleIndex);
+
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
 void effScatterDrawObject(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
