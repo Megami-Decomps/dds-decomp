@@ -1533,8 +1533,8 @@ s32 mnuGetTerminalListSlotForCount(MenuList *list) {
 }
 
 /* Configure the terminal selection grid for its entry and transition mode. */
-void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuConfigureTerminalModeEffects(u32 mode, s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     s32 effectIndex = 0;
     s32 materialFlags = 0;
     s32 height = 0;
@@ -1565,28 +1565,28 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
         effectIndex = 3;
         break;
     }
-    slot = mnuGetTerminalListSlotForCount(state->secondaryList);
-    /* The context word transports the terminal state address. */
-    effect = (struct EffMappedResource **)(effectIndex * sizeof(state->effect[0]) + context +
+    slot = mnuGetTerminalListSlotForCount(work->secondaryList);
+    /* The state word transports the terminal state address. */
+    effect = (struct EffMappedResource **)(effectIndex * sizeof(work->effect[0]) + state +
         (u32)&((MenuSlotState *)0)->effect);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         slot, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], slot,
+    effConfigureWithDefaultSetting(work->resourceBank[0], slot,
         *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         0x40, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x40,
+    effConfigureWithDefaultSetting(work->resourceBank[0], 0x40,
         *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         0x41, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x41,
+    effConfigureWithDefaultSetting(work->resourceBank[0], 0x41,
         *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         0x42, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x42,
+    effConfigureWithDefaultSetting(work->resourceBank[0], 0x42,
         *effect,
         0, materialFlags, color);
 }
