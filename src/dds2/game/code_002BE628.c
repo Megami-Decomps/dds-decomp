@@ -1926,21 +1926,21 @@ void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
     }
 }
 
-void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+void mnuPopulatePartyPanelSlot(DatPartyRecord *partyRecord, s32 unused, u32 index, PartyPanel *panel) {
     s32 i;
 
-    if (entry->flags & 2)
+    if (partyRecord->flags & 2)
         panel->frontlineCount++;
     else
         panel->reserveCount++;
-    panel->slots[index].unitIndex = entry->unitId - 1;
-    panel->slots[index].level = entry->level;
-    panel->slots[index].hp = entry->hp;
-    panel->slots[index].mp = entry->mp;
-    panel->slots[index].maxHp = entry->maxHp;
-    panel->slots[index].maxMp = entry->maxMp;
+    panel->slots[index].unitIndex = partyRecord->unitId - 1;
+    panel->slots[index].level = partyRecord->level;
+    panel->slots[index].hp = partyRecord->hp;
+    panel->slots[index].mp = partyRecord->mp;
+    panel->slots[index].maxHp = partyRecord->maxHp;
+    panel->slots[index].maxMp = partyRecord->maxMp;
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
-        panel->slots[index].stats[i] = entry->baseStats[i];
+        panel->slots[index].stats[i] = partyRecord->baseStats[i];
     }
 }
 
