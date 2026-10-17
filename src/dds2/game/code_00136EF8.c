@@ -2244,27 +2244,12 @@ typedef struct FldRoomStateHeader {
     s16 axisMode;
     s32 shapeKind;
 } FldRoomStateHeader;
-#include "fld_trigger_shape.h"
-typedef struct FldActionTransform {
-    f32 position[4];
-    f32 rotation[4];
-    f32 scale[4];
-} FldActionTransform;
-/* Serialized sphere/task prefix, transform and paired resources. */
-typedef struct FldActionRow {
-    union {
-        struct { FldTriggerSphere shape; FldTaskInfo info; } task;
-        FldTriggerShape shape;
-    } prefix;
-    FldActionTransform transform;
-    FldFileResource childResource;
-    FldFileResource displayResource;
-} FldActionRow;
+#include "fld_action_row.h"
 extern FldActionRow D_0038BE50[];
 extern u8 D_0038BC00[];
 extern u8 D_0038BC10[];
 extern u8 D_0038BC20[];
-static inline void fldInitializeActionTransform(FldActionTransform *transform, f32 x, f32 y, f32 z) {
+static inline void fldInitializeActionTransform(FldActionTransformFields *transform, f32 x, f32 y, f32 z) {
     transform->position[3] = 1.0f;
     transform->scale[0] = 1.0f;
     transform->scale[1] = 1.0f;
@@ -2280,7 +2265,7 @@ static inline void fldInitializeActionTransform(FldActionTransform *transform, f
 }
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
-    FldActionTransform *transform;
+    FldActionTransformFields *transform;
     EffWorldNode *object;
     EffWorldNode *child;
     s32 index;
@@ -2300,7 +2285,7 @@ void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     D_0038BE50[index].prefix.task.info.slot = slot;
     D_0038BE50[index].prefix.task.info.unk08 = 1;
     D_0038BE50[index].prefix.task.info.shape = &D_0038BE50[index].prefix.shape;
-    transform = &D_0038BE50[index].transform;
+    transform = &D_0038BE50[index].transform.fields;
     fldInitializeActionTransform(transform, x, y, z);
     D_0038BE50[index].childResource.transform = transform->position;
     D_0038BE50[index].childResource.data = &D_0038BE50[index].prefix.task.info;
@@ -2319,20 +2304,10 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013ED20);
 
 extern char D_0038BC30[];
 extern char D_0038BC40[];
-/* Flat view of a row transform: union member stores share the row's alias set. */
-typedef union FldActionTransformView {
-    struct {
-        f32 position[4];
-        f32 rotation[4];
-        f32 scale[4];
-    };
-    f32 values[12];
-} FldActionTransformView;
-
 void func_0013EEA0(s32 kind, s32 roomValue,
                    f32 x, f32 y, f32 z, f32 radius) {
     s32 index = D_004361C4;
-    FldActionTransformView *transform;
+    FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
     EffWorldNode *object;
     s32 taskIndex;
@@ -2352,7 +2327,7 @@ void func_0013EEA0(s32 kind, s32 roomValue,
     D_0038BE50[index].prefix.task.info.unk08 = 1;
     D_0038BE50[index].prefix.task.info.shape = (FldTriggerShape *)&D_0038BE50[index].prefix.task.shape;
     D_0038BE50[index].childResource.data = &D_0038BE50[index].prefix.task.info;
-    transform = (FldActionTransformView *)&D_0038BE50[index].transform;
+    transform = &D_0038BE50[index].transform;
     transform->position[3] = 1.0f;
     transform->scale[0] = 1.0f;
     transform->scale[1] = 1.0f;
