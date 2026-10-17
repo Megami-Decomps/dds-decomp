@@ -3172,13 +3172,13 @@ void fldReleaseBackgroundBuffer(void) {
     }
 }
 
-extern u32 D_003980F0[];
+extern SdfGraphObj D_003980E0;
 
 void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
         SdfListHead *packet = sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateResourcePacket(packet, (SdfTexResource *)D_003980F0[0],
+        sdfCreateResourcePacket(packet, D_003980E0.buffers[2],
                                 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append(descriptor, packet);
@@ -3189,7 +3189,7 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
         SdfListHead *packet = sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateDescriptorPacket(packet, (SdfTexResource *)D_003980F0[0],
+        sdfCreateDescriptorPacket(packet, D_003980E0.buffers[2],
                                   0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append(descriptor, packet);

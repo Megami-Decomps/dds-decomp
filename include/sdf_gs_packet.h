@@ -62,7 +62,7 @@ typedef struct SdfGsPacketHeader {
     u64 vifCommands;
     u64 gifTag;
     u64 gifRegisters;
-} SdfGsPacketHeader;
+} QWORD_ALIGNED SdfGsPacketHeader;
 
 typedef struct SdfGsRegisterWrite {
     u64 value;

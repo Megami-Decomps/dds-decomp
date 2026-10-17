@@ -11,7 +11,6 @@
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
-#include "ui_owner_ref.h"
 #include "pcp_vu0.h"
 #include "scr.h"
 #include "sdf_sif_command.h"
@@ -40,7 +39,7 @@ extern SndPad D_00324510;
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-extern UiOwnerRef *D_00357D88[];
+extern ItfMesDebugState D_00357D80;
 
 
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
@@ -669,7 +668,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
             itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
         }
     }
-    if (D_00357D88[0] != 0 && D_00357D88[0]->owner == panel && place != 0) {
+    if (D_00357D80.window != NULL && D_00357D80.window->state == panel && place != 0) {
         itfQueueSpriteQuadPacket(place->sprite);
     }
 }
@@ -799,7 +798,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
 s32 itfUpdateActiveMessageWindows(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     while (node != 0) {
-        itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
+        itfUpdateBattleDisplayAndFadeIndicator(node->state);
         node = node->next;
     }
     return 0;
@@ -815,7 +814,7 @@ s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
         return 0;
     }
     for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
-        itfUpdateSoundSelectorPanel((ItfMesState *)node->stateAddress);
+        itfUpdateSoundSelectorPanel(node->state);
     }
     itfMesWork.unk8++;
     return 0;
@@ -942,7 +941,7 @@ ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
         if (node == NULL) {
             node = itfMesWork.pool.activeTail;
         }
-        if (((ItfMesState *)node->stateAddress)->blkA4.sprite != NULL) {
+        if ((node->state)->blkA4.sprite != NULL) {
             break;
         }
         index++;

@@ -14,17 +14,11 @@
 #include "kwln_task_create.h"
 
 
-typedef struct ItfMesWindowRec ItfMesWindowRec;
+typedef ItfMesPoolNode ItfMesWindowRec;
 
 
 
 
-/* State of the interactive message-layout inspector. */
-typedef struct ItfMesDebugState {
-    s32 selectedItem;
-    s32 mode;
-    ItfMesWindowRec *window;
-} ItfMesDebugState;
 
 
 extern ItfMesSlot itfWindowSlots[];
@@ -355,7 +349,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     handle = sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
     mes = (ItfMesState *)sdfResourceRetainAddress(handle);
-    node->stateAddress = (s32)mes;
+    node->state = mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
     mes->flags = 0;
@@ -965,7 +959,7 @@ void itfMesInit(void) {
     itfMesWork.windowTexture = itfLoadTextureFromAsset("/itf/MESWIN.TMX");
     itfInitPool(&itfMesWork.pool, itfMesWork.nodes, ITF_MES_WINDOW_CAPACITY, ITF_MES_POOL_NODE_BYTES);
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
-        poolNode->stateAddress = 0;
+        poolNode->state = NULL;
     }
     kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)itfMesDestroyActiveWindowsAndReleaseTexture, 0);
     kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)itfMesDestroyActiveWindowsAndReleaseTexture, 0);
@@ -987,15 +981,6 @@ u16 itfMesGetGlobalFlags(void) {
 }
 
 
-struct ItfMesWindowRec {
-    u8 pad00[0xC];
-    ItfMesState *mes;
-    struct SdfMemBlock *handle;
-};
-typedef char ItfMesWindowRec_size_must_be_0x14[
-    (sizeof(ItfMesWindowRec) == 0x14) ? 1 : -1];
-typedef char ItfMesWindowRec_handle_offset_must_be_0x10[
-    ((u32)&((ItfMesWindowRec *)0)->handle == 0x10) ? 1 : -1];
 
 extern s8 D_00324510[];
 extern char *D_00357FA0[];
@@ -1041,7 +1026,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     {
         ItfMesDebugState *debug = &D_00357D80;
 
-        panel = &debug->window->mes->blkA4;
+        panel = &debug->window->state->blkA4;
         switch (debug->mode) {
         case 0:
             if (D_00324510[0x36] & 2) {
@@ -1117,7 +1102,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
                                                  D_003BB228, panel->fadeLimit));
-    bounds = D_00357D80.window->mes->blkA4.bounds;
+    bounds = D_00357D80.window->state->blkA4.bounds;
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d,%3d - %3d,%3d",
@@ -1143,7 +1128,7 @@ extern ItfMesWindowRec D_003D6EC0[];
  * the pool-array-relative counter. An empty record is a no-op. */
 void itfMesDestroyWindow(s32 window) {
     ItfMesWindowRec *windowRecord = &D_003D6EC0[window];
-    ItfMesState *mes = windowRecord->mes;
+    ItfMesState *mes = windowRecord->state;
 
     if (mes != NULL) {
         itfMesCleanupWindow(window, 1);
@@ -1151,8 +1136,8 @@ void itfMesDestroyWindow(s32 window) {
         btlReleaseEffectResourceHandles(mes);
         itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
-        sdfReleaseResourceAllocation(windowRecord->handle);
-        windowRecord->mes = NULL;
+        sdfReleaseResourceAllocation(windowRecord->resourceHandle);
+        windowRecord->state = NULL;
         itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_003D6EC0 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_003D6EC0 - 0x20))->activeWindowCount -= 1;
     }

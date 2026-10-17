@@ -18,7 +18,7 @@ typedef struct ConsMatrixPacket {
     u32 mscalCommand;     /* 0xC4 */
     u32 unknownC8;        /* 0xC8 */
     u32 unknownCC;        /* 0xCC */
-} ConsMatrixPacket;
+} QWORD_ALIGNED ConsMatrixPacket;
 
 typedef ConsMatrixPacket SdfVuBonePacket;
 

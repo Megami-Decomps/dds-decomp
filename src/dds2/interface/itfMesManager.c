@@ -8,7 +8,6 @@
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
-#include "ui_owner_ref.h"
 #include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
@@ -51,12 +50,6 @@ ItfMesGlobals itfMesWork __attribute__((section(".bss")));
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
 
-/* State of the interactive message-layout inspector. */
-typedef struct ItfMesDebugState {
-    s32 selectedItem;
-    s32 mode;
-    ItfMesWindowRec *window;
-} ItfMesDebugState;
 
 extern ItfMesDebugState D_003B4770;
 
@@ -362,7 +355,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     handle = sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
     mes = (ItfMesState *)sdfResourceRetainAddress(handle);
-    node->stateAddress = (s32)mes;
+    node->state = mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
     mes->flags = 0;
@@ -960,7 +953,7 @@ void itfMesInit(void) {
     itfMesWork.windowTexture = itfLoadTextureFromAsset("/itf/MESWIN.TMX");
     itfInitPool(&itfMesWork.pool, itfMesWork.nodes, ITF_MES_WINDOW_CAPACITY, ITF_MES_POOL_NODE_BYTES);
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
-        poolNode->stateAddress = 0;
+        poolNode->state = NULL;
     }
     kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, itfUpdateActiveMessageWindows, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
     kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
@@ -1024,7 +1017,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     {
         ItfMesDebugState *debug = &D_003B4770;
 
-        panel = &((ItfMesState *)debug->window->stateAddress)->blkA4;
+        panel = &(debug->window->state)->blkA4;
         switch (debug->mode) {
         case 0:
             if (D_0037F510.secondaryUp & 2) {
@@ -1100,7 +1093,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
                                                  D_00436628, panel->fadeLimit));
-    bounds = ((ItfMesState *)D_003B4770.window->stateAddress)->blkA4.bounds;
+    bounds = (D_003B4770.window->state)->blkA4.bounds;
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d,%3d - %3d,%3d",
@@ -1124,7 +1117,7 @@ extern ItfMesWindowRec D_00452960[];
  * the pool-array-relative counter. An empty record is a no-op. */
 void itfMesDestroyWindow(s32 window) {
     ItfMesWindowRec *windowRecord = &D_00452960[window];
-    ItfMesState *mes = (ItfMesState *)windowRecord->stateAddress;
+    ItfMesState *mes = windowRecord->state;
     if (mes != NULL) {
         itfMesCleanupWindow(window, 1);
         itfMesResetWindow(window);
@@ -1132,7 +1125,7 @@ void itfMesDestroyWindow(s32 window) {
         itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
         sdfReleaseResourceAllocation(windowRecord->resourceHandle);
-        windowRecord->stateAddress = 0;
+        windowRecord->state = NULL;
         itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_00452960 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_00452960 - 0x20))->activeWindowCount -= 1;
     }
@@ -1594,7 +1587,6 @@ extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *);
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-extern UiOwnerRef *D_003B4778[];
 
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 
@@ -2215,7 +2207,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
             itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
         }
     }
-    if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
+    if (D_003B4770.window != NULL && D_003B4770.window->state == panel && place != 0) {
         itfQueueSpriteQuadPacket(place->sprite);
     }
 }
@@ -2346,7 +2338,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
 s32 itfUpdateActiveMessageWindows(KwlnTask *task) {
     ItfMesPoolNode *node;
     for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
-        itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
+        itfUpdateBattleDisplayAndFadeIndicator(node->state);
     }
     return 0;
 }
@@ -2360,7 +2352,7 @@ s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
         return 0;
     }
     for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
-        itfUpdateSoundSelectorPanel((ItfMesState *)node->stateAddress);
+        itfUpdateSoundSelectorPanel(node->state);
     }
     itfMesWork.unk8++;
     return 0;
@@ -2490,7 +2482,7 @@ ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
         if (node == NULL) {
             node = itfMesWork.pool.activeTail;
         }
-        if (((ItfMesState *)node->stateAddress)->blkA4.sprite != NULL) {
+        if ((node->state)->blkA4.sprite != NULL) {
             break;
         }
         index++;

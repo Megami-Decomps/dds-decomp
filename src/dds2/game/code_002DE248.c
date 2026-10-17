@@ -408,7 +408,7 @@ extern u8 btlIsRuntimeAllocated(void);
 
 extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
 
-extern void dds3DispatchIndexedCallback(s32, f32);
+#include "eff_emitter_type.h"
 
 
 
@@ -5397,7 +5397,7 @@ void effSetSurfaceNodeColor(s32 node, u32 color) {
 
 void effIndexedFloatCallbackDispatch(u8 *p, f32 value) {
     ((EffectSlotNode54 *)p)->opacity = value;
-    dds3DispatchIndexedCallback((s32)((EffectSlotNode54 *)p)->record, value);
+    dds3DispatchIndexedCallback((u16 *)((EffectSlotNode54 *)p)->record, value);
 }
 
 extern EffPacketParams D_00458310;
@@ -7175,7 +7175,7 @@ void effSetStripRecordColor(EffectStripNode *node, u32 color) {
 /* Store opacity and notify the strip's active-record callback. */
 void effSetStripOpacity(EffectStripNode *p, f32 value) {
     p->opacity = value;
-    dds3DispatchIndexedCallback((s32)p->active, value);
+    dds3DispatchIndexedCallback((u16 *)p->active, value);
 }
 
 void effResetBillTable(u8 *p) {
@@ -8418,7 +8418,7 @@ void effSynchronizeFileTransform(u8 *work) {
     if (state->record != 0) {
         mnuRecordSetVector(state->record, work);
         fileSetRecordSecondVector(state->record, work + 0x10);
-        dds3DispatchIndexedCallback((s32)state->record, ((EffClassWork *)work)->scale);
+        dds3DispatchIndexedCallback((u16 *)state->record, ((EffClassWork *)work)->scale);
         fileAcquireRecord(state->record);
     }
 }
@@ -11860,7 +11860,7 @@ void effSetActiveSlotColor(s32 node, u32 color) {
 /* Set slot opacity and forward it to the retained record's indexed callback. */
 void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
     ((EffectSlotNode80 *)work)->opacity = opacity;
-    dds3DispatchIndexedCallback(work[0x70 / 4], opacity);
+    dds3DispatchIndexedCallback((u16 *)work[0x70 / 4], opacity);
 }
 
 

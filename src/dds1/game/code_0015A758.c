@@ -46,7 +46,6 @@ extern ParDispatch parKindConstructorEntries[];
 
 
 
-extern ParDispatch D_0034E258[];
 
 extern void (*D_0034E5E0[])(void *, void *, void *);
 
@@ -173,7 +172,7 @@ ParObj *parInstantiateKind(ParObj *source) {
 }
 
 void parObjDispatch(ParObj *object) {
-    D_0034E258[object->dispatchIndex].func(object);
+    parKindConstructorEntries[object->dispatchIndex].destroy(object);
 }
 
 extern void billInvokeCallback(BillObj *);
