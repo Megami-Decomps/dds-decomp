@@ -79,47 +79,47 @@ void evtEndUnitValueTransitionForObject(EffWorldNode *object, s32 duration) {
     evtEndUnitValueTransition((struct EvtUnit *)data->transitionWork, duration);
 }
 /* Load flags, mode and the transform block from a setup record. */
-void dds3LoadWorldTransformSetup(EffWorldNode *object, WorldTransformSetup *setup) {
-    WorldTransformData *data = object->data;
+void dds3LoadWorldTransformSetup(EffWorldNode *worldNode, WorldTransformSetup *setup) {
+    WorldTransformData *transformData = worldNode->data;
 
-    data->flags = 0;
+    transformData->flags = 0;
     if (setup->flags & 1) {
-        data->flags = 1;
+        transformData->flags = 1;
     }
     if (setup->flags & 2) {
-        data->flags |= 4;
+        transformData->flags |= 4;
     }
-    data->rotation[0] = setup->transform.rotation[0];
-    data->mode = setup->mode;
-    data->rotation[1] = setup->transform.rotation[1];
-    data->rotation[2] = setup->transform.rotation[2];
-    data->rotation[3] = setup->transform.rotation[3];
-    data->position[0] = setup->transform.position[0];
-    data->position[1] = setup->transform.position[1];
-    data->position[2] = setup->transform.position[2];
-    data->positionW = 0.0f;
-    data->scale[0] = setup->transform.scale[0];
-    data->scale[1] = setup->transform.scale[1];
-    data->scale[2] = setup->transform.scale[2];
-    data->scaleW = 1.0f;
+    transformData->rotation[0] = setup->transform.rotation[0];
+    transformData->mode = setup->mode;
+    transformData->rotation[1] = setup->transform.rotation[1];
+    transformData->rotation[2] = setup->transform.rotation[2];
+    transformData->rotation[3] = setup->transform.rotation[3];
+    transformData->position[0] = setup->transform.position[0];
+    transformData->position[1] = setup->transform.position[1];
+    transformData->position[2] = setup->transform.position[2];
+    transformData->positionW = 0.0f;
+    transformData->scale[0] = setup->transform.scale[0];
+    transformData->scale[1] = setup->transform.scale[1];
+    transformData->scale[2] = setup->transform.scale[2];
+    transformData->scaleW = 1.0f;
 }
 
 /* Load rotation, position and scale from a parameter block. */
-void dds3LoadWorldTransformParams(EffWorldNode *object, const WorldTransformParams *params) {
-    WorldTransformData *data = object->data;
+void dds3LoadWorldTransformParams(EffWorldNode *worldNode, const WorldTransformParams *params) {
+    WorldTransformData *transformData = worldNode->data;
 
-    data->rotation[0] = params->rotation[0];
-    data->rotation[1] = params->rotation[1];
-    data->rotation[2] = params->rotation[2];
-    data->rotation[3] = params->rotation[3];
-    data->position[0] = params->position[0];
-    data->position[1] = params->position[1];
-    data->position[2] = params->position[2];
-    data->positionW = 0.0f;
-    data->scale[0] = params->scale[0];
-    data->scale[1] = params->scale[1];
-    data->scale[2] = params->scale[2];
-    data->scaleW = 1.0f;
+    transformData->rotation[0] = params->rotation[0];
+    transformData->rotation[1] = params->rotation[1];
+    transformData->rotation[2] = params->rotation[2];
+    transformData->rotation[3] = params->rotation[3];
+    transformData->position[0] = params->position[0];
+    transformData->position[1] = params->position[1];
+    transformData->position[2] = params->position[2];
+    transformData->positionW = 0.0f;
+    transformData->scale[0] = params->scale[0];
+    transformData->scale[1] = params->scale[1];
+    transformData->scale[2] = params->scale[2];
+    transformData->scaleW = 1.0f;
 }
 
 
