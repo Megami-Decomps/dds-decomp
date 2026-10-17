@@ -551,11 +551,11 @@ PolyMovieWork *evtPolygonMovieAllocWork(void)
     return work;
 }
 
-PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, PmdHeader *sub, PmdHeader *sub2)
+PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeader, PmdHeader *sub, PmdHeader *sub2)
 {
     s32 i;
 
-    if (data == NULL) {
+    if (mainHeader == NULL) {
         return NULL;
     }
     work->unk_114 = 0;
@@ -569,8 +569,8 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     work->mainEntry3Count = 0;
     work->mainEntry7Count = 0;
     work->mainEntry22Count = 0;
-    work->entries = data->entries;
-    work->data = data;
+    work->entries = mainHeader->entries;
+    work->data = mainHeader;
     work->mainEntry1Data = NULL;
     work->mainEntry2Data = NULL;
     work->mainEntry10Data = NULL;
@@ -585,31 +585,31 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     for (i = 0; i < work->data->count; i++) {
         switch (work->entries[i].type) {
         case 2:
-            work->mainEntry2Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry2Data = (u8 *)mainHeader + work->entries[i].offset;
             work->unk_24 = work->entries[i].value;
             break;
         case 10:
-            work->mainEntry10Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry10Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 11:
-            work->mainEntry11Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry11Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 12:
-            work->mainEntry12Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry12Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 3:
-            work->mainEntry3Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry3Data = (u8 *)mainHeader + work->entries[i].offset;
             work->mainEntry3Count = work->entries[i].value;
             break;
         case 9:
-            work->mainEntry9Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry9Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 1:
-            work->mainEntry1Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry1Data = (u8 *)mainHeader + work->entries[i].offset;
             work->unk_1C = work->entries[i].value;
             break;
         case 6:
-            work->mainEntry6Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry6Data = (u8 *)mainHeader + work->entries[i].offset;
             if (work->entries[i].value == 0) {
                 work->handle = -1;
             } else {
@@ -617,18 +617,18 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             }
             break;
         case 7:
-            work->mainEntry7Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry7Data = (u8 *)mainHeader + work->entries[i].offset;
             work->mainEntry7Count = work->entries[i].value;
             break;
         case 8:
-            work->mainEntry8Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry8Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         case 22:
-            work->mainEntry22Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry22Data = (u8 *)mainHeader + work->entries[i].offset;
             work->mainEntry22Count = work->entries[i].value;
             break;
         case 23:
-            work->mainEntry23Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry23Data = (u8 *)mainHeader + work->entries[i].offset;
             break;
         }
     }
