@@ -68,7 +68,7 @@ extern void effPcpScatterSharePoolResource(PcpScatterPool *work, PcpScatterPool 
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resId);
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);

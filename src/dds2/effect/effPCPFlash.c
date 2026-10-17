@@ -210,7 +210,7 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     effDrawTriangleRecordPool(handle);
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
 PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
@@ -297,7 +297,7 @@ void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index
     }
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 void effFlashSpawnRotatingParticle(PcpFlashStreakWork *work, s32 index, void *orientation) {
     PcpFlashRotatingParticle *part = work->parts + index;
@@ -402,7 +402,7 @@ void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *o
     part->position[2] = position[2];
 }
 extern void effDrawScaledRecordPool(EffRecordPool *pool);
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 
@@ -1326,7 +1326,7 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 i
     }
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 void effFlashRotatingQuadSpawnParticle(PcpFlashRotatingQuadWork *work, s32 index, void *orientation) {
     PcpFlashRotatingQuadParticle *part = work->parts + index;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_task_work.h"
 #include "mnu_mantra_grid.h"
@@ -306,7 +307,6 @@ void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackSt
 
 
 
-extern f32 effMiscRandUnitFloat(void *state);
 static inline s16 mnuRandomPulseDuration(void *state) {
     return effMiscRandUnitFloat(state) * 120.0f + 30.0f;
 }

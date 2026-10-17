@@ -46,7 +46,7 @@
 
 extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void btlSetDefaultActionCameraPose();
 

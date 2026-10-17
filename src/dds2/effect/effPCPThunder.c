@@ -34,7 +34,7 @@ typedef char EffThunderFragmentParamsColorOffsetsCheck[
      (u32)&((EffThunderFragmentParams *)0)->middleColorWord == 0x48 &&
      (u32)&((EffThunderFragmentParams *)0)->edgeColorWord == 0x50) ? 1 : -1];
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* Keep literal types and arithmetic associations identical to the native code. */
 #define EFF_THUNDER_PARAMETER_BLOCK 0

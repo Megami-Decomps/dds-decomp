@@ -56,7 +56,7 @@
 
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);

@@ -1424,7 +1424,7 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
    the base-scale random factor; motion's Y component begins as zero height. */

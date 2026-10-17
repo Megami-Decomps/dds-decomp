@@ -1,3 +1,4 @@
+#include "eff_random.h"
 #include "common.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
@@ -386,7 +387,7 @@ extern ItfMesSub D_0032A520;
 
 extern ItfMesSub D_0032A210;
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 
 

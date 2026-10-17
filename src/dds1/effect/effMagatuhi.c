@@ -255,7 +255,7 @@ void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work) {
     D_00355720[work->unk10]->append(D_00355720[work->unk10], list);
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 
@@ -370,7 +370,7 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
     }
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
@@ -379,7 +379,7 @@ void effMagatuhiResetValueHistorySlot(EffMagatuhiValueWork *valueWork, s32 index
     effResetMagatuhiValueSlot(valueWork, index);
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* Clone the first-family parameters; return the work after its state array.
  * Clamp only the copied delay modulus, leaving the caller's parameters intact. */

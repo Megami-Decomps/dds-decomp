@@ -3757,7 +3757,7 @@ extern s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlApplyCombinedActorFlags(u8 *);
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 extern char D_0041A5E0[], D_0041A5F8[];
 
 /* VURI camera selection retains the command link and mode payload across

@@ -1779,7 +1779,7 @@ typedef char EffBillFrameEntry_radius_offset_check[((u32)&((EffBillFrameEntry *)
 typedef char EffBillFrameEntry_innerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->innerWidth == 0x10) ? 1 : -1];
 typedef char EffBillFrameEntry_outerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->outerWidth == 0x14) ? 1 : -1];
 
-extern s32 effSharedRandomState[4];
+extern EffRandState effSharedRandomState[];
 extern u8 D_003E9100[];
 
 void billAdvanceFrameInstances(EffClassWork *work) {
@@ -2444,7 +2444,7 @@ void billReleaseAlternatingTransformNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s32 effSharedRandomState[4];
+extern EffRandState effSharedRandomState[];
 
 /* Kind-4 animated frame entry: the radius grows by radiusStep each frame
  * for the config's drawProgress frames. */
@@ -2746,7 +2746,7 @@ void billReleaseEmitterNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s32 effSharedRandomState[4];
+extern EffRandState effSharedRandomState[];
 
 void billAdvanceEmitterInstances(EffClassWork *work) {
     EffBillEmitterFrameConfig *config = (EffBillEmitterFrameConfig *)work->payload;
@@ -3052,7 +3052,7 @@ void billReleaseStripNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s32 effSharedRandomState[4];
+extern EffRandState effSharedRandomState[];
 
 void billAdvanceStripInstances(EffClassWork *work) {
     EffBillStripFrameConfig *config = (EffBillStripFrameConfig *)work->payload;
@@ -3461,7 +3461,7 @@ void billReleaseQuadNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s32 effSharedRandomState[4];
+extern EffRandState effSharedRandomState[];
 
 void billAdvanceQuadInstances(EffClassWork *work) {
     EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
@@ -4422,7 +4422,7 @@ void effResetClassFrameAndFlags(s32 work) {
     effInitializeClassFrame(resource);
 }
 
-extern s32 effSharedRandomState[4];
+extern EffRandState effSharedRandomState[];
 /* The cached class payload is copied from the 0x5C-byte source prefix. */
 typedef struct EffRingClassConfig {
     EffRingSource ring;

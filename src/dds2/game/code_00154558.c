@@ -1865,7 +1865,7 @@ extern void effInitWorks(void);
 
 extern void effBTLFieldColorResetFlags(void);
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 extern char D_004363F8[];
 

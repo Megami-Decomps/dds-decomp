@@ -67,7 +67,7 @@ typedef struct EffRingBlock {
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 effRingBasisScratchVector[];
 

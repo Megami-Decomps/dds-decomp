@@ -144,7 +144,7 @@ extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern void btlBossDebugPrintf(const char *, ...);
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void *btlCommandAttributeNames[];
 

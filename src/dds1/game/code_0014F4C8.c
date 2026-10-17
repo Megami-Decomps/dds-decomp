@@ -120,7 +120,7 @@ s32 func_0014F780(void) {
     return 1;
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 extern void fileManagerResetSubsystems(void);
 
@@ -136,7 +136,7 @@ extern void effInitWorks(void);
 
 extern void effBTLFieldColorResetFlags(void);
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 extern char D_003BB008[];
 

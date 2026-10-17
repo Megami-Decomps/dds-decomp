@@ -23,7 +23,7 @@
 #define EFF_CHANNEL_RGB_COLOR 0x00808080
 #define EFF_PRIMITIVE_CUBIC_MODE 0
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 extern void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex);
 

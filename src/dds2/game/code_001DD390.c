@@ -72,7 +72,7 @@ extern s32 btlIsUnitInActiveList(void *unit);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void btlDrawUnitTransparencyPasses(BtlUnit *, MdlCtx *, SdfModel *, SdfPoolNode **, u32);
 

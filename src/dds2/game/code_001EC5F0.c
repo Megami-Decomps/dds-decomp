@@ -84,7 +84,7 @@ extern s64 mnuGetSoundBufferStateLocked(void);
 
 extern void sdfVuLoadRotationMatrixX(f32);
 
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 

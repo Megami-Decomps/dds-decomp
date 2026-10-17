@@ -25,7 +25,7 @@
 
 extern void effSamplePrimitiveCurveVertex(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t);
 extern void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t);
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex);
 extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
 extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents);

@@ -1278,7 +1278,7 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfAtan2Poly(f32 ratio);
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 /* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
  * own direction, and fade them over their last ten frames. */

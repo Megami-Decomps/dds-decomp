@@ -324,7 +324,7 @@ void polyInitializeBandRecordAges(PolyBand *band) {
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
 
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
 void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {

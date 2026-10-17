@@ -136,7 +136,7 @@ extern s32 dds3FindEntryIndex(s32);
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 /* Clear the supplied party-record status mask. */
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask) {
@@ -1174,7 +1174,7 @@ s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag) {
     }
 }
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 s32 btlSelectActorAction(s32 object) {
     s32 result = btlSelectEnemyDropItem(object, 1);

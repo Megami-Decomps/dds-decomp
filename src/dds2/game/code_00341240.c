@@ -18,7 +18,7 @@ extern s8 sndSynchronousCommandMode;
 extern void *sceSifAllocIopHeap(s32);
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
-f32 effMiscRandUnitFloat(void *state) {
+f32 effMiscRandUnitFloat(EffRandState *state) {
     u32 value = effMiscRand(state) & 0xFFFFFF;
 
     return (f32)value * 5.9604644775390625e-8f;
