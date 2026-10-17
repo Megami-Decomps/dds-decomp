@@ -1,3 +1,4 @@
+#include "file_pac.h"
 #include "bill_object_api.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -63,16 +64,6 @@ void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
 
 typedef struct MemBlock MemBlock;
 
-typedef struct EffBillResourceNode {
-    struct EffBillResourceNode *next;
-    u8 pad04[4];
-    MemBlock *blockHandle;
-} EffBillResourceNode;
-
-typedef struct EffBillResourceArchive {
-    u8 pad00[0x60];
-    EffBillResourceNode *nodes;
-} EffBillResourceArchive;
 
 extern s32 billPendingChildList;
 extern BillObj *effBillResourceOwners[];
@@ -82,8 +73,8 @@ extern char D_004142C0[];
 extern void sdfDebugPrintf(const char *format, ...);
 
 void effInitializeBillResourceOwners(void) {
-    EffBillResourceArchive *archive;
-    EffBillResourceNode *node;
+    FilePacRequest *archive;
+    PacWork *node;
     f32 *scale;
     u8 *configTable;
     f32 *scaleTable;
@@ -93,9 +84,9 @@ void effInitializeBillResourceOwners(void) {
     u32 configOffset;
 
     billPendingChildList = 0;
-    archive = (EffBillResourceArchive *)fileQueuePlainDispatchRequest(D_004142B0);
+    archive = (FilePacRequest *)fileQueuePlainDispatchRequest(D_004142B0);
     fileWaitForRequestReady((struct FileRequest *)archive);
-    node = archive->nodes;
+    node = archive->packet.queueHead;
     if (node != NULL) {
         configTable = (u8 *)D_003AA880;
         owner = effBillResourceOwners;
@@ -103,14 +94,14 @@ void effInitializeBillResourceOwners(void) {
         configOffset = 0;
         do {
             billboard = billCreateIndexed(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
-                                          (u32)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->blockHandle));
+                                          (u32)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
             payload = billboard->child;
             *owner++ = billboard;
             payload->halfWidth = payload->halfWidth * *scale;
             payload->halfHeight = payload->halfHeight * *scale;
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(node->blockHandle));
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(node->resourceHandle));
             node = node->next;
         } while (node != NULL);
     }
