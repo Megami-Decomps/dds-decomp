@@ -583,13 +583,13 @@ KwlnTask* kwlnTaskFindByPriority(u32 prio)
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
 s32 kwlnTaskIsRegistered(KwlnTask* target)
 {
-    s32 idx;
+    s32 taskListIndex;
     KwlnTask* node;
     node = 0;
-    idx = 0;
-    for (; idx < 3; idx++)
+    taskListIndex = 0;
+    for (; taskListIndex < 3; taskListIndex++)
     {
-        switch (idx)
+        switch (taskListIndex)
         {
         case 0:
             node = kwlnDelayedStartTaskHead;
