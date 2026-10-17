@@ -820,7 +820,7 @@ typedef struct StaffMenuRuntime {
     u8 pad28[8];
 } StaffMenuRuntime;
 
-s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 flag) {
+s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 staffView) {
     s32 context = kwlnTaskGetUserValue(task);
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuRuntime));
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress(allocation);
@@ -828,8 +828,8 @@ s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 flag) {
     ((CampMenuContext *)context)->menu = state;
     memset(state, 0, sizeof(*state));
     state->allocation = allocation;
-    state->staffView = flag;
-    if (flag == 0) {
+    state->staffView = staffView;
+    if (staffView == 0) {
         state->staffMode = 0;
     } else {
         state->staffMode = 1;

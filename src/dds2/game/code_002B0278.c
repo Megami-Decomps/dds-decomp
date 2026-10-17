@@ -1246,15 +1246,15 @@ void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
     } while (--resourceCountdown >= 0);
 }
 
-u32 mnuCreateSelectState(KwlnTask *task, s32 flag) {
+u32 mnuCreateSelectState(KwlnTask *task, s32 staffView) {
     s32 context = kwlnTaskGetUserValue(task);
     u32 handle = (u32)sdfAllocGeneralBlock(0x30);
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress((struct SdfMemBlock *)handle);
     *(StaffMenuRuntime **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
     state->allocation = (SdfMemBlock *)handle;
-    state->staffView = flag;
-    if (flag == 0) {
+    state->staffView = staffView;
+    if (staffView == 0) {
         state->staffMode = 0;
     } else {
         state->staffMode = 1;
