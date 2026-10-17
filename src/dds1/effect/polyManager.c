@@ -457,7 +457,7 @@ void effPolyScaleFourComponents(f32 scale, PolyBand *band) {
 
 /* Advance band ages, fades, geometry, and loop completion. */
 void polyUpdateBandCells(PolyBand *band) {
-    s32 index = 0;
+    s32 recordIndex = 0;
     u32 completed = 0;
     u8 loop;
     ParSystem *strip;
@@ -480,7 +480,7 @@ void polyUpdateBandCells(PolyBand *band) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyRingRandomizeRecord(band, index);
+                polyRingRandomizeRecord(band, recordIndex);
                 age = record->age;
             }
             if (age < 0) {
@@ -494,7 +494,7 @@ void polyUpdateBandCells(PolyBand *band) {
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyStripBuildScaledRing(band, index);
+                    polyStripBuildScaledRing(band, recordIndex);
                     age++;
                 } else {
                     entry->vertexCount = 0;
@@ -515,10 +515,10 @@ void polyUpdateBandCells(PolyBand *band) {
             }
 
             record->age = age;
-            index++;
+            recordIndex++;
             entry++;
             record++;
-        } while (index < count);
+        } while (recordIndex < count);
     }
     parPrependCellNode(band->strip);
 }
