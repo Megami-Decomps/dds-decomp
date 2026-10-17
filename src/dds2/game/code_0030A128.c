@@ -469,7 +469,6 @@ extern void sdfInstallNonzeroSpriteSlots(SdfSlotSet *);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
-extern void *sdfPacGetExtensionData(SdfPacStreamPacketHeader *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);

@@ -140,7 +140,7 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, SdfPacStreamPacketHeader *
     return 0;
 }
 /* Return the second header's payload when its extension-length nibble is nonzero. */
-void *sdfPacGetExtensionData(SdfPacStreamPacketHeader *header) {
+u8 *sdfPacGetExtensionData(SdfPacStreamPacketHeader *header) {
     SdfPacStreamPacketHeader *extension = (SdfPacStreamPacketHeader *)header->payload;
     s32 extensionBytes = extension->flags & PAC_EXTENSION_BYTES_MASK;
     if (extensionBytes <= 0) {
