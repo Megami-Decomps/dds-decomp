@@ -405,7 +405,172 @@ void mdlInitializeViewerResourceTable(void) {
     D_003C6588[MDL_VIEWER_TABLE_SLOT].count = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlRefreshDebugModelWorkFileList);
+/* File-I/O directory record: native stat prefix, filename and private words. */
+typedef struct {
+    u32 mode;
+    u8 stat[0x3C];
+    char name[0x100];
+    u32 privateWords[2];
+} DebugDirectoryEntry;
+
+/* One debug model base name and the .?B variants found for it (MB/PB, TB, AB). */
+typedef struct DebugModelFile {
+    struct DebugModelFile *next;
+    char name[47];
+    u8 available[3];
+    s8 extension[3][2];
+} DebugModelFile;
+
+/* Five-character device prefix copied in front of each work-file path. */
+typedef struct {
+    char text[5];
+} DebugWorkPrefix;
+
+/* newlib's character-class table: one EOF slot, then one entry per byte value. */
+extern const char _ctype_[];
+#define _L 02
+#define islower(c) ((_ctype_ + 1)[(unsigned)(c)] & _L)
+
+extern DebugModelFile *D_00438F94;
+extern const char D_00420FD8[];
+extern DebugWorkPrefix D_00436FB8[];
+extern u8 sdfPfsDebugMode;
+extern s32 sceDopen(const char *);
+extern s32 sceDread(s32, DebugDirectoryEntry *);
+extern s32 sceDclose(s32);
+extern s32 memcmp(const void *, const void *, u32);
+
+static inline s32 debugFileUpper(s32 c) {
+    return islower(c) ? c - 'a' + 'A' : c;
+}
+
+void mdlRefreshDebugModelWorkFileList(void) {
+    DebugDirectoryEntry directory;
+    s32 index;
+    s32 count;
+    s32 handle;
+    s32 length;
+    s32 end;
+    DebugModelFile *next;
+    DebugModelFile *file;
+    DebugModelFile **link;
+
+    if (sdfPfsDebugMode && (handle = sceDopen(D_00420FD8)) >= 0) {
+        mdlReleaseViewerSlotResources();
+        while ((length = sceDread(handle, &directory)) > 0) {
+            if ((directory.mode & 0xF000) != 0x1000 && length >= 4 && length < 49) {
+                s32 kind = -1;
+
+                if (directory.name[length - 3] == '.' &&
+                    (s8)debugFileUpper(directory.name[length - 1]) == 'B') {
+                    s32 ext = directory.name[length - 2];
+
+                    if (islower(ext)) {
+                        ext -= 'a' - 'A';
+                    }
+                    switch (ext) {
+                    case 'A':
+                        kind = 2;
+                        break;
+                    case 'T':
+                        kind = 1;
+                        break;
+                    case 'M':
+                    case 'P':
+                        kind = 0;
+                        break;
+                    }
+                    if (kind >= 0) {
+                        file = D_00438F94;
+                        while (file != NULL && memcmp(file->name, directory.name, length - 2) != 0) {
+                            file = file->next;
+                        }
+                        if (file == NULL) {
+                            file = sdfAllocSizeClassBlock(sizeof(*file));
+                            memset(file, 0, sizeof(*file));
+                            memcpy(file->name, directory.name, length - 2);
+                            file->name[length - 2] = 0;
+                            file->next = D_00438F94;
+                            D_00438F94 = file;
+                        }
+                        file->available[kind] = 1;
+                        file->extension[kind][0] = directory.name[length - 2];
+                        file->extension[kind][1] = directory.name[length - 1];
+                    }
+                }
+            }
+        }
+        count = 0;
+        sceDclose(handle);
+        link = &D_00438F94;
+        next = D_00438F94;
+        while (next != NULL) {
+            file = next;
+            next = file->next;
+            if (!file->available[0]) {
+                *link = next;
+                mdlReleaseViewerAllocation(file);
+            } else {
+                if (debugFileUpper(file->extension[0][0]) == 'P') {
+                    file->available[1] = 0;
+                    file->available[2] = 0;
+                }
+                link = &file->next;
+                count++;
+            }
+        }
+        if (count != 0) {
+            index = 0;
+            D_00436FAC = (u32)sdfAllocGeneralBlock(count * sizeof(MdlResourceSelection));
+            D_00438F98 = sdfResourceRetainAddress((SdfMemBlock *)D_00436FAC);
+            D_00436FB0 = (u32)sdfAllocGeneralBlock(count * sizeof(MdlResourcePath));
+            D_00438F9C = sdfResourceRetainAddress((SdfMemBlock *)D_00436FB0);
+            memset(D_00438F9C, 0, count * sizeof(MdlResourcePath));
+            file = D_00438F94;
+            while (file != NULL) {
+                const char *name = file->name;
+                s32 kind;
+
+                D_00438F98[index].pathTable = 5;
+                D_00438F98[index].pathIndex = index;
+                D_00438F98[index].unk4 = 0x1000;
+                D_00438F98[index].unk6 = 1000;
+                length = strlen(name);
+                end = length + 5;
+                for (kind = 0; kind != 3; kind++) {
+                    if (file->available[kind]) {
+                        char *path = sdfAllocSizeClassBlock(length + 8);
+
+                        *(DebugWorkPrefix *)path = D_00436FB8[0];
+                        memcpy(path + 5, name, length);
+                        path[end] = file->extension[kind][0];
+                        path[end + 1] = file->extension[kind][1];
+                        path[end + 2] = 0;
+                        switch (kind) {
+                        case 0:
+                            D_00438F9C[index].path = path;
+                            break;
+                        case 1:
+                            D_00438F9C[index].resourceListPath = path;
+                            break;
+                        case 2:
+                            D_00438F9C[index].motionPath = path;
+                            break;
+                        }
+                    }
+                }
+                file = file->next;
+                index++;
+            }
+            D_003C86B0[MDL_VIEWER_TABLE_SLOT].entries = D_00438F98;
+            D_003C86B0[MDL_VIEWER_TABLE_SLOT].count = count;
+            D_003C6588[MDL_VIEWER_TABLE_SLOT].entries = D_00438F9C;
+            D_003C6588[MDL_VIEWER_TABLE_SLOT].count = count;
+            return;
+        }
+    }
+    mdlInitializeViewerResourceTable();
+}
 
 s32 mdlSetViewerSlotResourceHandles(s32 table, s32 slot, const char *resourceListPath, const char *path, const char *motionPath) {
     MdlResourcePath *entries = D_003C6588[table].entries;
