@@ -2155,12 +2155,12 @@ typedef struct CampRateRow {
 
 extern CampRateRow mnuShopProgressSlotPricePercentView[];
 
-s32 mnuCampScalePriceByTier(s32 level, s32 price) {
+s32 mnuCampScalePriceByTier(s32 quantity, s32 price) {
     u32 i;
 
-    if (level != 0) {
+    if (quantity != 0) {
         for (i = 0; i < 8; i++) {
-            if (mnuShopQuantityPriceTiers[i].limit != 0 && mnuShopQuantityPriceTiers[i].limit >= level) {
+            if (mnuShopQuantityPriceTiers[i].limit != 0 && mnuShopQuantityPriceTiers[i].limit >= quantity) {
                 price = price * mnuShopQuantityPriceTiers[i].percent / 100;
                 break;
             }
