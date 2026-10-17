@@ -292,8 +292,8 @@ s32 btlEditCameraFieldOfView(void) {
     return 0;
 }
 
-s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
-    f32 current = *value;
+s32 itfStepFloatWithPad(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+    f32 current = *angleDegrees;
     s32 changed = 0;
 
     if (D_0037F510.coarseUp < 0) {
@@ -360,7 +360,7 @@ s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f3
         }
     }
     if (changed != 0) {
-        *value = current;
+        *angleDegrees = current;
         return 1;
     }
     return 0;

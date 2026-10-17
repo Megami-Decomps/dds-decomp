@@ -590,8 +590,8 @@ typedef struct ShootingVector {
 extern const ShootingVector D_0042D7A0;
 extern struct EffWorldNode *dds3AppendWorldNode(void);
 extern void mnuCreateShootingSceneCamera(void);
-extern s32 kwlnSetLightColorTarget(s32, s32, void *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+extern void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
 extern s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern struct WideSlotPool *itfCreateSpriteWorkPool(u32 count);

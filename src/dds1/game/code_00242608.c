@@ -1462,7 +1462,7 @@ s32 mnuCampRunPanel2(KwlnTask *request) {
 }
 
 
-s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
+s32 mnuCampGetSourceItemPrice(s32 entryIndex, s32 source, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1472,11 +1472,11 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     s32 progressStage;
 
     rowIndex = (u8)campFlagRowValue(source);
-    itemId = mnuShopSourcePriceRows[rowIndex].entries[index].itemId;
+    itemId = mnuShopSourcePriceRows[rowIndex].entries[entryIndex].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = mnuShopSourcePriceRows[rowIndex].pricePercent;
-        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[index].pricePercent;
+        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[entryIndex].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -1491,7 +1491,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
+s32 mnuCampGetRankedItemPrice(s32 entryIndex, s32 halfPrice) {
     u32 rowOffset;
     u8 *row;
     u8 *entry;
@@ -1503,7 +1503,7 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     s32 progressStage;
 
     rowOffset = (u8)mnuCampFindActiveSlot() * sizeof(ShopRankPriceRow);
-    entry = mnuShopRankPriceRows + index * sizeof(ShopRankPriceEntry) + rowOffset;
+    entry = mnuShopRankPriceRows + entryIndex * sizeof(ShopRankPriceEntry) + rowOffset;
     row = mnuShopRankPriceRows + rowOffset;
     itemId = *(u16 *)(entry + 4);
     if (halfPrice == 0) {

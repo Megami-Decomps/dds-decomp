@@ -1756,15 +1756,15 @@ void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
     } while (-1 < remaining);
 }
 
-u16 *txtFormatNumberU16(s32 value, u16 *out) {
+u16 *txtFormatNumberU16(s32 number, u16 *out) {
     s32 digits[10];
     s32 count = 0;
     s32 i;
     do {
-        digits[count] = value % 10;
-        value = value / 10;
+        digits[count] = number % 10;
+        number = number / 10;
         count++;
-    } while (value > 0 && count < 10);
+    } while (number > 0 && count < 10);
     for (i = count - 1; i >= 0; i--) {
         *out++ = (digits[i] << 8) - 0x6F80;
     }

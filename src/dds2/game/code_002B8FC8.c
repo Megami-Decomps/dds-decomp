@@ -409,7 +409,7 @@ void mnuSelectStaffSelectionVisuals(u32 context);
 
 void mnuReleaseMenuWindowHandles(s32 context);
 
-u32 mnuCreateSelectState(u32 unused, s32 flag);
+u32 mnuCreateSelectState(u32 unused, s32 staffView);
 
 s32 mnuStaffCloseSelectionState(void);
 

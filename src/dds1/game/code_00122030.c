@@ -1569,12 +1569,7 @@ void fldConfigureRenderCleanupMessage(void) {
     sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (u32 *)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
 }
 
-typedef struct FldEncEntry {
-    s16 stage;
-    s16 flag;
-    s16 chance;
-    s16 result;
-} FldEncEntry;
+#include "fld_encounter_roll_entry.h"
 
 extern FldEncEntry *fldEncounterRollTable;
 

@@ -162,7 +162,7 @@ extern MenuTextEntry D_003482A8[];
 
 /* Select an encoded text row, draw it at the supplied grid cell, and queue the glyph.
  * The signed-byte slot is not bounds checked; DDS1 has no DDS2 x-origin adjustment. */
-void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
+void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
     struct FrFontGlyph *handle;
 
@@ -171,7 +171,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
     } else {
         text = D_003482A8[slot].encodedText;
     }
-    handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, value, text, 0);
+    handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, colors, text, 0);
     frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
@@ -997,27 +997,27 @@ s32 fldPollSceneState(void) {
 extern char mnuTerminalPreparationPopupEntry[];
 
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
-s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
-    s32 context = kwlnTaskGetUserValue(value);
+s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuTerminalWork *work = (MenuTerminalWork *)context;
     s32 *state = &work->popupState;
 
     mnuSetPopupEntry(state, mnuTerminalPreparationPopupEntry);
-    return menuRunPanel((void *)context, 0, (void *)value);
+    return menuRunPanel((void *)context, 0, (void *)task);
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
-s32 evtRunTerminalPanel(KwlnTask *value) {
-    s32 context = kwlnTaskGetUserValue(value);
+s32 evtRunTerminalPanel(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
-    return menuRunPanel((void *)context, 1, (void *)value);
+    return menuRunPanel((void *)context, 1, (void *)task);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
-s32 evtRunTerminalPanelSync(KwlnTask *value) {
-    s32 context = kwlnTaskGetUserValue(value);
+s32 evtRunTerminalPanelSync(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
-    return menuRunPanel((void *)context, 2, (void *)value);
+    return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 /* Require the fade to be inactive before testing message-window control for idle. */
@@ -1205,20 +1205,20 @@ void mnuTerminalSelectSlot(u32 mode, s32 commandIndex, MenuTerminalWork *state) 
 }
 
 /* Draw valid current/previous slots; mode two also runs its native extra draw step. */
-void mnuDrawTerminalSelectedSlots(s32 context) {
-    MenuTerminalWork *state = (MenuTerminalWork *)context;
+void mnuDrawTerminalSelectedSlots(s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
     EffectPair position = D_003BC400[0];
     s32 *slot;
     u32 i;
 
-    for (i = 0, slot = state->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
+    for (i = 0, slot = work->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
         if (*slot >= 0) {
             itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                        state->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
+                                        work->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
         }
     }
-    if (state->mode == 2) {
-        mnuDrawTerminalAmountText(0, context);
+    if (work->mode == 2) {
+        mnuDrawTerminalAmountText(0, state);
     }
 }
 
@@ -1342,8 +1342,8 @@ void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
 
 
 
-s32 mnuGetTerminalListSlotForCount(MenuTerminalWork *context) {
-    s32 value = context->listResource->count;
+s32 mnuGetTerminalListSlotForCount(MenuTerminalWork *terminalWork) {
+    s32 value = terminalWork->listResource->count;
 
     switch (value) {
     case 2:
@@ -1443,8 +1443,8 @@ void mnuDrawTerminalSelectionListAndStep(s32 close, MenuTerminalWork *work) {
     }
 }
 
-void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
-    MenuTerminalWork *work = (MenuTerminalWork *)context;
+void mnuConfigureTerminalModeEffects(u32 mode, s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
     s32 effectIndex = 0;
     s32 materialFlags = 0;
     s32 height = 0;
@@ -1475,11 +1475,11 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
         effectIndex = 3;
         break;
     }
-    /* Keep the selected-field byte displacement separate from the context;
+    /* Keep the selected-field byte displacement separate from the state;
      * see docs/idioms.md, "Trace-justified terminal effect byte displacement". */
     effectOffset = effectIndex * sizeof(work->effect[0]) +
                    (u32)&((MenuTerminalWork *)0)->effect;
-    effect = (EffMappedResource **)(context + effectOffset);
+    effect = (EffMappedResource **)(state + effectOffset);
     itfSetGridEntryQuantizedAndRefresh(work->batch, 9, 0, 0, 0, 0);
     effConfigureWithDefaultSetting(work->batch, 9, *effect, 0, materialFlags, stateFlags);
     itfSetGridEntryQuantizedAndRefresh(work->batch, 10, 0, yOffset, 0, height);
@@ -2002,19 +2002,19 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
 }
 
 
-void mnuDrawTerminalAmountText(s32 fading, s32 context) {
-    MenuTerminalWork *scene = (MenuTerminalWork *)context;
+void mnuDrawTerminalAmountText(s32 fading, s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
     char text[16];
     s32 index;
     s32 color;
     struct FrFontGlyph *sprite;
 
-    index = fldGetModeFrameRecordIndex(scene);
+    index = fldGetModeFrameRecordIndex(work);
     sprintf(text, D_003BC3F0, datGameState->header.currency);
     if (fading == 0) {
-        color = (*(u8 *)&scene->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
+        color = (*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
     } else {
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, work->list->scale);
     }
     sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
     frFontDrawGlyphChain(sprite, 1, 0x53);

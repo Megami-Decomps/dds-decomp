@@ -343,14 +343,14 @@ void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
 
 /* Rebuild preset skills/vitals in mode0, or current-profile skill flags in mode1. */
-void ptyRebuildProfileSkills(s32 mode, DatPartyRecord *unit) {
+void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit) {
     PrfSkillList list;
     s32 profile;
     u16 profileId;
     u32 i;
 
-    ptyApplyProfilePreset(mode, unit);
-    switch (mode) {
+    ptyApplyProfilePreset(useCurrentProfile, unit);
+    switch (useCurrentProfile) {
     case 0:
         ptyLoadPresetSkillSlots(unit);
         ptyMarkPresetSkillPool(unit);

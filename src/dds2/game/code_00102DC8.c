@@ -1112,21 +1112,8 @@ s32 kwlnEnsureDefaultResource(void) {
 }
 
 /* Two fixed frame banks: thirteen draw groups and their scene/overlay packets. */
-typedef struct KwlnFrameDrawBank {
-    SdfListHead initialList;
-    DmaPacketHeader programReference;
-    u8 packetGroups[13][0x1B0];
-    SdfListHead sceneList;
-    SdfLinkedPacketList linkedList;
-    SdfSceneNode scene;
-    ConsMatrixPacket sceneMatrix;
-    u8 scenePacketStorage[0x420]; /* Light and following per-frame packets. */
-    SdfListHead thirdList;
-    ConsMatrixPacket thirdMatrix;
-    SdfLightingPacketStorage overlayLightPacket;
-} KwlnFrameDrawBank;
+#include "kwln_frame_draw_bank.h"
 typedef char KwlnFrameDrawBank_size_check[sizeof(KwlnFrameDrawBank) == 0x1F40 ? 1 : -1];
-typedef char MatrixPacket_size_check[sizeof(ConsMatrixPacket) == 0xD0 ? 1 : -1];
 
 extern KwlnFrameDrawBank D_00380870[2];
 extern u32 D_00435CBC;

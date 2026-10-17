@@ -73,8 +73,8 @@ McPollResult mcPollWithExtendedErrors(void) {
 
 /* Request directory entries on slot zero with SDK mode zero. The output table
  * is SDK argument six; its entry limit is argument five. */
-void mcReadDirectoryEntries(u32 port, const char *path, void *entries, s32 entryLimit) {
-    sceMcGetDir(port, MC_CARD_SLOT, path, 0, entryLimit, entries);
+void mcReadDirectoryEntries(u32 port, const char *path, void *directoryEntries, s32 entryLimit) {
+    sceMcGetDir(port, MC_CARD_SLOT, path, 0, entryLimit, directoryEntries);
 }
 
 /* Accept any completed nonnegative status and write it to resultOut, which
