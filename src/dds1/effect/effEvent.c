@@ -1433,7 +1433,7 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
     SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(particleBytes + sizeof(EffEventBillSet));
     EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(allocationHandle);
     EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + particleBytes);
-    u32 i;
+    u32 particleIndex;
 
     work->head = *src;
     work->allocationHandle = allocationHandle;
@@ -1454,7 +1454,7 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
         D_003BB148 = (u32)billCreateFromResource(0, "/efftool/bill/dbball02.tmx");
     }
     particleCount = work->head.particleCount;
-    for (i = 0; i < particleCount; i++) {
+    for (particleIndex = 0; particleIndex < particleCount; particleIndex++) {
         particle->age = 0;
         particle++;
     }
