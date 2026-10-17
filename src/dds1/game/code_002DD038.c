@@ -76,7 +76,7 @@ void sdfBlendMotionSlotPairWeights(SdfMotionSlotPairBinding *motion, f32 frame, 
     SdfSlotEntry *current;
     SdfSlotPair *previous;
     u32 count;
-    s32 i;
+    s32 previousPairIndex;
     s32 firstId;
     s32 secondId;
     f32 firstValue;
@@ -110,34 +110,34 @@ void sdfBlendMotionSlotPairWeights(SdfMotionSlotPairBinding *motion, f32 frame, 
     }
 
     contributionWeight = 1.0f - amount;
-    for (previous = motion->previous.pair, i = 0;
-         i < 2; i++, previous++) {
-        f32 value = previous->weight * contributionWeight;
+    for (previous = motion->previous.pair, previousPairIndex = 0;
+         previousPairIndex < 2; previousPairIndex++, previous++) {
+        f32 previousContributionWeight = previous->weight * contributionWeight;
 
-        if (!(value <= 1.0e-6f)) {
+        if (!(previousContributionWeight <= 1.0e-6f)) {
             s32 id = previous->index;
 
             if (count == 1) {
                 if (current->pair[0].index == id) {
-                    current->pair[0].weight += value;
+                    current->pair[0].weight += previousContributionWeight;
                 } else {
                     current->pair[1].index = id;
-                    current->pair[1].weight = value;
+                    current->pair[1].weight = previousContributionWeight;
                     count = 2;
                 }
             } else if (current->pair[0].index == id) {
-                current->pair[0].weight += value;
+                current->pair[0].weight += previousContributionWeight;
             } else if (current->pair[1].index == id) {
-                current->pair[1].weight += value;
+                current->pair[1].weight += previousContributionWeight;
             } else if (current->pair[0].weight < current->pair[1].weight) {
-                if (current->pair[0].weight < value) {
+                if (current->pair[0].weight < previousContributionWeight) {
                     current->pair[0].index = id;
-                    current->pair[0].weight = value;
+                    current->pair[0].weight = previousContributionWeight;
                 }
             } else {
-                if (current->pair[1].weight < value) {
+                if (current->pair[1].weight < previousContributionWeight) {
                     current->pair[1].index = id;
-                    current->pair[1].weight = value;
+                    current->pair[1].weight = previousContributionWeight;
                 }
             }
         }
