@@ -8163,7 +8163,7 @@ void func_002F1888(EffRibbonWork *work, Matrix4 *matrix) {
                 remaining = rowStride;
                 D_004583D0.colors = (u32 *)extra;
                 D_004583D0.positions = (u128 *)positions;
-                D_004583D0.texcoords = (u32 *)uvs;
+                D_004583D0.texcoords = (f32 *)uvs;
                 unpackNormalizedColor(segmentColor);
                 VU0_LOAD_VF(vf11, baseVector);
                 VU0_MUL(vf10, vf10, vf11);

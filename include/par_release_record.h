@@ -2,7 +2,7 @@
 #define PAR_RELEASE_RECORD_H
 
 #include "common.h"
-#include "eff_vertex_draw_request.h"
+#include "eff_packet_params.h"
 
 struct SdfMemBlock;
 struct SdfAsset;
@@ -15,7 +15,7 @@ typedef struct ParReleaseRecord {
     s32 unk08;
     s32 drawCount;
     struct SdfMemBlock *allocation;
-    EffVertexDrawRequest request;
+    EffPacketParams request;
     struct SdfAsset *asset;
     u128 *positions;
     u32 (*texcoords)[2];

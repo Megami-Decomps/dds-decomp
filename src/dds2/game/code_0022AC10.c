@@ -1737,7 +1737,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         btlCapturedScreenTileDrawParams.color = 0x80808080;
         btlCapturedScreenTileDrawParams.positions = (u128 *)positions;
         btlCapturedScreenTileDrawParams.normals = (u128 *)normals;
-        btlCapturedScreenTileDrawParams.texcoords = (u32 *)coordinates;
+        btlCapturedScreenTileDrawParams.texcoords = coordinates[0];
         height = tanf(D_0037F980.camera.fov * 0.5f) * 1000.0f;
         width = height * 1.333333254f;
         packet = (u64 *)sdfAllocPacketAligned(0x40);

@@ -1082,7 +1082,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress(pool->drawAsset, pool->sharedResource->textureHandle);
-        effScatterPoolDrawParams->texcoords = effScatterPoolTexcoords;
+        effScatterPoolDrawParams->texcoords = (f32 *)effScatterPoolTexcoords;
     } else {
         effScatterPoolDrawParams->texcoords = NULL;
     }

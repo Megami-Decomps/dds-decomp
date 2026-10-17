@@ -1,5 +1,5 @@
 #include "common.h"
-#include "eff_scatter_draw_request.h"
+#include "eff_packet_params.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "sdf_asset_state.h"
@@ -43,7 +43,7 @@ void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) 
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-extern EffScatterDrawRequest effScatterDrawParams;
+extern EffPacketParams effScatterDrawParams;
 extern void *memset(void *, s32, u32);
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
@@ -100,8 +100,8 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
             right -= 2;
         }
     }
-    memset(&effScatterDrawParams, 0, sizeof(EffScatterDrawRequest));
-    effScatterDrawParams.flags = 0x4000;
+    memset(&effScatterDrawParams, 0, sizeof(EffPacketParams));
+    effScatterDrawParams.primitive = 0x4000;
     return object;
 }
 
@@ -121,7 +121,7 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
 extern u8 effScatterTriangleIndices[];
 extern SdfPoolNode *effScatterDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffScatterDrawRequest *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 particleIndex);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 particleIndex);
 struct SdfAsset;
@@ -132,7 +132,7 @@ extern u32 effGetScatterEntry(PcpScatterDraw *object, s32 particleIndex);
 void effScatterDrawObject(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
-    EffScatterDrawRequest *draw;
+    EffPacketParams *draw;
     s32 count;
     s32 remaining;
     s32 particleIndex;
@@ -155,26 +155,26 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     }
     sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;
-    effScatterDrawParams.parameters = effScatterTriangleIndices;
+    effScatterDrawParams.parameters = (const u32 *)effScatterTriangleIndices;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
         draw = &effScatterDrawParams;
         remaining = object->vectorsPerParticle;
-        draw->points = effGetScatterWideBlock(object, particleIndex);
-        draw->uv = effGetScatterNarrowBlock(object, particleIndex);
+        draw->positions = (u128 *)effGetScatterWideBlock(object, particleIndex);
+        draw->texcoords = effGetScatterNarrowBlock(object, particleIndex);
         draw->colors = object->vertexColors;
         draw->color = effGetScatterEntry(object, particleIndex);
-        draw->primitiveCount = 16;
+        draw->parameterCount = 16;
         draw->vertexCount = 18;
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
                 sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effScatterDrawParams));
-                effScatterDrawParams.points += 64;
+                effScatterDrawParams.positions += 16;
                 effScatterDrawParams.colors += 16;
-                effScatterDrawParams.uv += 32;
+                effScatterDrawParams.texcoords += 32;
             }
             if (remaining >= 4) {
-                draw->primitiveCount = remaining - 2;
+                draw->parameterCount = remaining - 2;
                 draw->vertexCount = remaining;
                 sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(draw));
             }
