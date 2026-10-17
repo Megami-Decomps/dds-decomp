@@ -17,7 +17,7 @@ void sdfDevConsFinalizeGlyphTag(ConsBuf *packetBuffers);
 void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
 void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers);
 void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *packetBuffers);
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes);
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes);
 s32 sdfVFormatString(char *destination, const char *format, void *args);
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
@@ -279,14 +279,14 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
     u64 textureState;
-    s32 halfBufferBytes = bufferBytes >> 1;
+    s32 halfBufferBytes = storageCapacityBytes >> 1;
 
-    ringAddress = ((u32)buffer & SDF_DMA_ADDRESS_MASK) | 0x30000000;
+    ringAddress = ((u32)storageBase & SDF_DMA_ADDRESS_MASK) | 0x30000000;
     ring = (u8 *)ringAddress;
     packetBuffers->bufferBytes = halfBufferBytes;
     packetBuffers->bufferAddresses[0] = ring;
