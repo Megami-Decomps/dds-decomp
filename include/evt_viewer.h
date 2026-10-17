@@ -235,6 +235,9 @@ typedef struct EvtRuntime {
 #endif
 } EvtRuntime;
 
+/* Find a runtime group by its name-table entry. */
+EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name);
+
 /* Returns the next update function as the scheduler's signed callback word. */
 s32 evtViewerStartUpdate(struct KwlnTask *task);
 struct KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
