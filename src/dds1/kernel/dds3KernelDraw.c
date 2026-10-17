@@ -99,7 +99,7 @@ extern void effMiscNormalizeVU(void);
 #define KWLN_DRAW_CLEAR_OVERLAY_TRANSITION 0xfffff7ff
 
 /* Copy one complete vector into the default draw color state. */
-void kwlnDrawCopyRow128(void *source) {
+void kwlnDrawCopyRow128(u128 *source) {
     PCP_COPY_VECTOR(&kwlnDefaultColorVector, source);
 }
 
