@@ -615,6 +615,9 @@ extern s32 btlIsFadeOutCompleteOrIdle(void);
 
 extern s32 btlAreWorkBuffersReady(void);
 
+void fldInitializeSceneGroups(void);
+extern void btlResetSceneSlotFades();
+
 s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
     BattleSceneWork *work = (BattleSceneWork *)scene;
     u32 i;
@@ -639,6 +642,8 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
 void btlConsumeSceneAdvanceFlags(void) {
 }
 
+extern void fldClearSceneAdvanceFlag(void);
+
 s32 fldConsumeSceneInputFlags(s32 scene) {
     u32 flags = *(u32 *)(scene + 0x1F4);
     s32 result;
@@ -655,8 +660,6 @@ s32 fldConsumeSceneInputFlags(s32 scene) {
     *(u32 *)(scene + 0x1F4) |= 0x20;
     return result;
 }
-
-extern void btlResetSceneSlotFades();
 
 void fldAdvanceSceneVariant(BattleSceneWork *scene) {
     s32 notFirst = scene->variant != 1;
@@ -788,7 +791,6 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
     return 0;
 }
 
-extern void fldClearSceneAdvanceFlag(void);
 extern s32 btlCanStartPrimaryScriptTask(void);
 extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
@@ -853,6 +855,8 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
         break;
     }
 }
+
+void fldEnableSceneGroupAdvancement(void);
 
 s32 fldSceneStateWaitScriptRelease(u8 *scene) {
     s32 finished = 1;
@@ -924,6 +928,8 @@ extern void btlSyncPlayerWork(BtlUnit *);
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 extern s32 btlCountAvailableParticipants(void);
 extern void brsTaskStart(void);
+
+extern void btlBossDebugPrintf(const char *format, ...);
 
 /* Prepare the outcome tasks, then settle battle money and participant EP. */
 void btlFinalizeBattleRewards(BtlState *scene) {
@@ -1323,8 +1329,6 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
 
 
 
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 #include "brs_task_poll_done_api.h"
 

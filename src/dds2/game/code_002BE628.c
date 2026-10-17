@@ -360,6 +360,8 @@ typedef char MenuQueuedRenderContext_size_check[
 
 extern void uiDrawSurfaceAtNearDepth(u32);
 
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
+
 void func_002BF000(s32 x, s32 y, s32 z, MenuQueuedCommand *command,
                    MenuQueuedRenderContext *context, s32 surface) {
     enum {
@@ -1341,8 +1343,6 @@ void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
 void mnuSetStateValue(u32 *out, u32 value) {
     *out = value;
 }
-
-extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Draw two clear corners and two blended corners, then step the bounded blend value. */
 void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
@@ -2664,6 +2664,8 @@ u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry) {
     return entry->menuValue;
 }
 
+void mnuMarkEntryBlocked(s32 itemId);
+
 u32 mnuSetPartyEntryCurrentId(DatPartyRecord *entry, u32 id) {
     entry->itemId = id;
     mnuMarkEntryBlocked(id);
@@ -3355,6 +3357,8 @@ void evtStageTestInit(s32 mode) {
     }
     mnuSetStageTestCameraOffset(offset);
 }
+
+void evtStageTestDestroyModelEffect(void);
 
 /* Release the viewer's model/effect and discard its pending effect, except in mode 1. */
 void evtStageTestStop(void) {

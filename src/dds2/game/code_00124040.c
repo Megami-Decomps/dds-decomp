@@ -732,6 +732,8 @@ extern void fldResetFieldRuntimeState();
 
 extern char D_00435F48[];
 
+void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name);
+
 void fldStartSequenceRecord(void) {
     FieldSequenceRecord record;
     u32 mode;
@@ -1324,6 +1326,8 @@ void fldSnapshotAndReleasePlayerSceneObject(void) {
         fldReleaseResources();
     }
 }
+
+void fldReleaseCampSceneTasks(void);
 
 void fldShutdownSceneTasksAndWorld(void) {
     fldResetTaskSlots();
@@ -2163,6 +2167,8 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F40);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F58);
 
+extern s8 dds3AdminGetRequestedMode(void);
+
 s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     EffBlurScatterParams blur;
     FieldPlayerSceneWork *playerWork = &D_0038A640;
@@ -2564,8 +2570,6 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
     fldDeferredCommand = command;
     fldDeferredCommandParameter = parameter;
 }
-
-extern s8 dds3AdminGetRequestedMode(void);
 
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 

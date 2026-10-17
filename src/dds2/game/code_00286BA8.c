@@ -677,7 +677,7 @@ s32 mtrMantraEquipDraw(void) {
     return 0;
 }
 
-extern const char mnuMantraUnitLevelTextFormat[];
+extern char mnuMantraUnitLevelTextFormat[];
 extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
 
@@ -1018,7 +1018,7 @@ s32 mtrDrawSelectedMantraEntry(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource
 
 TaskWork *mnuMantraSelectionResource __attribute__((section(".sdata"))) = NULL;
 
-const char mnuMantraUnitLevelTextFormat[] __attribute__((section(".sdata"))) = "%2d";
+char mnuMantraUnitLevelTextFormat[] __attribute__((section(".sdata"))) = "%2d";
 
 /* The source-list builder publishes its status object's eight-byte entries here. */
 MenuMantraRecord *mnuMantraPublishedSourceRecords __attribute__((section(".sdata"))) = NULL;

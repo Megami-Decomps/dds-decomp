@@ -410,6 +410,8 @@ void btlUpdateLinkedHeightCamera(BtlLinkedCommand *action) {
 
 extern void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
+extern void btlClearAllUnitDefeatCandidates(void);
+
 void btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *action) {
     BtlTask *task = action->task;
     btlAppendIndexListEntry(action->targetList, task->unit);
@@ -613,8 +615,6 @@ BtlCamState *out;
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
 }
-
-extern void btlClearAllUnitDefeatCandidates(void);
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
@@ -7358,6 +7358,8 @@ extern u8 kwlnDefaultColorVector[];
 
 extern void fldApplyLightSetCurrent(void);
 
+void btlInitTintTransitionResource(u32 resource, u16 soundId);
+
 void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)btlGetRuntime();
     fldApplyLightSetCurrent();
@@ -8918,6 +8920,8 @@ void btlResetFieldColorAndSweepFlags(void) {
     kwlnDrawControlFlags = kwlnDrawControlFlags & 0xdfffffff;
 }
 
+void sndClearResourceNodes(void);
+
 void btlClearSoundAndModelResources(void) {
     sndClearResourceNodes();
     mdlMarkAndProcessObjectNodes();
@@ -9142,6 +9146,8 @@ void sndLoadSysEffLb(void) {
     }
     btlStageTaskCleanupCallback(archive);
 }
+
+void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle);
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */
 void btlRefreshSoundEntries(void) {

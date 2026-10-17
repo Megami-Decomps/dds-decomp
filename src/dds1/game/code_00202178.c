@@ -729,6 +729,8 @@ s32 btlAppendSelfAfterTargetScan(s32 actor) {
     return 1;
 }
 
+void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert);
+
 /* Default scan picks a party-group candidate without status 0x1000; mode shortcuts stay native. */
 u32 btlPickUnlinkedPartyTarget(u32 task, u32 input) {
     btlSelectLinkedTargets(task, input, 1);
@@ -881,6 +883,10 @@ BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     return command->task->unit;
 }
 
+
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *);
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
 void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     BtlUnit *user;
@@ -3550,6 +3556,8 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     }
 }
 
+extern void btlArrangeOpponentFormationSlots(void);
+
 /* Nidhoggr's update hook reapplies the opponent formation slots. */
 void btlUpdateNidhoggrOpponentSlots(void) {
     btlArrangeOpponentFormationSlots();
@@ -3576,8 +3584,6 @@ u32 btlGetSpecialModeEffectValue(void) {
     }
     return *(u16 *)(effect + 0x4);
 }
-
-extern void btlArrangeOpponentFormationSlots(void);
 
 void btlTriggerSpecialUnitAction(void) {
     u8 *battle = (u8 *)btlGetRuntime();
@@ -4042,8 +4048,6 @@ s32 btlRemapSelectedBossCommand(u8 *unit, s32 command, u8 mode) {
     }
     return command;
 }
-
-extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 
 
 void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task) {
@@ -5183,8 +5187,6 @@ s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
 
 extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
-extern void btlClearAllUnitDefeatCandidates(void);
-extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);

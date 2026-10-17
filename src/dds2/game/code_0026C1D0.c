@@ -119,6 +119,8 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
 
 extern s32 scrCreateTaskForProcessId();
 
+void evtClearActiveFlag(s32 flagIndex);
+
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
 s32 evtReplaceScriptProcessTask(s32 processId, s32 processValue, s32 *taskSlot) {
@@ -285,6 +287,8 @@ s8 evtGetCapturedWindowPanelValue(void) {
     return dspCapturedSoundMode;
 }
 
+extern void itfPanelSetStatus(s32 windowIndex, s32 status);
+
 /* Reset an open window, optionally notify it first, and report whether it existed.
  * Cleanup leaves the singleton handle intact; dspCloseChannel destroys it. */
 u32 evtCleanupMessageWindow(s32 notify) {
@@ -414,8 +418,6 @@ void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
 s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
-
-extern void itfPanelSetStatus(s32 windowIndex, s32 status);
 
 /* Enable clears both disable flags and restores panel/control state one.
  * Disable sets the gate and flags, but deliberately leaves the control byte alone.

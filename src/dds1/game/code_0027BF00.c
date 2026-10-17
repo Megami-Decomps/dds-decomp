@@ -284,6 +284,8 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32
     return window;
 }
 
+void mnuReleaseWindowTextures(struct MenuWindowSpriteGroup *group);
+
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 void mnuDestroyWindowContainer(MenuWindowContainer *window) {
     struct MenuWindowSpriteGroup *textures;
@@ -520,6 +522,8 @@ void mnuDrawWindowFrameAndOverlay(s32 x, s32 y, s32 depth, MenuWindowContainer *
         effDrawSpriteWithCornerFade(x, y, depth, fadeScale, 0, sprite, slot, drawArg);
     }
 }
+
+void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *panel, s32 selectionMode, s32 drawArg);
 
 /* Draw at the selected row before advancing the panel's transition value.
  * DDS1 also normalizes the transition range before drawing; DDS2 does not. */

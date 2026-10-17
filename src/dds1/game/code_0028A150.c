@@ -545,6 +545,9 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
 extern f32 fileSaveHighlightPhase;
 
+extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
 void fileDrawPulsingSaveHighlight(void) {
     s32 angle;
@@ -563,8 +566,6 @@ void fileDrawPulsingSaveHighlight(void) {
                   (D_0037D4D0[3] << 24) | 0xAEC014, itfMesGetWindowTexture());
 }
 
-extern void evtSetDrawSurfaceIndex(s32);
-extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void fileCursorPulseUpdate(void);
 extern void fileDrawCursorPulse(s32, s32, s32);
@@ -2635,6 +2636,8 @@ extern s32 D_003BC830;
 extern s32 D_003BC838;
 void fileDestroyMemoryCardMenuTask(void);
 
+void fileInitCursorPulse(void);
+
 /* Load the memory-card pack textures, pick the menu entry state for the
  * requested mode (0 load, 1 slot select, 2 new-game save, else poll) and
  * start the file-menu task with every flow counter cleared. */
@@ -2745,6 +2748,8 @@ void fileEnterMcPackScene(s32 mode) {
         dds3SetWorldObjectDrawEnabled((EffWorldNode *)world, 0);
     }
 }
+
+void fileReleaseMenuResources(void);
 
 void fileDestroyMemoryCardMenuTask(void) {
     fileReleaseMenuResources();
@@ -3922,6 +3927,8 @@ void fileDrawConfigurationMenuBackground(void *unused) {
 }
 
 
+void fileResetRenderFlags(void);
+
 void fileManagerResetSubsystems(void) {
     sdfDebugPrintf(D_003BC900);
     effLoadFlashTextures();
@@ -4591,6 +4598,8 @@ FileQueue *effCloneQueueForNode(u32 unused, FileQueue *source) {
 }
 
 void camFollowOffsetVec(FileJob *job, void *dst);
+
+void camAimRotation(CamAim *obj, void *dst);
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start time (job+0x80) has been reached. */
 void fileQueueUpdate(FileQueue *queue)
@@ -5337,6 +5346,13 @@ LoadObj *fileCreateGridLoaderRecord(FileCellGrid *grid) {
 }
 
 
+
+void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data);
+void fileLoadObjectOpenDevice(LoadObj *obj, void *name);
+void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name);
+void fileLoadObjectOpenNamedDevice(LoadObj *obj, s32 resourceIndex);
+void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job);
+void fileReplaceReferenceHolder(LoadObj *obj, u32 resource);
 
 LoadObj *effLoadObjectCreateFromJob(FileJobPayload *job) {
     void *primary = fileResolvePrimaryBuffer(job);

@@ -578,6 +578,8 @@ extern void fldResetFieldRuntimeState(s32);
 
 extern char D_003BAB68[];
 
+void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name);
+
 void fldStartSequenceRecord(void) {
     FieldSequenceRecord record;
 
@@ -1154,6 +1156,8 @@ void fldReleasePlayerSceneResources(void) {
         fldReleaseResources();
     }
 }
+
+void fldReleaseCampSceneTasks(void);
 
 void fldCleanupFieldScene(void) {
     fldResetTaskSlots();

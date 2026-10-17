@@ -5173,6 +5173,8 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
     return 0;
 }
 
+u32 btlGetMarkedCommandCurrentState(void);
+
 s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action) {
     u32 flags = unit->status.flags;
 

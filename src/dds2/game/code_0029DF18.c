@@ -39,6 +39,9 @@ void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
     }
 }
 
+void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                   BrsProgressRow *progressRow, s32 surfaceIndex, s32 rowIndex);
+
 void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, BrsProgressRow *row,
                    BrsActiveProgressList *list, s32 context, s32 progressRowIndex) {
     u32 color[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };

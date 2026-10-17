@@ -2315,6 +2315,8 @@ s32 mdlIsDebugTimeGraph(void) {
     return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
 }
 
+void mdlSaveViewerPresentationConfig(void);
+
 /* Debug menu: page 0 selects an action, pages 1-4 edit the color channels and value steps. */
 void mdlUpdateViewerSettingsInput(void) {
     switch (mdlViewerState.unk3E) {

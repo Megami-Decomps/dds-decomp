@@ -458,16 +458,13 @@ s32 mnuCountActiveSlots(void) {
     return (activeCount < MNU_STAFF_DISPLAY_OVERFLOW) ? activeCount : MNU_STAFF_DISPLAY_LIMIT;
 }
 
-extern void mnuCopyPartyEntries();
-
-/* Reset selection/backup state, activate all panel slots, and enable list nodes.
- * Keep the native short-arity snapshot call unchanged. */
+/* Reset selection/backup state, activate all panel slots, and enable list nodes. */
 void mnuClearPartySelectionAndActivateSlots(s32 context) {
     PartyMenuData *menuWork = (PartyMenuData *)((CampMenuContext *)context)->menu;
     s32 entryIndex;
     s32 nodeAddress;
 
-    mnuCopyPartyEntries();
+    mnuCopyPartyEntries(context);
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
     ((CampMenuContext *)context)->partyPanel.frontlineCount = 1;

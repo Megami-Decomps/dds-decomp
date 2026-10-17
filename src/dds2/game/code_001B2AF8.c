@@ -208,6 +208,8 @@ typedef struct BattleEscapeParameters {
 
 const char D_004156B0[] = "btl:escape=%d%%[ratio=%.2f,sn=%d]\n";
 
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+
 s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *enemy;
@@ -806,8 +808,6 @@ void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
 void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
-
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 const char D_004156D8[] = "btl:drop money=%d[ratio=%f]\n";
 
@@ -2515,6 +2515,8 @@ s32 btlCountSceneSlots(void) {
     return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
+extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
+
 s32 btlSyncEligibleActorPanelHpMp(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 eligibleCount = btlCountEligibleLinkedActors(battle);
@@ -2546,7 +2548,6 @@ s32 btlSyncEligibleActorPanelHpMp(void) {
 }
 
 extern s32 btlCountEligibleLinkedActors(BtlState *);
-extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
 
 s32 btlSetEligibleActorPanelTransitionState(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();

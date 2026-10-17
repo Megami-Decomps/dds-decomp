@@ -904,6 +904,8 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_003BA8E0;
 
+void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode);
+
 void kwlnDrawTextureViewerFrame(void *surfaceContext, s32 handle) {
     SdfPoolNode *surface;
     SdfTex *image;

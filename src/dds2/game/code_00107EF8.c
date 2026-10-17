@@ -1533,6 +1533,8 @@ extern u16 D_00435D40;
 extern u16 D_00435D42;
 extern char D_00435D48[];
 
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+
 s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
     SdfListHead *list;
@@ -1750,7 +1752,6 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
     return 0;
 }
 
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern s32 frFontGetParentGlyphCount(void);
 extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);

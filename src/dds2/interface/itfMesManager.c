@@ -346,6 +346,8 @@ void itfMesClearFlags(u32 mask) {
     itfMessageFlags = itfMessageFlags & ~mask;
 }
 
+ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub);
+
 s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesPoolNode *node = itfAcquirePoolNode(&itfMesWork.pool);
     s32 window = node->index;
@@ -379,6 +381,8 @@ void itfMesDestroyWindowIfPresent(s32 window) {
         itfMesDestroyWindow(window);
     }
 }
+
+void itfMesBuildEntryGlyph(ItfMesState *mes);
 
 /* Install an entry's table into the window, rebuild its text glyphs and the
  * selected-item caption, then mark the entry block active. */
@@ -1805,6 +1809,8 @@ void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);
 
 void itfUpdateSoundSelectionTransition(ItfMesState *panel);
+
+void itfMesAdvanceEntryText(ItfMesState *mes);
 
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);

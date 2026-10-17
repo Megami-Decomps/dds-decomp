@@ -198,6 +198,9 @@ extern s32 sprintf(char *, const char *, ...);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+
 /* Draw the terminal value panel for the selected item: its frames, then by
  * item kind its power (kind 1) or per-stat bonuses (kind 3), and the count. */
 void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object, s32 scale,
@@ -279,7 +282,6 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawMenuItemListRow);
 
 extern s32 itfSetTextDrawLimit(s32);
-extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern char D_00437970[];
 
 void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
@@ -512,7 +514,6 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
 
 struct FrFontGlyph;
 
-extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
 
 /* Draw the selected row's icons and quantity at full opacity. */

@@ -139,6 +139,9 @@ extern s32 D_00437A30, D_00437A34, D_00437A38, D_00437A3C;
 extern u32 mnuTitleStreamDecoderState[], mnuTitleSoundBufferDecoderState[];
 extern u8 mnuTitleAudioSilenceBuffer[], mnuTitleAudioMixBuffer[];
 
+void mnuResetTitleStream(void);
+void mnuReleaseSoundBuffer(void);
+
 void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_00437A3C + 1;
     u8 *source;
@@ -665,8 +668,6 @@ void mnuClearInactiveSoundBufferState(void) {
     }
     SignalSema(mnuTitleStreamSemaphore);
 }
-
-void mnuReleaseSoundBuffer(void);
 
 void mnuResetSoundBuffer(void) {
     mnuTitleSoundBufferState.frameIndex = 0;

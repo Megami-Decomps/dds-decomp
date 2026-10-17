@@ -2416,6 +2416,8 @@ void evtStageTestInit(s32 mode) {
     mnuSetStageTestCameraOffset(offset);
 }
 
+void evtStageTestDestroyModelEffect(void);
+
 /* Release the viewer's model/effect and discard its pending effect, except in mode 1. */
 void btlStopStage(void) {
     if (evtStageTestState.mode != 1) {

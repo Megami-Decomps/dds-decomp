@@ -617,6 +617,8 @@ void mnuReleaseAssets(MenuAssets *assets) {
 
 extern void uiDrawSurfaceAtNearDepth(u32);
 
+extern void itfGridLookupValueOrDefault(s32, s32);
+
 void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
     uiDrawTexturedSurfaceAtFarDepth(drawArg);
     itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, assets->sprites[4], 0, drawArg);
@@ -631,8 +633,6 @@ void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
     itfGridLookupValueOrDefault((s32)assets->sprites[1], 0);
     uiDrawSurfaceAtNearDepth(drawArg);
 }
-
-extern void itfGridLookupValueOrDefault(s32, s32);
 
 void mnuDrawCursorIcons(MenuAssets *assets, s32 surface) {
     EffectSlotSet *icon = assets->sprites[2];

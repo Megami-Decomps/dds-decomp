@@ -3805,6 +3805,8 @@ void mnuResetPanelAnimationFlags(MantraPanelAnimation *panel) {
     panel->flags = (panel->flags & 0xfffc03ff) | 0x800;
 }
 
+u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *panel, u32 bits, s16 length);
+
 void mnuTransitionActivePanelAnimations(MantraPanelPool *pool, s32 mode) {
     s32 i;
     u32 *item = (u32 *)pool->items;

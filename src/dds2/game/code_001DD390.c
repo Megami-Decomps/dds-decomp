@@ -2201,6 +2201,8 @@ void btlFreeTask(BtlRuntimeTask *task) {
     sdfReleaseChipBlock(task);
 }
 
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
+
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
 u64 btlStartTask(taskObject)
     void *taskObject;
@@ -5172,8 +5174,6 @@ void btlResetUnitLinks(BtlUnit *unit) {
     unit->resourceLink = sndAllocResourceLink(unit);
     unit->link = sndAllocLink(unit);
 }
-
-extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern void *memset(void *, s32, u32);
 

@@ -1407,6 +1407,8 @@ void effBillboardWorkRelease(u32 work) {
     sdfReleaseChipBlock((void *)work);
 }
 
+void effReplaceBillboardClone(s32 dst, s32 src);
+
 u8 *effDuplicateBillState(const u8 *source) {
     u8 *effect = (u8 *)effCreateBillboardWork(NULL);
     memcpy(effect + 0x2C, source + 0x2C, 0x38);
@@ -4766,6 +4768,9 @@ EffectSurfaceNode *effCreateSurfaceNodeForGrid(FileKeyBlock *grid) {
     return effCreateSurfaceNode(n > 100 ? 100 : n);
 }
 
+extern void effRebuildSurfaceHandles(EffectSurfaceNode *, u16, void *);
+void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource);
+
 EffectSurfaceNode *effResourceReferenceReplaceFromFile(u8 *work) {
     u8 *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     FileKeyBlock *params = (FileKeyBlock *)(source + 0x1C);
@@ -4781,6 +4786,10 @@ extern EffectSurfaceNode *effResourceReferenceReplaceFromFile(u8 *);
 extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
 
 extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
+
+void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId);
+void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId);
+void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId);
 
 EffectSurfaceNode *effInitializeSurfaceForKind(u8 *work) {
     EffectSurfaceNode *node = effResourceReferenceReplaceFromFile(work);
@@ -4842,8 +4851,6 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
     }
     sdfReleaseChipBlock(node);
 }
-
-extern void effRebuildSurfaceHandles(EffectSurfaceNode *, u16, void *);
 
 EffectSurfaceNode *effRecreateSurfaceNodeFromWork(u8 *work) {
     FileKeyBlock *params = (FileKeyBlock *)((EffectSurfaceNode *)work)->record->data1;
@@ -7833,6 +7840,8 @@ u32 *effPrepareOwnedTextureAnimation(u8 *work) {
     return buffer;
 }
 
+void effReleaseScalyStripResources(s32 work);
+
 void effReleaseTextureAnimationWork(s32 work) {
     EffFrameState *state;
 
@@ -10149,6 +10158,8 @@ void btlInitializeEffectWork(void) {
     VU0_STORE_VF($vf0, D_003DF910);
 }
 
+void effResetFileResourceStores(void);
+
 s32 btlUpdateEffectWork(void) {
     if (D_003BD074 != NULL) {
         if ((func_002B59A8(0) & 1) == 0) {
@@ -10161,6 +10172,9 @@ s32 btlUpdateEffectWork(void) {
 
 void func_002B51A8(void) {
 }
+
+void effResetFileResources(void);
+extern void effResetFileResourceManager(void);
 
 void effResetFileResourceStores(void) {
     effResetFileResources();
@@ -10790,8 +10804,6 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     effResetFileResourceManager();
     return 0x800000;
 }
-
-extern void effResetFileResourceManager(void);
 
 /* Load the selected job's payload and camera snapshots; return the refresh status. */
 u32 effLoadSelectedFileJob(void) {

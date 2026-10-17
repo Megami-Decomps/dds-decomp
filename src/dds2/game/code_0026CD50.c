@@ -92,6 +92,8 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
 extern void mnuRebuildMantraCategoryAvailability(void);
 void mnuLoadMantraNodePositionTable(u32 resourceId);
 
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+
 /* Load the mantra node-position table synchronously and release the request. */
 void mtrLoadMantraNodePositions(void) {
     struct FileRequest *request;
@@ -105,6 +107,8 @@ void mtrLoadMantraNodePositions(void) {
     sdfReleaseResourceAllocation(fileGetResourceHandle(request));
     filePollEntryCleanup(request);
 }
+
+void mnuReleaseMantraNodePositionTable(void);
 
 /* Replace the node-position resource, releasing an existing table first. */
 void mnuLoadMantraNodePositionTable(u32 resourceId) {
@@ -158,6 +162,8 @@ u32 mnuGetMantraNodePositionRecordCount(void) {
     return mnuMantraNodePositionTable->recordCount;
 }
 
+void mnuReleaseMantraPanelPositionTable(void);
+
 /* Replace the panel-position resource, releasing an existing table first. */
 void mnuLoadMantraPanelPositionTable(u32 resourceId) {
     if (mnuMantraPanelPositionTable != 0) {
@@ -209,8 +215,6 @@ void evtReleaseMantraSelectionWork(EvtMantraWork *work) {
 }
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
-
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 

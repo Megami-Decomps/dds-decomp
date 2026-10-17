@@ -161,6 +161,8 @@ s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
+void mnuDestroyCampTasks(void);
+
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
 s32 mnuStaffCampCancelCheck(KwlnTask *task) {

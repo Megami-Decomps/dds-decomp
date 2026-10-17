@@ -199,6 +199,8 @@ s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
+void evtClearActiveFlag(); /* no prototype: called here without its index */
+
 /* Reset display slots for a zero exit marker, otherwise start the existing fade-in.
  * Preserve the legacy zero-argument active-flag call; no index is supplied here. */
 u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {

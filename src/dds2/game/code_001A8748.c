@@ -201,6 +201,8 @@ extern u8 D_003B4A28[];
 
 extern s32 scrCreateTaskForProcessId();
 
+void sndCycleTestMessageResource(void);
+
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
@@ -2454,6 +2456,8 @@ s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *partyRecord, u32 entryId)
     }
     return mnuGetPartyEntryCurrentId(partyRecord) == entryId;
 }
+
+u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
 
 s32 btlSelectActorAction(s32 state) {
     s32 selection = btlSelectEnemyDropItem(state, 1);

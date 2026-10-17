@@ -87,6 +87,8 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value);
 extern BtlRuntimeTask *btlCreateFadeInTask(u32 value);
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 
+extern void btlUpdateLinkedEffectUnitTransforms(void);
+
 /* Run the linked-pair transform pass from the battle's update hook. */
 void btlRunLinkedPairUpdateHook(void) {
     btlUpdateLinkedEffectUnitTransforms();
@@ -1577,7 +1579,6 @@ extern void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta);
 extern s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command);
 extern s32 btlTriggerLinkedActionMotionAlternate(BtlLinkedCommand *command);
 extern u32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit);
-extern void btlUpdateLinkedEffectUnitTransforms(void);
 extern void btlUpdateSpecialActorChunkFade(void);
 extern void effBTLFieldColorSetFlags(u32 bits);
 extern void btlQueueBossScriptResourceAndSound(ActionStateLink *action);

@@ -233,6 +233,8 @@ void effUploadModelTextures(EffModelOwner *owner) {
     } while (i < 2);
 }
 
+void effFloorModelListPush(EffModelOwner *obj);
+
 /* Track floor models only while battle is active and the current actor is not fully marked. */
 EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     EffModelOwner *owner;
