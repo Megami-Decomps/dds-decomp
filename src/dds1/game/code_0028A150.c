@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file_job_type.h"
 #include "sdf_vu_rotation_axes.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
@@ -131,12 +132,7 @@ extern s32 D_003BC814;
 extern s32 fileDrawMenuFrame(s32);
 
 
-typedef struct FileRecordType {
-    void (*acquire)(void *);
-    u32 unk4;
-    s32 slotBytes;
-    s32 dataBytes;
-} FileRecordType;
+#include "eff_emitter_type.h"
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
@@ -162,7 +158,6 @@ extern s32 fileUpdateWait(void);
 
 extern s32 fileSlotStatusPoll(void);
 
-extern FileRecordType effEmitterTypeDescriptors[];
 
 extern void fileResetSlotStates(FileSlotTable *record);
 
@@ -298,7 +293,6 @@ extern char D_003B2668[];
 
 
 
-extern void dds3DispatchIndexedCallback(void *callback);
 
 extern void fileDrawLoadObjectSlots(s32 object);
 
@@ -432,39 +426,6 @@ extern Init374E0 fileCursorPulseState;
 
 extern u32 D_0037D4AC[];
 
-/* Callback table at fileJobTypeCallbacks (0x28 bytes per entry). */
-typedef struct Cb3714C {
-    void (*cb)(void *arg);    /* 0x00 */
-    u8 pad4[8];               /* 0x04 */
-    void (*cbC)(void *, void *); /* 0x0C */
-    void (*cb10)(void *arg);  /* 0x10 */
-    void (*cb14)(void *arg, f32 position[4]); /* 0x14 */
-    void (*cb18)(void *arg, f32 rotation[4]); /* 0x18 */
-    void (*cb1C)(void *arg, f32 scale);  /* 0x1C */
-    void (*cb20)(void *arg, u32 color);  /* 0x20 */
-    u32 unk24;                /* 0x24 */
-} Cb3714C;
-
-extern Cb3714C fileJobTypeCallbacks[];
-
-typedef struct FileTypeCallbacks {
-    void *(*create)(void *);       /* 0x00 */
-    void (*unk4)(void *);          /* 0x04 */
-    void (*destroy)(void *);       /* 0x08 */
-    void *(*createChild)(void *, u16); /* 0x0C */
-    u8 unk10[4];                   /* 0x10 */
-    void (*reset)(void *);         /* 0x14 */
-    u8 unk18[0x10];                /* 0x18 */
-} FileTypeCallbacks;
-
-typedef char FileTypeCallbacksResetOffsetAssert[
-    sizeof(FileTypeCallbacks) - sizeof(((FileTypeCallbacks *)0)->reset) -
-            sizeof(((FileTypeCallbacks *)0)->unk18) == 0x14
-        ? 1
-        : -1];
-typedef char FileTypeCallbacksSizeAssert[sizeof(FileTypeCallbacks) == 0x28 ? 1 : -1];
-
-extern FileTypeCallbacks fileJobTypeOperations[];
 
 /* Object with loader sub-objects (+0x40...). */
 typedef struct LoadObj {
@@ -4277,15 +4238,15 @@ FileJobPayload *fileJobCreateChild(FileJobPayload *request) {
 }
 
 void fileJobNotifyPair(FileJobPayload *left, FileJobPayload *right) {
-    Cb3714C *entry = &fileJobTypeCallbacks[right->type];
-    if (entry->cbC != NULL) {
-        entry->cbC(left->data, right->data);
+    FileTypeCallbacks *entry = &fileJobTypeOperations[right->type];
+    if (entry->notifyPair != NULL) {
+        entry->notifyPair(left->data, right->data);
     }
 }
 
 void fileJobNotifyComplete(FileJobPayload *job) {
     u16 idx = job->type;
-    void (*cb)(void *) = fileJobTypeCallbacks[idx].cb10;
+    void (*cb)(void *) = fileJobTypeOperations[idx].reset;
     if (cb != NULL) {
         cb(job->data);
     }
@@ -4295,12 +4256,12 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     u16 idx = job->type;
     void *data = job->data;
 
-    fileJobTypeCallbacks[idx].cb(data);
+    fileJobTypeOperations[idx].invoke(data);
 }
 
 void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 idx = job->type;
-    void (*cb)(void *, f32 position[4]) = fileJobTypeCallbacks[idx].cb14;
+    void (*cb)(void *, f32 position[4]) = fileJobTypeOperations[idx].setPosition;
     if (cb != NULL) {
         cb(job->data, position);
     }
@@ -4308,7 +4269,7 @@ void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
 
 void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 idx = job->type;
-    void (*cb)(void *, f32 rotation[4]) = fileJobTypeCallbacks[idx].cb18;
+    void (*cb)(void *, f32 rotation[4]) = fileJobTypeOperations[idx].setRotation;
     if (cb != NULL) {
         cb(job->data, rotation);
     }
@@ -4316,14 +4277,14 @@ void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
 
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale) {
     u16 idx = job->type;
-    void (*cb)(void *, f32) = fileJobTypeCallbacks[idx].cb1C;
+    void (*cb)(void *, f32) = fileJobTypeOperations[idx].setScale;
     if (cb != NULL) {
         cb(job->data, scale);
     }
 }
 
 void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color) {
-    void (*cb)(void *, u32) = fileJobTypeCallbacks[job->type].cb20;
+    void (*cb)(void *, u32) = fileJobTypeOperations[job->type].setColor;
     if (cb != NULL) {
         cb(job->data, color);
     }
@@ -5824,7 +5785,7 @@ void fileSetRecordWordFour(s32 record, u32 value) {
 
 void fileSetLoadObjectScale(LoadObj *obj, f32 scale) {
     obj->scale = scale;
-    dds3DispatchIndexedCallback(obj->recordWork);
+    dds3DispatchIndexedCallback(obj->recordWork, scale);
 }
 
 void fileResetSlotStates(FileSlotTable *record) {
@@ -7425,7 +7386,7 @@ void fileAcquireRecord(FileSlotTable *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
-    effEmitterTypeDescriptors[record->type].acquire(record);
+    effEmitterTypeDescriptors[record->type].updateSlots(record);
     record->references++;
 }
 

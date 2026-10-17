@@ -24,9 +24,6 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;
 extern SdfPoolNode D_00325588;
 
-extern BillDispatch billObjectCallbacks[];
-
-extern BillDispatch D_0034E654[];
 extern BillDispatch effBillConstructorEntries[];
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
@@ -66,12 +63,12 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
 
 /* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
 void billDestroyDispatchedObject(EffectDispatchState *effect) {
-    billObjectCallbacks[effect->handler].func();
+    effBillConstructorEntries[effect->handler].destroy();
 }
 
 /* Invoke the update column of the selected constructor/update/destructor record. */
 void billUpdateDispatchedObject(EffectDispatchState *effect) {
-    D_0034E654[effect->handler].func();
+    effBillConstructorEntries[effect->handler].callback();
 }
 
 void effInvokeHandlerAndMarkActive(EffectDispatchState *effect) {

@@ -16,7 +16,7 @@ typedef struct SdfDrawPacketGroup {
 typedef struct SdfDrawPacketGroups {
     SdfDrawPacketGroup groups[4];
     SdfListHead syncList;
-    u64 syncPacketWords[2];
+    u64 syncPacketWords[2] QWORD_ALIGNED; /* a DMA tag: NEXT, with VIF FLUSHA */
 } SdfDrawPacketGroups;
 
 void sdfInitializeDrawPacketGroups(SdfDrawPacketGroups *packets);

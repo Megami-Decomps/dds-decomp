@@ -13,7 +13,7 @@ typedef struct SdfDmaTagHeader {
     u32 address;
     u32 firstVifCode;
     u32 secondVifCode;
-} SdfDmaTagHeader;
+} QWORD_ALIGNED SdfDmaTagHeader;
 
 /* Packet-list code views the same 16-byte row as QWC/ID/ADDR/VIF commands. */
 typedef struct SdfDmaTag {
@@ -22,7 +22,7 @@ typedef struct SdfDmaTag {
     u8 kind;
     u32 address;
     u64 vifCommands;
-} SdfDmaTag;
+} QWORD_ALIGNED SdfDmaTag;
 
 typedef char SdfDmaTagHeader_size_must_be_0x10[
     (sizeof(SdfDmaTagHeader) == 0x10) ? 1 : -1];

@@ -587,7 +587,7 @@ extern void *memset(void *s, s32 c, u32 n);
 
 
 
-extern u32 D_0040B2A0[];
+extern SdfGraphObj D_0040B290;
 
 
 
@@ -2999,7 +2999,7 @@ void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
         SdfListHead *packet = sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateResourcePacket(packet, (SdfTexResource *)D_0040B2A0[0],
+        sdfCreateResourcePacket(packet, D_0040B290.buffers[2],
                                 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append(descriptor, packet);
@@ -3010,7 +3010,7 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
         SdfListHead *packet = sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateDescriptorPacket(packet, (SdfTexResource *)D_0040B2A0[0],
+        sdfCreateDescriptorPacket(packet, D_0040B290.buffers[2],
                                   0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append(descriptor, packet);
