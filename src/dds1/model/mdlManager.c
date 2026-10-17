@@ -63,12 +63,12 @@ extern BattleGroupIdEntry *btlGroupIdHeads[];
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void btlInitializeCommandSemaphoreSlots(void) {
-    s32 i;
+    s32 groupIndex;
 
     mdlGroupJobSemaphore = sdfCreateSemaphore(1, 0x7f, 0);
-    for (i = 0; i != 8; i++) {
-        btlGroupNodeHeads[i] = 0;
-        btlGroupIdHeads[i] = 0;
+    for (groupIndex = 0; groupIndex != 8; groupIndex++) {
+        btlGroupNodeHeads[groupIndex] = 0;
+        btlGroupIdHeads[groupIndex] = 0;
     }
 }
 
