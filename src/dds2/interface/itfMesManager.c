@@ -886,7 +886,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 panelMode, s32 fadeLimit) {
 s32 itfMesSetOptionValue(s32 window, s32 id, s32 value) {
     ItfMesBlk40 *optionBlock = &itfWindowSlots[window].mes->blk40;
     ItfMesOption *option = NULL;
-    s32 index;
+    s32 optionIndex;
 
     if ((u32)id >= 0x10) {
         return 0;
@@ -894,9 +894,9 @@ s32 itfMesSetOptionValue(s32 window, s32 id, s32 value) {
     if (id == 1 || id == 6 || id == 7) {
         return 0;
     }
-    for (index = 0; index < optionBlock->optionCount; index++) {
-        if (optionBlock->options[index].id == id) {
-            option = &optionBlock->options[index];
+    for (optionIndex = 0; optionIndex < optionBlock->optionCount; optionIndex++) {
+        if (optionBlock->options[optionIndex].id == id) {
+            option = &optionBlock->options[optionIndex];
             break;
         }
     }
