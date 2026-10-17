@@ -171,7 +171,7 @@ void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha
 }
 
 void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
-    s32 contextHandle, s32 renderHandle, s32 unused7) {
+    s32 contextHandle, s32 renderHandle) {
     s32 n;
     u32 zeroColor;
     s32 *p;
@@ -196,7 +196,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 
 }
 
 void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
-    s32 contextHandle, s32 renderHandle, s32 unused7) {
+    s32 contextHandle, s32 renderHandle) {
     s32 n;
     u32 zeroColor;
     s32 *p;
