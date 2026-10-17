@@ -4468,16 +4468,16 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416428);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BC618);
 
+extern const s32 D_00436830[];
+extern const s32 D_00436838[];
+extern const s32 D_00416458[2][2];
+extern const s32 D_00416468[2][2];
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416448);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416458);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416468);
-
-extern const s32 D_00436830[];
-extern const s32 D_00436838[];
-extern const s32 D_00416458[2][2];
-extern const s32 D_00416468[2][2];
 
 void func_001BC8A8(BattlePhasePanelWork *work) {
     s32 modeOneSlots[2];
@@ -4588,8 +4588,6 @@ void func_001BC8A8(BattlePhasePanelWork *work) {
         break;
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416498);
 
 /* Draw the phase-change panels and their trailing echoes.
  * The first pair retains four converted source bounds across its echo draws;
@@ -4717,6 +4715,8 @@ void func_001BCFB0(BattlePhasePanelWork *work) {
 }
 
 /* The quad renderer owns this complete four-slot mode-zero bank. */
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416498);
+
 const s32 D_004164A8[4] = {0x21, 0x22, 0x2C, 0x2D};
 
 

@@ -928,6 +928,9 @@ static inline s32 btlRefreshCommandRow(BattleSceneObject *object) {
 }
 extern s32 btlGetActorCommandClass(BattleSceneObject *, s8);
 
+void btlReleaseAndClearChipBlock(void);
+void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *sceneObject);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DD8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DF8);
@@ -947,9 +950,6 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FC0);
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorIdsByClass);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorClassPairs);
-
-void btlReleaseAndClearChipBlock(void);
-void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *sceneObject);
 
 void func_001AADF8(BattleSceneObject *object) {
     s32 changed = 0;
@@ -3589,16 +3589,16 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A28F8);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B19F8);
 
+extern const s32 D_003BB418[];
+extern const s32 D_003BB420[];
+extern const s32 D_003A2928[2][2];
+extern const s32 D_003A2938[2][2];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2918);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2928);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2938);
-
-extern const s32 D_003BB418[];
-extern const s32 D_003BB420[];
-extern const s32 D_003A2928[2][2];
-extern const s32 D_003A2938[2][2];
 
 void func_001B1C88(BattlePhasePanelWork *work) {
     s32 modeOneSlots[2];
@@ -3710,8 +3710,6 @@ void func_001B1C88(BattlePhasePanelWork *work) {
     }
 }
 
-
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2968);
 
 /* Draw the phase-change panels and their trailing echoes.
  * The first pair retains four converted source bounds across its echo draws;
@@ -3839,6 +3837,8 @@ void func_001B2390(BattlePhasePanelWork *work) {
 }
 
 /* The quad renderer owns this complete four-slot mode-zero bank. */
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2968);
+
 const s32 D_003A2978[4] = {0x21, 0x22, 0x2C, 0x2D};
 
 
