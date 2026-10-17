@@ -202,7 +202,7 @@ typedef char SdfModel_scalarOverrideFirst_at_88[
 typedef char SdfModel_scalarOverrideSecond_at_8C[
     ((u32)&((SdfModel *)0)->scalarOverrideSecond == 0x8C) ? 1 : -1];
 
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
+SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 nodeIdOrIndex);
 void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source);
 
 

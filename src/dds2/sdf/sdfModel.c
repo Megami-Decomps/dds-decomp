@@ -28,27 +28,27 @@ extern vu8 sdfCurrentBufferIndex;
 
 /* Retail selects by nodeId when SDF_MODEL_FIND_DRAW_NODE_BY_ID is set,
  * otherwise by array index. */
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
+SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 nodeIdOrIndex) {
     DevRequest *list = model->list;
-    s16 count;
+    s16 entryCount;
     SdfDrawNode **entries;
-    s32 i;
+    s32 entryIndex;
 
-    count = list->usedCount;
+    entryCount = list->usedCount;
     entries = list->buffer;
     if (model->flags & SDF_MODEL_FIND_DRAW_NODE_BY_ID) {
-        for (i = 0; i < count; i++) {
-            SdfDrawNode *node = entries[i];
-            if (node->nodeId == id) {
+        for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+            SdfDrawNode *node = entries[entryIndex];
+            if (node->nodeId == nodeIdOrIndex) {
                 return node;
             }
         }
         return 0;
     }
-    if ((u32)id >= (u32)count) {
+    if ((u32)nodeIdOrIndex >= (u32)entryCount) {
         return 0;
     }
-    return entries[id];
+    return entries[nodeIdOrIndex];
 }
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
