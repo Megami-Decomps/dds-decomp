@@ -20,6 +20,7 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_blend_node.h"
 
 extern u32 D_003BDA28;
 
@@ -29,13 +30,7 @@ extern u16 D_003BDA24;
 
 extern s32 D_003BDA20;
 
-typedef struct VuBlendNode {
-    u8 pad00[0x30];
-    u8 result[0x10];
-    struct VuBlendNode *next;
-    void *sourceA;
-    void *sourceB;
-} VuBlendNode;
+
 
 typedef struct {
     f32 matrix[4][4];      /* 0x00 */

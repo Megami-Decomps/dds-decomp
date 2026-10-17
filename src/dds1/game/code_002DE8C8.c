@@ -16,14 +16,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
-
-typedef struct VuBlendNode {
-    u8 pad00[0x30];
-    u8 result[0x10];
-    struct VuBlendNode *next;
-    void *sourceA;
-    void *sourceB;
-} VuBlendNode;
+#include "sdf_vu_blend_node.h"
 
 void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {

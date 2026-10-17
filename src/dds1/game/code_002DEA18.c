@@ -17,6 +17,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_blend_node.h"
 
 #define SDF_GIF_REGISTER_AD 0xE
 
@@ -36,16 +37,7 @@ extern u128 *D_003EB860[][3];
 
 extern u16 D_003BDA24;
 
-typedef struct VuBlendNode {
-    f32 position[4];       /* 0x00: native VU position */
-    u8 pad10[0x10];
-    f32 color[4];
-    u8 result[0x10];
-    struct VuBlendNode *next;
-    void *sourceA;
-    void *sourceB;
-    u8 pad4C[0x14];
-} VuBlendNode;
+
 
 typedef struct {
     f32 matrix[4][4];      /* 0x00 */
@@ -158,9 +150,9 @@ void func_002DEB40(VuWork *work) {
         u32 cRegion;
         VuBlendNode *d, *e, *f, *g;
         f32 facing;
-        u32 clipA = a->pad4C[5];
-        u32 clipB = b->pad4C[5];
-        u32 clipC = c->pad4C[5];
+        u32 clipA = a->clipFlags;
+        u32 clipB = b->clipFlags;
+        u32 clipC = c->clipFlags;
 
         triangles += 3;
         if ((clipA & clipB & clipC & 0x3F) != 0 ||
@@ -173,9 +165,9 @@ void func_002DEB40(VuWork *work) {
             D_003F7860[rejected++] = i;
             continue;
         }
-        aRegion = a->pad4C[4];
-        bRegion = b->pad4C[4];
-        cRegion = c->pad4C[4];
+        aRegion = a->region;
+        bRegion = b->region;
+        cRegion = c->region;
 
         if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
             out[0][0] = (u128 *)a;
@@ -317,9 +309,9 @@ void sdfVuBuildVisibleTriangleList(VuWork *work) {
         u32 cRegion;
         VuBlendNode *d, *e, *f, *g;
         f32 facing;
-        u32 clipA = a->pad4C[5];
-        u32 clipB = b->pad4C[5];
-        u32 clipC = c->pad4C[5];
+        u32 clipA = a->clipFlags;
+        u32 clipB = b->clipFlags;
+        u32 clipC = c->clipFlags;
 
         triangles += 3;
         if ((clipA & clipB & clipC & 0x3F) != 0 ||
@@ -331,9 +323,9 @@ void sdfVuBuildVisibleTriangleList(VuWork *work) {
         if (facing < 0.0f) {
             continue;
         }
-        aRegion = a->pad4C[4];
-        bRegion = b->pad4C[4];
-        cRegion = c->pad4C[4];
+        aRegion = a->region;
+        bRegion = b->region;
+        cRegion = c->region;
 
         if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
             out[0][0] = (u128 *)a;
@@ -446,7 +438,7 @@ typedef struct {
     s16 indexedTriangleCount;
 } VuIndexedTriangleCount;
 void func_002DF710(VuWork *work) {
-    /* DDS1 node region is the existing tail byte +0x50 (pad4C[4]). */
+    /* DDS1 node region uses the tail byte at +0x50. */
     f32 scale = D_003BDA30;
     s32 remaining;
     u16 *triangles;
@@ -470,9 +462,9 @@ void func_002DF710(VuWork *work) {
             VuBlendNode *a = nodes + triangle[0];
             VuBlendNode *b = nodes + triangle[1];
             VuBlendNode *c = nodes + triangle[2];
-            u32 bRegion = b->pad4C[4];
-            u32 aRegion = a->pad4C[4];
-            u32 cRegion = c->pad4C[4];
+            u32 bRegion = b->region;
+            u32 aRegion = a->region;
+            u32 cRegion = c->region;
             VuBlendNode *d, *e, *f, *g;
             if (!acceptAll && (aRegion != bRegion || aRegion != cRegion)) {
                 goto classifyRegions;

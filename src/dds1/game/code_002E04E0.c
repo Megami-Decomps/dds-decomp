@@ -17,16 +17,11 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_blend_node.h"
 
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
-typedef struct VuBlendNode {
-    u8 pad00[0x30];
-    u8 result[0x10];
-    struct VuBlendNode *next;
-    void *sourceA;
-    void *sourceB;
-} VuBlendNode;
+
 
 typedef struct {
     f32 matrix[4][4];      /* 0x00 */
