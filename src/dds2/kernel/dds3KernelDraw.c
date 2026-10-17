@@ -9,7 +9,7 @@
 #include "eff.h"
 #include "kwln_draw_params.h"
 
-extern u32 D_0037F770[4];
+extern f32 *D_0037F770[4]; /* three light sources and a null */
 
 extern u32 kwlnDrawControlFlags;
 
@@ -135,9 +135,9 @@ void kwlnDrawCopyWords20(KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
 }
 
-/* Store a light-source pointer in the indexed raw address table. */
+/* Store a light-source pointer in the indexed light table. */
 void dds3DrawSetLightSourcePointer(void *lightSource, s32 index) {
-    D_0037F770[index] = (u32)lightSource;
+    D_0037F770[index] = lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */
