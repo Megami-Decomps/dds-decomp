@@ -6037,6 +6037,7 @@ extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
 extern s32 sprintf(char *, const char *, ...);
 extern void btlDrawReservePanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001C7020(BtlUnit *, BattleActorPanelWork *, s32, s8, s16, s32, s32);
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const BattlePanelColors D_00416830;
 extern const char D_00436818[];
@@ -7177,7 +7178,7 @@ finished:
     return;
 }
 
-extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s16, s8, s8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004168C8);
 
@@ -7325,7 +7326,134 @@ void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 sl
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C7020);
+typedef struct BattleHudOffsets { s32 values[5][2]; } BattleHudOffsets;
+typedef struct BattleHudSprites { s32 values[5]; } BattleHudSprites;
+extern const BattleHudSprites D_00416920;
+extern const BattlePanelColors D_00416938;
+extern SdfPoolNode D_003805A8;
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
+extern void btlDrawButtonIconFixed64(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
+extern void btlDrawButtonIcon(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
+void func_001C7020(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
+                   s8 bank, s16 alpha, s32 x, s32 y) {
+    BattleHudOffsets offsets = {{{10, 43}, {51, 47}, {23, 62}, {54, 49}, {26, 64}}};
+    BattleHudSprites sprites = D_00416920;
+    BattlePanelColors colors = D_00416938;
+    s32 level;
+    u32 color;
+    u32 i;
+
+    colors.values[0] = alpha | 0x80808000;
+    colors.values[1] = colors.values[0];
+    colors.values[2] = colors.values[0];
+    colors.values[3] = colors.values[0];
+    for (i = 0; i < 1; i++) {
+        effDrawSpriteWithCornerColors((x + offsets.values[i][0]) << 4,
+            (y + offsets.values[i][1]) << 3, 0, colors.values, 0,
+            btlResourceBlock->resA, sprites.values[i], 0x53);
+    }
+    if (bank == 0) {
+        level = work->activeEntries[slot].presentation.fade;
+        if ((work->activeEntries[slot].presentation.transitionState == 1 ||
+             work->activeEntries[slot].presentation.transitionState == 2) &&
+            work->activeEntries[slot].presentation.secondaryPresentationValue == 1) {
+            btlChooseActorPanelColors(unit, 1,
+                work->activeEntries[slot].presentation.transitionState,
+                work->activeEntries[slot].presentation.transitionFade[0], &colors);
+        } else {
+            btlChooseActorPanelColors(unit,
+                work->activeEntries[slot].presentation.presentationValue,
+                work->activeEntries[slot].presentation.presentationState,
+                work->activeEntries[slot].presentation.transitionFade[0], &colors);
+        }
+        colors.values[0] = (level << 24) | (colors.values[0] & 0xFFFFFF);
+        colors.values[1] = (level << 24) | (colors.values[1] & 0xFFFFFF);
+        colors.values[2] = (level << 24) | (colors.values[2] & 0xFFFFFF);
+        colors.values[3] = (level << 24) | (colors.values[3] & 0xFFFFFF);
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+        btlDrawButtonIconFixed64(&D_003805A8,
+            work->activeEntries[slot].position[0] + 9,
+            work->activeEntries[slot].position[1] + 7,
+            colors.values[0], colors.values[1], colors.values[2], colors.values[3],
+            unit->partyRecord.unitId);
+        if (work->activeEntries[slot].presentation.offset[0] != 0) {
+            level = work->activeEntries[slot].presentation.fade >> 2;
+            colors.values[0] = (level << 24) | (colors.values[0] & 0xFFFFFF);
+            colors.values[1] = (level << 24) | (colors.values[1] & 0xFFFFFF);
+            colors.values[2] = (level << 24) | (colors.values[2] & 0xFFFFFF);
+            colors.values[3] = (level << 24) | (colors.values[3] & 0xFFFFFF);
+            btlDrawButtonIconFixed64(&D_003805A8,
+                work->activeEntries[slot].position[0] + work->activeEntries[slot].presentation.offset[0] + 9,
+                work->activeEntries[slot].position[1] + work->activeEntries[slot].presentation.offset[1] + 7,
+                colors.values[0], colors.values[1], colors.values[2], colors.values[3],
+                unit->partyRecord.unitId);
+            level = work->activeEntries[slot].presentation.fade >> 3;
+            colors.values[0] = (level << 24) | (colors.values[0] & 0xFFFFFF);
+            colors.values[1] = (level << 24) | (colors.values[1] & 0xFFFFFF);
+            colors.values[2] = (level << 24) | (colors.values[2] & 0xFFFFFF);
+            colors.values[3] = (level << 24) | (colors.values[3] & 0xFFFFFF);
+            /* The negative echo uses the opposite axis's displacement. */
+            btlDrawButtonIconFixed64(&D_003805A8,
+                work->activeEntries[slot].position[0] - work->activeEntries[slot].presentation.offset[1] + 9,
+                work->activeEntries[slot].position[1] - work->activeEntries[slot].presentation.offset[0] + 7,
+                colors.values[0], colors.values[1], colors.values[2], colors.values[3],
+                unit->partyRecord.unitId);
+        }
+        level = work->activeEntries[slot].presentation.fade;
+        color = (level << 24) | 0x808080;
+        if (unit->partyRecord.status & 0x7FFF) {
+            btlDrawButtonIcon(&D_003805A8,
+                work->activeEntries[slot].position[0] + 56,
+                work->activeEntries[slot].position[1] + 22,
+                color, color, color, color, unit->partyRecord.status);
+        }
+    }
+    if (bank == 1) {
+        u32 opacity;
+
+        level = work->reserveEntries[slot].presentation.fade;
+        btlChooseActorPanelColors(unit,
+            work->reserveEntries[slot].presentation.presentationValue,
+            work->reserveEntries[slot].presentation.presentationState,
+            work->reserveEntries[slot].presentation.transitionFade[0], &colors);
+        opacity = (u32)level << 24;
+        colors.values[0] = opacity | (colors.values[0] & 0xFFFFFF);
+        colors.values[1] = opacity | (colors.values[1] & 0xFFFFFF);
+        colors.values[2] = opacity | (colors.values[2] & 0xFFFFFF);
+        colors.values[3] = opacity | (colors.values[3] & 0xFFFFFF);
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+        btlDrawButtonIconFixed64(&D_003805A8,
+            work->reserveEntries[slot].position[0] + 9,
+            work->reserveEntries[slot].position[1] + 7,
+            colors.values[0], colors.values[1], colors.values[2], colors.values[3],
+            unit->partyRecord.unitId);
+        if (unit->partyRecord.status & 0x7FFF) {
+            color = opacity | 0x808080;
+            btlDrawButtonIcon(&D_003805A8,
+                work->reserveEntries[slot].position[0] + 56,
+                work->reserveEntries[slot].position[1] + 22,
+                color, color, color, color, unit->partyRecord.status);
+        }
+    }
+    colors.values[0] = alpha | 0x80808000;
+    colors.values[1] = colors.values[0];
+    colors.values[2] = colors.values[0];
+    colors.values[3] = colors.values[0];
+    for (i = 1; i < 3; i++) {
+        effDrawSpriteWithCornerColors((x + offsets.values[i][0]) << 4,
+            (y + offsets.values[i][1]) << 3, 0, colors.values, 0,
+            btlResourceBlock->resA, sprites.values[i], 0x53);
+    }
+    func_001C7760(unit, unit->partyRecord.hp, unit->partyRecord.hp,
+        unit->partyRecord.maxHp, sprites.values[3],
+        x + offsets.values[3][0], y + offsets.values[3][1], alpha, 0, 0);
+    func_001C7760(unit, unit->partyRecord.mp, unit->partyRecord.mp,
+        unit->partyRecord.maxMp, sprites.values[4],
+        x + offsets.values[4][0], y + offsets.values[4][1], alpha, 0, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C7760);
 
