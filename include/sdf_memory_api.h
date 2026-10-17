@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-void *sdfClearQuadwords(void *destination, s32 quadwordCount);
+u128 *sdfClearQuadwords(u128 *destination, s32 quadwordCount);
 
 #endif /* SDF_MEMORY_API_H */
