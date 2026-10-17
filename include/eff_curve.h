@@ -18,10 +18,10 @@ typedef struct EffScalarCurve {
     u8 reserved0C[4];
     u8 headingMode; /* Used by heading tracks: 2 selects projected direction. */
     u8 reserved11[3];
-    f32 firstValue;
-    f32 firstFraction;
-    f32 secondValue;
-    f32 secondFraction;
+    struct {
+        f32 value;
+        f32 fraction;
+    } keys[2];
 } EffScalarCurve; /* 0x24 */
 
 /* Scalar tracks in effect configurations reserve eight trailing bytes. */

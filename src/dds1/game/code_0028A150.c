@@ -5951,35 +5951,35 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
         to = curve->finalValue;
         break;
     case EFF_SCALAR_CURVE_MODE_ONE_INTERMEDIATE_KEY:
-        firstFrame = (s32)(curve->firstFraction * durationFloat);
+        firstFrame = (s32)(curve->keys[0].fraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
             from = curve->initialValue;
-            to = curve->firstValue;
+            to = curve->keys[0].value;
         } else {
             f32 span = duration - firstFrame;
             factor = (f32)(frame - firstFrame) / span;
-            from = curve->firstValue;
+            from = curve->keys[0].value;
             to = curve->finalValue;
         }
         break;
     case EFF_SCALAR_CURVE_MODE_TWO_INTERMEDIATE_KEYS:
-        firstFrame = (s32)(curve->firstFraction * durationFloat);
+        firstFrame = (s32)(curve->keys[0].fraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
             from = curve->initialValue;
-            to = curve->firstValue;
+            to = curve->keys[0].value;
         } else {
-            secondFrame = (s32)(curve->secondFraction * durationFloat);
+            secondFrame = (s32)(curve->keys[1].fraction * durationFloat);
             if (frame < secondFrame) {
                 f32 span = secondFrame - firstFrame;
                 factor = (f32)(frame - firstFrame) / span;
-                from = curve->firstValue;
-                to = curve->secondValue;
+                from = curve->keys[0].value;
+                to = curve->keys[1].value;
             } else {
                 f32 span = duration - secondFrame;
                 factor = (f32)(frame - secondFrame) / span;
-                from = curve->secondValue;
+                from = curve->keys[1].value;
                 to = curve->finalValue;
             }
         }
