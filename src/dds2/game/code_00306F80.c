@@ -25,6 +25,7 @@
 #include "sdf_primitive.h"
 #include "sdf_packet_append.h"
 #include "grid_packed_vertex.h"
+#include "itf_grid_status_records.h"
 
 #include "sdf_packet_alloc.h"
 extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
@@ -63,14 +64,6 @@ extern void effDrawSpriteWithWorkCornerColors(s32, s32, s32, s32, EffectSlotSet 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
-
-
-typedef struct GridAngleTable {
-    s32 divisor;      /* 0x00 */
-    s32 mirrored;     /* 0x04 */
-    s32 cycleDivisor; /* 0x08 */
-} GridAngleTable;
-
 
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
@@ -371,12 +364,6 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
 }
 
 /* The FLUSH_01 status payload stores the signed IN, WAIT and OUT durations. */
-typedef struct GridFlushTable {
-    s32 inDuration;
-    s32 waitDuration;
-    s32 outDuration;
-} GridFlushTable;
-
 /* Shrink the grid bounds and apply the three-phase flush envelope to corner alpha. */
 s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridFlushTable *table;
@@ -507,14 +494,6 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ti
     } while (--repetitions >= 0);
     return 0x10000 / table->divisor;
 }
-
-typedef struct GridColorTargetTable {
-    s32 divisor; /* 0x00 */
-    s32 alpha;   /* 0x04 */
-    s32 blue;    /* 0x08 */
-    s32 green;   /* 0x0C */
-    s32 red;     /* 0x10 */
-} GridColorTargetTable;
 
 /* Blend each saved corner color toward the table's target color. */
 s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
