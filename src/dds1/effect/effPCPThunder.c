@@ -1836,10 +1836,10 @@ extern void effThunderBuildJoinedFragmentStrip(EffThunderFragmentWork *work, s32
 
 
 void effThunderGroupRelease(EffThunderGroup *group) {
-    s32 i;
+    s32 fragmentIndex;
 
-    for (i = 0; i < group->head.count - 1; i++) {
-        effThunderReleaseFragmentWork(group->handles[i]);
+    for (fragmentIndex = 0; fragmentIndex < group->head.count - 1; fragmentIndex++) {
+        effThunderReleaseFragmentWork(group->handles[fragmentIndex]);
     }
     sdfReleaseChipBlock(group);
 }
