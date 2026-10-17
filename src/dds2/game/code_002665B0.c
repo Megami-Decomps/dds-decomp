@@ -2145,20 +2145,20 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
 
 extern char D_00437868[];
 
-void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     s32 index;
     FrFontGlyph *font;
     u32 color;
     char text[16];
 
-    index = fldGetModeFrameRecordIndex(context);
+    index = fldGetModeFrameRecordIndex(state);
     sprintf(text, D_00437868, datGameState->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
-        color = *(u8 *)&((MenuSlotState *)context)->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
+        color = *(u8 *)&work->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
     } else {
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, state->progressList->scale);
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, work->progressList->scale);
     }
     font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);

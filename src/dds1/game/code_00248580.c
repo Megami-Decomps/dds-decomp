@@ -2002,19 +2002,19 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
 }
 
 
-void mnuDrawTerminalAmountText(s32 fading, s32 context) {
-    MenuTerminalWork *scene = (MenuTerminalWork *)context;
+void mnuDrawTerminalAmountText(s32 fading, s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
     char text[16];
     s32 index;
     s32 color;
     struct FrFontGlyph *sprite;
 
-    index = fldGetModeFrameRecordIndex(scene);
+    index = fldGetModeFrameRecordIndex(work);
     sprintf(text, D_003BC3F0, datGameState->header.currency);
     if (fading == 0) {
-        color = (*(u8 *)&scene->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
+        color = (*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
     } else {
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, work->list->scale);
     }
     sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
     frFontDrawGlyphChain(sprite, 1, 0x53);
