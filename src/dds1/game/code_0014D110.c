@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_title_banner_menu.h"
 #include "common.h"
 #include "fld_scene_status_api.h"
 #include "sdf_trig.h"
