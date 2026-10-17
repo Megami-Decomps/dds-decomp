@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
+#include "btl_command_affinity_api.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
@@ -182,8 +183,6 @@ extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 extern s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
-
-extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
 
 extern s32 btlHasAdjacentActorRecordStatus(BtlUnit *);
 
