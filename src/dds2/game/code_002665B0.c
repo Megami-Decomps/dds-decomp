@@ -1288,17 +1288,17 @@ void mnuTerminalSelectSlot(s32 mode, s32 commandIndex, MenuSlotState *state) {
 }
 
 /* Draw valid current/previous slots only while DDS2's native terminal draw gate is set. */
-void mnuDrawTerminalSelectedSlots(s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuDrawTerminalSelectedSlots(s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     EffectPair position = D_00437878[0];
     s32 *slot;
     u32 i;
 
     if (D_00437859 != 0) {
-        for (i = 0, slot = state->selectedSlots; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
+        for (i = 0, slot = work->selectedSlots; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
             if (*slot >= 0) {
                 itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                            state->resourceBank[0], *slot, MNU_TEXT_DRAW_PRIORITY);
+                                            work->resourceBank[0], *slot, MNU_TEXT_DRAW_PRIORITY);
             }
         }
     }

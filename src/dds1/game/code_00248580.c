@@ -1205,20 +1205,20 @@ void mnuTerminalSelectSlot(u32 mode, s32 commandIndex, MenuTerminalWork *state) 
 }
 
 /* Draw valid current/previous slots; mode two also runs its native extra draw step. */
-void mnuDrawTerminalSelectedSlots(s32 context) {
-    MenuTerminalWork *state = (MenuTerminalWork *)context;
+void mnuDrawTerminalSelectedSlots(s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
     EffectPair position = D_003BC400[0];
     s32 *slot;
     u32 i;
 
-    for (i = 0, slot = state->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
+    for (i = 0, slot = work->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
         if (*slot >= 0) {
             itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                        state->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
+                                        work->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
         }
     }
-    if (state->mode == 2) {
-        mnuDrawTerminalAmountText(0, context);
+    if (work->mode == 2) {
+        mnuDrawTerminalAmountText(0, state);
     }
 }
 
