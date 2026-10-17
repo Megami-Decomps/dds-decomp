@@ -2,6 +2,7 @@
 #define SDF_TASK_WORK_H
 
 #include "common.h"
+#include "sdf.h"
 
 struct SdfMemBlock;
 struct SdfList;
@@ -87,9 +88,9 @@ typedef char TaskWork_layout_must_match_native_owner[
      (u32)&((TaskWork *)0)->currentNode == 0x10)
         ? 1 : -1];
 
-/* This legacy factory deliberately accepts an opaque callback function type. */
-TaskWork *sdfCreateTaskWorker(char *, s32, s32, SdfTaskItemDesc *, void (*)(), void *);
-TaskWork *sdfCreateNamedTaskWork(char *, void (*)(), void *);
+/* The list teardown callback is stored on TaskWork's backing list. */
+TaskWork *sdfCreateTaskWorker(char *, s32, s32, SdfTaskItemDesc *, SdfListCallback, void *);
+TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 void sdfDestroyTaskResourceWork(TaskWork *);
 void sdfDestroyTaskWorkerTasks(TaskWork *);
 void sdfAttachTaskItem(TaskWork *, SdfTaskItemDesc *);
