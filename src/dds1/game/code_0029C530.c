@@ -35,6 +35,7 @@
 #include "kwln_fade.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3obj.h"
+#include "dds3_world_primary.h"
 #include "sdf_packet_append.h"
 #include "sdf_dev_state.h"
 #include "bill_object_api.h"
@@ -9348,7 +9349,174 @@ void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
     sdfReleaseResourceAllocation(payload->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3698);
+typedef struct EffCameraPathParameters {
+    u32 startFrame;
+    u8 actorSelection;
+    u8 count;
+    u8 directionMode;
+    u8 pad07;
+    u32 defeatSelection;
+} EffCameraPathParameters;
+extern void btlSetRuntimeFlag2000(void);
+extern u32 btlIsRuntimeFlag2000Clear(void);
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
+extern void btlFlagAllUnitsDefeatCandidate(void);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *);
+extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
+extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+extern f32 D_003BC9A8;
+extern u128 D_0037EE90, D_0037EEA0, D_0037EEB0, D_0037EEC0, D_0037EED0;
+extern u128 D_0037E110;
+
+
+/* vu0 routine: follow the selected actor with the active camera path. */
+void func_002B3698(EffActiveResource *owner) {
+    f32 position[4];
+    f32 actorPosition[4];
+    f32 eyeOffset[4];
+    f32 actorRotation[4];
+    EffectVectorRequest request;
+    EffCameraPathParameters *config = owner->payload;
+    EffCopiedPayload *slots = owner->resource;
+    EffWorldNode *camera;
+    CameraData *data;
+    BtlUnit *actor;
+    Dds3PathCurveWork *path;
+
+    if (config->startFrame < owner->frame && config->startFrame != 0) {
+        return;
+    }
+    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    if (camera == NULL || camera->value == NULL) {
+        return;
+    }
+    if (owner->frame == 0) {
+        btlSetRuntimeFlag2000();
+        D_003BC9A8 = 0.6981317f;
+        if (config->defeatSelection < 8) {
+            btlClearAllUnitDefeatCandidates();
+            switch (config->defeatSelection) {
+            case 0:
+            case 2:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetVariantSelector());
+                break;
+            case 1:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetOriginalSelector());
+                break;
+            case 4:
+                btlFlagMatchingUnitsDefeatCandidate(
+                    ((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600);
+                break;
+            case 3:
+                btlFlagMatchingUnitsDefeatCandidate(
+                    ((BtlUnit *)effBTLFieldColorGetOriginalSelector())->status.flags & 0x600);
+                break;
+            case 5:
+                btlFlagAllUnitsDefeatCandidate();
+                break;
+            case 6:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetOverrideSelector());
+                break;
+            case 7:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetFinalSelector());
+                break;
+            }
+        }
+    }
+    if (btlIsRuntimeFlag2000Clear()) {
+        return;
+    }
+    request.count = config->count;
+    request.directionMode = config->directionMode;
+    request.extentOverride = 0;
+    switch (config->actorSelection) {
+    case 0:
+    case 1:
+        actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        request.kind = 0;
+        break;
+    case 2:
+        actor = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+        request.kind = 0;
+        break;
+    case 3:
+        actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        request.kind = 1;
+        break;
+    case 4:
+        actor = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+        request.kind = 2;
+        break;
+    case 5:
+        actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        request.kind = 3;
+        break;
+    case 6:
+        actor = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+        request.kind = 6;
+        break;
+    case 7:
+        actor = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+        request.kind = 7;
+        break;
+    default:
+        actor = NULL;
+        break;
+    }
+    effBattleMiscQueryPosition(actor, &request, (u128 *)actorPosition);
+    path = slots->targets[slots->selectedTargetIndex];
+    dds3InterpolatePathVectorVU(path);
+    if (config->actorSelection != 5) {
+        VU0_STORE_VF(vf10, position);
+        switch (config->actorSelection) {
+        case 3:
+        case 4:
+            if (actor->status.flags & 0x200) {
+                VU0_LOAD_VF(vf10, &D_0037EEC0);
+            } else {
+                VU0_LOAD_VF(vf10, &D_0037EED0);
+            }
+            VU0_STORE_VF(vf10, actorRotation);
+            break;
+        default:
+            btlCopyUnitRotationQuaternion(actor, actorRotation);
+            VU0_LOAD_VF(vf10, actorRotation);
+            VU0_LOAD_VF(vf11, &D_0037EEA0);
+            effMiscQuatMultiplyVU();
+            VU0_STORE_VF(vf10, actorRotation);
+            break;
+        }
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, position);
+        VU0_ROTATE_VEC(vf10, vf10);
+    }
+    VU0_LOAD_VF(vf11, actorPosition);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, position);
+    data = camera->data;
+    dds3InterpolatePathQuaternionVU(path);
+    if (config->actorSelection != 5) {
+        VU0_LOAD_VF_MEMORY(vf11, actorRotation);
+        effMiscQuatMultiplyVU();
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, &D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, eyeOffset);
+    VU0_LOAD_VF(vf10, &D_0037EE90);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, &data->localUp);
+    effObjSetInnerPosition(camera, position);
+    VU0_LOAD_VF(vf10, eyeOffset);
+    PCP_COPY_VECTOR(&data->localEyeOffset, eyeOffset);
+    VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF(vf10, &data->worldEye);
+    dds3SetCameraFieldOfView(camera, D_003BC9A8);
+    data->fovUpdatePending |= 1;
+    effObjSetInnerRotation(camera, &D_0037EEB0);
+    sdfStepWrappingFloatCounter(path);
+}
 
 
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
