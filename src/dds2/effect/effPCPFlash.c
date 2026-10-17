@@ -220,7 +220,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     u32 range;
-    u32 i;
+    u32 particleIndex;
 
     memcpy(work, src, 0x40);
     work->parts = (PcpFlashRotatingParticle *)(work + 1);
@@ -235,8 +235,8 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     work->resourceHandle = record;
     record->drawMode = work->drawMode;
     range = work->randomRange;
-    for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+    for (particleIndex = 0; particleIndex < work->particleCount; particleIndex++) {
+        work->parts[particleIndex].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
