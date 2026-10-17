@@ -255,7 +255,7 @@ DevRequest *sdfAssetListParse(DevRequest *lookup, u32 *data);
 /* Build the buffered model, parse its asset records and create one draw node per
  * item, linking each node under its parent item's node when it has one. */
 SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) {
-    s32 i = 0;
+    s32 itemIndex = 0;
     SdfModel *model = sdfCreateBufferedTransformSlot();
     SdfItemList *list;
     s32 count;
@@ -272,7 +272,7 @@ SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) 
     list++;
     sdfResizeBufferedSlotRequest(model, count);
     item = (SdfItem *)list;
-    if (count != i) {
+    if (count != itemIndex) {
         do {
             node = sdfCreateDrawNode();
             parent = NULL;
@@ -280,35 +280,35 @@ SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) 
                 parent = ((SdfDrawNode **)model->list->buffer)[item->parentNodeIndex];
             }
             sdfAppendBufferedRouteNode(model, parent, node);
-            i++;
+            itemIndex++;
             node->nodeId = item->nodeId;
             item++;
-        } while (i != count);
+        } while (itemIndex != count);
     }
     return model;
 }
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
 SdfModel *sdfModelCreateWithItems(void *assetData, SdfItemListRef *listRef) {
-    s32 i = 0;
+    s32 itemIndex = 0;
     SdfModel *model = sdfModelCreateFromAssetData(assetData, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
     SdfItem *item = list->firstItem;
 
-    if (count != i) {
+    if (count != itemIndex) {
         do {
-            sdfDrawNodeBuildFromItemAndCommands(((SdfDrawNode **)model->list->buffer)[i], item);
+            sdfDrawNodeBuildFromItemAndCommands(((SdfDrawNode **)model->list->buffer)[itemIndex], item);
             item++;
-            i++;
-        } while (i != count);
+            itemIndex++;
+        } while (itemIndex != count);
     }
     return model;
 }
 
 /* Attach each item using the alternate draw-node setup path. */
 SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *listRef) {
-    s32 i = 0;
+    s32 itemIndex = 0;
     SdfModel *model = sdfModelCreateFromAssetData(assetData, listRef);
     SdfItemList *list;
     s32 count;
@@ -318,12 +318,12 @@ SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *list
     list = listRef->items;
     count = list->count;
     item = list->firstItem;
-    if (count != i) {
+    if (count != itemIndex) {
         do {
-            sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[i], item);
+            sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[itemIndex], item);
             item++;
-            i++;
-        } while (i != count);
+            itemIndex++;
+        } while (itemIndex != count);
     }
     return model;
 }
