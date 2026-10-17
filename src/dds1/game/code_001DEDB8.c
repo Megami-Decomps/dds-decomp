@@ -7301,8 +7301,7 @@ void btlCreateRainEffect(u32 majorId, u32 minorId) {
         break;
     }
     if (work->soundTransitionTask != 0) {
-        btlBossDebugPrintf("btl:rain create[f%03X_%03X]
-", majorId, minorId);
+        btlBossDebugPrintf("btl:rain create[f%03X_%03X]\n", majorId, minorId);
     }
 }
 
