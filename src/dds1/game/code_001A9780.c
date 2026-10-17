@@ -7010,7 +7010,31 @@ void btlDrawRetreatCommandLabel(s32 unused) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001BEB58);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BF040);
+/* First non-zero command failure reason: the actor itself, then each linked
+ * partner in turn. All three checks run before the first result is tested. */
+s32 func_001BF040(BtlUnit *actor, BattleRosterPair *pair) {
+    s32 result;
+    s32 first = 0;
+    s32 second = 0;
+
+    result = btlGetLinkedPartyCommandFailureReason(actor, actor, pair->first, pair->second, pair->skill);
+    if (pair->first != NULL) {
+        first = btlGetLinkedPartyCommandFailureReason(pair->first, pair->first, actor, pair->second, pair->skill);
+    }
+    if (pair->second != NULL) {
+        second = btlGetLinkedPartyCommandFailureReason(pair->second, pair->second, actor, pair->first, pair->skill);
+    }
+    if (result != 0) {
+        return result;
+    }
+    if (first != 0) {
+        return first;
+    }
+    if (second != 0) {
+        return second;
+    }
+    return 0;
+}
 
 extern s32 func_001B5CD8(void);
 
