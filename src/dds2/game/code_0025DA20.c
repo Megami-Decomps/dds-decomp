@@ -2018,19 +2018,19 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
 
 extern u8 mnuCampWideRewardKindByteView[];
 
-u8 mnuCampGetWideRewardKind(s32 row, s32 column) {
-    return mnuCampWideRewardKindByteView[column * 0xC + row * 0xC0];
+u8 mnuCampGetWideRewardKind(s32 rewardRow, s32 column) {
+    return mnuCampWideRewardKindByteView[column * 0xC + rewardRow * 0xC0];
 }
 
 extern u8 mnuCampCompactRewardKindByteView[];
 
-u8 mnuCampGetCompactRewardKind(s32 row, s32 column) {
-    return mnuCampCompactRewardKindByteView[column * 8 + row * 0x44];
+u8 mnuCampGetCompactRewardKind(s32 rewardRow, s32 column) {
+    return mnuCampCompactRewardKindByteView[column * 8 + rewardRow * 0x44];
 }
 
-s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
-    u8 *entry = mnuCampWideRewardEntries + column * 0xC + row * 0xC0;
-    s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + row * 0xC0 + 4);
+s32 mnuCampResolveOwnedItemVariant(s32 rewardRow, s32 column) {
+    u8 *entry = mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0;
+    s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0 + 4);
 
     if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && datGameState->inventory.counts[id] != 0) {
         id = *(u16 *)(entry + 8);
@@ -2038,8 +2038,8 @@ s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     return id;
 }
 
-s32 mnuCampGetCompactEntryId(s32 row, s32 column) {
-    return *(s32 *)(mnuCampCompactEntries + row * 0x44 + column * 8);
+s32 mnuCampGetCompactEntryId(s32 rewardRow, s32 column) {
+    return *(s32 *)(mnuCampCompactEntries + rewardRow * 0x44 + column * 8);
 }
 
 s32 mnuCampCountRemainingUses(s32 mode, s32 id, MenuTerminalContext *record) {
