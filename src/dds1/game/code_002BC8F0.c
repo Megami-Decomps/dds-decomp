@@ -513,7 +513,7 @@ EffMappedResource *effCreateStatusBatch(u32 category) {
 
 
 /* Release each record's status storage, then the record allocation and batch header. */
-u32 effDestroyPackedBatch(EffMappedResource *batch) {
+s32 effDestroyPackedBatch(EffMappedResource *batch) {
     s32 recordIndex;
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
         sdfReleaseChipBlock(batch->records[recordIndex].status);
