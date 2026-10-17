@@ -7103,7 +7103,7 @@ EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
     u8 *source = primary + 0x20;
     EffectStripNode *node = effCreateStripNodeFromGrid(source);
 
-    memcpy(node->copiedHeader, primary, sizeof(node->copiedHeader));
+    memcpy(&node->copiedHeader, primary, sizeof(node->copiedHeader));
     effReplaceFileResourceRef(node, work->option, source);
     return node;
 }
@@ -7125,7 +7125,7 @@ EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
     u8 *source = work->active->data1;
     EffectStripNode *node = effCreateStripNodeFromGrid(source);
 
-    memcpy(node->copiedHeader, source, sizeof(node->copiedHeader));
+    memcpy(&node->copiedHeader, source, sizeof(node->copiedHeader));
     effReplaceFileResourceRef(node, work->active->type, source);
     return node;
 }
@@ -7153,7 +7153,207 @@ void effAcquireStripRecord(EffectStripNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EE670);
+extern f32 sdfViewUpVector[4];
+void func_002EE670(EffectStripNode *node) {
+    Matrix4 matrix;
+    f32 nodeTint[4];
+    f32 tint[4];
+    u128 translation[1];
+    u128 rotation[1];
+    f32 view[4];
+    f32 rightAxis[4];
+    f32 viewUp[4];
+    f32 right[4];
+    f32 up[4];
+    f32 position[4];
+    f32 innerTint[4];
+    f32 outerTint[4];
+    u32 packedInnerColor;
+    u32 packedOuterColor;
+    u32 childColor;
+    FileKeyBlock *info;
+    EffTrackSet *output;
+    FileSlot *entry;
+    f32 (*positions)[4];
+    f32 (*quad)[4];
+    u32 *colors;
+    u32 *quadColors;
+    struct BillObj *billboard;
+    s32 count;
+    s32 remaining;
+    u32 hasTransform;
+    s32 i;
+    f32 opacity;
+    f32 billSize;
+    f32 crossSize;
+    f32 longSize;
+    f32 sideSize;
+    f32 scale;
+    f32 cross;
+    f32 billExtent;
+    f32 along;
+    f32 side;
+
+    info = (FileKeyBlock *)node->active->data0;
+    eeUnpackRGBAWordFloat(node->color, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, nodeTint);
+    eeUnpackRGBAWordFloat(node->copiedHeader.tint, 1.0f / 128.0f);
+    VU0_LOAD_VF(vf11, nodeTint);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    hasTransform = node->active->flags & 1;
+    if (!hasTransform) {
+        EE_MMI_UNIT_MATRIX(&matrix);
+    } else {
+        fileReadRecordSecondVector(node->active, rotation);
+        fileReadVectorPtr20(node->active, translation);
+        VU0_LOAD_VF(vf10, rotation);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, translation);
+        VU0_SET_W_ONE(vf10);
+        VU0_MOVE_VF(vf31, vf10);
+        VU0_STORE_MATRIX(&matrix);
+    }
+    billboard = node->resource;
+    opacity = node->opacity;
+    billSize = node->copiedHeader.billSize;
+    billSetBillboardMode(billboard, (s16)info->alphaTrack.surfaceIndex);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, view);
+    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_STORE_VF_UNCLOBBERED(vf11, up);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, right);
+    output = node->trackSet;
+    entry = node->active->slots;
+    count = node->percent;
+    positions = (f32 (*)[4])output->buffer;
+    colors = (u32 *)output->tail;
+    if (info->length <= 0 || count == 0) {
+        return;
+    }
+    longSize = node->copiedHeader.longSize;
+    sideSize = node->copiedHeader.sideSize;
+    crossSize = node->copiedHeader.crossSize;
+    eeUnpackRGBAWordFloat(node->copiedHeader.innerColor, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, innerTint);
+    eeUnpackRGBAWordFloat(node->copiedHeader.outerColor, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, outerTint);
+    if (count > 0) {
+        remaining = count;
+        do {
+            if ((u32)(entry->state + 2) < 2) {
+                quad = positions;
+                for (i = 0; i < 4; i++, quad += 4) {
+                    VU0_STORE_VF(vf0, quad[0]);
+                    VU0_STORE_VF(vf0, quad[1]);
+                    VU0_STORE_VF(vf0, quad[2]);
+                    VU0_STORE_VF(vf0, quad[3]);
+                }
+            } else if (entry->state > 0) {
+                scale = entry->scale * opacity;
+                if (hasTransform) {
+                    VU0_LOAD_MATRIX(&matrix);
+                    VU0_LOAD_VF(vf10, entry->pos);
+                    VU0_TRANSFORM_POINT(vf10, vf10);
+                    VU0_STORE_VF(vf10, position);
+                } else {
+                    PCP_COPY_VECTOR(position, entry->pos);
+                }
+                eeUnpackRGBAWordFloat(entry->color, 1.0f / 128.0f);
+                VU0_LOAD_VF(vf11, tint);
+                VU0_MUL(vf10, vf10, vf11);
+                childColor = eePackRGBAWord(128.0f);
+                cross = crossSize * scale;
+                billExtent = billSize * scale;
+                billSetChildParameter(billboard, childColor);
+                billSetChildScaleComponents(billboard, billExtent, billExtent);
+                billSetRotationAngle(billboard, entry->angle);
+                effCopyVector(billboard, position);
+                billInvokeCallback(billboard);
+                along = longSize * scale * 1.5f;
+                side = sideSize * scale * 1.5f;
+                sdfBuildVuRotationFromAxisAngle(entry->angle, (const RwV3d *)view);
+                VU0_LOAD_VF(vf10, right);
+                VU0_ROTATE_VEC(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, rightAxis);
+                VU0_LOAD_VF(vf10, up);
+                VU0_ROTATE_VEC(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, viewUp);
+                VU0_LOAD_VF(vf12, entry->pos);
+                VU0_STORE_VF(vf12, positions[2]);
+                VU0_STORE_VF(vf12, positions[6]);
+                VU0_LOAD_VF(vf10, rightAxis);
+                VU0_SCALE_VF(vf10, along);
+                VU0_MOVE_VF(vf11, vf10);
+                VU0_ADD(vf10, vf10, vf12);
+                VU0_STORE_VF(vf10, positions[0]);
+                VU0_NEGATE_XYZ(vf11);
+                VU0_ADD(vf11, vf11, vf12);
+                VU0_STORE_VF(vf11, positions[4]);
+                VU0_LOAD_VF(vf10, viewUp);
+                VU0_SCALE_VF(vf10, cross);
+                VU0_MOVE_VF(vf11, vf10);
+                VU0_ADD(vf10, vf10, vf12);
+                VU0_STORE_VF(vf10, positions[1]);
+                VU0_STORE_VF(vf10, positions[5]);
+                VU0_NEGATE_XYZ(vf11);
+                VU0_ADD(vf11, vf11, vf12);
+                VU0_STORE_VF(vf11, positions[3]);
+                VU0_STORE_VF(vf11, positions[7]);
+                quad = positions + 8;
+                /* Retail addresses this store from positions (+0xA0) but the next one from quad (+0x60):
+                 * a bare volatile asm (no memory clobber) flushes cse's table, so the second address is not
+                 * folded (cc1probe --cse, hooked==unhooked: uid599 stays quad+96). */
+                VU0_STORE_VF_UNCLOBBERED(vf12, quad[2]);
+                VU0_STORE_VF(vf12, quad[6]);
+                VU0_LOAD_VF(vf10, viewUp);
+                VU0_SCALE_VF(vf10, side);
+                VU0_MOVE_VF(vf11, vf10);
+                VU0_ADD(vf10, vf10, vf12);
+                VU0_STORE_VF(vf10, quad[0]);
+                VU0_NEGATE_XYZ(vf11);
+                VU0_ADD(vf11, vf11, vf12);
+                VU0_STORE_VF(vf11, quad[4]);
+                VU0_LOAD_VF(vf10, rightAxis);
+                VU0_SCALE_VF(vf10, cross);
+                VU0_MOVE_VF(vf11, vf10);
+                VU0_ADD(vf10, vf10, vf12);
+                VU0_STORE_VF(vf10, quad[1]);
+                VU0_STORE_VF(vf10, quad[5]);
+                VU0_NEGATE_XYZ(vf11);
+                VU0_ADD(vf11, vf11, vf12);
+                VU0_STORE_VF(vf11, quad[3]);
+                VU0_STORE_VF(vf11, quad[7]);
+                eeUnpackRGBAWordFloat((entry->color & 0xFF000000) | 0x808080, 1.0f / 128.0f);
+                VU0_MOVE_VF(vf11, vf10);
+                VU0_LOAD_VF(vf10, innerTint);
+                VU0_MUL(vf10, vf10, vf11);
+                packedInnerColor = eePackRGBAWord(128.0f);
+                VU0_LOAD_VF(vf10, outerTint);
+                VU0_MUL(vf10, vf10, vf11);
+                packedOuterColor = eePackRGBAWord(128.0f);
+                quadColors = colors;
+                for (i = 3; i >= 0; i--, quadColors += 4) {
+                    quadColors[0] = packedOuterColor;
+                    quadColors[1] = packedOuterColor;
+                    quadColors[2] = packedInnerColor;
+                    quadColors[3] = packedOuterColor;
+                }
+            }
+            entry++;
+            positions += 16;
+            colors += 16;
+        } while (--remaining != 0);
+    }
+    output->color = node->color;
+    output->flag = node->copiedHeader.flag;
+    output->type = info->alphaTrack.surfaceIndex;
+    effDrawTrackSet(output, &matrix);
+}
 
 /* Advance the active strip record, rebuild its geometry, and submit its tracks. */
 void effUpdateAndDrawStripRecord(EffectStripNode *node) {

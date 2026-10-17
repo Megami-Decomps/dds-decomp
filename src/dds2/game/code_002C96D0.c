@@ -3328,9 +3328,9 @@ s32 fileWaitAfterLoadResult(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
-
 extern s32 sdfDebugPrintf(const char *, ...);
+
+INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 
 s32 fileApplySelectedLoadResult(void) {
     s32 i;

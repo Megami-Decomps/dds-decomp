@@ -2155,6 +2155,8 @@ s32 fldDispatchPendingSceneResource(void) {
     return 0;
 }
 
+extern s8 dds3AdminGetRequestedMode(void);
+
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F00);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F10);
@@ -2166,8 +2168,6 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F30);
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F40);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F58);
-
-extern s8 dds3AdminGetRequestedMode(void);
 
 s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     EffBlurScatterParams blur;

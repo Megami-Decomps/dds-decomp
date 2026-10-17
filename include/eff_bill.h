@@ -37,13 +37,27 @@ typedef char EffLensFlareSetOffsetCheck[((u32)&((EffLensFlareParams *)0)->flareS
 typedef char EffFadeVectorWorkSizeCheck[(sizeof(EffFadeVectorWork) == 0x58) ? 1 : -1];
 typedef char EffFadeVectorSourceOffsetCheck[((u32)&((EffFadeVectorWork *)0)->source == 0x18) ? 1 : -1];
 
+/* The 0x20-byte strip file header copied into EffectStripNode at +0x0C. */
+typedef struct EffStripParams {
+    u8 flag;
+    u8 pad01[3];
+    u32 innerColor;
+    u32 outerColor;
+    f32 crossSize;
+    f32 longSize;
+    f32 sideSize;
+    f32 billSize;
+    u32 tint;
+} EffStripParams;
+typedef char EffStripParamsSizeCheck[(sizeof(EffStripParams) == 0x20) ? 1 : -1];
+
 /* DDS1 002AAF70 / DDS2 002EE348 allocate this 0x3C-byte strip owner.
  * File constructors copy a 0x20-byte source header into its +0x0C member. */
 typedef struct EffectStripNode {
     u32 percent;
     u32 color;
     f32 opacity;
-    u8 copiedHeader[0x20];
+    EffStripParams copiedHeader;
     struct EffTrackSet *trackSet;
     struct BillObj *resource;
     struct FileSlotTable *active;
