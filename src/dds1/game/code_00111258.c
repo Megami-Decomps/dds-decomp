@@ -8,23 +8,23 @@ s32 dds3SelectOwnerWorldIndexSlot(u32 kind);
 extern s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNode *targetNode, s32 processAllMatches);
 
 /* Remove every entry for the node from the owner's world slot selected by the node's kind. */
-void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *object, EffWorldNode *node) {
-    WorldIndexNode *slot = dds3GetWorldSlotValue(object, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
+void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *worldIndexOwner, EffWorldNode *node) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(worldIndexOwner, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
 
     dds3RemoveMatchingWorldValueEntries((WorldValueIndices *)slot, node, 0);
 }
 
 /* Select one of the kind-2 owner's two world index nodes. */
-WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 slotIndex) {
-    WorldIndexNode **slot = object->data;
+WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *worldIndexOwner, s32 slotIndex) {
+    WorldIndexNode **slot = worldIndexOwner->data;
 
     slot += slotIndex;
     return *slot;
 }
 #include "dds3_world_secondary.h"
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-WorldIndexNode *dds3CopyFilteredWorldSlot(EffWorldNode *object, s32 slotIndex, s32 (*filter)(u32)) {
-    WorldIndexNode *slot = dds3GetWorldSlotValue(object, slotIndex);
+WorldIndexNode *dds3CopyFilteredWorldSlot(EffWorldNode *worldIndexOwner, s32 slotIndex, s32 (*filter)(u32)) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(worldIndexOwner, slotIndex);
     WorldIndexNode *result;
     u32 word;
 

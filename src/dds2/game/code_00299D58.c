@@ -56,26 +56,26 @@ extern u8 D_003D643C[];
 
 s32 brsMessageInputStep(KwlnTask *input) {
     BrsSkillPackageWork *context;
-    s32 *window;
+    s32 *transitionState;
     s32 buttons;
     s32 result;
 
     context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
-    window = &context->transition.state;
+    transitionState = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
         return 0;
     }
-    result = mnuDispatchPopupTransition(&context->transition, window, 0, input);
+    result = mnuDispatchPopupTransition(&context->transition, transitionState, 0, input);
     if (result != 0) {
         return result;
     }
-    if (*window == 0) {
+    if (*transitionState == 0) {
         brsNoOpMessageInputCallback(context);
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
             mnuClearTitleState(context);
-            mnuSetPopupEntry(window, D_003D643C);
+            mnuSetPopupEntry(transitionState, D_003D643C);
         }
     }
     return 0;

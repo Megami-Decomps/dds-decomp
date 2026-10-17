@@ -136,7 +136,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
 
 s32 evtUpdateMotionSeTask(KwlnTask *task) {
     EvtMotionSeTaskParams *motionSeParams;
-    EffWorldNode *node;
+    EffWorldNode *motionNode;
     EvtPackLoadState *packState;
     EvtUnit *unit;
     u16 motionId;
@@ -149,8 +149,8 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
-    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
-    if (node == NULL) {
+    motionNode = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
+    if (motionNode == NULL) {
         return -1;
     }
     packState = evtGetEventPackLoadState(motionSeParams->eventTaskId);
@@ -160,7 +160,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (motionSeParams->eventTaskId < 600) {
         return 0;
     }
-    unit = ((EvtMotionSeUnitLink *)node->data)->unit;
+    unit = ((EvtMotionSeUnitLink *)motionNode->data)->unit;
     if (unit == NULL) {
         return -1;
     }

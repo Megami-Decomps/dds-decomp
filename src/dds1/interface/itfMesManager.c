@@ -2,6 +2,7 @@
 #include "snd_pad_step.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
+#include "sdf_pac_reloc.h"
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
@@ -62,7 +63,6 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
 s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 
-void sdfRelocatePackedResourceWords(int *words, int relocationBase, u8 *table, int tableBytes);
 
 
 
@@ -1160,7 +1160,7 @@ void itfMesDestroyWindow(s32 window) {
 /* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
 void itfMesRelocate(ItfMesRelocHeader *resource) {
     if (resource->relocated == 0) {
-        sdfRelocatePackedResourceWords((int *)resource->payload, (int)resource->payload,
+        sdfRelocatePackedResourceWords((s32 *)resource->payload, (s32)resource->payload,
                       (u8 *)resource + resource->fixupTableOffset, resource->fixupTableBytes);
         resource->relocated = 1;
     }

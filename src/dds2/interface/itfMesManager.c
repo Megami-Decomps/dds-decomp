@@ -4,9 +4,11 @@
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
+#include "sdf_pac_reloc.h"
 #include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
+#include "ui_owner_ref.h"
 #include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
@@ -34,7 +36,6 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 
-void sdfRelocatePackedResourceWords(int *words, int relocationBase, u8 *table, int tableBytes);
 
 extern u32 itfMessageFlags;
 
@@ -1148,7 +1149,7 @@ void itfMesRelocate(ItfMesRelocHeader *resource)
         payload = resource->payload;
         fixupTable = (u8 *)resource + resource->fixupTableOffset;
         fixupSize = resource->fixupTableBytes;
-        sdfRelocatePackedResourceWords((int *)payload, (int)payload, fixupTable, fixupSize);
+        sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, fixupTable, fixupSize);
         resource->relocated = 1;
     }
 }
@@ -1590,8 +1591,6 @@ extern void sndSetSequenceVolumePan();
 extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *);
-
-typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 

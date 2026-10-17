@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
 #include "fld_script_resource.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
@@ -1123,7 +1124,7 @@ void fldRelocatePackedWords(u32 *table, u32 base, const u8 *data, s32 size) {
 
 /* Relocate the words described by this packed-resource transfer chunk. */
 void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk) {
-    sdfRelocatePackedResourceWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
+    sdfRelocatePackedResourceWords((s32 *)buffer, (s32)buffer, (const u8 *)((s32)buffer + chunk->offset), chunk->size);
 }
 
 void fldRelocateTransferChunkWords(u32 buffer, FldTransferChunk *chunk) {

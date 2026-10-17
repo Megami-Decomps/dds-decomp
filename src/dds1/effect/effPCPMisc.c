@@ -3,6 +3,7 @@
 #include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_spawn_range_event_row.h"
+#include "eff_pcp_spawn_range_work.h"
 #include "eff_pcp_drift_event_row.h"
 #include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
@@ -5253,33 +5254,6 @@ void effPcpCopyRandomizedVector(void *dst, void *src) {
 void effPcpSetPairedEventColor(EffPCPPairedEventWork *work, u32 val) {
     work->color = val;
 }
-
-typedef struct EffPCPSpawnRangeParams {
-    f32 origin[4];
-    u8 pad10[0x44];
-    s32 duration;
-    u32 count;
-    s32 delaySpread;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 initialAngularStep, angularJitter;
-    f32 angularDamping;
-    f32 initialHeightStep, heightJitter;
-    f32 heightDamping;
-    f32 startPosition, endPosition, startJitter, endJitter;
-    f32 startHeightRange;
-} EffPCPSpawnRangeParams;
-
-typedef struct EffPCPSpawnRangeWork {
-    EffPCPSpawnRangeParams params;
-    EffPCPSpawnRangeEventRow *entries;
-    SoundMixer *owner;
-    u8 unk9C;
-    u8 pad9D[3];
-    f32 scale;
-    u32 color;
-    struct SdfMemBlock *handle;
-} EffPCPSpawnRangeWork;
 
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
 EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {

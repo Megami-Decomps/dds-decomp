@@ -1361,7 +1361,7 @@ void sdfDevDiscRequestWorkerThread(DevWorkerEntry *worker) {
     void (*callback)(DevState *, s32, s32, s32, s32);
     s32 result;
     s32 transferResult;
-    void *data;
+    void *readBuffer;
     u32 operation;
 
     for (;;) {
@@ -1437,13 +1437,13 @@ void sdfDevDiscRequestWorkerThread(DevWorkerEntry *worker) {
                 transferResult = sdfDevGetFileSize();
             }
             if (transferResult != 0) {
-                data = state->requestData;
-                if (data == NULL) {
-                    data = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(sdfAllocGeneralBlock(transferResult)));
+                readBuffer = state->requestData;
+                if (readBuffer == NULL) {
+                    readBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(sdfAllocGeneralBlock(transferResult)));
                 }
-                state->requestData = data;
+                state->requestData = readBuffer;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = sdfDevReadDiscFileBytes(data, transferResult);
+                transferResult = sdfDevReadDiscFileBytes(readBuffer, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
