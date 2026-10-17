@@ -114,7 +114,7 @@ extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
 extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 extern void fldApplyPendingCameraHeading(void);
-extern void fldApplyRoomObjectModeZero(s32 world, s32 stage, void *roomName, s32 mode);
+extern s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode);
 extern void fldBeginNpcInteractionById(s32);
 extern s32 D_003898FC[];
 extern s32 D_00389780[];
@@ -2832,7 +2832,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     } else if (kind == 11) {
         if (entry->floor == D_00389784[0] + 1) {
             if (entry->motion == 3) {
-                fldApplyRoomObjectModeZero(0, 0, entry->otherName, 0);
+                fldApplyRoomObjectModeZero(0, 0, (char *)entry->otherName, 0);
                 return;
             }
         }
@@ -3858,7 +3858,7 @@ void fldBeginNpcInteractionById(s32 id) {
             actor = &fldActorEntries[i];
             npc = &fldActorSlots[i];
             if (npc->kind == 1 && npc->actorId == id) {
-                fldApplyRoomObjectModeZero(0, 0, actor->motionName, 0);
+                fldApplyRoomObjectModeZero(0, 0, (char *)actor->motionName, 0);
                 return;
             }
         }
@@ -3973,7 +3973,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
 void func_00143C90(void) {
 }
 
-extern void fldApplyRoomObjectModeOne(s32 world, s32 stage, void *roomName, s32 mode);
+extern s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode);
 
 void fldApplyCurrentAreaActorEntries(void) {
     FldActorEntry *entry;
@@ -3982,10 +3982,10 @@ void fldApplyCurrentAreaActorEntries(void) {
     for (i = 0; i < 256; i++) {
         entry = &fldActorEntries[i];
         if (entry->kind == 1 && entry->floor == fldAreaState.floor + 1 && entry->motion != 0) {
-            fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
+            fldApplyRoomObjectModeOne(0, 0, (char *)entry->motionName, 0);
         }
         if (entry->kind == 11 && entry->floor == fldAreaState.floor + 1 && entry->motion == 3) {
-            fldApplyRoomObjectModeOne(0, 0, entry->otherName, 0);
+            fldApplyRoomObjectModeOne(0, 0, (char *)entry->otherName, 0);
         }
     }
 }
