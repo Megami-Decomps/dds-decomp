@@ -458,12 +458,12 @@ typedef struct MenuContextSprites {
     u32 spriteE4;
 } MenuContextSprites;
 
-void mnuDrawSkillMenuFrameIcons(s32 context) {
-    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite74, 0x1f, 0x53);
-    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite74, 0, 0x53);
-    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite74, 0, 0x53);
-    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->spriteE4, 0x18, 0x53);
-    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite64, 2, 0x53);
+void mnuDrawSkillMenuFrameIcons(s32 menuContext) {
+    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite74, 0x1f, 0x53);
+    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->spriteE4, 0x18, 0x53);
+    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)menuContext)->sprite64, 2, 0x53);
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);
