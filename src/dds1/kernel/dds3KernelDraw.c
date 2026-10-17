@@ -449,14 +449,14 @@ void kwlnDrawSetupC70B(s32 duration) {
 
 /* Stage filter-blur parameters, counting/clamping only counts above 100.
  * The secondary values are forwarded into the shared effect parameter body. */
-void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 blendControl,
+void kwlnDrawSetCd0Clamped(s32 filterCount, s32 size, s32 delaySpread, s32 blendControl,
                            f32 angleStep, f32 uvDisplacementAngleDegrees,
                            f32 uvDisplacementAmplitude) {
-    if (count >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
+    if (filterCount >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
         kwlnDistanceBlurErrorCount++;
-        count = KWLN_DRAW_FILTER_MAX_COUNT;
+        filterCount = KWLN_DRAW_FILTER_MAX_COUNT;
     }
-    kwlnFilterBlurParameters.count = count;
+    kwlnFilterBlurParameters.count = filterCount;
     kwlnFilterBlurParameters.size = size;
     kwlnFilterBlurParameters.delaySpread = delaySpread;
     kwlnFilterBlurParameters.angleStep = angleStep;
