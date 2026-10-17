@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
 #include "fld_script_resource.h"
@@ -2603,7 +2604,6 @@ void fldSubmitAlternateFramePacket(void) {
 
 extern f32 D_0032F4E0[][4];
 extern u32 D_0032F500[];
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     SdfListHead *list;

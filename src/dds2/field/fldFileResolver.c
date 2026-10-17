@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
 #include "fld_script_resource.h"
@@ -580,7 +581,6 @@ extern f32 D_0038A980[][4];
 
 extern u32 D_0038A9A0[];
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 extern void *memset(void *s, s32 c, u32 n);
 

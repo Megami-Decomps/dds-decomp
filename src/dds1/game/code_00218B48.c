@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "dds3_path.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_request.h"
@@ -2526,7 +2527,6 @@ extern f32 D_00367B80[][4];
 extern u32 D_00367BE0[];
 
 
-extern void *sdfDrawPostmultipliedLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Submit the intermediate packet with an identity basis in phases 2 and 3. */
 void mdlSubmitViewerIntermediateDrawPacket(void) {

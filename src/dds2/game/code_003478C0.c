@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_thread_workspace_api.h"
@@ -286,7 +287,7 @@ void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
 
 extern f32 D_0040B5F0[][4];
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
-void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+SdfPacket *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;
     f32 (*viewport)[4];
     u128 *cursor;
@@ -398,13 +399,13 @@ void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 ve
 }
 
 /* vu0 routine: render line pairs using the cached composed matrix. */
-void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+SdfPacket *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     VU0_LOAD_MATRIX(D_0040B620);
     return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
 
 /* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
-void *sdfDrawPostmultipliedLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+SdfPacket *sdfDrawPostmultipliedLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     sdfPostmultiplyVuMatrixFromMemory(D_0040B620);
     return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }

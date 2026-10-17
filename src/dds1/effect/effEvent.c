@@ -1,3 +1,4 @@
+#include "sdf_line_pair_packet_api.h"
 #include "sdf_projection.h"
 #include "sdf_compact_vertex_vif_packet.h"
 #include "bill_object_api.h"
@@ -371,7 +372,6 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 commandIndex, s32 format) {
     scene->append(scene, (SdfListHead *)task);
 }
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
@@ -493,7 +493,6 @@ void effDrawRotatingTriangleAtPosition(f32 *position) {
     D_00325028.append(&D_00325028, list);
 }
 
-extern void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
