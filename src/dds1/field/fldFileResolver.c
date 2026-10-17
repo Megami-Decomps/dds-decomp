@@ -8135,25 +8135,7 @@ const char *fldGetTaskRecordValue(u32 task) {
     return 0;
 }
 
-#include "fld_trigger_shape.h"
-typedef union FldActionTransform {
-    struct {
-        f32 position[4];
-        f32 rotation[4];
-        f32 scale[4];
-    };
-    f32 values[12];
-} FldActionTransform;
-/* Serialized sphere/task prefix, transform and paired resources. */
-typedef struct FldActionRow {
-    union {
-        struct { FldTriggerSphere shape; FldTaskInfo info; } task;
-        FldTriggerShape shape;
-    } prefix;
-    FldActionTransform transform;
-    FldFileResource childResource;
-    FldFileResource displayResource;
-} FldActionRow;
+#include "fld_action_row.h"
 extern FldActionRow D_003309B0[];
 extern char D_00330760[];
 extern char D_00330770[];
