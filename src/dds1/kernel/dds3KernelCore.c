@@ -397,15 +397,15 @@ s32 kwlnTaskTickScheduler(void)
 KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
                          TaskUpdate update, TaskDestroy destroy, u32 userValue) {
     KwlnTask *task = sdfAllocSizeClassBlock(sizeof(KwlnTask));
-    s32 i = 0;
+    s32 taskNameByteIndex = 0;
 
     if (task == NULL) {
         return NULL;
     }
     task->nameSum = 0;
-    while ((task->name[i] = name[i]) != 0 && i < 0x18) {
-        task->nameSum += name[i];
-        i++;
+    while ((task->name[taskNameByteIndex] = name[taskNameByteIndex]) != 0 && taskNameByteIndex < 0x18) {
+        task->nameSum += name[taskNameByteIndex];
+        taskNameByteIndex++;
     }
     task->priority = priority;
     task->flags = KWLN_TASK_DELAYED_START;
