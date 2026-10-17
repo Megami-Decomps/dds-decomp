@@ -410,10 +410,6 @@ typedef struct {
  * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
 #define VU0_SUB(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-/* Selected-lane subtraction: DDS1 002DEC44..002DEC4C / 002DF264..002DF26C
- * and DDS2 00337AF4..00337AFC / 00338114..0033811C preserve the W lanes. */
-#define VU0_SUB_LANES(lanes, dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub." #lanes " " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_ADD(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_MUL(dst, a, b) __asm__ volatile ( \
@@ -473,15 +469,17 @@ typedef struct {
     ".set noreorder\n\tvmul.xyz vf2, " #a ", " #b "\n\tvaddy.x vf2, vf2, vf2y\n\t" \
     "vaddz.x vf2, vf2, vf2z\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
-/* Facing-test dot fold, with vf1.x already equal to one:
- * DDS1 002DEC58..002DEC68 / 002DF278..002DF288 and DDS2
- * 00337B08..00337B18 / 00338128..00338138. ACC and vf2 are SDK scratch.
- * Return the low float bits in a compiler-owned GPR; C emits their MTC1. */
-#define VU0_DOT_XYZ_ACC(out, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, " #a ", " #b "\n\t" \
-    "vadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
-    "qmfc2.ni %0, vf2\n\t.set reorder" \
-    : "=r" (out))
+/* Triangle facing against the current vf21 eye vector; vf1.x is one.
+ * Exact native sequence: DDS1 002DEC38..002DEC68 /002DF258..002DF288,
+ * DDS2 00337AE8..00337B18 /00338108..00338138. The thirteen instructions
+ * are the native VU arithmetic and scalar result transfer; $2 is scratch. */
+#define VU0_TRIANGLE_FACING(out, a, b, c) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf2, 0(%1)\n\tlqc2 vf3, 0(%2)\n\tlqc2 vf4, 0(%3)\n\t" \
+    "vsub.xyz vf2, vf2, vf3\n\tvsub.xyz vf4, vf4, vf3\n\tvsub.xyz vf3, vf21, vf3\n\t" \
+    "vopmula.xyz ACC, vf2, vf4\n\tvopmsub.xyz vf2, vf4, vf2\n\t" \
+    "vmul.xyz vf2, vf2, vf3\n\tvadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
+    "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : "r" (a), "r" (b), "r" (c) : "$2")
 
 
 /* ---- shared idioms for the remaining hand-written COP2 blocks ----
@@ -538,9 +536,14 @@ typedef struct {
     "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
 /* vf24-vf27 = vf28-vf31: the primary matrix becomes the second bank before the
  * point projection overwrites it. */
-/* vf23.x += vf2.z: the clipped triangle builders fold the plane z term into x. */
-#define VU0_ADD_VF2Z_TO_VF23X() __asm__ volatile ( \
-    ".set noreorder\n\tvaddz.x vf23, vf23, vf2z\n\t.set reorder")
+/* Shared clip-plane register setup: DDS1 002DF178 and002DF758,
+ * DDS2 00338028 and00338608. The scalar bits and both source addresses
+ * remain live together through the native five-instruction SDK idiom. */
+#define VU0_SET_CLIP_PLANES(bias, eye, projection) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\t" \
+    "lqc2 vf21, 0(%1)\n\tlqc2 vf22, 0x70(%2)\n\t" \
+    "lqc2 vf23, 0x80(%2)\n\tvaddz.x vf23, vf23, vf2z\n\t.set reorder" \
+    : : "r" (bias), "r" (eye), "r" (projection))
 
 #define VU0_MOVE_MATRIX_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
