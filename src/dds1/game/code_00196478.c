@@ -6,6 +6,7 @@
 #include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
+#include "itf_gs_state_packet.h"
 #include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -1470,17 +1471,10 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, (u32)packet);
 }
 
-/* The packet builder returns a 0x30-byte command with two trailing qwords. */
-typedef struct TextPacketTail {
-    u8 pad00[0x20];
-    u64 value;
-    u64 registerCode;
-} TextPacketTail;
-
 /* Write TEST for the selected GS context, not the ALPHA blend register. */
 void itfSendBlendPacket(SdfListHead *command, u64 value, s32 flag) {
     s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
-    TextPacketTail *dst = (TextPacketTail *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = value;
     dst->registerCode = flag ? ITF_TEST_SECOND_CONTEXT : ITF_TEST_FIRST_CONTEXT;
@@ -1490,7 +1484,7 @@ void itfSendBlendPacket(SdfListHead *command, u64 value, s32 flag) {
 /* Write an unchecked table entry to ALPHA for the selected GS context. */
 void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag) {
     s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
-    TextPacketTail *dst = (TextPacketTail *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = D_00357998[index];
     dst->registerCode = flag ? ITF_ALPHA_SECOND_CONTEXT : ITF_ALPHA_FIRST_CONTEXT;
@@ -1500,7 +1494,7 @@ void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag) {
 /* Write CLAMP for the selected GS context. */
 void func_00199560(SdfListHead *command, s32 flag, s32 wms, s32 wmt, s32 minu, s32 maxu, s32 minv, s32 maxv) {
     s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
-    TextPacketTail *dst = (TextPacketTail *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+    ItfGsStatePacket *dst = (ItfGsStatePacket *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
 
     dst->value = ((u64)maxv << 34) | ((u64)minv << 24) | (maxu << 14) | (minu << 4) | (wmt << 2) | wms;
     dst->registerCode = flag ? SDF_GS_CLAMP_2 : SDF_GS_CLAMP_1;
