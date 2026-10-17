@@ -11,6 +11,7 @@
 #include "mnu_scene_work.h"
 #include "mnu_scene_list.h"
 #include "mnu_sprite_placement.h"
+#include "evt_message_window_api.h"
 
 struct EffectSlotSet;
 
@@ -717,7 +718,6 @@ void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32
     }
 }
 
-#include "evt_message_window_api.h"
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC448);
 
 INCLUDE_SDATA(const s32, "game/code_00254B30", D_003BC450);

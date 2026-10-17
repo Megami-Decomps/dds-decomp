@@ -72,6 +72,8 @@ void fldRotateVectorAroundZ(f32 *vector, f32 angle) {
 }
 
 
+float sdfVec3NormalizeInPlaceAndGetLength(float *vector);
+
 /* Rotate XYZ about a normalized copy of axis; copy inputs before writing XYZ and leave W untouched. */
 void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
     SdfMathVector4 normalizedAxis;

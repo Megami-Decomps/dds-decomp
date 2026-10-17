@@ -1524,6 +1524,10 @@ extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
 const char D_00413128[] = "%sk%03d_%03d.f2";
 
+extern void fldResetRecordState();
+extern void fldResetZoneRecordsAndActorSlots();
+extern void fldResetPendingSounds();
+
 u32 fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
@@ -1700,13 +1704,7 @@ extern void fldReleaseResourceSlots();
 
 
 
-extern void fldResetRecordState();
-
 extern s32 fldTitleMiniIsActive();
-
-extern void fldResetZoneRecordsAndActorSlots();
-
-extern void fldResetPendingSounds();
 
 
 extern void fldReleaseMenuSlotsAfterWait();
@@ -1748,6 +1746,9 @@ extern struct SdfMemBlock *fldCachedRoomF1ResourceAllocation;
 extern struct SdfMemBlock *fldCachedRoomF2ResourceAllocation;
 
 extern struct SdfMemBlock *fldCachedRoomKF2ResourceAllocation;
+
+void fldReleaseBackgroundBuffer(void);
+void fldReleaseSkyResources(void);
 
 void fldReleaseFieldResources(void) {
     s32 i;
@@ -3355,6 +3356,8 @@ s32 fldEncProc(KwlnTask *task) {
     return 0;
 }
 
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
+
 void fldRequestEncounterWithFade(u32 encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
@@ -3971,7 +3974,6 @@ extern void fldSetSequenceVolume(s32 category, s32 volume);
 extern void fldQueuePrimaryEffectPosition(f32 x, f32 y, f32 z);
 extern void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
 /* Dispatch camera-model frame crossings to sequence sounds and queued effects. */
 void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
@@ -4352,6 +4354,9 @@ s32 fldApplyPlayerVerticalStep(void) {
 
 extern void mnuResetTitleStreamAfterFileIdle(void);
 
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
+extern void fldSetSceneControlFlags(u32 mask);
+
 /* Advance the field transition while the camera model's motion drives completion. */
 s32 fldUpdateFieldTransition(void) {
     FldAreaWork *work = &fldAreaState;
@@ -4398,8 +4403,6 @@ s32 fldUpdateFieldTransition(void) {
 
 extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
 extern void fldPlayMenuSound(s32 soundId);
-extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
-extern void fldSetSceneControlFlags(u32 mask);
 extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);
 
 s32 fldUpdateAreaDamageReaction(void) {
@@ -4990,6 +4993,8 @@ u8 fldHasPendingSceneFlags(void) {
     }
     return 1;
 }
+
+void fldSetCameraNodeModeWithZero(void);
 
 void fldHideSceneModelsAndResetCamera(void) {
     dds3SetObjectFlags(fldPlayerObject, 1);

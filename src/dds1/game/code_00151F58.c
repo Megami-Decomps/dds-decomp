@@ -2695,6 +2695,9 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
     }
 }
 
+/* No prototype: retail calls it with no argument. */
+void effInitParticleRecord();
+
 void effResetSingleParticleTemplate(void) {
     effInitParticleRecord();
 }

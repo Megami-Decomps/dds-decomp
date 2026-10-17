@@ -15,11 +15,15 @@
 #include "eff_track_poly_data.h"
 #include "eff_packet_params.h"
 
+void effTrackPolyFreeData(EffTrackPolyData *data);
+
 /* Release both owned resources before freeing this track. */
 void effTrackPolyRelease(EffTrackPolyWork *work) {
     effTrackPolyFreeData(work->data);
     sdfReleaseChipBlock(work);
 }
+
+void effTrackPolyInitData(EffTrackPolyData *data);
 
 void effTrackPolyReset(EffTrackPolyWork *work) {
     work->updateCount = 0;
@@ -46,6 +50,8 @@ void effTrackPolyPushWorkEndpoints(EffTrackPolyWork *work, const u128 *endpoints
 void effTrackPolySetColor(EffTrackPolyWork *work, u32 color) {
     work->data->color = color;
 }
+
+void effTrackPolyDrawStrips(EffTrackPolyData *data);
 
 void effTrackPolyDrawWork(EffTrackPolyWork *work) {
     effTrackPolyDrawStrips(work->data);

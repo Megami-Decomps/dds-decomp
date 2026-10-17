@@ -2092,6 +2092,8 @@ s32 mcHandleSetupResult(void) {
 
 extern s8 D_00437CD5;
 
+void fileRestoreSlotFlagsToState(void);
+
 s32 mcdHandleSaveSetupDone(void) {
     McPollResult status = mcPollZeroCommandResult();
 
@@ -2650,6 +2652,8 @@ extern s32 D_00437D80;
 extern void fileDestroyMemoryCardMenuTask(KwlnTask *task);
 extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 
+void fileInitCursorPulse(void);
+
 void fileStartMemoryCardMenuForMode(s32 mode) {
     FilePacRequest *request;
     PacWork *node;
@@ -2770,6 +2774,8 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         dds3SetWorldObjectDrawEnabled((EffWorldNode *)world, 0);
     }
 }
+
+void fileReleaseMenuResources(void);
 
 void fileDestroyMemoryCardMenuTask(KwlnTask *task) {
     fileReleaseMenuResources();
@@ -3324,6 +3330,8 @@ s32 fileWaitAfterLoadResult(void) {
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 
+extern s32 sdfDebugPrintf(const char *, ...);
+
 s32 fileApplySelectedLoadResult(void) {
     s32 i;
 
@@ -3564,7 +3572,6 @@ typedef struct FileMultiFlagBonus {
 extern FileMultiFlagBonus ptyUnit7StatBonusFlagGroups[6];
 extern s8 (*D_00435E3C)[6];
 extern s32 dds3FindEntryIndex(s32);
-extern s32 sdfDebugPrintf(const char *, ...);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
@@ -4391,6 +4398,8 @@ void fileDrawConfigurationMenuBackground(void *unusedTask) {
                  fileConfigTaskWork->slots[2], 11, 0x53);
 }
 
+
+void fileResetRenderFlags(void);
 
 void effLoadCommonTexturesAndResetRenderFlags(void) {
     effLoadFlashTextures();
@@ -5894,6 +5903,8 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
     }
     sdfReleaseChipBlock(node);
 }
+
+void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *src);
 
 EffectSurfaceNode *fileLoadObjectCreateChild(EffectSurfaceNode *owner) {
     FileKeyBlock *source = (FileKeyBlock *)owner->active->data1;

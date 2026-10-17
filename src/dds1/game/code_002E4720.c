@@ -977,6 +977,8 @@ extern DevState *D_003BD41C;
 
 extern s16 D_003BD42C;
 
+void sdfEnsureDeviceWorkerThreadStarted(s32 index);
+
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     DevWorkerEntry *worker;

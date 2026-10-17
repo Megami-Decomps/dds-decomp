@@ -1651,6 +1651,8 @@ void effBillboardWorkRelease(u32 work) {
     sdfReleaseChipBlock((void *)work);
 }
 
+void effReplaceBillboardClone(s32 dst, s32 src);
+
 u8 *effDuplicateBillState(const u8 *source) {
     u8 *effect = (u8 *)effCreateBillboardWork(NULL);
     memcpy(effect + 0x2C, source + 0x2C, 0x38);
@@ -5019,6 +5021,9 @@ s32 effCreateSurfaceNodeForGrid(s32 source) {
     return effCreateSurfaceNode(effSlotCount((u8 *)source, 100));
 }
 
+extern void effRebuildSurfaceHandles(s32, s32, s32);
+extern void effReplaceResourceRef(s32, s32, s32);
+
 s32 effResourceReferenceReplaceFromFile(u8 *source) {
     s32 primary = (s32)fileResolvePrimaryBuffer((FileJobPayload *)source);
     s32 next = primary + 0x1C;
@@ -5030,10 +5035,6 @@ s32 effResourceReferenceReplaceFromFile(u8 *source) {
 }
 
 extern s32 effCreateSurfaceNodeForGrid(s32);
-
-extern void effRebuildSurfaceHandles(s32, s32, s32);
-
-extern void effReplaceResourceRef(s32, s32, s32);
 
 s32 effCreateSurfaceNodeFromPayload(u16 kind, s32 source) {
     s32 next = source + 0x1C;
@@ -8296,6 +8297,8 @@ u32 *effPrepareOwnedTextureAnimation(u8 *p) {
     return buf;
 }
 
+void effReleaseScalyStripResources(u8 *work);
+
 void effReleaseTextureAnimationWork(s32 work) {
     EffFrameState *state;
 
@@ -8313,6 +8316,8 @@ typedef struct EffMeshOutput {
     u8 pad_0C[8];
     u8 mode;            // 0x14
 } EffMeshOutput;
+
+void func_002F3F70(u8 *owner, void *matrix);
 
 void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -8376,6 +8381,8 @@ void effInitializeAnimationPositions(u8 *work) {
 u32 effClampSlotCount(u8 *p) {
     return effSlotCount(p, 200);
 }
+
+u32 effRetainScalyTextureReference(void);
 
 EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 8 + 0x10);
@@ -11690,6 +11697,8 @@ void effDestroyOwnedResources(s32 *work) {
 
 extern s32 *effCreateConfiguredSlotNode(s32 *);
 
+void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 *src);
+
 s32 *effCloneOwnedState(u8 *owner) {
     s32 *source = (s32 *)((EffectSlotNode80 *)owner)->record->data1;
     s32 *work = effCreateConfiguredSlotNode(source);
@@ -11996,6 +12005,8 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 
 
 
+void effShareReferenceCountedEffectObject(s32 target, s32 source);
+
 s32 effCloneEffectRequest(u8 *src) {
     u8 *dst = effCreateSharedEffectResourceWork(0);
 
@@ -12047,6 +12058,8 @@ void btlInitializeEffectWork(void) {
         VU0_STORE_VF(vf0, D_0045C1E0);
 }
 
+void effResetFileResourceStores(void);
+
 s32 btlUpdateEffectWork(void) {
     if (D_004386CC != NULL) {
         if ((func_002FCA58(0) & 1) == 0) {
@@ -12059,6 +12072,8 @@ s32 btlUpdateEffectWork(void) {
 
 void func_002FC158(void) {
 }
+
+void effResetFileResources(void);
 
 void effResetFileResourceStores(void) {
     effResetFileResources();
@@ -12252,6 +12267,8 @@ s32 effPollPrimaryFile(void) {
     }
     return result;
 }
+
+void effReleaseQueuedResourceName(void);
 
 void effQueueNamedResourceRequest(void) {
     effReleaseQueuedResourceName();
@@ -12932,6 +12949,8 @@ u32 effCloneSelectedFileJob(void) {
     }
     return 0x800000;
 }
+
+u32 effSelectLinkedFileState(); /* no prototype: called here with an argument */
 
 u32 effFlagFileQueueActive(void) {
     D_00439075 = 1;
@@ -15806,6 +15825,8 @@ void effInitializeSlotPhase(EffTimedState *state) {
 }
 
 extern s8 D_004002F0[];
+
+EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entryData);
 
 /* Rebuild a slot's live work from its source description, then prime the timed states. */
 void effInitializeSlotWorkFromDescription(EffectSlotSet *owner, s32 slotIndex, void *payload) {

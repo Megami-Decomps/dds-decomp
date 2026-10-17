@@ -455,6 +455,8 @@ void btlUpdateLinkedActionEffectVectorByTarget(BtlLinkedCommand *action) {
 void btlUpdateEscapeCameraNoOp(void) {
 }
 
+void btlInitLinkedUnitActionCursor(ActionStateLink *linkState);
+
 void btlInitializeCursorForLinkedAction(s32 action) {
     if (((BtlLinkedCommand *)action)->link != 0) {
         btlInitLinkedUnitActionCursor(((BtlLinkedCommand *)action)->link);
@@ -6571,6 +6573,8 @@ void btlFreeFieldBlocks(void) {
     blocks->battleFlags &= ~2;
 }
 
+void btlInitTintTransitionResource(u32 resource, u16 soundId);
+
 void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)btlGetRuntime();
     fldApplyLightSetCurrent();
@@ -8082,6 +8086,8 @@ void btlResetFieldColorAndSweepFlags(void) {
     kwlnDrawControlFlags = kwlnDrawControlFlags & 0xdfffffff;
 }
 
+void sndClearResourceNodes(void);
+
 void btlClearSoundAndModelResources(void) {
     sndClearResourceNodes();
     mdlMarkAndProcessObjectNodes();
@@ -8368,6 +8374,8 @@ void sndLoadSysEffLb(void) {
     }
     btlStageTaskCleanupCallback(archive);
 }
+
+void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle);
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */
 void btlRefreshSoundEntries(void) {

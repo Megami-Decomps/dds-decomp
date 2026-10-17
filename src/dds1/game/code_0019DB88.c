@@ -272,6 +272,8 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s
 void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);
 
+void itfMesAdvanceEntryText(ItfMesState *mes);
+
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *object) {
     itfMesUpdatePanelFades(object);
     itfMesAdvanceEntryText(object);
@@ -482,6 +484,8 @@ void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
         itfMesOffsetNodeChain(origin->glyphChain, 0, dy);
     }
 }
+
+void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir);
 
 s32 sndSeqSelectPoll(ItfMesState *panel) {
     ItfMesBlk40 *sel = &panel->blk40;

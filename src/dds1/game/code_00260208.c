@@ -775,6 +775,9 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
 
+extern void mnuClearEntries(MenuPageWindow *window);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
+
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
 
@@ -1095,8 +1098,6 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
     work->rewardIndex = eligible[(u32)effMiscRand(0) % (u32)eligibleCount];
 }
 
-extern void mnuClearEntries(MenuPageWindow *window);
-extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused,
                                    s32 retainScale);

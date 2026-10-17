@@ -685,6 +685,8 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
 void btlConsumeSceneAdvanceFlags(void) {
 }
 
+extern void fldClearSceneAdvanceFlag(void);
+
 s32 fldConsumeSceneInputFlags(BtlState *scene) {
     u32 flags = scene->battleFlags;
     s32 result;
@@ -837,7 +839,6 @@ s32 btlAdvanceSceneWhenActorTasksReady(BtlState *scene) {
 }
 
 
-extern void fldClearSceneAdvanceFlag(void);
 extern s32 btlCanStartPrimaryScriptTask(void);
 extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);

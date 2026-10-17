@@ -205,6 +205,8 @@ void ptySelectProfileStage(DatPartyRecord *unit) {
     }
 }
 
+extern void ptyApplyProfile(DatPartyRecord *, u16);
+
 /* Choose the least-conflicting profile group and install its nonzero IDs. */
 void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
     s32 presetIndex = unit->unitId;
@@ -291,7 +293,6 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
     }
 }
 
-extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
 extern s32 scrSetFlag(DatPartyRecord *, u16);

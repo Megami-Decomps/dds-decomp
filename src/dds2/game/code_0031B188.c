@@ -606,6 +606,8 @@ u8 *mnuAcquireUnusedModelNode(u32 *group) {
     return 0;
 }
 
+void mnuSetModelNodeVisibility(u8 *node, s8 selector);
+
 void mnuSetActiveNodeModelVisibility(s32 *list, s8 value) {
     u8 *node = (u8 *)list[0];
     s32 index = 0;

@@ -676,6 +676,8 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 colorWord) {
     quad->unk00[3] = colorWord;
 }
 
+void itfDrawColoredTriangle(); /* no prototype: called here with a sixth argument */
+
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
@@ -757,6 +759,8 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
     itfDrawColoredRectangle(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
+
+void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
 void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {

@@ -827,14 +827,13 @@ s32 mnuCountActiveSlots(void) {
     return activeCount;
 }
 
-/* Reset selection/backup state, activate all panel slots, and enable list nodes.
- * Keep the native short-arity snapshot call unchanged. */
+/* Reset selection/backup state, activate all panel slots, and enable list nodes. */
 void mnuClearPartySelectionAndActivateSlots(s32 context) {
     PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
     s32 entryIndex;
     s32 nodeAddress;
 
-    mnuCopyPartyEntries();
+    mnuCopyPartyEntries(context);
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
     ((MenuContext *)context)->partyPanel.frontlineCount = 1;
@@ -917,6 +916,8 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     mnuBeginWindowFadeTransition(((MenuContext *)menu)->imageHandle, &((MenuContext *)menu)->transition);
     party->freezePanel = 1;
 }
+
+void mnuClearWindowListSelectionFlags(MenuWindowContainer *menu);
 
 s32 mnuHandlePartySelectionInput(KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
@@ -2763,6 +2764,8 @@ s32 ptySkillMenuOpenPartyPage(KwlnTask *callback) {
     return 1;
 }
 
+void mnuClearPageSelectionHandles(MenuPageWindow *window);
+
 u32 ptySkillMenuClosePartyPage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
@@ -2794,6 +2797,9 @@ s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
     }
     return 0;
 }
+
+MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step);
+MenuListNode *mnuAdvanceListSelection(MenuWindowContainer *menu, s32 step);
 
 /* Shift a selected child window's list to the requested row. Keep the
  * double-dereferenced cursor load raw: the typed form does not match. */
@@ -3811,6 +3817,8 @@ typedef struct MenuSpriteRef {
 } MenuSpriteRef;
 
 
+extern void itfSetGridEntryQuantizedAndRefresh();
+
 void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
     node->sprites[row * 4 + col].sprite = (EffectSlotSet *)(u32)sprite;
     node->sprites[row * 4 + col].effect = effect;
@@ -4150,12 +4158,8 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu);
 
 /* Advance selection; clear its byte and panel sprite flags only when a node is returned. */
-MenuListNode *mnuAdvanceListSelection(MenuWindowContainer *menu, s32 step);
 
 /* Retreat selection with the same conditional byte/panel cleanup as advancement. */
-MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step);
-
-void mnuClearWindowListSelectionFlags(MenuWindowContainer *menu);
 
 void mnuCheckWindowListStatus(MenuWindowContainer *menu);
 
@@ -4336,8 +4340,6 @@ void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 fir
 
 void mnuClearEntries(MenuPageWindow *menu);
 
-extern void itfSetGridEntryQuantizedAndRefresh();
-
 typedef struct MenuIconEntry {
     u32 id;
     s32 x;
@@ -4399,8 +4401,6 @@ void mnuRefreshPageHandles(MenuPageWindow *window);
 
 
 
-
-void mnuClearPageSelectionHandles(MenuPageWindow *window);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437BE0);
 

@@ -1880,6 +1880,8 @@ void sdfCollectTreeNodes(SdfModel *hierarchy) {
 }
 
 
+void sdfLinkRouteNode(SdfDrawNode *node, SdfDrawNode *owner);
+
 /* Grow the buffered root's node array if needed, then attach the new node.
  * Fetch the element buffer after growth because its allocation can move. */
 void sdfAppendBufferedRouteNode(SdfModel *list, SdfDrawNode *owner, SdfDrawNode *node) {

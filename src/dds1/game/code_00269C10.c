@@ -128,6 +128,9 @@ extern TitleAudioStreamState mnuTitleStreamStatus;
 extern TitleAudioStreamState mnuTitleSoundBufferState;
 
 
+void mnuResetTitleStream(void);
+void mnuReleaseSoundBuffer(void);
+
 void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_003BC5CC + 1;
     u8 *source;

@@ -855,6 +855,8 @@ extern const BattleCmdPanelSlotTable D_003A1FC0;
 
 extern s16 btlGetActorIdForClass(s8 classId);
 
+void btlGetActorClassPair(s8 classId, u32 *first, u32 *second);
+
 void btlInitializeCommandPanelSlotTables(void) {
     BattleCmdPanelSlotTable tableA = D_003A1FA8;
     BattleCmdPanelSlotTable tableB = D_003A1FC0;
@@ -945,6 +947,9 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FC0);
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorIdsByClass);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorClassPairs);
+
+void btlReleaseAndClearChipBlock(void);
+void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *sceneObject);
 
 void func_001AADF8(BattleSceneObject *object) {
     s32 changed = 0;
@@ -6962,6 +6967,8 @@ extern void btlDrawRetreatCommandLabel(s32);
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
 extern void func_001BDF60(BattleSceneObject *, u16, u16, u16);
+
+void func_001BE590(BattleSceneObject *object);
 
 void btlDrawCommandClassRows(s32 sceneContext) {
     switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {

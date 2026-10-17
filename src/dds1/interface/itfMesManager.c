@@ -374,6 +374,8 @@ void itfMesDestroyWindowIfPresent(s32 window) {
     }
 }
 
+void itfMesBuildEntryGlyph(ItfMesState *mes);
+
 /* Install an entry's table into the window, rebuild its text glyphs and the
  * selected-item caption, then mark the entry block active. */
 s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
@@ -594,6 +596,8 @@ void itfMesCountClearBits(s32 window, s32 selectedBitIndex) {
     optionBlock->savedIndex = clearBitCount;
 }
 
+extern void itfMesOffsetNodeChain(FrFontGlyph *, s32, s32);
+
 /* Move primary text to an absolute position; an unchanged position is a no-op. */
 void itfMesBlk14MoveTo(s32 window, s32 x, s32 y) {
     ItfMesBlk14 *primaryTextBlock = &itfWindowSlots[window].mes->blk14;
@@ -608,8 +612,6 @@ void itfMesBlk14MoveTo(s32 window, s32 x, s32 y) {
     primaryTextBlock->x = x;
     primaryTextBlock->y = y;
 }
-
-extern void itfMesOffsetNodeChain(FrFontGlyph *, s32, s32);
 
 /* Translate primary text and update its cached position, including zero deltas. */
 void itfMesBlk14MoveBy(s32 window, s32 dx, s32 dy) {

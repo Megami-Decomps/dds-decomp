@@ -1151,6 +1151,8 @@ extern s32 mnuUpdateStaffRoll(KwlnTask *);
 extern s32 mnuUpdateStaffMoviePresentation(void);
 extern void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task);
 extern char D_00437AC8[];
+void mnuInitializeMovieRollViewport(void);
+
 s32 mnuUpdateStaffRoll(KwlnTask *task) {
     char text[128];
     s32 i;

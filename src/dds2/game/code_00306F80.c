@@ -859,6 +859,8 @@ void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     itfDrawVertexColoredRectangle(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
 
+void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
+
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
 void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
     uiDrawUniformColorLine(x, y, z, x + width, y, z, color, context);

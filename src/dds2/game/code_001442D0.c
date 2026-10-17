@@ -591,6 +591,8 @@ extern s32 D_00435EE0;
 
 extern void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y);
 
+void func_0014B0F8(); /* no prototype: called here with arguments */
+
 s32 fldFieldTaskUpdate(void) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;

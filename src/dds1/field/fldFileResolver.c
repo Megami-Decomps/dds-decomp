@@ -1241,6 +1241,8 @@ void fldActivateRoomFlagObjects(void) {
     }
 }
 
+void fldSetDisplayState(u32 state);
+
 void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     char directory[32];
     char path[64];
@@ -1330,6 +1332,8 @@ extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
 
 extern s32 sprintf(char *, const char *, ...);
 
+extern void fldFreeDisplayObjects(void);
+
 s32 fldLoadAreaResource(void) {
     char directory[64];
     char path[80];
@@ -1354,8 +1358,6 @@ extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 extern void sdfRaiseDeviceThreadPriority(void);
 
 extern s32 D_003BAC80;
-
-extern void fldFreeDisplayObjects(void);
 
 s32 fldRequestAreaResource(s32 area, s32 room) {
     char directory[64];
@@ -3545,6 +3547,8 @@ s32 fldEncProc(KwlnTask *task) {
     return 0;
 }
 
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
+
 void fldRequestEncounterWithFade(u32 encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
@@ -4138,8 +4142,6 @@ extern void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern s32 D_003BAD44;
 
 /* Dispatch camera-model frame crossings to sequence sounds and queued effects. */
@@ -4504,6 +4506,9 @@ s32 fldApplyPlayerVerticalStep(void) {
 
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
+extern void fldSetSceneControlFlags(u32 mask);
+
 /* Advance the field transition while the camera model's motion drives completion. */
 s32 fldUpdateFieldTransition(void) {
     FldAreaWork *work = &fldAreaState;
@@ -4549,10 +4554,6 @@ s32 fldUpdateFieldTransition(void) {
 }
 
 extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
-
-extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
-
-extern void fldSetSceneControlFlags(u32 mask);
 
 s32 fldUpdateAreaDamageReaction(void) {
     FldAreaWork *work = &fldAreaState;

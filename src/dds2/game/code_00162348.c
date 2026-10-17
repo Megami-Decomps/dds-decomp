@@ -449,6 +449,8 @@ u32 parGetEmitterCellGroupDivisor(u16 pointCapacity) {
 extern u8 D_00451F50[];
 
 
+void parControlInit(void);
+
 void parSysReset(void) {
     parRecordListHead = 0;
     parControlInit();

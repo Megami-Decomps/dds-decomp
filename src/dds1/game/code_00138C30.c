@@ -1829,6 +1829,8 @@ extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 st
 
 extern s32 D_003BAE58;
 
+extern void fldLoadActorWaypointTable(s32);
+
 /* Run the actor transition selected by fldSelectActorFromSceneIndexTables:
  * find the first enabled kind-7 actor for the pending field, motion and
  * index, mark its floor and exploration bits, then submit its sequence and
@@ -1935,8 +1937,6 @@ void func_0013EC68(void) {
         return;
     }
 }
-
-extern void fldLoadActorWaypointTable(s32);
 
 extern void fldInitializeLinkedSequence(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
 

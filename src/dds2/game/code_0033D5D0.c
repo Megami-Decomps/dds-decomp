@@ -969,6 +969,8 @@ extern DevState *D_00438B0C;
 
 extern s16 D_00438B1C;
 
+extern void EIntr(void);
+
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     DevWorkerEntry *worker;
@@ -1005,8 +1007,6 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
         SignalSema(worker->semaphore);
     }
 }
-
-extern void EIntr(void);
 
 extern DevState *D_00438B14;
 

@@ -18,6 +18,7 @@
 #include "eff.h"
 #include "evt_world.h"
 #include "mnu_list.h"
+#include "dds3_world_secondary.h"
 #include "dds3obj.h"
 #include "fld_map_resource.h"
 #include "mdl_flag_api.h"
@@ -317,7 +318,6 @@ s32 fldAdvanceLocalMapCameraTransition(void) {
 }
 
 typedef struct EffectObject EffectObject;
-#include "dds3_world_secondary.h"
 #include "dds3_object_payload.h"
 
 /* Fixed-width names identify the corresponding local-map model chain. */
