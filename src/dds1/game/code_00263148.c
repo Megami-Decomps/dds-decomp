@@ -36,9 +36,9 @@ extern void dspRequestMessageWindowModeOne(void);
 /* Apply a capped selected profile and record whether the selection was applied. */
 void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
     DatPartyRecord *item = scene->selectedRewardRow->unit;
-    DatProfileRecord *data = ptyGetCurrentProfileRecord(item);
+    DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
     s8 selection = item->profileId;
-    if (selection != 0 && prfGetCapValue((u16)selection) == data->value &&
+    if (selection != 0 && prfGetCapValue((u16)selection) == profile->value &&
         ptyTestPrimaryProfileFlag(item, item->profileId) == 0) {
         ptyApplyProfile(item, item->profileId);
         scene->selectionApplied = 1;

@@ -1114,7 +1114,7 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
 extern void mnuDrawAndAdvancePanelItem(s32, s32, s32, s32, u32, MenuPanelItem *, u32);
 
 /* Draw the five party stats, including the sequel's candidate-value colors. */
-void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *partyRecord,
                                  MenuPanelGroup *group, s32 mode, s32 drawFlags) {
     s32 index;
     s32 selectionMode;
@@ -1125,7 +1125,7 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
     s32 offset = 0;
 
     for (index = 0; index < 5; index++) {
-        mnuSetGroupPair(group->entries[index], entry->baseStats[index],
+        mnuSetGroupPair(group->entries[index], partyRecord->baseStats[index],
                         group->entries[index]->option);
         if (group->selection == index) {
             selectionMode = 1;
@@ -1135,7 +1135,7 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
         textMode = 0;
         switch (mode) {
         case 1:
-            itemBonus = ptyGetCombinedRecordAndSlotValue(entry->itemId, index);
+            itemBonus = ptyGetCombinedRecordAndSlotValue(partyRecord->itemId, index);
             currentValue = group->entries[index]->value18 + group->entries[index]->value24;
             proposedValue = group->entries[index]->value18 + itemBonus;
             if (currentValue >= 100) {
@@ -1926,21 +1926,21 @@ void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
     }
 }
 
-void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+void mnuPopulatePartyPanelSlot(DatPartyRecord *partyRecord, s32 unused, u32 index, PartyPanel *panel) {
     s32 i;
 
-    if (entry->flags & 2)
+    if (partyRecord->flags & 2)
         panel->frontlineCount++;
     else
         panel->reserveCount++;
-    panel->slots[index].unitIndex = entry->unitId - 1;
-    panel->slots[index].level = entry->level;
-    panel->slots[index].hp = entry->hp;
-    panel->slots[index].mp = entry->mp;
-    panel->slots[index].maxHp = entry->maxHp;
-    panel->slots[index].maxMp = entry->maxMp;
+    panel->slots[index].unitIndex = partyRecord->unitId - 1;
+    panel->slots[index].level = partyRecord->level;
+    panel->slots[index].hp = partyRecord->hp;
+    panel->slots[index].mp = partyRecord->mp;
+    panel->slots[index].maxHp = partyRecord->maxHp;
+    panel->slots[index].maxMp = partyRecord->maxMp;
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
-        panel->slots[index].stats[i] = entry->baseStats[i];
+        panel->slots[index].stats[i] = partyRecord->baseStats[i];
     }
 }
 

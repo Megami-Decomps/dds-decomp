@@ -12,6 +12,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
+#include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
 #include "btl_marked_command_requested_state_api.h"
 #include "pcp_vu0.h"
@@ -225,8 +226,6 @@ extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
 extern s32 btlGroup400UnitHasAction(void *, s32);
 
-extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-
 extern s8 D_00438F84;
 
 extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
@@ -339,7 +338,7 @@ s32 btlActionMatchesUnit(s32 unit, s32 action) {
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     btlGetRuntime();
     if ((btlUnitStatusPair((BtlUnit *)unit) & 0x421) == 0x401) {
-        if (btlHasRequiredCommandAffinityPartners(unit, action) != 0) {
+        if (btlHasRequiredCommandAffinityPartners((BtlUnit *)unit, action) != 0) {
             return 1;
         }
     }

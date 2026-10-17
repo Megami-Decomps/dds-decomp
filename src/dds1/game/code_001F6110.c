@@ -12,7 +12,7 @@
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
-#include "btl_command_partner_output.h"
+#include "btl_command_affinity_api.h"
 #include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -1497,9 +1497,6 @@ u32 btlScriptSelectModeAValueOne(void) {
     return 1;
 }
 
-
-extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-extern s32 btlResolveCommandAffinityPartners(void *, s32, BtlCommandPartnerOutput *);
 
 /* Resolve a command-table entry through its probe, or store the direct command id. */
 u32 btlScriptSelectActionEntry(void) {

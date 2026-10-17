@@ -506,7 +506,7 @@ extern void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelIt
 
 /* Draw the five stat panels of a group (values from the party record, if any), then ramp the
  * group's fade value up to 0x100. */
-void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry, MenuPanelGroup *group, s32 drawFlags) {
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *partyRecord, MenuPanelGroup *group, s32 drawFlags) {
     s32 index;
     s32 mode;
     s32 value;
@@ -514,8 +514,8 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
 
     for (index = 0; index < 5; index++) {
         value = 0;
-        if (entry != NULL) {
-            value = entry->baseStats[index];
+        if (partyRecord != NULL) {
+            value = partyRecord->baseStats[index];
         }
         mnuSetPanelItemValueAndOption(group->children[index], value, group->children[index]->option);
         if (group->selection == index) {
@@ -1421,21 +1421,21 @@ void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
     }
 }
 
-void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+void mnuPopulatePartyPanelSlot(DatPartyRecord *partyRecord, s32 unused, u32 index, PartyPanel *panel) {
     s32 i;
 
-    if (entry->flags & 2)
+    if (partyRecord->flags & 2)
         panel->frontlineCount++;
     else
         panel->reserveCount++;
-    panel->slots[index].unitIndex = entry->unitId - 1;
-    panel->slots[index].level = entry->level;
-    panel->slots[index].hp = entry->hp;
-    panel->slots[index].mp = entry->mp;
-    panel->slots[index].maxHp = entry->maxHp;
-    panel->slots[index].maxMp = entry->maxMp;
+    panel->slots[index].unitIndex = partyRecord->unitId - 1;
+    panel->slots[index].level = partyRecord->level;
+    panel->slots[index].hp = partyRecord->hp;
+    panel->slots[index].mp = partyRecord->mp;
+    panel->slots[index].maxHp = partyRecord->maxHp;
+    panel->slots[index].maxMp = partyRecord->maxMp;
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
-        panel->slots[index].stats[i] = entry->baseStats[i];
+        panel->slots[index].stats[i] = partyRecord->baseStats[i];
     }
 }
 

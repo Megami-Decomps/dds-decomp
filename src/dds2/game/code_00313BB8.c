@@ -21,6 +21,7 @@ extern void memset();
 #include "mnu_mantra.h"
 #include "prf_profile_cap.h"
 #include "script_flag_slot.h"
+#include "pty_preset_record.h"
 
 
 #define SCR_FLAG_ID_MASK 0xFFFF
@@ -97,21 +98,6 @@ extern FrFontTextBank frFontColoredGlyphResource;
 
 
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
-
-/* The first four pairs in each 0xA0-byte row select script/value initialization
- * for the active mantra model flag state. */
-typedef struct PtyPresetScriptChoice {
-    u16 scriptId;
-    u16 initialValue;
-} PtyPresetScriptChoice;
-
-typedef struct PtyPresetRecord {
-    PtyPresetScriptChoice scriptChoices[4];
-    u8 profileIds[4][12]; /* 0x10: four preset groups of byte profile IDs. */
-    u8 pad40[0x60];
-} PtyPresetRecord;
-typedef char PtyPresetRecordSizeCheck[(sizeof(PtyPresetRecord) == 0xA0) ? 1 : -1];
-typedef char PtyPresetRecordProfileOffsetCheck[((u32)&((PtyPresetRecord *)0)->profileIds == 0x10) ? 1 : -1];
 
 extern PtyPresetRecord D_004052A8[];
 extern s32 mnuGetActiveMantraModelFlagState(void);

@@ -28,20 +28,20 @@ extern u32 effResourceDefaultTriangleColors[];
 
 extern SdfPoolNode *effResourceDrawSurfaces[];
 
-/* Create an effect resource work with index entries, its entry list inline at +0x74. */
-EffResourceWork *effCreateResourceEntryWork(s32 index) {
+/* Create an effect resource work with count entries, its entry list inline at +0x74. */
+EffResourceWork *effCreateResourceEntryWork(u32 count) {
     struct SdfMemBlock *allocation;
     EffResourceWork *work;
     EffResourceEntry *entries;
     SdfAsset *asset;
     u32 i;
 
-    allocation = sdfAllocGeneralBlock(index * 20 + 0x74);
+    allocation = sdfAllocGeneralBlock(count * 20 + 0x74);
     work = (EffResourceWork *)sdfResourceRetainAddress(allocation);
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
     work->backingAllocation = allocation;
-    work->entryCount = index;
+    work->entryCount = count;
     work->scale[0] = 1.0f;
     work->scale[1] = 1.0f;
     work->scale[2] = 1.0f;
@@ -52,12 +52,12 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     sdfSetPrimaryStateFloat(asset, 1.0f);
     entries = work->entries;
     i = 0;
-    if (index != 0) {
+    if (count != 0) {
         do {
             i++;
             entries->color = 0x80808080;
             entries++;
-        } while (i < index);
+        } while (i < count);
     }
     memset(&effResourceDrawParams, 0, sizeof(effResourceDrawParams));
     effResourceDrawParams.primitive = 0x4000;
