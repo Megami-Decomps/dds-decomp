@@ -4943,7 +4943,243 @@ f32 btlBuildUnitTargetSphereVU(BtlUnit *first, BtlUnit *second, u8 firstMode, u8
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001FE068);
+f32 func_001FE068(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *to, const f32 *extra, f32 extraRadius) {
+    f32 pos[4];
+    f32 target[4];
+    f32 direction[4];
+    f32 side[4];
+    f32 seed[4];
+    f32 origin[4];
+    BtlState *work;
+    BtlUnit *unit;
+    s32 first;
+    s32 pass;
+    s32 valid;
+    f32 high;
+    f32 low;
+    f32 maxX;
+    f32 minX;
+    f32 maxZ;
+    f32 minZ;
+    /* Retail retains the unused maximum at 001FE330..001FE338. */
+    f32 maxRadius;
+    f32 height;
+    /* One radius workspace serves the point reach and framing radius, as in
+     * the adjacent group-bounds loops. */
+    f32 radius;
+    f32 length;
+    f32 x0;
+    f32 x1;
+    f32 z0;
+    f32 z1;
+
+    memset(origin, 0, sizeof(origin));
+    work = (BtlState *)btlGetRuntime();
+    if (from == NULL || to == NULL) {
+        VU0_LOAD_VF_PTR(vf10, origin);
+        VU0_STORE_VF_PTR(vf10, target);
+    } else {
+        VU0_LOAD_VF_PTR(vf10, from);
+        VU0_STORE_VF_PTR(vf10, origin);
+        VU0_LOAD_VF_PTR(vf10, to);
+        VU0_STORE_VF_PTR(vf10, target);
+        VU0_LOAD_VF_PTR(vf10, to);
+        VU0_LOAD_VF_PTR(vf11, from);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(length);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF_PTR(vf10, direction);
+    }
+    first = 1;
+    pass = 1;
+    unit = work->units;
+    /* Reset box extrema separately from the current-point radius and corners. */
+    minZ = maxZ = minX = maxX = low = maxRadius = high = 0.0f;
+    height = z0 = z1 = x0 = x1 = radius = 0.0f;
+    while (pass != 0 && unit != NULL) {
+        valid = 0;
+        if (pass == 1) {
+            if (extra == NULL) {
+                seed[0] = 0.0f;
+                seed[1] = 0.0f;
+                seed[2] = 0.0f;
+                seed[3] = 0.0f;
+            } else {
+                VU0_LOAD_VF_PTR(vf10, extra);
+                VU0_STORE_VF_PTR(vf10, seed);
+            }
+            pos[0] = seed[0];
+            pos[1] = seed[1];
+            pos[2] = seed[2];
+            pos[3] = seed[3];
+            height = pos[1];
+            x1 = pos[0] + extraRadius;
+            z1 = pos[2] + extraRadius;
+            x0 = pos[0] - extraRadius;
+            z0 = pos[2] - extraRadius;
+            /* Retail 001FE204..001FE234 canonicalizes a signed-zero seed. */
+            if (height == 0.0f) {
+                height = 0.0f;
+            }
+            radius = extraRadius;
+            valid = 1;
+        } else {
+            if (unit != NULL) {
+                u32 flags;
+                flags = unit->status.flags;
+                if (flags & 1) {
+                    if ((flags & 0xC0) == 0) {
+                        if (flags & sides) {
+                            btlUnitGetMuzzlePosVU(unit);
+                            VU0_STORE_VF_PTR(vf10, pos);
+                            radius = unit->reach * unit->scale;
+                            height = unit->height * unit->scale * 0.5f - pos[1];
+                            x1 = pos[0] + radius;
+                            z1 = pos[2] + radius;
+                            x0 = pos[0] - radius;
+                            z0 = pos[2] - radius;
+                            valid = 1;
+                        }
+                    }
+                }
+            } else {
+                pass = 0;
+                /* Retail retains this invalid-sample clear at 001FE2C8 beside
+                 * the live per-iteration clear at 001FE1C4. */
+                valid = 0;
+            }
+        }
+        if (valid) {
+            if (first) {
+                maxRadius = radius;
+                if (x0 < x1) {
+                    maxX = x1;
+                    minX = x0;
+                } else {
+                    maxX = x0;
+                    minX = x1;
+                }
+                if (z0 < z1) {
+                    maxZ = z1;
+                    minZ = z0;
+                } else {
+                    maxZ = z0;
+                    minZ = z1;
+                }
+                low = height;
+                high = low;
+                first = 0;
+            } else {
+                if (maxRadius < radius) {
+                    maxRadius = radius;
+                }
+                if (maxX < x1) {
+                    maxX = x1;
+                }
+                if (x1 < minX) {
+                    minX = x1;
+                }
+                if (maxX < x0) {
+                    maxX = x0;
+                }
+                if (x0 < minX) {
+                    minX = x0;
+                }
+                if (maxZ < z1) {
+                    maxZ = z1;
+                }
+                if (z1 < minZ) {
+                    minZ = z1;
+                }
+                if (maxZ < z0) {
+                    maxZ = z0;
+                }
+                if (z0 < minZ) {
+                    minZ = z0;
+                }
+                if (high < height) {
+                    high = height;
+                }
+                if (height < low) {
+                    low = height;
+                }
+            }
+        }
+        if (pass == 1) {
+            pass = 2;
+        } else if (pass == 2) {
+            unit = unit->nextActor;
+        }
+    }
+    {
+        f32 halfY = (high - low) * 0.5f;
+        f32 halfX;
+        f32 halfZ;
+        pos[0] = (maxX + minX) * 0.5f;
+        pos[1] = (low - high) * 0.5f;
+        halfX = (maxX - minX) * 0.5f;
+        pos[2] = (maxZ + minZ) * 0.5f;
+        halfZ = (maxZ - minZ) * 0.5f;
+        pos[3] = 0.0f;
+        if (halfZ < halfX) {
+            radius = halfY;
+            if (radius < halfX) {
+                radius = halfX;
+            }
+        } else {
+            radius = halfZ;
+            if (!(halfY < radius)) {
+                radius = halfY;
+            }
+        }
+    }
+    VU0_LOAD_VF_PTR(vf10, pos);
+    if (from != NULL) {
+        f32 value;
+        f32 x;
+        f32 z;
+        f32 shift;
+        sdfVuLoadRotationMatrixY(4.71225f);
+        VU0_LOAD_VF_PTR(vf10, direction);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        /* Same SDK side scratch contract as the adjacent group-bounds routine. */
+        VU0_STORE_VF_UNCLOBBERED(vf10, side);
+        value = side[1];
+        if (0.0f <= direction[0]) {
+            if (0.0f <= direction[2]) {
+                VU0_LOAD_VF_PTR(vf10, side);
+                VU0_NEGATE_XYZ(vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, side);
+            }
+        } else if (direction[2] < 0.0f) {
+            VU0_LOAD_VF_PTR(vf10, side);
+            VU0_NEGATE_XYZ(vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, side);
+        }
+        /* Reflect the horizontal side direction without changing its height. */
+        z = ffabsf(side[2]);
+        x = ffabsf(side[0]);
+        side[1] = value;
+        if (x < z) {
+            value = x / z;
+        } else {
+            value = z / x;
+        }
+        shift = (radius * 0.3f) * value;
+        VU0_LOAD_VF_PTR(vf10, side);
+        VU0_SCALE_VF(vf10, shift);
+        VU0_LOAD_VF_PTR(vf11, pos);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_PTR(vf10, pos);
+    }
+    if (top != NULL) {
+        *top = high;
+    }
+    if (bottom != NULL) {
+        *bottom = low;
+    }
+    return radius;
+}
 
 f32 func_001FE5C0(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
                   f32 *outMaxHeight, f32 *outMinHeight, const f32 *from, const f32 *to) {
