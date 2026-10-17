@@ -7,6 +7,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "mdl_option_label.h"
 #include "eff_inner_float_api.h"
 #include "mdl_light_editor_state.h"
 #include "kwln_task_add_child.h"
@@ -2934,13 +2935,6 @@ void mdlCleanupViewerTasksAndResources(void) {
         }
     }
 }
-
-typedef struct MdlOptionLabel {
-    u16 x;
-    u16 y;
-    s32 style;
-    const char *format;
-} MdlOptionLabel;
 
 extern MdlLightEditorState D_00367D30;
 extern MdlOptionLabel D_00367CE0[4];
