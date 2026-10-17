@@ -1923,8 +1923,8 @@ u8 mnuCampChooseWeightedTableValue(void) {
     return 1;
 }
 
-s32 mnuCampFindFreeWideEntryIndex(s32 row) {
-    s32 *entry = (s32 *)(mnuCampWideRewardIdView + row * 0xC0);
+s32 mnuCampFindFreeWideEntryIndex(s32 rewardRow) {
+    s32 *entry = (s32 *)(mnuCampWideRewardIdView + rewardRow * 0xC0);
     s32 entryIndex = 0;
     do {
         s32 value = *entry;
@@ -1966,10 +1966,10 @@ typedef char CampWideRewardEntry_size_check[
 
 extern s32 mtrMantraFindIndex(s32);
 
-s32 mnuCampChooseWideRewardEntry(s32 row) {
+s32 mnuCampChooseWideRewardEntry(s32 rewardRow) {
     s32 entryIndex = 0;
     s32 eligibleCount = 0;
-    s32 count = mnuCampFindFreeWideEntryIndex(row);
+    s32 count = mnuCampFindFreeWideEntryIndex(rewardRow);
     s32 cumulative = 0;
     s32 totalWeight = 0;
     s32 indices[count];
@@ -1979,7 +1979,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
         s32 *output = indices;
         for (; entryIndex < count; entryIndex++) {
             CampWideRewardEntry *entry = (CampWideRewardEntry *)(
-                mnuCampWideRewardEntries + entryIndex * sizeof(CampWideRewardEntry) + row * 0xC0);
+                mnuCampWideRewardEntries + entryIndex * sizeof(CampWideRewardEntry) + rewardRow * 0xC0);
             s32 id = entry->id;
             s32 allowed = 1;
 
@@ -2005,7 +2005,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
     roll = effMiscRand(NULL) % (totalWeight + 1);
     for (entryIndex = 0; entryIndex < eligibleCount; entryIndex++) {
         s32 selected = indices[entryIndex];
-        cumulative += mnuCampWideRewardEntries[selected * 0xC + row * 0xC0];
+        cumulative += mnuCampWideRewardEntries[selected * 0xC + rewardRow * 0xC0];
         if (cumulative >= roll) {
             return selected;
         }
