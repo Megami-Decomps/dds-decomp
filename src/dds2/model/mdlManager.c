@@ -764,7 +764,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
     mdlUpdateDevSlotTransforms(ctx, surfaces);
 }
 
-extern void sdfSetPrimaryIdentityMatrixVU(void *);
+extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfRotateVuMatrixAboutX(f32 angle);
 extern void sdfRotateVuMatrixAboutY(f32 angle);
 
@@ -794,7 +794,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
     inner = ctx->inner;
     if (entryIndex != MDL_NO_BLEND_ENTRY) {
         entry = ((SdfDrawNode **)inner->list->buffer)[entryIndex];
-        sdfSetPrimaryIdentityMatrixVU(inner->list);
+        sdfSetPrimaryIdentityMatrixVU();
         sdfRotateVuMatrixAboutX(pitch * MDL_RADIANS_PER_DEGREE);
         sdfRotateVuMatrixAboutY(yaw * MDL_RADIANS_PER_DEGREE);
         VU0_STORE_MATRIX(targetRows);
