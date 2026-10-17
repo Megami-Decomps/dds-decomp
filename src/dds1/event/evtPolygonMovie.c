@@ -798,14 +798,14 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
 SdfMemBlock *evtPolygonMovieCreateHeader(PmdHeader **out)
 {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
-    s32 size;
+    s32 headerBytes;
     SdfMemBlock *handle;
     void *block;
 
-    size = 0x40;
-    handle = sdfAllocGeneralBlock(size);
+    headerBytes = 0x40;
+    handle = sdfAllocGeneralBlock(headerBytes);
     block = (void *)sdfResourceRetainAddress(handle);
-    memcpy(block, header, size);
+    memcpy(block, header, headerBytes);
     *out = block;
     return handle;
 }
@@ -832,16 +832,16 @@ extern char D_003BBF78[];
  * hand the retained address back through `out`. */
 SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
     u8 buffer[0x20];
-    s32 size = 0x20;
+    s32 headerBytes = 0x20;
     SdfMemBlock *handle;
     u8 *address;
 
-    memset(buffer, 0, size);
+    memset(buffer, 0, headerBytes);
     memcpy(buffer + 8, D_003BBF78, 4);
     *(s32 *)(buffer + 0x14) = 9;
-    handle = sdfAllocGeneralBlock(size);
+    handle = sdfAllocGeneralBlock(headerBytes);
     address = (u8 *)sdfResourceRetainAddress(handle);
-    memcpy(address, buffer, size);
+    memcpy(address, buffer, headerBytes);
     *out = (PmdHeader *)address;
     return handle;
 }
