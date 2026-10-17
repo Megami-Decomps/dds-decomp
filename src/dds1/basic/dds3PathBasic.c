@@ -62,8 +62,8 @@ void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path) {
     }
 }
 
-/* vu0 routine: lerp the three key vectors (xyzw, xyz, xyz) of path entries `segmentIndex` and `segmentIndex + 1` at the sampled weight into out, or clear out */
-void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *out) {
+/* vu0 routine: lerp the three key vectors of adjacent path entries into transformParams, or clear it. */
+void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *transformParams) {
     u32 segmentIndex;
     f32 interpolationWeight;
     Dds3PathKeyframes *keyframes;
@@ -85,10 +85,10 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *ou
         VU0_SET_VF10_W(entries[segmentIndex].rotation[3]);
         VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(out->rotation[0]);
-        VU0_GET_VF10_Y(out->rotation[1]);
-        VU0_GET_VF10_Z(out->rotation[2]);
-        VU0_GET_VF10_W(out->rotation[3]);
+        VU0_GET_VF10_X(transformParams->rotation[0]);
+        VU0_GET_VF10_Y(transformParams->rotation[1]);
+        VU0_GET_VF10_Z(transformParams->rotation[2]);
+        VU0_GET_VF10_W(transformParams->rotation[3]);
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].position[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].position[1]);
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].position[2]);
@@ -99,9 +99,9 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *ou
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].position[2]);
         VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(out->position[0]);
-        VU0_GET_VF10_Y(out->position[1]);
-        VU0_GET_VF10_Z(out->position[2]);
+        VU0_GET_VF10_X(transformParams->position[0]);
+        VU0_GET_VF10_Y(transformParams->position[1]);
+        VU0_GET_VF10_Z(transformParams->position[2]);
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].scale[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].scale[1]);
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].scale[2]);
@@ -112,10 +112,10 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *ou
         VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].scale[2]);
         VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_ADD(vf10, vf10, vf11);
-        VU0_GET_VF10_X(out->scale[0]);
-        VU0_GET_VF10_Y(out->scale[1]);
-        VU0_GET_VF10_Z(out->scale[2]);
+        VU0_GET_VF10_X(transformParams->scale[0]);
+        VU0_GET_VF10_Y(transformParams->scale[1]);
+        VU0_GET_VF10_Z(transformParams->scale[2]);
     } else {
-        memset(out, 0, 0x28);
+        memset(transformParams, 0, 0x28);
     }
 }

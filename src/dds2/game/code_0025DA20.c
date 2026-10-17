@@ -1875,21 +1875,21 @@ s32 itmClaimFreeSlot(s32 row) {
 }
 
 /* Convert a camp reward row and its three-way option to a flat index. */
-s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option) {
+s32 mnuCampGetWideRewardRowIndex(s32 listedItemIndex, s32 option) {
     s32 flatRewardIndex = 3;
 
-    flatRewardIndex = row * flatRewardIndex;
+    flatRewardIndex = listedItemIndex * flatRewardIndex;
     flatRewardIndex += option;
     return flatRewardIndex;
 }
 
-s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
-    return row * 2 + slot;
+s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 listedItemIndex) {
+    return listedItemIndex * 2 + slot;
 }
 
-u32 mnuCampChooseSolarWeightedOption(s32 row) {
+u32 mnuCampChooseSolarWeightedOption(s32 listedItemIndex) {
     s32 chance = effMiscRand(0) & 0xFF;
-    u8 *item = mnuCampListedItemSolarWeightsView + row * 8;
+    u8 *item = mnuCampListedItemSolarWeightsView + listedItemIndex * 8;
     s32 total = 0;
     u32 optionIndex = 0;
     do {
@@ -1923,8 +1923,8 @@ u8 mnuCampChooseWeightedTableValue(void) {
     return 1;
 }
 
-s32 mnuCampFindFreeWideEntryIndex(s32 row) {
-    s32 *entry = (s32 *)(mnuCampWideRewardIdView + row * 0xC0);
+s32 mnuCampFindFreeWideEntryIndex(s32 rewardRow) {
+    s32 *entry = (s32 *)(mnuCampWideRewardIdView + rewardRow * 0xC0);
     s32 entryIndex = 0;
     do {
         s32 value = *entry;
@@ -1937,8 +1937,8 @@ s32 mnuCampFindFreeWideEntryIndex(s32 row) {
     return 15;
 }
 
-s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row) {
-    s32 *entry = (s32 *)(mnuCampCompactEntries + row * 0x44);
+s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 listedItemIndex) {
+    s32 *entry = (s32 *)(mnuCampCompactEntries + listedItemIndex * 0x44);
     s32 entryIndex = 0;
     do {
         s32 value = *entry;
@@ -1966,10 +1966,10 @@ typedef char CampWideRewardEntry_size_check[
 
 extern s32 mtrMantraFindIndex(s32);
 
-s32 mnuCampChooseWideRewardEntry(s32 row) {
+s32 mnuCampChooseWideRewardEntry(s32 rewardRow) {
     s32 entryIndex = 0;
     s32 eligibleCount = 0;
-    s32 count = mnuCampFindFreeWideEntryIndex(row);
+    s32 count = mnuCampFindFreeWideEntryIndex(rewardRow);
     s32 cumulative = 0;
     s32 totalWeight = 0;
     s32 indices[count];
@@ -1979,7 +1979,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
         s32 *output = indices;
         for (; entryIndex < count; entryIndex++) {
             CampWideRewardEntry *entry = (CampWideRewardEntry *)(
-                mnuCampWideRewardEntries + entryIndex * sizeof(CampWideRewardEntry) + row * 0xC0);
+                mnuCampWideRewardEntries + entryIndex * sizeof(CampWideRewardEntry) + rewardRow * 0xC0);
             s32 id = entry->id;
             s32 allowed = 1;
 
@@ -2005,7 +2005,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
     roll = effMiscRand(NULL) % (totalWeight + 1);
     for (entryIndex = 0; entryIndex < eligibleCount; entryIndex++) {
         s32 selected = indices[entryIndex];
-        cumulative += mnuCampWideRewardEntries[selected * 0xC + row * 0xC0];
+        cumulative += mnuCampWideRewardEntries[selected * 0xC + rewardRow * 0xC0];
         if (cumulative >= roll) {
             return selected;
         }
@@ -2018,19 +2018,19 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
 
 extern u8 mnuCampWideRewardKindByteView[];
 
-u8 mnuCampGetWideRewardKind(s32 row, s32 column) {
-    return mnuCampWideRewardKindByteView[column * 0xC + row * 0xC0];
+u8 mnuCampGetWideRewardKind(s32 rewardRow, s32 column) {
+    return mnuCampWideRewardKindByteView[column * 0xC + rewardRow * 0xC0];
 }
 
 extern u8 mnuCampCompactRewardKindByteView[];
 
-u8 mnuCampGetCompactRewardKind(s32 row, s32 column) {
-    return mnuCampCompactRewardKindByteView[column * 8 + row * 0x44];
+u8 mnuCampGetCompactRewardKind(s32 rewardRow, s32 column) {
+    return mnuCampCompactRewardKindByteView[column * 8 + rewardRow * 0x44];
 }
 
-s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
-    u8 *entry = mnuCampWideRewardEntries + column * 0xC + row * 0xC0;
-    s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + row * 0xC0 + 4);
+s32 mnuCampResolveOwnedItemVariant(s32 rewardRow, s32 column) {
+    u8 *entry = mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0;
+    s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + rewardRow * 0xC0 + 4);
 
     if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && datGameState->inventory.counts[id] != 0) {
         id = *(u16 *)(entry + 8);
@@ -2038,25 +2038,25 @@ s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     return id;
 }
 
-s32 mnuCampGetCompactEntryId(s32 row, s32 column) {
-    return *(s32 *)(mnuCampCompactEntries + row * 0x44 + column * 8);
+s32 mnuCampGetCompactEntryId(s32 rewardRow, s32 column) {
+    return *(s32 *)(mnuCampCompactEntries + rewardRow * 0x44 + column * 8);
 }
 
-s32 mnuCampCountRemainingUses(s32 mode, s32 id, MenuTerminalContext *record) {
+s32 mnuCampCountRemainingUses(s32 itemMode, s32 itemId, MenuTerminalContext *record) {
     s32 value = record->availableCount;
 
-    if (mode == 1) {
-        value -= ptyCountBulletItem(id);
-    } else if (mode == 3) {
-        value = 1 - datGameState->inventory.counts[id];
-    } else if (mode == 2) {
-        value = 1 - datGameState->inventory.counts[id];
+    if (itemMode == 1) {
+        value -= ptyCountBulletItem(itemId);
+    } else if (itemMode == 3) {
+        value = 1 - datGameState->inventory.counts[itemId];
+    } else if (itemMode == 2) {
+        value = 1 - datGameState->inventory.counts[itemId];
     } else {
-        value = 99 - datGameState->inventory.counts[id];
+        value = 99 - datGameState->inventory.counts[itemId];
     }
-    if (mnuCampFindListedItemIndex(id) >= 0) {
+    if (mnuCampFindListedItemIndex(itemId) >= 0) {
         if (value >= 2) {
-            value = datGameState->inventory.counts[id] == 0;
+            value = datGameState->inventory.counts[itemId] == 0;
         }
     }
     return value < 0 ? 0 : value;
@@ -2155,12 +2155,12 @@ typedef struct CampRateRow {
 
 extern CampRateRow mnuShopProgressSlotPricePercentView[];
 
-s32 mnuCampScalePriceByTier(s32 level, s32 price) {
+s32 mnuCampScalePriceByTier(s32 quantity, s32 price) {
     u32 i;
 
-    if (level != 0) {
+    if (quantity != 0) {
         for (i = 0; i < 8; i++) {
-            if (mnuShopQuantityPriceTiers[i].limit != 0 && mnuShopQuantityPriceTiers[i].limit >= level) {
+            if (mnuShopQuantityPriceTiers[i].limit != 0 && mnuShopQuantityPriceTiers[i].limit >= quantity) {
                 price = price * mnuShopQuantityPriceTiers[i].percent / 100;
                 break;
             }
@@ -3753,10 +3753,10 @@ s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
-extern u32 mnuCampChooseSolarWeightedOption(s32 row);
+extern s32 mnuCampGetWideRewardRowIndex(s32 listedItemIndex, s32 option);
+extern u32 mnuCampChooseSolarWeightedOption(s32 listedItemIndex);
 extern u8 mnuCampChooseWeightedTableValue(void);
-extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
+extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 listedItemIndex);
 s32 evtMenuPrepareCampRewardSelection(KwlnTask *task) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     struct MenuList *activeList = scene->window->list;

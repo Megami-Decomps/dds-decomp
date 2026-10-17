@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_stop_entry.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
@@ -113,7 +114,7 @@ extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
 extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
 extern void fldApplyPendingCameraHeading(void);
-extern void fldApplyRoomObjectModeZero(s32 world, s32 stage, void *roomName, s32 mode);
+extern s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode);
 extern void fldBeginNpcInteractionById(s32);
 extern s32 D_003898FC[];
 extern s32 D_00389780[];
@@ -1457,11 +1458,6 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
 extern void fldToggleWorldNodeState(s32 enabled);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
-typedef struct FldStopEntry {
-    u32 unk0;
-    const u8 *name;
-} FldStopEntry;
-
 s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
@@ -2248,27 +2244,12 @@ typedef struct FldRoomStateHeader {
     s16 axisMode;
     s32 shapeKind;
 } FldRoomStateHeader;
-#include "fld_trigger_shape.h"
-typedef struct FldActionTransform {
-    f32 position[4];
-    f32 rotation[4];
-    f32 scale[4];
-} FldActionTransform;
-/* Serialized sphere/task prefix, transform and paired resources. */
-typedef struct FldActionRow {
-    union {
-        struct { FldTriggerSphere shape; FldTaskInfo info; } task;
-        FldTriggerShape shape;
-    } prefix;
-    FldActionTransform transform;
-    FldFileResource childResource;
-    FldFileResource displayResource;
-} FldActionRow;
+#include "fld_action_row.h"
 extern FldActionRow D_0038BE50[];
 extern u8 D_0038BC00[];
 extern u8 D_0038BC10[];
 extern u8 D_0038BC20[];
-static inline void fldInitializeActionTransform(FldActionTransform *transform, f32 x, f32 y, f32 z) {
+static inline void fldInitializeActionTransform(FldActionTransformFields *transform, f32 x, f32 y, f32 z) {
     transform->position[3] = 1.0f;
     transform->scale[0] = 1.0f;
     transform->scale[1] = 1.0f;
@@ -2284,7 +2265,7 @@ static inline void fldInitializeActionTransform(FldActionTransform *transform, f
 }
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
-    FldActionTransform *transform;
+    FldActionTransformFields *transform;
     EffWorldNode *object;
     EffWorldNode *child;
     s32 index;
@@ -2304,7 +2285,7 @@ void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     D_0038BE50[index].prefix.task.info.slot = slot;
     D_0038BE50[index].prefix.task.info.unk08 = 1;
     D_0038BE50[index].prefix.task.info.shape = &D_0038BE50[index].prefix.shape;
-    transform = &D_0038BE50[index].transform;
+    transform = &D_0038BE50[index].transform.fields;
     fldInitializeActionTransform(transform, x, y, z);
     D_0038BE50[index].childResource.transform = transform->position;
     D_0038BE50[index].childResource.data = &D_0038BE50[index].prefix.task.info;
@@ -2323,20 +2304,10 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013ED20);
 
 extern char D_0038BC30[];
 extern char D_0038BC40[];
-/* Flat view of a row transform: union member stores share the row's alias set. */
-typedef union FldActionTransformView {
-    struct {
-        f32 position[4];
-        f32 rotation[4];
-        f32 scale[4];
-    };
-    f32 values[12];
-} FldActionTransformView;
-
 void func_0013EEA0(s32 kind, s32 roomValue,
                    f32 x, f32 y, f32 z, f32 radius) {
     s32 index = D_004361C4;
-    FldActionTransformView *transform;
+    FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
     EffWorldNode *object;
     s32 taskIndex;
@@ -2356,7 +2327,7 @@ void func_0013EEA0(s32 kind, s32 roomValue,
     D_0038BE50[index].prefix.task.info.unk08 = 1;
     D_0038BE50[index].prefix.task.info.shape = (FldTriggerShape *)&D_0038BE50[index].prefix.task.shape;
     D_0038BE50[index].childResource.data = &D_0038BE50[index].prefix.task.info;
-    transform = (FldActionTransformView *)&D_0038BE50[index].transform;
+    transform = &D_0038BE50[index].transform;
     transform->position[3] = 1.0f;
     transform->scale[0] = 1.0f;
     transform->scale[1] = 1.0f;
@@ -2861,7 +2832,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     } else if (kind == 11) {
         if (entry->floor == D_00389784[0] + 1) {
             if (entry->motion == 3) {
-                fldApplyRoomObjectModeZero(0, 0, entry->otherName, 0);
+                fldApplyRoomObjectModeZero(0, 0, (char *)entry->otherName, 0);
                 return;
             }
         }
@@ -3887,7 +3858,7 @@ void fldBeginNpcInteractionById(s32 id) {
             actor = &fldActorEntries[i];
             npc = &fldActorSlots[i];
             if (npc->kind == 1 && npc->actorId == id) {
-                fldApplyRoomObjectModeZero(0, 0, actor->motionName, 0);
+                fldApplyRoomObjectModeZero(0, 0, (char *)actor->motionName, 0);
                 return;
             }
         }
@@ -4002,7 +3973,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
 void func_00143C90(void) {
 }
 
-extern void fldApplyRoomObjectModeOne(s32 world, s32 stage, void *roomName, s32 mode);
+extern s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode);
 
 void fldApplyCurrentAreaActorEntries(void) {
     FldActorEntry *entry;
@@ -4011,10 +3982,10 @@ void fldApplyCurrentAreaActorEntries(void) {
     for (i = 0; i < 256; i++) {
         entry = &fldActorEntries[i];
         if (entry->kind == 1 && entry->floor == fldAreaState.floor + 1 && entry->motion != 0) {
-            fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
+            fldApplyRoomObjectModeOne(0, 0, (char *)entry->motionName, 0);
         }
         if (entry->kind == 11 && entry->floor == fldAreaState.floor + 1 && entry->motion == 3) {
-            fldApplyRoomObjectModeOne(0, 0, entry->otherName, 0);
+            fldApplyRoomObjectModeOne(0, 0, (char *)entry->otherName, 0);
         }
     }
 }

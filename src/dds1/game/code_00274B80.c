@@ -255,8 +255,8 @@ void mnuSelectPartySelectionVisuals(u32 context) {
 void mnuNoOpPartySelectionCleanup(s32 context) {
 }
 
-s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 item) {
-    if (nodeIndex < (((MenuItemCount *)item)->count - 1)) {
+s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 listAddress) {
+    if (nodeIndex < (((MenuItemCount *)listAddress)->count - 1)) {
         return 0;
     }
     return 1;
@@ -820,7 +820,7 @@ typedef struct StaffMenuRuntime {
     u8 pad28[8];
 } StaffMenuRuntime;
 
-s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 flag) {
+s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 staffView) {
     s32 context = kwlnTaskGetUserValue(task);
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuRuntime));
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress(allocation);
@@ -828,8 +828,8 @@ s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 flag) {
     ((CampMenuContext *)context)->menu = state;
     memset(state, 0, sizeof(*state));
     state->allocation = allocation;
-    state->staffView = flag;
-    if (flag == 0) {
+    state->staffView = staffView;
+    if (staffView == 0) {
         state->staffMode = 0;
     } else {
         state->staffMode = 1;
@@ -1861,11 +1861,11 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     return 0;
 }
 
-s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
-    s32 context = kwlnTaskGetUserValue(param);
+s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 *slot;
 
-    mnuDrawCampScreenDefault(param);
+    mnuDrawCampScreenDefault(callback);
     slot = &((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index;
     if (*slot == 0) {
         mnuCreateStaffImageSprite(1);
@@ -1880,7 +1880,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((CampMenuContext *)context)->actor));
-    return menuRunPanel((void *)context, 1, (void *)param);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 mnuStepSkillSlotControl(KwlnTask *callback) {

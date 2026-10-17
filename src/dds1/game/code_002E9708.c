@@ -827,7 +827,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 }
 
 /* Relocate the payload following the packed header and return its address. */
-void *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
+u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
     sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload,
@@ -844,7 +844,7 @@ SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **ou
 }
 
 /* This entry point uses the same payload-relative relocation table. */
-void *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource) {
+u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
     sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload,

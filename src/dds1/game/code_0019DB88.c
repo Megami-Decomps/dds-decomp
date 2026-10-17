@@ -219,15 +219,15 @@ void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
     } while (-1 < remaining);
 }
 
-u16 *txtFormatNumberU16(s32 value, u16 *out) {
+u16 *txtFormatNumberU16(s32 number, u16 *out) {
     s32 digits[10];
     s32 count = 0;
     s32 i;
     do {
-        digits[count] = value % 10;
-        value = value / 10;
+        digits[count] = number % 10;
+        number = number / 10;
         count++;
-    } while (value > 0 && count < 10);
+    } while (number > 0 && count < 10);
     for (i = count - 1; i >= 0; i--) {
         *out++ = (digits[i] << 8) - 0x6F80;
     }
@@ -1074,8 +1074,8 @@ s32 btlEditCameraFieldOfView(void) {
     return 0;
 }
 
-s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
-    f32 current = *value;
+s32 itfStepFloatWithPad(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+    f32 current = *angleDegrees;
     s32 changed = 0;
 
     if (D_00324510.coarseUp < 0) {
@@ -1142,7 +1142,7 @@ s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f3
         }
     }
     if (changed != 0) {
-        *value = current;
+        *angleDegrees = current;
         return 1;
     }
     return 0;

@@ -644,8 +644,8 @@ void mnuSelectPartySelectionVisuals(u32 context) {
 void mnuNoOpPartySelectionCleanup(u32 callback) {
 }
 
-s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 item) {
-    if (nodeIndex < (((MenuList *)item)->count - 1)) {
+s32 mnuIsFinalItemIndex(s32 nodeIndex, s32 listAddress) {
+    if (nodeIndex < (((MenuList *)listAddress)->count - 1)) {
         return 0;
     }
     return 1;
@@ -1246,15 +1246,15 @@ void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
     } while (--resourceCountdown >= 0);
 }
 
-u32 mnuCreateSelectState(KwlnTask *task, s32 flag) {
+u32 mnuCreateSelectState(KwlnTask *task, s32 staffView) {
     s32 context = kwlnTaskGetUserValue(task);
     u32 handle = (u32)sdfAllocGeneralBlock(0x30);
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress((struct SdfMemBlock *)handle);
     *(StaffMenuRuntime **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
     state->allocation = (SdfMemBlock *)handle;
-    state->staffView = flag;
-    if (flag == 0) {
+    state->staffView = staffView;
+    if (staffView == 0) {
         state->staffMode = 0;
     } else {
         state->staffMode = 1;
@@ -3164,19 +3164,19 @@ typedef struct MnuCampPanelOrigins {
 
 extern const MnuCampPanelOrigins D_0042AE48;
 
-void mnuDrawSkillMenuFrameIcons(MenuContext *context) {
+void mnuDrawSkillMenuFrameIcons(MenuContext *menuContext) {
     MnuCampPanelDrawRecord primaryRows[5] = {
-        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
-        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
-        {(EffectSlotSet *)context->labelHandle, 0x0C, 0x2A0, 0x38},
-        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
-        {(EffectSlotSet *)context->labelHandle, 0x10, 0x180, 0x138},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)menuContext->labelHandle, 0x0C, 0x2A0, 0x38},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x0F, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->labelHandle, 0x10, 0x180, 0x138},
     };
     MnuCampPanelDrawRecord secondaryRows[4] = {
-        {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
-        {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
-        {(EffectSlotSet *)context->resourceHandle, 0x0E, 0x2C0, 0x50},
-        {(EffectSlotSet *)context->resourceHandle, 0x0F, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x11, 0x1E0, 0xC0},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x09, 0x110, 0x20},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x0E, 0x2C0, 0x50},
+        {(EffectSlotSet *)menuContext->resourceHandle, 0x0F, 0x1E0, 0xC0},
     };
     MnuCampPanelOrigins origins = D_0042AE48;
     s32 i;

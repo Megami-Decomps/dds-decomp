@@ -494,13 +494,13 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
-s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, s32 end)
+s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 startFrame, s32 endFrame)
 {
     PolyMovieClip *clip;
     s32 elapsedFrames;
     s32 duration;
 
-    elapsedFrames = end - start;
+    elapsedFrames = endFrame - startFrame;
     if (elapsedFrames < 0) {
         elapsedFrames = 0;
     }
@@ -983,8 +983,8 @@ EvtPictureWork *evtAllocateContext(void) {
     return context;
 }
 
-void evtSetConvertedContextValue(EvtPictureWork *context, const char *path) {
-    context->texture = itfLoadTextureFromAsset(path);
+void evtSetConvertedContextValue(EvtPictureWork *pictureWork, const char *path) {
+    pictureWork->texture = itfLoadTextureFromAsset(path);
 }
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_003ADDB0);

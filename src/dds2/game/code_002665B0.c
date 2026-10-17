@@ -324,7 +324,7 @@ extern MenuTextEntry D_003A47E8[];
 
 /* Select an encoded text row, draw it at the supplied grid cell, and queue the glyph.
  * The signed-byte slot is not bounds checked; DDS2 subtracts 0x120 from gridX. */
-void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
+void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
     FrFontGlyph *handle;
 
@@ -333,7 +333,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     } else {
         text = D_003A47E8[slot].encodedText;
     }
-    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
+    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, colors, text, 0);
     frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
@@ -707,19 +707,19 @@ void mnuReleaseWorkResources(u8 *work) {
 
 /* Close via the native fade/script choice, including DDS2's extra party/flag gates.
  * All paths clear active flag zero and set display slot one. */
-void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
+void mnuTerminalFadeOrClose(s32 flag, MenuSlotState *state) {
     if (flag == 0) {
-        s32 state = ((MenuSlotState *)scene)->reduced;
+        s32 reducedMode = state->reduced;
 
-        if (state < 3) {
-            if (state > 0) {
+        if (reducedMode < 3) {
+            if (reducedMode > 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
-            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(scene) != 0) {
+            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
             } else {
                 evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
             }
-        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(scene) != 0) {
+        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
             kwlnFadeOutStart(0, 0, 0, 0xF);
         } else {
             evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
@@ -884,8 +884,8 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
 }
 
 /* Apply the supplied terminal track mode with enable fixed to one. */
-void mnuEnableTerminalTrackMode(s8 index) {
-    mnuTerminalSetTrack(index, 1);
+void mnuEnableTerminalTrackMode(s8 mode) {
+    mnuTerminalSetTrack(mode, 1);
 }
 
 /* Allocate seven effect batches and seed their two opaque parameter words.
@@ -1288,17 +1288,17 @@ void mnuTerminalSelectSlot(s32 mode, s32 commandIndex, MenuSlotState *state) {
 }
 
 /* Draw valid current/previous slots only while DDS2's native terminal draw gate is set. */
-void mnuDrawTerminalSelectedSlots(s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuDrawTerminalSelectedSlots(s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     EffectPair position = D_00437878[0];
     s32 *slot;
     u32 i;
 
     if (D_00437859 != 0) {
-        for (i = 0, slot = state->selectedSlots; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
+        for (i = 0, slot = work->selectedSlots; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
             if (*slot >= 0) {
                 itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                            state->resourceBank[0], *slot, MNU_TEXT_DRAW_PRIORITY);
+                                            work->resourceBank[0], *slot, MNU_TEXT_DRAW_PRIORITY);
             }
         }
     }
@@ -1371,13 +1371,13 @@ void mnuConfigureTerminalSlotEffects(u32 mode, MenuSlotState *state) {
 }
 
 /* Draw terminal grids and the selected effect text. */
-void mnuDrawTerminalFrameAndSlotLabels(s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuDrawTerminalFrameAndSlotLabels(s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     EffectPair position[6] = {
         {0, 0}, {0x200, 0xF0}, {0x1280, 0xC8},
         {0x840, 0x220}, {0x1500, 0xD0}, {0x1410, 0x1E0}
     };
-    s32 index = fldGetModeFrameRecordIndex(context);
+    s32 index = fldGetModeFrameRecordIndex(state);
     EffectSlotSet *batch;
     BdWork *record;
     u32 progress;
@@ -1386,15 +1386,15 @@ void mnuDrawTerminalFrameAndSlotLabels(s32 context) {
         return;
     }
     itfDrawGridWithResolvedSlot(position[0].firstValue, position[0].secondValue, 0, 0x81,
-                                state->resourceBank[0], index, MNU_TEXT_DRAW_PRIORITY);
-    batch = state->resourceBank[0];
+                                work->resourceBank[0], index, MNU_TEXT_DRAW_PRIORITY);
+    batch = work->resourceBank[0];
     record = (BdWork *)(sizeof(*batch->workEntries) * index + (u32)batch->workEntries);
     progress = ((u32)*(u8 *)&record->geometry.cornerColors[0] << 8) /
         *(u8 *)&record->savedColors[0];
-    if (state->reduced != 2) {
+    if (work->reduced != 2) {
         effDrawTextureSlotWithBlendedCornerColors(position[1].firstValue, position[1].secondValue, 0,
                       progress, 0x81, batch, 4, MNU_TEXT_DRAW_PRIORITY);
-        batch = state->resourceBank[0];
+        batch = work->resourceBank[0];
     }
     if (*(s32 *)((u8 *)state + 0xA0) != 0) {
         position[3].firstValue += 0x320;
@@ -1402,13 +1402,13 @@ void mnuDrawTerminalFrameAndSlotLabels(s32 context) {
     itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
                                 batch, 7, MNU_TEXT_DRAW_PRIORITY);
     itfDrawGridWithResolvedSlot(position[3].firstValue, position[3].secondValue, 0, 0x81,
-                                state->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
-    if (state->mode != 2) {
+                                work->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
+    if (work->mode != 2) {
         itfDrawGridWithResolvedSlot(position[2].firstValue, position[2].secondValue, 0, 0x81,
-                                    state->resourceBank[0], 6, MNU_TEXT_DRAW_PRIORITY);
+                                    work->resourceBank[0], 6, MNU_TEXT_DRAW_PRIORITY);
         mnuQueueFontGlyphFromSelectedAtlasSlot(position[4].firstValue, position[4].secondValue,
-                                                0, *(u8 *)&state->resourceBank[0]->workEntries[6].geometry.cornerColors[0] | 0xA09DC300,
-                                                (s8)state->slotCopy, (s8)state->mode);
+                                                0, *(u8 *)&work->resourceBank[0]->workEntries[6].geometry.cornerColors[0] | 0xA09DC300,
+                                                (s8)work->slotCopy, (s8)work->mode);
     }
 }
 
@@ -1533,8 +1533,8 @@ s32 mnuGetTerminalListSlotForCount(MenuList *list) {
 }
 
 /* Configure the terminal selection grid for its entry and transition mode. */
-void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuConfigureTerminalModeEffects(u32 mode, s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     s32 effectIndex = 0;
     s32 materialFlags = 0;
     s32 height = 0;
@@ -1565,28 +1565,28 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
         effectIndex = 3;
         break;
     }
-    slot = mnuGetTerminalListSlotForCount(state->secondaryList);
-    /* The context word transports the terminal state address. */
-    effect = (struct EffMappedResource **)(effectIndex * sizeof(state->effect[0]) + context +
+    slot = mnuGetTerminalListSlotForCount(work->secondaryList);
+    /* The state word transports the terminal state address. */
+    effect = (struct EffMappedResource **)(effectIndex * sizeof(work->effect[0]) + state +
         (u32)&((MenuSlotState *)0)->effect);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         slot, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], slot,
+    effConfigureWithDefaultSetting(work->resourceBank[0], slot,
         *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         0x40, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x40,
+    effConfigureWithDefaultSetting(work->resourceBank[0], 0x40,
         *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         0x41, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x41,
+    effConfigureWithDefaultSetting(work->resourceBank[0], 0x41,
         *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(work->resourceBank[0],
         0x42, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x42,
+    effConfigureWithDefaultSetting(work->resourceBank[0], 0x42,
         *effect,
         0, materialFlags, color);
 }
@@ -2145,20 +2145,20 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
 
 extern char D_00437868[];
 
-void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
-    MenuSlotState *state = (MenuSlotState *)context;
+void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
+    MenuSlotState *work = (MenuSlotState *)state;
     s32 index;
     FrFontGlyph *font;
     u32 color;
     char text[16];
 
-    index = fldGetModeFrameRecordIndex(context);
+    index = fldGetModeFrameRecordIndex(state);
     sprintf(text, D_00437868, datGameState->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
-        color = *(u8 *)&((MenuSlotState *)context)->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
+        color = *(u8 *)&work->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
     } else {
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, state->progressList->scale);
+        color = uiBlendColors(0xA09DC380, 0xA09DC300, work->progressList->scale);
     }
     font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);
@@ -2529,19 +2529,19 @@ s32 evtBDispatchSyncB(KwlnTask *request) {
     return menuSetHandler(state, 2, (void *)request);
 }
 
-extern void mnuTerminalFadeOrClose(s32, s32);
+extern void mnuTerminalFadeOrClose(s32, MenuSlotState *);
 
 
 
 extern void mnuStartMantraSpriteLoad(void);
 
 s32 evtBCloseTerminalAndLoadMantraSprites(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
     s32 mode;
     mnuTerminalFadeOrClose(0, state);
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
-    mode = ((MenuSlotState *)state)->reduced;
+    mode = state->reduced;
     if (mode < 2) {
         if (mode >= 0) {
             mnuStartMantraSpriteLoad();

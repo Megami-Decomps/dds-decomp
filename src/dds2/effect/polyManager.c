@@ -10,8 +10,7 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
-#include "poly_ring_head.h"
-#include "poly_ring_records.h"
+#include "poly_band.h"
 #include "poly_node.h"
 
 struct SdfMemBlock;
@@ -21,26 +20,6 @@ enum {
     POLY_RESET_ENTRY_AGE = 0xFFFFFF0,
     POLY_RESET_DURATION = 0xFFFFFFF
 };
-
-typedef struct {
-    PolyRingHead head;
-    u32 spawnDelayStep;
-    u32 segments;
-    f32 radialWidth;
-    f32 initialRadius;
-    f32 targetRadius;
-    f32 initialRadiusJitter;
-    f32 targetRadiusJitter;
-    f32 liftStep;
-    u8 padE0[4];
-    void *dispatchArgB;
-    u8 padE8[4];
-    void *dispatchArgA;
-    ParSystem *strip;              /* 0xF0 */
-    PolyBandRecord *records;       /* 0xF4 */
-    struct SdfMemBlock *allocation; /* 0xF8 */
-    u8 padFC[4];
-} PolyBand; /* 0x100, followed by eight-byte records */
 
 typedef struct {
     PolyRingHead head;

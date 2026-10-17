@@ -284,7 +284,7 @@ void frFontBindResourceSections(
     }
     entry->slots = (FrFontRecord **)(resourceBytes + sectionOffset);
     sectionOffset += entry->resourceHeader->widthCount * FR_FONT_WORD_BYTES;
-    entry->resource = resourceBytes + sectionOffset;
+    entry->resource = (struct ItfRelativeSegmentResourceView *)(resourceBytes + sectionOffset);
     lookupOffset = entry->resourceHeader->lookupOffset;
     if (lookupOffset != 0) {
         entry->unk20 = (u32)(resourceBytes + lookupOffset);

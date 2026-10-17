@@ -46,7 +46,7 @@ void sdfTexAllocatePaletteData(SdfTex *texture) {
 }
 
 /* Copy retained palette bytes without changing the texture resource metadata. */
-void sdfTexCopyImageData(SdfTex *texture, const void *source) {
+void sdfTexCopyImageData(SdfTex *texture, const u8 *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 

@@ -56,7 +56,7 @@ extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern void dds3DrawSetLightSourcePointer(void *lightSource, s32 index);
 extern void kwlnDrawCopyWords20(void *source);
-extern void kwlnDrawCopyRow128(void *source);
+extern void kwlnDrawCopyRow128(u128 *source);
 extern void sprintf(char *, const char *, ...);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
@@ -83,7 +83,7 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x40, 1);
     dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x80, 2);
     kwlnDrawCopyWords20(D_003C8C60);
-    kwlnDrawCopyRow128(D_003C8C80);
+    kwlnDrawCopyRow128((u128 *)D_003C8C80);
     return 1;
 }
 
@@ -111,7 +111,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
     dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x40, 1);
     dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x80, 2);
     kwlnDrawCopyWords20(D_003C8C60);
-    kwlnDrawCopyRow128(D_003C8C80);
+    kwlnDrawCopyRow128((u128 *)D_003C8C80);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     return 1;

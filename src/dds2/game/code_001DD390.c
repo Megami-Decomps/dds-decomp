@@ -23,6 +23,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
@@ -4686,13 +4687,6 @@ BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *unit, f32 value) {
     args->unk_08 = 0;
     return task;
 }
-
-typedef struct BtlPositionEffectArgs {
-    BtlUnit *unit;
-    s32 tick;
-    f32 amount;
-    f32 velocity;
-} BtlPositionEffectArgs;
 
 u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
     BtlState *runtime = (BtlState *)btlGetRuntime();

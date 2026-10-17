@@ -122,8 +122,8 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
-    s32 restoring;
-    void (*entry)(s32, void *);
+    s32 isRestoringHistory;
+    void (*modeEntryCallback)(s32, void *);
 
     if ((flags & 1) != 0 && work->requestedMode >= 0) {
         if (work->modeTransitionDelay != 0) {
@@ -142,9 +142,9 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
         if (work->flags & 0x10000) {
             work->flags &= ~0x10000;
             work->historyIndex = (work->historyIndex + 7) & 7;
-            restoring = 1;
+            isRestoringHistory = 1;
         } else {
-            restoring = 0;
+            isRestoringHistory = 0;
             if (work->flags & 8) {
                 work->flags &= ~8;
             } else {
@@ -153,9 +153,9 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
         }
         work->signedHistory[work->historyIndex] = work->activeMode;
         work->unsignedHistory[work->historyIndex] = 0;
-        entry = ddsAdminModeCallbacks[work->activeMode].entry;
-        if (entry != NULL) {
-            entry(restoring, work->requestData);
+        modeEntryCallback = ddsAdminModeCallbacks[work->activeMode].entry;
+        if (modeEntryCallback != NULL) {
+            modeEntryCallback(isRestoringHistory, work->requestData);
         }
     }
     return (s32)dds3AdminPollModeCompletion;
@@ -166,12 +166,12 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
    as a signed scheduler control word, or zero on failure. */
 s32 dds3AdminPollModeDestruction(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
-    s32 mode = work->activeMode;
+    s32 activeMode = work->activeMode;
     s32 (*destroy)(void);
     s32 destroyResult;
 
-    if (mode >= 0) {
-        destroy = ddsAdminModeCallbacks[mode].destroy;
+    if (activeMode >= 0) {
+        destroy = ddsAdminModeCallbacks[activeMode].destroy;
         if (destroy != NULL) {
             destroyResult = destroy();
             if (destroyResult < 0) {
@@ -188,7 +188,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);
-    s32 previous;
+    s32 previousHistoryIndex;
 
     if ((flags & 2) == 0) {
         if (work->activeMode >= 0) {
@@ -201,12 +201,12 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
         flags = work->flags;
     }
     if ((flags & 2) && work->activeMode >= 0) {
-        previous = (work->historyIndex + 7) & 7;
-        if (work->signedHistory[previous] >= 0 && (work->unsignedHistory[previous] & 1)) {
+        previousHistoryIndex = (work->historyIndex + 7) & 7;
+        if (work->signedHistory[previousHistoryIndex] >= 0 && (work->unsignedHistory[previousHistoryIndex] & 1)) {
             void *requestData = work->requestData;
 
             work->flags |= 0x10001;
-            work->requestedMode = work->signedHistory[previous];
+            work->requestedMode = work->signedHistory[previousHistoryIndex];
             work->modeTransitionDelay = 2;
             work->flags &= ~4;
             if (requestData != NULL) {

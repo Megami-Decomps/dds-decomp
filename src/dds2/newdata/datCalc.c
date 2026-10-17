@@ -315,10 +315,10 @@ u32 datReadHighHalfOfCalculatedValue(DatPartyRecord *unit, s32 element) {
 
 /* Map one exact flag to a stat index. Flag one and unknown/combined flags
  * return -1; shared destination indices are intentional. */
-s32 datFlagToElementIndex(s32 flag) {
+s32 datFlagToElementIndex(s32 elementFlag) {
     s32 statIndex = -1;
 
-    switch (flag) {
+    switch (elementFlag) {
     case 1:
         statIndex = -1;
         break;
@@ -860,20 +860,19 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
 /* Resolve the command's unmodified integer value for this entry.
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
- * value is intentionally reused: incoming command ID, then resolved result. */
-s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 value) {
-    s32 commandId = value;
+ * commandId selects the record; cost holds the resolved result. */
+s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 commandId) {
+    s32 cost = 0;
     DatCommandRecord *commands = datCommandRecords;
 
-    value = 0;
     switch (commands[commandId].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
         if (battler->flags & 0x20) {
             return 0;
         }
-        value = battler->maxHp * commands[commandId].costPercentage / 100 + commands[commandId].costBase;
-        if (value <= 0) {
-            value = 1;
+        cost = battler->maxHp * commands[commandId].costPercentage / 100 + commands[commandId].costBase;
+        if (cost <= 0) {
+            cost = 1;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
@@ -881,10 +880,10 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *battler, s32 value) {
             (datEnemyRecords[battler->unitId].flags & 0x10)) {
             return 0;
         }
-        value = commands[commandId].costPercentage;
+        cost = commands[commandId].costPercentage;
         break;
     }
-    return value;
+    return cost;
 }
 
 void ptyInitRuntime(void) {
@@ -1063,7 +1062,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
     ptyAssignRosterItemAndMarkOwned(entry);
 }
 
-extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
 void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {

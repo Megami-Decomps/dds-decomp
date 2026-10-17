@@ -53,7 +53,7 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 #include "dds3_world_secondary.h"
 struct EffWorldNode;
-extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 extern s32 strcmp(const char *left, const char *right);
 
@@ -68,7 +68,7 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
     args[5] = 0;
     args[6] = 0;
     args[7] = 0;
-    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), (f32 *)args, args + 4);
+    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), (f32 *)args, (f32 *)(args + 4));
     dds3SetWorldNodeValue(matter, (u32)D_00412FF0);
     return matter;
 }
@@ -920,8 +920,8 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
 }
 typedef struct FldActionSpawn {
     u32 unk0;
-    u32 secondValue;
-    u32 firstValue;
+    u32 objectName; /* 0x04: evtSpawnActionObj2's name/value argument. */
+    u32 key;         /* 0x08: evtSpawnActionObj2's world-node key. */
 } FldActionSpawn;
 
 void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
@@ -930,17 +930,14 @@ void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
 
     dds3GetWorldSecondaryObject();
     for (spawnIndex = 0; spawnIndex < spawnCount; spawnIndex++, spawnList++) {
-        spawnedObject = evtSpawnActionObj2(spawnList->firstValue, spawnList->secondValue);
+        spawnedObject = evtSpawnActionObj2(spawnList->key, spawnList->objectName);
         if (spawnIndex == 0) {
             fldAreaState.taskHandle = (s32)spawnedObject;
         }
     }
 }
 
-typedef struct FldResourceName {
-    u32 unk00;
-    const char *name;
-} FldResourceName;
+#include "fld_resource_name.h"
 
 extern FldFileResource *D_00438EB8;
 extern u32 D_00438EBC;
@@ -948,7 +945,7 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern struct DevRequest *D_00435FA4;
 struct EffWorldNode;
-extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
