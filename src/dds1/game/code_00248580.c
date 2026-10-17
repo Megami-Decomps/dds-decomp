@@ -1443,8 +1443,8 @@ void mnuDrawTerminalSelectionListAndStep(s32 close, MenuTerminalWork *work) {
     }
 }
 
-void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
-    MenuTerminalWork *work = (MenuTerminalWork *)context;
+void mnuConfigureTerminalModeEffects(u32 mode, s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
     s32 effectIndex = 0;
     s32 materialFlags = 0;
     s32 height = 0;
@@ -1475,11 +1475,11 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
         effectIndex = 3;
         break;
     }
-    /* Keep the selected-field byte displacement separate from the context;
+    /* Keep the selected-field byte displacement separate from the state;
      * see docs/idioms.md, "Trace-justified terminal effect byte displacement". */
     effectOffset = effectIndex * sizeof(work->effect[0]) +
                    (u32)&((MenuTerminalWork *)0)->effect;
-    effect = (EffMappedResource **)(context + effectOffset);
+    effect = (EffMappedResource **)(state + effectOffset);
     itfSetGridEntryQuantizedAndRefresh(work->batch, 9, 0, 0, 0, 0);
     effConfigureWithDefaultSetting(work->batch, 9, *effect, 0, materialFlags, stateFlags);
     itfSetGridEntryQuantizedAndRefresh(work->batch, 10, 0, yOffset, 0, height);
