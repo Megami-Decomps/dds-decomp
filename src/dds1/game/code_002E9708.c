@@ -1293,7 +1293,94 @@ void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *node, u8 *source, s32 bytes
     FlushCache(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", sdfBuildStreamFrameTransferPackets);
+/* Build the two GIF upload buffers for the node's tiled frame images. */
+void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node) {
+    s32 pixelMode;
+    u32 tileQwords;
+    s32 width;
+    s32 height;
+    s32 bufferWidth;
+    s32 remainingTiles;
+    s32 packetBytes;
+    s32 sourceStride;
+    s32 bufferIndex;
+    s32 x;
+    s32 y;
+    s32 endOfPacket;
+    u32 sourceAddress;
+    u64 bitblt;
+    u32 sourceTag;
+    u64 imageTag;
+    u64 *packet;
+
+    if (node->audioMode == SDF_STREAM_AUDIO_DISABLED) {
+        pixelMode = SDF_STREAM_PSMCT32;
+        tileQwords = 64;
+    } else {
+        pixelMode = SDF_STREAM_PSMCT16;
+        tileQwords = 32;
+    }
+    width = node->width;
+    height = node->height;
+    /* Retail shares this count across both packet buffers. */
+    remainingTiles = (node->width >> 4) * (node->height >> 4);
+    bufferWidth = width >> 6;
+    if (bufferWidth == 0) {
+        bufferWidth = 1;
+    }
+    bitblt = ((u64)pixelMode << 56) | ((u64)bufferWidth << 48);
+    sourceTag = tileQwords | 0x30000000;
+    imageTag = (u64)(tileQwords | 0x50000000) << 32;
+    sourceStride = tileQwords << 4;
+    packetBytes = remainingTiles * 0x60 + 0x50;
+    node->transferPacketBytes = packetBytes;
+
+    bufferIndex = 0;
+    do {
+        packet = sdfAllocateBlockBySizeThreshold(packetBytes);
+        node->transferPacketBuffers[bufferIndex] = packet;
+        sourceAddress = (u32)node->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
+
+        packet[0] = 0x10000003;
+        packet[1] = (u64)0x50000003 << 32;
+        packet[4] = bitblt | ((u64)((u32)node->resourceWord >> 6) << 32);
+        packet[5] = 0x50;
+        packet[6] = ((u64)16 << 32) | 16;
+        packet[7] = 0x52;
+        packet[2] = ((u64)0x10000000 << 32) | 2;
+        packet[3] = 0xE;
+        packet += 8;
+
+        endOfPacket = 0;
+        y = 0;
+        do {
+            x = 0;
+            do {
+                remainingTiles--;
+                if (remainingTiles == 0) {
+                    endOfPacket = 1;
+                }
+                packet[0] = 0x10000004;
+                packet[1] = (u64)0x50000004 << 32;
+                packet[5] = 0x51;
+                packet[4] = ((u64)y << 48) | ((u64)x << 32);
+                packet[8] = (u64)(endOfPacket << 15) | (u64)tileQwords | ((u64)2 << 58);
+                packet[10] = sourceTag | ((u64)sourceAddress << 32);
+                sourceAddress += sourceStride;
+                packet[2] = ((u64)0x10000000 << 32) | 2;
+                packet[3] = 0xE;
+                packet[6] = 0;
+                packet[7] = 0x53;
+                packet[9] = 0;
+                packet[11] = imageTag;
+                x += 16;
+                packet += 12;
+            } while (x < width);
+            y += 16;
+        } while (y < height);
+        bufferIndex++;
+    } while (bufferIndex != 2);
+}
 
 /* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
 void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
