@@ -959,8 +959,8 @@ EvtPictureWork *evtAllocateContext(void) {
     return context;
 }
 
-void evtSetConvertedContextValue(EvtPictureWork *context, const char *path) {
-    context->texture = itfLoadTextureFromAsset(path);
+void evtSetConvertedContextValue(EvtPictureWork *pictureWork, const char *path) {
+    pictureWork->texture = itfLoadTextureFromAsset(path);
 }
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_00423360);
