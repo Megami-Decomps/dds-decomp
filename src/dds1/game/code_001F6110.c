@@ -19,7 +19,7 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource_browser.h"
 #include "eff_ref_obj.h"
@@ -3494,7 +3494,6 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(textureResource));
 }
 
-extern void *sdfConsAllocateColumnPacket(s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 
 /* Queue the descriptor's preview texture as a quad at its screen position. */

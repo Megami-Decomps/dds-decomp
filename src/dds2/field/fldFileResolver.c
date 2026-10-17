@@ -355,7 +355,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "common.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_column_packet_api.h"
 #include "sdf_packet_append.h"
 #include "sdf_packet_builders.h"
 #include "fr_font.h"
@@ -561,7 +561,6 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void *sdfConsAllocateColumnPacket(s32);
 
 
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
