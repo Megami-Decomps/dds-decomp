@@ -368,9 +368,16 @@ functions use trampolines and are a different case.
   `func_001EEC20`, `func_001FEB90` have the same shape). `abs` written as
   `l->arg < 0 ? -l->arg : l->arg` gives `bltzl; negu` for the same reason.
 - `xori t,x,K; movz` with K != 0 is plain `v = d; if (x == K) v = c;`.
-  With K = 0 it is an `xor reg,reg` compare that only became 0 after CSE;
-  the source shape is still unknown (`func_001E99C0`, DDS1
-  `btlLowestSetPairIndex`).
+  With K = 0 the xor is never in the source. Conditional-move expansion always
+  emits `xor cond,0`. An early if-conversion (before cse1) gets it folded. It
+  survives only when the early passes refuse, because the arm is more than one
+  insn before combine, and the late `ce` pass converts it. Shapes that keep it:
+  two returns where one arm is a load, arithmetic, compare or negation
+  (`if (id < 0xa0) return 0; return id < 0xbf;`, `mnuIsBulletItemId`); a
+  ternary/assign-if whose arm is a signed `s8`/`s16` load; several statements
+  in the `if` body (`if (x) { f |= 2; f |= 4; }`); a nested ternary
+  `a ? a : (b ? b : c)`; an else-if clamp chain on an `s8`/`s16`. One-insn arms
+  (`if (x) f |= 2;`, `return g ? h : 0;`) give no `xori`.
 - `li K; mult` for a small K that shifts could do: the multiplier is a named
   local, e.g. `s32 cw = 0xC0, ch = 0x60;`, used as `cols * cw + ch`. Literals
   and `const` locals fold to `sll/addu` (`func_00103790`; DDS1 twin
