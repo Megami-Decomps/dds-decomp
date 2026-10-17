@@ -77,22 +77,22 @@ Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
     Motion *motion;
     DevRequest *request;
     SdfMotionCommand *command;
-    s32 i;
-    u16 count;
+    s32 commandIndex;
+    u16 commandCount;
 
     motion = sdfAllocAndClearQuadwords(0x34);
     motion->next = model->motionList;
-    count = table->commandCount;
+    commandCount = table->commandCount;
     model->motionList = motion;
     motion->owner = model;
     motion->motionTable = table;
-    request = sdfDevCreateBufferedRequest(count, 4, 8);
+    request = sdfDevCreateBufferedRequest(commandCount, 4, 8);
     motion->request = request;
-    request->usedCount = count;
-    for (i = 0, command = motion->motionTable->commands;
-         i < count;
-         i++, command++) {
-        ((void **)motion->request->buffer)[i] =
+    request->usedCount = commandCount;
+    for (commandIndex = 0, command = motion->motionTable->commands;
+         commandIndex < commandCount;
+         commandIndex++, command++) {
+        ((void **)motion->request->buffer)[commandIndex] =
             sdfDispatchAssetCommandWord(motion, command->packedCommand, command->targetIndex);
     }
     motion->state = SDF_MOTION_STATE_UNINITIALIZED;
