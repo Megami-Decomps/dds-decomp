@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_stop_entry.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
@@ -1456,11 +1457,6 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
 
 extern void fldToggleWorldNodeState(s32 enabled);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
-
-typedef struct FldStopEntry {
-    u32 unk0;
-    const u8 *name;
-} FldStopEntry;
 
 s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];

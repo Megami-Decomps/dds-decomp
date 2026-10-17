@@ -6,6 +6,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
@@ -7325,11 +7326,6 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
     }
     return clearance;
 }
-
-typedef struct FldStopEntry {
-    u32 unk0;
-    const u8 *name;
-} FldStopEntry;
 
 s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
