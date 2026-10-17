@@ -228,7 +228,7 @@ extern s32 *D_00435DDC;
 extern s32 *D_00435DFC;
 
 s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
-    s32 value;
+    s32 calculatedValue;
     u16 unitId;
     u32 low;
 
@@ -244,65 +244,65 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     unitId = unit->unitId;
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         if (unit->flags & 0x1000) {
-            value = D_00435DD8[unitId * 19 + element];
+            calculatedValue = D_00435DD8[unitId * 19 + element];
         } else {
-            value = D_00435DDC[unitId * 19 + element];
+            calculatedValue = D_00435DDC[unitId * 19 + element];
         }
-        if (mdlFlagTest(0x80E) && value < 0) {
-            value = (value & DAT_CALC_HIGH_MASK) |
+        if (mdlFlagTest(0x80E) && calculatedValue < 0) {
+            calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) |
                     ((u32)(datBattleParameters->specialAffinityScale * 100.0f) & 0xFFFF);
         }
     } else {
         if (unit->affinityTableIndex != 0) {
-            value = D_00435DFC[unit->affinityTableIndex * 19 + element];
+            calculatedValue = D_00435DFC[unit->affinityTableIndex * 19 + element];
         } else {
-            value = D_00435DFC[unitId * 19 + element];
+            calculatedValue = D_00435DFC[unitId * 19 + element];
         }
     }
 
     if (element == 15) {
-        value = datRaiseCalculatedValueFloor(unit, value);
+        calculatedValue = datRaiseCalculatedValueFloor(unit, calculatedValue);
     }
     if (unit->flags & 0x2000) {
-        value = D_00435DFC[383 * 19 + element];
+        calculatedValue = D_00435DFC[383 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
-        value = D_00435DFC[382 * 19 + element];
+        calculatedValue = D_00435DFC[382 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
-        value = D_00435DFC[381 * 19 + element];
+        calculatedValue = D_00435DFC[381 * 19 + element];
     }
 
-    low = value & 0xFFFF;
+    low = calculatedValue & 0xFFFF;
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 4) {
         if (element < 2) {
             if (element >= 0) {
                 if (low < 100) {
-                    value = (value & DAT_CALC_HIGH_MASK) | 100;
-                    low = value & 0xFFFF;
+                    calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 100;
+                    low = calculatedValue & 0xFFFF;
                 }
             }
         }
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x400) {
         if (element == 9 && low < 300) {
-            value = (value & DAT_CALC_HIGH_MASK) | 300;
-            low = value & 0xFFFF;
+            calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 300;
+            low = calculatedValue & 0xFFFF;
         }
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x10 && element == 12 && low < 200) {
-        value = (value & DAT_CALC_HIGH_MASK) | 200;
-        low = value & 0xFFFF;
+        calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 200;
+        low = calculatedValue & 0xFFFF;
     }
 
     if (low == 0) {
-        if (value < 0) {
-            value |= 150;
-        } else if (value & 0x170000) {
-            value |= 100;
+        if (calculatedValue < 0) {
+            calculatedValue |= 150;
+        } else if (calculatedValue & 0x170000) {
+            calculatedValue |= 100;
         }
     }
-    return value;
+    return calculatedValue;
 }
 
 u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *unit, s32 element) {
