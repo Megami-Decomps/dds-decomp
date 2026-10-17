@@ -1027,19 +1027,19 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     f32 savedA[4];
     f32 savedB[4];
     s32 simulatedStepCount = 0;
-    s32 i;
-    for (i = 0; i < 4; i++) {
-        savedA[i] = unit->effObj->inner->position[i];
-        savedB[i] = unit->effObj->inner->rotation[i];
+    s32 vectorComponentIndex;
+    for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
+        savedA[vectorComponentIndex] = unit->effObj->inner->position[vectorComponentIndex];
+        savedB[vectorComponentIndex] = unit->effObj->inner->rotation[vectorComponentIndex];
     }
     copy = *unit;
     while (evtUnitHasReachedMotionEndpoint(&copy) == 0) {
         simulatedStepCount++;
         evtApplyUnitDirectionOffset(&copy);
     }
-    for (i = 0; i < 4; i++) {
-        unit->effObj->inner->position[i] = savedA[i];
-        unit->effObj->inner->rotation[i] = savedB[i];
+    for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
+        unit->effObj->inner->position[vectorComponentIndex] = savedA[vectorComponentIndex];
+        unit->effObj->inner->rotation[vectorComponentIndex] = savedB[vectorComponentIndex];
     }
     if (simulatedStepCount == 0) {
         sdfDebugPrintf("ymove frameno = 0\n");
