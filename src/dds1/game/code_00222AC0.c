@@ -15,6 +15,7 @@
 #include "evt_world_source_transform.h"
 #include "evt_model_header.h"
 #include "evt_unit.h"
+#include "evt_lips_link.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
@@ -62,18 +63,6 @@ extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_003BBDB0;
-
-/* Event lip-sync registry: world -> root -> list -> unit links. */
-typedef struct EvtLipsMh {
-    u8 pad00[0x0C];
-    MdlCtx *model;      /* 0x0C */
-} EvtLipsMh;
-
-typedef struct EvtLipsLink {
-    u8 pad00[0x08];
-    void *unit;         /* 0x08 */
-    EvtLipsMh *mh;      /* 0x0C */
-} EvtLipsLink;
 
 extern s32 scrReadIntParameter(s32 idx);
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource);
