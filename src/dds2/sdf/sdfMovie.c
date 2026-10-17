@@ -53,7 +53,7 @@ void sdfMovieScheduleLinearStreamRead(MovObj *movie) {
 }
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
-s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *readBuffer, s32 bytesRead, MovObj *movie) {
     MovLinearStream *stream;
     s32 restoreInterrupts;
 
