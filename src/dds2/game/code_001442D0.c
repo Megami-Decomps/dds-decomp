@@ -2954,7 +2954,7 @@ void func_0014B0F8(void) {
     s32 labelIndex;
     s32 width;
     s32 labelX;
-    if (fldAreaState.unk118 == 1) return;
+    if (fldAreaState.playerModelAlternate == 1) return;
     if (fldAreaState.area >= 200) return;
     switch (fldAreaState.unkD4) {
     case 0:
@@ -3518,7 +3518,7 @@ extern f32 D_0043634C;
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
 
-    if (fldAreaState.unk118 != 1 && fldAreaState.deferredExit != 1) {
+    if (fldAreaState.playerModelAlternate != 1 && fldAreaState.deferredExit != 1) {
         fldSelectDisplayBuffer(0x53);
         fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
@@ -3573,7 +3573,7 @@ void fldDrawLocationPanel(void) {
     if (fldGetSparkDialogPhase() != 0) {
         return;
     }
-    if (fldAreaState.unk118 == 1 || fldAreaState.deferredExit != 0) {
+    if (fldAreaState.playerModelAlternate == 1 || fldAreaState.deferredExit != 0) {
         return;
     }
     if (fldFindLocationCoordinateRecord(fldAreaState.area, fldAreaState.floor + 1)[2] <= 0) {
@@ -4996,7 +4996,7 @@ void fldResetSparkRewardProfileIndex(void) {
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_003899E0[0] = 0;
-    fldAreaState.unk118 = 0;
+    fldAreaState.playerModelAlternate = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
@@ -5012,7 +5012,7 @@ void fldResetAfterEvent(void) {
     sndQueueSoundId(0x680017);
     mnuAdvanceTitleStateUnderSemaphore();
     D_003899E0[0] = 0;
-    fldAreaState.unk118 = 0;
+    fldAreaState.playerModelAlternate = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldStartSceneBgmAlternate();

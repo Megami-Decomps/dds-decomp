@@ -87,7 +87,7 @@ typedef struct FldAreaWork {
     u8 pad10C[4];
     u32 pendingSceneRequest;
     s32 deferredExit;
-    s32 unk118;
+    s32 playerModelAlternate;    /* 0x118: toggles the player_a/player_b model selection. */
     s32 unk11C;
     f32 attritionDistance;      /* 0x120: movement toward the next HP attrition tick. */
 #ifdef VERSION_DDS2
@@ -168,6 +168,7 @@ typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[
     (FLD_AREA_OFFSET(cameraTargetGraceTicks) == 0xE8) ? 1 : -1];
 typedef char FldAreaWork_transitionMode_offset_check[(FLD_AREA_OFFSET(transitionMode) == 0x104) ? 1 : -1];
 typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
+typedef char FldAreaWork_playerModelAlternate_offset_check[(FLD_AREA_OFFSET(playerModelAlternate) == 0x118) ? 1 : -1];
 typedef char FldAreaWork_unk11C_offset_check[(FLD_AREA_OFFSET(unk11C) == 0x11C) ? 1 : -1];
 typedef char FldAreaWork_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(colorEffectSuppressed) == 0x12A) ? 1 : -1];
 typedef char FldAreaWork_sceneBgmSuppressed_offset_check[(FLD_AREA_OFFSET(sceneBgmSuppressed) == 0x130) ? 1 : -1];

@@ -2618,7 +2618,7 @@ void func_00147188(s32 unused) {
     s32 xOffset;
     s32 yOffset;
 
-    if (fldAreaState.unk118 == 1) {
+    if (fldAreaState.playerModelAlternate == 1) {
         return;
     }
     if (fldAreaState.area >= 200) {
@@ -3308,7 +3308,7 @@ void fldDrawLocationPanel(void) {
         return;
     }
     work = &fldAreaState;
-    if (work->unk118 == 1 || work->deferredExit != 0) {
+    if (work->playerModelAlternate == 1 || work->deferredExit != 0) {
         return;
     }
     if (fldFindLocationCoordinateRecord(work->area, work->floor + 1)[2] <= 0) {
@@ -4679,7 +4679,7 @@ void fldUpdateSparkEncounterScene(void) {
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_0032E5C4[0] = 0;
-    fldAreaState.unk118 = 0;
+    fldAreaState.playerModelAlternate = 0;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
