@@ -129,12 +129,12 @@ EffBossWork *effBossCreate(EffBossParams *bossParams, void *effectParams) {
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-void effPCPBossApplyTwoBlocks(void *data) {
+void effPCPBossApplyTwoBlocks(void *parameterTable) {
     EffBossParams *bossParams;
     void *effectParams;
 
-    bossParams = effParamTableGetBlock(data, 0);
-    effectParams = effParamTableGetBlock(data, 1);
+    bossParams = effParamTableGetBlock(parameterTable, 0);
+    effectParams = effParamTableGetBlock(parameterTable, 1);
     effBossCreate(bossParams, effectParams);
 }
 
@@ -191,14 +191,14 @@ EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
 }
 
 /* Apply three packed parameter blocks to the boss effect. */
-void effPCPBossApplyThreeBlocks(void *data) {
+void effPCPBossApplyThreeBlocks(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
 
-    firstBlock = effParamTableGetBlock(data, 0);
-    secondBlock = effParamTableGetBlock(data, 1);
-    thirdBlock = effParamTableGetBlock(data, 2);
+    firstBlock = effParamTableGetBlock(parameterTable, 0);
+    secondBlock = effParamTableGetBlock(parameterTable, 1);
+    thirdBlock = effParamTableGetBlock(parameterTable, 2);
     effBossBeamCreate(firstBlock, secondBlock, thirdBlock);
 }
 
