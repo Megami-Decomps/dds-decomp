@@ -165,7 +165,6 @@ extern SceneKindTable *D_00438F4C;
 extern void btlGatherActorCommandsByKind();
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
-extern void func_001C92A0(s32, s32, s32, s32);
 extern void func_001C9EA0(s32);
 extern void btlDrawItemCommandRows(s32);
 extern void func_001C98E8(s32);
