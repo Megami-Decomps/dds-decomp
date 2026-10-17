@@ -161,7 +161,6 @@ extern char D_003BD198[];
 #define EFF_PACKED_STATUS_HEADER_BYTES 0x20
 #define EFF_STATUS_PARAM_STRIDE 0x18
 #define EFF_STATUS_PARAM_HEADER_BYTES 4
-#define EFF_BATCH_HEADER_BYTES 0xC
 #define EFF_SLOT_WORK_BYTES 0xA0
 #define EFF_PHASE_FULL 0x10000
 #define EFF_PAYLOAD_RECORD_BYTES 0x6C
@@ -262,7 +261,7 @@ void effRequestMappedResource(const char *base, const char *name,
 
 /* Create an owner list with sixteen initially empty record buckets. */
 EffectOwnerRecord *effCreateOwnerRecordList(void *owner) {
-    EffectOwnerRecord *list = sdfAllocSizeClassBlock(EFF_OWNER_LIST_BYTES);
+    EffectOwnerRecord *list = sdfAllocSizeClassBlock(sizeof(EffectOwnerRecord));
     memset(list, 0, EFF_OWNER_LIST_BYTES);
     list->owner = owner;
     return list;
@@ -476,7 +475,7 @@ struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader
 
 /* Build the live batch header from the serialized count and owned record array. */
 EffMappedResource *effCreateMappedResource(const u8 *source) {
-    EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(sizeof(EffMappedResource));
     EffMappedHeader header;
 
     mappedResource->allocation = effLoadMappedStatusRecords(source, &header);
@@ -487,7 +486,7 @@ EffMappedResource *effCreateMappedResource(const u8 *source) {
 
 /* Build one zeroed status record and allocate the category's required status storage. */
 EffMappedResource *effCreateStatusBatch(u32 category) {
-    EffMappedResource *batch = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffMappedResource *batch = sdfAllocSizeClassBlock(sizeof(EffMappedResource));
     struct SdfMemBlock *allocation;
     u32 recordAddress;
     u32 statusBytes;
@@ -697,7 +696,7 @@ u8 effHasFirstTextureHandle(const EffectSlotSet *set) {
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
 EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
-    EffPayload *header = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffPayload *header = sdfAllocSizeClassBlock(sizeof(EffPayload));
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(recordBytes);
     u8 *records;
 
@@ -723,7 +722,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
     u32 index;
     u32 sourceOffset;
 
-    set = sdfAllocSizeClassBlock(0x30);
+    set = sdfAllocSizeClassBlock(sizeof(EffectSlotSet));
     memset(set, 0, 0x30);
     set->sharesTextureReferences = 0;
     set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
@@ -753,7 +752,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
 }
 
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
-    EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
+    EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(sizeof(EffectSlotSet));
     u32 index = 0;
     effect->sharesTextureReferences = 1;
     {

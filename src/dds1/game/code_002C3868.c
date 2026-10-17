@@ -318,7 +318,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
         if ((mask >> i) & 1) {
             channel = (SdfCounterChannel *)mnuListAppendNode(
                 (struct MenuList *)sdfActiveCounterRuntime, NULL);
-            display = sdfAllocSizeClassBlock(0x10);
+            display = sdfAllocSizeClassBlock(sizeof(SdfCounterDisplay));
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->word = (u32 *)(D_00390220 + i * 0x18);

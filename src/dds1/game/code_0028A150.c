@@ -4202,7 +4202,7 @@ void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
 
 FileJobPayload *fileCreateJob(FileJobType type) {
     FileJobType kind = type;
-    FileJobPayload *job = sdfAllocSizeClassBlock(0x2C);
+    FileJobPayload *job = sdfAllocSizeClassBlock(sizeof(FileJobPayload));
     memset(job, 0, 0x2C);
     job->unk0 = 200;
     job->type = kind;
@@ -4534,7 +4534,7 @@ void fileQueueRemove(FileQueue *queue, FileJob *job) {
 }
 
 FileQueue *fileQueueCreate(void) {
-    FileQueue *queue = sdfAllocSizeClassBlock(0x90);
+    FileQueue *queue = sdfAllocSizeClassBlock(sizeof(FileQueue));
     memset(queue, 0, 0x90);
     queue->count = 0;
     queue->updateFrame = 0;
@@ -4543,7 +4543,7 @@ FileQueue *fileQueueCreate(void) {
 }
 
 FileJob *fileJobCreate(void) {
-    FileJob *job = sdfAllocSizeClassBlock(0xC0);
+    FileJob *job = sdfAllocSizeClassBlock(sizeof(FileJob));
     memset(job, 0, 0xC0);
     fileJobResetAndInitTransform(job);
     return job;
@@ -5347,7 +5347,7 @@ void camAimRotation(CamAim *obj, void *dst)
 }
 
 LoadObj *fileLoadObjectCreate(void *owner) {
-    LoadObj *obj = sdfAllocAndClearQuadwords(0x4C);
+    LoadObj *obj = sdfAllocAndClearQuadwords(sizeof(LoadObj));
     obj->owner = owner;
     obj->color = 0x80808080;
     obj->scale = 1.0f;

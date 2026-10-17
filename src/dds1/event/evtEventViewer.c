@@ -317,7 +317,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 entryType, EvtRuntime *viewer)
 {
     EvtRuntimeGroup *entry;
 
-    entry = sdfAllocSizeClassBlock(0x84);
+    entry = sdfAllocSizeClassBlock(sizeof(EvtRuntimeGroup));
     if (entry == NULL) {
         return NULL;
     }

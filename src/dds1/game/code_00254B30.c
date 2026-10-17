@@ -567,7 +567,7 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
 INCLUDE_ASM(const s32, "game/code_00254B30", itfUpdateDisplayListNode);
 
 MnuSceneListNode *mnuAllocateDisplayListNode(void) {
-    MnuSceneListNode *node = sdfAllocSizeClassBlock(0x14);
+    MnuSceneListNode *node = sdfAllocSizeClassBlock(sizeof(MnuSceneListNode));
 
     memset(node, 0, 0x14);
     return node;

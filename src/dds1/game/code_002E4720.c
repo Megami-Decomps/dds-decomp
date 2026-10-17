@@ -36,7 +36,6 @@
 
 #define SDF_DEV_SEEK_END 2
 
-#define SDF_DEV_STATE_BYTES 0x40
 
 #define SDF_DEV_INVALID_FILE_HANDLE -1
 
@@ -1538,7 +1537,7 @@ INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevResolvePathForWorker);
 /* Allocate a request state and retain the callback's opaque context word. */
 DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
-    DevState *state = (DevState *)sdfAllocAndClearQuadwords(SDF_DEV_STATE_BYTES);
+    DevState *state = (DevState *)sdfAllocAndClearQuadwords(sizeof(DevState));
     state->resolvedPath = resource;
     state->workerIndex = workerIndex;
     state->operation = operation;

@@ -34,7 +34,6 @@ extern s32 SignalSema(s32);
 #define FILE_READ_SLOT_SHIFT 16
 #define FILE_PAC_REQUEST_BYTES 0x70
 #define FILE_PAC_PACKET_OFFSET 0x30
-#define FILE_VALUE_PAIR_REQUEST_BYTES 0x30
 
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
  * then release any device state, duplicated name and entry, returning zero.
@@ -264,7 +263,7 @@ void fileWaitIdle(void) {
 /* Create a kind-two request with the caller's source buffer and byte count.
  * Its address is stored in the existing value word at +0x24. */
 FileWindowSlot *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
-    FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
+    FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(sizeof(FileWindowSlot));
 
     requestSlot->sourceData = sourceData;
     requestSlot->sourceDataCopy = sourceData;

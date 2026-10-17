@@ -1819,7 +1819,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
         procedureIndex >= sections->count) {
         return NULL;
     }
-    process = sdfAllocSizeClassBlock(0xF4);
+    process = sdfAllocSizeClassBlock(sizeof(ScrData));
     if (process == NULL) {
         return NULL;
     }

@@ -149,7 +149,7 @@ void func_001FF0C8(BtlTask *task, u32 mode) {
         break;
     }
     datEnemyAiRecords[0] = D_00360640[table];
-    work = sdfAllocAndClearQuadwords(0x10);
+    work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     unit = task->unit;
     btlActionScratchWork = work;
     work->actor = task;

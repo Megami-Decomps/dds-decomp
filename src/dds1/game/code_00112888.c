@@ -39,7 +39,7 @@ s32 dds3CreateCameraData(EffWorldNode *object) {
     ObjBase *objectBase;
 
     effObjInnerCreate(object);
-    inner = sdfAllocSizeClassBlock(0x90);
+    inner = sdfAllocSizeClassBlock(sizeof(CameraData));
     object->data = inner;
     objectBase = dds3CreateSlotResourceState(object);
     inner->handle = objectBase;

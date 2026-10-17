@@ -15,8 +15,6 @@
 #include "mdl.h"
 #include "bill_object_api.h"
 
-#define EFF_PARAM_WORK_BYTES 8
-#define EFF_PARAM_EXTENDED_WORK_BYTES 0xC
 #define EFF_VIEWER_RESOURCE_GROUP 7
 #define EFF_VIEWER_LOAD_FLAGS 0x101
 
@@ -212,7 +210,7 @@ u16 effParamWorkGetId(EffParamWork *work) {
 EffParamWork *effParamWorkCreate(u16 kind, void *source) {
     EffParamWork *work;
 
-    work = sdfAllocSizeClassBlock(EFF_PARAM_WORK_BYTES);
+    work = sdfAllocSizeClassBlock(sizeof(EffParamWork));
     work->kind = kind;
     work->payload = effParamWorkFactories[kind].create(source);
     return work;
@@ -235,7 +233,7 @@ void effParamWorkInvokeCallback(EffParamWork *work) {
 EffParamWork *effParamWorkDuplicate(EffParamWork *source) {
     EffParamWork *work;
 
-    work = sdfAllocSizeClassBlock(EFF_PARAM_WORK_BYTES);
+    work = sdfAllocSizeClassBlock(sizeof(EffParamWork));
     work->kind = source->kind;
     work->payload = effParamWorkFactories[source->kind].duplicate(source->payload);
     return work;
@@ -390,7 +388,7 @@ extern u32 effParamDescriptorGetTableIndex(const u32 *descriptor);
 EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
-    work = sdfAllocSizeClassBlock(EFF_PARAM_EXTENDED_WORK_BYTES);
+    work = sdfAllocSizeClassBlock(sizeof(EffParamWorkEx));
     work->kind = effParamDescriptorGetKind(source);
     work->tableIndex = effParamDescriptorGetTableIndex(source);
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
@@ -416,7 +414,7 @@ void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
 EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
     EffParamWorkEx *work;
 
-    work = sdfAllocSizeClassBlock(EFF_PARAM_EXTENDED_WORK_BYTES);
+    work = sdfAllocSizeClassBlock(sizeof(EffParamWorkEx));
     work->kind = source->kind;
     work->tableIndex = source->tableIndex;
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {

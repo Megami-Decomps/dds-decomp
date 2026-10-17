@@ -97,7 +97,7 @@ void effDestroyModelContext(MdlCtx *model) {
 }
 
 EffModelOwner *effCreateModelOwner(u8 *source) {
-    EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
+    EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(EffModelOwner));
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;

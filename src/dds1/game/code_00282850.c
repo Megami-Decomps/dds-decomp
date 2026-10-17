@@ -50,7 +50,6 @@ extern char D_003BC7A0[];
 
 #define MNU_PANEL_ITEM_COUNT 5
 #define MNU_PANEL_STATE_BYTES 0x64
-#define MNU_PANEL_GROUP_BYTES 0x28
 #define MNU_SPRITE_STATE_BYTES 0x20
 #define MNU_SIMPLE_SPRITE_BYTES 0x28
 #define MNU_PANEL_ITEM_BYTES 0x90
@@ -336,7 +335,7 @@ typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
 MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
-    MenuPanelState *panel = sdfAllocSizeClassBlock(MNU_PANEL_STATE_BYTES);
+    MenuPanelState *panel = sdfAllocSizeClassBlock(sizeof(MenuPanelState));
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
     panel->width = width;
     panel->height = height;
@@ -445,7 +444,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
 
 /* Create the five panel items owned by this group and clear its selection. */
 MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *parent) {
-    MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
+    MenuPanelGroup *group = sdfAllocSizeClassBlock(sizeof(MenuPanelGroup));
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         MenuPanelItem *panelItem = mnuCreatePanelItem();
@@ -544,7 +543,7 @@ void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 o
 MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
                                       struct EffectSlotSet *resourceSet1,
                                       struct EffectSlotSet *resourceSet2) {
-    MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
+    MenuSpriteState *spriteState = sdfAllocSizeClassBlock(sizeof(MenuSpriteState));
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
     spriteState->resourceSets[0] = resourceSet0;
     spriteState->resourceSets[1] = resourceSet1;
@@ -578,7 +577,7 @@ MenuSimpleSpriteState *mnuAllocateSimpleSprite(
     struct EffectSlotSet *resourceSet0, struct EffectSlotSet *resourceSet1,
     struct EffectSlotSet *resourceSet2, struct EffectSlotSet *resourceSet3,
     struct EffectSlotSet *resourceSet4) {
-    MenuSimpleSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
+    MenuSimpleSpriteState *sprite = sdfAllocSizeClassBlock(sizeof(MenuSimpleSpriteState));
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
     sprite->resourceSets[0] = resourceSet0;
     sprite->resourceSets[1] = resourceSet1;
@@ -961,7 +960,7 @@ void func_00284880(void) {
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {
-    MenuPanelItem *panelItem = sdfAllocSizeClassBlock(MNU_PANEL_ITEM_BYTES);
+    MenuPanelItem *panelItem = sdfAllocSizeClassBlock(sizeof(MenuPanelItem));
     memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
     panelItem->value14 = 0x63;
     panelItem->value10 = 0x8c;

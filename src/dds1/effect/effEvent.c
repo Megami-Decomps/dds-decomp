@@ -60,7 +60,6 @@
 #define EFF_EVENT_STAGGERED_SLOT_COUNT 4
 #define EFF_EVENT_NEUTRAL_COLOR 0x80808080
 #define EFF_EVENT_EVENT_RECORD_BYTES 0x30
-#define EFF_EVENT_COMPACT_WORK_BYTES 0x38
 #define EFF_EVENT_HALF_TURN 3.14159265f
 #define EFF_EVENT_RANDOM_MIDPOINT 0.5f
 #define EFF_EVENT_JITTER_RANGE 0.3f
@@ -1168,7 +1167,7 @@ extern void effBattleSetScale(BattleEffect *effect, f32 scale);
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
     const EffEventInit *init = (const EffEventInit *)params;
-    EffEventWork *work = sdfAllocSizeClassBlock(EFF_EVENT_COMPACT_WORK_BYTES);
+    EffEventWork *work = sdfAllocSizeClassBlock(sizeof(EffEventWork));
 
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
