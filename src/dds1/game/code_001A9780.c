@@ -2565,7 +2565,7 @@ void btlDrawPanelIconGroup(s32 section, s32 delta) {
 extern void func_001AF058(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001AF5D0(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void btlDrawCompositePanelSprites(void *, s32, s32, u32);
-extern void func_001AFF78(BtlAnalysisPanelWork *, s32, s32, s32, s16);
+extern void func_001AFF78(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
