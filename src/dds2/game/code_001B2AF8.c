@@ -3061,7 +3061,7 @@ s32 btlCreatePhaseChangePanelTask(s32 variant) {
         points = &secondPoints;
     }
     /* Copy the five coordinate pairs into the current rows. */
-    destination = &work->current[0].y;
+    destination = &work->current[0][1];
     source = (s32 *)points->points;
     for (i = 0; i < 5; i++) {
         destination[-1] = source[0];
@@ -4393,9 +4393,9 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
         work->waitCounter = work->waitCounter <= 0 ? 0 : work->waitCounter > 10 ? 10 : work->waitCounter;
         if (work->waitCounter >= 3) {
             for (i = 0; i < 3; i++) {
-                work->current[i].x -= 10;
-                work->current[i].x = work->current[i].x <= bounds.values[i][0] ? bounds.values[i][0] :
-                    work->current[i].x < bounds.values[i][1] ? work->current[i].x : bounds.values[i][1];
+                work->current[i][0] -= 10;
+                work->current[i][0] = work->current[i][0] <= bounds.values[i][0] ? bounds.values[i][0] :
+                    work->current[i][0] < bounds.values[i][1] ? work->current[i][0] : bounds.values[i][1];
                 for (j = 0; j < 4; j++) {
                     work->fade[i][j] += 0x20;
                     work->fade[i][j] = work->fade[i][j] <= 0 ? 0 : work->fade[i][j] < limits.values[i][j] ? work->fade[i][j] : limits.values[i][j];
@@ -4406,30 +4406,30 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
         break;
     case 1:
         work->fade[0][0] = 0xFF;
-        work->current[0].x -= 2;
-        if (work->current[0].x <= 300) work->phase++;
+        work->current[0][0] -= 2;
+        if (work->current[0][0] <= 300) work->phase++;
         break;
     case 2:
-        work->current[0].x -= 20;
-        work->current[1].x -= 16;
+        work->current[0][0] -= 20;
+        work->current[1][0] -= 16;
         work->fade[0][0] -= 16;
         work->fade[0][0] = work->fade[0][0] <= 0 ? 0 : work->fade[0][0] > 0xFF ? 0xFF : work->fade[0][0];
-        if (work->current[0].x <= 128) work->phase++;
+        if (work->current[0][0] <= 128) work->phase++;
         break;
     case 3:
-        work->current[0].x -= 18;
-        work->current[1].x -= 18;
-        work->current[2].x -= 18;
-        if (work->current[0].x <= 96) {
+        work->current[0][0] -= 18;
+        work->current[1][0] -= 18;
+        work->current[2][0] -= 18;
+        if (work->current[0][0] <= 96) {
             work->phase++;
             work->fade[0][0] = 0;
             work->fade[0][2] = 0;
         }
         break;
     case 4:
-        work->current[0].x -= 20;
-        work->current[1].x -= 20;
-        work->current[2].x -= 20;
+        work->current[0][0] -= 20;
+        work->current[1][0] -= 20;
+        work->current[2][0] -= 20;
         work->fade[0][1] -= 0x20;
         work->fade[0][1] = work->fade[0][1] <= 0 ? 0 : work->fade[0][1] > 0x80 ? 0x80 : work->fade[0][1];
         work->fade[0][3] -= 0x20;
@@ -4453,8 +4453,8 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
     if (work->phase >= 3) {
         for (i = 0; i < 3; i++) {
             s32 height = btlResourceBlock->resC->workEntries[slots.values[i]].sourceHeight;
-            work->saved[i].y += 3;
-            work->saved[i].y = work->saved[i].y <= 0 ? 0 : work->saved[i].y < height ? work->saved[i].y : height;
+            work->saved[i][1] += 3;
+            work->saved[i][1] = work->saved[i][1] <= 0 ? 0 : work->saved[i][1] < height ? work->saved[i][1] : height;
         }
     }
     work->fade[1][3] = 0;
