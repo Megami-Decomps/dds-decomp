@@ -614,8 +614,8 @@ s32 dds3FindEntryIndex(rosterIndex)
 }
 
 /* Read a signed stat byte in the first active roster record. */
-s8 ptyReadSignedRosterStatByte(s32 statIndex) {
-    return datGameState->party[0].baseStats[statIndex];
+s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
+    return datGameState->party[0].baseStats[byteOffset];
 }
 
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32 minimumValue);
