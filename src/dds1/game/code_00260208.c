@@ -645,8 +645,8 @@ s8 brsTaskHasPendingRows(void) {
     return brsPendingRowsLatched;
 }
 
-s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *context) {
-    if (context->teardownResource != NULL) {
+s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *work) {
+    if (work->teardownResource != NULL) {
         brsUpdateBlocked = 0;
     }
     return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
