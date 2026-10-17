@@ -3861,7 +3861,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     s32 cols;
     s32 size;
     struct SdfMemBlock *base;
-    u8 *data;
+    u8 *trackStorage;
     EffTrackSet *set;
 
     switch (kind) {
@@ -3893,19 +3893,19 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     size = ((rows * 2 + cols) * 2 + rows) * 4;
     size = (((size >> 4) + ((size & 0xF) != 0)) << 4);
     base = sdfAllocGeneralBlock(size + 0x30);
-    data = (u8 *)sdfResourceRetainAddress(base);
-    set = (EffTrackSet *)(data + size);
-    set->buffer = data;
-    data += rows * 16;
+    trackStorage = (u8 *)sdfResourceRetainAddress(base);
+    set = (EffTrackSet *)(trackStorage + size);
+    set->buffer = trackStorage;
+    trackStorage += rows * 16;
     if (cols > 0) {
-        set->columns = data;
-        data += cols * 8;
+        set->columns = trackStorage;
+        trackStorage += cols * 8;
     } else {
         set->columns = 0;
     }
     set->color = 0x80808080;
     set->type = 2;
-    set->tail = data;
+    set->tail = trackStorage;
     set->rows = rows;
     set->kind = kind;
     set->count = count;
