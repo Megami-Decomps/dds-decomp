@@ -1495,6 +1495,8 @@ extern u16 D_003BA970;
 extern u16 D_003BA972;
 extern char D_003BA978[];
 
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+
 s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
     SdfListHead *list;

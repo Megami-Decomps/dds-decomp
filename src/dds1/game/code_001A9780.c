@@ -385,7 +385,7 @@ s32 btlRollStoneDeathChance(BtlUnit *actor, s32 index) {
     }
     chance = (s32)((f32)chance * ratio);
     btlBossDebugPrintf("btl:stone dead=%d%%[ratio=%.2f]\n", chance, ratio);
-    return btlRollAiBucket() < chance;
+    return (s32)btlRollAiBucket() < chance;
 }
 
 extern char D_003A1DA0[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
@@ -398,7 +398,7 @@ s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *actor) {
     if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 0;
     if (btlCheckSpecialAbility(&actor->partyRecord, 0x231)) return 1;
     btlBossDebugPrintf(D_003A1DA0, 5, 1.0);
-    return btlRollAiBucket() < 5;
+    return (s32)btlRollAiBucket() < 5;
 }
 
 s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
@@ -436,7 +436,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     if (chance == 0) {
         return 0;
     }
-    if (btlRollAiBucket() >= chance) {
+    if ((s32)btlRollAiBucket() >= chance) {
         return 0;
     }
     flags = record->huntPenaltyFlags;
@@ -460,7 +460,7 @@ s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
     for (i = 0; i < 3; i++) {
         if (btlCheckSpecialAbility(&actor->partyRecord, btlPassiveAbilityActions[i * 2])) {
             threshold = (s32)(datAbilityParameters[btlPassiveAbilityActions[i * 2] - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
-            if (btlRollAiBucket() < threshold) {
+            if ((s32)btlRollAiBucket() < threshold) {
                 result = (btlPassiveAbilityActions + i * 2)[1];
                 break;
             }

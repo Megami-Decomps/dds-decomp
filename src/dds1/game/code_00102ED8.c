@@ -765,6 +765,8 @@ void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
                                 width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
 
+extern u32 kwlnTextureGetPageIndex(void);
+
 /* Append the zero-based viewer page and final page index; an empty list prints -1. */
 void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
     char pageText[0x70];

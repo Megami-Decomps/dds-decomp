@@ -433,6 +433,9 @@ void btlReleaseEventAssets(void) {
     btlBossDebugPrintf(D_003A6838);
 }
 
+extern u8 *btlFindUnitByModeClear(s32);
+extern u8 *btlFindUnitByModeFlagged(s32);
+
 /* Select a unit and event-resource key from script parameters.
  * Missing/inactive units or missing resources leave state untouched;
  * the command still returns 1 on every path. */
