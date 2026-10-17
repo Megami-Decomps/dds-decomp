@@ -83,7 +83,6 @@ void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) 
 
 typedef EffBlurQuad BlurSource;
 
-extern void *billGetWorkTransformMatrix(void *packet);
 
 
 struct SdfListHead;
@@ -290,7 +289,7 @@ void effDrawBlurRectangle(const EffBlurQuad *source)
         clampPacket[5] = 8;
         sdfAppendPacket(list, (u32)clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
-        effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix(drawPacket), 0);
+        effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, (u32)drawPacket);
         D_003803E8.append(&D_003803E8, list);
     }
@@ -376,10 +375,10 @@ void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixe
     SdfDrawPacket *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
-    effBuildBlurUnitTextureQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix(packet), fixedPointCoordinates);
+    effBuildBlurUnitTextureQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
     sdfAppendPacket(list, (u32)packet);
     packet = effCreateSizedDrawPacket(1, 0);
-    effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix(packet), fixedPointCoordinates);
+    effBuildBlurTransformedQuad(source, billGetWorkTransformMatrix(packet), fixedPointCoordinates);
     sdfAppendPacket(list, (u32)packet);
 }
 

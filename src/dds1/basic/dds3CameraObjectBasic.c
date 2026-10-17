@@ -28,12 +28,12 @@ extern f32 sdfViewUpVector[4];
 
 /* Release the camera's inner node, base handle, and owned data block. */
 void dds3DestroyCameraData(EffWorldNode *camera) {
-    CameraData *data;
+    CameraData *cameraData;
 
     effObjFreeInner(camera);
-    data = ((CameraData *)camera->data);
-    dds3DestroyObjectBase(data->handle);
-    sdfReleaseChipBlock(data);
+    cameraData = ((CameraData *)camera->data);
+    dds3DestroyObjectBase(cameraData->handle);
+    sdfReleaseChipBlock(cameraData);
 }
 
 /* Rebuild dirty vectors and publish only the active world's camera; return 1.

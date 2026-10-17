@@ -66,11 +66,11 @@ u32 sdfReadTimerCount(void) {
 
 /* EE timer 0 count register; subtraction is reduced modulo 2^16 so
  * wraparound does not make short elapsed intervals negative. */
-u32 sdfGetElapsedTimerTicks(u32 previous) {
+u32 sdfGetElapsedTimerTicks(u32 previousTick) {
     u32 current;
 
     current = *(volatile u32 *)0x10000000;
-    return (current - previous) & 0xFFFF;
+    return (current - previousTick) & 0xFFFF;
 }
 
 void sdfRunTickWorkerThread(void) {

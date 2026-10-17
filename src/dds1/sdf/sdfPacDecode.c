@@ -26,7 +26,6 @@ enum {
 
 void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfDecodePacNodeAndAdvanceTail(PacState *state);
-void sdfRelocatePackedResourceWords(void *words, void *relocationBase, void *table, s32 tableBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
 void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
@@ -254,7 +253,7 @@ void sdfPacRelocateQueuedPayload(PacState *state) {
     s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
     if (tableBytes != 0) {
-        sdfRelocatePackedResourceWords(payload, payload, payload + record->tableOffset, tableBytes);
+        sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);
@@ -274,7 +273,7 @@ void sdfPacFinalizeRelocatedPayload(PacState *state) {
     s32 tableBytes = record->tableBytes;
     work->dataCursor = payload;
     if (tableBytes != 0) {
-        sdfRelocatePackedResourceWords(payload, payload, payload + record->tableOffset, tableBytes);
+        sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
     sdfDecodePacNodeAndAdvanceTail(state);

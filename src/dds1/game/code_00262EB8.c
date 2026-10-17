@@ -15,12 +15,12 @@ extern u8 D_0036D3EC[];
 
 s32 brsMessageInputStep(KwlnTask *input) {
     BrsSkillPackageWork *context;
-    s32 *window;
+    s32 *transitionState;
     s32 buttons;
     s32 result;
 
     context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
-    window = &context->transition.state;
+    transitionState = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
         return 0;
@@ -29,12 +29,12 @@ s32 brsMessageInputStep(KwlnTask *input) {
     if (result != 0) {
         return result;
     }
-    if (*window == 0) {
+    if (*transitionState == 0) {
         brsNoOpMessageInputCallback(context);
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_00324530[3] & 2) != 0)) {
             mnuClearTitleState(context);
-            mnuSetPopupEntry(window, D_0036D3EC);
+            mnuSetPopupEntry(transitionState, D_0036D3EC);
         }
     }
     return 0;

@@ -9,7 +9,6 @@
 extern void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8 gsCoordinates);
 
 #include "sdf_packet_alloc.h"
-extern void *billGetWorkTransformMatrix(void *packet);
 extern SdfPoolNode D_003253C8;
 
 void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8 gsCoordinates) {
@@ -32,7 +31,7 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
     sdfAppendPacket(list, (u32)packet);
     sdfConsCreateDrawPacket(list, resource, 1);
     drawPacket = effCreateSizedDrawPacket(1, 0x200);
-    quad = (BlurPacketQuad *)billGetWorkTransformMatrix(drawPacket);
+    quad = billGetWorkTransformMatrix(drawPacket);
     quad->color[0] = params->color[0];
     quad->color[1] = params->color[1];
     quad->color[2] = params->color[2];

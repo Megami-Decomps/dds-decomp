@@ -26,6 +26,7 @@
 #include "kwln_task_lifecycle.h"
 #include "sdf_chip.h"
 #include "mdl_flag_api.h"
+#include "mnu_effect_pair.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -128,11 +129,6 @@ extern s32 sprintf(char *, const char *, ...);
 typedef struct FrFontGlyph FrFontGlyph;
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];
-
-typedef struct EffectPair {
-    s32 firstValue;
-    s32 secondValue;
-} EffectPair;
 
 extern EffectPair D_00437878[];
 

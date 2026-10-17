@@ -11,6 +11,8 @@ typedef struct PacReloc {
     u8 payload[1]; /* 0x10: relocated payload */
 } PacReloc;
 
+void sdfRelocatePackedResourceWords(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes);
+
 typedef char PacReloc_tableOffset_must_be_at_0[
     ((u32)&((PacReloc *)0)->tableOffset == 0) ? 1 : -1];
 typedef char PacReloc_tableBytes_must_be_at_4[

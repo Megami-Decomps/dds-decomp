@@ -230,10 +230,10 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
  * attached data block and the task's AdminWork block. */
 void dds3AdminReleaseTaskWork(KwlnTask *task) {
     AdminWork* work = (AdminWork*)kwlnTaskGetUserValue(task);
-    s32 mode = work->activeMode;
+    s32 activeMode = work->activeMode;
 
-    if (mode >= 0) {
-        s32 (*destroy)(void) = ddsAdminModeCallbacks[mode].destroy;
+    if (activeMode >= 0) {
+        s32 (*destroy)(void) = ddsAdminModeCallbacks[activeMode].destroy;
 
         if (destroy != NULL) {
             destroy();

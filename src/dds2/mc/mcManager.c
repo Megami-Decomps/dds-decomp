@@ -80,14 +80,14 @@ void mcReadDirectoryEntries(u32 port, const char *path, void *directoryEntries, 
 /* Accept any completed nonnegative status and write it to resultOut, which
  * must be valid on success and stays untouched otherwise. Translate -4 to
  * -2, other negatives to -1; non-complete SDK polls map to 0. */
-McPollResult mcPollNonnegativeResult(s32 *resultOut) {
+McPollResult mcPollNonnegativeResult(s32 *commandResultOut) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
-            *resultOut = commandResult;
+            *commandResultOut = commandResult;
             return pollResult;
         }
         if (commandResult == MC_SDK_SPECIAL_ERROR) {
@@ -125,14 +125,14 @@ void mcOpenFilePath(u32 port, const char *path, s32 openFlags) {
 
 /* Accept any completed nonnegative status, writing resultOut only then.
  * Preserve the -4/-2 translation and all other poll/result distinctions. */
-McPollResult mcPollCommandStatusWithResult(s32 *resultOut) {
+McPollResult mcPollCommandStatusWithResult(s32 *commandResultOut) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
-            *resultOut = commandResult;
+            *commandResultOut = commandResult;
             return pollResult;
         }
         if (commandResult == MC_SDK_SPECIAL_ERROR) {

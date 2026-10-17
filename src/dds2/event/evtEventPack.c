@@ -41,23 +41,23 @@ const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %
 
 /* Decode one retained unit payload and return its new viewer-object key. */
 s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
-    EvtPackLoadState *data;
+    EvtPackLoadState *packState;
     EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
     u8 *modelPayload;
     s32 viewerObjectKey;
 
-    data = evtGetEventPackLoadState(eventId);
+    packState = evtGetEventPackLoadState(eventId);
     packEntryIndex = 0;
-    if (data->header->entryCount > 0) {
-        entry = data->entries;
+    if (packState->header->entryCount > 0) {
+        entry = packState->entries;
         do {
             if (entry->secondaryResourceId == resourceId) {
                 switch (entry->kind) {
                 case 5:
                     entrySize = entry->dataSize;
-                    modelPayload = data->data + entry->dataOffset;
+                    modelPayload = packState->data + entry->dataOffset;
                     sdfDebugPrintf(D_00424830, resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
@@ -80,7 +80,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 }
             }
             entry++;
-        } while (++packEntryIndex < data->header->entryCount);
+        } while (++packEntryIndex < packState->header->entryCount);
     }
     return -1;
 }
@@ -137,7 +137,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
 
 s32 evtUpdateMotionSeTask(KwlnTask *task) {
     EvtMotionSeTaskParams *motionSeParams;
-    EffWorldNode *node;
+    EffWorldNode *motionNode;
     EvtPackLoadState *packState;
     EvtUnit *unit;
     u16 motionId;
@@ -150,8 +150,8 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
-    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
-    if (node == NULL) {
+    motionNode = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
+    if (motionNode == NULL) {
         return -1;
     }
     packState = evtGetEventPackLoadState(motionSeParams->eventTaskId);
@@ -161,7 +161,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (motionSeParams->eventTaskId < 600) {
         return 0;
     }
-    unit = ((EvtMotionSeUnitLink *)node->data)->unit;
+    unit = ((EvtMotionSeUnitLink *)motionNode->data)->unit;
     if (unit == NULL) {
         return -1;
     }

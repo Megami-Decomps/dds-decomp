@@ -21,6 +21,7 @@
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
 #include "sdf_draw_packet_groups.h"
+#include "sdf_motion.h"
 
 extern u32 sdfForcedAssetTextureMode;
 
@@ -982,8 +983,8 @@ void sdfCopyAssetListParameterState(DevRequest *destination, DevRequest *source)
 
 extern s32 (*D_0040B358[])(u32, u32);
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-void *sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
-    return (void *)D_0040B358[commandWord >> 16](context, commandWord);
+void *sdfDispatchAssetCommandWord(Motion *motion, u32 commandWord, s32 targetIndex) {
+    return (void *)D_0040B358[commandWord >> 16]((u32)motion, commandWord);
 }
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", sdfLiveAssetCount);

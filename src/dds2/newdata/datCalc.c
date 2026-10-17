@@ -1367,7 +1367,7 @@ extern DatSkillList *D_00435E28;
 s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex) {
     DatAffinityRecord *record;
     s32 requirement;
-    s32 value;
+    s32 requirementValue;
     u32 i;
 
     if (unit == NULL) {
@@ -1388,23 +1388,23 @@ s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 req
         }
         break;
     case 0x10000000:
-        value = requirement & 0x0FFFFFFF;
+        requirementValue = requirement & 0x0FFFFFFF;
         for (i = 0; i < 24; i++) {
-            if (unit->effectData[i] != 0 && (1 << datCommandSelectors[unit->effectData[i]].stat) == value) {
+            if (unit->effectData[i] != 0 && (1 << datCommandSelectors[unit->effectData[i]].stat) == requirementValue) {
                 return 1;
             }
         }
         break;
     case 0x20000000:
-        value = requirement & 0x0FFFFFFF;
-        if (value == 0 || value == (1 << unit->unitId)) {
+        requirementValue = requirement & 0x0FFFFFFF;
+        if (requirementValue == 0 || requirementValue == (1 << unit->unitId)) {
             return 1;
         }
         break;
     case 0x40000000:
-        value = requirement & 0x0FFFFFFF;
+        requirementValue = requirement & 0x0FFFFFFF;
         for (i = 0; i < 24; i++) {
-            s16 skill = D_00435E28[value].skills[i];
+            s16 skill = D_00435E28[requirementValue].skills[i];
 
             if (skill >= 0 && datUnitHasSkill(unit, skill)) {
                 return 1;
@@ -2133,13 +2133,13 @@ s32 evtPushLevelValueCCommand18E(void) {
 }
 
 s32 evtRollFlagDependentResultCode(void) {
-    s32 value;
+    s32 resultCode;
     if ((((DatPartyRecord *)evtWorkScriptContext.secondArgument)->flags & 0x20) == 0) {
-        value = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
+        resultCode = effMiscRandMod(0, 0x20) != 0 ? 0xA : 0x80;
     } else {
-        value = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
+        resultCode = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
     }
-    scrSetIntegerReturnValue(value);
+    scrSetIntegerReturnValue(resultCode);
     return 1;
 }
 
