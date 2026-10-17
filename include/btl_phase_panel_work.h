@@ -21,8 +21,8 @@ typedef struct BattlePhasePanelWork {
     s32 counter;
     s32 angle;
     u8 pad2C[0xC];
-    BattleSelectionPosition current[8]; /* 0x38 */
-    BattleSelectionPosition saved[8];   /* 0x78 */
+    s32 current[8][2]; /* 0x38 */
+    s32 saved[8][2];   /* 0x78 */
     s32 fade[8][4];                    /* 0xB8 */
 } BattlePhasePanelWork;
 
