@@ -377,7 +377,10 @@ functions use trampolines and are a different case.
   ternary/assign-if whose arm is a signed `s8`/`s16` load; several statements
   in the `if` body (`if (x) { f |= 2; f |= 4; }`); a nested ternary
   `a ? a : (b ? b : c)`; an else-if clamp chain on an `s8`/`s16`. One-insn arms
-  (`if (x) f |= 2;`, `return g ? h : 0;`) give no `xori`.
+  (`if (x) f |= 2;`, `return g ? h : 0;`) give no `xori`. If-conversion turns one
+  nesting level per pass, so a three-level ladder of conditional returns
+  (`if (r) return r; if (a) return a; if (b) return b; return 0;`) leaves the
+  outermost cmov to the late pass (DDS1 `func_001BF040`).
 - `li K; mult` for a small K that shifts could do: the multiplier is a named
   local, e.g. `s32 cw = 0xC0, ch = 0x60;`, used as `cols * cw + ch`. Literals
   and `const` locals fold to `sll/addu` (`func_00103790`; DDS1 twin
