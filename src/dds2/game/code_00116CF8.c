@@ -76,8 +76,8 @@ EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name) {
 extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
 
-Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
-    Dds3PathCurveTable *table = object->data;
+Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *pathSource) {
+    Dds3PathCurveTable *table = pathSource->data;
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;
     Dds3PathCurveWork *work;
