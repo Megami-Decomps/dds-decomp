@@ -1875,10 +1875,10 @@ s32 itmClaimFreeSlot(s32 row) {
 }
 
 /* Convert a camp reward row and its three-way option to a flat index. */
-s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option) {
+s32 mnuCampGetWideRewardRowIndex(s32 listedItemIndex, s32 option) {
     s32 flatRewardIndex = 3;
 
-    flatRewardIndex = row * flatRewardIndex;
+    flatRewardIndex = listedItemIndex * flatRewardIndex;
     flatRewardIndex += option;
     return flatRewardIndex;
 }
@@ -1887,9 +1887,9 @@ s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
     return row * 2 + slot;
 }
 
-u32 mnuCampChooseSolarWeightedOption(s32 row) {
+u32 mnuCampChooseSolarWeightedOption(s32 listedItemIndex) {
     s32 chance = effMiscRand(0) & 0xFF;
-    u8 *item = mnuCampListedItemSolarWeightsView + row * 8;
+    u8 *item = mnuCampListedItemSolarWeightsView + listedItemIndex * 8;
     s32 total = 0;
     u32 optionIndex = 0;
     do {
@@ -1937,8 +1937,8 @@ s32 mnuCampFindFreeWideEntryIndex(s32 row) {
     return 15;
 }
 
-s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row) {
-    s32 *entry = (s32 *)(mnuCampCompactEntries + row * 0x44);
+s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 listedItemIndex) {
+    s32 *entry = (s32 *)(mnuCampCompactEntries + listedItemIndex * 0x44);
     s32 entryIndex = 0;
     do {
         s32 value = *entry;
@@ -3753,10 +3753,10 @@ s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
-extern u32 mnuCampChooseSolarWeightedOption(s32 row);
+extern s32 mnuCampGetWideRewardRowIndex(s32 listedItemIndex, s32 option);
+extern u32 mnuCampChooseSolarWeightedOption(s32 listedItemIndex);
 extern u8 mnuCampChooseWeightedTableValue(void);
-extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
+extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 listedItemIndex);
 s32 evtMenuPrepareCampRewardSelection(KwlnTask *task) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     struct MenuList *activeList = scene->window->list;
