@@ -1475,8 +1475,8 @@ void sdfPadBuildButtonStates(void) {
 }
 
 /* Store a mode request for the indexed logical pad; setup applies it later. */
-void sdfPadRequestMode(s32 padIndex, u8 mode) {
-    sdfPadPorts[padIndex].requestedMode = mode;
+void sdfPadRequestMode(s32 padIndex, u8 requestedMode) {
+    sdfPadPorts[padIndex].requestedMode = requestedMode;
 }
 
 /* Store the small-motor request without validating the logical pad index. */
