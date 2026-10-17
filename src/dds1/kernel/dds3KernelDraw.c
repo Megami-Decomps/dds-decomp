@@ -20,7 +20,7 @@ extern s16 kwlnDrawOverlayTransitionStartScale;
 extern s16 kwlnDrawOverlayTransitionTargetAlpha;
 extern s16 kwlnDrawOverlayTransitionTargetScale;
 
-extern u32 D_00324770[4];
+extern f32 *D_00324770[4]; /* three light sources and a null */
 
 /* Draw state blocks (D_003C2xxx) with dirty flags in kwlnDrawControlFlags. Each
  * setter writes its block, snapshots a flag byte to D_003BD7xx and
@@ -108,9 +108,9 @@ void kwlnDrawCopyWords20(KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
 }
 
-/* Store a light-source pointer in the indexed raw address table. */
+/* Store a light-source pointer in the indexed light table. */
 void dds3DrawSetLightSourcePointer(void *lightSource, s32 index) {
-    D_00324770[index] = (u32)lightSource;
+    D_00324770[index] = lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */
