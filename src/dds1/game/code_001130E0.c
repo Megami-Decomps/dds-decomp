@@ -394,7 +394,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
 }
 
 extern void evtEndUnitValueTransitionForObject(EffWorldNode *, s32);
-extern void evtSetUnitValueTransitionForObject(void *, EffWorldNode *, s32);
+extern void evtSetUnitValueTransitionForObject(EffectValueObject *value, EffWorldNode *object, s32 duration);
 
 void evtEndObjectValueTransition(EffWorldNode *object) {
     EffectObjectData *data;

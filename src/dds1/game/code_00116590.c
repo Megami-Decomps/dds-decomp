@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "effect_value_object.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_light.h"
@@ -69,7 +70,7 @@ void dds3ClearUnitObjectLowFlags(EffWorldNode *object) {
 }
 
 /* Kind-5 effect payloads retain transition work separately from light data. */
-void evtSetUnitValueTransitionForObject(void *value, EffWorldNode *object, s32 duration) {
+void evtSetUnitValueTransitionForObject(EffectValueObject *value, EffWorldNode *object, s32 duration) {
     EffectObjectData *data = object->data;
 
     evtSetUnitValueTransition(data->transitionWork, value, duration);
