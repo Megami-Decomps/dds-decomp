@@ -35,12 +35,12 @@ u32 dds3GetAdminTaskValue(void) {
  * when the requested mode is activated. */
 void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory) {
     AdminWork *work;
-    void *previousData;
+    void *previousRequestData;
     u32 flags;
 
     if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
         work = dds3GetAdminTaskWork();
-        previousData = work->requestData;
+        previousRequestData = work->requestData;
         work->requestedMode = requestedMode;
         flags = work->flags;
         flags |= DDS3_ADMIN_REQUEST_PENDING_BIT;
@@ -48,8 +48,8 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
         flags &= ~DDS3_ADMIN_RESTORE_HISTORY_BIT;
         work->flags = flags;
         work->modeTransitionDelay = DDS3_ADMIN_REQUEST_DELAY;
-        if (previousData != NULL) {
-            sdfReleaseChipBlock(previousData);
+        if (previousRequestData != NULL) {
+            sdfReleaseChipBlock(previousRequestData);
             work->requestData = NULL;
             work->requestSizeLowByte = 0;
         }
