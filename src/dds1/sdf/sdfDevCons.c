@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eeregs.h"
 #include "sdf.h"
 #include "sdf_dev_cons.h"
 #include "sdf_dev_cons_stack_packets.h"
@@ -172,7 +173,7 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
     if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
         channelRegisters = packetBuffers->dmaChannel;
         sceDmaSync(channelRegisters, 0, 0);
-        *channelRegisters |= SDF_DMA_CHCR_TTE; /* CHCR bit 6: tag-transfer enable */
+        HW_WRITE(channelRegisters, HW_READ(channelRegisters) | SDF_DMA_CHCR_TTE); /* CHCR bit 6: tag-transfer enable */
         EE_SYNC();
         sceDmaSendN(channelRegisters, (void *)((u32)packetBuffers->packetStart & SDF_DMA_ADDRESS_MASK), packetBytes >> SDF_DMA_QWORD_SHIFT);
         nextBufferIndex = packetBuffers->activeBufferIndex ^ 1;

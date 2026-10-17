@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eeregs.h"
 #include "eff_random.h"
 #include "sdf_timer.h"
 #include "sdf.h"
@@ -57,7 +58,7 @@ void sdfSleepWithAlarm(u32 delay) {
 
 /* Read EE timer 0's free-running count register. */
 u32 sdfReadTimerCount(void) {
-    return *(volatile u32 *)0x10000000;
+    return HW_READ(T0_COUNT);
 }
 
 /* EE timer 0 count register; subtraction is reduced modulo 2^16 so
@@ -65,7 +66,7 @@ u32 sdfReadTimerCount(void) {
 u32 sdfGetElapsedTimerTicks(u32 previousTick) {
     u32 current;
 
-    current = *(volatile u32 *)0x10000000;
+    current = HW_READ(T0_COUNT);
     return (current - previousTick) & 0xFFFF;
 }
 
@@ -85,8 +86,8 @@ void sdfRunTickWorkerThread(void) {
 
 /* Initialize heaps, textures, pad, graphics/resource services and the tick worker. */
 void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes) {
-    *(volatile u32 *)0x10000010 = 0x83;
-    *(volatile u32 *)0x10000000 = 0;
+    HW_WRITE(T0_MODE, 0x83);
+    HW_WRITE(T0_COUNT, 0);
     sdfInitChipHeap(initialHeapSize);
     sdfInitGeneralHeap(heapSize);
     sdfTexInitializeLists();
