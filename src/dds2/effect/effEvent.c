@@ -261,7 +261,7 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {
@@ -619,7 +619,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
 }
 
 
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 /* Submit a filled rectangle and its line-strip border. Keep native width/height
  * scaling and the distinct shift/multiply forms used by the other draw paths. */

@@ -146,12 +146,12 @@ void scrDestroyAllNamedProcesses(void)
 /* Start a procedure on a script process: copy its name, set pc, clear the stack and timers. */
 s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 {
-    s32 i;
+    s32 cursor;
 
     if (procedureIndex < 0 || procedureIndex >= process->sections->count) {
         return 0;
     }
-    for (i = 0; (process->name[i] = process->procedures[procedureIndex].name[i]) != 0; i++) {
+    for (cursor = 0; (process->name[cursor] = process->procedures[procedureIndex].name[cursor]) != 0; cursor++) {
     }
     process->pc = process->procedures[procedureIndex].addr;
     process->sp = 0;
@@ -159,7 +159,7 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
         ScrStackValue *stackValue = process->stackValues;
         s8 *stackType = process->stackTypes;
 
-        for (i = SCR_STACK_RET; i >= 0; i--) {
+        for (cursor = SCR_STACK_RET; cursor >= 0; cursor--) {
             *stackType++ = 0;
             stackValue++->i = 0;
         }
