@@ -12,17 +12,17 @@ extern ObjBase *dds3GetLightObjectResource(EffWorldNode *object);
 
 
 /* Each object kind keeps its handle in a different structure. */
-ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {
+ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *worldNode) {
     ObjBase *handle;
 
     handle = 0;
-    switch ((object->kindTag >> 24) - 4) {
-    case 0: handle = dds3GetCameraHandle(object); break;
-    case 1: handle = dds3GetEffectObjectModelHolder(object); break;
-    case 2: handle = effObjGetDataHandle(object); break;
-    case 3: handle = effObjGetObjectHandle(object); break;
-    case 4: handle = dds3GetResourceOwnerHandle(object); break;
-    case 5: handle = dds3GetLightObjectResource(object); break;
+    switch ((worldNode->kindTag >> 24) - 4) {
+    case 0: handle = dds3GetCameraHandle(worldNode); break;
+    case 1: handle = dds3GetEffectObjectModelHolder(worldNode); break;
+    case 2: handle = effObjGetDataHandle(worldNode); break;
+    case 3: handle = effObjGetObjectHandle(worldNode); break;
+    case 4: handle = dds3GetResourceOwnerHandle(worldNode); break;
+    case 5: handle = dds3GetLightObjectResource(worldNode); break;
     }
     return handle;
 }
