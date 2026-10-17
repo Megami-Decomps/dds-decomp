@@ -323,12 +323,7 @@ extern u8 D_0037FF88[];
 extern u8 D_003807F8[];
 
 
-typedef struct FldEncEntry {
-    s16 stage;
-    s16 flag;
-    s16 chance;
-    s16 result;
-} FldEncEntry;
+#include "fld_encounter_roll_entry.h"
 
 extern FldEncEntry *fldEncounterRollTable;
 
