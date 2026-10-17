@@ -478,7 +478,7 @@ ObjBase *effObjGetDataHandle(const EffWorldNode *object) {
 
 
 /* Spawn a world object of kind 6 and seed its stored vector. */
-EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation) {
+EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation) {
     f32 zero[4];
     EffWorldNode *obj;
 
@@ -487,7 +487,7 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation) {
     obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_TRANSFORM);
     obj->key = (u32)key;
     dds3EnsureSlotData(obj);
-    effObjSetInnerRotation(obj, rotation);
+    effObjSetInnerRotation(obj, (u128 *)rotation);
     effObjSetInnerPosition(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
     ((EffectTransformData *)obj->data)->offset[0] = offset[0];
