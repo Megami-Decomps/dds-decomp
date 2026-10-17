@@ -83,7 +83,7 @@ extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
 extern s32 kwlnCurrentIncompleteResource;
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 extern void effMiscSeedRandom(void *data, u32 tag);
 extern s32 kwlnTextureViewerHandlePad(void);
 extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);

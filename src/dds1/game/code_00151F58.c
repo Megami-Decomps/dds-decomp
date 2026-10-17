@@ -44,7 +44,7 @@
 /* Header shared by the effect emitters that spawn a ring or spray of packets:
  * an origin, a sub-effect, a fade descriptor, jitter ranges and the packet
  * buffer. The kind-specific parameters follow at +0x150. */
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 extern EffectConfig D_0034DF54[];
 

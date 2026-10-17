@@ -92,9 +92,9 @@ extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void btlUnitGetBodyPosVU(u8 *);
 

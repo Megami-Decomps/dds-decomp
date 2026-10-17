@@ -6,7 +6,7 @@
 #include "sdf_resource.h"
 #include "eff_blur.h"
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 
 

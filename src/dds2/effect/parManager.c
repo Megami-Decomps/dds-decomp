@@ -74,7 +74,7 @@ typedef struct {
     f32 radiusStep;
 } ParBurstPacket;
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern u8 effEmitterDelayRandomState[];
 
 /* Initialize one 64-byte particle record and its kind-specific state. Negative

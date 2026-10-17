@@ -262,7 +262,7 @@ extern s32 datActionAnimationRecords;
 
 extern s32 btlArrangeFormationSlots(s32 filter);
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void sndResetTransition(void);
 
@@ -272,7 +272,7 @@ extern void btlResetFieldColorAndSweepFlags(void);
 
 extern void btlRefreshSoundEntries(void);
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void sndSetStationedSeVolume(u32 sequence);
 

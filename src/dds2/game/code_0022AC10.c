@@ -1,3 +1,4 @@
+#include "eff_random.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
 #include "scr_integer_return_value_api.h"
@@ -1573,7 +1574,7 @@ void btlInitLightParams(void) {
     kwlnOverlayAmbientColor.b = 1.15f;
 }
 
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 extern f32 cosf(f32);
 void func_0022D040(void) {
     s32 row;

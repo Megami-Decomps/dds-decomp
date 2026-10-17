@@ -234,10 +234,10 @@ extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
 
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 typedef struct EffPCPSprayWork {
     f32 pos[4];       /* 0x00 vector loaded by the pulse updater */

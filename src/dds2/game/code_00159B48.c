@@ -923,7 +923,7 @@ typedef struct EffPacket {
     f32 f3C;
 } EffPacket;
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 typedef struct EffRingEmitter {
     EffEmitterHead head;
@@ -2704,7 +2704,7 @@ void effFreeSingleParticleTemplate(void *effect) {
     sdfReleaseChipBlock(effect);
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* Initialize the first record at frame -1; speed draws RNG, angle draws it only for nonzero jitter. */
 void effInitParticleRecord(effect)

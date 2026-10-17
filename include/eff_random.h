@@ -21,6 +21,6 @@ u32 effMiscRand(EffRandState *state);
 void effMiscSeedRandomFromClock(EffRandState *state);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 effMiscRandUnitFloat(void *state);
+f32 effMiscRandUnitFloat(EffRandState *state);
 
 #endif /* EFF_RANDOM_H */

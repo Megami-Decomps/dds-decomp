@@ -7,7 +7,7 @@
 #include "sdf_chip.h"
 #include "eff_blur.h"
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 
 

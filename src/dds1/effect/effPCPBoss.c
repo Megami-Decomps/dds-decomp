@@ -28,7 +28,7 @@ extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 extern f32 D_003B9308;
 extern void effBossInitializeModelGroups(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);

@@ -131,7 +131,7 @@ extern s32 datRosterDetails;
 extern s32 effMiscRandMod(s32, s32);
 
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void btlAllocatePanelTaskWork(void);
 
@@ -139,7 +139,7 @@ extern void itfMesDestroyWindowIfPresent(s32);
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 

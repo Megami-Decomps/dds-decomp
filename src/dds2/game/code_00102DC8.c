@@ -139,7 +139,7 @@ extern u8 D_0043DDA0[];
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
-extern u8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void effMiscSeedRandom(void *data, u32 tag);
 

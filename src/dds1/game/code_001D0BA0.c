@@ -158,7 +158,7 @@ extern DatEnemyRecord *datEnemyRecords;
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern void btlResetDeferredTaskQueue(void);
 
@@ -172,7 +172,7 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
 
 void btlRaisePartyRecordStatusValue();
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 extern SndPad D_00324510;
 

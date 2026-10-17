@@ -1,3 +1,4 @@
+#include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
@@ -234,8 +235,8 @@ extern s32 btlResolveBattleTerminalOutcome(void);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern f32 effMiscRandUnitFloat(void *state);
-extern u8 effSharedRandomState[];
+extern f32 effMiscRandUnitFloat(EffRandState *state);
+extern EffRandState effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(void *, void *);
 struct MdlCtx;

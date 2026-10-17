@@ -219,7 +219,7 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, const void *sr
 }
 
 extern void parDispatchSub(u32, s32, s32, s32);
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* effNeedleCreateWork */
 EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {

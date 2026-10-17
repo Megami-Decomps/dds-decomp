@@ -1542,7 +1542,7 @@ typedef char EffBillFrameEntry_radius_offset_check[((u32)&((EffBillFrameEntry *)
 typedef char EffBillFrameEntry_innerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->innerWidth == 0x10) ? 1 : -1];
 typedef char EffBillFrameEntry_outerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->outerWidth == 0x14) ? 1 : -1];
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 extern u8 D_0037E0E0[];
 
 void billAdvanceFrameInstances(EffClassWork *work) {
@@ -2530,7 +2530,7 @@ void billReleaseEmitterNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 void billAdvanceEmitterInstances(EffClassWork *work) {
     EffBillEmitterFrameConfig *config = (EffBillEmitterFrameConfig *)work->payload;
@@ -2838,7 +2838,7 @@ void billReleaseStripNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 void billAdvanceStripInstances(EffClassWork *work) {
     EffBillStripFrameConfig *config = (EffBillStripFrameConfig *)work->payload;
@@ -3247,7 +3247,7 @@ void billReleaseQuadNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 
 void billAdvanceQuadInstances(EffClassWork *work) {
     EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
@@ -4188,7 +4188,7 @@ void effResetClassFrameAndFlags(s32 work) {
     effInitializeClassFrame(effect);
 }
 
-extern s8 effSharedRandomState[];
+extern EffRandState effSharedRandomState[];
 /* The cached class payload is copied from the 0x5C-byte source prefix. */
 typedef struct EffRingClassConfig {
     EffRingSource ring;

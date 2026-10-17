@@ -235,7 +235,7 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
     work->scale = val;
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 /* Re-rolls slot `index`: random-angle rotation matrix pushed to both handles
  * of the pair, then a new random countdown. */
@@ -3249,7 +3249,7 @@ void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, const void *src) {
     }
 }
 
-extern u8 effDefaultRandomState[];
+extern EffRandState effDefaultRandomState[];
 
 
 
