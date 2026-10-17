@@ -530,7 +530,7 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
 /* Build a glyph chain for a byte string, appending to a supplied head. */
 FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *head) {
     u32 length = 0;
-    u32 offset;
+    u32 textByteOffset;
     u32 code;
     FrFontChildGlyph *previous;
     FrFontChildGlyph *created;
@@ -550,14 +550,14 @@ FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
         frFontInitGlyph(head);
     }
     previous = head->lastChild;
-    offset = 0;
+    textByteOffset = 0;
     created = NULL;
     if (length != 0) {
         do {
-            code = (u8)text[offset];
+            code = (u8)text[textByteOffset];
             if (code >= 0x80) {
-                offset++;
-                code = (u8)text[offset] | (code << 8);
+                textByteOffset++;
+                code = (u8)text[textByteOffset] | (code << 8);
             }
             created = frFontCreateGlyphFromCode(code, D_00436570, firstOption & 0xFF, secondOption & 0xFF);
             if (previous == NULL) {
@@ -565,12 +565,12 @@ FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
             } else {
                 previous->next = created;
             }
-            offset++;
+            textByteOffset++;
             head->advance += created->advance;
             head->childCount++;
             created->previous = previous;
             previous = created;
-        } while (offset < length);
+        } while (textByteOffset < length);
     }
     if (created != NULL) {
         head->lastChild = created;
