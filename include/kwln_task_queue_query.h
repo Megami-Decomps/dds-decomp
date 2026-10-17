@@ -8,6 +8,6 @@
 s32 kwlnTaskGetStateList(u32 state);
 
 /* Returns a borrowed queue node, or NULL for detached/unsupported states or exhaustion. */
-KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index);
+KwlnTask *kwlnTaskGetByStateAndIndex(u32 taskState, s32 taskIndex);
 
 #endif /* KWLN_TASK_QUEUE_QUERY_H */
