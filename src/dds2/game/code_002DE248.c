@@ -4824,7 +4824,8 @@ void effInitializeClassFrame(EffClassWork *work) {
 
 void effAdvanceClassFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        effClassWorkOperations[work->kind].update();
+        EffClassOps *operations = &effClassWorkOperations[work->kind];
+        operations->update();
         work->frame++;
     }
 }
