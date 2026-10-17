@@ -8287,15 +8287,15 @@ extern const char D_00332DF0[];
 extern s32 strcmp(const char *, const char *);
 
 const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
-    s32 i;
-    s32 j;
+    s32 packOrSetIndex;
+    s32 eventHitIndex;
     if (eventName == 0) return 0;
-    for (i = 0; i < 8; i++) {
-        if (D_00332E30.packs[i].setIndex != 0) {
-            for (j = 0; j < 5; j++) {
-                if (D_00332E30.packs[i].hits[j].area == fldAreaState.floor + 1 &&
-                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
-                    s32 candidateSet = D_00332E30.packs[i].setIndex;
+    for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
+        if (D_00332E30.packs[packOrSetIndex].setIndex != 0) {
+            for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
+                if (D_00332E30.packs[packOrSetIndex].hits[eventHitIndex].area == fldAreaState.floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
+                    s32 candidateSet = D_00332E30.packs[packOrSetIndex].setIndex;
                     if (D_00332E30.sets[D_003BAE38].kindArea.packed == 1) {
                         D_003BAE38 = candidateSet;
                         return D_00332DF0;
@@ -8304,11 +8304,11 @@ const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
             }
         }
     }
-    for (i = 0; i < 40; i++) {
-        if (D_00332E30.sets[i].kindArea.packed == 1 &&
-            D_00332E30.sets[i].action == fldAreaState.floor + 1 &&
-            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
-            D_003BAE38 = i;
+    for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
+        if (D_00332E30.sets[packOrSetIndex].kindArea.packed == 1 &&
+            D_00332E30.sets[packOrSetIndex].action == fldAreaState.floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[packOrSetIndex].eventName) == 0) {
+            D_003BAE38 = packOrSetIndex;
             return D_00332DF0;
         }
     }
@@ -8317,15 +8317,15 @@ const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
 
 
 const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
-    s32 i;
-    s32 j;
+    s32 packOrSetIndex;
+    s32 eventHitIndex;
     if (eventName == 0) return 0;
-    for (i = 0; i < 8; i++) {
-        if (D_00332E30.packs[i].setIndex != 0) {
-            for (j = 0; j < 5; j++) {
-                if (D_00332E30.packs[i].hits[j].area == fldAreaState.floor + 1 &&
-                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
-                    s32 candidateSet = D_00332E30.packs[i].setIndex;
+    for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
+        if (D_00332E30.packs[packOrSetIndex].setIndex != 0) {
+            for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
+                if (D_00332E30.packs[packOrSetIndex].hits[eventHitIndex].area == fldAreaState.floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
+                    s32 candidateSet = D_00332E30.packs[packOrSetIndex].setIndex;
                     if (D_00332E30.sets[D_003BAE38].kindArea.packed == 0) {
                         D_003BAE38 = candidateSet;
                         return D_00332DF0;
@@ -8334,11 +8334,11 @@ const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
             }
         }
     }
-    for (i = 0; i < 40; i++) {
-        if (D_00332E30.sets[i].kindArea.packed == 0 &&
-            D_00332E30.sets[i].action == fldAreaState.floor + 1 &&
-            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
-            D_003BAE38 = i;
+    for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
+        if (D_00332E30.sets[packOrSetIndex].kindArea.packed == 0 &&
+            D_00332E30.sets[packOrSetIndex].action == fldAreaState.floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[packOrSetIndex].eventName) == 0) {
+            D_003BAE38 = packOrSetIndex;
             return D_00332DF0;
         }
     }
@@ -8347,25 +8347,25 @@ const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
 
 
 const char *fldResolveEventSetByNameEitherKindArea(const char *eventName) {
-    s32 i;
-    s32 j;
+    s32 packOrSetIndex;
+    s32 eventHitIndex;
     if (eventName == 0) return 0;
-    for (i = 0; i < 8; i++) {
-        if (D_00332E30.packs[i].setIndex != 0) {
-            for (j = 0; j < 5; j++) {
-                if (D_00332E30.packs[i].hits[j].area == fldAreaState.floor + 1 &&
-                    strcmp(eventName, D_00332E30.packs[i].hits[j].eventName) == 0) {
-                    D_003BAE38 = D_00332E30.packs[i].setIndex;
+    for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
+        if (D_00332E30.packs[packOrSetIndex].setIndex != 0) {
+            for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
+                if (D_00332E30.packs[packOrSetIndex].hits[eventHitIndex].area == fldAreaState.floor + 1 &&
+                    strcmp(eventName, D_00332E30.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
+                    D_003BAE38 = D_00332E30.packs[packOrSetIndex].setIndex;
                     return D_00332DF0;
                 }
             }
         }
     }
-    for (i = 0; i < 40; i++) {
-        if ((u16)D_00332E30.sets[i].kindArea.packed < 2 &&
-            D_00332E30.sets[i].action == fldAreaState.floor + 1 &&
-            strcmp(eventName, D_00332E30.sets[i].eventName) == 0) {
-            D_003BAE38 = i;
+    for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
+        if ((u16)D_00332E30.sets[packOrSetIndex].kindArea.packed < 2 &&
+            D_00332E30.sets[packOrSetIndex].action == fldAreaState.floor + 1 &&
+            strcmp(eventName, D_00332E30.sets[packOrSetIndex].eventName) == 0) {
+            D_003BAE38 = packOrSetIndex;
             return D_00332DF0;
         }
     }
