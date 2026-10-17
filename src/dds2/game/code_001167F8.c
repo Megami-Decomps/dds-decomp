@@ -67,16 +67,16 @@ void dds3ClearUnitObjectLowFlags(EffWorldNode *object) {
 }
 
 /* Kind-5 effect payloads retain transition work separately from light data. */
-void evtSetUnitValueTransitionForObject(EffectValueObject *value, EffWorldNode *object, s32 duration) {
-    EffectObjectData *data = object->data;
+void evtSetUnitValueTransitionForObject(EffectValueObject *value, EffWorldNode *effectNode, s32 duration) {
+    EffectObjectData *effectData = effectNode->data;
 
-    evtSetUnitValueTransition(data->transitionWork, value, duration);
+    evtSetUnitValueTransition(effectData->transitionWork, value, duration);
 }
 
-void evtEndUnitValueTransitionForObject(EffWorldNode *object, s32 duration) {
-    EffectObjectData *data = object->data;
+void evtEndUnitValueTransitionForObject(EffWorldNode *effectNode, s32 duration) {
+    EffectObjectData *effectData = effectNode->data;
 
-    evtEndUnitValueTransition((struct EvtUnit *)data->transitionWork, duration);
+    evtEndUnitValueTransition((struct EvtUnit *)effectData->transitionWork, duration);
 }
 /* Load flags, mode and the transform block from a setup record. */
 void dds3LoadWorldTransformSetup(EffWorldNode *worldNode, WorldTransformSetup *setup) {
