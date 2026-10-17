@@ -463,11 +463,12 @@ typedef struct BillChildPayload {
 typedef char BillChildPayload_size_must_be_0x50[
     (sizeof(BillChildPayload) == 0x50) ? 1 : -1];
 
-/* Billboard callbacks and metadata (0xC); DDS1/2 effect/billManager.c and game billboard units. */
+/* Billboard dispatch (0xC): a kind's constructor, per-frame callback and release;
+ * DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct {
     void *(*func)();
     void (*callback)();
-    u32 unk8;
+    void (*destroy)();
 } BillDispatch;
 
 /* Resource index configuration (0xC); DDS1/2 game/code_00151F58/00159B48.c. */

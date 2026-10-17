@@ -17,7 +17,6 @@
 #include "sdf_texture_primary_buffer_api.h"
 
 extern BillDispatch D_0034E060[];
-extern BillDispatch D_0034E068[];
 
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *resourceData);
@@ -873,7 +872,7 @@ BillObj *billCloneObjectRetainingSharedData(const BillObj *source) {
 }
 
 void billDispatchByKind(BillObj *obj) {
-    D_0034E068[obj->kind].func();
+    D_0034E060[obj->kind].destroy();
 }
 
 void billInvokeCallback(BillObj *obj) {
