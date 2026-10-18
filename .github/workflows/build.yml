@@ -33,6 +33,7 @@ jobs:
           python3 tools/test_include_sdata.py
           python3 tools/test_include_rodata.py
           python3 tools/test_ee_gcc_aslr.py
+          python3 tools/test_ee_gcc_diagnostics.py
 
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
