@@ -112,7 +112,7 @@ extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
 s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
-/* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */ u32 btlRollAiBucket(void);
+/* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */ s32 btlRollAiBucket(void);
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask);
 

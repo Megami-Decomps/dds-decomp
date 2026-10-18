@@ -188,7 +188,7 @@ s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit
 /* Select a follow-up encounter from the override, forced scene or adjustment rows. */
 s32 btlSelectSerialEncounter(void) {
     extern void btlSerialBattleChanceHook(s32);
-    extern u32 btlRollAiBucket(void);
+    extern s32 btlRollAiBucket(void);
 
     BtlState *state = (BtlState *)btlGetRuntime();
     u16 selectionIndex = (u16)state->adjustmentEntryIndex;
@@ -282,7 +282,7 @@ extern void btlSurpriseChanceHook(s32 chance);
 
 /* Roll the level/ability-scaled surprise chance, including scene overrides. */
 s32 btlRollSurpriseAttack(void) {
-    extern u32 btlRollAiBucket(void);
+    extern s32 btlRollAiBucket(void);
     f32 levelScale[9];
     BtlState *state;
     u32 partyLevel;
@@ -377,7 +377,7 @@ void btlClearUnitStatusMask(void) {
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-extern u32 btlRollAiBucket(void);
+extern s32 btlRollAiBucket(void);
 
 s32 btlRollStoneDeathChance(BtlUnit *actor, s32 index) {
     DatPartyRecord *record;
@@ -631,7 +631,7 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
 #include "btl_start_voice_row.h"
 
 extern BattleStartVoiceRow btlStartVoiceRows[];
-extern u32 btlRollAiBucket(void);
+extern s32 btlRollAiBucket(void);
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 extern u32 func_001A5C40(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
 
@@ -665,7 +665,7 @@ s8 btlChooseStartVoice(void) {
         btlBossDebugPrintf(D_003A1DF8);
         return -1;
     }
-    if (btlRollAiBucket() >= 10) {
+    if ((u32)btlRollAiBucket() >= 10) {
         btlBossDebugPrintf(D_003A1E18);
         return -1;
     }

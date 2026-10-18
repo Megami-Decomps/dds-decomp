@@ -421,7 +421,7 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
     return result;
 }
 
-extern u32 btlRollAiBucket(void);
+extern s32 btlRollAiBucket(void);
 
 s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     s32 ratio;

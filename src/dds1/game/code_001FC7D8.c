@@ -120,7 +120,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
 }
 
 
-extern u32 btlRollAiBucket(void);
+extern s32 btlRollAiBucket(void);
 
 /* Requires task bit 6 clear and a matching 0x2A49 status bit.
  * The masked-status switch assigns 25-bucket tests to cases 0x40/0x400. */
@@ -175,7 +175,7 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     if ((flags & 0x7FFF) != 0x20) {
         return 1;
     }
-    return btlRollAiBucket() < 0x46;
+    return (u32)btlRollAiBucket() < 0x46;
 }
 
 extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
