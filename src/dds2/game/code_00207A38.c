@@ -3199,11 +3199,11 @@ void btlDebugMenuRecordNoOp(u32 value) {
 
 
 /* Return the matching entry, or the one-past-end address when none matches. */
-u8 *btlFindEntryByCommand(BtlCommandEntryList *list, s32 command) {
+u8 *btlFindEntryByCommand(EffQueuedFileObject *list, s32 command) {
     s32 i;
-    BtlCommandEntry *entry = list->entries;
+    EffEditorRow *entry = list->rows;
     for (i = 0; i < list->count; i++) {
-        if (entry->command == command) {
+        if ((s32)entry->payload.numeric.target == command) {
             return (u8 *)entry;
         }
         entry++;
@@ -3212,9 +3212,9 @@ u8 *btlFindEntryByCommand(BtlCommandEntryList *list, s32 command) {
 }
 
 /* Count entries other than the two part opcodes, 0x14 and 0x15. */
-s32 btlCountNonPartOpcodes(BtlCommandEntryList *list) {
+s32 btlCountNonPartOpcodes(EffQueuedFileObject *list) {
     u32 count;
-    BtlCommandEntry *entry;
+    EffEditorRow *entry;
     u32 i;
     s32 found;
     if (list == NULL) {
@@ -3224,10 +3224,10 @@ s32 btlCountNonPartOpcodes(BtlCommandEntryList *list) {
     if (count == 0) {
         return 0;
     }
-    entry = list->entries;
+    entry = list->rows;
     found = 0;
     for (i = 0; i < count; i++) {
-        switch (entry->opcode) {
+        switch (entry->kind) {
         case 0x14:
         case 0x15:
             break;
