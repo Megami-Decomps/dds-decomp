@@ -11037,6 +11037,12 @@ INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39E0);
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39F0);
 
+typedef struct EffectBlock128 {
+    u32 word[32];
+} EffectBlock128;
+
+extern EffectBlock128 D_003DF920;
+
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B59A8);
 
 extern EffQueuedFileObject D_0038F428;
@@ -11550,12 +11556,6 @@ u32 effPollPartResource(void) {
     return result;
 }
 
-
-typedef struct EffectBlock128 {
-    u32 word[32];
-} EffectBlock128;
-
-extern EffectBlock128 D_003DF920;
 
 
 u32 effPollNamedFileJob(void) {
