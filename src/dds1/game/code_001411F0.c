@@ -4288,7 +4288,57 @@ extern FldSparkController fldSparkControlState;
 
 
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
+/* Reset the spark controller for the field entry of the current area and floor
+ * (or take the early dialog path when flag 0x819 is set). unk10C is an f32:
+ * its alias set keeps that clear independent of the entry loads in sched1
+ * (cc1probe sched1: priority 2, no dependence chain to the entry loads). */
+void func_0014C468(void) {
+    FldEnt110 *entry;
+
+    if (D_0032E5C4[0] != 0) {
+        return;
+    }
+    if (mdlFlagTest(0x819) != 0) {
+        evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+        dspStartEntry(6);
+        D_0032E4B4[0] = 1;
+        fldSparkControlState.dialogPhase = 12;
+        fldSparkControlState.phase = 0;
+        fldSparkControlState.dialogTimer = 0;
+        fldResetPlayerSceneObjectState();
+        return;
+    }
+    evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+    if (mdlFlagTest(0x81A) != 0) {
+        dspStartEntry(1);
+    } else {
+        dspStartEntry(0);
+    }
+    evtStoreValueAndCaptureWindowPanelValue(2);
+    evtSetMessageWindowOptionWhenOpen(0);
+    mdlFlagSet(0x81A);
+    entry = (FldEnt110 *)fldFindFieldEntryByKeyPair(fldAreaState.area, fldAreaState.floor + 1);
+    fldSparkControlState.phase = 0;
+    fldAreaState.score = 0;
+    fldSparkControlState.countdown = entry->duration;
+    fldAreaState.transitionMode = 1;
+    fldSparkControlState.dialogPhase = 1;
+    fldSparkControlState.terminated = 0;
+    fldSparkControlState.mode = 0;
+    fldSparkControlState.modeCountdown = 0;
+    fldSparkControlState.pendingMode = 0;
+    fldSparkControlState.pulse = 0;
+    fldSparkControlState.dialogTimer = 0;
+    fldSparkControlState.sequenceIndex = 0;
+    fldSparkControlState.sequenceRemaining = 0;
+    fldSparkControlState.entry = entry;
+    fldSparkControlState.entryCount = entry->entryCount;
+    fldSparkControlState.cursor = 0;
+    fldAreaState.collectedCount = 0;
+    fldAreaState.unk10C = 0.0f;
+    fldResetSparkTable();
+    fldResetPlayerSceneObjectState();
+}
 
 extern s32 D_0032E5C4[];
 
