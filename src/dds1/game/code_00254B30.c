@@ -251,7 +251,6 @@ extern DspMantraName *D_003BAA78;
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(u16);
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {

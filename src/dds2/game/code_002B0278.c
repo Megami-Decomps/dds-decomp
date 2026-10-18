@@ -28,7 +28,6 @@
 /* Declared before first use (were implicit int). */
 extern void evtStageTestInit(s32 mode);
 extern void evtStageTestStop(void);
-extern s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry);
 extern void mnuResetWorkFloats(void);

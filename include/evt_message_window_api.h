@@ -11,6 +11,9 @@ u32 evtFinishMessageWindowAndNotify(void);
 s32 evtGetMessageWindowControlState(void);
 
 s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 displayValue);
+/* Store the opaque value and snapshot the panel field when a window is open.
+ * Returns 1 on success, or 0 when no window is open. */
+s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue);
 void evtSetMessageWindowOptionWhenOpen(s32 option);
 
 #endif
