@@ -463,7 +463,146 @@ void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_001528C0);
+#include "eff_packet_params.h"
+extern u32 D_0034E090[],D_0034E0A0[];
+extern SdfPoolNode *D_0034E0B0[];
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
+
+void func_001528C0(EffUnitObject *instance) {
+    EffPacketParams params;
+    s32 modeValues[3];
+    f32 matrix[4][4];
+    f32 positions[4][4];
+    f32 uv[4][2];
+    f32 secondaryUv[4][2];
+    s32 list;
+    BillChildPayload *child;
+    SdfTex *texture;
+    SdfPoolNode *surface;
+    f32 x, y;
+    f32 scaleX, scaleY;
+    f32 cornerX, cornerY;
+    f32 cosine, sine;
+    f32 width, height;
+
+    if (!billGetKindOneParameter(instance->billboard)) {
+        return;
+    }
+    effReadBillboardModeValues(instance, modeValues);
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)list);
+    VU0_LOAD_MATRIX(instance->transform);
+    VU0_LOAD_MATRIX_B(instance->localMatrix);
+    sdfComposeVuMatrixFromRegisters();
+    VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+    matrix[3][0] = instance->billboard->position[0];
+    matrix[3][1] = instance->billboard->position[1];
+    matrix[3][2] = instance->billboard->position[2];
+    VU0_LOAD_MATRIX(matrix);
+    sdfConsAppendVuPacket((SdfListHead *)list, 0);
+    memset(&params, 0, sizeof(params));
+    params.primitive = 0x4000;
+    params.parameters = D_0034E090;
+    params.positions = (u128 *)positions;
+    params.colors = D_0034E0A0;
+    params.texcoords = (u32 *)uv;
+    params.color = instance->billboard->childParam;
+    params.parameterCount = 2;
+    params.vertexCount = 4;
+    child = (BillChildPayload *)modeValues[1];
+    scaleX = instance->billboard->childScaleX;
+    scaleY = instance->billboard->childScaleY;
+    x = child->x * scaleX;
+    y = child->y * scaleY;
+    width = child->halfWidth * scaleX;
+    height = child->halfHeight * scaleY;
+    cosine = sdfEvaluateCosineViaSinePhaseShift(instance->billboard->rotationAngle);
+    sine = sdfSinPoly(instance->billboard->rotationAngle);
+    cornerX = x - width;
+    cornerY = y - height;
+    positions[0][0] = cornerX * cosine - cornerY * sine;
+    positions[0][1] = cornerX * sine + cornerY * cosine;
+    positions[0][2] = 0.0f;
+    cornerX = x + width;
+    cornerY = y - height;
+    positions[1][0] = cornerX * cosine - cornerY * sine;
+    positions[1][1] = cornerX * sine + cornerY * cosine;
+    positions[1][2] = 0.0f;
+    cornerX = x + width;
+    cornerY = y + height;
+    positions[3][0] = cornerX * cosine - cornerY * sine;
+    positions[3][1] = cornerX * sine + cornerY * cosine;
+    positions[3][2] = 0.0f;
+    cornerX = x - width;
+    cornerY = y + height;
+    positions[2][0] = cornerX * cosine - cornerY * sine;
+    positions[2][1] = cornerX * sine + cornerY * cosine;
+    positions[2][2] = 0.0f;
+    width = 1.0f / (f32)(child->texture->width * 16);
+    height = 1.0f / (f32)(child->texture->height * 16);
+    texture = child->texture;
+    uv[0][0] = child->uv.components[0] * width;
+    uv[0][1] = child->uv.components[1] * height;
+    uv[1][0] = child->uv.components[2] * width;
+    uv[1][1] = child->uv.components[3] * height;
+    uv[2][0] = child->uv.components[6] * width;
+    uv[2][1] = child->uv.components[7] * height;
+    uv[3][0] = child->uv.components[4] * width;
+    uv[3][1] = child->uv.components[5] * height;
+    sdfSetAssetPrimaryTextureAddress((SdfAsset *)instance->resource, texture);
+    switch ((u32)modeValues[0]) {
+    case 2:
+    case 3:
+        child = (BillChildPayload *)modeValues[2];
+        scaleX = instance->billboard->childScaleX;
+        scaleY = instance->billboard->childScaleY;
+        x = child->x * scaleX;
+        y = child->y * scaleY;
+        width = child->halfWidth * scaleX;
+        height = child->halfHeight * scaleY;
+        params.primitive |= 0x1000;
+        params.extraTexcoords = (u32 *)secondaryUv;
+        cosine = sdfEvaluateCosineViaSinePhaseShift(instance->billboard->rotationAngle);
+        sine = sdfSinPoly(instance->billboard->rotationAngle);
+        cornerX = x - width;
+        cornerY = y - height;
+        positions[0][0] = cornerX * cosine - cornerY * sine;
+        positions[0][1] = cornerX * sine + cornerY * cosine;
+        positions[0][2] = 0.0f;
+        cornerX = x + width;
+        cornerY = y - height;
+        positions[1][0] = cornerX * cosine - cornerY * sine;
+        positions[1][1] = cornerX * sine + cornerY * cosine;
+        positions[1][2] = 0.0f;
+        cornerX = x + width;
+        cornerY = y + height;
+        positions[3][0] = cornerX * cosine - cornerY * sine;
+        positions[3][1] = cornerX * sine + cornerY * cosine;
+        positions[3][2] = 0.0f;
+        cornerX = x - width;
+        cornerY = y + height;
+        positions[2][0] = cornerX * cosine - cornerY * sine;
+        positions[2][1] = cornerX * sine + cornerY * cosine;
+        positions[2][2] = 0.0f;
+        texture = child->texture;
+        width = (f32)(texture->width * 16);
+        height = (f32)(texture->height * 16);
+        secondaryUv[0][0] = child->uv.components[0] / width;
+        secondaryUv[0][1] = child->uv.components[1] / height;
+        secondaryUv[1][0] = child->uv.components[2] / width;
+        secondaryUv[1][1] = child->uv.components[3] / height;
+        secondaryUv[2][0] = child->uv.components[6] / width;
+        secondaryUv[2][1] = child->uv.components[7] / height;
+        secondaryUv[3][0] = child->uv.components[4] / width;
+        secondaryUv[3][1] = child->uv.components[5] / height;
+        sdfSetAssetSecondaryTextureAddress((SdfAsset *)instance->resource, texture);
+        break;
+    }
+    sdfConsAppendAssetPacket((SdfListHead *)list, (SdfAsset *)instance->resource, 0);
+    sdfAppendPacket((SdfListHead *)list, (u32)effCreateVertexDrawPacket(&params));
+    surface = D_0034E0B0[instance->billboard->requestedPacketListIndex];
+    surface->append(surface, (SdfListHead *)list);
+}
 
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
