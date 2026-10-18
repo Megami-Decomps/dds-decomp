@@ -153,6 +153,8 @@ extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
 extern EffRandState effSharedRandomState[];
 
+extern s32 sdfCalculateCommandVitalDelta(s32, s32, DatPartyRecord *, u32, u8);
+
 /* Clear the supplied party-record status mask. */
 
 s32 func_001A5C40(BtlUnit *attacker, BtlUnit *recipient, s32 command,
@@ -262,7 +264,6 @@ s32 func_001A5C40(BtlUnit *attacker, BtlUnit *recipient, s32 command,
     }
 }
 
-extern s32 sdfCalculateCommandVitalDelta(s32,s32,DatPartyRecord *,u32,u8);
 s32 func_001A6118(BtlUnit *attacker, BtlUnit *recipient, s32 command,
                    s32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
