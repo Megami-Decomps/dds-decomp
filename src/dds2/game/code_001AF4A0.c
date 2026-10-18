@@ -225,9 +225,238 @@ extern u8 *datRosterDetails;
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 
-INCLUDE_ASM(const s32, "game/code_001AF4A0", btlCalculateHpActionAmount);
-
+s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
+s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 extern s32 sdfCalculateCommandVitalDelta(s32, s32, DatPartyRecord *, u32, u8);
+s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
+                               u32 maxHits, s32 actionKind, s32 side,
+                               u32 calculationFlags) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    SdfBattleParameters *parameters;
+    f32 attack;
+    f32 defense = 1.0f;
+    f32 status;
+    f32 automatic;
+    f32 solar;
+    f32 (*scaleHook)(BtlUnit *, BtlUnit *, u32, s32);
+    s8 charge = !(datCommandRecords[command].flags & 1);
+    u32 attribute;
+    s32 base;
+    s32 amount;
+    s32 phase;
+    s32 limit;
+
+    switch (datCommandRecords[command].effectType) {
+    case 0:
+        calculationFlags &= 1;
+        attack = calculationFlags == 0
+            ? btlGetActorEntryMultiplier(source, 0, charge) : 1.0f;
+        if (side == 1) {
+            defense = btlGetActorEntryMultiplier(target, 3, charge);
+        }
+        status = 0.5f;
+        switch (source->partyRecord.status & 0x7FFF) {
+        case 1:
+        case 0x80:
+            break;
+        case 0x1000:
+            status = 0.1f;
+            break;
+        default:
+            status = 1.0f;
+            break;
+        }
+        break;
+    case 1:
+        if (side == 1 && datCommandRecords[command].hpType != 8 &&
+            datCommandRecords[command].hpType != 10) {
+            calculationFlags &= 1;
+            attack = 1.0f;
+            if (calculationFlags == 0) {
+                attack = btlGetActorEntryMultiplier(source, 1, charge);
+            }
+            defense = btlGetActorEntryMultiplier(target, 3, charge);
+        } else {
+            defense = 1.0f;
+            calculationFlags &= 1;
+            attack = 1.0f;
+        }
+        status = 1.0f;
+        break;
+    case 2:
+        return 0;
+    default:
+        defense = 0.0f;
+        calculationFlags &= 1;
+        attack = 0.0f;
+        status = 0.0f;
+        break;
+    }
+
+    if (side == 1 && datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10 &&
+        (target->partyRecord.status & 0x7FFF) == 0x100) {
+        status *= 1.5f;
+    }
+    attribute = btlGetActorIndexedSignedValue(source, command);
+    automatic = calculationFlags == 0
+        ? btlGetElementAbilityMultiplier(source, attribute) : 1.0f;
+    switch ((u32)command) {
+    case 0:
+    case 0x94:
+    case 0x95:
+    case 0x96:
+        automatic *= btlGetLowHpAbilityMultiplier(source);
+        break;
+    }
+    if (source->status.flags & 0x400) {
+        if (btlGetEntryFlagsUnlessDisabled(&source->partyRecord) & 0x10000) {
+            if (attribute < 2 ||
+                (attribute == 7 && datCommandRecords[command].effectType == 0)) {
+                automatic *= 3.0f;
+            }
+        }
+    }
+    if (actionKind == 2 && btlCheckSpecialAbility(&source->partyRecord, 0x229)) {
+        defense *= datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    if (side == 1 && attribute != -1 &&
+        datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10) {
+        automatic *= (f32)btlGetAbilityAttributeMultiplierPercent(target, attribute) / 100.0f;
+    }
+    if (side == 0 && calculationFlags == 0 && btlCheckSpecialAbility(&source->partyRecord, 0x259)) {
+        automatic *= datAbilityParameters[0x259 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    if (datCommandRecords[command].unk30 == 0x13 &&
+        (target->partyRecord.status & 0x2000)) {
+        status += status;
+    }
+
+    solar = 1.0f;
+    if (side == 1 && attribute != -1 &&
+        !(datBattleSceneRecords[battle->battleMode].flags & 1)) {
+        switch (datCommandRecords[command].hpType) {
+        case 1:
+        case 6:
+        case 12:
+        case 14:
+            parameters = datBattleParameters;
+            phase = evtGetMirroredSolarPhase();
+            solar = parameters->solarScale[
+                (source->status.flags & 0x200) ? 0 : 1][phase];
+            break;
+        }
+    }
+    if (side == 1) {
+        if (btlDoesEnabledStatusMatchCurrentId(&target->partyRecord, 0xDB) &&
+            !(target->status.flags & 0x1000) && !(target->partyRecord.flags & 0x10) &&
+            datCommandRecords[command].hpType != 8 &&
+            datCommandRecords[command].hpType != 10) {
+            automatic *= 0.7f;
+        }
+    }
+    switch ((u32)command) {
+    case 0:
+    case 0x94:
+    case 0x95:
+    case 0x96:
+        if ((source->partyRecord.status & 0x400) &&
+            btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE5)) {
+            automatic += automatic;
+        }
+        break;
+    }
+    if (side == 1 && !calculationFlags &&
+        btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE7) &&
+        datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10) {
+        f32 varied = ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f) *
+                     0.5f * automatic + automatic;
+        automatic = varied;
+    }
+    if (side == 1 && !calculationFlags &&
+        btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE3) &&
+        datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10) {
+        automatic *= btlGetClampedBattleTableValue(source);
+    }
+    if (side == 0 && !calculationFlags && btlDoesEnabledStatusMatchCurrentId(&target->partyRecord, 0xE6)) {
+        if (datCommandRecords[command].hpType != 11 ||
+            datCommandRecords[command].hpPower != 100) {
+            automatic += automatic;
+        }
+    }
+    if (side == 1 && btlDoesEnabledStatusMatchCurrentId(&target->partyRecord, 0xEF) &&
+        attribute == 7 && datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10) {
+        automatic *= 0.7f;
+    }
+    scaleHook = battle->commandAmountScaleHook;
+    if (scaleHook != NULL) {
+        automatic *= scaleHook(source, target, command, side);
+    }
+    if (datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10 && mdlFlagTest(0x80E) &&
+        (source->status.flags & 0x400) && (target->status.flags & 0x200)) {
+        attack *= datBattleParameters->unkB64;
+    }
+    if (side == 1 && !calculationFlags && datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10) {
+        if ((source->partyRecord.flags & 0x10) && (source->status.flags & 0x200)) {
+            defense *= datBattleParameters->unkB90;
+        }
+        if ((target->partyRecord.flags & 0x10) && (target->status.flags & 0x200)) {
+            defense *= datBattleParameters->unkB94;
+        }
+    }
+    btlBossDebugPrintf("btl:hp[atk=%.2f,def=%.2f,bat=%.2f,auto=%.2f,sn=%.2f]\n",
+                       attack, defense, status, automatic, solar);
+    amount = sdfCalculateCommandVitalDelta(command, (s32)&source->partyRecord,
+                                           &target->partyRecord, maxHits, 1);
+    base = amount;
+    amount = (s32)((f32)base * attack * defense * status * automatic * solar);
+    if (!(target->status.flags & 0x10) && actionKind == 2 && amount != 0) {
+        amount = (s32)((f32)amount *
+                       (f32)evtRunContext(6, (s32)&source->partyRecord, 0, 0, 0) /
+                       100.0f);
+    }
+    if ((target->status.flags & 0x10) && side == 1) {
+        amount = (s32)((f32)amount + (f32)amount);
+        btlBossDebugPrintf("btl:hp[back]\n");
+    }
+    limit = datCommandRecords[command].stat36;
+    if (amount < -limit) {
+        amount = -(limit * ((s32)effMiscRandMod(0, 11) + 95)) / 100;
+    } else if (amount > limit) {
+        amount = limit * ((s32)effMiscRandMod(0, 11) + 95) / 100;
+    }
+    if (amount == 0 && base != 0) {
+        amount = base < 0 ? -1 : 1;
+        btlBossDebugPrintf("btl:hp limit 1\n");
+    }
+    switch (datCommandRecords[command].hpType) {
+    case 3:
+    case 4:
+    case 5:
+    case 13:
+        amount = base;
+        break;
+    }
+    if (datCommandRecords[command].hpType == 12 && amount < 0 &&
+        target->partyRecord.hp < -amount) {
+        amount = -(s32)target->partyRecord.hp;
+    }
+    switch (side) {
+    case 0:
+        return amount > 0 ? amount : -1;
+    case 1:
+        return amount < 0 ? -amount : -1;
+    default:
+        return -1;
+    }
+}
+
 s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
                                u32 maxHits, s32 actionKind, s32 side,
                                u32 calculationFlags) {
