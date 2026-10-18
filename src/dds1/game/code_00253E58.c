@@ -197,5 +197,3 @@ void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindow
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00253E58", D_003BC440);
-
