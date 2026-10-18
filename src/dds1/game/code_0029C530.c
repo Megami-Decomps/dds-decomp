@@ -10401,7 +10401,7 @@ EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayloa
     }
     work->option = source->option;
     buffer = fileResolvePrimaryBuffer(source);
-    memcpy(work->opaquePayload, buffer, sizeof(work->opaquePayload));
+    memcpy(&work->colorTrack, buffer, EFF_PARTICLE_SHARED_PAYLOAD_BYTES);
     buffer = fileResolveSecondaryBuffer(source);
     if (buffer != NULL) {
         switch (source->primary.selector) {
@@ -10440,7 +10440,7 @@ void effReplaceSharedResource(EffParticleSharedResource *, EffParticleSharedReso
 
 EffParticleSharedResource *effCloneParticleSharedResource(EffParticleSharedResource *source) {
     EffParticleSharedResource *effect = effCreateParticleSharedResourceFromFile(NULL);
-    memcpy(effect->opaquePayload, source->opaquePayload, sizeof(effect->opaquePayload));
+    memcpy(&effect->colorTrack, &source->colorTrack, EFF_PARTICLE_SHARED_PAYLOAD_BYTES);
     effReplaceSharedResource(effect, source);
     return effect;
 }
@@ -10464,7 +10464,7 @@ void effReplaceSharedResource(EffParticleSharedResource *work, EffParticleShared
 }
 
 void effResetParticleStateWord(EffParticleSharedResource *work) {
-    work->opaque08 = 0;
+    work->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B4BA0);

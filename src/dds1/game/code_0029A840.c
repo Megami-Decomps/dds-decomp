@@ -458,18 +458,26 @@ void mdlMarkAndProcessObjectNodes(void) {
     } while (node != NULL);
 }
 
-/* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload. */
+/* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload.
+ * The 0x3C bytes at +8 are the animation header copied from the resource
+ * (EffectModelHeaderCopy). */
 struct FileQueue;
 typedef struct EffResourceOwner {
     u32 count;
     u32 unk04;
-    u8 pad_08[0x34];
+    SdfColorTrack colorTrack; /* 0x08 */
+    SdfAlphaTrack alphaTrack; /* 0x2C */
     u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
-    u8 pad_40[4];
+    f32 frameStep; /* 0x40 */
     struct FileQueue **entries; /* 0x44: retained queue-pointer array */
     struct SdfMemBlock *queueAllocation; /* 0x48: queue-pointer array descriptor */
     MdlCtx *model;
 } EffResourceOwner;
+typedef char EffResourceOwner_size_check[(sizeof(EffResourceOwner) == 0x50) ? 1 : -1];
+typedef char EffResourceOwner_plainEntry_offset_check[
+    ((u32)&((EffResourceOwner *)0)->plainEntry == 0x3C) ? 1 : -1];
+typedef char EffResourceOwner_entries_offset_check[
+    ((u32)&((EffResourceOwner *)0)->entries == 0x44) ? 1 : -1];
 
 typedef struct {
     u8 bytes[0x38];
