@@ -7361,12 +7361,12 @@ void effUpdateAndDrawStripRecord(EffectStripNode *node) {
     func_002EE670(node);
 }
 
-void effSetStripRecordVector(EffectStripNode *node) {
-    mnuRecordSetVector(node->active);
+void effSetStripRecordVector(EffectStripNode *node, const u128 *value) {
+    mnuRecordSetVector(node->active, value);
 }
 
-void effSetStripRecordSecondaryVector(EffectStripNode *node) {
-    fileSetRecordSecondVector(node->active);
+void effSetStripRecordSecondaryVector(EffectStripNode *node, const u128 *value) {
+    fileSetRecordSecondVector(node->active, value);
 }
 
 void effSetStripRecordColor(EffectStripNode *node, u32 color) {
@@ -9020,11 +9020,11 @@ u32 repeat;
     return (u8 *)work;
 }
 
-/* Create a scaly strip and retain its texture; preserve the argument-less allocator call. */
-u64 effCreateTexturedStripWithSharedTexture(void) {
+/* Create a scaly strip and retain its shared texture reference. */
+u64 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
     u64 strip;
 
-    strip = effAllocateTexturedStripWork();
+    strip = effAllocateTexturedStripWork(count, repeat);
     effRetainScalyTextureReference();
     return strip;
 }
@@ -12418,7 +12418,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source)
 
 void effInvokeFileJobWithBattleCamera(u32 work) {
     if (effAuxiliaryFileQueue == 0) {
-        effApplyBattleCameraToObject();
+        effApplyBattleCameraToObject((void *)work);
         fileJobInvokeTypeCallback((FileJobPayload *)work);
         return;
     }

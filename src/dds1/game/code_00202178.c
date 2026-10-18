@@ -5014,7 +5014,7 @@ s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
             btlSetLinkedDefeatCameraPresetA(unit, unit, 0);
         }
     } else {
-        btlChooseRandomPresetCameraKeys();
+        btlChooseRandomPresetCameraKeys(unit);
     }
     return 1;
 }

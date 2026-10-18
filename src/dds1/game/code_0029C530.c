@@ -5052,12 +5052,12 @@ void effUpdateSurfaceRecordAndDraw(s32 node) {
     func_002A6440(node);
 }
 
-void effMenuRecordVectorSet(s32 node) {
-    mnuRecordSetVector(((EffectSurfaceNode *)node)->record);
+void effMenuRecordVectorSet(s32 node, const u128 *value) {
+    mnuRecordSetVector(((EffectSurfaceNode *)node)->record, value);
 }
 
-void effSetSurfaceRecordSecondaryVector(s32 node) {
-    fileSetRecordSecondVector(((EffectSurfaceNode *)node)->record);
+void effSetSurfaceRecordSecondaryVector(s32 node, const u128 *value) {
+    fileSetRecordSecondVector(((EffectSurfaceNode *)node)->record, value);
 }
 
 void effSetSurfaceNodeColor(s32 node, u32 value) {
@@ -6879,12 +6879,12 @@ void effUpdateAndDrawStripRecord(EffectStripNode *node) {
     func_002AB290(node);
 }
 
-void effSetStripRecordVector(EffectStripNode *node) {
-    mnuRecordSetVector(node->active);
+void effSetStripRecordVector(EffectStripNode *node, const u128 *value) {
+    mnuRecordSetVector(node->active, value);
 }
 
-void effSetStripRecordSecondaryVector(EffectStripNode *node) {
-    fileSetRecordSecondVector(node->active);
+void effSetStripRecordSecondaryVector(EffectStripNode *node, const u128 *value) {
+    fileSetRecordSecondVector(node->active, value);
 }
 
 void effSetStripRecordColor(EffectStripNode *node, u32 value) {
@@ -10484,7 +10484,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJo
 
 void effInvokeFileJobWithBattleCamera(u32 job) {
     if (effAuxiliaryFileQueue == 0) {
-        effApplyBattleCameraToObject();
+        effApplyBattleCameraToObject((void *)job);
         fileJobInvokeTypeCallback((FileJobPayload *)job);
         return;
     }

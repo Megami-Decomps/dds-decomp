@@ -916,7 +916,7 @@ s32 effCloneRingTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeRingTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -1118,7 +1118,7 @@ s32 effCloneTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeDiscTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -1304,7 +1304,7 @@ s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeBallisticTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -1595,7 +1595,7 @@ s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeLookAtRingTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -1758,7 +1758,7 @@ s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeBurstTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -1960,7 +1960,7 @@ s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeSphereTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -2153,7 +2153,7 @@ s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
 }
 
 void effFreeExpandRingTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -2327,7 +2327,7 @@ s32 effCloneConeTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeConeTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -2498,7 +2498,7 @@ s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreePacketRecordScaleTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -2724,7 +2724,7 @@ void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeSingleParticleTemplate(void *effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 
@@ -2817,7 +2817,7 @@ s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
 }
 
 void effFreeOffsetGravityTemplate(u32 effect) {
-    effDestroyResources();
+    effDestroyResources(effect);
     sdfReleaseChipBlock(effect);
 }
 

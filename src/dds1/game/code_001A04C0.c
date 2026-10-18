@@ -781,9 +781,11 @@ u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
     return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
-/* Forward the legacy record/value arguments to the packed low-15-bit status update. */
-void btlRaisePartyRecordStatusValue() {
-    sdfRaisePackedChannelValue();
+extern void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+
+/* Forward the record and value to the packed low-15-bit status update. */
+void btlRaisePartyRecordStatusValue(DatPartyRecord *item, u32 minimumValue) {
+    sdfRaisePackedChannelValue(item, minimumValue);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A1698);

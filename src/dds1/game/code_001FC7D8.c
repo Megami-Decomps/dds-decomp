@@ -34,19 +34,19 @@ extern u32 btlRandomState;
 extern void func_00202668(s32, s32);
 extern void func_00202F90(s32, s32);
 extern void btlSelectLowestHealthRateTarget(s32, s32);
-extern void btlSelectLowestHealthElementBlockTarget();
+extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
 extern void btlSelectLowestRankTarget(s32, s32);
 extern void func_00203BA8(s32, s32);
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
-extern void btlSelectTargetsByActionMask();
-extern void btlSelectTargetsWithoutActionMask();
-extern void btlSelectTargetsByMode();
-extern void btlPickUnlinkedPartyTarget();
-extern void btlPickLinkedPartyTarget();
-extern void btlAppendSelfAfterTargetScan();
+extern void btlSelectTargetsByActionMask(s32, s32);
+extern void btlSelectTargetsWithoutActionMask(s32, s32);
+extern void btlSelectTargetsByMode(s32, s32);
+extern void btlPickUnlinkedPartyTarget(u32, u32);
+extern void btlPickLinkedPartyTarget(u32, u32);
+extern void btlAppendSelfAfterTargetScan(s32);
 extern s32 btlSelectTargetsExcludingActorUnit(s32);
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
-extern void btlSelectTargetsBlockingElement();
+extern void btlSelectTargetsBlockingElement(s32, s32);
 
 extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 extern s32 btlWaitEffectTask();
@@ -1302,9 +1302,9 @@ void btlPickCommandLowestHpRatioTarget(s32 context) {
     btlSelectLowestHealthRateTarget(context, 0);
 }
 
-/* Pick a lowest-HP element-block candidate; retain zero-formal argument forwarding. */
-void btlPickCommandLowestHpBlockTarget(void) {
-    btlSelectLowestHealthElementBlockTarget();
+/* Pick a lowest-HP element-block candidate for the command's actor and action. */
+void btlPickCommandLowestHpBlockTarget(s32 actor, s32 action) {
+    btlSelectLowestHealthElementBlockTarget(actor, action);
 }
 
 /* Forward command selection with its native zero second argument. */
@@ -1322,34 +1322,34 @@ void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action) {
     btlSelectTargetsPassingCheck(commandContext, action);
 }
 
-/* Select by status-mask presence; retain the native zero-formal forwarding surface. */
-void btlPickCommandTargetWithStatusMask(void) {
-    btlSelectTargetsByActionMask();
+/* Select by status-mask presence. */
+void btlPickCommandTargetWithStatusMask(s32 actor, s32 mask) {
+    btlSelectTargetsByActionMask(actor, mask);
 }
 
-/* Select by status-mask absence; retain the native zero-formal forwarding surface. */
-void btlPickCommandTargetWithoutStatusMask(void) {
-    btlSelectTargetsWithoutActionMask();
+/* Select by status-mask absence. */
+void btlPickCommandTargetWithoutStatusMask(s32 actor, s32 mask) {
+    btlSelectTargetsWithoutActionMask(actor, mask);
 }
 
-/* Forward mode selection while retaining the native zero-formal C surface. */
-void btlSelectCommandTargetsByMode(void) {
-    btlSelectTargetsByMode();
+/* Forward mode selection. */
+void btlSelectCommandTargetsByMode(s32 actor, s32 mode) {
+    btlSelectTargetsByMode(actor, mode);
 }
 
-/* Current-command adapter for the unlinked-party selector; retain the short-arity ABI. */
-void btlPickUnlinkedCommandTarget(void) {
-    btlPickUnlinkedPartyTarget();
+/* Current-command adapter for the unlinked-party selector. */
+void btlPickUnlinkedCommandTarget(u32 task, u32 input) {
+    btlPickUnlinkedPartyTarget(task, input);
 }
 
-/* Current-command adapter for the linked-party selector; retain the short-arity ABI. */
-void btlPickLinkedCommandTarget(void) {
-    btlPickLinkedPartyTarget();
+/* Current-command adapter for the linked-party selector. */
+void btlPickLinkedCommandTarget(u32 task, u32 input) {
+    btlPickLinkedPartyTarget(task, input);
 }
 
-/* Append the command's own actor after the native scan; keep short-arity forwarding. */
-void btlAppendActorToCommandTargets(void) {
-    btlAppendSelfAfterTargetScan();
+/* Append the command's own actor after the native scan. */
+void btlAppendActorToCommandTargets(s32 actor) {
+    btlAppendSelfAfterTargetScan(actor);
 }
 
 /* Default selection excludes the actor, with native self fallback; unused stays unused. */
@@ -1362,9 +1362,9 @@ void btlAddEffectActorTargetToCommand(s32 context) {
     btlAppendEffectActorToCommandIndices(context, 0);
 }
 
-/* Select element-block candidates; retain the native zero-formal forwarding surface. */
-void btlPickCommandElementBlockTarget(void) {
-    btlSelectTargetsBlockingElement();
+/* Select element-block candidates. */
+void btlPickCommandElementBlockTarget(s32 actor, s32 mask) {
+    btlSelectTargetsBlockingElement(actor, mask);
 }
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB840);

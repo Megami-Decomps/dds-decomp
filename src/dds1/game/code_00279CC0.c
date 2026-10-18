@@ -390,10 +390,12 @@ u32 mnuDestroySkillSelectionWindow(KwlnTask *task) {
     return 1;
 }
 
+extern s32 mnuCampMenuInit(KwlnTask *task);
+
 s32 mnuResetSelection(KwlnTask *selection) {
     s32 context;
     s32 menu;
-    mnuCampMenuInit();
+    mnuCampMenuInit(selection);
     context = kwlnTaskGetUserValue(selection);
     menu = *(s32 *)(context + 0x90C);
     ptySkillMenuBuildLinkageSkills(selection);
