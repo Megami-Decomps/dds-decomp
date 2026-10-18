@@ -261,12 +261,15 @@ void effParUpdateAndDrawInstance(ParObj *effect) {
     parSubmitKindDrawing(&effect->kindState);
 }
 
-void parRestartInstanceCallback(void) {
-    parRestartKind();
+extern void parRestartKind(ParObj *obj);
+extern void parScaleAndRestartKind(ParObj *obj, f32 factor);
+
+void parRestartInstanceCallback(ParObj *obj) {
+    parRestartKind(obj);
 }
 
 void effParScaleComponent(float scale, ParObj *work) {
-    parScaleAndRestartKind();
+    parScaleAndRestartKind(work, scale);
     work->scaleEnd = work->scaleEnd * scale;
 }
 
@@ -279,8 +282,10 @@ void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void parRebuildInstanceTransforms(void) {
-    parComposeEffectTransformMatrices();
+extern void parComposeEffectTransformMatrices(ParObj *effect, void *matrix);
+
+void parRebuildInstanceTransforms(ParObj *effect, void *matrix) {
+    parComposeEffectTransformMatrices(effect, matrix);
 }
 
 void effParSetInstanceParameterWord(ParObj *work, u32 parameterWord) {

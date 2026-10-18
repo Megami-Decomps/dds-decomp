@@ -1215,8 +1215,8 @@ void mnuDestroyScrollPanel(MenuScrollPanel *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel, u32 unused0, u32 unused1, u32 selection) {
-    itfGridStorePosition(&panel->positions[0]);
+void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel, u32 x, u32 y, u32 selection) {
+    itfGridStorePosition(&panel->positions[0], x, y);
     panel->selection = selection;
 }
 

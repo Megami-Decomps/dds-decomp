@@ -123,10 +123,9 @@ void effCreateRingFanFromParams(void *table) {
     effCreateRingFan(parameterBlock);
 }
 
-/* Kind 85 duplicate: recreate the parameter prefix, not the live vertex state.
- * Retail tail-jumps with its incoming argument; retain this short-arity void C surface. */
-void effDuplicateRingFan(void) {
-    effCreateRingFan();
+/* Kind 85 duplicate: recreate the parameter prefix, not the live vertex state. */
+void effDuplicateRingFan(EffRingWork *ring) {
+    effCreateRingFan(ring);
 }
 
 /* Release the matrix pool's resources before the ring's backing allocation. */

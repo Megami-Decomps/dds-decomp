@@ -954,11 +954,10 @@ extern s32 evtRunTerminalPanel(KwlnTask *task);
 extern s32 evtRunTerminalPanelSync(KwlnTask *task);
 extern void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task);
 
-/* Create the terminal update/draw/exit tasks sharing one scene.
- * Preserve the legacy no-argument scene constructor call. */
-s32 mnuTerminalCreateTasks(void) {
+/* Create the terminal update/draw/exit tasks sharing one scene. */
+s32 mnuTerminalCreateTasks(s32 reduced, s32 slot) {
     s32 result;
-    void *work = mnuTerminalCreateScene();
+    void *work = mnuTerminalCreateScene(reduced, slot);
 
     D_003BC3E4 = (s32)kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, (u32)work);
     kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, (u32)work);

@@ -979,10 +979,10 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
     return 1;
 }
 
-u8 ptyIsRosterEntryPresent(void) {
+u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
     DatPartyRecord *entry;
 
-    entry = dds3FindEntry();
+    entry = dds3FindEntry(rosterIndex);
     return entry != 0;
 }
 
@@ -2477,13 +2477,13 @@ void btlSurpriseChanceHook(s32 chance) {
 
 /* Mode zero queries presence; nonzero mode selects/moves the entry into the
  * frontline group. The latter is not a pure presence test: its retail
- * callee changes flag mask 2 and swaps roster records. Preserve the short-arity
- * presence call and push whether the operation returned exactly one. */
+ * callee changes flag mask 2 and swaps roster records. Push whether the
+ * operation returned exactly one. */
 s32 ptyScriptCheckOrRebalanceFrontline(void) {
     s32 rosterIndex = scrReadIntParameter(0);
     s32 result;
     if (scrReadIntParameter(1) == 0) {
-        result = ptyIsRosterEntryPresent();
+        result = ptyIsRosterEntryPresent(rosterIndex);
     } else {
         result = ptyRebalanceFrontline(rosterIndex);
     }

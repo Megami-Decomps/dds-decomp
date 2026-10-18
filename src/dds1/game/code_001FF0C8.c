@@ -55,13 +55,13 @@ extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
-extern s32 btlHasAvailableOption(void);
+extern s32 btlHasAvailableOption(u32);
 
 extern s32 btlMatchesActorEntryCodeCondition();
 
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
-extern s32 btlIsSelectedActorStatusAndRecordClear();
+extern s32 btlIsSelectedActorStatusAndRecordClear(s32);
 
 extern s8 btlHistoryCounter;
 
@@ -526,11 +526,11 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
     return 1;
 }
 
-/* Normalize the scene/status/AI-record gate; retain the zero-formal C surface. */
-u8 btlPassesSceneAndActorRecordGate(void) {
+/* Normalize the scene/status/AI-record gate. */
+u8 btlPassesSceneAndActorRecordGate(s32 object) {
     s32 result;
 
-    result = btlIsSelectedActorStatusAndRecordClear();
+    result = btlIsSelectedActorStatusAndRecordClear(object);
     return result != 0;
 }
 
@@ -887,9 +887,9 @@ u8 btlUnitPassesActionTenCheck(u32 unitAddress) {
     return queryResult != 0;
 }
 
-/* Normalize the entry-code query without repairing its native short-arity call. */
-s32 btlQueryActorEntryCondition(void) {
-    return btlMatchesActorEntryCodeCondition() != 0;
+/* Normalize the entry-code query. */
+s32 btlQueryActorEntryCondition(s32 actorAddress, s32 conditionIndex) {
+    return btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex) != 0;
 }
 
 /* Test record bit 0x2000 only outside actor group 0x200; its meaning is unknown. */
@@ -965,11 +965,11 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
     return 1;
 }
 
-/* Normalize option-skill availability; retain the zero-formal C surface. */
-u8 btlQueryActorOptionAvailability(void) {
+/* Normalize option-skill availability. */
+u8 btlQueryActorOptionAvailability(u32 actorAddress) {
     s32 result;
 
-    result = btlHasAvailableOption();
+    result = btlHasAvailableOption(actorAddress);
     return result != 0;
 }
 
@@ -1420,7 +1420,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 fldGetSelectedUnitStat();
+extern s32 fldGetSelectedUnitStat(s32);
 
 s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     u32 flags = unit->status.flags;
@@ -1429,7 +1429,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     if (flags & 1) {
         if (flags & mask) {
             if (!(flags & 0x20)) {
-                stat = fldGetSelectedUnitStat();
+                stat = fldGetSelectedUnitStat((s32)unit);
                 if (action & 0x100000) {
                     s32 i;
                     for (i = 0; i < 19; i++) {

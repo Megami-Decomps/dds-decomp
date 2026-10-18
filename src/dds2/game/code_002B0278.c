@@ -909,7 +909,7 @@ u32 mnuReleasePartySelectionResources(KwlnTask *task) {
 void mnuPreparePartyPanelTransition(s32 menu) {
     PartyMenuData *party = (PartyMenuData *)((MenuContext *)menu)->party;
 
-    mnuRestorePartyEntriesAndRefresh();
+    mnuRestorePartyEntriesAndRefresh(menu);
     mnuSetPopupEntryFlagged(((MenuContext *)menu)->popupState, mnuCampPartySelectionReturnPopupEntry);
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)menu)->panelHandle,
                               (struct EffectSlotSet *)(u32)((MenuContext *)menu)->displayHandle, 0, 1);

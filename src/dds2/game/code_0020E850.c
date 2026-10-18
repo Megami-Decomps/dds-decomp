@@ -59,11 +59,11 @@ extern void btlSelectLowestRankTarget(s32, s32);
 
 extern s32 btlSelectHighestCurrentMpTarget(s32, s32);
 
-extern void btlPickLinkedPartyTarget();
+extern void btlPickLinkedPartyTarget(u32, u32);
 
-extern void btlPickUnlinkedPartyTarget();
+extern void btlPickUnlinkedPartyTarget(u32, u32);
 
-extern void btlAppendSelfAfterTargetScan();
+extern void btlAppendSelfAfterTargetScan(s32);
 
 extern s32 btlSelectTargetsExcludingActorUnit(s32);
 
@@ -71,7 +71,7 @@ extern void btlAppendEffectActorToCommandIndices(s32, s32);
 
 extern void btlAppendSelectedOrCurrentActorTarget(s32, s32);
 
-extern void btlSelectTargetsByMode();
+extern void btlSelectTargetsByMode(s32, s32);
 
 
 extern s8 D_0037F510[];
@@ -1406,9 +1406,9 @@ void btlPickCommandLowestHpRatioTarget(s32 context) {
     btlSelectLowestHealthRateTarget(context, 0);
 }
 
-/* Forward mode selection while retaining the native zero-formal C surface. */
-void btlSelectCommandTargetsByMode(void) {
-    btlSelectTargetsByMode();
+/* Forward mode selection. */
+void btlSelectCommandTargetsByMode(s32 task, s32 mode) {
+    btlSelectTargetsByMode(task, mode);
 }
 
 /* Append the selected/current actor pointer with the native zero mode argument. */
@@ -1461,19 +1461,19 @@ void btlFilterCommandTargetsByUnitId(s32 context, s32 value) {
     btlFilterTargetListByUnitId(context, value);
 }
 
-/* Current-command adapter for the unlinked-party selector; retain the short-arity ABI. */
-void btlPickUnlinkedCommandTarget(void) {
-    btlPickUnlinkedPartyTarget();
+/* Current-command adapter for the unlinked-party selector. */
+void btlPickUnlinkedCommandTarget(u32 task, u32 input) {
+    btlPickUnlinkedPartyTarget(task, input);
 }
 
-/* Current-command adapter for the linked-party selector; retain the short-arity ABI. */
-void btlPickLinkedCommandTarget(void) {
-    btlPickLinkedPartyTarget();
+/* Current-command adapter for the linked-party selector. */
+void btlPickLinkedCommandTarget(u32 task, u32 input) {
+    btlPickLinkedPartyTarget(task, input);
 }
 
-/* Append the command's own actor after the native scan; keep short-arity forwarding. */
-void btlAppendActorToCommandTargets(void) {
-    btlAppendSelfAfterTargetScan();
+/* Append the command's own actor after the native scan. */
+void btlAppendActorToCommandTargets(s32 battle) {
+    btlAppendSelfAfterTargetScan(battle);
 }
 
 /* Default selection excludes the actor, with native self fallback; unused stays unused. */

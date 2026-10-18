@@ -464,11 +464,10 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)record->handle);
 }
 
-/* Create the singleton message window only when its handle is negative.
- * The legacy DDS1 argument is unused; the page setup remains unconditional. */
-s32 evtCreateMessageWindowIfMissing(s32 unused) {
+/* Create the singleton message window only when its handle is negative. */
+s32 evtCreateMessageWindowIfMissing(s32 sub) {
     if (dspWindowHandle < 0) {
-        dspWindowHandle = itfMesCreateWindow();
+        dspWindowHandle = itfMesCreateWindow(sub);
         itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
         return 1;
     }
