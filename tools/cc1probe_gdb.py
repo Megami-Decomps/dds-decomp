@@ -1776,7 +1776,10 @@ def install():
             Hook(a, mk_est_tag(a))
         Hook(sym("dbr_schedule"), hk_dbr)
         Hook(sym("fill_simple_delay_slots"), hk_fill_simple)
-        Hook(sym("fill_eager_delay_slots"), hk_fill_eager)
+        # Omit the redundant eager-fill banner: its entry at 0x08166ddc
+        # is adjacent to the fill_slots_from_thread RET hook at 0x08166ddb.
+        # This paired breakpoint setup perturbed reorg under QEMU/GDB 16.3.
+        # Keep the decision hooks below and require full output qualification.
         Hook(sym("mostly_true_jump"), hk_mtj_entry)
         for r in rets("mostly_true_jump"):
             Hook(r, hk_mtj_exit)
