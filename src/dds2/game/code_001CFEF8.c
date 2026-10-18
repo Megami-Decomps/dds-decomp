@@ -703,7 +703,7 @@ s32 fldConsumeSceneInputFlags(BtlState *scene) {
     return result;
 }
 
-void fldAdvanceSceneGroupInitialization(BtlState *scene) {
+s32 fldAdvanceSceneGroupInitialization(BtlState *scene) {
     s32 notFirst = scene->mode != 1;
     scene->mode = 2 - notFirst;
     if (scene->sceneCallback != 0) {
@@ -715,7 +715,7 @@ void fldAdvanceSceneGroupInitialization(BtlState *scene) {
     scene->groupHandleCount = 0;
     scene->turnCount = scene->turnCount + 1;
     fldInitializeSceneGroups();
-    btlResetSceneSlotFades();
+    return btlResetSceneSlotFades();
 }
 
 extern void btlTickActorEntryCountdowns(BtlUnit *);

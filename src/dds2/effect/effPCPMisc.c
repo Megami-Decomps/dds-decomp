@@ -4002,7 +4002,7 @@ EffPCPGrowWork *effPcpScaledEffectCreateFromTable(void *data) {
 }
 
 
-void effPcpCreateScaledEffectFromResource(EffPCPGrowWork *work) {
+EffPCPGrowWork *effPcpCreateScaledEffectFromResource(EffPCPGrowWork *work) {
     EffPCPScaledThunderParams params;
     EffThunderParameterHead *res;
 
@@ -4013,7 +4013,7 @@ void effPcpCreateScaledEffectFromResource(EffPCPGrowWork *work) {
     params.base = work->base;
     params.target = work->target;
     params.res = res->alpha;
-    effPcpCreateScaledThunder(&params);
+    return effPcpCreateScaledThunder(&params);
 }
 
 void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
