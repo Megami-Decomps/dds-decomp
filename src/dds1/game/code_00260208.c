@@ -1,3 +1,4 @@
+#include "brs_icon_record.h"
 #include "common.h"
 #include "evt_stage_test_api.h"
 #include "snd_track_playback_api.h"
@@ -30,7 +31,6 @@ extern s8 brsUpdateBlocked;
 
 extern s8 brsTaskState;
 
-typedef s16 BrsIconRecord[4];
 
 enum {
     BRS_ICON_ID = 1,

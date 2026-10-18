@@ -1,3 +1,4 @@
+#include "brs_icon_record.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
@@ -90,7 +91,6 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *unit, u32 amount);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
-typedef s16 BrsIconRecord[4];
 
 enum {
     BRS_ICON_ID = 1,

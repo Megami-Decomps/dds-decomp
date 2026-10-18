@@ -1,3 +1,4 @@
+#include "mnu_scene_sprite_entry.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -203,8 +204,6 @@ void mnuDrawMantraPulseAndSparks(MnuSparkleSpriteWork *work, s32 alpha, s32 cont
 
 typedef s16 MnuSpritePlacement[4];
 
-/* Packed 12-byte scene row used by the profile-menu placement table. */
-typedef s16 MnuSceneSpriteEntry[6];
 
 enum {
     MNU_SCENE_SPRITE_INDEX = 1,
