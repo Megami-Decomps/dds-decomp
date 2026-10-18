@@ -2792,6 +2792,42 @@ retail image, since focused checks can mask local-literal relocations.
 Only fix types the data really has (rodata placement, a bitfield the code
 tests bit-by-bit). Adding views to steer alias sets is the lever above.
 
+### A float-typed word leaves an integer store chain; the last user of a base issues first
+
+Two sched1 facts decided DDS1 `func_0014C468` (`game/code_001411F0`, exact
+after both; cc1probe `--sched`, hooked==unhooked):
+
+- A store whose destination has an `int` alias set is ordered before a later
+  load through an unrelated pointer (`entry->duration`, `entry->entryCount`
+  loaded from the pointer a call returned). Every int store that precedes such
+  a load therefore inherits the load's priority (here 10 against 2-3 for the
+  `li` constants) and issues before them. Retail has the clear of the word at
+  `fldAreaState + 0x10C` after both `li` and after the loads' latency slot,
+  i.e. no dependence chain. The word is an `f32` (`FldAreaWork.unk10C`); its
+  float alias set breaks the chain and the clear sits at priority 2 like the
+  halfword stores. A `const` pointer or typed members of `FldEnt110` did not
+  change it; only the destination's own type did.
+  When a store needs to issue later than its source position suggests, ask
+  whether the field really is an `f32`/pointer/`s16` (zero is `sw $0`
+  for all of them) before reordering statements.
+- Among ready insns with equal priority, sched1 prefers the smaller register
+  weight, and an insn that is the last use of a pseudo (a `REG_DEAD` note
+  taken from the original source order) has weight -1. The store through a
+  shared base that comes last in the source is therefore issued first of its
+  tied group, and the others keep source order. `func_0014C468`: writing the
+  `0x10C` clear after `collectedCount = 0` made it the last user of the
+  `fldAreaState` base, which put it ahead of the `sh $0, 0x106` that retail
+  leaves in the `jal` delay slot; the same rule explains why the source order
+  of tied stores often looks reversed against the retail issue order
+  (`kind`, `mode`, `entry` stores in `func_0013C138`).
+- Constants of different widths: when an `s16` store of `1` and an `s32` store of `1`
+  appear, writing the halfword first keeps two `li` (a narrower constant after a
+  wider one is merged by CSE as a lowpart of the wider register).
+- A non-void function whose last path falls off the end leaves the last call's
+  result live in `$2`. DDS1 `func_0013AFC8` (still parked) reproduces the
+  retail `bnel ... li $2,-1` early exit only with the `== 0` body first and
+  `return -1` last.
+
 ### Inferred array bounds and literal-copy alias sets
 
 In the cases below, completing an inferred bound (`s32 origin[] = {x, y}`) produced distinct aggregate alias sets in the pinned EE GCC 2.96's stock RTL, while the corresponding fixed-bound controls (`s32 origin[2]`) shared sets. All arrays have their real, fully determined extent and element type. This observation does not establish a universal compiler type-node rule or a special C alias guarantee.
