@@ -1439,7 +1439,7 @@ f32 angle, f32 blend) {
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-extern f32 func_002F9CD0(f32);
+extern f32 atanf(f32);
 extern f32 tanf(f32);
 extern f32 sinf(f32);
 extern void sdfVuLoadRotationMatrixZ(f32);
@@ -1537,7 +1537,7 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
         sideLength = fsqrtf(midpointDistance * midpointDistance - sideReach * sideReach);
         angleScale = sideReach;
     }
-    angle = func_002F9CD0(angleScale / sideLength);
+    angle = atanf(angleScale / sideLength);
 
     if (!alternate) {
         if (targetMuzzle[0] > actorMuzzle[0]) {
@@ -10363,7 +10363,7 @@ extern f32 D_0035F9C0[4];
 
 extern f32 D_0035F9D0[4];
 
-extern f32 func_002F9CD0(f32);
+extern f32 atanf(f32);
 
 s32 btlArrangeFormationSlots(s32 filter) {
     f32 position[4];
@@ -10430,12 +10430,12 @@ s32 btlArrangeFormationSlots(s32 filter) {
     } else {
         spacing = 0;
     }
-    spacingAngle = func_002F9CD0(spacing / radius);
+    spacingAngle = atanf(spacing / radius);
     totalArcAngle = -spacingAngle;
     for (i = 0; i < count; i++) {
         unit = actors[i];
         distance = unit->bodyRadius * unit->scale;
-        halfAngle = func_002F9CD0(distance / radius);
+        halfAngle = atanf(distance / radius);
         totalArcAngle += halfAngle + halfAngle;
         totalArcAngle += spacingAngle;
     }
@@ -10453,7 +10453,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
     }
     for (i = count - 1; i != (u32)-1; i--) {
         unit = actors[i];
-        halfAngle = func_002F9CD0(unit->bodyRadius * unit->scale / radius);
+        halfAngle = atanf(unit->bodyRadius * unit->scale / radius);
         angle += halfAngle;
         position[0] = sdfSinPoly(angle) * radius;
         position[1] = 0.0f;
