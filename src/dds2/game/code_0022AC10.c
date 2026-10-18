@@ -1,3 +1,4 @@
+#include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
@@ -161,41 +162,7 @@ extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
 extern s8 D_00453068[];
 
-/* Native 32-byte overlay particle, initialized at0022D040 and rendered at0022D8A8. */
-typedef struct BtlFadeParticle {
-    f32 direction[3];
-    f32 rotationAngle;
-    f32 rotationSpeed;
-    f32 displacement;
-    f32 displacementSpeed;
-    u8 alpha;
-    u8 age;
-    u8 delay;
-    u8 pad1F;
-} BtlFadeParticle;
 
-typedef struct BattleRuntimeState {
-    s32 counter; /* Active encounter updates since initialization. */
-    u16 state;
-    u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
-    s8 pending;
-    s8 active;
-    u8 pad09[3];
-    u32 options;
-    u32 color10;
-    u32 color14;
-    s32 particlesPerRow;
-    s32 particleRowCount;
-    s32 unk20;
-    s32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    BtlFadeParticle *ownedData;
-    void *resource;
-    void *handle;
-} BattleRuntimeState;
 
 extern BattleRuntimeState btlRuntimeState;
 
