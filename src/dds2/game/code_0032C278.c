@@ -296,10 +296,10 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *s
         source->word, source->width, source->format,
         sourceX, sourceY, width, height, 1);
     quadwordCount = (sdfFormatBitsPerPixelB(source->format) * width * height) >> 7;
-    packet->quadwordCount = quadwordCount;
-    packet->unkB4 = resourceAddress;
-    packet->unkB8 = arg7;
-    packet->unkBC = arg8;
+    packet->readback.quadwordCount = quadwordCount;
+    packet->readback.destinationAddress = resourceAddress;
+    packet->readback.callbackAddress = arg7;
+    packet->readback.callbackArgument = arg8;
     packet->tail[0] = 0x20000002ULL;
     packet->tail[1] = 0x5000000206000000ULL;
     packet->tail[2] = 0x1000000000008001ULL;
