@@ -1,3 +1,6 @@
+#include "eff_surface_grid_node.h"
+#include "eff_surface_node.h"
+#include "eff_animation_state.h"
 #include "eff_model_resource.h"
 #include "eff_gs_packet.h"
 #include "eff_packet_params.h"
@@ -195,7 +198,6 @@ extern struct SdfTextureFileHeader *effFlashTextureHandles;
 
 
 extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
-typedef struct EffSurfaceGridNode EffSurfaceGridNode;
 extern EffSurfaceGridNode *effCreateSurfaceGridNode(u32, u32);
 
 extern void effFillSurfaceGridColorGradient(EffSurfaceGridNode *, u32 *);
@@ -476,11 +478,6 @@ extern s32 effPollFileRecord(char *, s32);
 
 
 
-
-typedef struct EffSurfaceParams {
-    u32 opaque00[6];
-    f32 scale;
-} EffSurfaceParams;
 
 struct EffKindWork;
 
@@ -4738,24 +4735,6 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
     }
 }
 
-typedef struct EffectSurfaceNode {
-    u32 handleCount;
-    u32 color;
-    f32 opacity;
-    u32 kind;
-    EffSurfaceParams params; /* 0x10: copied source header */
-    u32 index;
-    struct SdfMemBlock *handleBuffer; // 0x30
-    BillObj *resource;
-    FileJobPayload **jobs;          // 0x38
-    struct SdfMemBlock *jobAllocation;      // 0x3C
-    struct EffExpandedList *resourceHolder; // 0x40, released separately from the grid record
-    FileSlotTable *record; // 0x44: retained grid record table
-    u16 count;          // 0x48: initialized to 1; remaining role unknown
-} EffectSurfaceNode;
-typedef char EffectSurfaceNode_handleBuffer_offset_check[
-    ((u32)&((EffectSurfaceNode *)0)->handleBuffer == 0x30) ? 1 : -1];
-
 /* Create an empty surface node for handleCount grid cells; no handles are allocated yet. */
 EffectSurfaceNode *effCreateSurfaceNode(u32 handleCount) {
     EffectSurfaceNode *node = sdfAllocAndClearQuadwords(sizeof(EffectSurfaceNode));
@@ -5087,24 +5066,6 @@ extern EffPacketParams D_003DCA70;
 extern u8 D_0037EB90[];
 
 extern u8 D_0037EBE0[];
-
-/* Surface node: 0x3C bytes at the end of the retained block, after the vertex rows. */
-struct EffSurfaceGridNode {
-    u8 pad_00[0x10];
-    s32 rows;       // 0x10
-    s32 field_14;   // 0x14
-    s32 field_18;   // 0x18
-    s32 columns;    // 0x1C
-    u32 type;       // 0x20
-    u128 *buffer;     // 0x24
-    u32 *tail;       // 0x28
-    SdfAsset *handle; // 0x2C
-    u128 *queueA;     // 0x30
-    u32 *queueB;     // 0x34
-    struct SdfMemBlock *allocation; // 0x38
-};
-
-typedef char EffSurfaceGridNodeSizeCheck[(sizeof(EffSurfaceGridNode) == 0x3C) ? 1 : -1];
 
 /* vu0 routine: grid surface node with rows of three vertex columns */
 EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
@@ -8271,14 +8232,6 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     func_002B0B70(out, mtx);
 }
 
-
-/* Per-animation allocation: positions follow this four-word owner header. */
-typedef struct EffAnimationState {
-    f32 *positions;       // 0x00
-    u32 textureHandle;    // 0x04
-    FileSlotTable *record; // 0x08
-    struct SdfMemBlock *allocation;       // 0x0C
-} EffAnimationState;
 
 void effInitializeAnimationPositions(u8 *work) {
     EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
