@@ -628,7 +628,7 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     if (src != 0) {
         state->src = src;
     } else {
-        state->src = (MantraMenuSrc *)mnuGetDefaultMantraPanelRecord(object);
+        state->src = mnuGetDefaultMantraPanelRecord(object);
     }
     if (state->src != 0) {
         state->drawBits.sourceKind = 4;

@@ -60,9 +60,16 @@ typedef struct MtrUnitMenuEntry {
     u8 pad02[6];
 } MtrUnitMenuEntry;
 
-typedef struct MantraMenuSrc {
+/* One eight-byte source-bank record: source selection and transition phases
+ * use the same packed cell and retain their established field names. */
+typedef struct MenuMantraRecord {
     union {
+        u16 flags;
         u16 bits;
+        struct {
+            u8 mantraId;
+            u8 flagsHigh;
+        };
         struct {
             u16 unitIndex : 8;
             u16 kind : 4;
@@ -71,11 +78,16 @@ typedef struct MantraMenuSrc {
             u16 unk14 : 2;
         } fields;
     };
-    u16 completionFlagId; /* Set when applying or completing the source transition. */
-    u8 pad04;
-    s8 selectedIndex; /* party-list row selected by the source search */
+    union {
+        u16 eventFlag;
+        u16 completionFlagId;
+    };
+    s8 element;
+    s8 selectedIndex;
     s16 targetId;
-} MantraMenuSrc;
+} MenuMantraRecord;
+
+typedef MenuMantraRecord MantraMenuSrc;
 
 typedef struct MantraFlagResource {
     struct SdfMemBlock *allocation;
@@ -111,18 +123,7 @@ typedef struct MantraNodePos {
     struct MantraNodePos *neighbors[6];
 } MantraNodePos;
 
-typedef struct MenuMantraRecord {
-    union {
-        u16 flags;
-        struct {
-            u8 mantraId;
-            u8 flagsHigh;
-        };
-    };
-    u16 eventFlag; /* 0x02: event flag claimed from 0x923 by mnuBuildMantraSourceList */
-    s8 element;
-    u8 pad05[3];
-} MenuMantraRecord;
+
 
 /* The single menu work area starts at owner+0x240. Allocation and call
  * chains share it between selection, navigation and panel animation. */
