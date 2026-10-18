@@ -3,6 +3,7 @@
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
 #include "fld_room_effect_entry.h"
+#include "fld_object_slot.h"
 #include "fld_npc_palette.h"
 #include "file_pac.h"
 #include "evt_world.h"
@@ -3056,29 +3057,10 @@ void fldClearMenuEntries(void) {
     fldRoomEffectEntryCount = 0;
 }
 
-/* One of the 32 field object slots. Field names match the DDS2 copy of this
- * struct (src/dds2/game/code_001442D0.c), which is already reviewed. */
-typedef struct {
-    s32 unk0;
-    s32 id;
-    s32 activationState;
-    s32 activationRequested;
-    u8 pad10[0x10];
-    s32 effectVariant;
-    s32 effectNode;
-    u8 pad28[8];
-} FldObj30; /* 0x30 bytes */
-typedef char FldObj30_activationState_offset_must_be_0x08[
-    ((u32)&((FldObj30 *)0)->activationState == 0x08) ? 1 : -1];
-typedef char FldObj30_size_must_be_0x30[sizeof(FldObj30) == 0x30 ? 1 : -1];
-
-extern FldObj30 fldObjectSlots[32];
-
 extern s32 D_003BAF70;
 
 extern s32 D_003BAF7C;
 
-extern s32 fldObjectSlotCount;
 
 void fldResetObjectSlots(void) {
     s32 i;
