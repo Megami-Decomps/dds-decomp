@@ -1155,7 +1155,17 @@ s32 mnuDrawMantraCostTransition(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawDisplaySpriteAndPanelMarks);
+extern void itfDspDrawMarksA(s32, s32);
+/* Shared draw-callback helper for the TU's eight itfDspDrawMarksA sites (retail keeps jal + epilogue tails, like mnuDrawPlacedSpriteVia). */
+static inline void itfDrawMarksVia(void (*draw)(s32, s32), s32 scale, s32 context) {
+    draw(scale, context);
+}
+
+void mnuDrawDisplaySpriteAndPanelMarks(MenuSceneMetadata *scene, s32 alpha, s32 context) {
+    mnuDrawMantraSparkScene(scene, alpha, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, alpha, 0x5A, context);
+    itfDrawMarksVia(itfDspDrawMarksA, alpha, context);
+}
 
 /* Three sprite layers drawn at the origin for one draw context. */
 void mnuDrawMantraSceneSpriteSequence(s32 scale, s32 context) {
