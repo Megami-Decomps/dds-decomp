@@ -20,7 +20,7 @@
 /* Declared before first use (were implicit int). */
 extern void * memset(void *, s32, u32);
 
-extern u32 *mnuGetSelectedNodeValue(void);
+extern u32 mnuGetSelectedNodeValue(void);
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
 #define MNU_SCENE_SHADE_FRAME_SCALE 10.0f
@@ -641,7 +641,7 @@ s32 mnuBeginMantraProfileSelection(void) {
     scene->pendingProfileId = entry->sceneId;
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
-    memcpy((u32 *)((u8 *)scene + 0x28), (u32 *)*(u32 *)mnuGetSelectedNodeValue(), 0x1A4);
+    memcpy((u32 *)((u8 *)scene + 0x28), ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord, 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
     mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), scene->attachedEffect);
     scene->stageFinished = 0;
@@ -881,17 +881,17 @@ void mnuBeginTransitionAlt(MenuSceneWork *work, s32 mode) {
         transition->payload.transition.mode = mode;
         if (mode == 1) {
             work->transitionBlendCounter = 10;
-            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
+            transition->payload.transition.fromValue = (u32)((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord;
             mnuStopResourceAnimation();
-            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
+            transition->payload.transition.toValue = (u32)((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord;
             mnuResetResourceAnimation();
             return;
         }
         if (mode == 2) {
             work->transitionBlendCounter = -10;
-            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
+            transition->payload.transition.fromValue = (u32)((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord;
             mnuResetResourceAnimation();
-            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
+            transition->payload.transition.toValue = (u32)((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord;
             mnuStopResourceAnimation();
         }
     }
@@ -1093,7 +1093,7 @@ s32 mnuDrawMantraCostTransition(void) {
     s32 scaled;
     s32 raw;
     f32 frac;
-    u32 *cost;
+    MnuProfileProgress *cost;
 
     frac = 0.0f;
     mnuGetSelectedNodeValue();
@@ -1112,8 +1112,8 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawMantraScenePlacementSprite(0, 0, 1, 0x80, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scaled, 0x5B, 0x53);
-        cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
+        cost = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance((u32)cost->partyRecord, &scene->costTransitionList, scaled, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 2:
@@ -1126,8 +1126,8 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawMantraScenePlacementSprite(0, 0, 0, 0x80, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scaled, 0x5B, 0x53);
-        cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
+        cost = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance((u32)cost->partyRecord, &scene->costTransitionList, scaled, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 1:
@@ -1145,8 +1145,8 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawMantraScenePlacementSprite(0, 0, 1, 0x80, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0x5B, 0x53);
-        cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, 0x80, 0x53);
+        cost = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance((u32)cost->partyRecord, &scene->costTransitionList, 0x80, 0x53);
         mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, 0x80, 0xB, 0x53);
         break;
     default:
