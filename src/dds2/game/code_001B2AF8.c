@@ -8447,7 +8447,223 @@ BattleRosterTable *btlGetActorLinkageSkillList(s32 address, u16 *outCount) {
     return &D_003B5D10;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C8A80);
+extern u16 btlReadUnitStatusMask(DatPartyRecord *);
+#include "btl_command_affinity_api.h"
+extern void btlCreateReserveActorPanelTask(void);
+extern s32 btlIsSupportedCommandKind(BattleIndexWork *);
+extern s32 btlCheckScenePairResult(BtlUnit *, BattleRosterPair *);
+extern s16 D_004368BC;
+extern s16 D_004368BE;
+extern s16 D_004368C0;
+
+s32 func_001C8A80(BattleSceneObject *object) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u16 count = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1);
+    s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
+    s16 entry = object->selections[kind].entry;
+    s16 cursor = object->selections[kind].cursor;
+    BtlCommandPartnerOutput partners;
+    u16 *commands;
+    u16 *picked;
+
+    if (D_0037F510.confirm < 0) {
+        switch (kind) {
+        case 0:
+            if (entry == 0 && cursor == 0) {
+                object->commandData->skillId = 0;
+                object->commandData->phase = 1;
+                D_004368BC = 1;
+                D_004368BE = 0;
+                D_004368C0 = 0;
+            } else {
+                commands = btlGatherActorCommandsByKind((s32)object, (s16 *)&count, 0, 2, 3);
+                if (entry == (u16)count) {
+                    object->commandData->phase = 10;
+                    btlSetActorCommandSelection((s32)object, 10, entry, 0);
+                } else {
+                    picked = &commands[entry - 1];
+                    if (btlGetCommandUseError(object->owner->unit, *picked) != 0) {
+                        sndSetStationedSeVolume(10);
+                        break;
+                    }
+                    object->commandData->phase = 2;
+                    object->commandData->skillId = *picked;
+                    if (btlIsSupportedCommandKind(object->commandData) == 0) {
+                        btlSetActorCommandSelection((s32)object, 2, entry, (s16)*picked);
+                    } else {
+                        D_004368BC = 2;
+                        D_004368BE = entry;
+                        D_004368C0 = *picked;
+                    }
+                }
+            }
+            object->state = 3;
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 4:
+            if ((object->owner->unit->status.flags & 0x400) != 0) {
+                if (btlHasRequiredCommandAffinityPartners(object->owner->unit, D_003B5D10.entries[entry].skill) == 0) {
+                    break;
+                }
+                if (btlResolveCommandAffinityPartners(object->owner->unit, D_003B5D10.entries[entry].skill, &partners) == 0) {
+                    break;
+                }
+                object->owner->indexWork.companionA = partners.firstPartner;
+                object->commandData->skillId = partners.commandId;
+                object->commandData->phase = 2;
+                object->owner->indexWork.companionB = partners.secondPartner;
+                object->owner->indexWork.skillId = partners.commandId;
+                object->state = 3;
+                sndSetStationedSeVolume(8);
+                return 1;
+            }
+            if (btlCheckScenePairResult(object->owner->unit, &D_003B5D10.entries[entry]) != 0) {
+                sndSetStationedSeVolume(10);
+                break;
+            }
+            object->commandData->phase = 2;
+            object->commandData->skillId = D_003B5D10.entries[entry].skill;
+            object->owner->indexWork.skillId = D_003B5D10.entries[entry].skill;
+            object->owner->indexWork.companionA = D_003B5D10.entries[entry].first;
+            object->state = 3;
+            object->owner->indexWork.companionB = D_003B5D10.entries[entry].second;
+            if ((battle->battleFlags & 0x1000000) != 0) {
+                btlSetActorCommandSelection((s32)object, 3, entry, (s16)D_003B5D10.entries[entry].skill);
+            } else {
+                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            }
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 2:
+            object->commandData->phase = 4;
+            object->commandData->reference = D_003B5B10[entry * 2];
+            object->state = 3;
+            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 3:
+            switch (entry) {
+            case 0:
+                if ((object->owner->unit->partyRecord.flags & 0x10) != 0 || mdlFlagTest(0x820) != 0 ||
+                    object->owner->unit->partyRecord.unitId == 9 ||
+                    (btlReadUnitStatusMask(&object->owner->unit->partyRecord) & 0x1000) != 0) {
+                    sndSetStationedSeVolume(10);
+                    break;
+                }
+                object->commandData->phase = 5;
+                object->state = 3;
+                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                sndSetStationedSeVolume(8);
+                return 1;
+            case 1: {
+                s32 capacity = 0;
+                s32 i;
+
+                for (i = 0; i < datGameState->partyCount; i++) {
+                    if ((datGameState->party[i].flags & 2) != 0) {
+                        capacity++;
+                    }
+                }
+                capacity = datGameState->partyCount - capacity;
+                if (capacity == 0) {
+                    sndSetStationedSeVolume(10);
+                    break;
+                }
+                object->state = 6;
+                sndSetStationedSeVolume(8);
+                btlCreateReserveActorPanelTask();
+                return 1;
+            }
+            case 2:
+            default:
+                if (btlIsSceneActorCountWithinLimit(object->owner->unit, 1) != 0) {
+                    sndSetStationedSeVolume(10);
+                    break;
+                }
+                object->commandData->phase = 11;
+                object->commandData->linkedUnit = object->owner->unit;
+                object->state = 3;
+                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                sndSetStationedSeVolume(8);
+                return 1;
+            }
+            break;
+        case 6:
+            if (datBattleSceneRecords[battle->battleMode].voice != 0) {
+                sndSetStationedSeVolume(10);
+                break;
+            }
+            object->commandData->phase = 6;
+            object->state = 3;
+            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 1:
+        case 5:
+        default:
+            return 0;
+        }
+    } else if (D_0037F510.primaryCancel < 0) {
+        if ((u32)(object->state - 1) < 2) {
+            if (kind == 4) {
+                btlSetActionActorPanelPresentation(object->owner, 1, 0);
+            }
+            if (btlCommandPanelWork->classIndex == 0) {
+                entry = 0;
+                cursor = 0;
+            }
+            btlCommandPanelWork->classIndex = 0;
+            object->selections[0].entry = 0;
+            object->selections[0].cursor = 0;
+            sndSetStationedSeVolume(10);
+        }
+    } else if ((D_0037F510.prev & 2) != 0) {
+        if (entry > 0) {
+            if (entry == cursor + 1 && cursor > 0) {
+                cursor--;
+            }
+            entry--;
+            sndSetStationedSeVolume(0);
+        } else if (D_0037F510.prev < 0) {
+            entry = (s16)(count - 1);
+            cursor = entry - 3;
+            if (cursor < 0) {
+                cursor = 0;
+            } else {
+                sndSetStationedSeVolume(0);
+            }
+        }
+    } else if ((D_0037F510.next & 2) != 0) {
+        if (entry < count - 1) {
+            entry++;
+            if (entry == cursor + 3 && cursor < count - 4) {
+                cursor++;
+            }
+            if (count >= 2) {
+                sndSetStationedSeVolume(0);
+            }
+        } else if (D_0037F510.next < 0) {
+            entry = 0;
+            cursor = 0;
+            if (count >= 2) {
+                sndSetStationedSeVolume(0);
+            }
+        }
+    } else if (D_0037F510.buttons[0] < 0) {
+        if (kind == 4) {
+            btlSetActionActorPanelPresentation(object->owner, 1, 0);
+        }
+        object->commandData->phase = 10;
+        count = fldUpdateSceneKindCounter((s32)object, 0, 1);
+        btlSetActorCommandSelection((s32)object, 10, (s16)(count - 1), 0);
+        object->state = 3;
+        sndSetStationedSeVolume(8);
+        return 1;
+    }
+    object->selections[kind].entry = entry;
+    object->selections[kind].cursor = cursor;
+    return 0;
+}
 
 extern void func_001C92A0(BattleSceneObject *, u16, u16, u16);
 
@@ -8857,36 +9073,29 @@ void btlDrawRetreatCommandLabel(s32 unused) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C9EA0);
 
-typedef struct SceneCheckArgs {
-    u16 mode;
-    u16 pad2;
-    BtlUnit *first;
-    BtlUnit *second;
-} SceneCheckArgs;
-
 extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlCheckCommandVitalCost(BtlUnit *, s32);
 
 /* Check helper for a pair of scene objects: the caller's own result wins,
  * then the first object's, then the second's. */
-s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
+s32 btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args) {
     s32 base;
     s32 resultA = 0;
     s32 resultB = 0;
-    base = btlGetPartnerCommandUseError(self, self, args->first, args->second, args->mode);
+    base = btlGetPartnerCommandUseError(self, self, args->first, args->second, args->skill);
     if (args->first != 0) {
-        resultA = btlGetPartnerCommandUseError(args->first, args->first, self, args->second, args->mode);
+        resultA = btlGetPartnerCommandUseError(args->first, args->first, self, args->second, args->skill);
         if (resultA == 6 && base == 0) {
-            if (btlCheckCommandVitalCost(args->first, args->mode) == 0) {
+            if (btlCheckCommandVitalCost(args->first, args->skill) == 0) {
                 resultA = 0;
             }
         }
     }
     if (args->second != 0) {
-        resultB = btlGetPartnerCommandUseError(args->second, args->second, self, args->first, args->mode);
+        resultB = btlGetPartnerCommandUseError(args->second, args->second, self, args->first, args->skill);
         if (resultB == 6 && base == 0) {
-            if (btlCheckCommandVitalCost(args->second, args->mode) == 0) {
+            if (btlCheckCommandVitalCost(args->second, args->skill) == 0) {
                 resultB = 0;
             }
         }

@@ -7295,7 +7295,224 @@ BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *v
     return &D_00359160;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BD750);
+extern u16 btlReadUnitStatusMask(DatPartyRecord *);
+#include "btl_command_affinity_api.h"
+extern void btlCreateReserveActorPanelTask(void);
+extern s32 btlIsSupportedCommandKind(BattleIndexWork *);
+extern s32 func_001BF040(BtlUnit *, BattleRosterPair *);
+extern s16 D_003BB494;
+extern s16 D_003BB496;
+extern s16 D_003BB498;
+
+s32 func_001BD750(BattleSceneObject *object) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u16 count = btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 1);
+    s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
+    s16 entry = object->selections[kind].entry;
+    s16 cursor = object->selections[kind].cursor;
+    BtlCommandPartnerOutput partners;
+    u16 *commands;
+    u16 *picked;
+
+    if (D_00324510.confirm < 0) {
+        switch (kind) {
+        case 0:
+            if (entry == 0 && cursor == 0) {
+                object->commandData->skillId = 0;
+                object->commandData->phase = 1;
+                D_003BB494 = 1;
+                D_003BB496 = 0;
+                D_003BB498 = 0;
+            } else {
+                commands = btlGatherActorCommandsByKind((s32)object, (s16 *)&count, 0, 2, 3);
+                if (entry == (u16)count) {
+                    object->commandData->phase = 10;
+                    btlSetActorCommandSelection((s32)object, 10, entry, 0);
+                } else {
+                    picked = &commands[entry - 1];
+                    if (btlGetCommandFailureReason(object->owner->unit, *picked) != 0) {
+                        sndSetStationedSeVolume(10);
+                        break;
+                    }
+                    object->commandData->phase = 2;
+                    object->commandData->skillId = *picked;
+                    if (btlIsSupportedCommandKind(object->commandData) == 0) {
+                        btlSetActorCommandSelection((s32)object, 2, entry, *picked);
+                    } else {
+                        D_003BB494 = 2;
+                        D_003BB496 = entry;
+                        D_003BB498 = *picked;
+                    }
+                }
+            }
+            object->state = 3;
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 4:
+            if ((object->owner->unit->status.flags & 0x400) != 0) {
+                if (btlHasRequiredCommandAffinityPartners(object->owner->unit, D_00359160.entries[entry].skill) == 0) {
+                    break;
+                }
+                if (btlResolveCommandAffinityPartners(object->owner->unit, D_00359160.entries[entry].skill, &partners) == 0) {
+                    break;
+                }
+                object->owner->indexWork.companionA = partners.firstPartner;
+                object->commandData->skillId = partners.commandId;
+                object->commandData->phase = 2;
+                object->owner->indexWork.companionB = partners.secondPartner;
+                object->owner->indexWork.skillId = partners.commandId;
+                object->state = 3;
+                sndSetStationedSeVolume(8);
+                return 1;
+            }
+            if (func_001BF040(object->owner->unit, &D_00359160.entries[entry]) != 0) {
+                sndSetStationedSeVolume(10);
+                break;
+            }
+            object->commandData->phase = 2;
+            object->commandData->skillId = D_00359160.entries[entry].skill;
+            object->owner->indexWork.skillId = D_00359160.entries[entry].skill;
+            object->owner->indexWork.companionA = D_00359160.entries[entry].first;
+            object->state = 3;
+            object->owner->indexWork.companionB = D_00359160.entries[entry].second;
+            if ((battle->battleFlags & 0x1000000) != 0) {
+                btlSetActorCommandSelection((s32)object, 3, entry, D_00359160.entries[entry].skill);
+            } else {
+                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            }
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 2:
+            object->commandData->phase = 4;
+            object->commandData->reference = D_00358FE0[entry * 2];
+            object->state = 3;
+            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 3:
+            switch (entry) {
+            case 0:
+                if ((btlReadUnitStatusMask(&object->owner->unit->partyRecord) & 0x1000) != 0) {
+                    sndSetStationedSeVolume(10);
+                    break;
+                }
+                object->commandData->phase = 5;
+                object->state = 3;
+                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                sndSetStationedSeVolume(8);
+                return 1;
+            case 1: {
+                s32 capacity = 0;
+                s32 i;
+
+                for (i = 0; i < datGameState->partyCount; i++) {
+                    if ((datGameState->party[i].flags & 2) != 0) {
+                        capacity++;
+                    }
+                }
+                capacity = datGameState->partyCount - capacity;
+                if ((datBattleSceneRecords[battle->battleMode].flags & 0x800) != 0) {
+                    capacity = 0;
+                }
+                if (capacity == 0) {
+                    sndSetStationedSeVolume(10);
+                    break;
+                }
+                object->state = 6;
+                sndSetStationedSeVolume(8);
+                btlCreateReserveActorPanelTask();
+                return 1;
+            }
+            case 2:
+            default:
+                if (btlIsSceneActorLimitSatisfied((s32)object->owner->unit, 1) != 0) {
+                    sndSetStationedSeVolume(10);
+                    break;
+                }
+                object->commandData->phase = 11;
+                object->commandData->linkedUnit = object->owner->unit;
+                object->state = 3;
+                btlSetActorCommandSelection((s32)object, 0, 0, 0);
+                sndSetStationedSeVolume(8);
+                return 1;
+            }
+            break;
+        case 6:
+            if (datBattleSceneRecords[battle->battleMode].voice != 0) {
+                sndSetStationedSeVolume(10);
+                break;
+            }
+            object->commandData->phase = 6;
+            object->state = 3;
+            btlSetActorCommandSelection((s32)object, 0, 0, 0);
+            sndSetStationedSeVolume(8);
+            return 1;
+        case 1:
+        case 5:
+        default:
+            return 0;
+        }
+    } else if (D_00324510.primaryCancel < 0) {
+        if ((u32)(object->state - 1) < 2) {
+            if (kind == 4) {
+                btlSetActionActorPanelPresentation(object->owner, 1, 0);
+            }
+            if (btlCommandPanelWork->classIndex == 0) {
+                entry = 0;
+                cursor = 0;
+            }
+            btlCommandPanelWork->classIndex = 0;
+            object->selections[0].entry = 0;
+            object->selections[0].cursor = 0;
+            sndSetStationedSeVolume(10);
+        }
+    } else if ((D_00324510.prev & 2) != 0) {
+        if (entry > 0) {
+            if (entry == cursor + 1 && cursor > 0) {
+                cursor--;
+            }
+            entry--;
+            sndSetStationedSeVolume(0);
+        } else if (D_00324510.prev < 0) {
+            entry = (s16)(count - 1);
+            cursor = entry - 3;
+            if (cursor < 0) {
+                cursor = 0;
+            } else {
+                sndSetStationedSeVolume(0);
+            }
+        }
+    } else if ((D_00324510.next & 2) != 0) {
+        if (entry < count - 1) {
+            entry++;
+            if (entry == cursor + 3 && cursor < count - 4) {
+                cursor++;
+            }
+            if (count >= 2) {
+                sndSetStationedSeVolume(0);
+            }
+        } else if (D_00324510.next < 0) {
+            entry = 0;
+            cursor = 0;
+            if (count >= 2) {
+                sndSetStationedSeVolume(0);
+            }
+        }
+    } else if (D_00324510.buttons[0] < 0) {
+        if (kind == 4) {
+            btlSetActionActorPanelPresentation(object->owner, 1, 0);
+        }
+        object->commandData->phase = 10;
+        count = btlGetCommandOptionCount((s32)object, 0, 1);
+        btlSetActorCommandSelection((s32)object, 10, (s16)(count - 1), 0);
+        object->state = 3;
+        sndSetStationedSeVolume(8);
+        return 1;
+    }
+    object->selections[kind].entry = entry;
+    object->selections[kind].cursor = cursor;
+    return 0;
+}
 
 extern void btlDrawRetreatCommandLabel(s32);
 
