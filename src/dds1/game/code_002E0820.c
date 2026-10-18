@@ -31,6 +31,10 @@
 #include "sdf_lookup_texture.h"
 #include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dev_console_node.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
+extern void sdfTransposeVuMatrix(void);
 
 #define SDF_PAD_ENTRY_COUNT 2
 

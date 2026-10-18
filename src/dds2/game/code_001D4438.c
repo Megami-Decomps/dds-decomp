@@ -39,6 +39,17 @@
 #include "evt_solar.h"
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
+extern u32 btlGetActiveUnitId(void);
+extern s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId);
+extern s32 btlGetLoggedIndexedCommandItem(s32 index);
+extern void btlInitializeBattleDebugMenu(void);
+extern s32 btlTestActorStatusPredicate(BtlUnit *unit);
+extern s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor);
+extern void * memset(void *, s32, u32);
+extern void sndSetStationedSeVolume(u32 sequence);
+/* Original-style implicit int, kept: matched code depends on it: sndGetResourceStatus, sndHasResourceFlagsOneOrEight, sndIsResourceNodeReferencedOrActive. */
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);

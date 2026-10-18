@@ -30,6 +30,9 @@
 #include "fld_trigger_shape.h"
 #include "fld_room_state.h"
 #include "fld_action_row.h"
+#include "dds3_world_counter.h"
+/* Declared before first use (were implicit int). */
+extern void func_00136EF8(void);
 
 extern void evtSetDrawSurfaceIndex();
 

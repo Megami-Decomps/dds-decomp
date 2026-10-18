@@ -6,6 +6,8 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_command.h"
+/* Declared before first use (were implicit int). */
+extern void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex);
 
 typedef s16 MenuIconPlacement[4];
 

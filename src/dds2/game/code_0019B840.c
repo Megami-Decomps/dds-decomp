@@ -5,6 +5,10 @@
 #include "itf.h"
 #include "itf_mem_node.h"
 #include "kwln.h"
+/* Declared before first use (were implicit int). */
+extern void frFontLoadDefaultFonts(void);
+extern void * memset(void *, s32, u32);
+extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 
 #define FR_FONT_BYTE_MASK 0xFF
 #define FR_FONT_ENTRY_ENABLED 1

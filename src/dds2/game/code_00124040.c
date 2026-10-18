@@ -41,6 +41,15 @@
 #include "file_selection_api.h"
 #include "fld_player_scene_state.h"
 #include "eff_inner_float_api.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void evtDestroySecondaryWorldNode(void);
+extern f32 fabsf(f32);
+extern void fldResetTargetViewAndSound(void);
+extern void fldStopCurrentBgm(void);
+extern void func_00141898(void);
+extern void * memset(void *, s32, u32);
+extern char * strcpy(char *, const char *);
 
 extern EffWorldNode *dds3CreateConfiguredCameraObject(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
 

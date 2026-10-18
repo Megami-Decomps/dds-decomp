@@ -41,6 +41,13 @@
 #include "file_request_api.h"
 
 #include "kwln_task_create.h"
+#include "itf.h"
+#include "sdf_packet_list.h"
+/* Declared before first use (were implicit int). */
+extern s32 evtCreateSkyTask(void);
+extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
+extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
+extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
 #include "dds3_world_primary.h"

@@ -34,6 +34,8 @@
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
+/* Declared before first use (were implicit int). */
+extern s32 itfMesCountZeroBits(s32 bitCount, u32 remainingMask);
 
 
 extern u32 itfMessageFlags;

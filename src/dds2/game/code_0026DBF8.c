@@ -14,6 +14,13 @@
 #include "mnu_mantra_position_api.h"
 #include "mnu_panel_position_record.h"
 #include "mdl_flag_api.h"
+/* Declared before first use (were implicit int). */
+extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void * memset(void *, s32, u32);
+extern void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination);
+extern s32 sprintf(char *, const char *, ...);
+extern u32 strlen(const char *);
+/* Original-style implicit int, kept: matched code depends on it: mnuUpdateAndDrawMantraBackgroundBursts. */
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"

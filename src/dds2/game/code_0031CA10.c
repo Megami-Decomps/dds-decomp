@@ -2,6 +2,8 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu_shooting.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
 
 extern f32 tanf(f32);
 

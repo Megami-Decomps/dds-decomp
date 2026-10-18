@@ -54,6 +54,22 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "mdl_flag_api.h"
+#include "btl.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "itf.h"
+/* Declared before first use (were implicit int). */
+extern void effLoadFlashTextures(void);
+extern void effLoadScalyTexture(void);
+extern void effLoadWindTexture(void);
+extern void fileClearMemoryCardOperationActive(void);
+extern void frFontAddSharedGlyphFlags(s32 mask);
+extern u8 frFontClearFlagBits(u8 mask);
+extern void frFontSetSharedRenderFlags(u32 renderFlags);
+extern s32 mcResetSlotMetadata(void);
+extern void sndReleaseTrackHandle(u32 trackHandle);
+extern char * strcpy(char *, const char *);
+extern u32 strlen(const char *s);
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
 struct MenuListNode;

@@ -33,6 +33,45 @@
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
 #include "fld_resource_wait_api.h"
+#include "itf.h"
+/* Declared before first use (were implicit int). */
+extern void btlCreateStageTestTask(void);
+extern s32 btlExitWhenAudioAndTasksIdle(void);
+extern void evtBattleStageTestStopTask(void);
+extern void evtDestroySecondaryWorldNode(void);
+extern void evtStartTestTask(void);
+extern void evtViewerCreateTaskWithSky(void);
+extern void fileMenuReleaseNoOp(void);
+extern void fileMenuWorkCreate(u32 startBranchFlag);
+extern void fileReleaseMenuResources(void);
+extern void fldDispatchDeferredFieldCommand(void);
+extern void fldProcessDeferredSceneCommand(void);
+extern void fldRunPendingSceneAction(void);
+extern void fldShutdownSceneTasksAndWorld(void);
+extern void fldStopLmapTask(void);
+extern void fldStopSceneTasks(void);
+extern void itfInitializeAdminInterfaceNoop(void);
+extern void itfShutdownAdminInterfaceNoop(void);
+extern void itfStartFontTestScene(void);
+extern void mdlCreateViewerPackageTask(void);
+extern u32 mdlStopViewerPackageTask(void);
+extern void * memset(void *, s32, u32);
+extern void mnuCampDestroyPanelTasks(void);
+extern void mnuConfigTasksDestroy(void);
+extern void mnuCreateCampShopPopupTasks(const s32 *stockGroup);
+extern void mnuCreateCampTasks(void);
+extern void mnuCreateConfigTasks(s32 mode);
+extern void mnuCreateMovieViewerTask(void);
+extern void mnuCreateTerminalSceneTasks(s32 reduced, s32 slot);
+extern void mnuDestroyCampTasks(void);
+extern void mnuDestroyMovieViewerTask(void);
+extern s32 mnuDestroyTitleMenuTask(void);
+extern u32 mnuOpenTitleMenuForMode(s32 mode);
+extern s32 mnuStaffCreateTasks(void);
+extern u32 mnuStaffDestroyTasks(void);
+extern u32 mnuStartStaffMovieRequest(void);
+extern s32 mnuStopStaffTasks(void);
+/* Original-style implicit int, kept: matched code depends on it: fldStartFieldSceneTasks. */
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,

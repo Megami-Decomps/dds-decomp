@@ -20,6 +20,12 @@
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
 #include "snd_midi_state_views.h"
+/* Declared before first use (were implicit int). */
+extern void EIntr(void);
+extern s32 SleepThread(void);
+extern s32 WaitSema(s32);
+extern void * memset(void *, s32, u32);
+extern char * strcpy(char *, const char *);
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100

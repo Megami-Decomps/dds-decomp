@@ -10,6 +10,9 @@
 #include "pty_roster_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18

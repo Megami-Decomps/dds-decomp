@@ -13,6 +13,13 @@
 #include "itf_resource_segments.h"
 #include "kwln.h"
 #include "kwln_draw_buffer.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void evtLipsStopFunction(void);
+extern void frFontFreeEntry(s32 slotId);
+extern void * memset(void *, s32, u32);
+extern u32 strlen(const char *);
+/* Original-style implicit int, kept: matched code depends on it: frFontListInsert. */
 
 
 extern s32 mnuQueryTitleSoundBusy(void);

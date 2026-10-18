@@ -33,6 +33,13 @@
 #include "kwln_task_lifecycle.h"
 #include "sdf_chip.h"
 #include "mdl_flag_api.h"
+#include "btl.h"
+#include "fr_font.h"
+#include "mnu_staff.h"
+/* Declared before first use (were implicit int). */
+extern void evtCreateEventScriptProcess(s32 eventId);
+extern void fldDrawCameraColorLayerPass(void);
+/* Original-style implicit int, kept: matched code depends on it: evtViewerCleanupMessageWindow. */
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48

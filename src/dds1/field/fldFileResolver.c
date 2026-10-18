@@ -98,6 +98,15 @@
 #include "fld_room_state.h"
 #include "fld_trigger_shape.h"
 #include "fld_action_row.h"
+#include "btl.h"
+#include "itf.h"
+/* Declared before first use (were implicit int). */
+extern void btlResetAsyncState(void);
+extern void dds3ClearObjectFlags(void *object, s32 mask);
+extern void dds3SetObjectFlags(void *object, s32 mask);
+extern void fldDrawCameraColorScrollingGradient(void);
+extern s32 fldSetEncounterMode(s32 encounterMode);
+extern char * strcpy(char *, const char *);
 
 extern FldFileResource *D_003BD7B8;
 

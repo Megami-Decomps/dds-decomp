@@ -16,6 +16,8 @@
 #include "common.h"
 #include "sdf_trig.h"
 #include "snd_sequence_volume_pan.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
 
 extern u32 *mnuGetSelectedNodeValue(void);
 #define MNU_SCENE_WORK_SIZE 0x5B0

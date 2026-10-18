@@ -5,6 +5,8 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "prf_profile_cap.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
 
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);

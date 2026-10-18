@@ -17,6 +17,13 @@
 #include "sdf_thread_workspace_api.h"
 #include "sdf_dev_start_load_api.h"
 #include "sdf_disc_file_record.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void func_002F3CB8(s32);
+extern s32 sdfDevQueueControlRequest(DevState *state);
+extern char * strchr(const char *, s32);
+extern char * strcpy(char *, const char *);
+/* Original-style implicit int, kept: matched code depends on it: sdfDevQueueOperation. */
 
 #define SDF_DEV_WORKER_COUNT 4
 

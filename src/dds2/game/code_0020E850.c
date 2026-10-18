@@ -23,6 +23,11 @@
 #include "dat_command.h"
 #include "btl_boss_debug_api.h"
 #include "eff.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration);
+extern s32 btlGetRegisteredTaskValueOrDefault(void);
+extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
+/* Original-style implicit int, kept: matched code depends on it: btlIsLowHpActionReady. */
 
 extern u32 btlRandomState;
 

@@ -27,6 +27,18 @@
 #include "sdf_chip.h"
 #include "mdl_flag_api.h"
 #include "mnu_effect_pair.h"
+/* Declared before first use (were implicit int). */
+extern void datAddCurrencyClamped(s32 delta);
+extern s32 evtIsActiveFlagSet(s32 flagIndex);
+extern void * memset(void *, s32, u32);
+extern void mnuClearEntries(MenuPageWindow *menu);
+extern void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *menu);
+extern void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots);
+extern void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
+extern void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
+extern u32 strlen(const char *);
+/* Original-style implicit int, kept: matched code depends on it: fileSetPreviewLocation, mnuSelectLastListNode. */
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4

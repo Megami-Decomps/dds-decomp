@@ -18,6 +18,13 @@
 #include "sdf_dev_worker.h"
 #include "sdf_dev_start_load_api.h"
 #include "sdf_disc_file_record.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void func_0034CB60(s32);
+extern s32 sceClose(s32 fd);
+extern s32 sdfDevQueueControlRequest(DevState *state);
+extern char * strchr(const char *, s32);
+/* Original-style implicit int, kept: matched code depends on it: iSignalSema, sdfDevQueueOperation, sdfDevSetFallbackDeviceWorker. */
 
 #define SDF_DEV_WORKER_COUNT 4
 

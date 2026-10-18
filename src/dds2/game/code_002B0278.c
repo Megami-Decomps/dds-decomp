@@ -25,6 +25,17 @@
 #include "prf_skill_list_buffer.h"
 #include "eff_random.h"
 #include "fr_font.h"
+/* Declared before first use (were implicit int). */
+extern void evtStageTestInit(s32 mode);
+extern void evtStageTestStop(void);
+extern s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
+extern s32 mnuGetSelectionFromFlags(DatPartyRecord *actorEntry);
+extern void mnuResetWorkFloats(void);
+extern void mnuSetStateValue(u32 *out, u32 value);
+extern void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
+extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 struct MenuListNode;
 struct StaffMenuRuntime;
 #include "fpu.h"

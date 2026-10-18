@@ -20,6 +20,11 @@
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
 #include "snd_midi_state_views.h"
+/* Declared before first use (were implicit int). */
+extern void EIntr(void);
+extern s32 SleepThread(void);
+extern s32 WaitSema(s32);
+extern char * strcpy(char *, const char *);
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);

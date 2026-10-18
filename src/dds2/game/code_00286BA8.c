@@ -14,6 +14,11 @@
 #include "sdf_task_work.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
+#include "btl.h"
+#include "mnu.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
+/* Original-style implicit int, kept: matched code depends on it: mnuDrawMantraPhaseOpacity. */
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08

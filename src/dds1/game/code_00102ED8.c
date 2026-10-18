@@ -30,6 +30,13 @@
 #include "kwln_task_lifecycle.h"
 #include "sdf_dma_tag.h"
 #include "sdf_gs_packet.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
+extern void * memset(void *, s32, u32);
 
 typedef struct {
     s8 r;

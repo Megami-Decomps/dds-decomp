@@ -48,6 +48,15 @@
 #include "dds3_world_counter.h"
 #include "kwln_fade.h"
 #include "sdf_vu_matrix.h"
+#include "btl.h"
+#include "itf.h"
+/* Declared before first use (were implicit int). */
+extern void btlResetAsyncState(void);
+extern void dds3ClearObjectFlags(void *object, u32 mask);
+extern void dds3SetObjectFlags(void *object, u32 mask);
+extern void fldSetDisplayState(u32 state);
+extern s32 fldSetEncounterMode(s32 encounterMode);
+extern char * strcpy(char *, const char *);
 
 
 

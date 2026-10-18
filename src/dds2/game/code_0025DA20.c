@@ -39,6 +39,12 @@
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+/* Declared before first use (were implicit int). */
+extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
+extern void func_00137888(void);
+extern void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
+extern void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
+/* Original-style implicit int, kept: matched code depends on it: mnuSelectLastListNode. */
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48

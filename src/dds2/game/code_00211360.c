@@ -20,6 +20,8 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "mdl_flag_api.h"
+#include "btl_boss_debug_api.h"
+/* Original-style implicit int, kept: matched code depends on it: btlAiCounterReachedLimit. */
 
 
 #define BTL_AI_SLOT_COUNT 5

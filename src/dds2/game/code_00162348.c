@@ -24,6 +24,8 @@
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
 
 
 

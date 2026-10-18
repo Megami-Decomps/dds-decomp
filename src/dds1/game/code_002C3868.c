@@ -13,6 +13,11 @@
 #include "mnu_list.h"
 #include "fld_map_resource.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_secondary.h"
+/* Declared before first use (were implicit int). */
+extern s32 abs(s32);
+extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern s32 sprintf(char *, const char *, ...);
 
 extern void sdfCounterTickCountdown(void);
 

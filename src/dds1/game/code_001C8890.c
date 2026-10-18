@@ -42,6 +42,30 @@
 #include "file_request_api.h"
 #include "dat_affinity.h"
 #include "btl_ai_table.h"
+#include "btl_ui.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
+extern s32 btlCheckStatusActionEligibility(BtlTask *task);
+extern void * btlCreateCommandSoundTask(s32 owner, s32 variant);
+extern u8 * btlCreateSecondaryCommandSoundTask(void);
+extern u8 * btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant);
+extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
+extern u32 btlGetActiveUnitId(void);
+extern s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
+extern s32 btlGetStatusActionEffectId(BtlTask *task);
+extern void btlInitUnitFxDefaults(BtlUnit *fx);
+extern void btlInitializeBattleDebugMenu(void);
+extern s32 btlIsActiveActor(s32 candidate);
+extern s32 btlIsSupportedCommandKind(s32 *state);
+extern void btlRemovePartyActorAndShiftEntries(BtlUnit *unit);
+extern void btlResetActiveUnitList(void);
+extern void * btlScheduleRefreshTask(u8 *owner);
+extern s32 btlSetEligibleActorPanelTransitionState(void);
+extern void func_001F0CA0(BtlTask *task, BattleIndexWork *work);
+extern void func_001FF0C8(BtlTask *task, u32 mode);
+extern void * memset(void *, s32, u32);
+extern s32 sndHasActiveActor(void);
+/* Original-style implicit int, kept: matched code depends on it: btlCreateCommandSoundUpdateTask, btlFlagUnitDefeatCandidate. */
 
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 

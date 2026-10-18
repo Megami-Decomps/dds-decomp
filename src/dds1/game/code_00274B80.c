@@ -23,6 +23,14 @@
 #include "dsp_name.h"
 #include "eff_random.h"
 #include "fr_font.h"
+#include "btl.h"
+#include "mnu_staff.h"
+/* Declared before first use (were implicit int). */
+extern void itfSetTextDrawLimit(s32 limit);
+extern void * memset(void *, s32, u32);
+extern void mnuDrawCampScreenDefault(u32 task);
+extern void mnuResetWorkFloats(void);
+/* Original-style implicit int, kept: matched code depends on it: mnuSetStaffDisplayMode. */
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);

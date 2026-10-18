@@ -21,6 +21,10 @@
 #include "mdl_flag_api.h"
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
+/* Declared before first use (were implicit int). */
+extern u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex);
+extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
+/* Original-style implicit int, kept: matched code depends on it: scrFindSlot, scrRemoveSlot. */
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7

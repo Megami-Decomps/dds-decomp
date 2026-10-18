@@ -14,6 +14,13 @@
 #include "sdf_key_pool.h"
 #include "sdf_model_command_views.h"
 #include "sdf_packet_alloc.h"
+#include "sdf_packet_list.h"
+/* Declared before first use (were implicit int). */
+extern void sdfApplyResourceListEntriesWithForcedTexture(DevRequest *list, s32 entryIndex);
+extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
+extern void sdfSetForcedAssetTextureMode(u32 mode);
+extern void sdfVuCacheObjectVector(u8 *sourceObject);
+extern void sdfVuSelectTransformMatrix(u32 matrixAddress);
 
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);

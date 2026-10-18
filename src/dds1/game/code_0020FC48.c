@@ -45,6 +45,13 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "mdl_flag_api.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index);
+extern void dds3WorkClear(void);
+extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern s32 scrReadIntParameter(s32 parameterIndex);
+extern void sndEnsureMidiBankResident(s32 packed);
+extern s32 sndFindPackedTrackLoadStatus(s32 packed);
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 

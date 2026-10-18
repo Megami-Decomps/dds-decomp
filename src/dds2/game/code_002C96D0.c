@@ -46,6 +46,22 @@
 #include "sdf_texture_file.h"
 #include "sdf.h"
 #include "mdl_flag_api.h"
+#include "btl.h"
+#include "fr_font_draw_glyph.h"
+#include "itf.h"
+/* Declared before first use (were implicit int). */
+extern void effLoadFlashTextures(void);
+extern void effLoadScalyTexture(void);
+extern void effLoadWindTexture(void);
+extern s32 fileBeginRequest(char *fileName, void *dataAddressSlot, void *dataSizeSlot, void *continuation, void *pendingRequestStatus);
+extern void fileClearMemoryCardOperationActive(void);
+extern s32 fileCreateMainBegin(void);
+extern void frFontAddSharedGlyphFlags(s32 mask);
+extern u8 frFontClearFlagBits(u8 mask);
+extern void frFontSetSharedRenderFlags(u32 renderFlags);
+extern void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
+extern char * strcpy(char *, const char *);
+extern u32 strlen(const char *);
 struct EffectSlotSet;
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
