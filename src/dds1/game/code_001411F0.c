@@ -1,3 +1,4 @@
+#include "fld_projected_sprite.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -1085,16 +1086,6 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     sdfModelUpdateCurrentFrameTransforms(emitter);
     sdfModelBuildNodeResourcePackets(D_00325838, emitter);
 }
-
-typedef struct {
-    s16 u;
-    s16 v;
-    s16 width;
-    s16 height;
-    s16 anchorX;
-    s16 anchorY;
-    s32 textureSlot;
-} FldProjectedSprite;
 
 extern FldProjectedSprite D_0033EBA0[];
 extern SdfTex *D_003D40A0[4];
