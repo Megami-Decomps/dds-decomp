@@ -237,11 +237,84 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002818B8", mnuDrawPartyMemberStatusPanel);
+/* Shared level-number format, followed by the next literal's alignment. */
+char D_003BC760[] = "%2d";
 
-INCLUDE_SDATA(const s32, "game/code_002818B8", D_003BC760);
+/* Draw the status row, level label and its page or HP/MP bars.
+ * Retains the released Son4/Son3 reconstruction findings. */
+void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
+                                 s32 panelIndex, s32 surface) {
+    char text[16];
+    MenuPageSlot *panel = &menu->slots[panelIndex];
+    s32 alpha = menu->transitionValue;
+    u32 textColor = uiBlendColors(0x80808080, 0x80808000, alpha);
+    /* As in the command panel, inferred bounds preserve distinct array alias
+     * sets for independent literal copies in the stock compiler. */
+    s32 positions[4] = {32, 16, 0x280, 0x60};
+    s32 framePositions[] = {0x50, 0x38, 0x2C0, 0xC8};
+    s32 pagePosition[] = {0x540, 0x28};
+    s32 barPosition[2] = {0x6E0, 0x48};
+    s32 labelX, labelY;
+    s32 iconX, iconY;
+    s32 selection;
+    s32 level;
+    struct FrFontGlyph *glyph;
 
-INCLUDE_SDATA(const s32, "game/code_002818B8", D_003BC768);
-
-INCLUDE_SDATA(const s32, "game/code_002818B8", D_003BC770);
-
+    if (panel->flags & 1) {
+        return;
+    }
+    iconX = x + positions[0];
+    iconY = y + positions[1];
+    if (panel->leftHandle != NULL && (panel->flags & 0x80) != 0) {
+        mnuDrawPartyPanelResourceIcons(iconX, iconY, z, panel, 1, surface);
+        return;
+    }
+    effDrawSpriteWithCornerFade(iconX, iconY, z, alpha, 1, panel->icon[1], 0, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    effDrawSpriteWithCornerFade(x + framePositions[0], y + framePositions[1], 0xFFFFFF,
+                               alpha, 1, panel->frame[4], 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    mnuDrawPartyRowFrameVariant(x, y, z, menu, panelIndex, 0, surface);
+    labelX = x + positions[2];
+    labelY = y + positions[3];
+    effDrawSpriteWithCornerFade(labelX, labelY, z, alpha, 1, panel->icon[2], 0, surface);
+    level = menu->records->slots[panelIndex].level;
+    sprintf(text, D_003BC760, level);
+    glyph = itfCreateFont2TextGlyph(labelX + 0x170, labelY, z, textColor, text, NULL);
+    frFontDrawGlyphChain(glyph, 1, surface);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    uiDrawActiveSurfaceRegion(surface);
+    effDrawSpriteWithCornerFade(x + framePositions[0], y + framePositions[1], 0xFFFFFF,
+                               alpha, 1, panel->frame[4], 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    mnuDrawAndAdvancePanelFades(x, y, z, panel->work, surface);
+    uiDrawSurfaceAtNearDepth(surface);
+    if (panel->frame[5] == NULL) {
+        effDrawSpriteWithCornerFade(x + framePositions[0], y + framePositions[1], z,
+                                   alpha, 1, panel->frame[4], 0, surface);
+    } else {
+        effDrawSpriteWithCornerFade(x + framePositions[0] + 0x60, y + framePositions[1] + 0x30, z,
+                                   alpha, 1, panel->frame[5], 0, surface);
+    }
+    selection = mnuClearWindowPendingFlagAfterSelection(x + framePositions[2], y + framePositions[3], z,
+                                                       menu, panelIndex, surface);
+    if (selection != 0) {
+        mnuDrawPartyRowFrameVariant(x, y, z, menu, panelIndex, 1, surface);
+    }
+    effDrawSpriteWithCornerFade(x + framePositions[2], y + framePositions[3], z,
+                               alpha, 1, panel->frame[selection + 2], 0, surface);
+    if (panel->resources != NULL && (menu->flags & 0x40)) {
+        mnuDrawPartyPageContents(x + pagePosition[0], y + pagePosition[1], z,
+                                panel->kind, panel->resources, surface);
+        return;
+    }
+    if (panel->bars[0].resourceSets[0] != NULL) {
+        s32 hp = menu->records->slots[panelIndex].hp;
+        u32 hpColor = mnuGetPanelRatioColor(0, hp, menu->records->slots[panelIndex].maxHp);
+        mnuDrawAndAdvanceRatioPanel(x + barPosition[0] + 0x40, y + barPosition[1] + 0x28, z,
+                                   hpColor, hp, -1, &panel->bars[0], surface);
+        mnuDrawAndAdvanceRatioPanel(x + barPosition[0] + 0x40, y + barPosition[1] + 0xB8, z,
+                                   0xA09DC380, menu->records->slots[panelIndex].mp,
+                                   -1, &panel->bars[1], surface);
+    }
+}
