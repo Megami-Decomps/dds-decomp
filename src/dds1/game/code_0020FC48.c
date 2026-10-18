@@ -2234,7 +2234,7 @@ extern s32 btlCountTasksForOwner(s64);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 /* Keep the diagnostic scale as a float in the existing four-argument ABI. */
 extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);
-extern void btlDebugMenuSetupNoOp(void *);
+extern u32 btlDebugMenuSetupNoOp(void *);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *);
 extern void btlDebugMenuAfterRecordNoOp(void);
@@ -2716,7 +2716,7 @@ extern u16 D_003BBB1C, D_003BBB1E, D_003BBB20;
 extern u32 D_003BBB24, D_003BBB28;
 extern const char *D_003BBB2C, *D_003BBB30;
 extern char D_003BBB50[];
-extern void btlDebugMenuSetupNoOp(void *);
+extern u32 btlDebugMenuSetupNoOp(void *);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *);
 extern void btlDebugMenuAfterRecordNoOp(void);
@@ -2806,8 +2806,8 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_003BBB28 = state->unk_1FC;
         D_003BBB24 = state->battleFlags;
         btlDebugMenuSetupNoOp(window);
-        state->unk_1FC = D_003BBB28;
         state->battleFlags = D_003BBB24;
+        state->unk_1FC = D_003BBB28;
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp(window);
         btlDebugMenuAfterRecordNoOp();
