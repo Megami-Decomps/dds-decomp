@@ -816,7 +816,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     sdfQueueAssetRelease((SdfAsset *)asset);
 }
 
-void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+void evtSubmitViewParamPacket(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second) {
     void *list;
     D_0037F5B0[0][0] = x;
     D_0037F5B0[0][1] = y;
