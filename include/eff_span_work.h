@@ -43,7 +43,7 @@ typedef struct EffSpanConfig {
     u32 edgeColor;                       /* 0x40 */
     u8 pad44[4];
     f32 drawScale;                       /* 0x48 */
-    u8 pad4C[4];
+    f32 pointHalfWidth;                  /* 0x4C: ribbon half-width at the span points */
     SdfColorTrack referenceColorTrack;   /* 0x50 */
     SdfAlphaTrack referenceAlphaTrack;   /* 0x74 */
     s32 referenceLifetime;               /* 0x84 */
