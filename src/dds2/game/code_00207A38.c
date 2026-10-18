@@ -179,7 +179,7 @@ extern s32 sceDopen(char *path);
 
 extern s32 btlBuiltinResourceNameIndex;
 
-extern void sprintf();
+extern s32 sprintf(char *buffer, const char *format, ...);
 
 
 

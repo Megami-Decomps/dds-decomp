@@ -108,7 +108,7 @@ extern s8 D_003A5558[];
 
 extern u32 D_003BB6C8;
 
-extern void sprintf();
+extern s32 sprintf(char *buffer, const char *format, ...);
 
 extern u8 D_003BB820[];
 
