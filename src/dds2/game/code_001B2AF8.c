@@ -9635,11 +9635,118 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416C98);
+extern void btlScaleEffectSlotSourceBounds(EffectSlotSet *, s32);
+extern s32 btlSetActorEffectParameter();
+extern s32 btlProjectForwardPositionToScreen(s32 *);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416CC8);
+void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
+    s32 position[4];
+    s32 origin[5];
+    f32 muzzle[4];
+    s32 panelRows[] = {0, 0, 25, 0, 0, 24, 7, 7, 27, 7, 7, 26};
+    s32 rowSlots[] = {-13, 0, 46, 38, 0, 48, 16, 46, 56};
+    s32 echoSlots[] = {47, 49, 57};
+    u32 colors[] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 ax;
+    s32 ay;
+    s32 bx;
+    s32 by;
+    s32 i;
+    s32 j;
+    s32 n;
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CB7A8);
+    btlGetRuntime();
+    if (btlSetActorEffectParameter(unit, 0) == 0) {
+        btlUnitGetMuzzlePosVU(unit);
+    } else if ((unit->status.flags & 0x8000000) != 0) {
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+        muzzle[1] = -24.0f;
+        VU0_LOAD_VF(vf10, muzzle);
+    }
+    if (btlProjectForwardPositionToScreen(position) == 0) {
+        return;
+    }
+    origin[3] = 0x35;
+    origin[4] = 0x35;
+    origin[0] = position[0] - 0x1A;
+    origin[1] = position[1] - 0x1A;
+    origin[2] = 0xFFFFFFF;
+    if (work->animationPhase < 6) {
+    if (work->animationPhase >= 0) {
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 4; j++) {
+                if (i == 1) {
+                    colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, panelRows[5], j, work->panelFade[1]);
+                } else {
+                    colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, panelRows[i * 3 + 2], j, work->panelFade[i]);
+                }
+            }
+            btlResourceBlock->resC->workEntries[panelRows[i * 3 + 2]].geometry.angleDegrees = work->panelAngleDegrees[i];
+            func_001CE418(btlResourceBlock->resC, panelRows[i * 3 + 2], &ax, &ay, work->panelScale[i]);
+            effDrawSpriteWithCornerColors((origin[0] + ax + panelRows[i * 3]) << 4,
+                         (origin[1] + ay + panelRows[i * 3 + 1]) << 3, -1, colors, 0,
+                         btlResourceBlock->resC, panelRows[i * 3 + 2], 0x53);
+            btlResourceBlock->resC->workEntries[panelRows[i * 3 + 2]].geometry.angleDegrees = 0;
+            btlScaleEffectSlotSourceBounds(btlResourceBlock->resC, panelRows[i * 3 + 2]);
+        }
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 4; j++) {
+                colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, rowSlots[i * 3 + 2], j, work->rowFade[i]);
+            }
+            func_001CE418(btlResourceBlock->resC, rowSlots[i * 3 + 2], &ax, &ay, work->rowScale[i]);
+            effDrawSpriteWithCornerColors((origin[0] + work->rowPosition[i][0]) << 4,
+                         (origin[1] + work->rowPosition[i][1]) << 3, -1, colors, 0,
+                         btlResourceBlock->resC, rowSlots[i * 3 + 2], 0x53);
+            btlScaleEffectSlotSourceBounds(btlResourceBlock->resC, rowSlots[i * 3 + 2]);
+            if (work->rowStep[i] >= 0) {
+                switch (work->rowPhase[i]) {
+                case 0:
+                    for (n = 0; n < work->rowStep[i]; n++) {
+                        for (j = 0; j < 4; j++) {
+                            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, echoSlots[i], j,
+                                                                 work->rowFade[i] - ((6 - n) << 4));
+                        }
+                        btlGetTargetRowAnimationOffset(&ax, &ay, i, work->rowStep[i] - n);
+                        func_001CE418(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
+                        effDrawSpriteWithCornerColors((origin[0] + ax + bx) << 4,
+                                     (origin[1] + ay + by) << 3, -1, colors, 0,
+                                     btlResourceBlock->resC, echoSlots[i], 0x53);
+                        btlScaleEffectSlotSourceBounds(btlResourceBlock->resC, echoSlots[i]);
+                    }
+                    break;
+                case 1:
+                    for (n = 0; n < work->rowStep[i]; n++) {
+                        for (j = 0; j < 4; j++) {
+                            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, echoSlots[i], j,
+                                                                 work->rowFade[i] - ((6 - n) << 4));
+                        }
+                        btlGetTargetRowAnimationOffset(&ax, &ay, i, 5 - n);
+                        func_001CE418(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
+                        effDrawSpriteWithCornerColors((origin[0] + ax) << 4,
+                                     (origin[1] + ay) << 3, -1, colors, 0,
+                                     btlResourceBlock->resC, echoSlots[i], 0x53);
+                        btlScaleEffectSlotSourceBounds(btlResourceBlock->resC, echoSlots[i]);
+                    }
+                    break;
+                default:
+                    for (j = 0; j < 4; j++) {
+                        colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, echoSlots[i], j, work->rowFade[i] + 0x40);
+                    }
+                    btlGetTargetRowAnimationOffset(&ax, &ay, i, 5);
+                    func_001CE418(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
+                    effDrawSpriteWithCornerColors((origin[0] + ax) << 4,
+                                 (origin[1] + ay) << 3, -1, colors, 0,
+                                 btlResourceBlock->resC, echoSlots[i], 0x53);
+                    btlScaleEffectSlotSourceBounds(btlResourceBlock->resC, echoSlots[i]);
+                    break;
+                }
+            }
+        }
+    }
+    }
+}
 
 u32 func_001CC018(void) {
     return 0;
@@ -9650,7 +9757,6 @@ extern s16 D_004368BE;
 extern s16 D_004368C0;
 
 /* Process target confirm/cancel and mode-selected directional input. */
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D00);
 
 void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode) {
     BattleSceneObject *object;
