@@ -53,6 +53,7 @@ enum {
 };
 #include "dds3_world_secondary.h"
 #include "sdf_packet_alloc.h"
+#include "fld_camera_tracking.h"
 
 extern void fldInitializeAreaWork(void);
 
@@ -722,10 +723,6 @@ void fldConfigureCameraMoveTracking(s32 start, s32 end) {
         }
     }
 }
-
-enum {
-    FIELD_CAMERA_TRACKING_UNSET = -999
-};
 
 /* Clear the move mode and invalidate all six stored tracking values. */
 void fldResetCameraMoveTracking(void) {
