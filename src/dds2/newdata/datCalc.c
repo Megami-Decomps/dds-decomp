@@ -909,7 +909,8 @@ void ptyInitRuntime(void) {
     }
 }
 
-u16 evtGetIndexedEventRecordId(s32 tableIndex) {
+/* Return the record's command index, zero-extended: its callers read a word. */
+u32 evtGetIndexedEventRecordId(s32 tableIndex) {
     return datItemSkillRecords[tableIndex].commandIndex;
 }
 

@@ -36,6 +36,7 @@
 #include "fld_player_scene_state.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "dds3_world_counter.h"
+#include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
@@ -165,11 +166,6 @@ extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
 extern s16 D_00444C68[];
 
 extern u32 fldSelectedActorEntryIndex;
-
-typedef struct {
-    s16 unk0;
-    s16 requiredModelFlag; /* Shared table halfword tested by mdlFlagTest. */
-} FldIndexPair;
 
 extern FldIndexPair D_0038A3B8[];
 

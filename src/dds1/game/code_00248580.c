@@ -2231,7 +2231,7 @@ u32 mnuTerminalEntryMessageLeaveNoOp(void) {
     return 1;
 }
 
-extern s32 evtGetCapturedWindowPanelValue(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
 extern u8 mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {

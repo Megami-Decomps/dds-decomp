@@ -54,7 +54,7 @@ extern s32 scrReadIntParameter(s32);
 extern s32 D_0032E48C[];
 
 
-extern s32 fldIsSceneStateEight(void);
+extern u8 fldIsSceneStateEight(void);
 
 extern s32 fldCurrentBgmId[];
 

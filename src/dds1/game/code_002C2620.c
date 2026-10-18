@@ -80,7 +80,7 @@ extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
 extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
-extern s32 evtGetCapturedWindowPanelValue(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
 /* The retail caller passes color bytes as promoted ints; the callee narrows them. */
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
