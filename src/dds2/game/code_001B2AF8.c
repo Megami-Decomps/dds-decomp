@@ -7012,7 +7012,119 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C3EC0);
+typedef struct BattleCursorIds {
+    s16 values[3];
+} BattleCursorIds;
+
+typedef struct BattleCursorOffsets {
+    s32 values[3][2];
+} BattleCursorOffsets;
+
+typedef struct BattleCursorEchoOffsets {
+    s32 values[3][2];
+} BattleCursorEchoOffsets;
+
+extern const BattleCursorIds D_00436878[];
+extern const BattleCursorOffsets D_00416840;
+extern const BattleCursorEchoOffsets D_00416858;
+
+void func_001C3EC0(s32 unused, BattleActorPanelWork *work, s32 slot) {
+    BattleCursorIds ids = D_00436878[0];
+    BattleCursorOffsets settle = D_00416840;
+    BattleCursorEchoOffsets echo = D_00416858;
+    s32 settled;
+
+    switch (work->activeEntries[slot].presentation.pendingSceneState) {
+    case 1:
+        break;
+    case 5:
+        if (work->activeEntries[slot].presentation.unkF0 < 0x20) {
+            work->activeEntries[slot].presentation.unkF0 = 0;
+            return;
+        }
+        work->activeEntries[slot].presentation.unkF0 -= 0x20;
+        if (work->activeEntries[slot].presentation.unkF0 < 0x20) {
+            work->activeEntries[slot].presentation.unkF0 = 0;
+        }
+        return;
+    case 3:
+        if (work->activeEntries[slot].presentation.unkF0 < 0x20 ||
+            (work->activeEntries[slot].presentation.unkF0 -= 0x20,
+             work->activeEntries[slot].presentation.unkF0 < 0x20)) {
+            work->activeEntries[slot].presentation.unkF0 = 0;
+            work->activeEntries[slot].presentation.pendingSceneState = 2;
+            work->activeEntries[slot].presentation.cursorSelection =
+                work->activeEntries[slot].presentation.pendingCursorSelection;
+            work->activeEntries[slot].presentation.cursorOffset[0] =
+                settle.values[work->activeEntries[slot].presentation.cursorSelection][0];
+            work->activeEntries[slot].presentation.cursorOffset[1] =
+                settle.values[work->activeEntries[slot].presentation.cursorSelection][1];
+            work->activeEntries[slot].presentation.cursorOption =
+                ids.values[work->activeEntries[slot].presentation.cursorSelection];
+            if (work->activeEntries[slot].presentation.cursorSelection != 0) {
+                work->activeEntries[slot].presentation.cursorPhase = 0;
+            } else {
+                work->activeEntries[slot].presentation.cursorPhase = 180;
+                work->activeEntries[slot].presentation.cursorEchoCount = 0;
+            }
+        }
+        break;
+    case 2:
+        settled = 0;
+        if (work->activeEntries[slot].presentation.cursorSelection != 0) {
+            work->activeEntries[slot].presentation.cursorPhase++;
+            work->activeEntries[slot].presentation.cursorPhase =
+                work->activeEntries[slot].presentation.cursorPhase <= 0 ? 0 :
+                work->activeEntries[slot].presentation.cursorPhase > 0xB ? 0xB :
+                work->activeEntries[slot].presentation.cursorPhase;
+            if (work->activeEntries[slot].presentation.cursorPhase >= 5) {
+                work->activeEntries[slot].presentation.unkF0 += 6;
+                work->activeEntries[slot].presentation.unkF0 =
+                    work->activeEntries[slot].presentation.unkF0 <= 0 ? 0 :
+                    (s8)work->activeEntries[slot].presentation.unkF0 < 0 ? 0x80 :
+                    work->activeEntries[slot].presentation.unkF0;
+                if ((s8)work->activeEntries[slot].presentation.unkF0 < 0) {
+                    settled = 1;
+                }
+            }
+        } else {
+            work->activeEntries[slot].presentation.cursorPhase =
+                (work->activeEntries[slot].presentation.cursorPhase + 0x10) % 360;
+            work->activeEntries[slot].presentation.unkF0 =
+                (sdfSinPoly((f32)((work->activeEntries[slot].presentation.cursorPhase + 90) % 360) /
+                            180.0f * 3.14159f) + 1.0f) * 0.5f * 96.0f + 0.0f;
+            work->activeEntries[slot].presentation.cursorEchoCount++;
+            work->activeEntries[slot].presentation.cursorEchoCount =
+                work->activeEntries[slot].presentation.cursorEchoCount <= 0 ? 0 :
+                work->activeEntries[slot].presentation.cursorEchoCount >= 6 ? 5 :
+                work->activeEntries[slot].presentation.cursorEchoCount;
+            if (work->activeEntries[slot].presentation.cursorEchoCount < 5) {
+                s32 x = work->activeEntries[slot].position[0];
+                s32 y = work->activeEntries[slot].position[1];
+                btlInitializeActionRecordWithScale(
+                    &work->activeEntries[slot].presentation.mirroredSprites[
+                        work->activeEntries[slot].presentation.cursorEchoCount - 1],
+                    work->activeEntries[slot].presentation.cursorOption,
+                    x + echo.values[0][0],
+                    y + echo.values[0][1],
+                    work->activeEntries[slot].presentation.cursorEchoCount - 1,
+                    6.0f - work->activeEntries[slot].presentation.cursorEchoCount);
+            }
+            settled = work->activeEntries[slot].presentation.cursorEchoCount > 4;
+        }
+        if (settled == 1) {
+            work->activeEntries[slot].presentation.cursorOffset[0] =
+                echo.values[work->activeEntries[slot].presentation.cursorSelection][0];
+            work->activeEntries[slot].presentation.cursorOffset[1] =
+                echo.values[work->activeEntries[slot].presentation.cursorSelection][1];
+            work->activeEntries[slot].presentation.pendingSceneState = 1;
+            work->activeEntries[slot].presentation.cursorOption =
+                ids.values[work->activeEntries[slot].presentation.cursorSelection];
+            work->activeEntries[slot].presentation.unkF0 = 0x80;
+        }
+        break;
+    }
+}
 
 extern BtlResBlock *btlResourceBlock;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
