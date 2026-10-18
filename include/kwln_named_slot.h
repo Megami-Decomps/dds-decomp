@@ -2,17 +2,18 @@
 #define KWLN_NAMED_SLOT_H
 
 #include "common.h"
+#include "kwln.h"
 
 /* Linked named-task slots shared by the DDS1 and DDS2 kernel windows. */
 typedef struct KwlnNamedSlot {
     s32 kind;               /* 0x00 */
     char name[32];          /* 0x04 */
-    void *task;             /* 0x24: task passed to scheduler APIs. */
-    void *opaque28;         /* 0x28: cleared by unregister; contents unknown. */
-    void *opaque2C;         /* 0x2C: cleared by unregister; contents unknown. */
-    void *opaque30;         /* 0x30: cleared by unregister; contents unknown. */
-    s32 opaque34;           /* 0x34: cleared by unregister; contents unknown. */
-    void *opaque38;         /* 0x38: cleared by unregister; contents unknown. */
+    KwlnTask *task;         /* 0x24: task passed to scheduler APIs. */
+    TaskUpdate update;      /* 0x28 */
+    TaskDestroy destroy;    /* 0x2C */
+    void (*setState)(s32);  /* 0x30: state callback. */
+    s32 enabled;            /* 0x34 */
+    void *userValue;        /* 0x38 */
     s32 previous;           /* 0x3C: previous slot index. */
     s32 next;               /* 0x40: next slot index. */
 } KwlnNamedSlot;

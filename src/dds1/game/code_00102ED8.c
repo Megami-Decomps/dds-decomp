@@ -147,6 +147,21 @@ void kwlnDebugTaskCreate(void) {
 INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnRegisterNamedSlot);
 
 extern KwlnNamedSlot D_003C1C90[];
+
+extern s32 kwlnRegisterNamedSlot(const char *name);
+
+/* One shared initializer for the three configure modes and unregister. */
+static inline void kwlnSetNamedSlotState(s32 index, s32 kind, TaskUpdate update, TaskDestroy destroy,
+                                         void (*setState)(s32), void *userValue) {
+    D_003C1C90[index].kind = kind;
+    D_003C1C90[index].task = NULL;
+    D_003C1C90[index].update = update;
+    D_003C1C90[index].destroy = destroy;
+    D_003C1C90[index].setState = setState;
+    D_003C1C90[index].enabled = 0;
+    D_003C1C90[index].userValue = userValue;
+}
+
 extern s32 D_003BA850;
 
 #define KWLN_PAD_INPUTS_PER_SET 16
@@ -207,19 +222,13 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
     }
     if (D_003C1C90[slotIndex].kind > 0) {
         if (D_003C1C90[slotIndex].kind < 3) {
-            if (kwlnTaskIsRegistered((KwlnTask *)D_003C1C90[slotIndex].task) == 1) {
-                kwlnTaskDestroyWithHierarchy((KwlnTask *)D_003C1C90[D_003BA85C].task, 1);
+            if (kwlnTaskIsRegistered(D_003C1C90[slotIndex].task) == 1) {
+                kwlnTaskDestroyWithHierarchy(D_003C1C90[D_003BA85C].task, 1);
             }
         }
     }
-    D_003C1C90[slotIndex].kind = 0;
     D_003C1C90[slotIndex].name[0] = 0;
-    D_003C1C90[slotIndex].task = 0;
-    D_003C1C90[slotIndex].opaque28 = 0;
-    D_003C1C90[slotIndex].opaque2C = 0;
-    D_003C1C90[slotIndex].opaque30 = 0;
-    D_003C1C90[slotIndex].opaque34 = 0;
-    D_003C1C90[slotIndex].opaque38 = 0;
+    kwlnSetNamedSlotState(slotIndex, 0, NULL, NULL, NULL, 0);
     if (D_003C1C90[slotIndex].previous < 0) {
         D_003BA850 = D_003C1C90[slotIndex].next;
     } else {
@@ -239,11 +248,32 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnConfigureNamedSlotMode3);
+s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
+    s32 index = kwlnRegisterNamedSlot(name);
+    if (index < 0) {
+        return 0;
+    }
+    kwlnSetNamedSlotState(index, 3, NULL, NULL, setState, 0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnConfigureNamedSlotMode1);
+s32 kwlnConfigureNamedSlotMode1(const char *name, TaskUpdate update, TaskDestroy destroy, void *userValue) {
+    s32 index = kwlnRegisterNamedSlot(name);
+    if (index < 0) {
+        return 0;
+    }
+    kwlnSetNamedSlotState(index, 1, update, destroy, NULL, userValue);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnConfigureNamedSlotMode2);
+s32 kwlnConfigureNamedSlotMode2(const char *name, TaskUpdate update, TaskDestroy destroy, void *userValue) {
+    s32 index = kwlnRegisterNamedSlot(name);
+    if (index < 0) {
+        return 0;
+    }
+    kwlnSetNamedSlotState(index, 2, update, destroy, NULL, userValue);
+    return 1;
+}
 
 void kwlnRuntimeStartupHook(void) {
 }
