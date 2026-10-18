@@ -465,7 +465,7 @@ segments:
       - [0x333EC8, .lit4, game/code_00113308]
       - [0x333EE4, .lit4, game/code_00116440]
       - [0x333EEC, .lit4, game/code_0011F208]
-      - [0x333F3C, .lit4, game/code_00124040]
+      - [0x333F1C, .lit4, game/code_00124040]
       - [0x333F7C, .lit4, field/fldFileResolver]
       - [0x334010, .lit4, game/code_00136EF8]
       - [0x334044, .lit4, game/code_0013B818]

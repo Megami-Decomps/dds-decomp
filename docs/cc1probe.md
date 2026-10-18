@@ -146,6 +146,31 @@ the literal quotes in `ASM_ROOT`. The compiler can still emit output while
 reporting malformed arguments and exiting with errors; output equality alone
 does not qualify that run. The probe also requires a successful compiler exit.
 
+## Qualification catches debugger breakpoint interference
+
+Read-only hook bodies do not guarantee observational execution. With Debian
+GDB 16.3 attached to the pinned QEMU i386 loopback route, the original reorg
+hook set changed `mnuDrawMantraGridEntryIndicators` only at pass 29: eager
+filling saw zero candidates instead of 42, and later labels shifted. Transport
+alone, without hooks, preserved every dump and the assembly.
+
+The `fill_slots_from_thread` return hook at `0x08166ddb` is immediately before
+the `fill_eager_delay_slots` entry at `0x08166ddc`. Omitting only the latter's
+redundant banner hook restored every RTL dump, normalized assembly, and all
+non-debug ELF sections against the strict build. A stop-PC ambiguity at that
+adjacent boundary is plausible, but the debugger's internal cause was not
+packet-traced. The useful donor, eligibility and live-set hooks remain active;
+eager work is visible through their events and the pass-29 counters.
+
+Keep the banner breakpoint omitted. The AST guard in
+`tools/test_ee_gcc_diagnostics.py` prevents accidental reinstatement while
+checking that useful entry/return hooks remain installed. It complements,
+not replaces, a fresh same-source live probe. Require `verify: OK` for every
+RTL dump and assembly, then independently compare canonical strict assembly
+and all non-debug object sections, including symbols and relocations, before
+citing a new debugger/runtime route. Failed captures are diagnostic artifacts,
+never evidence for a source change.
+
 ## Citing a trace for the trace-justified rule
 
 [CONTRIBUTING.md](CONTRIBUTING.md) accepts a form the trace says the compiler

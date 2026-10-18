@@ -119,7 +119,7 @@ extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *
 #include "sdf_packet_alloc.h"
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F543[];
-extern void dds3DrawWorldNodeChainDiagnosticPanel();
+extern s32 dds3DrawWorldNodeChainDiagnosticPanel(void *task);
 
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
 s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
