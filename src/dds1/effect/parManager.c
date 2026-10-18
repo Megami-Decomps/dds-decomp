@@ -44,7 +44,8 @@ typedef struct {
  * selected by the emitter's 16-bit dispatch index at +0x140. */
 
 extern ParDispatch parKindConstructorEntries[];
-extern void (*D_0034E2F0[])();
+/* Restart callbacks: each takes the object, which retail leaves in a0. */
+extern void (*D_0034E2F0[])(ParObj *);
 
 void effDestroyResources(void *arg);
 
@@ -616,7 +617,7 @@ void parCreateIndexed(s32 dispatchIndex, void *creationData) {
 
 /* Invoke the selected destructor with the existing empty argument list. */
 void parDispatchByKind(ParObj *obj) {
-    parKindConstructorEntries[obj->dispatchIndex].destroy();
+    parKindConstructorEntries[obj->dispatchIndex].destroy(obj);
 }
 
 /* Draw live particles after applying the requested number of emitter updates. */
@@ -672,7 +673,7 @@ ParObj *parCloneKind(ParObj *obj) {
 /* Reissue the callback, reload the native updater's repeat count, and arm restart. */
 
 void parRestartKind(ParObj *obj) {
-    D_0034E2F0[obj->dispatchIndex]();
+    D_0034E2F0[obj->dispatchIndex](obj);
     obj->pendingRestartSteps = obj->restartStepCount;
     obj->restartFlag = 1;
 }

@@ -27,8 +27,10 @@ extern SdfPoolNode D_00325588;
 extern BillDispatch effBillConstructorEntries[];
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
-extern void (*D_0034E680[])();
-extern void (*D_0034E690[])();
+/* Node restarts and scales: retail leaves the dispatch state in a0 (and the
+ * factor in f12) for them. */
+extern void (*D_0034E680[])(EffectDispatchState *);
+extern void (*D_0034E690[])(f32, EffectDispatchState *);
 extern void effBattleReleaseParameterBanks(SoundMixer *);
 extern void dds3EndCrossfade();
 extern const char D_003A0D70[];
@@ -54,7 +56,7 @@ void *effBillCreateDispatch(s32 index, void *arg) {
 }
 
 void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
-    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func();
+    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func(effect);
 
     result->handler = effect->handler;
     result->valueB2 = 1;
@@ -63,21 +65,21 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
 
 /* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
 void billDestroyDispatchedObject(EffectDispatchState *effect) {
-    effBillConstructorEntries[effect->handler].destroy();
+    effBillConstructorEntries[effect->handler].destroy(effect);
 }
 
 /* Invoke the update column of the selected constructor/update/destructor record. */
 void billUpdateDispatchedObject(EffectDispatchState *effect) {
-    effBillConstructorEntries[effect->handler].callback();
+    effBillConstructorEntries[effect->handler].callback(effect);
 }
 
 void effInvokeHandlerAndMarkActive(EffectDispatchState *effect) {
-    D_0034E680[effect->handler]();
+    D_0034E680[effect->handler](effect);
     effect->valueB2 = 1;
 }
 
-void effRunPreHandlerAndActivate(EffectDispatchState *effect) {
-    D_0034E690[effect->handler]();
+void effRunPreHandlerAndActivate(EffectDispatchState *effect, f32 factor) {
+    D_0034E690[effect->handler](factor, effect);
     effInvokeHandlerAndMarkActive(effect);
 }
 
