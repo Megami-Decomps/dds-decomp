@@ -222,7 +222,7 @@ extern s32 evtPendingEventSelection;
 
 extern void evtCreateEventScriptProcess(s32 eventId);
 
-extern void evtCreateSkyTask(void);
+extern s32 evtCreateSkyTask(void);
 
 extern void evtStopTestTasks(void);
 

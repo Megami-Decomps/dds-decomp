@@ -1100,8 +1100,8 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
 }
 
 /* Evaluate rules without mismatch-count output; retain DDS1's existing void form. */
-void prfCheckRequirementRules(u32 state, u32 operand, u16 requirementId) {
-    prfReqEvaluateRules(state, operand, requirementId, 0);
+s32 prfCheckRequirementRules(u32 state, u32 operand, u16 requirementId) {
+    return prfReqEvaluateRules(state, operand, requirementId, 0);
 }
 
 /* Read requirement flags for an unchecked profile ID. */
