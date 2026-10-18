@@ -10,7 +10,10 @@ typedef struct FldObjectSlot {
     s32 id;
     s32 activationState;     /* 0x08 */
     s32 activationRequested; /* 0x0C */
-    u8 pad10[0x10];
+    f32 x;                   /* 0x10: placement position */
+    f32 y;
+    f32 z;
+    f32 yaw;                 /* 0x1C: placement yaw, in degrees */
     s32 effectVariant;       /* 0x20 */
     s32 effectNode;          /* 0x24 */
     s32 effectKindIndex;     /* 0x28: row of DDS1's D_0034C8F0 */
