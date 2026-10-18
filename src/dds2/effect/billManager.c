@@ -886,5 +886,5 @@ void billDispatchByKind(BillObj *obj) {
 }
 
 void billInvokeCallback(BillObj *obj) {
-    obj->callback();
+    obj->callback(obj);
 }
