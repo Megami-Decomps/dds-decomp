@@ -1489,7 +1489,170 @@ void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
 
 INCLUDE_ASM(const s32, "game/code_0013B818", func_00140BC8);
 
-INCLUDE_ASM(const s32, "game/code_0013B818", func_001411F8);
+#include "dat_state.h"
+extern s32 D_004361E8;
+extern char D_004134C0[];
+extern char D_004134D0[];
+extern void fldInitializeAlternateSequence(FieldSequenceRecord *, s32, s32, const char *);
+extern void fldInitializeSequenceWithNote(FieldSequenceRecord *, s32, s32, const char *, s32, const char *);
+
+/* Dispatch the first enabled field actor matching this action.
+ * Elevator block IDs occupy the second six-halfword bank of body.data,
+ * the same canonical header view used by fldGetRowValue below. */
+void func_001411F8(s32 action) {
+    FieldSequenceRecord sequence;
+    s32 preview[2];
+    s32 event;
+    s32 area;
+    s32 warp;
+    s32 room;
+    s32 index;
+    s32 headerIndex;
+    s32 headerFloor;
+    u32 floorFlags;
+    u32 flags;
+    FldActorEntry *entry;
+
+    if (action == 0) return;
+    if (action == 0x384) {
+        dds3WorkClear();
+        fldSetDeferredFieldCommand(0, 0);
+        D_004361E4 = fldAreaState.area;
+        preview[0] = 2;
+        preview[1] = 0;
+        D_004361E8 = fldAreaState.floor + 1;
+        D_004361EC = 5;
+        D_004361F0 = 0;
+        datGameState->vr.previewX = preview[0];
+        datGameState->vr.previewY = preview[1];
+        dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+        return;
+    }
+    if (action == 0x385) {
+        dds3WorkClear();
+        fldSetDeferredFieldCommand(0, 0);
+        D_004361E4 = fldAreaState.area;
+        preview[0] = 1;
+        preview[1] = D_004361B4;
+        D_004361E8 = fldAreaState.floor + 1;
+        D_004361EC = 4;
+        D_004361F0 = D_004361B4;
+        datGameState->vr.previewX = preview[0];
+        datGameState->vr.previewY = preview[1];
+        dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+        return;
+    }
+    for (index = 0; index < 256; index++) {
+        entry = &fldActorEntries[index];
+        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) continue;
+        if (entry->kind != 9 || entry->motion != action) continue;
+        floorFlags = entry->flags64;
+        if (floorFlags & 1) {
+            if (entry->explorationArea == 0) area = fldAreaState.area;
+            else area = entry->explorationArea;
+            room = entry->flags64 >> 2;
+            if (room == 0) room = fldAreaState.floor + 1;
+            fldSetFloorFlag(area, room, entry->floorFlagBit);
+        }
+        flags = entry->flags64;
+        if (flags & 2) {
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor,
+                entry->explorationColumn, entry->explorationRow,
+                entry->explorationColumnCount, entry->explorationRowCount);
+        }
+        if (entry->variantMode == 2) {
+            fldSetFloorFlag(fldAreaState.area, fldAreaState.floor + 1, entry->warpEntry2);
+            D_004361E4 = fldAreaState.area;
+            D_004361E8 = fldAreaState.floor + 1;
+            D_004361EC = entry->variant;
+            D_004361F0 = entry->warpEntry;
+            dds3WorkClear();
+            switch (entry->variant) {
+            case 0:
+                fldReleaseCurrentBgm();
+                event = entry->warpEntry;
+                dds3AdminSubmitModeRequest(0x14, &event, 4, 0);
+                return;
+            case 3:
+                fldReleaseCurrentBgm();
+                preview[0] = 0;
+                preview[1] = entry->warpEntry;
+                if (D_0038A3B8[preview[1]].requiredModelFlag != 0) {
+                    mdlFlagSet(D_0038A3B8[preview[1]].requiredModelFlag);
+                }
+                datGameState->vr.previewX = preview[0];
+                datGameState->vr.previewY = preview[1];
+                dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+                return;
+            case 4:
+                preview[0] = 1;
+                preview[1] = entry->warpEntry;
+                datGameState->vr.previewX = preview[0];
+                datGameState->vr.previewY = preview[1];
+                dds3AdminSubmitModeRequest(0x15, preview, 8, 0);
+                return;
+            }
+            return;
+        } else if (entry->variantMode == 0) {
+            if (entry->variant == 1) {
+                fldReleaseCurrentBgm();
+                area = fldAreaState.area;
+                dds3AdminSubmitModeRequest(0x1C, &area, 4, 0);
+                return;
+            }
+            if (entry->variant == 0) area = fldAreaState.area;
+            else area = entry->variant;
+            if (entry->warpEntry == 0) room = fldAreaState.floor + 1;
+            else room = entry->warpEntry;
+            if (fldAreaState.area != area) fldReleaseCurrentBgm();
+            fldApplySceneRoomSelection(entry);
+            if (entry->flags54 != 0) {
+                D_00435F24 = entry->flags54;
+                strcpy((char *)D_00387D60, entry->taskName);
+                D_00435F28 = index + 1;
+            }
+            if (entry->flags31 & 2) fldAreaState.unk100 = 1;
+            else if (entry->flags31 & 4) fldAreaState.unk100 = -1;
+            else fldAreaState.unk100 = 0;
+            if ((u32)((u8)entry->kind - 3) < 2U) {
+                fldAreaState.unk188 = 15;
+                if (entry->linkKind == 1) {
+                    fldInitializeFieldSequenceRecord(&sequence, area, room, entry->warpName,
+                        entry->sequenceCode, 1, entry->linkName);
+                } else {
+                    fldInitializeAlternateSequence(&sequence, area, room, entry->warpName);
+                }
+            } else {
+                fldInitializeFieldSequenceRecord(&sequence, area, room, entry->warpName,
+                    entry->sequenceCode, entry->linkKind, entry->linkName);
+            }
+            dds3AdminSubmitModeRequest(5, &sequence, 0xA0, 0);
+            return;
+        } else if (entry->variantMode == 1) {
+            headerIndex = entry->variant - 1;
+            headerFloor = entry->warpEntry;
+            area = fldAreaState.area;
+            room = fldActorWaypointRows.headers[headerIndex].area;
+            D_004361DC = headerIndex;
+            D_004361E0 = headerFloor;
+            fldSetFloorFlag(area, fldAreaState.floor + 1,
+                fldActorWaypointRows.headers[headerIndex].body.data[headerFloor + 6]);
+            fldInitializeSequenceWithNote(&sequence, area, room, D_004134C0, 0, D_004134D0);
+            dds3AdminSubmitModeRequest(5, &sequence, 0xA0, 0);
+            return;
+        } else if (entry->variantMode == 3) {
+            warp = entry->variant;
+            fldSetDeferredFieldCommand(fldAreaState.area, warp);
+            fldReleaseCurrentBgm();
+            if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
+                fldSetDeferredFieldCommand(entry->warpEntry2, warp);
+            }
+            dds3AdminSubmitModeRequest(6, &warp, 4, 0);
+            return;
+        }
+    }
+}
+
 
 void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
     switch (mode) {
