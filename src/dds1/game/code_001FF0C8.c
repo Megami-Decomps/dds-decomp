@@ -55,7 +55,7 @@ extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
-extern s32 btlHasAvailableOption(u32);
+extern u8 btlHasAvailableOption(u32 actorAddress);
 
 extern s32 btlMatchesActorEntryCodeCondition();
 

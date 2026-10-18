@@ -7397,6 +7397,8 @@ BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *v
 
 extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 #include "btl_command_affinity_api.h"
+extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress);
+extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress);
 extern void btlCreateReserveActorPanelTask(void);
 extern s32 btlIsSupportedCommandKind(BattleIndexWork *);
 extern s32 func_001BF040(BtlUnit *, BattleRosterPair *);
