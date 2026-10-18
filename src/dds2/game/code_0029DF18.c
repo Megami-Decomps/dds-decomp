@@ -730,7 +730,165 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProfileProgressDetails);
+/* Draw the profile name and its remaining-progress gauge.
+ * Prior algorithm/research lineage: W16_Snd, PurB, LiteC, PurC, PurD, MatchC,
+ * LaneH, NewRule, SdfModelVis, Lite, BtlSlot (dds-collab#17:6237048856).
+ * Reconstructed from native loads/stores and truthful provider declarations.
+ * Keep the draw-fresh resource reads and guard-edge denominator capture.
+ */
+#include "eff.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+
+extern u32 scrGetIndexedRecordAddress(u32, s32 *);
+extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
+
+typedef struct BrsProfilePalette { u32 values[4]; } BrsProfilePalette;
+typedef struct BrsProfileBarCoordinates {
+    s16 fillX, fillY;
+    u8 fillSlot, pad05;
+    s16 tailX, tailY;
+    u8 tailSlot, pad0B;
+} BrsProfileBarCoordinates;
+extern const BrsProfilePalette D_004285F0;
+extern const BrsProfileBarCoordinates D_00428600;
+
+void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *work,
+                                  BrsProgressRow *row, s32 context, s32 index) {
+    BrsProfilePalette palette = D_004285F0;
+    BrsProfileBarCoordinates coordinates = D_00428600;
+    s32 textAddress;
+    s32 currentProfile;
+    s32 cap;
+    s32 remaining;
+    s32 phase;
+    s32 fillX, fillY, fillSlot, tailX, tailY, tailSlot;
+    u16 profileId;
+    s32 progress, originalProgress, difference, range;
+    s32 textOffset;
+    s32 tailPosition;
+    u32 color = work->profileAnimation[index].alpha | 0x80808000;
+    u32 barColor;
+    struct FrFontGlyph *glyph;
+    EffectSlotSet *resources;
+    EffectSlotSet *restoreResources;
+
+    palette.values[0] = color;
+    palette.values[1] = color;
+    palette.values[2] = color;
+    palette.values[3] = color;
+    ptyGetCurrentProfileRecord(row->unit);
+    currentProfile = ptyGetCurrentProfileId(row->unit);
+    if (currentProfile != 0) {
+        profileId = currentProfile;
+        cap = ptyGetProfileRecordCap(profileId);
+        if (row->unit->hp != 0 && !(row->unit->status & 0x4000)) {
+            color = work->profileAnimation[index].alpha | 0x80808000;
+        } else {
+            color = (work->profileAnimation[index].alpha =
+                work->profileAnimation[index].alpha <= 0 ? 0 :
+                (work->profileAnimation[index].alpha > 128 ? 128 : work->profileAnimation[index].alpha)) | 0x4F4E4E00;
+        }
+        if (mnuIsTitleEntryAvailable(row->unit) || (row->unit->status & 0x40)) {
+            barColor = 0x48644800 | (work->profileAnimation[index].alpha =
+                work->profileAnimation[index].alpha <= 0 ? 0 :
+                (work->profileAnimation[index].alpha > 128 ? 128 : work->profileAnimation[index].alpha));
+            color = (work->profileAnimation[index].alpha =
+                work->profileAnimation[index].alpha <= 0 ? 0 :
+                (work->profileAnimation[index].alpha > 128 ? 128 : work->profileAnimation[index].alpha)) | 0x4F4E4E00;
+            palette.values[0] = barColor;
+            palette.values[1] = barColor;
+            palette.values[2] = barColor;
+            palette.values[3] = barColor;
+        }
+        /* Name/fallback acquisition precedes its placement choice. */
+        textOffset = scrGetIndexedRecordAddress(profileId, &textAddress) ? 0 : 18;
+        glyph = itfCreateConvertedTextGlyph(x + ((textOffset + 0x149) << 4), y + 0xB8, depth,
+                                            color, (const u8 *)textAddress, NULL);
+        frFontDrawGlyphChain(glyph, 1, context);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    } else {
+        cap = 0;
+    }
+    remaining = work->profileAnimation[index].remaining;
+    phase = work->profileAnimation[index].drawPhase;
+    /* Native signed rejection edges at 002A0BC4/002A0BCC share the fallback.
+     * EE GCC 2.96 pass 00 retains their order; a switch reverses it, while
+     * an enclosing one-pass loop also aligns the progress join. */
+    if (phase < 0) goto fallback;
+    if (phase >= 3) goto fallback;
+    fillX = coordinates.fillX;
+    fillY = coordinates.fillY;
+    fillSlot = coordinates.fillSlot;
+    tailX = coordinates.tailX;
+    tailY = coordinates.tailY;
+    tailSlot = coordinates.tailSlot;
+    if (cap != 0) {
+        if (remaining < cap) {
+            /* The denominator is captured on the positive-progress guard edge:
+             * DDS2 002A0C00/04 and DDS1 00269054/58. CSE forwards the quotient
+             * divisor but retains this snapshot for its divide-zero check. */
+            s32 normalizationBase = cap;
+            if (remaining > 0) {
+                progress = remaining * 1000 / normalizationBase;
+                originalProgress = progress;
+                if (work->profileAnimation[index].progressInitialized == 0) {
+                    work->profileAnimation[index].previousProgress = progress;
+                    work->profileAnimation[index].progressInitialized = 1;
+                }
+                if (progress <= 40) {
+                    progress = 40;
+                }
+                if (work->profileAnimation[index].applied == 0 &&
+                    originalProgress >= work->profileAnimation[index].previousProgress &&
+                    originalProgress - work->profileAnimation[index].previousProgress < 41) {
+                    difference = originalProgress - work->profileAnimation[index].previousProgress;
+                    if (difference < 10) {
+                        progress += 9;
+                    } else {
+                        progress += difference;
+                    }
+                }
+                progress = progress <= 0 ? 0 : (progress > 1000 ? 1000 : progress);
+                resources = work->teardownResource;
+                resources->workEntries[fillSlot].geometry.bounds[2] =
+                    (resources->workEntries[fillSlot].sourceWidth << 4) * progress / 1000;
+                range = resources->descriptions[fillSlot].colors[2] -
+                    resources->descriptions[fillSlot].colors[0];
+                range = range * progress / 1000 - range;
+                resources->workEntries[fillSlot].parameters[2] = range;
+                effDrawSpriteWithCornerColors(x + (fillX << 4), y + (fillY << 3),
+                                             depth, palette.values, 0, resources, fillSlot, context);
+                /* Capture the tail origin, then reacquire the draw-owned entry. */
+                tailPosition = x + (tailX << 4);
+                resources = work->teardownResource;
+                effDrawSpriteWithCornerColors(tailPosition +
+                                             resources->workEntries[fillSlot].geometry.bounds[2], y + (tailY << 3), depth,
+                                             palette.values, 0, resources, tailSlot, context);
+                /* Draw may replace the resource; restore the current fill entry. */
+                restoreResources = work->teardownResource;
+                restoreResources->workEntries[fillSlot].parameters[2] = 0;
+                restoreResources->workEntries[fillSlot].geometry.bounds[2] =
+                    restoreResources->workEntries[fillSlot].sourceWidth << 4;
+            }
+        } else {
+            if (row->unit->hp == 0 || mnuIsTitleEntryAvailable(row->unit) || (row->unit->status & 0x4040)) {
+                barColor = work->profileAnimation[index].alpha | 0x60606000;
+                palette.values[0] = barColor;
+                palette.values[1] = barColor;
+                palette.values[2] = barColor;
+                palette.values[3] = barColor;
+            }
+            effDrawSpriteWithCornerColors(x + 0x13A0, y + 0x168, depth, palette.values,
+                                         0, work->teardownResource, 26, context);
+        }
+    }
+    return;
+fallback:
+    effDrawSpriteWithCornerColors(x + 0x1290, y + 0x160, depth, palette.values,
+                                 0, work->teardownResource, 19, context);
+}
+
 
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */

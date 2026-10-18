@@ -809,8 +809,6 @@ typedef struct Bytes7 {
 
 extern Bytes7 D_003BD400[];
 
-extern char *strcpy(char *, char *);
-
 extern char *strcat(char *, char *);
 
 char *sdfDevBuildPath(char *dst, char *src) {
