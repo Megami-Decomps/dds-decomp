@@ -1,3 +1,4 @@
+#include "mnu_variant_sprite_placement.h"
 #include "common.h"
 #include "dsp_channel.h"
 #include "mnu_title_stream.h"
@@ -46,7 +47,6 @@ extern u8 mnuMantraResourceTaskDescriptor[];
 typedef s16 MnuSpritePlacement[4];
 
 
-typedef s16 MnuVariantSpritePlacement[6];
 
 enum {
     MNU_VARIANT_X_OFFSET = 2,
