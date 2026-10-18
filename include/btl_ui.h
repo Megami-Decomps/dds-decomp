@@ -201,9 +201,9 @@ typedef struct BattleActorPanelPresentation {
         u32 cursorPhase; /* +0xEC: unsigned pulse/fade counter. */
         u8 unkF0;
         u8 padF1[3];
-        s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
-        u8 padF5[3];
     };
+    s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
+    u8 padF5[3];
     BattleMirroredSpriteRecord mirroredSprites[4];
     u8 pad1A8[4];
     s32 hpLevel;
