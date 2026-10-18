@@ -20,6 +20,7 @@ the [decision atlas](compiler-decision-atlas.md), then use the relevant idiom:
 | Two independent instructions are exchanged | [Actual scheduler comparator](#use-the-actual-gcc-296-comparator), including sched1 register weight |
 | A branch next to a call changes annulment | Same-TU callee visibility under Small shape rules; confirm reorg liveness and independent ownership evidence |
 | Integer/FPU argument setup differs | [Mixed-class parameter order](#mixed-integer-and-floating-parameter-order), with all callers checked |
+| Call-argument or restore-resource allocation differs | [Profile rendering phases](#profile-progress-renderers-preserve-acquisition-and-drawing-epochs), native reads and stock RTL |
 | A saved-register pair is exchanged | [Allocation](#saved-register-homes-what-global-allocation-actually-sorts-by) and [GCSE context](#code-that-changes-with-unrelated-text-context) |
 
 An optimisation-disable probe can localise a cause; it does not justify a
@@ -12372,6 +12373,67 @@ the qualified observed object in all those sections. This closes Brass Osprey's 
 Kestrel, Tidal Quill, Sable Forge and Cedar Ridge predecessor/compiler work.
 The independent native contract audit passes without shared header or compiler
 changes. Production integration/retail gates remain separate.
+
+### Profile-progress renderers: preserve acquisition and drawing epochs
+
+The DDS2 `brsDrawProfileProgressDetails` (`0x002A08D8`, 1548 bytes) and DDS1
+semantic sibling (`0x00268D40`, 1440 bytes) match with their real provider
+contracts and distinct text, palette and resource lifetimes. They are not
+byte twins: DDS1 measures and recreates centered text, uses fixed sprite
+slots, and has no DDS2 tail or coordinate-table copy.
+
+Three source relationships explain otherwise small residuals:
+
+- Capture the normalization denominator before the positive-progress guard,
+  then use it in the actual quotient. Native DDS2 `0x002A0C00/04` and DDS1
+  `0x00269054/58` copy the cap on that guard edge; the later zero check uses
+  the copy while division uses the original cap register. The DDS2 stock
+  RTL shows CSE forwarding the quotient divisor while retaining the snapshot
+  for its check. In the measured DDS2 control, introducing the snapshot
+  inside the positive branch erases that boundary. The same guard-edge form
+  also matches DDS1.
+- In DDS2, acquire the name/fallback address and then choose its placement:
+  `offset = scrGetIndexedRecordAddress(id, &textAddress) ? 0 : 18;`.
+  Initializing 18 before the call and overwriting it on success produces the
+  same value, but the measured DDS2 control leaves a two-word color/Y argument
+  schedule swap. The post-call conditional matches the native lookup and
+  conditional-move epoch.
+- After drawing, use a fresh resource owner for restoration. In the measured
+  controls, reusing the draw-resource or draw-entry local through restoration
+  changes the final entry allocation. DDS2 stock RTL traced the reused
+  resource local's call-argument preferences; DDS1 separately matched with
+  fresh restore-owner member accesses. The native reads serve distinct
+  purposes: draw the cropped entry, then restore the current entry. Ordinary
+  typed indexing is sufficient; no parallel memory view is needed.
+
+Keep text and palette colors distinct where their jobs diverge. The
+inactive-unit text tint, predicate/status-selected palette and text tints,
+and completed-bar palette follow their native clamp/publication sequence.
+`mnuIsTitleEntryAvailable` takes a `DatPartyRecord *` even though DDS2's provider
+is a zero-return stub; its DDS1 counterpart actually reads the unit.
+
+Both native phase checks reject `<0` and then `>=3` through one real fallback.
+Two ordinary forward rejection branches match that order. Under the pinned
+EE GCC 2.96 compiler, the DDS2 switch control reverses it, and its enclosing
+one-pass-loop control also changes join alignment. These controls were
+measured on DDS2, not separately asserted for DDS1. Neither exact source
+retains a loop wrapper.
+
+DDS1's name centering uses signed half-width truncation, negates that
+half-width, adds 0x15D and shifts by 4. Its fill slot 19 is a real reusable
+index shared by the BdWork, description, draw and restore. The games' 0x68-byte
+animation rows have different field roles, which must be checked before
+transferring the algorithm.
+
+These exact, plausible forms do not uniquely recover the historical source
+spelling or guarantee the same compiler outcome elsewhere. Keep the full
+owning-unit checks and native data/provider contracts when applying the
+observations to another function.
+
+Source checkpoints: [DDS2 profile progress](https://github.com/Megami-Decomps/dds-decomp/commit/8f75cee889f1ddd814f0907c5cafff7cdf109562)
+and [DDS1 profile progress](https://github.com/Megami-Decomps/dds-decomp/commit/d79b1cfa70167bee9c67daa67260eee1802a8317).
+These continue the reconstruction research of W16_Snd, PurB, LiteC, PurC,
+PurD, MatchC, LaneH, NewRule, SdfModelVis, Lite and BtlSlot.
 
 ### Shared rejection blocks: battle command availability
 
