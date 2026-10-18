@@ -61,9 +61,9 @@ extern void effFlashFadingOrbitWriteCorners(PcpFlashFadingOrbitWork *, s32);
 
 extern void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *, s32, void *);
 
-void effFlashTrianglePulseSpawnFromTable(void *table)
+PcpFlashTrianglePulseWork *effFlashTrianglePulseSpawnFromTable(void *table)
 {
-    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(table, 0));
+    return effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(table, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -253,9 +253,9 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakParams *src) {
     return work;
 }
 
-void effFlashRotatingStreakSpawnFromTable(void *data)
+PcpFlashStreakWork *effFlashRotatingStreakSpawnFromTable(void *data)
 {
-    effFlashRotatingStreakCreate(effParamTableGetBlock(data, 0));
+    return effFlashRotatingStreakCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -527,9 +527,9 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams 
     return work;
 }
 
-void effFlashOrbitScalingSpawnFromTable(void *data)
+PcpFlashScalingOrbitWork *effFlashOrbitScalingSpawnFromTable(void *data)
 {
-    effFlashOrbitScalingCreate(effParamTableGetBlock(data, 0));
+    return effFlashOrbitScalingCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -770,9 +770,9 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     return work;
 }
 
-void effFlashAccumulatingParticleSpawnFromTable(void *data)
+PcpFlashAccumulatingWork *effFlashAccumulatingParticleSpawnFromTable(void *data)
 {
-    effFlashAccumulatingCreate(effParamTableGetBlock(data, 0));
+    return effFlashAccumulatingCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1030,9 +1030,9 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     return ring;
 }
 
-void effFlashOrbitArcSpawnFromTable(void *data)
+PcpFlashOrbitArcWork *effFlashOrbitArcSpawnFromTable(void *data)
 {
-    effFlashOrbitArcCreate(effParamTableGetBlock(data, 0));
+    return effFlashOrbitArcCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
