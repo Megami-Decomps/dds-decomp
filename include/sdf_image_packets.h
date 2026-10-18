@@ -29,14 +29,30 @@ typedef char SdfImageTransferPacket_layout[
     (sizeof(SdfImageTransferPacket) == 0x60 &&
      (u32)&((SdfImageTransferPacket *)0)->transfer == 0x20) ? 1 : -1];
 
+/* DMA reaches this CPU readback request at resource-packet offset 0xB0.
+ * The producer writes four words; the dispatcher consumes a signed quadword
+ * count, an EE32 destination address, an optional callback address, and its
+ * word argument. The address carriers retain the existing builder API. */
+typedef struct SdfImageReadbackRequest {
+    s32 quadwordCount;
+    u32 destinationAddress;
+    u32 callbackAddress;
+    u32 callbackArgument;
+} SdfImageReadbackRequest;
+
+typedef char SdfImageReadbackRequest_layout[
+    (sizeof(SdfImageReadbackRequest) == 0x10 &&
+     __alignof__(SdfImageReadbackRequest) == 4 &&
+     (u32)&((SdfImageReadbackRequest *)0)->quadwordCount == 0 &&
+     (u32)&((SdfImageReadbackRequest *)0)->destinationAddress == 4 &&
+     (u32)&((SdfImageReadbackRequest *)0)->callbackAddress == 8 &&
+     (u32)&((SdfImageReadbackRequest *)0)->callbackArgument == 0xC) ? 1 : -1];
+
 /* Resource upload payload and its terminal primitive-reset tag (0xF0). */
 typedef struct SdfResourcePacket {
     u64 header[14];
     SdfImageTransferRegisters transfer;
-    s32 quadwordCount;
-    u32 unkB4;
-    u32 unkB8;
-    u32 unkBC;
+    SdfImageReadbackRequest readback;
     u64 tail[6];
 } SdfResourcePacket;
 
@@ -45,7 +61,7 @@ typedef char SdfResourcePacket_size_must_be_0xF0[
 typedef char SdfResourcePacket_transfer_offset_must_be_0x70[
     ((u32)&((SdfResourcePacket *)0)->transfer == 0x70) ? 1 : -1];
 typedef char SdfResourcePacket_count_offset_must_be_0xB0[
-    ((u32)&((SdfResourcePacket *)0)->quadwordCount == 0xB0) ? 1 : -1];
+    ((u32)&((SdfResourcePacket *)0)->readback == 0xB0) ? 1 : -1];
 typedef char SdfResourcePacket_tail_offset_must_be_0xC0[
     ((u32)&((SdfResourcePacket *)0)->tail == 0xC0) ? 1 : -1];
 
