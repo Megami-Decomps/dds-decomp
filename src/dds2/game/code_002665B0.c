@@ -400,9 +400,57 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
-INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
+extern char D_00437868[];
 
-INCLUDE_ASM(const s32, "game/code_002665B0", mnuDrawTerminalRecoveryListEntry);
+/* Draw one recovery-cost row: panel, cursor highlight and cost text when selected,
+ * portrait, HP/MP numbers, ratio bars and the status icon. The highlight flag is
+ * raised after the cost text is queued. */
+void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList *list, MenuListNode *node, s32 priority) {
+    char text[16];
+    s32 portraitCodes[8] = {0x1D, 0x4C, 0x1F, 0x23, 0x21, 0x25, 0x4E, 0x50};
+    s32 statusCodes[5] = {0x27, 0x28, 0x29, 0x2A, 0x2B};
+    MenuSlotState *host = list->context;
+    s32 scale = list->scale;
+    MenuThresholdEntry *entry = &node->terminal;
+    DatPartyRecord *record = &datGameState->party[entry->entryId];
+    s32 selected = 0;
+    FrFontGlyph *glyph;
+    MenuPageBar *panels;
+    s32 fade;
+    s32 status;
+
+    effDrawTextureSlotWithBlendedCornerColors(0, rowY, depth, scale, 0, host->resourceBank[0], 0x1B, priority);
+    if (list->cursor == node) {
+        effDrawTextureSlotWithBlendedCornerColors(0, rowY, depth, scale, 0, host->resourceBank[0], 0x1C, priority);
+        sprintf(text, D_00437868, entry->requiredAmount);
+        glyph = itfCreateFont3TextGlyph(0x1810, 0x268, depth,
+            uiBlendColors(0xA09DC380, 0xA09DC300, scale), text, 0);
+        frFontSetChildChainFirstOption(glyph, 4);
+        frFontDrawGlyphChain(glyph, 1, priority);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        selected = 1;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(0x510, rowY + 0x80, depth, scale, 0, host->resourceBank[0],
+        portraitCodes[record->unitId - 1] + selected, priority);
+    mnuCreateNumberSprite(0xA70, rowY + 0x70, depth, scale, record->hp,
+        mnuGetPanelRatioColor(0, record->hp, record->maxHp), priority);
+    mnuCreateNumberSprite(0xCF0, rowY + 0x70, depth, scale, record->maxHp, 0xA09DC340, priority);
+    mnuCreateNumberSprite(0x10B0, rowY + 0x70, depth, scale, record->mp, 0xA09DC380, priority);
+    mnuCreateNumberSprite(0x1330, rowY + 0x70, depth, scale, record->maxMp, 0xA09DC340, priority);
+    if (scale != 0) {
+        panels = node->childPanel;
+        fade = (scale * 0xB3) / 256;
+        panels[0].fade = fade;
+        mnuDrawAndAdvanceRatioPanel(0xA70, rowY + 0xD0, depth, 0, -1, -1, &panels[0], priority);
+        panels[1].fade = fade;
+        mnuDrawAndAdvanceRatioPanel(0x1050, rowY + 0xD0, depth, 0, -1, -1, &panels[1], priority);
+    }
+    status = mnuGetSelectionFromFlags(record);
+    if (status >= 0) {
+        effDrawTextureSlotWithBlendedCornerColors(0x14D0, rowY - 0x68, depth, scale, 0, host->resourceBank[0],
+            statusCodes[status], priority);
+    }
+}
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
