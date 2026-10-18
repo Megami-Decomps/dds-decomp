@@ -67,7 +67,6 @@ extern void sndSendSingleWordControlPacket(u32 controlWord);
 extern void sndQueueNoPayloadCommand1A0(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern void func_00148A98(void);
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern void dds3WorkClear(void);
 extern void fldAddCameraModelEntry(s32 motionIndex);
 

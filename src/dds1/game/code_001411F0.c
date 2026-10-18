@@ -4303,7 +4303,6 @@ void fldDrawWeatherLimitTimer(void) {
 
 extern FldSparkController fldSparkControlState;
 
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 
 

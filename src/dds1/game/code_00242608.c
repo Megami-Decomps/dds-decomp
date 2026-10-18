@@ -2723,7 +2723,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
 extern void sprintf(char *, const char *, ...);
 extern char D_003BC3B8[];
 extern void evtCopyEntryStringToActiveWindow(s32 window, char *text);
-extern void evtStoreValueAndCaptureWindowPanelValue(s32 value);
 
 /* Format the buy/sell price in the message window; sells over the currency cap use the overflow message. */
 INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);

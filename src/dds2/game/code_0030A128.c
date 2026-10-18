@@ -73,7 +73,6 @@ extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
 extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
 extern void dspRequestMessageWindowModeOne(void);
 

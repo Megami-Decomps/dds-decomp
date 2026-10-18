@@ -33,7 +33,6 @@ extern s32 D_003BD974;
 
 extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern void sndReleaseTrackHandle(u32);
 extern s32 fldReleaseLocalMapResources(void);

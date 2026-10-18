@@ -446,7 +446,6 @@ extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 sprintf(char *, const char *, ...);
-extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);

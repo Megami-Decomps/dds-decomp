@@ -1721,7 +1721,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 
 
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 
 

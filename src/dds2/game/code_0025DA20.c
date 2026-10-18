@@ -3456,7 +3456,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 entry = 7;
@@ -4113,7 +4112,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
 extern s32 sprintf(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
-extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 struct KwlnTask;
 
 
