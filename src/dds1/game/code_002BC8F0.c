@@ -356,9 +356,9 @@ u32 effDispatchRecordBuckets(u32 refresh, EffectOwnerRecord *list, s32 drawOptio
     return 1;
 }
 
-/* Release bucket records before the owner list; preserve the existing short-arity K&R call. */
+/* Release bucket records before the owner list. */
 u32 effDestroyOwnerRecordList(u32 list) {
-    effReleaseRecordBuckets();
+    effReleaseRecordBuckets((EffectOwnerRecord *)list);
     sdfReleaseChipBlock((void *)list);
     return 1;
 }

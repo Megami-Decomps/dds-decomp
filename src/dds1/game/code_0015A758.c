@@ -252,12 +252,15 @@ void effParUpdateAndDrawInstance(ParObj *effect) {
     parSubmitKindDrawing(&effect->kindState);
 }
 
-void parRestartInstanceCallback(void) {
-    parRestartKind();
+extern void parRestartKind(ParObj *obj);
+extern void parScaleAndRestartKind(ParObj *obj, f32 factor);
+
+void parRestartInstanceCallback(ParObj *obj) {
+    parRestartKind(obj);
 }
 
 void effParScaleComponent(float scale, ParObj *work) {
-    parScaleAndRestartKind();
+    parScaleAndRestartKind(work, scale);
     work->scaleEnd *= scale;
 }
 
@@ -270,8 +273,10 @@ void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void parRebuildInstanceTransforms(void) {
-    parComposeEffectTransformMatrices();
+extern void parComposeEffectTransformMatrices(ParObj *effect, void *matrix);
+
+void parRebuildInstanceTransforms(ParObj *effect, void *matrix) {
+    parComposeEffectTransformMatrices(effect, matrix);
 }
 
 void effParSetInstanceParameterWord(ParObj *work, u32 parameterWord) {
@@ -339,12 +344,12 @@ void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) 
     }
 }
 
-extern void parClearHistorySlotPoints(s32);
+extern void parClearHistorySlotPoints(s32, s32);
 
 void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearHistorySlotPoints((s32)work->payload.history.table);
+        parClearHistorySlotPoints((s32)work->payload.history.table, index);
         return;
     case 2:
         parCellInit(work->payload.crossStrip.drawSystem, index);

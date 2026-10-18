@@ -48,7 +48,7 @@ void dds3DestroyObjectBase(void *objectBase);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
 EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra);
-void billSetKind1Entry(void *arg);
+void billSetKind1Entry(void *arg, u32 entryIndex);
 EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
 EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, void *secondVector);
 EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
@@ -61,7 +61,7 @@ extern const f32 D_0039F828[20];
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 extern void effObjForwardOwnerBillEntry(EffectObj *obj);
 
-extern void *effCreateNodeFromParameter(void);
+extern void *effCreateNodeFromParameter(u32 parameter);
 
 
 struct EffNode;
@@ -351,8 +351,8 @@ EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
-void effObjSelectStoredBill(EffectObj *obj) {
-    billSetKind1Entry(((EffectDependencyState *)obj->data)->handle);
+void effObjSelectStoredBill(EffectObj *obj, u32 entryIndex) {
+    billSetKind1Entry(((EffectDependencyState *)obj->data)->handle, entryIndex);
 }
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
@@ -497,10 +497,10 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-void effObjCreateBillboardFromFactory(u32 unused, void *firstVector, s32 secondVectorAddress) {
+void effObjCreateBillboardFromFactory(u32 parameter, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
-    bill = effCreateNodeFromParameter();
+    bill = effCreateNodeFromParameter(parameter);
     effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress);
 }
 

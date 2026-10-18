@@ -1903,7 +1903,7 @@ s32 mnuGetAbilityTargetCategory(u16 commandId) {
 }
 
 void ptyCommitFieldSkillUse(u16 ability, s32 target, DatPartyRecord *entry) {
-    sdfApplyCommandResults(ability);
+    sdfApplyCommandResults(ability, target, entry);
 }
 
 u32 ptyCheckFieldUseOverride(s32 context, s32 ability, s32 target, DatPartyRecord *entry) {

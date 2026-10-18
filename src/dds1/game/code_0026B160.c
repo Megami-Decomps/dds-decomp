@@ -500,8 +500,10 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     return 0;
 }
 
-u32 mnuOpenTitleMenuForMode(void) {
-    mnuCreateTitleMenuTask();
+extern KwlnTask *mnuCreateTitleMenuTask(s32 mode);
+
+u32 mnuOpenTitleMenuForMode(s32 mode) {
+    mnuCreateTitleMenuTask(mode);
     return 0xffffffff;
 }
 

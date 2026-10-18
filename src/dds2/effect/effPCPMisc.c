@@ -2243,8 +2243,8 @@ void effPcpCreateFadeTimerFromTable(void *args) {
     effPcpCopyWork(param0);
 }
 
-void effPcpRecreateFadeTimer(void) {
-    effPcpCopyWork();
+void effPcpRecreateFadeTimer(EffPCPFadeTimerParams *src) {
+    effPcpCopyWork(src);
 }
 
 void effPcpReleaseFadeTimerWork(EffPCPFadeTimer *work) {
@@ -2308,8 +2308,8 @@ void effPcpCreateLongFadeTimerFromTable(void *args) {
     effPcpCopyWorkLong(param0);
 }
 
-void effPcpRecreateLongFadeTimer(void) {
-    effPcpCopyWorkLong();
+void effPcpRecreateLongFadeTimer(EffPCPFadeTimerLongParams *src) {
+    effPcpCopyWorkLong(src);
 }
 
 void effPcpReleaseLongFadeTimerWork(EffPCPFadeTimerLong *work) {
@@ -4246,8 +4246,8 @@ void effPcpBeamCreateFromTable(void *args) {
     effBeamEffectClone(param0);
 }
 
-void effPcpRecreateBeam(void) {
-    effBeamEffectClone();
+void effPcpRecreateBeam(EffPCPBeamParams *src) {
+    effBeamEffectClone(src);
 }
 
 void effPcpReleaseBeamClone(EffPCPBeamWork *work) {
@@ -4454,8 +4454,8 @@ void effPcpBeamLargeCreateFromTable(void *args) {
     effBeamEffectCloneLarge(param0);
 }
 
-void effPcpRecreateLinkedBeam(void) {
-    effBeamEffectCloneLarge();
+void effPcpRecreateLinkedBeam(EffPCPBeamLargeHead *src) {
+    effBeamEffectCloneLarge(src);
 }
 
 void effPcpReleaseLinkedBeamClone(EffPCPBeamLargeWork *work) {

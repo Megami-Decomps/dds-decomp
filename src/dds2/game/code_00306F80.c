@@ -1007,7 +1007,7 @@ void uiDrawActiveSurfaceWithTestMode(u32 context) {
 }
 
 void uiConfigureSurfaceAlphaState(s32 context) {
-    sdfDispatchSurfaceWithPreparedTexturePacket();
+    sdfDispatchSurfaceWithPreparedTexturePacket(context);
     sdfSubmitGsTestOneRegisterPacket(0x5001BL, context);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
 }

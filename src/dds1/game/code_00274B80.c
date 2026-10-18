@@ -532,7 +532,7 @@ s32 mnuShopReleaseResources(KwlnTask *task) {
 }
 
 void mnuPreparePartyPanelTransition(s32 menu) {
-    mnuRestorePartyEntriesAndRefresh();
+    mnuRestorePartyEntriesAndRefresh(menu);
     mnuSetPopupEntryFlagged((s32 *)(u32)(menu + 0x54), (void *)mnuCampPartySelectionReturnPopupEntry);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)((CampMenuContext *)menu)->display,
