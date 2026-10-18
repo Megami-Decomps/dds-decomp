@@ -100,6 +100,7 @@
 #include "fld_action_row.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "btl.h"
+#include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
@@ -325,11 +326,6 @@ extern FldWaypointBlock fldActorWaypointRows;
 extern FldFileResource *D_003307B0[];
 
 extern void fldDrawMarkerQuad(f32 *pos);
-
-typedef struct {
-    s16 unk0;
-    s16 requiredModelFlag; /* Shared table halfword tested by mdlFlagTest. */
-} FldIndexPair;
 
 extern FldIndexPair D_0032EF18[];
 

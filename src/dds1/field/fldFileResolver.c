@@ -100,6 +100,7 @@
 #include "fld_action_row.h"
 #include "btl.h"
 #include "itf.h"
+#include "fld_index_pair.h"
 /* Declared before first use (were implicit int). */
 extern void btlResetAsyncState(void);
 extern void dds3ClearObjectFlags(void *object, s32 mask);
@@ -800,11 +801,6 @@ extern FldWaypointBlock fldActorWaypointRows;
 extern FldFileResource *D_003307B0[];
 
 extern void fldDrawMarkerQuad(f32 *pos);
-
-typedef struct {
-    s16 unk0;
-    s16 requiredModelFlag; /* Shared table halfword tested by mdlFlagTest. */
-} FldIndexPair;
 
 extern FldIndexPair D_0032EF18[];
 
