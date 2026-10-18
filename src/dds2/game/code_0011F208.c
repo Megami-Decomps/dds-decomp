@@ -941,7 +941,7 @@ void fldResetFieldRuntimeState(s32 mode) {
     area->transitionMode = 0;
     area->collectedCount = 0;
     area->score = 0;
-    memset(area->pad10C, 0, sizeof(area->pad10C));
+    memset(&area->unk10C, 0, sizeof(area->unk10C));
     area->pendingSceneRequest = 0;
     area->deferredExit = 0;
     area->nextFloor = area->nextArea = -1;

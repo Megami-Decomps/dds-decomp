@@ -84,7 +84,7 @@ typedef struct FldAreaWork {
     s16 transitionMode;          /* 0x104 */
     u16 collectedCount;          /* 0x106: spark pickups. */
     s32 score;                   /* 0x108: pickups add 50. */
-    u8 pad10C[4];
+    f32 unk10C;                  /* 0x10C: cleared when a spark run starts. */
     u32 pendingSceneRequest;
     s32 deferredExit;
     s32 playerModelAlternate;    /* 0x118: toggles the player_a/player_b model selection. */
