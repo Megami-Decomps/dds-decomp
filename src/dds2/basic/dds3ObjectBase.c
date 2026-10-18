@@ -416,7 +416,178 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", effObjApplyTransformParameters);
+#include "fld_area_work.h"
+extern s32 fldTestRoomObjectModeFlag(s32, u32, s32);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
+extern void mdlBlendEntryPitchYawAndUpdate(MdlCtx *, struct SdfPoolNode **, s32, f32, f32);
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
+
+void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode *object) {
+    ObjBase *base;
+    struct SdfDmaTagHeader *lighting;
+    SdfModel *model;
+    s32 roomObjectIndex;
+
+    base = dds3GetObjectOwnedHandle(object);
+    if (dds3TestObjectFlags(object, 1)) {
+        return;
+    }
+    if (base->resourceHandle == 0) {
+        return;
+    }
+
+    if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
+        if (base->resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
+            return;
+        }
+        if (dds3TestObjectFlags(object, 0x800)) {
+            dds3DrawObjectWithGradientOverlay(object);
+            return;
+        }
+        lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->data)->transitionWork->value;
+        if (lighting != NULL) {
+            ((MdlCtx *)base->resourceHandle)->inner->lighting = lighting;
+        } else {
+            ((MdlCtx *)base->resourceHandle)->inner->lighting = NULL;
+        }
+        if (dds3TestObjectFlags(object, 0x2000)) {
+            mdlBlendEntryPitchYawAndUpdate((MdlCtx *)base->resourceHandle, surfaces, base->currentSlot,
+                                           ((EffectObjectData *)object->data)->angle,
+                                           ((EffectObjectData *)object->data)->word34);
+            return;
+        }
+        if (dds3TestObjectFlags(object, 0x10000)) {
+            model = ((MdlCtx *)base->resourceHandle)->inner;
+            model->flags |= 0x40;
+            mdlProcessContextNodesAndTransforms((MdlCtx *)base->resourceHandle, D_00380818);
+            model->flags &= ~0x40;
+            dds3ClearObjectFlags(object, 0x10000);
+            return;
+        }
+        mdlProcessContextNodesAndTransforms((MdlCtx *)base->resourceHandle, surfaces);
+        return;
+    }
+
+    if ((object->color >> 24) == 0) {
+        return;
+    }
+    /* Each of the three motion paths calls the model update itself; retail
+     * keeps a separate argument load per path (jump2 only merges the tail
+     * after the call). */
+    if (base->motion != NULL) {
+        roomObjectIndex = ((EffectObjectData *)object->data)->word04;
+        if (roomObjectIndex > 0) {
+            if (fldTestRoomObjectModeFlag(fldAreaState.area, fldAreaState.floor + 1, roomObjectIndex) == 0) {
+                switch (base->mode) {
+                case 0:
+                    base->weight = 1.0f;
+                    break;
+                case 1:
+                    base->weight += 0.05f;
+                    if (base->weight > 1.0f) {
+                        base->weight = 1.0f;
+                    }
+                    break;
+                case 2:
+                    base->weight += 0.025f;
+                    if (base->weight > 1.0f) {
+                        base->weight = 1.0f;
+                    }
+                    break;
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    break;
+                }
+                if (base->mode == 6) {
+                    sdfMotionSampleAtFrame(base->motion, base->motion->frameCount);
+                } else if (base->weight > 0.0f) {
+                    base->motion->frameStep = base->weight;
+                    sdfMotionUpdate(base->motion);
+                }
+                sdfModelUpdateCurrentFrameTransforms((SdfModel *)base->resourceHandle);
+            } else {
+                switch (base->mode) {
+                case 0:
+                case 1:
+                case 2:
+                    base->weight = 0.0f;
+                    base->mode = 3;
+                    break;
+                case 3:
+                    base->weight = 0.0f;
+                    break;
+                case 4:
+                    base->weight -= 0.05f;
+                    if (base->weight < 0.0f) {
+                        base->weight = 0.0f;
+                    }
+                    break;
+                case 5:
+                    base->weight -= 0.02f;
+                    if (base->weight < 0.0f) {
+                        base->weight = 0.0f;
+                    }
+                    break;
+                case 6:
+                    break;
+                }
+                if (base->mode == 6) {
+                    sdfMotionSampleAtFrame(base->motion, base->motion->frameCount);
+                } else if (base->weight > 0.0f) {
+                    base->motion->frameStep = base->weight;
+                    sdfMotionUpdate(base->motion);
+                }
+                sdfModelUpdateCurrentFrameTransforms((SdfModel *)base->resourceHandle);
+            }
+        } else {
+            switch (base->mode) {
+            case 0:
+                base->weight = 1.0f;
+                break;
+            case 1:
+                base->weight += 0.05f;
+                if (base->weight > 1.0f) {
+                    base->weight = 1.0f;
+                }
+                break;
+            case 2:
+                base->weight += 0.025f;
+                if (base->weight > 1.0f) {
+                    base->weight = 1.0f;
+                }
+                break;
+            case 3:
+                base->weight = 0.0f;
+                break;
+            case 4:
+                base->weight -= 0.05f;
+                if (base->weight < 0.0f) {
+                    base->weight = 0.0f;
+                }
+                /* Fallthrough is native. */
+            case 5:
+                base->weight -= 0.02f;
+                if (base->weight < 0.0f) {
+                    base->weight = 0.0f;
+                }
+                break;
+            }
+            if (base->weight > 0.0f) {
+                base->motion->frameStep = base->weight;
+                sdfMotionUpdate(base->motion);
+            }
+            sdfModelUpdateCurrentFrameTransforms((SdfModel *)base->resourceHandle);
+        }
+    }
+    ((SdfModel *)base->resourceHandle)->color = object->color;
+    sdfModelBuildNodeResourcePackets(surfaces, (SdfModel *)base->resourceHandle);
+    /* Retail ends in jal + epilogue here (not a sibling jump), like
+     * dds3SetObjectSlot1MoverCallback in this unit. The retired pointer is
+     * deleted after the sibcall decision (rtl.01.sibling..02.jump, 03.cse). */
+    base = NULL;
+}
 
 /* Create and attach kind-3 slot data only when the data slot is empty.
  * Existing data is retained; attachment still uses the new object's kind. */
