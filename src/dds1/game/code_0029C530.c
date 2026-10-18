@@ -10774,6 +10774,9 @@ u32 effGetSelectedFileQueueIndex(void) {
     return D_0038F2FC[0] + D_003BD058;
 }
 
+
+extern EffectBlock128 D_003DF920;
+
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D20);
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D30);
@@ -11037,9 +11040,6 @@ INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39C8);
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39E0);
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39F0);
-
-
-extern EffectBlock128 D_003DF920;
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B59A8);
 
