@@ -54,7 +54,7 @@ extern void frFontFreeEntry(s32 slotId);
 #define ITF_LINE_STRIP_PRIMITIVE_BITS 0x14A
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 extern s32 dds3AdminGetActiveMode(void);
-extern void sdfDebugPrintf(const char *);
+#include "sdf_debug_api.h"
 
 extern u32 itfFontTestScriptTask;
 extern u32 D_003BB18C;

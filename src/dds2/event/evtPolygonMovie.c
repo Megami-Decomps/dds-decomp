@@ -54,7 +54,7 @@ extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 s32 evtPolygonMovieTestFlag(KwlnTask *task) {
     EvtPolygonMovieTaskState *state;

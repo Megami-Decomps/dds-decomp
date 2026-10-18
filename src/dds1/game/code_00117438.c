@@ -403,7 +403,7 @@ u8 scrIsCurrentWorkTask(struct ScrData *expectedValue) {
     return currentValue == expectedValue;
 }
 
-extern void sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 /* Channel table row: a file name, then {destination slot, unused} pairs ending with a null slot. */
 typedef struct SdfChannel {
@@ -704,7 +704,6 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
-extern void sdfDebugPrintf(const char *, ...);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */

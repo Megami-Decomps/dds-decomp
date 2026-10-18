@@ -57,7 +57,7 @@ extern char D_003BA7E0[]; /* "19\n" */
 extern char D_003BA7E8[]; /* "20\n" */
 extern char D_003BA7F0[]; /* "21\n" */
 extern char D_003BA7F8[]; /* "22\n" */
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 extern s32 kwlnPrepareFrameDrawPackets(KwlnTask *task);
 extern s32 kwlnBuildFrameScenePackets(KwlnTask *task);
 extern s32 kwlnRenderFrame(KwlnTask *task);

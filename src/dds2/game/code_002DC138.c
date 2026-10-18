@@ -37,7 +37,7 @@ extern EffModelOwner *effCreateModelOwner(void *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern struct SdfPoolNode *D_00380828[4];
 

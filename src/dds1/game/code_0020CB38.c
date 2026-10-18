@@ -1,3 +1,4 @@
+#include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "sdf_vu_rotation_axes.h"

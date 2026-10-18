@@ -20,7 +20,7 @@ enum {
 
 
 extern char D_003A0DB8[];
-extern void sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 extern f32 D_00352870[4];
 extern f32 D_00352860[4];
 
@@ -138,7 +138,6 @@ u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
     return packedColor[0];
 }
 
-extern void sdfDebugPrintf(const char *, ...);
 extern f32 D_003A0DE0[4]; extern f32 D_003A0DF0[4]; extern f32 D_003A0E00[4];
 extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern u32 effFieldColorFlags;

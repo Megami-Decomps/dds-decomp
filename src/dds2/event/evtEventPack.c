@@ -31,7 +31,7 @@ extern void fldSetRelocateOnRelease(u32 relocateOnRelease);
 extern u32 kwlnDrawControlFlags;
 
 extern s32 evtNextCameraSlotViewerKey;
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 

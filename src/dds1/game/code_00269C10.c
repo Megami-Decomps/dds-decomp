@@ -66,7 +66,7 @@ extern u8 D_003D9178[];
 
 extern s32 sprintf(char *dst, const char *fmt, ...);
 
-extern s32 sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern u32 D_003BC5B0[2];
 

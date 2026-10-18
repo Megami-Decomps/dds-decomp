@@ -366,7 +366,7 @@ extern void evtCreateMessageWindowIfMissing(void *definition);
 extern void fldResetPlayerSceneObjectState(void);
 
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 

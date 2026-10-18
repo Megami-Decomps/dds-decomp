@@ -698,7 +698,7 @@ void billResolveEntry(BillData *animationData, s32 entryIndex, BillOut *resolved
     resolvedEntry->framesRemaining = value;
 }
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 /* Select an animation and initialize the plural records' signed start delays. */
 void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
@@ -741,7 +741,6 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
     obj->animationActive = 1;
 }
 
-extern s32 sdfDebugPrintf(const char *format, ...);
 
 BillData *billCreateAnimationDataFromResource(void *resourceData) {
     u8 *sourceBytes = resourceData;

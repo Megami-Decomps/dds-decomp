@@ -60,7 +60,7 @@ extern void fldSelectDisplayBuffer(s32 id);
 extern void fldSubmitTexturedOverlaySprite(void);
 extern void sndStartTrackExtended(s32 track);
 extern void sndTransitionBgm(s32 sequence);
-extern void sdfDebugPrintf(char *fmt, ...);
+#include "sdf_debug_api.h"
 extern void sndReleaseTrackHandle(u32 sequence);
 extern void sndQueueSoundId(u32 sequence);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);

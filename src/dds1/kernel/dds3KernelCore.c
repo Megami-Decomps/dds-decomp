@@ -29,7 +29,7 @@ extern void kwlnPrintTaskTreeRecursive(KwlnTask* task, s32 depth);
 
 
 
-extern void sdfDebugPrintf();
+#include "sdf_debug_api.h"
 
 extern KwlnTask* kwlnDelayedStartTaskHead;
 

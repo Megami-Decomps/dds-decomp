@@ -1,3 +1,4 @@
+#include "sdf_debug_api.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"

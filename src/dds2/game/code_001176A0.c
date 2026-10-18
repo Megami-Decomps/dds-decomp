@@ -58,7 +58,7 @@ typedef char SdfChannel_size_must_be_0xA4[(sizeof(SdfChannel) == 0xA4) ? 1 : -1]
 
 extern SdfChannel D_00385A90[8];
 extern void sdfReloadChannelSegments(SdfChannel *channel);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 const char D_00412AB0[16] = "sys:[%s]\n";
 
 
@@ -734,7 +734,6 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
-extern void sdfDebugPrintf(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */

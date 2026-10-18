@@ -120,7 +120,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
 extern void sprintf(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option);
-extern void sdfDebugPrintf(const char *format, ...);
+#include "sdf_debug_api.h"
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
 void evtCreateEventScriptProcess(s32 eventId) {

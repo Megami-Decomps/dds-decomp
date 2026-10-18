@@ -6097,7 +6097,7 @@ f32 func_001FEC00(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
     return radius;
 }
 
-extern void sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second, s8 firstMode, s8 secondMode,
                   f32 *maxY, f32 *minY, const f32 *lineStart, const f32 *lineEnd) {

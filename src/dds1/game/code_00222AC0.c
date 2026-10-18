@@ -83,7 +83,7 @@ extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
-extern s32 sdfDebugPrintf();
+#include "sdf_debug_api.h"
 extern u8 D_003AC480[];
 
 extern void *memset(void *dst, s32 c, u32 n);

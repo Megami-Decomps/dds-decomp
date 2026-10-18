@@ -1055,7 +1055,7 @@ extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 /* Applies duration-scaled alpha to the selected effect for supported track
  * kinds. The key's duration is used directly, without validation here. */

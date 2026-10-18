@@ -58,7 +58,7 @@ extern s32 btlPollEffectWaitTask();
 extern s32 btlHasRegisteredAphNamePanelTask();
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 extern s8 D_00324510[];
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
 INCLUDE_ASM(const s32, "game/code_001FC7D8", btlPollResourceNameOverwrite);

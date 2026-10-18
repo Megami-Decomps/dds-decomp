@@ -536,6 +536,14 @@ functions use trampolines and are a different case.
   declared field providers unused `$v0` results. Their actual definitions
   return `void`; truthful declarations before use remove those results and
   close the 616-byte actor transition without changing a provider ABI.
+  The converse matters too: `sdfDebugPrintf` is SDK `printf`, not a void
+  diagnostic stub. DDS2 `0035B6E0` calls `vfprintf` and returns its signed
+  result unchanged (`asm/dds2/sdk/libc.s`); use
+  `s32 sdfDebugPrintf(const char *, ...)` from `sdf_debug_api.h`.
+  Correcting its return mode restores the native `$3` loads after the call
+  at `001F7624`; discarding a result does not make that result nonexistent.
+  Preserve an existing declaration block when replacing local declarations
+  with an API include, and gate the whole unit if the include moves.
   Keep new externs in the declaration block at the top of the unit; externs
   added mid-file can flip other functions to CONTEXT.
 - **Same-TU callee visibility can change branch annulment.** Test this only

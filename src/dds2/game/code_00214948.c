@@ -425,7 +425,7 @@ s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **ou
     return 0;
 }
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern u32 fldCountSceneSlots(void);
 

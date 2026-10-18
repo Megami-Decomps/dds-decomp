@@ -22,7 +22,7 @@ extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32
 extern void frFontUploadClearedTexture(void);
 extern void mnuLoadStaffFonts(void);
 extern void mnuUnloadStaffFonts(void);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 extern s32 sdfPacCheckDecoderStatus(MovObj *job);
 extern s32 sprintf(char *, const char *, ...);
 

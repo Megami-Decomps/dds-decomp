@@ -1012,7 +1012,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
 
 
 extern s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 /* Run a copy of the unit until evtUnitHasReachedMotionEndpoint reports done, and derive its per-step Y speed. */
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215D0);

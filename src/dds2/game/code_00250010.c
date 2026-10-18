@@ -127,7 +127,7 @@ extern void sndEnsureMidiBankResident(s32 sound);
 extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern void sndStartTrackExtended(s32 track);
 
