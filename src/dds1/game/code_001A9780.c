@@ -7601,13 +7601,15 @@ extern void func_001BDF60(BattleSceneObject *, u16, u16, u16);
 
 void func_001BE590(BattleSceneObject *object);
 
+void func_001BEB58(BattleSceneObject *object);
+
 void btlDrawCommandClassRows(s32 sceneContext) {
     switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001BDF60((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
-        func_001BEB58(sceneContext);
+        func_001BEB58((BattleSceneObject *)sceneContext);
         return;
     case 2:
         btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
