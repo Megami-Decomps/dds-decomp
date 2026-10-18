@@ -100,6 +100,23 @@ after life analysis). A `||`-merged condition is not the retail shape there: it
 removes 12 words. No natural source statement that produces the trailing read
 has been found.
 
+### Which arm hosts a cross-jumped tail
+
+`jump_optimize_1`'s cross-jump pass takes each jump `e1` in layout order and scans
+the other jumps to the same label from the LAST to the first (`e2`), requiring a
+matching tail of at least two insns (one insn when `e2` is the label's fall-in). The
+first match wins and `e1`'s tail is deleted: an earlier arm is merged INTO a later
+host, and a later arm merges into an earlier host only when the earlier arm was the
+only jump with a matching tail at that point (`cc1probe --jump` lists each pair and
+`do_cross_jump`). Two jump labels are in play in a `switch` function: the join after
+the switch and the function's return label. An arm written `return 1;` jumps to the
+second and first merges its `li $2,1` into the join's, while a `break` arm jumps to the
+first; arms that keep an inline `li $2,1; b epilogue` copy in retail (DDS2
+`func_00211F38`: constant-pair arms `[sh $2; li $2,1; b; sw $3]`) are the `return 1;`
+arms whose value register still differs from the join's. Choosing return/break per
+arm to match retail's inline copies gave size parity (231/231) there, but the host
+direction of the `[sw $2,0($18); b]` tail still differs.
+
 ### State-field continuation after dispatch
 
 When each state transition is published to a signed-byte work field and the
