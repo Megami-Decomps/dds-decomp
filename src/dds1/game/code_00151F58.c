@@ -1,3 +1,4 @@
+#include "eff_composite_gs_descriptor.h"
 #include "eff_unit_object.h"
 #include "sdf_projection.h"
 #include "sdf_gs_header.h"
@@ -57,7 +58,6 @@ extern s32 effEmitterDelayRandomState[];
 
 void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
-typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
 void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
 
 void effInitializeEmitterHead(void *effect);
@@ -552,27 +552,6 @@ void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDe
     effDrawGeneratedTextureQuad(packetList, source);
     surface->append(surface, packetList);
 }
-
-/* Caller-built composite draw description; 0x68 bytes. */
-struct EffCompositeGsDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    u32 blendMode;
-    BillTextureQuad primaryUv;
-    BillTextureQuad secondaryUv;
-    SdfTex *primaryTexture;
-    u64 primaryClamp;
-    SdfTex *secondaryTexture;
-    u8 unk5C[4];
-    u64 secondaryClamp;
-};
-
-typedef char EffCompositeGsDescriptor_size_must_be_0x68[
-    (sizeof(EffCompositeGsDescriptor) == 0x68) ? 1 : -1];
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
