@@ -28,6 +28,8 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_dma_tag.h"
+#include "sdf_gs_packet.h"
 
 typedef struct {
     s8 r;
@@ -108,7 +110,24 @@ extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 sprintf();
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern u8 D_003C2620[];
+typedef struct EvtFrameStatePacket {
+    SdfDmaTagHeader dma;
+    u64 testGifTag;
+    u64 testGifRegisters;
+    SdfGsRegisterWrite clearTest;
+    u64 clearGifTag;
+    u64 clearGifRegisters;
+    SdfGsRegisterWrite topLeftColor;
+    SdfGsRegisterWrite topLeftPosition;
+    SdfGsRegisterWrite bottomRightColor;
+    SdfGsRegisterWrite bottomRightPosition;
+    u64 blendGifTag;
+    u64 blendGifRegisters;
+    SdfGsBlendRegisters blend;
+} EvtFrameStatePacket;
+
+typedef char EvtFrameStatePacketSizeCheck[sizeof(EvtFrameStatePacket) == 0xB0 ? 1 : -1];
+extern EvtFrameStatePacket D_003C2620[3][2];
 extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;
 extern s32 kwlnRippleBlurErrorCount;
@@ -1390,8 +1409,6 @@ void kwlnAdvanceShakeOffsets(void) {
 
 #define KWLN_FADE_TICKS_PER_FRAME 10
 #define KWLN_FADE_MARK_NUMERATOR 4
-#define KWLN_FRAME_STATE_BYTES 0x160
-#define KWLN_FRAME_BUFFER_BYTES 0xB0
 #define KWLN_FADE_COUNT_DOWN_BIT 1
 #define KWLN_FADE_COUNT_UP_BIT 2
 #define KWLN_FADE_DIRECTION_BITS 3
@@ -1437,7 +1454,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", evtInitializeFrameStatePacketTempla
 SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
     SdfListHead *packetList = sdfCreateResetPacketList();
 
-    sdfAppendPacket(packetList, (u32)(D_003C2620 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
+    sdfAppendPacket(packetList, (u32)&D_003C2620[stateIndex][kwlnGetDrawBufferIndex()]);
     return packetList;
 }
 
