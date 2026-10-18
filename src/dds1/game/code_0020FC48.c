@@ -1520,7 +1520,150 @@ void btlDrawTexturedGridCell(SdfListHead *packets, s32 primitive, s32 x, s32 y, 
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawCapturedScreenTileOverlay);
+void btlDrawCapturedScreenTileOverlay(SdfListHead *packets, u32 cellColor, u32 backColor, u32 textureColor, u32 windColor, s32 depth) {
+    SdfPacket *packet;
+    s32 dx = btlRuntimeState.cellWidth << 5;
+    s32 dy = btlRuntimeState.cellHeight << 4;
+    s32 row;
+    s32 column;
+    s32 x;
+    s32 y;
+    u32 alpha;
+    u32 color;
+
+    if (btlRuntimeState.options & 1) {
+        SdfPacket *clampPacket;
+        sdfConsCreateDrawPacket(packets, kwlnHeldTextureReference, 0);
+        clampPacket = (SdfPacket *)sdfAllocPacketAligned(0x30);
+        clampPacket[0].unk0 = 2;
+        clampPacket[0].unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
+        clampPacket[0].unk10 = ((u64)0x10000000 << 32) | 0x8001;
+        clampPacket[0].unk18 = 0xE;
+        clampPacket[1].unk0 = ((u64)0x37C << 32) | 8;
+        clampPacket[1].unk8 = 8;
+        sdfAppendPacket(packets, (u32)clampPacket);
+    }
+    packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+    packet[0].unk0 = 3;
+    packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+    packet[0].unk18 = 0xE;
+    packet[1].unk0 = 0x30003;
+    packet[1].unk8 = 0x47;
+    packet[1].unk10 = 0x44;
+    packet[1].unk18 = 0x42;
+    sdfAppendPacket(packets, (u32)packet);
+    btlBuildOverlayQuadPacket(packets, 0x40, 0, depth);
+    if (btlRuntimeState.options & 1) {
+        packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+        packet[0].unk0 = 3;
+        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+        packet[0].unk18 = 0xE;
+        packet[1].unk0 = 0x30003;
+        packet[1].unk8 = 0x47;
+        packet[1].unk10 = 0x44;
+        packet[1].unk18 = 0x42;
+        sdfAppendPacket(packets, (u32)packet);
+        for (row = 0, y = 0; row < btlRuntimeState.gridHeight; row++, y += dy) {
+            x = (row & 1) ? dx >> 1 : 0;
+            for (column = 0; column < btlRuntimeState.gridWidth; column++, x += dx) {
+                SdfPacket *alphaPacket;
+                alpha = btlRuntimeState.ownedData[row * btlRuntimeState.gridWidth + column];
+                color = (alpha << 24) | 0x808080;
+                alphaPacket = (SdfPacket *)sdfAllocPacketAligned(0x30);
+                alphaPacket[0].unk0 = 2;
+                alphaPacket[0].unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
+                alphaPacket[0].unk10 = ((u64)0x10000000 << 32) | 0x8001;
+                alphaPacket[0].unk18 = 0xE;
+                alphaPacket[1].unk0 = ((u64)(color >> 24) << 32) | 0x64;
+                alphaPacket[1].unk8 = 0x42;
+                sdfAppendPacket(packets, (u32)alphaPacket);
+                btlDrawTexturedGridCell(packets, 0x40, x, y, depth + 3, color, 16.0f);
+            }
+        }
+    } else {
+        packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+        packet[0].unk0 = 3;
+        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+        packet[0].unk18 = 0xE;
+        packet[1].unk0 = 0x32001;
+        packet[1].unk8 = 0x47;
+        packet[1].unk10 = 0x44;
+        packet[1].unk18 = 0x42;
+        sdfAppendPacket(packets, (u32)packet);
+        for (row = 0, y = 0; row < btlRuntimeState.gridHeight; row++, y += dy) {
+            x = (row & 1) ? dx >> 1 : 0;
+            for (column = 0; column < btlRuntimeState.gridWidth; column++, x += dx) {
+                btlDrawFlatGridCell(packets, 0x40, x, y, depth + 3, 0, 16.0f);
+            }
+        }
+    }
+    if (btlRuntimeState.options & 1) {
+        packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+        packet[0].unk0 = 3;
+        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+        packet[0].unk18 = 0xE;
+        packet[1].unk0 = 0x71001;
+        packet[1].unk8 = 0x47;
+        packet[1].unk10 = ((u64)(textureColor >> 24) << 32) | 0x64;
+        packet[1].unk18 = 0x42;
+        sdfAppendPacket(packets, (u32)packet);
+        btlDrawScaledHeldTextureQuad(packets, 0x40, textureColor, depth + 1, 1.0f);
+    }
+    if (textureColor & 0xFF000000) {
+        packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+        packet[0].unk0 = 3;
+        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+        packet[0].unk18 = 0xE;
+        packet[1].unk0 = 0x70003;
+        packet[1].unk8 = 0x47;
+        packet[1].unk10 = 0x44;
+        packet[1].unk18 = 0x42;
+        sdfAppendPacket(packets, (u32)packet);
+        btlBuildOverlayQuadPacket(packets, 0x40, backColor, depth + 2);
+    }
+    packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+    packet[0].unk0 = 3;
+    packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+    packet[0].unk18 = 0xE;
+    packet[1].unk0 = 0x3000D;
+    packet[1].unk8 = 0x47;
+    packet[1].unk10 = 0x44;
+    packet[1].unk18 = 0x42;
+    sdfAppendPacket(packets, (u32)packet);
+    for (row = 0, y = 0; row < btlRuntimeState.gridHeight; row++, y += dy) {
+        x = (row & 1) ? dx >> 1 : 0;
+        for (column = 0; column < btlRuntimeState.gridWidth; column++, x += dx) {
+            color = ((u32)btlRuntimeState.ownedData[row * btlRuntimeState.gridWidth + column] << 24) | 0x808080;
+            color = btlMulColor(cellColor, color);
+            btlDrawFlatGridCell(packets, 0x40, x, y, depth - 1, color, 16.0f);
+        }
+    }
+    if (btlRuntimeState.options & 4) {
+        packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+        packet[0].unk0 = 3;
+        packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+        packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+        packet[0].unk18 = 0xE;
+        packet[1].unk0 = 0x70003;
+        packet[1].unk8 = 0x47;
+        packet[1].unk10 = 0x44;
+        packet[1].unk18 = 0x42;
+        sdfAppendPacket(packets, (u32)packet);
+        sdfQueueFlatQuad(packets, 0x80000000, 0x40, 0x7000, 0x7900, 0x9000, 0x7900,
+                        0x7000, 0x7A88, 0x9000, 0x7A88, depth, 0);
+        sdfQueueFlatQuad(packets, 0x80000000, 0x40, 0x7000, 0x8488, 0x9000, 0x8488,
+                        0x7000, 0x8700, 0x9000, 0x8700, depth, 0);
+    }
+    if ((windColor & 0xFF000000) && btlRuntimeState.counter >= 2) {
+        btlDrawWindOverlay(packets, windColor, depth - 1);
+    }
+}
 
 void btlInitFadeColors(void) {
     btlInitVisibilityGrid();
