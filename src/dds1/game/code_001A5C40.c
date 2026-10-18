@@ -262,13 +262,6 @@ s32 func_001A5C40(BtlUnit *attacker, BtlUnit *recipient, s32 command,
     }
 }
 
-
-/* REFRESH Lite2-2: dds1 func_001A6118 @001A6118 (game/code_001A1960).
- * AUTHORITATIVE full-unit residual 1/277 words, first +0xB8 (DeepE body; live includes).
- * NOTE: fragment gates standalone at ~229/278 (symbol-hash context); always re-splice.
- * TOP SOLVE PRIORITY (1 word). Gate: TMPDIR=/home/raikaru/sandbox_main python3 tools/check_unit.py src/dds1/game/code_001A1960.c --source <this-file> --func func_001A6118
- * Live INCLUDE_ASM unchanged.
- */
 extern s32 sdfCalculateCommandVitalDelta(s32,s32,DatPartyRecord *,u32,u8);
 s32 func_001A6118(BtlUnit *attacker, BtlUnit *recipient, s32 command,
                    s32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
