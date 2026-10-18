@@ -80,6 +80,26 @@ zero-return hoist, producing `$v1` plus a plain `beq` in place of retail's
 `$v0` plus `beql`. Qualified ordinary/hooked compiler output and complete
 retail builds prove the separate-case form.
 
+### A call that ends a block cannot be cross-jumped into its join
+
+`sched2` (25) appends `(use (const_int 0))` after a call insn that is the last
+insn of its basic block, i.e. an arm whose call falls straight into the join
+label. `27.jump2`'s `find_cross_jump` walks both arms backwards from the jump
+and the label; for an arm that ends `call; jump` against an arm that ends
+`call; use0; label` it compares a CALL with a USE and reports "no usable common
+tail", even when the two arms' argument setup and call are byte-identical.
+Two such arms (`if (k == 1) f(a); else if (k == 2) f(a);`) therefore keep a
+`jal` each (`cc1probe --jump`, `rtl.25.sched2`).
+
+Retail shows the shape where arm 1 sets up its own arguments and then `b`s to
+arm 2's single `jal`: only the call (plus whatever follows it) was merged, so
+retail's arm 2 does not end in the call. Something real follows the call
+before the join label (DDS2 `mnuDrawMantraSelectionTransitionNode`: a dead
+`lw $2,16($17)` of `node->next`, the operand of a branch that `jump2` deleted
+after life analysis). A `||`-merged condition is not the retail shape there: it
+removes 12 words. No natural source statement that produces the trailing read
+has been found.
+
 ### State-field continuation after dispatch
 
 When each state transition is published to a signed-byte work field and the
