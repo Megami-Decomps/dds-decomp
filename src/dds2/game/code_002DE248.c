@@ -1,3 +1,5 @@
+#include "eff_model_resource.h"
+#include "eff_gs_packet.h"
 #include "eff_packet_params.h"
 #include "eff_copied_payload.h"
 #include "eff_class_ops.h"
@@ -107,14 +109,6 @@ extern char * strcpy(char *, const char *);
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
 
-typedef struct EffGsPacket {
-    u64 dmaTag;
-    u64 vifTag;
-    u64 gifTag;
-    u64 registerList;
-    u64 registerValue;
-    u64 registerAddress;
-} EffGsPacket;
 
 
 static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
@@ -266,18 +260,6 @@ extern void effPollResourceBankSlot(char *, u32, EffResourceBankSlot *);
 
 extern EffectBlock128 D_0045C1F0;
 
-typedef struct EffModelResource {
-    f32 position[4];
-    f32 orientation[4]; /* Quaternion. */
-    f32 scale;
-    u32 color;
-    s32 updateCount;
-    s32 kind;
-    MdlCtx *model;
-    u32 attributes;
-    struct EffSpanTable *childResource;
-    struct EffSpanConfig *source;
-} EffModelResource;
 
 typedef char EffModelResource_size_must_be_0x40[
     (sizeof(EffModelResource) == 0x40) ? 1 : -1];

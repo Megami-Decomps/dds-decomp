@@ -1,3 +1,6 @@
+#include "btl_selection_view.h"
+#include "btl_analysis_panel_work.h"
+#include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
@@ -2799,24 +2802,6 @@ void btlRequestMahenPanelClose(void) {
     }
 }
 
-typedef struct BtlAnalysisPanelWork {
-    s8 state;
-    u8 pad01[3];
-    BtlUnit *unit;
-    s32 duration;
-    s32 frame;
-    u8 pad10[4];
-    s16 fade;
-    u8 pad16[0x12];
-    s32 x;
-    s32 y;
-    s8 page;
-    u8 pad31[0xF];
-    f32 anchor[4];
-    f32 corners[4][4];
-    s16 edgeAlpha;
-    u8 pad92[0xE];
-} BtlAnalysisPanelWork;
 
 extern u32 btlHasRegisteredAnalysisPanelTask(void);
 
@@ -4985,12 +4970,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BDF20);
 
-typedef struct BattleSelectionTrailWork {
-    s32 direction;
-    s32 positions[4];
-    s32 fadeCountdowns[4];
-    s32 targetRow;
-} BattleSelectionTrailWork;
 
 extern const char *D_004367D4;
 extern s32 func_001BEBD0(KwlnTask *);
@@ -5966,8 +5945,6 @@ void btlInitializeSelectionWork(void) {
     btlSetTrackedTaskHandle(2, 1);
 }
 
-/* BattleSelectionWork with its screen positions viewed as [row][x,y] pairs. */
-typedef struct SelView { s8 selectedRow; u8 pad01; s16 rowFade[4]; u8 pad0A[2]; s32 pos[4][2]; } SelView;
 #define SELECTION_VIEW ((SelView *)btlLinkedSelectionTaskBuffer)
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlSoundSlotDefaults);
