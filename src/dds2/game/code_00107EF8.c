@@ -986,8 +986,7 @@ u8 evtWaitFileMenuTaskThree(void) {
 
 u32 evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *modeOverride) {
     if (modeOverride == 0) {
-        mnuOpenTitleMenuForMode(0);
-        return;
+        return mnuOpenTitleMenuForMode(0);
     }
     return mnuOpenTitleMenuForMode(*modeOverride);
 }

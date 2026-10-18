@@ -992,8 +992,7 @@ u8 evtWaitFileMenuTaskThree(void) {
 
 u32 evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *modeOverride) {
     if (modeOverride == 0) {
-        mnuOpenTitleMenuForMode(0);
-        return;
+        return mnuOpenTitleMenuForMode(0);
     }
     return mnuOpenTitleMenuForMode(*modeOverride);
 }
@@ -1352,8 +1351,7 @@ u8 evtWaitSkyCampTaskState(void) {
 s32 evtCreateSkyAndFieldTasks(u32 unused, u32 *fieldArgs) {
     evtCreateSkyTask();
     if (fieldArgs != 0) {
-        mnuTerminalCreateTasks(fieldArgs[0], fieldArgs[1]);
-        return;
+        return mnuTerminalCreateTasks(fieldArgs[0], fieldArgs[1]);
     }
     return mnuTerminalCreateTasks(0, 1);
 }
