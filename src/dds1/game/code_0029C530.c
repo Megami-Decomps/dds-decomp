@@ -1,3 +1,4 @@
+#include "eff_block128.h"
 #include "eff_editor_menu.h"
 #include "eff_surface_grid_node.h"
 #include "eff_surface_node.h"
@@ -11037,9 +11038,6 @@ INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39E0);
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39F0);
 
-typedef struct EffectBlock128 {
-    u32 word[32];
-} EffectBlock128;
 
 extern EffectBlock128 D_003DF920;
 

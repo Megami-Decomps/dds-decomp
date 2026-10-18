@@ -1,3 +1,4 @@
+#include "eff_block128.h"
 #include "eff_editor_menu.h"
 #include "eff_surface_grid_node.h"
 #include "eff_surface_node.h"
@@ -239,9 +240,6 @@ typedef struct EffMotionResourceConfig {
     f32 scale;
 } EffMotionResourceConfig;
 
-typedef struct EffectBlock128 {
-    u32 word[32];
-} EffectBlock128;
 
 extern void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out);
 
