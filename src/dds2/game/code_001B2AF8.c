@@ -5966,9 +5966,96 @@ void btlInitializeSelectionWork(void) {
     btlSetTrackedTaskHandle(2, 1);
 }
 
+/* BattleSelectionWork with its screen positions viewed as [row][x,y] pairs. */
+typedef struct SelView { s8 selectedRow; u8 pad01; s16 rowFade[4]; u8 pad0A[2]; s32 pos[4][2]; } SelView;
+#define SELECTION_VIEW ((SelView *)btlLinkedSelectionTaskBuffer)
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlSoundSlotDefaults);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0EF0);
+s32 func_001C0EF0(void) {
+    s32 i;
+
+    if (!(((BtlState *)btlGetRuntime())->battleFlags & 0x200)) {
+        return 0;
+    }
+    switch (fldGetSceneObjectState()) {
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+        for (i = 0; i < 4; i++) {
+            btlLinkedSelectionTaskBuffer->positions[i].x += 0x12;
+            btlLinkedSelectionTaskBuffer->positions[i].x = btlLinkedSelectionTaskBuffer->positions[i].x <= -200 ? -200 :
+                btlLinkedSelectionTaskBuffer->positions[i].x > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i].x;
+            if (btlLinkedSelectionTaskBuffer->positions[i].x >= 11) {
+                btlLinkedSelectionTaskBuffer->rowFade[i] += 8;
+            } else {
+                btlLinkedSelectionTaskBuffer->rowFade[i] += 4;
+            }
+            btlLinkedSelectionTaskBuffer->rowFade[i] = btlLinkedSelectionTaskBuffer->rowFade[i] <= 0 ? 0 :
+                btlLinkedSelectionTaskBuffer->rowFade[i] > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->rowFade[i];
+        }
+        btlLinkedSelectionTaskBuffer->backdropFade += 0x18;
+        btlLinkedSelectionTaskBuffer->backdropFade = btlLinkedSelectionTaskBuffer->backdropFade <= 0 ? 0 :
+            btlLinkedSelectionTaskBuffer->backdropFade > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->backdropFade;
+        break;
+    case 11:
+        for (i = 0; i < 4; i++) {
+            btlLinkedSelectionTaskBuffer->rowFade[i] -= btlTrackedTaskHandles->status.bytes.fadeStep;
+            btlLinkedSelectionTaskBuffer->rowFade[i] = btlLinkedSelectionTaskBuffer->rowFade[i] <= 0 ? 0 :
+                btlLinkedSelectionTaskBuffer->rowFade[i] > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->rowFade[i];
+        }
+        btlLinkedSelectionTaskBuffer->backdropFade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlLinkedSelectionTaskBuffer->backdropFade = btlLinkedSelectionTaskBuffer->backdropFade <= 0 ? 0 :
+            btlLinkedSelectionTaskBuffer->backdropFade > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->backdropFade;
+        break;
+    case 6:
+    case 8:
+        for (i = 0; i < 4; i++) {
+            if (i != 1) {
+                btlLinkedSelectionTaskBuffer->positions[i].x -= i;
+                btlLinkedSelectionTaskBuffer->rowFade[i] -= 0x18;
+                btlLinkedSelectionTaskBuffer->positions[i].x = btlLinkedSelectionTaskBuffer->positions[i].x <= -24 ? -24 :
+                    btlLinkedSelectionTaskBuffer->positions[i].x > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i].x;
+                btlLinkedSelectionTaskBuffer->rowFade[i] = btlLinkedSelectionTaskBuffer->rowFade[i] <= 0 ? 0 :
+                    btlLinkedSelectionTaskBuffer->rowFade[i] > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->rowFade[i];
+            } else {
+                SELECTION_VIEW->pos[i][1] -= 6;
+                SELECTION_VIEW->pos[i][1] = SELECTION_VIEW->pos[i][1] <= btlLinkedSelectionTaskBuffer->positions[0].y ? btlLinkedSelectionTaskBuffer->positions[0].y :
+                    SELECTION_VIEW->pos[i][1] >= btlLinkedSelectionTaskBuffer->positions[0].y + 23 ? btlLinkedSelectionTaskBuffer->positions[0].y + 23 : SELECTION_VIEW->pos[i][1];
+            }
+        }
+        btlLinkedSelectionTaskBuffer->backdropFade -= 0x18;
+        btlLinkedSelectionTaskBuffer->backdropFade = btlLinkedSelectionTaskBuffer->backdropFade <= 0 ? 0 :
+            btlLinkedSelectionTaskBuffer->backdropFade > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->backdropFade;
+        break;
+    case 7:
+    case 9:
+        for (i = 0; i < 4; i++) {
+            if (i != 1) {
+                btlLinkedSelectionTaskBuffer->positions[i].x += (6 - i) * 2;
+                btlLinkedSelectionTaskBuffer->positions[i].x = btlLinkedSelectionTaskBuffer->positions[i].x <= -24 ? -24 :
+                    btlLinkedSelectionTaskBuffer->positions[i].x > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i].x;
+                if (btlLinkedSelectionTaskBuffer->positions[i].x >= 11) {
+                    btlLinkedSelectionTaskBuffer->rowFade[i] += 0x10;
+                } else {
+                    btlLinkedSelectionTaskBuffer->rowFade[i] += 4;
+                }
+                btlLinkedSelectionTaskBuffer->rowFade[i] = btlLinkedSelectionTaskBuffer->rowFade[i] <= 0 ? 0 :
+                    btlLinkedSelectionTaskBuffer->rowFade[i] > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->rowFade[i];
+            } else {
+                SELECTION_VIEW->pos[i][1] += 6;
+                SELECTION_VIEW->pos[i][1] = SELECTION_VIEW->pos[i][1] <= btlLinkedSelectionTaskBuffer->positions[0].y ? btlLinkedSelectionTaskBuffer->positions[0].y :
+                    SELECTION_VIEW->pos[i][1] >= btlLinkedSelectionTaskBuffer->positions[0].y + 23 ? btlLinkedSelectionTaskBuffer->positions[0].y + 23 : SELECTION_VIEW->pos[i][1];
+            }
+        }
+        btlLinkedSelectionTaskBuffer->backdropFade += 0x18;
+        btlLinkedSelectionTaskBuffer->backdropFade = btlLinkedSelectionTaskBuffer->backdropFade <= 0 ? 0 :
+            btlLinkedSelectionTaskBuffer->backdropFade > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->backdropFade;
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416740);
 
