@@ -101,7 +101,7 @@ extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
 extern AiSpecies D_00360640[];
 extern s32 btlSelectConditionalAiRoute(s32, s32, u32 *, u32);
-extern u32 btlRollAiBucket(void);
+extern s32 btlRollAiBucket(void);
 extern s32 btlHasAdjacentActorRecordStatus(s32);
 extern u32 btlIsActorHighStateFlagClear(s32);
 extern s32 btlRunAiAction(BtlTask *, s32, u32);
@@ -416,7 +416,7 @@ static inline u32 btlRollTwice(void) {
 }
 
 /* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */
-u32 btlRollAiBucket(void) {
+s32 btlRollAiBucket(void) {
     u32 slot = btlRollTwice() / 0x29;
     if (btlPreviousAiCandidateBucket >= slot - 3 && btlPreviousAiCandidateBucket <= slot + 3) {
         u32 reroll = btlRollTwice();
