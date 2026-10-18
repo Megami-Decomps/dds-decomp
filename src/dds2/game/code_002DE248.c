@@ -453,7 +453,7 @@ extern u32 D_0043876C;
 
 extern u32 D_00438770;
 
-extern u32 D_00438778;
+extern s32 D_00438778;
 
 extern u32 D_004387A8;
 
