@@ -213,12 +213,12 @@ extern void fldSetSkyDrawState();
 extern void fldSetSkyAlpha();
 extern void fldSetFadeTarget();
 
-void evtCreateSkyTask(void) {
+s32 evtCreateSkyTask(void) {
     fldSetSwayMode(0);
     fldSetSkyDrawState(0x80);
     fldSetSkyAlpha(0);
     fldSetFadeTarget(0, 1, 0);
-    kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
+    return (s32)kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
@@ -231,8 +231,8 @@ s32 evtUpdateFrameVariableTask(KwlnTask *task) {
 
 extern char D_00423380[]; /* "FrameVar" */
 
-void evtCreateFrameVariableTask(void) {
-    kwlnTaskCreate(D_00423380, 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
+KwlnTask *evtCreateFrameVariableTask(void) {
+    return kwlnTaskCreate(D_00423380, 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
 }
 
 typedef s32 (*EvtMenuHeaderFn)();

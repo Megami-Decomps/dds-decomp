@@ -497,11 +497,11 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-void effObjCreateBillboardFromFactory(u32 parameter, void *firstVector, s32 secondVectorAddress) {
+EffectObj *effObjCreateBillboardFromFactory(u32 parameter, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = effCreateNodeFromParameter(parameter);
-    effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress);
+    return effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress);
 }
 
 extern const EffectEventVectorParameters D_0039F7D0;
