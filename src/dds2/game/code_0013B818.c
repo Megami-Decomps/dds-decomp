@@ -1978,7 +1978,101 @@ s32 fldFindTableEntry(s32 index) {
     return fldActorWaypointRows.headers[slot].body.data[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_0013B818", func_00142670);
+/* The retail code reaches the waypoint table through separate +4 and +6 address
+ * constants (a 16-halfword row stride), so the two views are distinct symbols. */
+extern s16 D_003931A4[];
+extern s16 D_003931A6[];
+
+void func_00142670(s32 index) {
+    FieldSequenceRecord sequence;
+    s32 command;
+    s32 sourceRoom;
+    s32 count;
+    s32 i;
+    s32 area;
+    s32 floor;
+    FldActorEntry *entry;
+    s32 remaining;
+    s32 inRange;
+    u32 floorFlags;
+    u32 flags;
+
+    sourceRoom = D_004361E0;
+    count = D_003931A6[D_004361DC * 16];
+    inRange = index < count;
+    remaining = count - index;
+    if (inRange) {
+        sourceRoom = remaining;
+        sourceRoom--;
+    }
+    for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
+        entry = &fldActorEntries[i];
+        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind == 6 && entry->motion - 1 == D_004361DC &&
+            entry->secondaryMotion == sourceRoom && entry->variantMode == 0) {
+            if (entry->variant == 0) {
+                area = fldAreaState.area;
+            } else {
+                area = entry->variant;
+            }
+            if (entry->warpEntry == 0) {
+                floor = fldAreaState.floor + 1;
+            } else {
+                floor = entry->warpEntry;
+            }
+            if (fldAreaState.area != area) {
+                fldReleaseCurrentBgm();
+            }
+            fldApplySceneRoomSelection(entry);
+            floorFlags = entry->flags64;
+            if (floorFlags & 1) {
+                if (entry->explorationArea != 0) {
+                    area = entry->explorationArea;
+                } else {
+                    area = fldAreaState.area;
+                }
+                floor = floorFlags >> 2;
+                if (floor == 0) {
+                    floor = fldAreaState.floor + 1;
+                }
+                fldSetFloorFlag(area, floor, entry->floorFlagBit);
+            }
+            flags = entry->flags64;
+            if (flags & 2) {
+                fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->explorationColumn, entry->explorationRow,
+                                                    entry->explorationColumnCount, entry->explorationRowCount);
+            }
+            if (entry->flags54 != 0) {
+                D_00435F24 = entry->flags54;
+                strcpy((char *)D_00387D60, entry->taskName);
+                D_00435F28 = i + 1;
+            }
+            if (entry->flags31 & 2U) {
+                fldAreaState.unk100 = 1;
+            } else if (entry->flags31 & 4U) {
+                fldAreaState.unk100 = -1;
+            } else {
+                fldAreaState.unk100 = 0;
+            }
+            fldSetFloorFlag(area, floor, D_003931A4[D_004361DC * 16 + sourceRoom + 8]);
+            fldInitializeFieldSequenceRecord(&sequence, area, floor, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
+            dds3AdminSubmitModeRequest(5, &sequence, sizeof(sequence), 0);
+            break;
+        } else if (entry->kind == 6 && entry->motion - 1 == D_004361DC &&
+                   entry->secondaryMotion == sourceRoom && entry->variantMode == 3) {
+            command = entry->variant;
+            fldSetDeferredFieldCommand(fldAreaState.area, command);
+            fldReleaseCurrentBgm();
+            if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
+                fldSetDeferredFieldCommand(entry->warpEntry2, command);
+            }
+            dds3AdminSubmitModeRequest(6, &command, sizeof(command), 0);
+            break;
+        }
+    }
+}
 
 /* Apply native actor-slot defaults; fields not written here remain untouched. */
 void fldResetActorSlots(void) {
