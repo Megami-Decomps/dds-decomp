@@ -1,8 +1,10 @@
 #include "common.h"
-#include "dat_state.h"
+#include "mnu_mantra.h"
 
-/* Query the fallback panel record with both filters unrestricted. The native
- * tail call forwards the selector's V0; retain the existing legacy declarations. */
-void mnuGetDefaultMantraPanelRecord(u32 object) {
-    mnuFindPendingMantraPanelRecord(object, 0xffffffffffffffff, 0xffffffffffffffff);
+extern MenuMantraRecord *mnuFindPendingMantraPanelRecord(MnuStatusResource *resource, s16 kind, s16 element);
+
+/* Query the fallback panel record with both filters unrestricted. Native A0
+ * supplies the resource object and the tail call forwards the selected V0. */
+MenuMantraRecord *mnuGetDefaultMantraPanelRecord(MnuStatusResource *object) {
+    return mnuFindPendingMantraPanelRecord(object, -1, -1);
 }

@@ -619,7 +619,7 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
 
 INCLUDE_ASM(const s32, "game/code_00289058", mnuUpdateMantraPanelVisualState);
 
-extern MantraMenuSrc *mnuGetDefaultMantraPanelRecord(void);
+extern MenuMantraRecord *mnuGetDefaultMantraPanelRecord(MnuStatusResource *object);
 
 /* Binds the source record (or the default one) and unpacks its two bit fields. */
 s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src) {
@@ -628,7 +628,7 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     if (src != 0) {
         state->src = src;
     } else {
-        state->src = mnuGetDefaultMantraPanelRecord();
+        state->src = (MantraMenuSrc *)mnuGetDefaultMantraPanelRecord(object);
     }
     if (state->src != 0) {
         state->drawBits.sourceKind = 4;
