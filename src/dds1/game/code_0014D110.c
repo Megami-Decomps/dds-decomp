@@ -610,6 +610,8 @@ extern void fldSetRoomModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 #include "dds3_object_payload.h"
+extern u8 fldTestObjectActivationFlag(u32 flagIndex);
+extern u8 fldIsSceneStateEight(void);
 
 s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;

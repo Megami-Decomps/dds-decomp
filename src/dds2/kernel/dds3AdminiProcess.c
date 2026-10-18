@@ -109,8 +109,9 @@ s8 dds3AdminReadPreviousSignedSample(void)
     return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
-/* Read the corresponding unsigned sample from the previous ring slot. */
-u8 dds3AdminReadPreviousUnsignedSample(void)
+/* Read the corresponding unsigned sample from the previous ring slot;
+ * its callers read the zero-extended sample as a word. */
+u32 dds3AdminReadPreviousUnsignedSample(void)
 {
     AdminWork* work;
 

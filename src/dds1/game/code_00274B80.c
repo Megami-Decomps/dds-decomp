@@ -1106,7 +1106,7 @@ s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
     return 0;
 }
 
-extern s32 mnuIsStaffMenuInputBlocked();
+extern u8 mnuIsStaffMenuInputBlocked(void);
 extern u8 mnuStaffCampPagePopupEntry[];
 
 /* Update popup state before page navigation, view toggles, and exit requests.

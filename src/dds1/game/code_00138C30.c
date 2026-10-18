@@ -2891,9 +2891,10 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
 void func_00140F68(void) {
 }
 
-extern s32 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void), fileMenuTaskExists(void);
+extern u8 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void);
+extern s32 fileMenuTaskExists(void);
 
-extern s32 fldHasKiretaLabelProcess(void), fldHasHirakenaiLabelProcess(void), fldHasBadkaifukuLabelProcess(void);
+extern u8 fldHasKiretaLabelProcess(void), fldHasHirakenaiLabelProcess(void), fldHasBadkaifukuLabelProcess(void);
 
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 

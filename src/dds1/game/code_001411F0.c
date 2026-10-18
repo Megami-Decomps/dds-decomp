@@ -1913,7 +1913,7 @@ extern s32 D_003BAECC;
 
 extern s32 D_003BAED4;
 
-extern s32 fldTestSceneLifecycleFlags(u32);
+extern u8 fldTestSceneLifecycleFlags(u32 mask);
 extern void fldSetSceneLifecycleFlags(u32);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern KwlnDrawVectorParams kwlnDrawVector;
@@ -3122,7 +3122,7 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-extern s32 fldTestSceneControlFlags(s32);
+extern u8 fldTestSceneControlFlags(u32 mask);
 
 void fldUpdateObjectSlotActivation(void) {
     s32 i;
@@ -3312,7 +3312,7 @@ void fldDrawLocationPanel(void) {
     }
 }
 
-extern s32 fldTestSceneLifecycleFlags(u32);
+extern u8 fldTestSceneLifecycleFlags(u32 mask);
 
 void fldFlushQueuedEffectPositions(void) {
     if (fldAreaState.area < 0xC8) {

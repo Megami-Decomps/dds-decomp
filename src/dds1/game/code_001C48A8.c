@@ -1331,6 +1331,9 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
 
 
 #include "brs_task_poll_done_api.h"
+extern u8 sndIsStreamStatusTwoOrThree(void);
+extern s8 btlChooseStartVoice(void);
+extern s8 brsTaskIsUpdateBlocked(void);
 
 /* Drive field loading or dispatch linked nodes to state 30; return 0xB while pending. */
 u32 fldStepAreaLoad(BattleSceneWork *work) {

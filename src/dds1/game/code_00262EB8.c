@@ -6,7 +6,7 @@
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
-extern s32 brsTaskIsUiUpdateAllowed(s32);
+extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *work);
 extern void brsNoOpMessageInputCallback(void *);
 extern s32 brsPollResultCounterCompletion(void);
 extern void mnuClearTitleState(BrsSkillPackageWork *);

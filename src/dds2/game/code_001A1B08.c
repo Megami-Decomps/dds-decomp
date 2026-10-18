@@ -830,8 +830,9 @@ s32 itfCommandSelectOptionWithFade(void) {
     return 0;
 }
 
-/* Return the option-block signed status word, not the separate entry status byte. */
-s16 itfPanelGetPairFirst(s32 windowIndex) {
+/* Return the option-block signed status word, not the separate entry status byte;
+ * its callers read the sign-extended halfword as a word. */
+s32 itfPanelGetPairFirst(s32 windowIndex) {
     return itfWindowSlots[windowIndex].ptr->options.status;
 }
 
@@ -840,8 +841,9 @@ void itfPanelSetPairFirst(s32 windowIndex, s16 status) {
     itfWindowSlots[windowIndex].ptr->options.status = status;
 }
 
-/* Return the same signed word forwarded as the script result when an option completes. */
-s16 itfPanelGetPairSecond(s32 windowIndex) {
+/* Return the same signed word forwarded as the script result when an option completes;
+ * its callers read the sign-extended halfword as a word. */
+s32 itfPanelGetPairSecond(s32 windowIndex) {
     return itfWindowSlots[windowIndex].ptr->options.clearBitCount;
 }
 
