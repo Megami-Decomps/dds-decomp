@@ -106,8 +106,8 @@ s32 mnuDrawMantraCostTransition(void) {
     return 0;
 }
 
-void mnuDrawDisplaySpriteAndPanelMarks(s32 p0, s32 alpha, s32 context) {
-    mnuDrawMantraSparkScene();
+void mnuDrawDisplaySpriteAndPanelMarks(s32 scene, s32 alpha, s32 context) {
+    mnuDrawMantraSparkScene(scene, alpha, context);
     mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x5A, context);
     itfDspDrawMarksA(alpha, context);
 }

@@ -2548,8 +2548,10 @@ u8 fldIsFieldResourceWaitFinished(void) {
     return sdfCheckPendingWorkWithInterrupts() == 0;
 }
 
-void fldApplyTerminalActorSelection(void) {
-    fldSelectActorFromSceneIndexTables();
+extern void fldSelectActorFromSceneIndexTables(s32 mode, s32 index);
+
+void fldApplyTerminalActorSelection(s32 mode, s32 index) {
+    fldSelectActorFromSceneIndexTables(mode, index);
 }
 
 extern void fldDispatchDeferredFieldCommand(void);

@@ -1344,9 +1344,11 @@ u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
     return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
-/* Forward the legacy record/value arguments to the packed low-15-bit status update. */
-void btlRaisePartyRecordStatusValue(void) {
-    sdfRaisePackedChannelValue();
+extern void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+
+/* Forward the record and value to the packed low-15-bit status update. */
+void btlRaisePartyRecordStatusValue(DatPartyRecord *item, u32 minimumValue) {
+    sdfRaisePackedChannelValue(item, minimumValue);
 }
 
 /* Forward the legacy record/mask arguments to the party-record status clear. */

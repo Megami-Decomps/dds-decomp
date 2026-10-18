@@ -830,10 +830,9 @@ void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const char *so
     itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
 }
 
-/* Legacy short-arity entry point: retain its one-argument copier call.
- * This function does not specify the copier's other parameters. */
-void itfMesCopyWindowTextSlot(s32 window) {
-    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes);
+/* Copy text into one of the window's message text slots. */
+void itfMesCopyWindowTextSlot(s32 window, s32 slotIndex, const char *source, s32 byteCount) {
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes, slotIndex, source, byteCount);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as

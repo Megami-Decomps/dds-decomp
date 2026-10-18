@@ -765,13 +765,13 @@ void sdfVuEmitColoredTriangleBatches(work)
     }
 }
 
-/* Select textured or colored emission; preserve the native no-argument calls. */
+/* Select textured or colored emission. */
 void sdfVuEmitSelectedNodePacket(VuWork *work) {
     if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
-        sdfVuEmitTexturedTriangleBatches();
+        sdfVuEmitTexturedTriangleBatches(work);
         return;
     }
-    sdfVuEmitColoredTriangleBatches();
+    sdfVuEmitColoredTriangleBatches(work);
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */

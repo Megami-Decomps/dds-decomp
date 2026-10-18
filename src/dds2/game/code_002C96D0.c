@@ -6390,12 +6390,12 @@ void fileUpdateLoadObjectSlots(u32 objectAddr) {
     fileDrawLoadObjectSlots(objectAddr);
 }
 
-void fileSendLoadObjectRecordVector(EffectSurfaceNode *obj) {
-    mnuRecordSetVector(obj->active);
+void fileSendLoadObjectRecordVector(EffectSurfaceNode *obj, const u128 *value) {
+    mnuRecordSetVector(obj->active, value);
 }
 
-void fileCopyLoadObjectRecordVector(EffectSurfaceNode *obj) {
-    fileSetRecordSecondVector(obj->active);
+void fileCopyLoadObjectRecordVector(EffectSurfaceNode *obj, const u128 *value) {
+    fileSetRecordSecondVector(obj->active, value);
 }
 
 void fileSetRecordWordFour(s32 record, u32 value) {

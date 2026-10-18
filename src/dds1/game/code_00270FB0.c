@@ -159,8 +159,7 @@ void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu) {
     s32 previousCategory = menu->displayMode;
     if (nextCategory != previousCategory) {
         if (previousCategory != 0) {
-            /* Preserve DDS1's short-arity call through the K&R definition. */
-            mnuReleaseStaffCategoryTextureHandles(previousCategory);
+            mnuReleaseStaffCategoryTextureHandles(previousCategory, menu);
         }
         if (nextCategory != 0) {
             movReleaseCategoryModels(nextCategory, menu);
