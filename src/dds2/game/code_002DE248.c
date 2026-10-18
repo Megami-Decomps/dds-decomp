@@ -23,6 +23,7 @@
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
 #include "eff_anim.h"
+#include "sdf_model_copy.h"
 #include "eff_bill_column_particle.h"
 #include "eff_ribbon_work.h"
 #include "itf_draw_grid.h"
@@ -410,6 +411,7 @@ extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
 
 
 extern struct SdfPoolNode *D_00380828[4];
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, struct SdfModel *);
 
 
 typedef struct EffectObjectFlag {
