@@ -180,8 +180,8 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     return node;
 }
 
-void effCreateNodeFromParameter(u32 parameter) {
-    effCreateNode(5, 0, parameter);
+EffNode *effCreateNodeFromParameter(u32 parameter) {
+    return effCreateNode(5, 0, parameter);
 }
 
 struct EffNode *effLoadResourceNode(const char *resource) {
