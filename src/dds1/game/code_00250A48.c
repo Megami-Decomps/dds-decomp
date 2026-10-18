@@ -1,9 +1,9 @@
+#include "mnu_variant_sprite_placement.h"
 #include "common.h"
 #include "snd_sequence_volume_pan.h"
 #include "mnu_scene_work.h"
 #include "mnu_mantra_grid.h"
 
-typedef s16 MnuVariantSpritePlacement[6];
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern s8 D_00324510[64];
 extern SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid);

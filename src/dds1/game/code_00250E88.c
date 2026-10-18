@@ -1,3 +1,4 @@
+#include "mnu_variant_sprite_placement.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -48,7 +49,6 @@ typedef struct {
 
 extern SceneEntry mnuMantraEntrySpritePlacements[];
 
-typedef s16 MnuVariantSpritePlacement[6];
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 
 typedef struct ScrVmOperand ScrVmOperand;

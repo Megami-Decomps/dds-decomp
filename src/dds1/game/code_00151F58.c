@@ -1,3 +1,5 @@
+#include "eff_composite_gs_descriptor.h"
+#include "eff_unit_object.h"
 #include "sdf_projection.h"
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
@@ -35,8 +37,6 @@
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_VARIANT_MASK 0xFFFF
-#define EFF_INSTANCE_BYTES 0x88
-#define EFF_MATRIX_BYTES 0x40
 #define EFF_PACKET_LIST_BYTES 0x20
 #define EFF_TEMPLATE_TAIL_OFFSET 0x150
 #define EFF_PACKET_INITIAL_TAG 0xF0000001
@@ -58,7 +58,6 @@ extern s32 effEmitterDelayRandomState[];
 
 void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
-typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
 void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
 
 void effInitializeEmitterHead(void *effect);
@@ -123,22 +122,6 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
 }
 
 
-/* Each effect scene object owns a billboard and an asset reference. */
-typedef struct EffUnitObject {
-    f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
-    f32 transform[4][4]; /* 0x40: VU0 matrix copied by effCopyMatrixToNext. */
-    BillObj *billboard; /* 0x80: scene-owned billboard */
-    void *resource; /* 0x84 */
-} EffUnitObject;
-typedef char EffUnitObject_size_check[(sizeof(EffUnitObject) == EFF_INSTANCE_BYTES) ? 1 : -1];
-typedef char EffUnitObject_localMatrix_offset_check[
-    ((u32)&((EffUnitObject *)0)->localMatrix == 0) ? 1 : -1];
-typedef char EffUnitObject_transform_offset_check[
-    ((u32)&((EffUnitObject *)0)->transform == EFF_MATRIX_BYTES) ? 1 : -1];
-typedef char EffUnitObject_billboard_offset_check[
-    ((u32)&((EffUnitObject *)0)->billboard == 0x80) ? 1 : -1];
-typedef char EffUnitObject_resource_offset_check[
-    ((u32)&((EffUnitObject *)0)->resource == 0x84) ? 1 : -1];
 
 /* Narrow mode for the child kinds, or update each resolved animation entry. */
 void billSetBillboardMode(BillObj *effect, s32 mode) {
@@ -569,27 +552,6 @@ void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDe
     effDrawGeneratedTextureQuad(packetList, source);
     surface->append(surface, packetList);
 }
-
-/* Caller-built composite draw description; 0x68 bytes. */
-struct EffCompositeGsDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    u32 blendMode;
-    BillTextureQuad primaryUv;
-    BillTextureQuad secondaryUv;
-    SdfTex *primaryTexture;
-    u64 primaryClamp;
-    SdfTex *secondaryTexture;
-    u8 unk5C[4];
-    u64 secondaryClamp;
-};
-
-typedef char EffCompositeGsDescriptor_size_must_be_0x68[
-    (sizeof(EffCompositeGsDescriptor) == 0x68) ? 1 : -1];
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);

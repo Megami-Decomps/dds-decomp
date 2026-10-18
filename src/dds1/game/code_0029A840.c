@@ -458,18 +458,7 @@ void mdlMarkAndProcessObjectNodes(void) {
     } while (node != NULL);
 }
 
-/* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload. */
-struct FileQueue;
-typedef struct EffResourceOwner {
-    u32 count;
-    u32 unk04;
-    u8 pad_08[0x34];
-    u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
-    u8 pad_40[4];
-    struct FileQueue **entries; /* 0x44: retained queue-pointer array */
-    struct SdfMemBlock *queueAllocation; /* 0x48: queue-pointer array descriptor */
-    MdlCtx *model;
-} EffResourceOwner;
+#include "eff_resource_owner.h"
 
 typedef struct {
     u8 bytes[0x38];

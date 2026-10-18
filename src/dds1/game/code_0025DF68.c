@@ -1,3 +1,4 @@
+#include "brs_icon_record.h"
 #include "common.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -9,7 +10,6 @@
 #include "fr_font_draw_glyph.h"
 
 
-typedef s16 BrsIconRecord[4];
 
 enum {
     BRS_ICON_ID = 1,
