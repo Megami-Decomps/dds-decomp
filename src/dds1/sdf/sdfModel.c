@@ -167,7 +167,87 @@ SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetS
     return node;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfDrawNodeBuildCommandList);
+/* The list head slot is declared `void **` (generic list storage), not `SdfCommandNode **`: its alias set must
+ * conflict with the node's `void *payload` store. cc1probe --sched (hooked==unhooked): sched2 then ranks the
+ * kind/selector/payload stores ahead of the halfword/pointer stores by #dependents, reproducing retail's
+ * sb kind, sb selector, sw payload, sh, sw next, sw alloc, sw head order. Loop cases 4/6/8 and 5/7 stay separate
+ * bodies (a fall-through merges the argument moves). */
+void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
+                                s32 packetSelector, s32 alternateSelector, s32 listIndex) {
+    s32 commandNodeCount;
+    s32 referenceQuadwords;
+    s32 bytes;
+    u32 count;
+    SdfCommandNode *listNode;
+    SdfDmaTagHeader *packet = NULL;
+    u32 *cursor;
+    SdfMeasureCommandPrefix *command;
+    struct SdfMemBlock *allocation;
+    SdfCommandNode *next;
+    void **head;
+
+    bytes = sdfCommandListMeasure(commandList, &commandNodeCount, &referenceQuadwords);
+    if (bytes == 0 && commandNodeCount == 0 && referenceQuadwords == 0) {
+        return;
+    }
+    cursor = commandList;
+    sdfEnsureFreeRootWorkspace(node);
+    count = *cursor++;
+    if (alternateSelector != 0) {
+        u16 headerSelector = count >> 16;
+        packetSelector = headerSelector;
+    }
+    count &= 0xFFFF;
+    if (bytes != 0) {
+        allocation = sdfAllocGeneralBlock(bytes);
+        listNode = (SdfCommandNode *)sdfResourceRetainAddress(allocation);
+        head = (void **)((u32)listIndex * sizeof(*node->lists) + (u32)node +
+                         (u32)&((SdfDrawNode *)0)->lists);
+        next = *head;
+        packet = (SdfDmaTagHeader *)(listNode + 1);
+        listNode->kind = 1;
+        listNode->packetSelector = packetSelector;
+        listNode->payload = packet;
+        listNode->quadwordCount = (bytes + 0xF) >> 4;
+        listNode->next = next;
+        listNode->allocation = allocation;
+        *head = listNode;
+    }
+    do {
+        command = (SdfMeasureCommandPrefix *)*cursor++;
+        switch (command->kind) {
+        case 1:
+            packet = sdfModelBuildIndexedCommandPayload(node, (SdfIndexedCommandView *)command, packet, listIndex);
+            break;
+        case 2:
+            packet = sdfModelBuildIndexedCommandPackets(node, command, packet, listIndex);
+            break;
+        case 3:
+            listNode = sdfDrawNodePrependCommandNode(node, packetSelector, listIndex);
+            listNode->kind = 2;
+            listNode->payload = command;
+            break;
+        case 4:
+        case 6:
+        case 8:
+            listNode = sdfDrawNodePrependCommandNode(node, packetSelector, listIndex);
+            listNode->kind = 3;
+            listNode->payload = command;
+            break;
+        case 5:
+        case 7:
+            sdfProcessReferencedObjects(node->root, (SdfObjectRefCommand *)command);
+            listNode = sdfDrawNodePrependCommandNode(node, packetSelector, listIndex);
+            listNode->kind = 3;
+            listNode->payload = command;
+            break;
+        }
+        count--;
+    } while (count != 0);
+    if (bytes != 0) {
+        sdfModelWriteFixedPacket((SdfModelPacket *)packet);
+    }
+}
 
 /* Build the local rotation basis and append its translation as the fourth row. */
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
