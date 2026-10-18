@@ -338,19 +338,27 @@ form applied to the last call of `mnuDrawMantraScenePlacementSprite`):
 
 Only the inline-callback helper is acceptable source, and only when it
 genuinely recurs (3+ sites: `mnuDrawPlacedSpriteFromTable` has 19 in
-`code_00253E58`); a local function pointer is a dummy variable and a
-`do { } while (0)` around one call is the whole-body tail-blocker lever.
-The four `code_00250E88` tails (`mnuReleaseSceneContext`,
-`mnuReinitializeSceneGrid`, `mnuFinishMantraProfileSelection`,
-`mnuCopySceneCoordinatesAndReleaseNodeList`) have four different callees
-and no shared helper, so the unit keeps its inferred no-sibling flag and
-is not merged with `code_00253D40`/`code_00253E58` (which would need one flag
-set: `mnuBeginTransitionAlt` there is a real sibling `j`). With those tails
-as pointer calls the merged three-unit extent matches under default flags,
-and `mnuHandleMantraSceneInput` (3/240 words alone) is exact once
+`code_00250E88`'s 0x254E58 suffix); a local function pointer is a dummy
+variable and a `do { } while (0)` around one call is the whole-body
+tail-blocker lever.
+
+DDS1 `code_00250E88` now owns the former `code_00253D40` and `code_00253E58`
+(one TU, default flags; the inferred no-sibling flags are dropped).
+Evidence: `mnuHandleMantraSceneInput` (3/240 alone) is exact only with
 `mnuSelectMantraGridLeftNeighbor`, `mnuSelectMantraGridRightNeighbor` and
-`mnuBeginTransitionAlt` are defined above it, which is the boundary evidence
-for a future landing.
+`mnuBeginTransitionAlt` defined above it, and `mnuBeginTransitionAlt` is a
+real sibling `j`, so the extent cannot carry `-fno-optimize-sibling-calls`.
+The nine non-obvious `jal` tails then need source reasons under default
+flags: `mnuFreeTaskData` and `mnuRestoreMantraGridSelection` fall off the end
+of an implicit-int definition after a join; three
+`mnuDrawPlacedSpriteFromTable` wrappers go through the 19-site callback
+helper; `mnuReleaseSceneContext`, `mnuReinitializeSceneGrid`,
+`mnuFinishMantraProfileSelection` and
+`mnuCopySceneCoordinatesAndReleaseNodeList` each clear the handle their final
+call just released (post-final-call exception; the clear survives
+`01.sibling` through `11.cfg` and dies in `13.life`). `mnuDrawDisplaySpriteAndPanelMarks`
+releases nothing, so an arg clear would be arbitrary: it stays `INCLUDE_ASM`.
+Merged unit: 32 match, 0 differ; the ELF keeps its retail SHA-1.
 
 ## Narrow return types and `jal` tails
 
