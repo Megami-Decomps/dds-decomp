@@ -10382,7 +10382,7 @@ extern u128 D_003E9130;
 
 
 /* vu0 routine: follow the selected actor with the active camera path. */
-void func_002F6D00(EffActiveResource *owner) {
+s32 func_002F6D00(EffActiveResource *owner) {
     f32 position[4];
     f32 actorPosition[4];
     f32 eyeOffset[4];
@@ -10526,7 +10526,7 @@ void func_002F6D00(EffActiveResource *owner) {
     dds3SetCameraFieldOfView(camera, D_00437E90);
     data->fovUpdatePending |= 1;
     effObjSetInnerRotation(camera, &D_003E9F80);
-    sdfStepWrappingFloatCounter(path);
+    return sdfStepWrappingFloatCounter(path);
 }
 
 
@@ -13453,78 +13453,78 @@ extern char D_0042CEF8[];
 
 extern u8 D_003FE280[];
 
-void effCreateParticleTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CEF8, D_003FE280, 0xF);
+u32 effCreateParticleTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CEF8, D_003FE280, 0xF);
 }
 
 extern char D_0042CED8[];
 
 extern u8 D_003FE430[];
 
-void effCreatePolyTrackControlTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CED8, D_003FE430, 7);
+u32 effCreatePolyTrackControlTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CED8, D_003FE430, 7);
 }
 
 extern u8 D_003FE500[];
 
-void effCreatePolyTrackTask(void) {
-    effSelectCameraFileJobFromRows("POLY TRACK S", D_003FE500, 7);
+u32 effCreatePolyTrackTask(void) {
+    return effSelectCameraFileJobFromRows("POLY TRACK S", D_003FE500, 7);
 }
 
 extern char D_00437F30[];
 
 extern u8 D_003FE610[];
 
-void effCreateBlurTask(void) {
-    effSelectCameraFileJobFromRows(D_00437F30, D_003FE610, 7);
+u32 effCreateBlurTask(void) {
+    return effSelectCameraFileJobFromRows(D_00437F30, D_003FE610, 7);
 }
 
 extern char D_004386A8[];
 
 extern u8 D_003FE6E0[];
 
-void effCreateFilterTask(void) {
-    effSelectCameraFileJobFromRows(D_004386A8, D_003FE6E0, 3);
+u32 effCreateFilterTask(void) {
+    return effSelectCameraFileJobFromRows(D_004386A8, D_003FE6E0, 3);
 }
 
 extern char D_0042CE48[];
 
 extern u8 D_003FE7C0[];
 
-void effCreateEnvironmentTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CE48, D_003FE7C0, 5);
+u32 effCreateEnvironmentTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CE48, D_003FE7C0, 5);
 }
 
 extern char D_0042CEB8[];
 
 extern u8 D_003FE780[];
 
-void effCreatePolyTextureTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CEB8, D_003FE780, 2);
+u32 effCreatePolyTextureTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CEB8, D_003FE780, 2);
 }
 
 extern char D_0042CEA8[];
 
 extern u8 D_003FE850[];
 
-void effCreatePolyFlashTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CEA8, D_003FE850, 0xB);
+u32 effCreatePolyFlashTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CEA8, D_003FE850, 0xB);
 }
 
 extern char D_0042CE98[]; /* "POLY RING" */
 
 extern u8 D_003FE990[];
 
-void effCreatePolyRingTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CE98, D_003FE990, 6);
+u32 effCreatePolyRingTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CE98, D_003FE990, 6);
 }
 
 extern char D_0042CE88[];
 
 extern u8 D_003FEA40[];
 
-void effCreatePolyThunderTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CE88, D_003FEA40, 5);
+u32 effCreatePolyThunderTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CE88, D_003FEA40, 5);
 }
 
 extern u8 D_003FEAD0[];
@@ -13538,48 +13538,48 @@ extern char D_0042CE78[];
 
 extern u8 D_003FEB80[];
 
-void effCreatePolyWindTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CE78, D_003FEB80, 7);
+u32 effCreatePolyWindTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CE78, D_003FEB80, 7);
 }
 
 extern char D_0042CE68[];
 
 extern u8 D_003FEC50[];
 
-void effCreatePolyScalyTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CE68, D_003FEC50, 5);
+u32 effCreatePolyScalyTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CE68, D_003FEC50, 5);
 }
 
 extern char D_0042CE58[];
 
 extern u8 D_003FED20[];
 
-void effCreatePolyCrackTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CE58, D_003FED20, 2);
+u32 effCreatePolyCrackTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CE58, D_003FED20, 2);
 }
 
 extern char D_0042CDF8[];
 
 extern u8 D_003FED60[];
 
-void effCreateBattleOnlyTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CDF8, D_003FED60, 0x12);
+u32 effCreateBattleOnlyTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CDF8, D_003FED60, 0x12);
 }
 
 extern char D_00438640[]; /* "2D" */
 
 extern u8 D_003FEFE0[];
 
-void effCreateTwoDimensionalTask(void) {
-    effSelectCameraFileJobFromRows(D_00438640, D_003FEFE0, 2);
+u32 effCreateTwoDimensionalTask(void) {
+    return effSelectCameraFileJobFromRows(D_00438640, D_003FEFE0, 2);
 }
 
 extern char D_0042CEE8[];
 
 extern u8 D_003FF020[];
 
-void effCreateObjectParticleTask(void) {
-    effSelectCameraFileJobFromRows(D_0042CEE8, D_003FF020, 7);
+u32 effCreateObjectParticleTask(void) {
+    return effSelectCameraFileJobFromRows(D_0042CEE8, D_003FF020, 7);
 }
 
 extern char D_0042CF58[];
@@ -14827,135 +14827,135 @@ extern u8 D_00400068[];
 extern s32 effEditScalarTrack(EffScalarTrack *, u32, void *, void *);
 
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
-void effEditPScaleTrack(s32 *work) {
+s32 effEditPScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 extern u8 D_004001A0[];
 
 /* Edit the requested P-family ROTATE track with its independent editor state. */
-void effEditPRotationTrack(s32 *work) {
+s32 effEditPRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
-void effEditGkScaleTrack(s32 *work) {
+s32 effEditGkScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
 extern u8 D_00400250[];
 
 /* ROTATE property callback for native K-family descriptors. */
-void effEditKRotationTrack(s32 *work) {
+s32 effEditKRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback for native B-family descriptors. */
-void effEditBScaleTrack(s32 *work) {
+s32 effEditBScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
-void effEditBRotationTrack(s32 *work) {
+s32 effEditBRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
-void effEditBfAreaTrack(s32 *work) {
+s32 effEditBfAreaTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
-void effEditTBoardScaleTrack(s32 *work) {
+s32 effEditTBoardScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
-void effEditTBoardRotationTrack(s32 *work) {
+s32 effEditTBoardRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* SCALE property callback for native W-family descriptors. */
-void effEditWScaleTrack(s32 *work) {
+s32 effEditWScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x80), ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x80), ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
 }
 
 /* ROTATE property callback for native W-family descriptors. */
-void effEditWRotationTrack(s32 *work) {
+s32 effEditWRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0xAC), ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xAC), ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
 }
 
 extern u8 D_004000B8[];
 
 /* Edit the SCALE_UV curve in U-CYLND's POLYGON child; native callback is void. */
-void effEditUCylinderPolygonUvScaleTrack(s32 *work) {
+s32 effEditUCylinderPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x90), ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x90), ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; native callback is void. */
-void effEditUSmokeSpiralScaleTrack(s32 *work) {
+s32 effEditUSmokeSpiralScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x9C), ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x9C), ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; native callback is void. */
-void effEditUSmokeSpiralRotationTrack(s32 *work) {
+s32 effEditUSmokeSpiralRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0xC8), ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xC8), ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
 }
 
 /* Edit SCALE_UV in their POLYGON children; preserve the native void callback. */
-void effEditUSmokeSpiralPolygonUvScaleTrack(s32 *work) {
+s32 effEditUSmokeSpiralPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
+    return effEditScalarTrack((EffScalarTrack *)source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
 }
 
 /* Edit the native U-SPHRE root SCALE curve; native callback is void. */
-void effEditUSphereScaleTrack(s32 *work) {
+s32 effEditUSphereScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
 }
 
 /* Edit the native 2D root SCALE curve; native callback is void. */
-void effEditTwoDimensionalScaleTrack(s32 *work) {
+s32 effEditTwoDimensionalScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* Edit the native 2D root ROTATE curve; native callback is void. */
-void effEditTwoDimensionalRotationTrack(s32 *work) {
+s32 effEditTwoDimensionalRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* SCALE editor for the native O-P2_TRK root descriptor. */
-void effEditOP2TrackScaleTrack(s32 *work) {
+s32 effEditOP2TrackScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
 /* ROTATE editor for the native O-P2_TRK root descriptor. */
-void effEditOP2TrackRotationTrack(s32 *work) {
+s32 effEditOP2TrackRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
 /* SCALE editor shared by the six native M-family descriptors. */
-void effEditMScaleTrack(s32 *work) {
+s32 effEditMScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    effEditScalarTrack((EffScalarTrack *)(source + 0xB0), ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xB0), ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
 }
 
 /* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
@@ -15105,8 +15105,8 @@ s32 effEditUSpherePolygonFadeTrack(s32 work) {
 }
 
 /* FADE editor for the native OLMODEL descriptor. */
-void effEditOlModelFadeTrack(s32 work) {
-    func_003025A8((SdfAlphaTrack *)(((EffMappingRequest *)work)->object + 0x10), ((EffMappingObject *)((EffMappingRequest *)work)->object)->value00);
+s32 effEditOlModelFadeTrack(s32 work) {
+    return func_003025A8((SdfAlphaTrack *)(((EffMappingRequest *)work)->object + 0x10), ((EffMappingObject *)((EffMappingRequest *)work)->object)->value00);
 }
 
 
@@ -15177,48 +15177,48 @@ extern char D_0042CF70[]; /* "/tool/effect/" */
 extern char D_0042D140[]; /* "/tool/effect/hlp/" */
 
 /* Poll the TEXTURE property chooser in /tool/effect/mat/; native callback is void. */
-void effPollTextureResourceFile(void) {
-    effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
+s32 effPollTextureResourceFile(void) {
+    return effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
 /* Alternate descriptor family's TEXTURE callback; retain its separate entrypoint. */
-void effPollAlternateTextureResourceFile(void) {
-    effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
+s32 effPollAlternateTextureResourceFile(void) {
+    return effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
 /* Poll EP resources from /tool/effect/ep/; native callback drops the status. */
-void effPollEpResourceFile(void) {
-    effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
+s32 effPollEpResourceFile(void) {
+    return effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
 }
 
 /* Poll EPL resources from /tool/effect/; native callback drops the status. */
-void effPollEplResourceFile(void) {
-    effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
+s32 effPollEplResourceFile(void) {
+    return effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
 /* Separate native EP descriptor callback using the same directory and format. */
-void effPollAlternateEpResourceFile(void) {
-    effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
+s32 effPollAlternateEpResourceFile(void) {
+    return effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
 }
 
 /* EPL chooser for MATERIAL groups under K-family and O-P2_TRK descriptors. */
-void effPollKoMaterialEplFile(void) {
-    effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
+s32 effPollKoMaterialEplFile(void) {
+    return effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
 /* TMX-only TEXTURE chooser for B-/F-family MATERIAL groups; discard status. */
-void effPollBfMaterialTmxFile(void) {
-    effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
+s32 effPollBfMaterialTmxFile(void) {
+    return effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
 /* TMX-only TEXTURE chooser for N-family MATERIAL groups; discard status. */
-void effPollNMaterialTmxFile(void) {
-    effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
+s32 effPollNMaterialTmxFile(void) {
+    return effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
 /* TMX-only TEXTURE chooser for S-RAD_T/SPK_T/RNG_T/SCT_T MATERIAL groups. */
-void effPollSTMaterialTmxFile(void) {
-    effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
+s32 effPollSTMaterialTmxFile(void) {
+    return effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
 u32 effFileJobSecondaryDataSet(void) {
@@ -15228,23 +15228,23 @@ u32 effFileJobSecondaryDataSet(void) {
 }
 
 /* Poll PB resources from /tool/effect/hlp/; native callback drops the status. */
-void effPollHlpPbResourceFile(void) {
-    effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
+s32 effPollHlpPbResourceFile(void) {
+    return effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 
 /* PB chooser for M-family MATERIAL groups, using /tool/effect/mat/. */
-void effPollMMaterialPbFile(void) {
-    effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_PB);
+s32 effPollMMaterialPbFile(void) {
+    return effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_PB);
 }
 
 /* EPL chooser for M-family MATERIAL groups, using /tool/effect/. */
-void effPollMMaterialEplFile(void) {
-    effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
+s32 effPollMMaterialEplFile(void) {
+    return effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
 /* PB chooser for O-HLP_UT/O-P2_HT MATERIAL groups, using /tool/effect/hlp/. */
-void effPollOMaterialPbFile(void) {
-    effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
+s32 effPollOMaterialPbFile(void) {
+    return effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 
 
