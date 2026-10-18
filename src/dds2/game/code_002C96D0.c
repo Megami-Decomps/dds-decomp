@@ -6459,35 +6459,35 @@ u32 effSampleColorAlphaTracks(const SdfColorTrack *colorTrack,
         color0 = colorTrack->finalColor;
         break;
     case SDF_COLOR_TRACK_MODE_ONE_INTERMEDIATE_KEY:
-        firstFrame = (s32)(colorTrack->firstFraction * durationFloat);
+        firstFrame = (s32)(colorTrack->keys[0].fraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
             color1 = colorTrack->initialColor;
-            color0 = colorTrack->firstKeyColor;
+            color0 = colorTrack->keys[0].color;
         } else {
             f32 span = duration - firstFrame;
             factor = (f32)(frame - firstFrame) / span;
-            color1 = colorTrack->firstKeyColor;
+            color1 = colorTrack->keys[0].color;
             color0 = colorTrack->finalColor;
         }
         break;
     case SDF_COLOR_TRACK_MODE_TWO_INTERMEDIATE_KEYS:
-        firstFrame = (s32)(colorTrack->firstFraction * durationFloat);
+        firstFrame = (s32)(colorTrack->keys[0].fraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
             color1 = colorTrack->initialColor;
-            color0 = colorTrack->firstKeyColor;
+            color0 = colorTrack->keys[0].color;
         } else {
-            secondFrame = (s32)(colorTrack->secondFraction * durationFloat);
+            secondFrame = (s32)(colorTrack->keys[1].fraction * durationFloat);
             if (frame < secondFrame) {
                 f32 span = secondFrame - firstFrame;
                 factor = (f32)(frame - firstFrame) / span;
-                color1 = colorTrack->firstKeyColor;
-                color0 = colorTrack->secondKeyColor;
+                color1 = colorTrack->keys[0].color;
+                color0 = colorTrack->keys[1].color;
             } else {
                 f32 span = duration - secondFrame;
                 factor = (f32)(frame - secondFrame) / span;
-                color1 = colorTrack->secondKeyColor;
+                color1 = colorTrack->keys[1].color;
                 color0 = colorTrack->finalColor;
             }
         }
