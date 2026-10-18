@@ -16,6 +16,9 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_action.h"
+extern u8 sndIsStreamStatusTwoOrThree(void);
+extern s8 btlChooseStartVoice(void);
+extern s8 brsTaskIsUpdateBlocked(void);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "pcp_vu0.h"
 #include "dat_state.h"
@@ -1331,9 +1334,6 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
 
 
 #include "brs_task_poll_done_api.h"
-extern u8 sndIsStreamStatusTwoOrThree(void);
-extern s8 btlChooseStartVoice(void);
-extern s8 brsTaskIsUpdateBlocked(void);
 
 /* Drive field loading or dispatch linked nodes to state 30; return 0xB while pending. */
 u32 fldStepAreaLoad(BattleSceneWork *work) {
