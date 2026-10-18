@@ -1926,7 +1926,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *action, BtlCamState *pose, BtlC
 
 extern f32 tanf(f32);
 
-void btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState *camera, s32 mask,
+s32 btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState *camera, s32 mask,
                    f32 *direction, f32 distance, f32 xOffset) {
     BtlUnit *unit;
     BtlUnit *leftActor = 0;
@@ -2066,10 +2066,10 @@ void btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
     } else {
         camera->distance = lowerDistance;
     }
-    btlAdjustCameraDirectionForDefaultPlane(camera);
+    return btlAdjustCameraDirectionForDefaultPlane(camera);
 }
 
-extern void btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32 *, f32, f32);
+extern s32 btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32 *, f32, f32);
 
 extern f32 D_00418240[4];
 

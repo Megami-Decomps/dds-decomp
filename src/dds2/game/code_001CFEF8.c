@@ -226,12 +226,12 @@ s32 btlLoadBankWhenTasksIdle(void) {
     return 0;
 }
 
-void fldMarkGridTiles(BtlState *scene) {
+u64 fldMarkGridTiles(BtlState *scene) {
     BtlRuntimeTask *tile = (BtlRuntimeTask *)fldCreateSceneTileTask(scene->background.ids.major, scene->background.ids.minor);
     tile->ownerId = 0x8000000000000001ULL;
     btlStartTask(tile);
     tile = (BtlRuntimeTask *)btlCreateFloorLoadTask(scene->background.ids.major, scene->background.ids.minor);
-    btlStartTask(tile);
+    return btlStartTask(tile);
 }
 
 s32 fldSceneStateStartTileEffect(BtlState *scene) {

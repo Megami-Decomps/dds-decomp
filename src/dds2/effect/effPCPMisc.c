@@ -4447,15 +4447,15 @@ u8 *effBeamEffectCloneLarge(src)
     return (u8 *)work;
 }
 
-void effPcpBeamLargeCreateFromTable(void *args) {
+u8 *effPcpBeamLargeCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effBeamEffectCloneLarge(param0);
+    return effBeamEffectCloneLarge(param0);
 }
 
-void effPcpRecreateLinkedBeam(EffPCPBeamLargeHead *src) {
-    effBeamEffectCloneLarge(src);
+u8 *effPcpRecreateLinkedBeam(EffPCPBeamLargeHead *src) {
+    return effBeamEffectCloneLarge(src);
 }
 
 void effPcpReleaseLinkedBeamClone(EffPCPBeamLargeWork *work) {
@@ -5002,13 +5002,13 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     return work;
 }
 
-void effPcpCreateDriftEventRingFromTable(void *data) {
+EffPCPDriftEventWork *effPcpCreateDriftEventRingFromTable(void *data) {
     void *work0;
     void *work1;
 
     work0 = effParamTableGetBlock(data, 0);
     work1 = effParamTableGetBlock(data, 1);
-    effPcpEntryWorkBCreate(work0, work1);
+    return effPcpEntryWorkBCreate(work0, work1);
 }
 
 EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
@@ -5233,7 +5233,7 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     return work;
 }
 
-void effPcpDriftCreateFromTable(void *data) {
+EffPCPPairedEventWork *effPcpDriftCreateFromTable(void *data) {
     void *work0;
     void *work1;
     void *work2;
@@ -5241,7 +5241,7 @@ void effPcpDriftCreateFromTable(void *data) {
     work0 = effParamTableGetBlock(data, 0);
     work1 = effParamTableGetBlock(data, 1);
     work2 = effParamTableGetBlock(data, 2);
-    effPcpCreateDelayedDriftEntries(work0, work1, work2);
+    return effPcpCreateDelayedDriftEntries(work0, work1, work2);
 }
 
 EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) {
@@ -5492,13 +5492,13 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     return work;
 }
 
-void effPcpSlotEffectCreateFromTable(void *data) {
+void *effPcpSlotEffectCreateFromTable(void *data) {
     void *work0;
     void *work1;
 
     work0 = effParamTableGetBlock(data, 0);
     work1 = effParamTableGetBlock(data, 1);
-    effPcpCreateDelayedEventEntries(work0, work1);
+    return effPcpCreateDelayedEventEntries(work0, work1);
 }
 
 EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
@@ -5730,7 +5730,7 @@ EffPCPMapEventWork *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *reso
     return work;
 }
 
-void effPcpEventWorkCreateFromTable(void *data) {
+EffPCPMapEventWork *effPcpEventWorkCreateFromTable(void *data) {
     void *work0;
     void *work1;
     void *work2;
@@ -5738,7 +5738,7 @@ void effPcpEventWorkCreateFromTable(void *data) {
     work0 = effParamTableGetBlock(data, 0);
     work1 = effParamTableGetBlock(data, 1);
     work2 = effParamTableGetBlock(data, 2);
-    effPcpEventWorkCreate(work0, work1, work2);
+    return effPcpEventWorkCreate(work0, work1, work2);
 }
 
 

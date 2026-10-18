@@ -130,10 +130,10 @@ void frFontSubmitAndFreeGlyphOwner(void *owner) {
     sdfReleaseChipBlock(node);
 }
 
-void frFontDrawOwnedGlyph(void *owner) {
+s32 frFontDrawOwnedGlyph(void *owner) {
     Dds3FontNode *node = owner;
 
-    frFontDrawGlyphInDefaultMode(node->glyph);
+    return frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {

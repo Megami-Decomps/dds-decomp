@@ -63,7 +63,7 @@ void dds3UpdateLinkedNodes(void);
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text);
 void itfConfigureOwnedGlyphChainFlag(Dds3FontNode *node, u8 value);
 void frFontSubmitAndFreeGlyphOwner(void *owner);
-void frFontDrawOwnedGlyph(void *owner);
+s32 frFontDrawOwnedGlyph(void *owner);
 void frFontReleaseOwnerStorage(void *owner);
 
 typedef char Dds3IntrusiveNodeSizeCheck[sizeof(Dds3IntrusiveNode) == 0x10 ? 1 : -1];

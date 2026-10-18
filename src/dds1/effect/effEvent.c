@@ -1967,11 +1967,11 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
 }
 
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
-void effEventParticleSetCreateFromTable(void *data) {
+EffChanWork *effEventParticleSetCreateFromTable(void *data) {
     void *block0 = effParamTableGetBlock(data, 0);
     void *block1 = effParamTableGetBlock(data, 1);
 
-    effEventCreateChannelFromParams(block0, effParamTableGetWord2(data, 1), block1);
+    return effEventCreateChannelFromParams(block0, effParamTableGetWord2(data, 1), block1);
 }
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB068);

@@ -1490,9 +1490,9 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
 }
 
 /* Create radius-damped ring work from its parameter and resource table blocks. */
-void effScatterSpawnFromParameterPair(void *parameterTable)
+PcpScatterInstanceB *effScatterSpawnFromParameterPair(void *parameterTable)
 {
-    effScatterCreateDampedRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effScatterCreateDampedRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
 
 /* Return freshly initialized radius-damped ring work sharing the source resource. */
@@ -1780,9 +1780,9 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
 }
 
 /* Create two-color ring work from its parameter and resource table blocks. */
-void effScatterCreateFromParameterTable(void *parameterTable)
+PcpScatterInstanceC *effScatterCreateFromParameterTable(void *parameterTable)
 {
-    effScatterCreateTwoColorRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effScatterCreateTwoColorRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
 
 /* Return freshly initialized two-color ring work sharing the source resource. */

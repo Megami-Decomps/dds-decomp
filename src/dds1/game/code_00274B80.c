@@ -817,21 +817,21 @@ s32 mnuStaffCloseSelectionState(KwlnTask *task) {
 }
 
 /* Open selection work in staff-view mode; the task argument is forwarded unchanged. */
-void mnuOpenStaffSelectionEntry(u32 context) {
-    mnuInitializeStaffSelectionState(context, 1);
+s32 mnuOpenStaffSelectionEntry(u32 context) {
+    return mnuInitializeStaffSelectionState(context, 1);
 }
 
-void mnuFinishStaffSelectionEntry(KwlnTask *task) {
-    mnuStaffCloseSelectionState(task);
+s32 mnuFinishStaffSelectionEntry(KwlnTask *task) {
+    return mnuStaffCloseSelectionState(task);
 }
 
 /* Open the same selection work in party-view mode. */
-void mnuOpenPartySelectionEntry(u32 context) {
-    mnuInitializeStaffSelectionState(context, 0);
+s32 mnuOpenPartySelectionEntry(u32 context) {
+    return mnuInitializeStaffSelectionState(context, 0);
 }
 
-void mnuFinishPartySelectionEntry(KwlnTask *task) {
-    mnuStaffCloseSelectionState(task);
+s32 mnuFinishPartySelectionEntry(KwlnTask *task) {
+    return mnuStaffCloseSelectionState(task);
 }
 
 /* Update the popup first; accept confirm/cancel only while its state is zero.

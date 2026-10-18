@@ -414,13 +414,13 @@ u32 mnuCreateSelectState(u32 unused, s32 staffView);
 
 s32 mnuStaffCloseSelectionState(void);
 
-void mnuOpenStaffSelectionEntry(u32 context);
+u32 mnuOpenStaffSelectionEntry(u32 context);
 
-void mnuFinishStaffSelectionEntry(void);
+s32 mnuFinishStaffSelectionEntry(void);
 
-void mnuOpenPartySelectionEntry(u32 context);
+u32 mnuOpenPartySelectionEntry(u32 context);
 
-void mnuFinishPartySelectionEntry(void);
+s32 mnuFinishPartySelectionEntry(void);
 
 /* Update the popup first; accept confirm/cancel only while its state is zero.
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
