@@ -13,7 +13,11 @@
 #include "mdl_flag_api.h"
 #include "prf_profile_cap.h"
 #include "prf_requirement_fallback.h"
+#include "common.h"
+#include "sdf_trig.h"
+#include "snd_sequence_volume_pan.h"
 
+extern u32 *mnuGetSelectedNodeValue(void);
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
 #define MNU_SCENE_SHADE_FRAME_SCALE 10.0f
@@ -197,14 +201,13 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
 }
 
 /* Release a nonnull grid-cell payload; the cell index is unused. */
-void mnuFreeTaskData(u32 unused, u32 taskData) {
+s32 mnuFreeTaskData(u32 unused, u32 taskData) {
     if (taskData != 0) {
         sdfReleaseChipBlock((void *)taskData);
     }
 }
 
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
-extern u32 mnuGetSelectedNodeValue(void);
 extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 extern void *memcpy(void *, const void *, u32);
@@ -262,7 +265,6 @@ extern DspMantraName *D_003BAA78;
 extern const s32 D_003AF840[];
 extern const s32 D_003AF850[];
 extern void *memcpy(void *, const void *, u32);
-extern u32 mnuGetSelectedNodeValue(void);
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
@@ -326,6 +328,8 @@ void mnuReleaseSceneContext(s32 unused, MenuSceneWork *scene) {
     mnuReleaseDisplayListNodes(&scene->sceneTransitionList);
     sdfReleaseResourceAllocation(scene->allocation);
     mnuResetWorkFloats();
+    /* Post-final-call exception: retail keeps jal + epilogue; this clear survives 01.sibling..11.cfg and is deleted in 13.life (cc1probe trace). */
+    scene = NULL; /* the scene work was released above */
 }
 
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF810);
@@ -578,9 +582,13 @@ void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 selecti
 
 /* Recreate the scene's selection grid and copy its resulting coordinates. */
 void mnuReinitializeSceneGrid(s32 sceneAddress) {
-    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
+    SdfGrid *oldGrid = ((MenuSceneWork *)sceneAddress)->gridHandle;
+
+    sdfDestroyGridWork(oldGrid);
     mnuInitializeMantraSelectionGrid((MenuSceneWork *)(u32)sceneAddress);
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
+    /* Post-final-call exception: retail keeps jal + epilogue; this clear survives 01.sibling..11.cfg and is deleted in 13.life (cc1probe trace). */
+    oldGrid = NULL; /* handle released by the first call */
 }
 
 extern void sdfGridClear(SdfGrid *grid);
@@ -589,7 +597,7 @@ extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
 extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *grid);
 
 
-void mnuRestoreMantraGridSelection(MenuSceneWork *work) {
+s32 mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     SdfGrid *grid = work->gridHandle;
     SdfGridCell *cursor = grid->cursor;
     MnuMantraGridEntry *selected = (MnuMantraGridEntry *)(u32)cursor->value;
@@ -621,7 +629,6 @@ MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
 }
 
 extern s32 evtCreateMessageWindowIfMissing(s32);
-extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);
 
 s32 mnuBeginMantraProfileSelection(void) {
@@ -645,6 +652,7 @@ extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    struct MenuProgressHost *effect;
 
     scene->messageShadeFrames = 0;
     if (scene->pendingProfileId != 0) {
@@ -662,7 +670,10 @@ void mnuFinishMantraProfileSelection(void) {
     }
 
     evtFinishMessageWindowAndNotify();
-    mnuReleaseMenuVisualWorkResources(scene->attachedEffect);
+    effect = scene->attachedEffect;
+    mnuReleaseMenuVisualWorkResources(effect);
+    /* Post-final-call exception: retail keeps jal + epilogue; this clear survives 01.sibling..11.cfg and is deleted in 13.life (cc1probe trace). */
+    effect = NULL; /* handle released by the call above */
 }
 
 extern s8 D_00324510[];
@@ -774,7 +785,6 @@ s32 mnuUpdateMantraSceneState(void) {
     return 0;
 }
 
-extern u32 mnuGetSelectedNodeValue(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
@@ -841,9 +851,383 @@ s32 fldResetSceneState(void) {
 /* Update and copy scene coordinates before releasing its node list; retain the native call order. */
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     s32 sceneAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    MnuSceneListHead *nodes;
     mnuUpdateMantraSelectionPositions((MenuSceneWork *)(u32)sceneAddress, 1);
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
-    mnuReleaseListNodes(
-        &((MenuSceneWork *)(u32)sceneAddress)->costTransitionList);
+    nodes = &((MenuSceneWork *)(u32)sceneAddress)->costTransitionList;
+    mnuReleaseListNodes(nodes);
+    /* Post-final-call exception: retail keeps jal + epilogue; this clear survives 01.sibling..11.cfg and is deleted in 13.life (cc1probe trace). */
+    nodes = NULL; /* list released by the call above */
 }
+
+
+extern void mnuStopResourceAnimation(void);
+extern void mnuResetResourceAnimation(void);
+extern s32 mnuRestoreMantraGridSelection(MenuSceneWork *work);
+
+void mnuBeginTransitionAlt(MenuSceneWork *work, s32 mode) {
+    MnuSceneListNode *transition = mnuAppendNodeToDisplayList(&work->costTransitionList);
+
+    if (transition != NULL) {
+        if (work->transitionBlendCounter >= 6) {
+            mnuStopResourceAnimation();
+            mnuRestoreMantraGridSelection(work);
+        } else if (work->transitionBlendCounter < -5) {
+            mnuResetResourceAnimation();
+            mnuRestoreMantraGridSelection(work);
+        }
+        transition->payload.transition.mode = mode;
+        if (mode == 1) {
+            work->transitionBlendCounter = 10;
+            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
+            mnuStopResourceAnimation();
+            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
+            mnuResetResourceAnimation();
+            return;
+        }
+        if (mode == 2) {
+            work->transitionBlendCounter = -10;
+            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
+            mnuResetResourceAnimation();
+            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
+            mnuStopResourceAnimation();
+        }
+    }
+}
+
+
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
+/* Shared draw-callback helper: the retail draw wrappers reach the placed-sprite
+ * provider through an operation callback and keep `jal` + epilogue tails. */
+static inline void mnuDrawPlacedSpriteVia(void (*draw)(s32, s32, s32, s32, s32, s32), s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
+    draw(x, y, z, alpha, placementIndex, context);
+}
+extern TaskWork *mnuSceneResourceContext;
+extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
+extern void mnuDrawMantraProfileSelectionSurface(s32, s32, s32, s32, MenuSceneWork *, s32);
+extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
+extern void mnuDrawMantraScenePlacementSprite(s32, s32, s32, s32, s32);
+
+typedef struct {
+    u8 pad00[0x38];
+    s32 shade; /* 0x38 */
+} DspEffectShade;
+
+typedef struct {
+    u8 pad00[0x828];
+    DspEffectShade *shade; /* 0x828 */
+} DspEffectRoot;
+
+typedef struct {
+    u8 pad00[0x1C];
+    s32 phase;
+    s32 frame;
+    DspEffectRoot *effectRoot; /* 0x24 */
+} DspTableScene;
+
+extern s8 D_00324510[64];
+extern void mnuStopResourceAnimation(void);
+extern void mnuResetResourceAnimation(void);
+extern s32 mnuRestoreMantraGridSelection(MenuSceneWork *);
+extern s32 mnuScheduleUnlockedMantraMessages(MenuSceneWork *);
+extern void mnuUpdateMantraSelectionCursorPosition(MenuSceneWork *);
+extern void mnuBeginTransitionAlt(MenuSceneWork *, s32);
+extern SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *);
+extern SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *);
+extern s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *);
+extern s32 mnuSelectMantraGridRightNeighbor(SdfGrid *);
+extern u8 D_0036B410[17][15];
+extern s32 mnuSelectMantraGridLeftCell(SdfGrid *, s32, s32, u32);
+extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
+extern s32 mnuSelectMantraGridRightCell(SdfGrid *, s32, s32, u32);
+extern SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *);
+extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
+extern SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *);
+
+s32 mnuHandleMantraSceneInput(void) {
+    DspTableScene *host;
+    MenuSceneWork *work;
+    s32 feedback = 0;
+    u32 direction;
+
+    host = (DspTableScene *)sdfGetTaskValueByKey(mnuSceneResourceContext,
+        SDF_TASK_VALUE_USER_DATA_KEY);
+    work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    switch (host->phase) {
+    case 0:
+        if (host->frame < 10) {
+            host->frame++;
+        } else {
+            host->phase = 1;
+            host->frame = 0;
+        }
+        return 0;
+    case 2:
+        if (host->frame < 10) {
+            host->frame++;
+            return 0;
+        }
+        host->frame = 0;
+        host->phase = 0;
+        sdfSetTaskItemMode(mnuSceneResourceContext, 1, 1);
+        return -1;
+    case 1:
+        if (work->unk52C != 0) {
+            host->phase = 2;
+            host->frame = 0;
+            work->pendingPhase13 = 1;
+            work->scenePhase = 10;
+            return 0;
+        }
+        if (work->transitionBlendCounter > 0) {
+            work->transitionBlendCounter--;
+            if (work->transitionBlendCounter == 5) {
+                mnuStopResourceAnimation();
+                mnuRestoreMantraGridSelection(work);
+                work->unk52C = mnuScheduleUnlockedMantraMessages(work);
+                if (work->unk52C != 0) {
+                    work->transitionBlendCounter = 0;
+                }
+            }
+        } else if (work->transitionBlendCounter < 0) {
+            work->transitionBlendCounter++;
+            if (work->transitionBlendCounter == -5) {
+                mnuResetResourceAnimation();
+                mnuRestoreMantraGridSelection(work);
+                work->unk52C = mnuScheduleUnlockedMantraMessages(work);
+                if (work->unk52C != 0) {
+                    work->transitionBlendCounter = 0;
+                }
+            }
+        }
+        break;
+    }
+    mnuUpdateMantraSelectionCursorPosition(work);
+    if (D_00324510[0x26] != 0) {
+        work->cursorInputMask = 0x80;
+    } else if (D_00324510[0x27] != 0) {
+        work->cursorInputMask = 0x40;
+    } else if (D_00324510[0x24] != 0) {
+        work->cursorInputMask = 0x20;
+    } else if (D_00324510[0x25] != 0) {
+        work->cursorInputMask = 0x10;
+    } else {
+        work->cursorInputMask = 0;
+    }
+    direction = work->cursorInputMask;
+    if (work->cursorMoving == 0) {
+        if ((D_00324510[0x26] & 2) && (direction & 0x80)) {
+            if (sdfGridCursorUpToFilledCell(work->gridHandle) != NULL) {
+                feedback = 1;
+            }
+        } else if ((D_00324510[0x27] & 2) && (direction & 0x40)) {
+            if (sdfGridCursorDownToFilledCell(work->gridHandle) != NULL) {
+                feedback = 1;
+            }
+        } else if ((D_00324510[0x24] & 2) && (direction & 0x20)) {
+            if (mnuSelectMantraGridLeftNeighbor(work->gridHandle) != 0) {
+                feedback = 1;
+            }
+        } else if ((D_00324510[0x25] & 2) && (direction & 0x10)) {
+            if (mnuSelectMantraGridRightNeighbor(work->gridHandle) != 0) {
+                feedback = 1;
+            }
+        } else if (D_00324510[0x28] < 0) {
+            mnuBeginTransitionAlt(work, 1);
+            feedback = 4;
+        } else if (D_00324510[0x2A] < 0) {
+            mnuBeginTransitionAlt(work, 2);
+            feedback = 4;
+        }
+    }
+    if ((D_00324510[0x23] < 0 || D_00324510[0x20] < 0 ||
+        D_00324510[0x21] < 0) && work->transitionBlendCounter == 0) {
+        host->frame = 0;
+        host->phase = 2;
+        feedback = 3;
+    }
+    if (feedback != 0) {
+        switch (feedback) {
+        case 1:
+            sndSetSequenceVolumePan(2, 127, 63);
+            break;
+        case 2:
+            sndSetSequenceVolumePan(8, 127, 63);
+            break;
+        case 3:
+            sndSetSequenceVolumePan(10, 127, 63);
+            break;
+        case 4:
+            sndSetSequenceVolumePan(4, 127, 63);
+            break;
+        }
+    }
+    return 0;
+}
+
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
+
+void mnuDrawPanelWithPackedColorPattern(s32 x, s32 y, s32 width, s32 fade, s32 t0) {
+    u32 arr[4];
+    s32 v;
+
+    v = (s32)(((f32)(fade << 4)) * 0.0078125f);
+    v |= 0x0A050700;
+    arr[0] = v;
+    arr[1] = v;
+    arr[2] = v;
+    arr[3] = v;
+    y += 0x32;
+    y *= 8;
+    uiDrawGradientColorRect(x * 16, y, width, 0x2000, 0xC70, arr, t0);
+}
+
+/* Fill-level dispatch: direct, inverted, or sin-pulsed, then the shared layers. */
+s32 mnuDrawMantraCostTransition(void) {
+    s32 nodePrev;
+    s32 nodeNext;
+    MenuSceneWork *scene;
+    s32 level;
+    s32 scaled;
+    s32 raw;
+    f32 frac;
+    u32 *cost;
+
+    frac = 0.0f;
+    mnuGetSelectedNodeValue();
+    nodePrev = sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    nodeNext = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    scene = (MenuSceneWork *)(u32)nodeNext;
+    mnuDrawMantraSparkScene((MenuSceneMetadata *)nodePrev, 0x80, 0x52);
+    level = *(s32 *)(nodePrev + 0x1C);
+    switch (level) {
+    case 0:
+        frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
+        scaled = (s32)(frac * 128.0f);
+        mnuDrawScaledPlacedSprite(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
+        mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
+        mnuDrawMantraProfileSelectionSurface(0, 0, 1, scaled, scene, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 0x80, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scaled, 0x5B, 0x53);
+        cost = mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, scaled, 0xB, 0x53);
+        break;
+    case 2:
+        frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
+        frac = 1.0f - frac;
+        scaled = (s32)(frac * 128.0f);
+        mnuDrawScaledPlacedSprite(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
+        mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
+        mnuDrawMantraProfileSelectionSurface(0, 0, 1, scaled, scene, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 0, 0x80, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scaled, 0x5B, 0x53);
+        cost = mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, scaled, 0xB, 0x53);
+        break;
+    case 1:
+        /* frac keeps its 0.0f initializer when raw == 0. */
+        raw = scene->transitionBlendCounter;
+        if (raw > 0) {
+            frac = (f32)raw / 10.0f;
+        } else if (raw < 0) {
+            frac = (f32)(-raw) / 10.0f;
+        }
+        frac = 1.0f - sdfSinPoly(frac * 3.14159265f);
+        mnuDrawScaledPlacedSprite(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
+        mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
+        mnuDrawMantraProfileSelectionSurface(0, 0, 1, (s32)(frac * 128.0f), scene, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 0x80, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xF, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0x5B, 0x53);
+        cost = mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, 0x80, 0x53);
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0x20, 0, 0, 0x80, 0xB, 0x53);
+        break;
+    default:
+        break;
+    }
+    mnuChooseDisplaySpriteKindFromEntryFlags(scene, 0x80, 0x53);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, 0x80, 0xD, 0x53);
+    return 0;
+}
+
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawDisplaySpriteAndPanelMarks);
+
+/* Three sprite layers drawn at the origin for one draw context. */
+void mnuDrawMantraSceneSpriteSequence(s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x4F, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0xC, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0xD, context);
+}
+
+void mnuDrawMantraScenePlacementSprite(s32 x, s32 y, s32 z, s32 drawContext, s32 drawArgument) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, drawContext, 14, drawArgument);
+}
+
+void mnuDrawMantraSceneSpriteGroup(s32 x, s32 y, s32 z, s32 alpha, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, 0x47, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, 0x48, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, 0x49, context);
+}
+
+typedef struct {
+    s8 spriteIndices[7];
+} DspUnitSpriteTable;
+
+
+typedef struct {
+    u8 pad00[4];
+    u16 unitId; /* 0x4 */
+} DspTablePartyRecord;
+
+typedef struct {
+    DspTablePartyRecord *partyRecord; /* 0x0 */
+    s32 profileId;                    /* 0x4: index into the 19-byte mantra-name rows */
+} DspTableProgress;
+
+typedef struct {
+    u8 pad00[0x1C];
+    struct { u8 pad00[0x70]; DspTableProgress *progress; } *selectedNode; /* 0x1C */
+    u8 pad20[0x10];
+    s32 *selectedValue; /* 0x30 */
+} DspTableUnit;
+
+typedef struct {
+    u8 pad00[0xC];
+    DspTableUnit *unit; /* 0xC */
+} DspTableWindowContext;
+
+
+extern DspUnitSpriteTable D_003BC440[];
+extern DspMantraName *D_003BAA78;
+extern void *memset(void *, s32, u32);
+extern u32 strlen(const char *);
+extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
+
+/* Draw the selected mantra's display: sprite, fade-driven effect and its name (shifted left for long names). */
+void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindowContext *windowContext, s32 drawContext) {
+    DspUnitSpriteTable sprites = D_003BC440[0];
+    DspTableUnit *unit = windowContext->unit;
+    s32 *selectedValue = unit->selectedValue;
+    DspTableProgress *progress = unit->selectedNode->progress;
+    DspTableScene *scene = (DspTableScene *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    u8 scratch[0x20];
+
+    selectedValue[1] = alpha;
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, sprites.spriteIndices[progress->partyRecord->unitId] + 0x4A, drawContext);
+    scene->effectRoot->shade->shade = (s32)((f32)(alpha << 8) * 0.0078125f);
+    effUpdateAttached(0xD80, 0xC30, 1, scene->effectRoot, 0x53);
+    memset(scratch, 0, sizeof(scratch));
+    if (strlen((const char *)(D_003BAA78 + progress->profileId)) >= 5) {
+        frFontQueueTextAndOptionallyMeasure(x + 0xEF, y + 0x15E, z, alpha | 0xA09DC300, 0, D_003BAA78 + progress->profileId, 0x80000000, drawContext);
+    } else {
+        frFontQueueTextAndOptionallyMeasure(x + 0xF8, y + 0x15E, z, alpha | 0xA09DC300, 0, D_003BAA78 + progress->profileId, 0x80000000, drawContext);
+    }
+}
+
+INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC440);
 

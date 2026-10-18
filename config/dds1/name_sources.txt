@@ -4688,7 +4688,7 @@
 0x00253CF8	mnuCopySceneCoordinatesAndReleaseNodeList	inferred	Copies scene coordinates and releases temporary list nodes. [names_reviewed16.tsv]
 0x00253D40	mnuBeginTransitionAlt	inferred	twin of func_00250A48 for the second list
 0x00254218	mnuDrawPanelWithPackedColorPattern	inferred	Builds a repeated packed color pattern and draws its panel rectangle. [names_reviewed16.tsv]
-0x00254288	mnuDrawMantraCostTransition	inferred	confidence=high; src/dds1/game/code_00253E58.c:func_00254288; Draws the Mantra cost and surrounding panel with state-dependent fade or pulse scaling. [names_qp9.tsv]
+0x00254288	mnuDrawMantraCostTransition	inferred	confidence=high; src/dds1/game/code_00250E88.c:func_00254288; Draws the Mantra cost and surrounding panel with state-dependent fade or pulse scaling. [names_qp9.tsv]
 0x00254680	mnuDrawDisplaySpriteAndPanelMarks	inferred	Submits a display sprite then draws its aligned panel marks. [names_reviewed16.tsv]
 0x002549F0	mnuDrawDisplayModeSprites	inferred	confidence=high; matched-C; src/dds1/game/code_002549F0.c:17:func_002549F0; Peer-matched C proposal; P7; source=names_pending_main.tsv:139 [names_qp12_apply.tsv]
 0x00254B30	itfDspDrawSelectionStrip	inferred	queued
