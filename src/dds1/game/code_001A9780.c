@@ -1884,7 +1884,11 @@ typedef struct BtlAnalysisPanelWork {
     s32 x;
     s32 y;
     s8 page;
-    u8 pad31[0x6F];
+    u8 pad31[0xF];
+    f32 anchor[4];
+    f32 corners[4][4];
+    s16 edgeAlpha;
+    u8 pad92[0xE];
 } BtlAnalysisPanelWork;
 
 extern s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *);
@@ -3042,17 +3046,107 @@ void func_001AF058(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AF5D0);
+extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitViewParamPacket(f32, f32, f32, f32, f32, f32, u32, u32);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2490);
+/* Draw the analysis silhouette with a mirrored five-level color ramp.
+ * Continues Deep Quasar, Iron Nebula, PiM, Cedar Spark and Luna. */
+void func_001AF5D0(BtlLinkedCommand *unused, BtlAnalysisPanelWork *work) {
+    u32 depths[5];
+    /* Inferred bounds keep the independent literal-copy alias sets distinct. */
+    s16 deltas[] = {0, 3, 3, 4, 4, 5, 5, 8};
+    s16 levels0[] = {0, 0, 1, 1, 0, 1, 1, 1, 2, 2, 1, 2, 2, 2, 3, 3, 2, 3, 3, 3, 4, 4, 3, 4};
+    s16 levels1[] = {0, 1, 0, 0, 1, 1, 1, 2, 1, 1, 2, 2, 2, 3, 2, 2, 3, 3, 3, 4, 3, 3, 4, 4};
+    s16 levels2[] = {1, 0, 0, 1, 0, 1, 2, 1, 1, 2, 1, 2, 3, 2, 2, 3, 2, 3, 4, 3, 3, 4, 3, 4};
+    s16 levels3[] = {0, 1, 1, 0, 1, 0, 1, 2, 2, 1, 2, 1, 2, 3, 3, 2, 3, 2, 3, 4, 4, 3, 4, 3};
+    u32 *level = depths;
+    s32 i;
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A24A0);
+    depths[4] = depths[0] = work->edgeAlpha >> 4;
+    depths[3] = depths[1] = work->edgeAlpha >> 1;
+    depths[2] = depths[1] + (depths[1] >> 1) + (depths[1] >> 2);
+    for (i = 4; i >= 0; i--) {
+        *level++ <<= 24;
+    }
+    depths[0] |= 0x50641C;
+    depths[1] |= 0x50944C;
+    depths[2] |= 0x60A45C;
+    depths[3] |= 0x50944C;
+    depths[4] |= 0x50641C;
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A24D0);
+    if (work->page < 8) {
+        if (work->page >= 0) {
+            evtSetDrawSurfaceIndex(0x53);
+            evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+            evtSubmitViewParamPacket(246.0f, 224.0f, 16711680.0f,
+                266.0f, 224.0f, 16711680.0f, depths[1], depths[1]);
+            evtSubmitViewParamPacket(256.0f, 216.0f, 16711680.0f,
+                256.0f, 232.0f, 16711680.0f, depths[1], depths[1]);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2500);
+            for (i = 0; i < 4; i++) {
+                if (work->anchor[1] < work->corners[0][1]) {
+                    evtSubmitGradientTriangle(
+                        work->anchor[0] + deltas[2 * i], work->anchor[1] + deltas[2 * i],
+                        work->corners[0][0] + deltas[2 * i], work->corners[0][1] - deltas[2 * i],
+                        work->anchor[0] + deltas[2 * i + 1], work->anchor[1] + deltas[2 * i + 1],
+                        depths[levels0[6 * i]], depths[levels0[6 * i + 1]], depths[levels0[6 * i + 2]]);
+                    evtSubmitGradientTriangle(
+                        work->anchor[0] + deltas[2 * i + 1], work->anchor[1] + deltas[2 * i + 1],
+                        work->corners[0][0] + deltas[2 * i], work->corners[0][1] - deltas[2 * i],
+                        work->corners[0][0] + deltas[2 * i + 1], work->corners[0][1] - deltas[2 * i + 1],
+                        depths[levels0[6 * i + 3]], depths[levels0[6 * i + 4]], depths[levels0[6 * i + 5]]);
+                }
+            }
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2530);
+            for (i = 0; i < 4; i++) {
+                if (work->corners[3][0] < work->corners[1][0]) {
+                    evtSubmitGradientTriangle(
+                        work->corners[3][0] + deltas[2 * i], work->corners[3][1] + deltas[2 * i],
+                        work->corners[3][0] + deltas[2 * i + 1], work->corners[3][1] + deltas[2 * i + 1],
+                        work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
+                        depths[levels1[6 * i]], depths[levels1[6 * i + 1]], depths[levels1[6 * i + 2]]);
+                    evtSubmitGradientTriangle(
+                        work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
+                        work->corners[3][0] + deltas[2 * i + 1], work->corners[3][1] + deltas[2 * i + 1],
+                        work->corners[1][0] - deltas[2 * i + 1], work->corners[1][1] + deltas[2 * i + 1],
+                        depths[levels1[6 * i + 3]], depths[levels1[6 * i + 4]], depths[levels1[6 * i + 5]]);
+                }
+            }
+
+            for (i = 0; i < 4; i++) {
+                if (work->corners[0][0] < work->corners[2][0]) {
+                    evtSubmitGradientTriangle(
+                        work->corners[0][0] + deltas[2 * i + 1], work->corners[0][1] - deltas[2 * i + 1],
+                        work->corners[0][0] + deltas[2 * i], work->corners[0][1] - deltas[2 * i],
+                        work->corners[2][0] - deltas[2 * i], work->corners[2][1] - deltas[2 * i],
+                        depths[levels2[6 * i]], depths[levels2[6 * i + 1]], depths[levels2[6 * i + 2]]);
+                    evtSubmitGradientTriangle(
+                        work->corners[0][0] + deltas[2 * i + 1], work->corners[0][1] - deltas[2 * i + 1],
+                        work->corners[2][0] - deltas[2 * i], work->corners[2][1] - deltas[2 * i],
+                        work->corners[2][0] - deltas[2 * i + 1], work->corners[2][1] - deltas[2 * i + 1],
+                        depths[levels2[6 * i + 3]], depths[levels2[6 * i + 4]], depths[levels2[6 * i + 5]]);
+                }
+            }
+
+            for (i = 0; i < 4; i++) {
+                if (work->corners[1][1] < work->corners[2][1]) {
+                    evtSubmitGradientTriangle(
+                        work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
+                        work->corners[1][0] - deltas[2 * i + 1], work->corners[1][1] + deltas[2 * i + 1],
+                        work->corners[2][0] - deltas[2 * i + 1], work->corners[2][1] - deltas[2 * i + 1],
+                        depths[levels3[6 * i]], depths[levels3[6 * i + 1]], depths[levels3[6 * i + 2]]);
+                    evtSubmitGradientTriangle(
+                        work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
+                        work->corners[2][0] - deltas[2 * i + 1], work->corners[2][1] - deltas[2 * i + 1],
+                        work->corners[2][0] - deltas[2 * i], work->corners[2][1] - deltas[2 * i],
+                        depths[levels3[6 * i + 3]], depths[levels3[6 * i + 4]], depths[levels3[6 * i + 5]]);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001AFF78);
 

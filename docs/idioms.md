@@ -14,6 +14,7 @@ the [decision atlas](compiler-decision-atlas.md), then use the relevant idiom:
 | --- | --- |
 | Same FPU instructions, different motion around `abs.s` | [Helper versus builtin](#absolute-values-ffabsf-versus-builtin-fabsf), with the kernel exception |
 | Indexed field constants or row-base copies differ | [Nested record and array addressing](#indexed-field-offsets-expose-nested-records-and-coordinate-arrays), pass 00 |
+| Independent literal copies reorder | [Inferred array bounds](#inferred-array-bounds-and-literal-copy-alias-sets), pass 00 and sched1 |
 | A store/reload crosses another memory access | [Declared types](#declared-types-change-scheduling-dependencies-alias-sets-readonly) and [union access](#access-through-a-union-versus-its-actual-member-type) |
 | Constants stay inside a retail loop | [Loop entry](#loops-that-loopc-never-optimises-a-branch-from-outside-into-the-test), [phony loops](#leading-exits-can-make-loopc-report-a-loop-as-phony), or [cost thresholds](#an-optimised-loop-can-still-retain-invariant-constants), pass 09 |
 | Two independent instructions are exchanged | [Actual scheduler comparator](#use-the-actual-gcc-296-comparator), including sched1 register weight |
@@ -2781,6 +2782,29 @@ retail image, since focused checks can mask local-literal relocations.
 
 Only fix types the data really has (rodata placement, a bitfield the code
 tests bit-by-bit). Adding views to steer alias sets is the lever above.
+
+### Inferred array bounds and literal-copy alias sets
+
+In the cases below, completing an inferred bound (`s32 origin[] = {x, y}`) produced distinct aggregate alias sets in the pinned EE GCC 2.96's stock RTL, while the corresponding fixed-bound controls (`s32 origin[2]`) shared sets. All arrays have their real, fully determined extent and element type. This observation does not establish a universal compiler type-node rule or a special C alias guarantee.
+
+For these opaque block-copy RTL operations, a shared alias set introduced a conservative output dependency between independent stack copies. The inferred-bound initializer forms allowed the stock scheduler to order those real copies independently. In these cases, replacing `memcpy` with automatic literal initialization also produced nonzero copy alias sets and source-owned literal data. Verify the actual source semantics, owner data and compiler decisions; do not introduce unrelated nominal structs to manufacture disjointness. Exact matching does not establish a unique historical source spelling.
+
+Verified examples:
+
+- DDS1 party command panel: the original `memcpy` candidate had 10/391 target text words differing. The fixed-bound automatic-initializer control had 65/391; inferring the page-origin bound made all 1,564 bytes exact.
+- DDS1 party status panel: inferred frame/page bounds with fixed icon/bar bounds produced four distinct copy sets and matched all 1,260 bytes. Fixing the frame bound gave 44/315 target text differences; fixing the page bound gave 50/315.
+- DDS1/DDS2 analysis silhouette renderers: the previous `memcpy` candidates had 81/617 target text words differing. The DDS1 fixed-bound flat-initializer control gave 120/617; the corresponding five inferred `s16[]` arrays reduced that to 5/617. The final source assigns the same `edgeAlpha >> 4` value to the two outer palette entries and the same `edgeAlpha >> 1` value to the two inner entries, with a separately calculated center. Ordinary paired-endpoint assignments express that genuine palette symmetry and close the remaining store schedule. Both 2,468-byte functions match; this is not a general prescription for adding assignment chains to influence register sharing.
+
+The control counts above describe target text residuals. Some fixed-bound controls also displaced literal data, so their complete gate totals include data differences.
+
+Evidence includes stock pass-00, sched1 and sched2 dumps, explicit-bound controls, ordinary-versus-probe object parity, complete owner gates and both full retail checksums. The conclusions are bounded to these verified cases and the pinned compiler.
+
+Source checkpoints: [DDS1 command panel](https://github.com/Megami-Decomps/dds-decomp/commit/8d59be0e86882333a5681c33bf01a674bd6cb413),
+[DDS1 status panel](https://github.com/Megami-Decomps/dds-decomp/commit/f8212ca32dab23844ea8415182200d7a7efc1681),
+and the [DDS1](https://github.com/Megami-Decomps/dds-decomp/commit/17f71374a143986652d3b2b623b0bf54895b7cdb)
+and [DDS2](https://github.com/Megami-Decomps/dds-decomp/commit/0439d820e57f0659f90fc14f06abfd69c8b0a551)
+analysis renderers. These continue the reconstruction work of Son3, Son4,
+Deep Quasar, Iron Nebula, PiM, Cedar Spark and Luna.
 
 ### Access through a union versus its actual member type
 
