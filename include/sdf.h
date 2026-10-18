@@ -779,10 +779,11 @@ typedef struct SdfColorTrack {
     u8 pad01[3];
     u32 initialColor;
     u32 finalColor;
-    u32 firstKeyColor;
-    f32 firstFraction;
-    u32 secondKeyColor;
-    f32 secondFraction;
+    /* The editor selects either intermediate key with an eight-byte stride. */
+    struct {
+        u32 color;
+        f32 fraction;
+    } keys[2];
     u8 pad1C[8];
 } SdfColorTrack;
 
@@ -817,14 +818,15 @@ typedef struct SdfFlagListWork {
     SdfMemBlock *allocation;
 } SdfFlagListWork;
 
+typedef char SdfColorTrack_key_stride_must_be_8[(sizeof(((SdfColorTrack *)0)->keys[0]) == 8) ? 1 : -1];
 typedef char SdfColorTrack_size_must_be_0x24[(sizeof(SdfColorTrack) == 0x24) ? 1 : -1];
 typedef char SdfColorTrack_fields_offset[((unsigned long)&((SdfColorTrack *)0)->segmentMode == 0x00 &&
                                           (unsigned long)&((SdfColorTrack *)0)->initialColor == 0x04 &&
                                           (unsigned long)&((SdfColorTrack *)0)->finalColor == 0x08 &&
-                                          (unsigned long)&((SdfColorTrack *)0)->firstKeyColor == 0x0C &&
-                                          (unsigned long)&((SdfColorTrack *)0)->firstFraction == 0x10 &&
-                                          (unsigned long)&((SdfColorTrack *)0)->secondKeyColor == 0x14 &&
-                                          (unsigned long)&((SdfColorTrack *)0)->secondFraction == 0x18) ? 1 : -1];
+                                          (unsigned long)&((SdfColorTrack *)0)->keys[0].color == 0x0C &&
+                                          (unsigned long)&((SdfColorTrack *)0)->keys[0].fraction == 0x10 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->keys[1].color == 0x14 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->keys[1].fraction == 0x18) ? 1 : -1];
 typedef char SdfAlphaTrack_size_must_be_0x10[(sizeof(SdfAlphaTrack) == 0x10) ? 1 : -1];
 typedef char SdfAlphaTrack_fields_offset[((unsigned long)&((SdfAlphaTrack *)0)->alpha == 0x00 &&
                                           (unsigned long)&((SdfAlphaTrack *)0)->surfaceIndex == 0x04 &&

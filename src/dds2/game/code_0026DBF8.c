@@ -6112,7 +6112,231 @@ u32 mnuDrawMantraPanelAccentSprites(u32 ctx, u32 x, u32 y, u32 direction, u32 un
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraPanelAccentTransition);
+s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+                  MantraPanelAnimation *panel, u32 packet) {
+    u8 ids[4] = {99, 97, 98, 100};
+    s8 offsets[2][2] = {{-41, 21}, {41, -19}};
+    f32 transitionFade;
+    f32 fade;
+    f32 pairFade;
+    f32 spread;
+    f32 emitterFade;
+    f32 pairDistance;
+    f32 radialMove;
+    f32 burstFadeA;
+    f32 burstFadeB;
+    f32 orbitFade;
+    f32 orbitPhase;
+    f32 idFade;
+    f32 idPulse;
+    f32 idAlpha;
+    f32 orbitAngle;
+    f32 sine;
+    s32 drawAlpha;
+    s32 drawX;
+    s32 drawY;
+    u32 rectX;
+    u32 rectY;
+    u32 i;
+
+    switch ((panel->flags >> 19) & 0xF) {
+    case 6:
+        transitionFade = panel->frame * 0.25f;
+        drawAlpha = alpha * transitionFade;
+        mnuDrawMantraPanelAccentSprites(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        break;
+    case 8:
+        transitionFade = panel->frame / 10.0f;
+        drawAlpha = alpha * transitionFade;
+        mnuDrawMantraPanelAccentSprites(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        break;
+    case 7:
+        transitionFade = panel->frame * 0.25f;
+        transitionFade = 1.0f - transitionFade;
+        drawAlpha = alpha * transitionFade;
+        mnuDrawMantraPanelAccentSprites(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        break;
+    case 9:
+        transitionFade = panel->frame / 10.0f;
+        transitionFade = 1.0f - transitionFade;
+        drawAlpha = alpha * transitionFade;
+        mnuDrawMantraPanelAccentSprites(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        break;
+    case 0:
+        mnuDrawMantraPanelAccentSprites(x, y, z, alpha, (u32)pool, (u32)panel, packet);
+        break;
+    case 1:
+        panel->frame++;
+        if (panel->frame < 20) fade = panel->frame / 20.0f;
+        else fade = 1.0f;
+        if (panel->frame < 10) pairFade = 0.0f;
+        else if (panel->frame < 20) pairFade = (panel->frame - 10) / 10.0f;
+        else pairFade = 1.0f;
+        spread = 1.0f;
+        if (panel->frame >= 20) {
+            if (panel->frame < 25) spread = (25 - panel->frame) / 5.0f;
+            else spread = 0.0f;
+        }
+        spread = 1.0f - sdfEvaluateCosineViaSinePhaseShift(spread * 1.5707962512969970703125f);
+        emitterFade = 0.0f;
+        if (panel->frame >= 5) {
+            if (panel->frame < 30) emitterFade = (panel->frame - 5) / 25.0f;
+            else emitterFade = 1.0f;
+        }
+        drawAlpha = alpha * fade;
+        mnuDrawMantraSprite(x, y, z, drawAlpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, drawAlpha, 0xF7, 0, packet);
+        drawAlpha = alpha * pairFade;
+        pairDistance = spread * 15.0f;
+        mnuDrawMantraSprite(x, (s32)(y - pairDistance), z, drawAlpha, 0xF8, 0, packet);
+        mnuDrawMantraSprite(x, (s32)(y + pairDistance), z, drawAlpha, 0xF9, 0, packet);
+        mnuUpdateAndDrawMantraSparkleEmitter(x, y, 0, (s32)(alpha * emitterFade), panel->spriteHandle, packet);
+        if (panel->frame >= 30) {
+            panel->frame = 0;
+            panel->flags &= ~0x780000;
+        }
+        break;
+    case 3:
+        panel->frame++;
+        if (panel->frame < 20) fade = panel->frame / 20.0f;
+        else fade = 1.0f;
+        fade = 1.0f - fade;
+        if (panel->frame < 7) spread = panel->frame / 7.0f;
+        else spread = 1.0f;
+        spread = sdfSinPoly(spread * 1.5707962512969970703125f);
+        if (panel->frame < 20) emitterFade = (20 - panel->frame) / 20.0f;
+        else emitterFade = 0.0f;
+        if (panel->frame < 7) radialMove = panel->frame / 7.0f;
+        else radialMove = 1.0f;
+        radialMove = 1.0f - sdfSinPoly(radialMove * 1.5707962512969970703125f);
+        if (panel->frame < 7) burstFadeA = panel->frame / 7.0f;
+        else if (panel->frame < 21) burstFadeA = (21 - panel->frame) / 14.0f;
+        else burstFadeA = 0.0f;
+        burstFadeA = sdfSinPoly(burstFadeA * 1.5707962512969970703125f);
+        burstFadeB = 0.0f;
+        if (panel->frame >= 3) {
+            if (panel->frame < 10) burstFadeB = (panel->frame - 3) / 7.0f;
+            else burstFadeB = 1.0f;
+        }
+        burstFadeB = sdfSinPoly(burstFadeB * 1.5707962512969970703125f);
+        if (panel->frame < 40) orbitFade = panel->frame / 40.0f;
+        else orbitFade = 1.0f;
+        orbitPhase = (120.0f - (60.0f - (f32)panel->frame)) / 120.0f;
+        idFade = 0.0f;
+        if (panel->frame >= 10) {
+            if (panel->frame < 25) idFade = (panel->frame - 10) / 15.0f;
+            else idFade = 1.0f;
+        }
+        idPulse = 0.0f;
+        if (panel->frame >= 10) {
+            if (panel->frame < 40) idPulse = (panel->frame - 10) / 30.0f;
+            else idPulse = 1.0f;
+        }
+        idAlpha = alpha * idFade;
+        idPulse = sdfSinPoly(idPulse * 3.141592502593994140625f);
+        drawAlpha = alpha * fade;
+        mnuDrawMantraSprite(x, y, z, drawAlpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, drawAlpha, 0xF7, 0, packet);
+        drawAlpha = idAlpha;
+        mnuDrawMantraSprite(x, y, z, drawAlpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, drawAlpha, 0xE6, 0, packet);
+        drawAlpha = alpha;
+        mnuDrawMantraSprite(x, (s32)(y - spread * 4.0f), z, drawAlpha, 0xF8, 0, packet);
+        mnuDrawMantraSprite(x, (s32)(y + spread * 4.099999904632568359375f), z, drawAlpha, 0xF9, 0, packet);
+        mnuUpdateAndDrawMantraSparkleEmitter(x, y, 0, (s32)(alpha * emitterFade), panel->spriteHandle, packet);
+        drawAlpha = alpha * burstFadeA;
+        mnuDrawMantraSprite((s32)(x + offsets[0][0] * radialMove), (s32)(y + offsets[0][1] * radialMove), 0, drawAlpha, 0xED, 0, packet);
+        mnuDrawMantraSprite((s32)(x + offsets[1][0] * radialMove), (s32)(y + offsets[1][1] * radialMove), 0, drawAlpha, 0xEE, 0, packet);
+        drawAlpha = alpha * burstFadeB;
+        mnuDrawMantraSprite((s32)(x + offsets[0][0] * radialMove), (s32)(y + offsets[0][1] * radialMove), 0, drawAlpha, 0xED, 0, packet);
+        mnuDrawMantraSprite((s32)(x + offsets[1][0] * radialMove), (s32)(y + offsets[1][1] * radialMove), 0, drawAlpha, 0xEE, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        rectX = ((u32)x - 128u) << 4;
+        rectY = ((u32)y - 128u) << 3;
+        uiDrawUniformColorRect(rectX, rectY, 0xFF, 0x1000, 0x800, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x3000D, packet);
+        uiDrawActiveSurfaceRegion(packet);
+        mnuDrawMantraSprite(x, y, 0, alpha, 0xEA, 0x20, packet);
+        sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+        drawAlpha = alpha * orbitFade;
+        orbitAngle = orbitPhase * 6.28318500518798828125f;
+        {
+            f32 cosine;
+            f32 cosineProduct;
+            f32 cosineScale;
+            f32 sineScale;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(orbitAngle);
+            sine = sdfSinPoly(orbitAngle);
+            cosineScale = 7.0f;
+            sineScale = -14.0f;
+            cosineProduct = cosine * cosineScale;
+            sine = sine * sineScale;
+            drawX = x + cosineProduct + sine;
+        }
+        {
+            f32 cosine;
+            f32 cosineProduct;
+            f32 cosineScale;
+            f32 sineScale;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(orbitAngle);
+            sine = sdfSinPoly(orbitAngle);
+            cosineScale = -14.0f;
+            sineScale = 7.0f;
+            cosineProduct = cosine * cosineScale;
+            sine = sine * sineScale;
+            drawY = y + cosineProduct - sine;
+        }
+        mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xEB, 0, packet);
+        {
+            f32 cosine;
+            f32 cosineProduct;
+            f32 cosineScale;
+            f32 sineScale;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(orbitAngle);
+            sine = sdfSinPoly(orbitAngle);
+            cosineScale = -6.0f;
+            sineScale = 16.0f;
+            cosineProduct = cosine * cosineScale;
+            sine = sine * sineScale;
+            drawX = x + cosineProduct + sine;
+        }
+        {
+            f32 cosine;
+            f32 cosineProduct;
+            f32 cosineScale;
+            f32 sineScale;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(orbitAngle);
+            sine = sdfSinPoly(orbitAngle);
+            cosineScale = 16.0f;
+            sineScale = -6.0f;
+            cosineProduct = cosine * cosineScale;
+            sine = sine * sineScale;
+            drawY = y + cosineProduct - sine;
+        }
+        mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xEC, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect(rectX, rectY, 0, 0x1000, 0x800, 0, packet);
+        drawAlpha = idAlpha;
+        for (i = 0; i < 4; i++) {
+            if (panel->id == ids[i]) {
+                mnuDrawMantraSprite(x, y, 0, drawAlpha, 0xEF + i * 2, 0, packet);
+                mnuDrawMantraSprite(x, y, 0, (s32)(alpha * idPulse), 0xF0 + i * 2, 0, packet);
+                i = -1;
+                break;
+            }
+        }
+        if (i != -1) {
+            mnuDrawMantraSprite(x, y, 0, drawAlpha, 0xEF, 0, packet);
+            mnuDrawMantraSprite(x, y, 0, (s32)(alpha * idPulse), 0xF0, 0, packet);
+        }
+        if (panel->frame >= 60) {
+            panel->frame = 0;
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 void mnuInitMantraFourIconPanelTransition(u32 unused, s32 view) {
     ((MantraPanelAnimation *)view)->stateA = 0;
@@ -6189,9 +6413,9 @@ s32 mnuDrawMantraPanelFourIconEffect(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378F0);
 
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378F8);
+
+
 
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_00437900);
 

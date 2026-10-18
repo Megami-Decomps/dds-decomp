@@ -3390,13 +3390,13 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
 }
 
 
-void btlStartOwnerEffectTasks(s32 *arguments) {
+u64 btlStartOwnerEffectTasks(s32 *arguments) {
     s32 owner = arguments[0x34 / 4];
     s32 value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
     value = btlCreateUnitExitFadeTask(owner, 1);
     *(s32 *)(value + 0x28) = 7;
-    btlStartTask(value);
+    return btlStartTask(value);
 }
 
 extern void btlResetUnitLinks(BtlUnit *unit);

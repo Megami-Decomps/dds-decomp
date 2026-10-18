@@ -30,16 +30,16 @@ void effPCPNeedleFree(EffPCPNeedleWork *work) {
 }
 
 /* The first parameter block supplies the effect's runtime work. */
-void effPCPNeedleCreate(void *data) {
+EffPCPNeedleWork *effPCPNeedleCreate(void *data) {
     EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(data, 0);
-    effNeedleCreateWork(work);
+    return effNeedleCreateWork(work);
 }
 
 /* Recreate needle work directly from the parameter prefix used by duplication. */
-void effNeedleCreateFromParams(EffPCPNeedleParams *work) {
-    effNeedleCreateWork(work);
+EffPCPNeedleWork *effNeedleCreateFromParams(EffPCPNeedleParams *work) {
+    return effNeedleCreateWork(work);
 }
 
 /* Advance the orbiting needle entries and rebuild their camera-facing trails. */

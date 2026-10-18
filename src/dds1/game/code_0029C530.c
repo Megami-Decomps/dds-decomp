@@ -605,8 +605,8 @@ void effFreeFadeVectorWork(EffFadeVectorWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effCloneFadeVectorWork(EffFadeVectorWork *work) {
-    effCreateFadeVectorWork(&work->source);
+EffFadeVectorWork *effCloneFadeVectorWork(EffFadeVectorWork *work) {
+    return effCreateFadeVectorWork(&work->source);
 }
 
 void effResetFadeVectorFrame(EffFadeVectorWork *work) {
@@ -1260,8 +1260,8 @@ void effReleaseLinkedTarget(EffKindWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effCloneKindWork(EffKindWork *work) {
-    effAllocateKindWork((u16)work->kind, work->payload);
+EffKindWork *effCloneKindWork(EffKindWork *work) {
+    return effAllocateKindWork((u16)work->kind, work->payload);
 }
 
 void effKindWorkFrameReset(EffKindWork *work) {
@@ -1356,8 +1356,8 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
 }
 
 /* Reallocate the source kind and payload; this path does not copy its secondary target. */
-void effCloneAlternateKindWork(EffKindWork *work) {
-    effAllocateAlternateKindWork((u16)work->kind, work->payload);
+EffKindWork *effCloneAlternateKindWork(EffKindWork *work) {
+    return effAllocateAlternateKindWork((u16)work->kind, work->payload);
 }
 
 /* Reset the alternate kind-table work's frame counter. */
@@ -9888,7 +9888,7 @@ extern u128 D_0037E110;
 
 
 /* vu0 routine: follow the selected actor with the active camera path. */
-void func_002B3698(EffActiveResource *owner) {
+s32 func_002B3698(EffActiveResource *owner) {
     f32 position[4];
     f32 actorPosition[4];
     f32 eyeOffset[4];
@@ -10032,7 +10032,7 @@ void func_002B3698(EffActiveResource *owner) {
     dds3SetCameraFieldOfView(camera, D_003BC9A8);
     data->fovUpdatePending |= 1;
     effObjSetInnerRotation(camera, &D_0037EEB0);
-    sdfStepWrappingFloatCounter(path);
+    return sdfStepWrappingFloatCounter(path);
 }
 
 
@@ -12340,11 +12340,11 @@ s32 effEditGkColorTrack(s32 request) {
 }
 
 /* B-/F-family COLOR callback: edit the request's color and adjacent alpha tracks. */
-void effEditBfColorTrack(s32 request) {
+s32 effEditBfColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
 }
 
 /* HELPER's COLOR callback edits the shared default color/alpha data. */
@@ -12366,27 +12366,27 @@ s32 effEditTBoardColorTrack(s32 request) {
 }
 
 /* Pass the E-RAIN request's color/alpha tracks and frame bound to the editor. */
-void effEditRainColorTrack(s32 request) {
+s32 effEditRainColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Pass the E-FLARE request's color/alpha tracks and frame bound to the editor. */
-void effEditFlareColorTrack(s32 request) {
+s32 effEditFlareColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value38);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value38);
 }
 
 /* COLOR property callback shared by the native S-family descriptors. */
-void effEditSColorTrack(s32 request) {
+s32 effEditSColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit R-NOMAL/R-CRCLE COLOR tracks, then restore the default option table. */
@@ -12404,19 +12404,19 @@ s32 effEditRColorTrack(s32 request) {
 }
 
 /* COLOR property callback for the native R-TRACK descriptor. */
-void effEditRTrackColorTrack(s32 request) {
+s32 effEditRTrackColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* D-family COLOR callback; its DDS2 twin also serves O-family descriptors. */
-void effEditDoColorTrack(s32 request) {
+s32 effEditDoColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 s32 effResolveMappingWithTemporaryTable(s32 request) {
@@ -12432,35 +12432,35 @@ s32 effResolveMappingWithTemporaryTable(s32 request) {
 }
 
 /* COLOR callback shared by the native N-SPIRL/N-CYLND/N-SPHRE descriptors. */
-void effEditNColorTrack(s32 request) {
+s32 effEditNColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit COLOR in the N-family descriptors' nested POLYGON data. */
-void effEditNPolygonColorTrack(s32 request) {
+s32 effEditNPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
+    return effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
 /* Edit the root U-CYLND color and alpha tracks selected by the request. */
-void effEditUCylinderColorTrack(s32 request) {
+s32 effEditUCylinderColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit COLOR in U-CYLND's nested POLYGON data. */
-void effEditUCylinderPolygonColorTrack(s32 request) {
+s32 effEditUCylinderPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
+    return effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
 /* U-SMOKE/U-SPIRL COLOR uses its own property options; forward editor status. */
@@ -12477,27 +12477,27 @@ s32 effEditUSmokeSpiralColorTrack(s32 request) {
 }
 
 /* Edit U-SPHRE's root COLOR tracks using its frame bound. */
-void effEditUSphereColorTrack(s32 request) {
+s32 effEditUSphereColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value70);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value70);
 }
 
 /* COLOR callback for the CRACK polygon descriptor. */
-void effEditCrackPolygonColorTrack(s32 request) {
+s32 effEditCrackPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* COLOR callback for the FLASH polygon descriptor. */
-void effEditFlashPolygonColorTrack(s32 request) {
+s32 effEditFlashPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    effEditColorTrack(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
+    return effEditColorTrack(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
 }
 
 /* 2D's COLOR callback restores its property options and forwards editor status. */
@@ -12995,28 +12995,28 @@ s32 func_002BB188(SdfAlphaTrack *range, s32 frames) {
 }
 
 /* ALPHA callback for POLYGON children of the native S-family descriptors. */
-void effEditSPolygonAlphaTrack(s32 work) {
-    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x3c), ((EffMappingObject *)((BaObj *)work)->x0C)->value4C);
+s32 effEditSPolygonAlphaTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x3c), ((EffMappingObject *)((BaObj *)work)->x0C)->value4C);
 }
 
 /* D-family POLYGON FADE callback, shared with O in DDS2; retain bound plus one. */
-void effEditDoPolygonFadeTrack(s32 work) {
-    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value3C + 1);
+s32 effEditDoPolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value3C + 1);
 }
 
 /* FADE callback for N-family POLYGON children; preserve bound plus one. */
-void effEditNPolygonFadeTrack(s32 work) {
-    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
+s32 effEditNPolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
 }
 
 /* FADE callback for the native U-CYLND POLYGON child. */
-void effEditUCylinderPolygonFadeTrack(s32 work) {
-    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
+s32 effEditUCylinderPolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
 }
 
 /* FADE callback for the native U-SPHRE POLYGON child. */
-void effEditUSpherePolygonFadeTrack(s32 work) {
-    func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
+s32 effEditUSpherePolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
 }
 
 
@@ -13057,18 +13057,18 @@ s32 effPollFileQueueRecord(s32 request) {
 }
 
 /* Poll queued TMX/P2A/general resources with the TLP format enabled. */
-void effPollResourceQueueWithTlp(void) {
-    effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
+s32 effPollResourceQueueWithTlp(void) {
+    return effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
 /* Separate native descriptor callback with the same TLP-enabled queue filter. */
-void effPollAlternateResourceQueueWithTlp(void) {
-    effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
+s32 effPollAlternateResourceQueueWithTlp(void) {
+    return effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
 /* Poll the queue without adding the TLP flag to its format mask. */
-void effPollResourceQueueWithoutTlp(void) {
-    effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL);
+s32 effPollResourceQueueWithoutTlp(void) {
+    return effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL);
 }
 
 extern u16 effClassifyResourceMask(s32);

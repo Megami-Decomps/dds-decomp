@@ -113,17 +113,17 @@ EffRingWork *effCreateRingFan(EffRingWork *source)
 }
 
 /* Create a ring from the first parameter-table block. */
-void effCreateRingFanFromParams(void *table) {
+EffRingWork *effCreateRingFanFromParams(void *table) {
     void *parameterBlock;
 
     parameterBlock = effParamTableGetBlock(table, 0);
-    effCreateRingFan(parameterBlock);
+    return effCreateRingFan(parameterBlock);
 }
 
 /* Kind 85 duplicate: recreate the parameter prefix, not the live vertex state.
  * Retail tail-jumps to the constructor, preserving its v0 result despite this void C surface. */
-void effDuplicateRingFan(EffRingWork *ring) {
-    effCreateRingFan(ring);
+EffRingWork *effDuplicateRingFan(EffRingWork *ring) {
+    return effCreateRingFan(ring);
 }
 
 /* Release the matrix pool's resources before the ring's backing allocation. */

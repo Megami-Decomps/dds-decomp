@@ -990,12 +990,11 @@ u8 evtWaitFileMenuTaskThree(void) {
     return operationResult == 0;
 }
 
-void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *modeOverride) {
+u32 evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *modeOverride) {
     if (modeOverride == 0) {
-        mnuOpenTitleMenuForMode(0);
-        return;
+        return mnuOpenTitleMenuForMode(0);
     }
-    mnuOpenTitleMenuForMode(*modeOverride);
+    return mnuOpenTitleMenuForMode(*modeOverride);
 }
 
 u32 evtCloseTitleMenu(void) {
@@ -1029,8 +1028,8 @@ u8 evtIsFileMenuTaskAbsent(void) {
     return operationResult == 0;
 }
 
-void evtStartStaffMovieRequest(void) {
-    mnuStartStaffMovieRequest();
+u32 evtStartStaffMovieRequest(void) {
+    return mnuStartStaffMovieRequest();
 }
 
 u32 evtStopStaffTasks(void) {
@@ -1181,8 +1180,8 @@ u32 evtIsAdminModeNineComplete(void) {
     return 1;
 }
 
-void evtCreateStaffTasks(void) {
-    mnuStaffCreateTasks();
+s32 evtCreateStaffTasks(void) {
+    return mnuStaffCreateTasks();
 }
 
 u32 evtDestroyStaffTasks(void) {
@@ -1231,8 +1230,8 @@ void evtDispatchSelectionCommand(s32 commandSource, s32 *commandParams) {
 }
 
 /* Check battle shutdown; the callee exits only after audio and task work become idle. */
-void evtCheckBattleShutdown(void) {
-    btlExitWhenAudioAndTasksIdle();
+s32 evtCheckBattleShutdown(void) {
+    return btlExitWhenAudioAndTasksIdle();
 }
 
 u32 evtEnsureSelectionTask(void) {
@@ -1261,11 +1260,11 @@ u32 evtKeepBattleStageTestModePending(void) {
     return 0;
 }
 
-void evtCreateTestAndSkyTasks(void) {
+s32 evtCreateTestAndSkyTasks(void) {
     D_003BA730 = 0;
     D_003BA958 = 0;
     evtStartTestTask();
-    evtCreateSkyTask();
+    return evtCreateSkyTask();
 }
 
 
@@ -1330,9 +1329,9 @@ u8 mnuCheckCampStateAndAcknowledge(void) {
     return campState == 0;
 }
 
-void evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
+s32 evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
     evtCreateSkyTask();
-    mnuOpenShopSceneWithInitialSelection(campMode);
+    return mnuOpenShopSceneWithInitialSelection(campMode);
 }
 
 u32 evtDestroySkyAndCampTasks(void) {
@@ -1349,13 +1348,12 @@ u8 evtWaitSkyCampTaskState(void) {
     return taskState == 0;
 }
 
-void evtCreateSkyAndFieldTasks(u32 unused, u32 *fieldArgs) {
+s32 evtCreateSkyAndFieldTasks(u32 unused, u32 *fieldArgs) {
     evtCreateSkyTask();
     if (fieldArgs != 0) {
-        mnuTerminalCreateTasks(fieldArgs[0], fieldArgs[1]);
-        return;
+        return mnuTerminalCreateTasks(fieldArgs[0], fieldArgs[1]);
     }
-    mnuTerminalCreateTasks(0, 1);
+    return mnuTerminalCreateTasks(0, 1);
 }
 
 u32 evtDestroySkyAndFieldTasks(void) {
@@ -1371,8 +1369,8 @@ u8 evtWaitFieldSceneState(void) {
     return sceneState == 0;
 }
 
-void evtCreateStaffTasksAlternate(void) {
-    mnuStaffCreateTasks();
+s32 evtCreateStaffTasksAlternate(void) {
+    return mnuStaffCreateTasks();
 }
 
 u32 evtDestroyStaffTasksAlternate(void) {

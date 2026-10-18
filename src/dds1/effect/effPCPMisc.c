@@ -1948,17 +1948,17 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params
     return work;
 }
 
-void effPcpCompactEffectCreateFromTable(void *args) {
+EffPCPCompactFadeWork *effPcpCompactEffectCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCompactEffectCreate(param0);
+    return effPcpCompactEffectCreate(param0);
 }
 
 
 
 
-void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
+EffPCPCompactFadeWork *effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
     EffPCPCompactRectParams params;
 
     params.timeline.flags = work->flags;
@@ -1968,7 +1968,7 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
     memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
-    effPcpCompactEffectCreate(&params);
+    return effPcpCompactEffectCreate(&params);
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
@@ -2055,15 +2055,15 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     return work;
 }
 
-void effPcpCompactLongCreateFromTable(void *args) {
+EffPCPCompactFadeWork *effPcpCompactLongCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCompactLongCreate(param0);
+    return effPcpCompactLongCreate(param0);
 }
 
 
-void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
+EffPCPCompactFadeWork *effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     EffPCPCompactTexturedBlurParams params;
 
     params.timeline.flags = work->flags;
@@ -2073,7 +2073,7 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
     params.res = work->resource.blur->body;
-    effPcpCompactLongCreate(&params);
+    return effPcpCompactLongCreate(&params);
 }
 
 void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
@@ -2149,15 +2149,15 @@ void *effPcpCopyWork(src)
     return dst;
 }
 
-void effPcpCreateFadeTimerFromTable(void *args) {
+void *effPcpCreateFadeTimerFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCopyWork(param0);
+    return effPcpCopyWork(param0);
 }
 
-void effPcpRecreateFadeTimer(EffPCPFadeTimerParams *src) {
-    effPcpCopyWork(src);
+void *effPcpRecreateFadeTimer(EffPCPFadeTimerParams *src) {
+    return effPcpCopyWork(src);
 }
 
 void effPcpReleaseFadeTimerWork(EffPCPFadeTimer *work) {
@@ -2214,15 +2214,15 @@ void *effPcpCopyWorkLong(src)
     return dst;
 }
 
-void effPcpCreateLongFadeTimerFromTable(void *args) {
+void *effPcpCreateLongFadeTimerFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCopyWorkLong(param0);
+    return effPcpCopyWorkLong(param0);
 }
 
-void effPcpRecreateLongFadeTimer(EffPCPFadeTimerLongParams *src) {
-    effPcpCopyWorkLong(src);
+void *effPcpRecreateLongFadeTimer(EffPCPFadeTimerLongParams *src) {
+    return effPcpCopyWorkLong(src);
 }
 
 void effPcpReleaseLongFadeTimerWork(EffPCPFadeTimerLong *work) {
@@ -2282,15 +2282,15 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams 
     return work;
 }
 
-void effPcpCreateChargeWorkFromTable(void *args) {
+EffPCPCompactWork *effPcpCreateChargeWorkFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCreateCompactWorkFromParams(param0);
+    return effPcpCreateCompactWorkFromParams(param0);
 }
 
 
-void effPcpChargeRespawn(EffPCPCompactWork *work) {
+EffPCPCompactWork *effPcpChargeRespawn(EffPCPCompactWork *work) {
     EffPCPCompactScatterParams params;
 
     params.timeline.flags = work->flags;
@@ -2300,7 +2300,7 @@ void effPcpChargeRespawn(EffPCPCompactWork *work) {
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
     params.res = work->resource.scatter->params;
-    effPcpCreateCompactWorkFromParams(&params);
+    return effPcpCreateCompactWorkFromParams(&params);
 }
 
 void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
@@ -2383,15 +2383,15 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *par
     return work;
 }
 
-void effPcpCreateChargeResourceWorkFromTable(void *args) {
+EffPCPCompactWork *effPcpCreateChargeResourceWorkFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCreateCompactResourceWork(param0);
+    return effPcpCreateCompactResourceWork(param0);
 }
 
 
-void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
+EffPCPCompactWork *effPcpChargeLongRespawn(EffPCPCompactWork *work) {
     EffPCPCompactScaleParams params;
 
     params.timeline.flags = work->flags;
@@ -2401,7 +2401,7 @@ void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
     params.res = work->resource.scale->params;
-    effPcpCreateCompactResourceWork(&params);
+    return effPcpCreateCompactResourceWork(&params);
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
@@ -2644,13 +2644,13 @@ EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams) 
     return work;
 }
 
-void effPcpSpanCreateFromTable(void *args) {
+EffPCPSpanWork *effPcpSpanCreateFromTable(void *args) {
     void *param0;
     void *param1;
 
     param0 = effParamTableGetBlock(args, 0);
     param1 = effParamTableGetBlock(args, 1);
-    effPcpSpanCreate(param0, param1);
+    return effPcpSpanCreate(param0, param1);
 }
 
 EffPCPSpanWork *effPcpCloneWithOptionalHandle(EffPCPSpanWork *work) {
@@ -2787,7 +2787,7 @@ EffPCPTripleWork *effPcpTripleHandleCreate(EffPCPTripleParams *params, EffNodeDe
     return work;
 }
 
-void effPcpTripleHandleCreateFromTable(void *data) {
+EffPCPTripleWork *effPcpTripleHandleCreateFromTable(void *data) {
     EffPCPTripleParams *params;
     EffNodeDescriptor *descriptors[7];
     EffNodeDescriptor **dst;
@@ -2801,7 +2801,7 @@ void effPcpTripleHandleCreateFromTable(void *data) {
         *dst = effParamTableGetBlock(data, i);
         dst++;
     } while (i < 7);
-    effPcpTripleHandleCreate(params, descriptors);
+    return effPcpTripleHandleCreate(params, descriptors);
 }
 
 EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
@@ -3675,8 +3675,8 @@ EffPCPBurstWork *effAllocateThunderFragmentWork(u32 unused) {
     return work;
 }
 
-void effPcpSpawnMuzzleThunderRay(void) {
-    effAllocateThunderFragmentWork(0);
+EffPCPBurstWork *effPcpSpawnMuzzleThunderRay(void) {
+    return effAllocateThunderFragmentWork(0);
 }
 
 EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
@@ -3689,8 +3689,8 @@ EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     return work;
 }
 
-void effPcpSpawnOffsetMuzzleThunderRay(void) {
-    effAllocateThunderFragmentBurstWork(0);
+EffPCPBurstWork *effPcpSpawnOffsetMuzzleThunderRay(void) {
+    return effAllocateThunderFragmentBurstWork(0);
 }
 
 EffPCPBurstWork *effPcpCreateCyanBlueFragmentPair(u32 unused) {
@@ -3703,8 +3703,8 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentPair(u32 unused) {
     return work;
 }
 
-void effPcpRecreateCyanBlueFragmentPair(void) {
-    effPcpCreateCyanBlueFragmentPair(0);
+EffPCPBurstWork *effPcpRecreateCyanBlueFragmentPair(void) {
+    return effPcpCreateCyanBlueFragmentPair(0);
 }
 
 EffPCPBurstWork *effPcpCreateCyanBlueFragmentSingle(u32 unused) {
@@ -3717,8 +3717,8 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentSingle(u32 unused) {
     return work;
 }
 
-void effPcpRecreateCyanBlueFragmentSingle(void) {
-    effPcpCreateCyanBlueFragmentSingle(0);
+EffPCPBurstWork *effPcpRecreateCyanBlueFragmentSingle(void) {
+    return effPcpCreateCyanBlueFragmentSingle(0);
 }
 
 EffPCPBurstWork *effPcpCreateWhiteYellowFragmentPair(u32 unused) {
@@ -3731,8 +3731,8 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentPair(u32 unused) {
     return work;
 }
 
-void effPcpRecreateWhiteYellowFragmentPair(void) {
-    effPcpCreateWhiteYellowFragmentPair(0);
+EffPCPBurstWork *effPcpRecreateWhiteYellowFragmentPair(void) {
+    return effPcpCreateWhiteYellowFragmentPair(0);
 }
 
 EffPCPBurstWork *effPcpCreateWhiteYellowFragmentSingle(u32 unused) {
@@ -3745,8 +3745,8 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentSingle(u32 unused) {
     return work;
 }
 
-void effPcpRecreateWhiteYellowFragmentSingle(void) {
-    effPcpCreateWhiteYellowFragmentSingle(0);
+EffPCPBurstWork *effPcpRecreateWhiteYellowFragmentSingle(void) {
+    return effPcpCreateWhiteYellowFragmentSingle(0);
 }
 
 EffPCPBurstWork *effPcpCreateYellowOrangeFragmentPair(u32 unused) {
@@ -3759,8 +3759,8 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentPair(u32 unused) {
     return work;
 }
 
-void effPcpRecreateYellowOrangeFragmentPair(void) {
-    effPcpCreateYellowOrangeFragmentPair(0);
+EffPCPBurstWork *effPcpRecreateYellowOrangeFragmentPair(void) {
+    return effPcpCreateYellowOrangeFragmentPair(0);
 }
 
 EffPCPBurstWork *effPcpCreateYellowOrangeFragmentSingle(u32 unused) {
@@ -3773,8 +3773,8 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentSingle(u32 unused) {
     return work;
 }
 
-void effPcpRecreateYellowOrangeFragmentSingle(void) {
-    effPcpCreateYellowOrangeFragmentSingle(0);
+EffPCPBurstWork *effPcpRecreateYellowOrangeFragmentSingle(void) {
+    return effPcpCreateYellowOrangeFragmentSingle(0);
 }
 
 EffPCPBurstWork *effPcpCreateBrownRedFragmentPair(u32 unused) {
@@ -3787,8 +3787,8 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentPair(u32 unused) {
     return work;
 }
 
-void effPcpRecreateBrownRedFragmentPair(void) {
-    effPcpCreateBrownRedFragmentPair(0);
+EffPCPBurstWork *effPcpRecreateBrownRedFragmentPair(void) {
+    return effPcpCreateBrownRedFragmentPair(0);
 }
 
 EffPCPBurstWork *effPcpCreateBrownRedFragmentSingle(u32 unused) {
@@ -3801,8 +3801,8 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentSingle(u32 unused) {
     return work;
 }
 
-void effPcpRecreateBrownRedFragmentSingle(void) {
-    effPcpCreateBrownRedFragmentSingle(0);
+EffPCPBurstWork *effPcpRecreateBrownRedFragmentSingle(void) {
+    return effPcpCreateBrownRedFragmentSingle(0);
 }
 
 EffPCPBurstWork *effPcpCreateOrangeVioletFragmentPair(u32 unused) {
@@ -3815,8 +3815,8 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentPair(u32 unused) {
     return work;
 }
 
-void effPcpRecreateOrangeVioletFragmentPair(void) {
-    effPcpCreateOrangeVioletFragmentPair(0);
+EffPCPBurstWork *effPcpRecreateOrangeVioletFragmentPair(void) {
+    return effPcpCreateOrangeVioletFragmentPair(0);
 }
 
 EffPCPBurstWork *effPcpCreateOrangeVioletFragmentSingle(u32 unused) {
@@ -3829,8 +3829,8 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentSingle(u32 unused) {
     return work;
 }
 
-void effPcpRecreateOrangeVioletFragmentSingle(void) {
-    effPcpCreateOrangeVioletFragmentSingle(0);
+EffPCPBurstWork *effPcpRecreateOrangeVioletFragmentSingle(void) {
+    return effPcpCreateOrangeVioletFragmentSingle(0);
 }
 
 void effPcpThunderBurstRelease(EffPCPBurstWork *work) {
@@ -3933,17 +3933,17 @@ EffPCPGrowWork *effPcpCreateScaledThunder(EffPCPScaledThunderParams *params) {
     return work;
 }
 
-void effPcpScaledEffectCreateFromTable(void *args) {
+EffPCPGrowWork *effPcpScaledEffectCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effPcpCreateScaledThunder(param0);
+    return effPcpCreateScaledThunder(param0);
 }
 
 
 
 
-void effPcpScaledRespawn(EffPCPGrowWork *work) {
+EffPCPGrowWork *effPcpScaledRespawn(EffPCPGrowWork *work) {
     EffPCPScaledThunderParams params;
     EffThunderParameterHead *res;
 
@@ -3954,7 +3954,7 @@ void effPcpScaledRespawn(EffPCPGrowWork *work) {
     params.base = work->base;
     params.target = work->target;
     params.res = res->alpha;
-    effPcpCreateScaledThunder(&params);
+    return effPcpCreateScaledThunder(&params);
 }
 
 void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
@@ -4188,15 +4188,15 @@ u8 *effBeamEffectClone(src)
     return (u8 *)work;
 }
 
-void effPcpBeamCreateFromTable(void *args) {
+u8 *effPcpBeamCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effBeamEffectClone(param0);
+    return effBeamEffectClone(param0);
 }
 
-void effPcpRecreateBeam(EffPCPBeamParams *src) {
-    effBeamEffectClone(src);
+u8 *effPcpRecreateBeam(EffPCPBeamParams *src) {
+    return effBeamEffectClone(src);
 }
 
 void effPcpReleaseBeamClone(EffPCPBeamWork *work) {
@@ -4397,15 +4397,15 @@ u8 *effBeamEffectCloneLarge(src)
     return (u8 *)work;
 }
 
-void effPcpBeamLargeCreateFromTable(void *args) {
+u8 *effPcpBeamLargeCreateFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
-    effBeamEffectCloneLarge(param0);
+    return effBeamEffectCloneLarge(param0);
 }
 
-void effPcpRecreateLinkedBeam(EffPCPBeamLargeHead *src) {
-    effBeamEffectCloneLarge(src);
+u8 *effPcpRecreateLinkedBeam(EffPCPBeamLargeHead *src) {
+    return effBeamEffectCloneLarge(src);
 }
 
 void effPcpReleaseLinkedBeamClone(EffPCPBeamLargeWork *work) {
@@ -4524,7 +4524,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
     return groupSet;
 }
 
-void effPcpGroupSetCreateFromTable(void *args) {
+EffPCPGroupSet *effPcpGroupSetCreateFromTable(void *args) {
     EffPCPGroupHead *work;
     void *resources[4];
     u32 i;
@@ -4537,7 +4537,7 @@ void effPcpGroupSetCreateFromTable(void *args) {
             resources[i] = NULL;
         }
     }
-    effPcpGroupSetCreate(work, resources);
+    return effPcpGroupSetCreate(work, resources);
 }
 
 EffPCPGroupSet *effPcpGroupSetCloneWithDuplicates(EffPCPGroupSet *work) {
@@ -4970,13 +4970,13 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     return work;
 }
 
-void effPcpCreateDriftEventRingFromTable(void *args) {
+EffPCPDriftEventWork *effPcpCreateDriftEventRingFromTable(void *args) {
     void *param0;
     void *param1;
 
     param0 = effParamTableGetBlock(args, 0);
     param1 = effParamTableGetBlock(args, 1);
-    effPcpEntryWorkBCreate(param0, param1);
+    return effPcpEntryWorkBCreate(param0, param1);
 }
 
 EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
@@ -5203,7 +5203,7 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     return work;
 }
 
-void effPcpDriftCreateFromTable(void *args) {
+EffPCPPairedEventWork *effPcpDriftCreateFromTable(void *args) {
     void *param0;
     void *param1;
     void *param2;
@@ -5211,7 +5211,7 @@ void effPcpDriftCreateFromTable(void *args) {
     param0 = effParamTableGetBlock(args, 0);
     param1 = effParamTableGetBlock(args, 1);
     param2 = effParamTableGetBlock(args, 2);
-    effPcpCreateDelayedDriftEntries(param0, param1, param2);
+    return effPcpCreateDelayedDriftEntries(param0, param1, param2);
 }
 
 EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) {
@@ -5463,13 +5463,13 @@ EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *sr
     return work;
 }
 
-void effPcpSlotEffectCreateFromTable(void *args) {
+EffPCPSpawnRangeWork *effPcpSlotEffectCreateFromTable(void *args) {
     void *param0;
     void *param1;
 
     param0 = effParamTableGetBlock(args, 0);
     param1 = effParamTableGetBlock(args, 1);
-    effPcpCreateDelayedEventEntries(param0, param1);
+    return effPcpCreateDelayedEventEntries(param0, param1);
 }
 
 EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
@@ -5700,7 +5700,7 @@ EffPCPMapEventWork *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *reso
     return work;
 }
 
-void effPcpEventWorkCreateFromTable(void *args) {
+EffPCPMapEventWork *effPcpEventWorkCreateFromTable(void *args) {
     void *param0;
     void *param1;
     void *param2;
@@ -5708,7 +5708,7 @@ void effPcpEventWorkCreateFromTable(void *args) {
     param0 = effParamTableGetBlock(args, 0);
     param1 = effParamTableGetBlock(args, 1);
     param2 = effParamTableGetBlock(args, 2);
-    effPcpEventWorkCreate(param0, param1, param2);
+    return effPcpEventWorkCreate(param0, param1, param2);
 }
 
 EffPCPMapEventWork *effEventWorkClone(EffPCPMapEventWork *src) {

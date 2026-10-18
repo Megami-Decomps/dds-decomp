@@ -363,16 +363,16 @@ void effThunderReleaseIndexedVectorWork(EffThunderVectorWork *work) {
 }
 
 /* Create indexed vector work from the first packed parameter block; ignore its result. */
-void effThunderCreateWorkFromPackedParams(void *parameterTable) {
+EffThunderVectorWork *effThunderCreateWorkFromPackedParams(void *parameterTable) {
     void *parameters;
 
     parameters = effParamTableGetBlock(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
-    effThunderWorkCreate(parameters);
+    return effThunderWorkCreate(parameters);
 }
 
 /* Direct parameter-pointer entry for indexed vector creation; ignore its result. */
-void effThunderSpawnIndexedVector(void *parameters) {
-    effThunderWorkCreate(parameters);
+EffThunderVectorWork *effThunderSpawnIndexedVector(void *parameters) {
+    return effThunderWorkCreate(parameters);
 }
 
 /* vu0 routine: copy the entire quadword, including its fourth component. */
@@ -2161,13 +2161,13 @@ EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *s
 }
 
 /* Forward the first two parameter-table blocks as one effect-handler pair. */
-void effApplyParamBlockPair(void *table) {
+EffPcpThunderGroup *effApplyParamBlockPair(void *table) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = effParamTableGetBlock(table, 0);
     secondBlock = effParamTableGetBlock(table, 1);
-    effThunderCreateCurveGroup(firstBlock, secondBlock);
+    return effThunderCreateCurveGroup(firstBlock, secondBlock);
 }
 
 EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {

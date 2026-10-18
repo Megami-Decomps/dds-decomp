@@ -226,12 +226,12 @@ s32 btlLoadBankWhenTasksIdle(void) {
     return 0;
 }
 
-void fldMarkGridTiles(BtlState *scene) {
+u64 fldMarkGridTiles(BtlState *scene) {
     BtlRuntimeTask *tile = (BtlRuntimeTask *)fldCreateSceneTileTask(scene->background.ids.major, scene->background.ids.minor);
     tile->ownerId = 0x8000000000000001ULL;
     btlStartTask(tile);
     tile = (BtlRuntimeTask *)btlCreateFloorLoadTask(scene->background.ids.major, scene->background.ids.minor);
-    btlStartTask(tile);
+    return btlStartTask(tile);
 }
 
 s32 fldSceneStateStartTileEffect(BtlState *scene) {
@@ -703,7 +703,7 @@ s32 fldConsumeSceneInputFlags(BtlState *scene) {
     return result;
 }
 
-void fldAdvanceSceneGroupInitialization(BtlState *scene) {
+s32 fldAdvanceSceneGroupInitialization(BtlState *scene) {
     s32 notFirst = scene->mode != 1;
     scene->mode = 2 - notFirst;
     if (scene->sceneCallback != 0) {
@@ -715,7 +715,7 @@ void fldAdvanceSceneGroupInitialization(BtlState *scene) {
     scene->groupHandleCount = 0;
     scene->turnCount = scene->turnCount + 1;
     fldInitializeSceneGroups();
-    btlResetSceneSlotFades();
+    return btlResetSceneSlotFades();
 }
 
 extern void btlTickActorEntryCountdowns(BtlUnit *);
