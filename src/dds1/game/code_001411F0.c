@@ -1,3 +1,4 @@
+#include "fld_projected_sprite.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -1086,16 +1087,6 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     sdfModelBuildNodeResourcePackets(D_00325838, emitter);
 }
 
-typedef struct {
-    s16 u;
-    s16 v;
-    s16 width;
-    s16 height;
-    s16 anchorX;
-    s16 anchorY;
-    s32 textureSlot;
-} FldProjectedSprite;
-
 extern FldProjectedSprite D_0033EBA0[];
 extern SdfTex *D_003D40A0[4];
 
@@ -1913,7 +1904,7 @@ extern s32 D_003BAECC;
 
 extern s32 D_003BAED4;
 
-extern s32 fldTestSceneLifecycleFlags(u32);
+extern u8 fldTestSceneLifecycleFlags(u32 mask);
 extern void fldSetSceneLifecycleFlags(u32);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern KwlnDrawVectorParams kwlnDrawVector;
@@ -3122,7 +3113,7 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-extern s32 fldTestSceneControlFlags(s32);
+extern u8 fldTestSceneControlFlags(u32 mask);
 
 void fldUpdateObjectSlotActivation(void) {
     s32 i;
@@ -3312,7 +3303,7 @@ void fldDrawLocationPanel(void) {
     }
 }
 
-extern s32 fldTestSceneLifecycleFlags(u32);
+extern u8 fldTestSceneLifecycleFlags(u32 mask);
 
 void fldFlushQueuedEffectPositions(void) {
     if (fldAreaState.area < 0xC8) {
