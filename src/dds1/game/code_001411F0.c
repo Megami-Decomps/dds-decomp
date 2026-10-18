@@ -2,6 +2,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
+#include "fld_room_effect_entry.h"
 #include "fld_npc_palette.h"
 #include "file_pac.h"
 #include "evt_world.h"
@@ -3036,36 +3037,14 @@ void fldReleaseResourceHandles(void) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    f32 unk4, unk8, unkC;
-    f32 unk10[4];
-    s32 *object; /* 0x20: room effect object/record. */
-    s16 kind, kindId;
-    f32 size;
-    s32 unk2C, unk30, unk34, room;
-    s16 unk3C, unk3E;
-    char name[0x10];
-} FldTblEnt50; /* 0x50 bytes */
-
-typedef char FldTblEnt50_size_check[(sizeof(FldTblEnt50) == 0x50) ? 1 : -1];
-typedef char FldTblEnt50_object_offset_check[
-    ((u32)&((FldTblEnt50 *)0)->object == 0x20) ? 1 : -1];
-typedef char FldTblEnt50_room_offset_check[
-    ((u32)&((FldTblEnt50 *)0)->room == 0x38) ? 1 : -1];
-
-extern FldTblEnt50 fldRoomEffectEntries[];
-
-extern s32 fldRoomEffectEntryCount;
-
 void fldClearMenuEntries(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
         fldRoomEffectEntries[i].unk0 = 0;
-        fldRoomEffectEntries[i].unk4 = 0.0f;
-        fldRoomEffectEntries[i].unk8 = 0.0f;
-        fldRoomEffectEntries[i].unkC = 0.0f;
+        fldRoomEffectEntries[i].x = 0.0f;
+        fldRoomEffectEntries[i].y = 0.0f;
+        fldRoomEffectEntries[i].z = 0.0f;
         fldRoomEffectEntries[i].object = 0;
         fldRoomEffectEntries[i].unk2C = 0;
         fldRoomEffectEntries[i].unk30 = 0;
@@ -3380,8 +3359,6 @@ void fldFlushQueuedEffectPositions(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
-
-extern s32 fldRoomEffectEntryCount;
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 

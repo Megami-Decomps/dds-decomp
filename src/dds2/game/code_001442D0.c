@@ -3,6 +3,7 @@
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fld_area_work.h"
+#include "fld_room_effect_entry.h"
 #include "fld_npc_palette.h"
 #include "file_pac.h"
 #include "evt_world.h"
@@ -172,8 +173,6 @@ extern s32 D_004363C4;
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 
 extern void evtSetSolarOverlayFullyVisible(void);
-
-extern s32 fldRoomEffectEntryCount;
 
 extern u32 D_00436330[];
 
@@ -436,27 +435,6 @@ extern s32 fldEffectTextureLoadHandles[4];
 extern s32 fldEffectTextureData[4];
 
 extern s32 fldEffectTextureNodes[4];
-
-typedef struct {
-    s32 unk0;
-    f32 x; /* 0x4 */
-    f32 y; /* 0x8 */
-    f32 z; /* 0xC */
-    f32 orientation[4]; /* 0x10 */
-    s32 *object; /* 0x20 */
-    s16 kind; /* 0x24 */
-    s16 kindId; /* 0x26 */
-    f32 size; /* 0x28 */
-    s32 unk2C, unk30, unk34, room;
-    s16 unk3C, unk3E;
-    char name[0x10];
-} FldTblEnt50; /* 0x50 bytes */
-
-typedef char FldTblEnt50_size_check[(sizeof(FldTblEnt50) == 0x50) ? 1 : -1];
-typedef char FldTblEnt50_object_offset_check[
-    ((u32)&((FldTblEnt50 *)0)->object == 0x20) ? 1 : -1];
-
-extern FldTblEnt50 fldRoomEffectEntries[];
 
 typedef struct {
     s32 unk0;
