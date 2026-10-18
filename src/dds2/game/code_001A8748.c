@@ -242,7 +242,7 @@ s32 sndUpdateTestMsgTask(KwlnTask *task) {
     return 0;
 }
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EB0);
 

@@ -32,7 +32,7 @@
 /* Declared before first use (were implicit int). */
 extern void btlDestroyUnit(u8 *actor);
 extern s32 btlFindScriptResource(char *name);
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 

@@ -119,7 +119,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 s32 btlFlagToElementIndex(s32 flag);
 
 extern s32 sdfQueryChannelValue(s32, DatPartyRecord *, DatPartyRecord *);
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
     DatPartyRecord *record;

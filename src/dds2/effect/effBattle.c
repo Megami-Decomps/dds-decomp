@@ -14,7 +14,7 @@ enum {
 
 
 extern char D_00414478[];
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 extern f32 D_003AF1A0[4];
 extern f32 D_003AF190[4];
 

@@ -35,7 +35,7 @@ extern s32 kwlnDelayedDestroyTaskCount;
 
 extern s32 kwlnActiveTaskCount;
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern u8 D_00435BF8[];
 

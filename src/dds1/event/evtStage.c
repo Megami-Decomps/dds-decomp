@@ -19,7 +19,7 @@ extern void dds3ReplaceObjectResource(EffWorldNode *object);
 
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 extern const char evtFieldScriptTerminationFormat[0x28];
-extern void sdfDebugPrintf(const char *format, ...);
+#include "sdf_debug_api.h"
 
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,

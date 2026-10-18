@@ -42,7 +42,7 @@ extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 #include "kwln_texture_reference_flag_api.h"
 extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 extern f32 D_003AAEB0[4];
 extern f32 kwlnHeldTextureTargetVector[];
 extern f32 kwlnHeldTextureEyeVector[];

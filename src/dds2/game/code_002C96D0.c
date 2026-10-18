@@ -3344,7 +3344,7 @@ s32 fileWaitAfterLoadResult(void) {
     return 0;
 }
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 

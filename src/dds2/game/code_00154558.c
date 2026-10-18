@@ -218,7 +218,7 @@ extern void fldResetPlayerSceneObjectState(void);
 
 extern s32 D_003897C0[];
 #include "dds3_world_secondary.h"
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern s32 D_003897C8[];
 

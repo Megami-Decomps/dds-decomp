@@ -260,7 +260,7 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 extern void sndEnsureMidiBankResident(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
-extern void sdfDebugPrintf(const char *format, ...);
+#include "sdf_debug_api.h"
 extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data);
 void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
 

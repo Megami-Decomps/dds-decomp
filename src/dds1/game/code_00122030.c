@@ -615,7 +615,7 @@ extern u64 D_003BAB98[], D_003BABA0[], D_003BABA8[], D_003BABB0[];
 
 extern u8 D_0032F240[];
 
-extern void sdfDebugPrintf(void *);
+#include "sdf_debug_api.h"
 
 extern void fldInitDisplayObjects(void);
 

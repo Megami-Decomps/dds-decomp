@@ -152,7 +152,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     return effNodeTypeOperations[node->type].queryOptional(node->instance);
 }
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 /* Build the effect node for a resource descriptor; descriptors older than 1.03 are converted first, and ones up to 1.02 get an identity matrix. */
 EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {

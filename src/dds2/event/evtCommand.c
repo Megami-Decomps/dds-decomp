@@ -52,8 +52,7 @@ s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32
 
 void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
-/* libc printf returns the signed vfprintf character count. */
-s32 sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 void scrDestroyAllNamedProcesses(void);
 

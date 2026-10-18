@@ -17,7 +17,7 @@ extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern s32 sceSifDmaStat(s32);
 extern s32 sceSifSetDma(void *, s32);
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
 extern void sdfSoundStopNamedPlayback(void);
 /* Original-style implicit int, kept: matched code depends on it: effDrawTextureSlotWithBlendedCornerColors. */

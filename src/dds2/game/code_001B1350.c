@@ -81,7 +81,7 @@ extern s32 D_003B4F74[];
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 
 extern s32 btlRollAiBucket(void);

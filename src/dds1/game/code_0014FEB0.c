@@ -25,7 +25,7 @@ EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
     return copy;
 }
 
-extern s32 sdfDebugPrintf(const char *format, ...);
+#include "sdf_debug_api.h"
 
 /* Normalize legacy payloads before the effect manager constructs their nodes. */
 void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {

@@ -91,7 +91,7 @@ extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 
-extern s32 sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern u8 D_00421AC0[];
 

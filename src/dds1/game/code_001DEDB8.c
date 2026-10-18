@@ -9880,7 +9880,7 @@ extern void mnuPrintTitleDebugBanner(void);
 
 extern void mnuInstallTitleSoundBufferFromData(u32, u32, s32);
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5178);
 

@@ -245,7 +245,7 @@ extern char fileConfigLoadTaskName[]; /* "config_draw" */
 extern char fileConfigOwnerTaskName[]; /* "config_update" */
 
 
-extern void sdfDebugPrintf(void *arg);
+#include "sdf_debug_api.h"
 
 extern char D_003BC900[];
 

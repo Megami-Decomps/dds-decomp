@@ -24,7 +24,7 @@
 /* Declared before first use (were implicit int). */
 extern void itfMesBuildEntryGlyph(ItfMesState *mes);
 extern void itfMesInitCharTable(s32 *table);
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 extern ItfMesGlobals itfMesWork;
 
 

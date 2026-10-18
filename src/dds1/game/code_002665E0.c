@@ -775,7 +775,7 @@ extern char D_003771D8[];
 /* libc sprintf returns the signed vfprintf character count. */
 extern s32 sprintf(char *dst, const char *fmt, ...);
 
-extern s32 sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern void mnuCreateTitleEffectTask(void);
 

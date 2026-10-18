@@ -2808,7 +2808,7 @@ void fldReleaseActorTasksById(s32 id) {
     }
 }
 
-extern s32 sdfDebugPrintf(const char *, ...);
+#include "sdf_debug_api.h"
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 

@@ -100,7 +100,7 @@ extern u32 strlen(const char *str);
 
 extern s32 dds3AdminGetActiveMode(void);
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern char D_00414C50[]; /* "Camp process halted.\n", followed by padding no C emits */
 

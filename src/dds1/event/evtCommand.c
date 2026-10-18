@@ -70,8 +70,7 @@ void evtSetSolarPhase(s32 phase);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-/* libc printf returns the signed vfprintf character count. */
-s32 sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 void scrDestroyAllNamedProcesses(void);
 

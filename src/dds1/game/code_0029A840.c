@@ -359,7 +359,7 @@ void effFloorModelListPush(EffModelOwner *obj) {
 
 extern char D_003B2AA0[];
 
-extern void sdfDebugPrintf(const char *, void *);
+#include "sdf_debug_api.h"
 
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {

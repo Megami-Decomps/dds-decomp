@@ -22,7 +22,7 @@ EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
     return copy;
 }
 
-extern void sdfDebugPrintf(const char *format, ...);
+#include "sdf_debug_api.h"
 
 void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
@@ -70,7 +70,6 @@ extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
-extern void sdfDebugPrintf(const char *format, ...);
 
 void effInitializeBillResourceOwners(void) {
     FilePacRequest *archive;

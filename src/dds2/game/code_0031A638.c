@@ -19,7 +19,7 @@ void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *record, MenuRuntime
     }
 }
 
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 /* Seed the saved-score floor and score snapshots, then clear the current score. */
 void mnuInitializeHighScoreState(MnuShootingWork *work) {

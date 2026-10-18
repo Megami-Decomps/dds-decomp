@@ -39,7 +39,7 @@ extern char D_00422050[];
 
 extern s32 fileMenuTaskExists(void);
 extern u32 fldIsUpdateInhibited(void);
-void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];

@@ -121,7 +121,7 @@ extern s32 D_0032E570[];
 
 extern u8 D_003BAE78[];
 #include "dds3_world_secondary.h"
-extern void sdfDebugPrintf(const char *fmt, ...);
+#include "sdf_debug_api.h"
 
 extern s32 fldCurrentBgmMode;
 
