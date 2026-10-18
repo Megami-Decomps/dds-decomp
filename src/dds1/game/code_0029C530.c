@@ -10953,7 +10953,7 @@ typedef char EffCameraMenuStateSizeCheck[(sizeof(EffCameraMenuState) == 0x38) ? 
 extern EffCameraMenuState D_0038F428;
 extern s8 sdfPadButtonStates[];
 extern const char D_003BD0E8[];
-extern void btlDebugMenuSetupNoOp(void *context);
+extern u32 btlDebugMenuSetupNoOp(void *context);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *context);
 extern void btlDebugMenuAfterRecordNoOp(void);
@@ -11600,7 +11600,7 @@ extern void btlDebugDrawRadiusGuide(f32 *center, f32 radius, u32 color, s32 flag
 extern void btlDebugDrawSegment(f32 *from, f32 *to, u32 color);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuAfterRecordNoOp(void);
-extern void btlDebugMenuSetupNoOp(void *camera);
+extern u32 btlDebugMenuSetupNoOp(void *camera);
 extern void btlDebugMenuRecordNoOp(void *camera);
 extern void camFollowOffsetVec(u8 *camera, void *destination);
 extern void effComputeBattleCameraPositionVU(u8 *snapshot);

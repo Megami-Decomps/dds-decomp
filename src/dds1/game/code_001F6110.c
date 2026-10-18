@@ -2876,9 +2876,10 @@ void func_001FB1D0(void) {
 void func_001FB1D8(void) {
 }
 
-/* First debug-menu stage; retail ignores the supplied context. */
-void btlDebugMenuSetupNoOp(void *context) {
-    (void)context;
+/* DDS1's file-queue editor consumes v0 after this call (002B609C).
+ * The DDS2 counterpart returns its argument; this retail debug stub's
+ * value-returning body was compiled out, leaving jr ra; nop. */
+u32 btlDebugMenuSetupNoOp(void *context) {
 }
 
 void func_001FB1E8(void) {
