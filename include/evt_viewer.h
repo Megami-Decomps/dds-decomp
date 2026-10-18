@@ -1,6 +1,7 @@
 #ifndef EVT_VIEWER_H
 #define EVT_VIEWER_H
 #include "common.h"
+#include "evt_blend_vec_color.h"
 #include "evt_world.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
@@ -14,10 +15,11 @@ typedef union EvtViewParam {
 
 /* Allocation-backed 0x20 payload used by type-0xB draw keys. */
 typedef struct EvtViewerDrawPayload {
-    f32 x, y, z, w;
-    s32 mode;
+    EvtBlendVecColor parameters;
     u8 unknown14[0xC];
 } EvtViewerDrawPayload;
+typedef char EvtViewerDrawPayload_parameters_offset[((u32)&((EvtViewerDrawPayload *)0)->parameters == 0x00) ? 1 : -1];
+typedef char EvtViewerDrawPayload_tail_offset[((u32)&((EvtViewerDrawPayload *)0)->unknown14 == 0x14) ? 1 : -1];
 typedef char EvtViewerDrawPayload_size[(sizeof(EvtViewerDrawPayload) == 0x20) ? 1 : -1];
 
 /* Complete 0x38-byte key allocated by the viewer and linked on a group. */
