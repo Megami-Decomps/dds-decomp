@@ -36,11 +36,11 @@ extern void *effGetRecordGroupElement(EffRecordPool *pool, s32 index);
 extern u32 effMultiplyPackedColors(u32 color, u32 colorB);
 
 
-void effFlashTrianglePulseSpawnFromTable(void *table) {
+PcpFlashTrianglePulseWork *effFlashTrianglePulseSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effectParams);
+    return effFlashRecordCreate((PcpFlashTrianglePulseParams *)effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -241,11 +241,11 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     return work;
 }
 
-void effFlashRotatingStreakSpawnFromTable(void *table) {
+PcpFlashStreakWork *effFlashRotatingStreakSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashRotatingStreakCreate(effectParams);
+    return effFlashRotatingStreakCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -521,11 +521,11 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams 
     return work;
 }
 
-void effFlashOrbitScalingSpawnFromTable(void *table) {
+PcpFlashScalingOrbitWork *effFlashOrbitScalingSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashOrbitScalingCreate(effectParams);
+    return effFlashOrbitScalingCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -763,11 +763,11 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     return work;
 }
 
-void effFlashAccumulatingParticleSpawnFromTable(void *table) {
+PcpFlashAccumulatingWork *effFlashAccumulatingParticleSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashAccumulatingCreate(effectParams);
+    return effFlashAccumulatingCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1022,11 +1022,11 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     return ring;
 }
 
-void effFlashOrbitArcSpawnFromTable(void *table) {
+PcpFlashOrbitArcWork *effFlashOrbitArcSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashOrbitArcCreate(effectParams);
+    return effFlashOrbitArcCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1274,11 +1274,11 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams 
     return work;
 }
 
-void effFlashRotatingQuadSpawnFromTable(void *table) {
+PcpFlashRotatingQuadWork *effFlashRotatingQuadSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashRotatingQuadCreate(effectParams);
+    return effFlashRotatingQuadCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1527,11 +1527,11 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(PcpFlashRadialTriangleP
     return work;
 }
 
-void effFlashRadialTriangleSpawnFromTable(void *table) {
+PcpFlashRadialTriangleWork *effFlashRadialTriangleSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashRadialTriangleCreate(effectParams);
+    return effFlashRadialTriangleCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1726,11 +1726,11 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *pa
     return work;
 }
 
-void effFlashRadialStripSpawnFromTable(void *table) {
+PcpFlashRadialStripWork *effFlashRadialStripSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashRadialStripCreate(effectParams);
+    return effFlashRadialStripCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1991,11 +1991,11 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *pa
     return work;
 }
 
-void effFlashFadingOrbitSpawnFromTable(void *table) {
+PcpFlashFadingOrbitWork *effFlashFadingOrbitSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashFadingOrbitCreate(effectParams);
+    return effFlashFadingOrbitCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -2225,11 +2225,11 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(PcpFlashOffsetRadia
     return work;
 }
 
-void effFlashOffsetRadialTriangleSpawnFromTable(void *table) {
+PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashOffsetRadialTriangleCreate(effectParams);
+    return effFlashOffsetRadialTriangleCreate(effectParams);
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */

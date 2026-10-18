@@ -200,11 +200,11 @@ s32 btlLoadBankWhenTasksIdle(void) {
     return 0;
 }
 
-void fldMarkGridTiles(u8 *context) {
+u64 fldMarkGridTiles(u8 *context) {
     BtlRuntimeTask *node = (BtlRuntimeTask *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
     node->ownerId = 0x8000000000000001ULL;
     btlStartTask(node);
-    btlStartTask(btlCreateFloorLoadTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A)));
+    return btlStartTask(btlCreateFloorLoadTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A)));
 }
 
 extern void btlResetTitleStreamOnBattleFlag(void);
@@ -428,7 +428,7 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
 
 /* Queue actor model, light, fade and entry tasks using their completion handles. */
-void btlQueueSceneActorModelEntry(s32 sceneAddress) {
+u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
     BtlUnit *unit;
     BtlUnit *tail;
     BtlRuntimeTask *task;
@@ -610,7 +610,7 @@ void btlQueueSceneActorModelEntry(s32 sceneAddress) {
     task = btlCreateSoundUpdateTask(12);
     task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
     task->startCondition.value.owner = 0x8000000000000003ULL;
-    btlStartTask(task);
+    return btlStartTask(task);
 }
 
 
@@ -619,7 +619,7 @@ extern s32 btlIsFadeOutCompleteOrIdle(void);
 extern s32 btlAreWorkBuffersReady(void);
 
 void fldInitializeSceneGroups(void);
-extern void btlResetSceneSlotFades();
+extern s32 btlResetSceneSlotFades(void);
 
 s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
     BattleSceneWork *work = (BattleSceneWork *)scene;
@@ -664,7 +664,7 @@ s32 fldConsumeSceneInputFlags(s32 scene) {
     return result;
 }
 
-void fldAdvanceSceneVariant(BattleSceneWork *scene) {
+s32 fldAdvanceSceneVariant(BattleSceneWork *scene) {
     s32 notFirst = scene->variant != 1;
     scene->variant = 2 - notFirst;
     if (scene->sceneCallback != 0) {
@@ -675,7 +675,7 @@ void fldAdvanceSceneVariant(BattleSceneWork *scene) {
     }
     scene->step = scene->step + 1;
     fldInitializeSceneGroups();
-    btlResetSceneSlotFades();
+    return btlResetSceneSlotFades();
 }
 
 extern void btlTickActorEntryCountdowns(u8 *);

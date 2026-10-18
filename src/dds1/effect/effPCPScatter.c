@@ -92,9 +92,9 @@ extern void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *sour
 extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
-void effScatterCreateFromParameterTriplet(void *parameterTable)
+PcpScatterRadialWork *effScatterCreateFromParameterTriplet(void *parameterTable)
 {
-    effScatterCreateRadialWork(
+    return effScatterCreateRadialWork(
         effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK),
         (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
         effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
@@ -427,9 +427,9 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
 }
 
 /* Create spin work from three parameter-table blocks, retaining native nested calls. */
-void effScatterCreateSpinFromTable(void *parameterTable)
+PcpScatterSpinWork *effScatterCreateSpinFromTable(void *parameterTable)
 {
-    effScatterCreateSpinWork(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    return effScatterCreateSpinWork(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 /* Return a spin clone sharing the texture owner; each child clones source group zero.
@@ -1215,10 +1215,10 @@ PcpScatterInstanceA *effPcpScatterCreateParticleInstance(src, resource)
     return inst;
 }
 
-/* Create ring work from the first two table blocks; this dispatch discards the result. */
-void effScatterCreateRingFromTable(void *parameterTable)
+/* Create ring work from the first two table blocks. */
+PcpScatterInstanceA *effScatterCreateRingFromTable(void *parameterTable)
 {
-    effPcpScatterCreateParticleInstance(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPcpScatterCreateParticleInstance(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
 
 /* Return newly initialized ring work sharing the source drawable's resource. */
@@ -1490,9 +1490,9 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
 }
 
 /* Create radius-damped ring work from its parameter and resource table blocks. */
-void effScatterSpawnFromParameterPair(void *parameterTable)
+PcpScatterInstanceB *effScatterSpawnFromParameterPair(void *parameterTable)
 {
-    effScatterCreateDampedRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effScatterCreateDampedRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
 
 /* Return freshly initialized radius-damped ring work sharing the source resource. */
@@ -1780,9 +1780,9 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
 }
 
 /* Create two-color ring work from its parameter and resource table blocks. */
-void effScatterCreateFromParameterTable(void *parameterTable)
+PcpScatterInstanceC *effScatterCreateFromParameterTable(void *parameterTable)
 {
-    effScatterCreateTwoColorRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effScatterCreateTwoColorRing(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
 
 /* Return freshly initialized two-color ring work sharing the source resource. */
@@ -2074,9 +2074,9 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
 }
 
 /* Create flat-ring work from its parameter and resource table blocks. */
-void effScatterCreatePlainRingFromTable(void *parameterTable)
+PcpScatterPlainInstance *effScatterCreatePlainRingFromTable(void *parameterTable)
 {
-    effPcpScatterCreatePlainInstance(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPcpScatterCreatePlainInstance(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
 }
 
 /* Return freshly initialized flat-ring work sharing the source resource. */

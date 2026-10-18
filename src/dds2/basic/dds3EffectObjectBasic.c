@@ -398,11 +398,11 @@ EffectObj *effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
-void effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
+EffectObj *effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCreateIndexed(0, billId);
-    effObjCreateBillNode(bill, firstVector, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */

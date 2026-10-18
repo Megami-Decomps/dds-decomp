@@ -29,16 +29,16 @@ void effPCPNeedleFree(EffPCPNeedleWork *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-void effPCPNeedleCreate(void *parameters) {
+EffPCPNeedleWork *effPCPNeedleCreate(void *parameters) {
     EffPCPNeedleParams *work;
 
     work = effParamTableGetBlock(parameters, 0);
-    effNeedleCreateWork(work);
+    return effNeedleCreateWork(work);
 }
 
 /* Recreate needle work directly from the parameter prefix used by duplication. */
-void effNeedleCreateFromParams(EffPCPNeedleParams *parameters) {
-    effNeedleCreateWork(parameters);
+EffPCPNeedleWork *effNeedleCreateFromParams(EffPCPNeedleParams *parameters) {
+    return effNeedleCreateWork(parameters);
 }
 
 /* Advance the orbiting needle entries and rebuild their camera-facing trails. */
