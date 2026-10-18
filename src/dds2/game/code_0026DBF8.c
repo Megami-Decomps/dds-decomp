@@ -6413,10 +6413,6 @@ s32 mnuDrawMantraPanelFourIconEffect(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
     return 0;
 }
 
-
-
-
-
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_00437900);
 
 s32 mnuDrawMantraFourIconPanelTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,

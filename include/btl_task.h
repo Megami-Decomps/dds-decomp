@@ -3,12 +3,10 @@
 
 #include "common.h"
 
-struct BtlUnit;
-
 typedef struct BtlIndexList {
     s32 capacity;       /* 0x00: allocated entry count */
     s32 count;          /* 0x04: live entry count */
-    struct BtlUnit **entries; /* 0x08: points just past this header */
+    void **entries;     /* 0x08: points just past this header */
 } BtlIndexList;
 
 BtlIndexList *btlAllocateIndexList(s32 capacity);
