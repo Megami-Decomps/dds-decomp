@@ -9145,7 +9145,103 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     itfSetTextDrawLimit(-1);
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C9EA0);
+extern const BattlePanelColors D_00416A10;
+
+extern s32 scrTestGlobalBitFlag(u16);
+
+extern s32 fldCountSceneFadeKinds(BtlState *, s32 *);
+
+static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
+    colors->values[0] = color;
+    colors->values[1] = color;
+    colors->values[2] = color;
+    colors->values[3] = color;
+}
+
+void func_001C9EA0(s32 sceneContext) {
+    BattleSceneObject *object = (BattleSceneObject *)sceneContext;
+    char text[16];
+    BattlePanelColors colors = D_00416A10;
+    u16 count;
+    s32 fadeCount;
+    s32 i = 0;
+    s32 rowCount;
+    s32 total;
+    s32 selected;
+    s32 y;
+    BtlState *scene;
+    BattleRosterTable *list;
+    s32 row;
+    s32 j;
+    s32 blocked;
+    s32 power;
+    u32 textColor;
+    u32 glyphColor;
+    u32 color;
+    u32 cost;
+
+    scene = (BtlState *)btlGetRuntime();
+    y = 0x14C;
+    rowCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 0);
+    total = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1);
+    row = object->selections[4].cursor;
+    selected = object->selections[4].entry;
+    list = btlGetActorLinkageSkillList(object, &count);
+
+    for (; i < rowCount && row < total; i++, row++) {
+        blocked = btlCheckScenePairResult(object->owner->unit, &list->entries[row]);
+        if (blocked == 0) {
+            glyphColor = selected == row ? 0x89FEFF80 : 0xA09DC380;
+        } else {
+            glyphColor = 0x504F6140;
+        }
+        textColor = (glyphColor & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[i];
+        glyphColor = textColor;
+        if (scrTestGlobalBitFlag(list->entries[row].skill) == 0 && blocked == 0 && selected != row) {
+            glyphColor = btlLinkedSelectionTaskBuffer->rowFade[i] | 0xD1BA7100;
+        }
+        btlDrawIndexedBattleEntryGlyphs(0x1A, y, 0xFF0010, glyphColor, list->entries[row].skill);
+
+        btlSetCornerColors(&colors, btlLinkedSelectionTaskBuffer->backdropFade | 0x80808000);
+        effDrawSpriteWithCornerColors(0x7C0, y << 3, 0, colors.values, 0, btlResourceBlock->resA, 0x29, 0x53);
+
+        power = btlGetCombinedPartyCommandPower(&object->owner->unit->partyRecord, object->owner->unit,
+                                                list->entries[row].first, list->entries[row].second,
+                                                list->entries[row].skill);
+        sprintf(text, D_00436818, power);
+        fldSubmitSceneObjectAtCoordinates(0x86, y + 2, textColor, text);
+
+        cost = btlGetSlotValueAdjustedForSpecialAbility(object->owner->unit, list->entries[row].skill);
+        if (fldCountSceneFadeKinds(scene, &fadeCount) >= cost) {
+            btlSetCornerColors(&colors, btlLinkedSelectionTaskBuffer->rowFade[i] | 0x80808000);
+        } else {
+            color = textColor;
+            btlSetCornerColors(&colors, color);
+        }
+        for (j = 0; j < cost; j++) {
+            effDrawSpriteWithCornerColors(0x8F0 + j * 0x90, (y + 0xF) << 3, 0, colors.values, 0, btlResourceBlock->resA, 6, 0x53);
+        }
+
+        if (blocked == 0) {
+            btlSetCornerColors(&colors, btlLinkedSelectionTaskBuffer->rowFade[i] | 0x80808000);
+        } else {
+            color = textColor;
+            btlSetCornerColors(&colors, color);
+        }
+        switch (datCommandRecords[list->entries[row].skill].costMode) {
+        case 1:
+            effDrawSpriteWithCornerColors(0xA70, (y + 5) << 3, 0, colors.values, 0, btlResourceBlock->resA, 7, 0x53);
+            break;
+        case 2:
+            effDrawSpriteWithCornerColors(0xA70, (y + 5) << 3, 0, colors.values, 0, btlResourceBlock->resA, 8, 0x53);
+            break;
+        default:
+            effDrawSpriteWithCornerColors(0xA70, (y + 5) << 3, 0, colors.values, 0, btlResourceBlock->resA, 8, 0x53);
+            break;
+        }
+        y += 0x17;
+    }
+}
 
 extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
