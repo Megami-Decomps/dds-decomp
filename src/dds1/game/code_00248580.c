@@ -197,9 +197,55 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
-INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00248580", mnuDrawTerminalRecoveryListEntry);
+void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct MenuList *list, struct MenuListNode *node, s32 priority) {
+    char text[16];
+    s32 portraitCodes[8] = {0x1D, 0, 0x1F, 0x23, 0x21, 0x25, 0, 0};
+    s32 statusCodes[5] = {0x27, 0x28, 0x29, 0x2A, 0x2B};
+    MenuTerminalWork *host = (MenuTerminalWork *)list->context;
+    s32 scale = list->scale;
+    MenuThresholdEntry *entry = &node->terminal;
+    DatPartyRecord *record = &datGameState->party[entry->entryId];
+    s32 selected = 0;
+    struct FrFontGlyph *glyph;
+    MenuEffectPair *panels;
+    s32 fade;
+    s32 status;
+
+    effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->batch, 0x1B, priority);
+    if (list->cursor == node) {
+        effDrawSpriteWithCornerFade(0x480, rowY + 0x88, depth, scale, 0, host->batch, 0x2C, priority);
+        effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->batch, 0x1C, priority);
+        sprintf(text, D_003BC3F0, entry->requiredAmount);
+        glyph = itfCreateFont3TextGlyph(0x1740, 0x2D8, depth,
+            uiBlendColors(0xA09DC380, 0xA09DC300, scale), text, 0);
+        frFontSetChildChainFirstOption(glyph, 4);
+        frFontDrawGlyphChain(glyph, 1, priority);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        selected = 1;
+    }
+    effDrawSpriteWithCornerFade(0x500, rowY + 0x80, depth, scale, 0, host->batch,
+        portraitCodes[record->unitId - 1] + selected, priority);
+    mnuCreateNumberSprite(0xA30, rowY + 0x98, depth, scale, record->hp,
+        mnuGetPanelRatioColor(0, record->hp, record->maxHp), priority);
+    mnuCreateNumberSprite(0xC70, rowY + 0x98, depth, scale, record->maxHp, 0xA09DC340, priority);
+    mnuCreateNumberSprite(0x1070, rowY + 0x98, depth, scale, record->mp, 0xA09DC380, priority);
+    mnuCreateNumberSprite(0x12B0, rowY + 0x98, depth, scale, record->maxMp, 0xA09DC340, priority);
+    if (scale != 0) {
+        panels = (MenuEffectPair *)node->childPanel;
+        fade = (scale * 0xB3) / 256;
+        panels[0].opacity = fade;
+        mnuDrawAndAdvanceRatioPanel(0x9C0, rowY + 0xF8, depth, 0, -1, -1, &panels[0], priority);
+        panels[1].opacity = fade;
+        mnuDrawAndAdvanceRatioPanel(0x1000, rowY + 0xF8, depth, 0, -1, -1, &panels[1], priority);
+    }
+    status = mnuGetSelectionFromFlags(record);
+    if (status >= 0) {
+        effDrawSpriteWithCornerFade(0x14D0, rowY - 0x60, depth, scale, 0, host->batch,
+            statusCodes[status], priority);
+    }
+}
 
 
 
