@@ -24,6 +24,8 @@
 #include "sdf_primitive_packet_api.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff_quaternion_nlerp.h"
+#include "sdf_vu_matrix.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_resource.h"
@@ -265,8 +267,8 @@ extern s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *);
 extern void *D_00438E64;
 
 extern f32 *D_0037F770[];
-extern s16 D_00438DC8[4];
-extern s16 D_00438DD0[4];
+extern u16 D_00438DC8[4];
+extern u16 D_00438DD0[4];
 extern u32 D_0043E320[4];
 extern u32 D_0043E330[4];
 
@@ -304,8 +306,8 @@ void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color) {
 }
 
 /* Normalize the requested light direction; replace it immediately or prepare its blend. */
-extern s16 D_00438DD8[4];
-extern s16 D_00438DE0[4];
+extern u16 D_00438DD8[4];
+extern u16 D_00438DE0[4];
 extern f32 D_0043E340[][4];
 extern f32 D_0043E370[][4];
 extern void kwlnBuildShortestArcQuaternion(void);
@@ -429,7 +431,111 @@ void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", kwlnUpdateDrawParameterTransitions);
+/* SDK float-input unpack: the RGBA word and its 16-byte workspace stay in memory. */
+static inline void eeUnpackRGBAWordFloatReadOnly(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unit);
+}
+
+/* The color-blend site passes ratio and the 128.0f pack scale as ordinary GPR operands
+   (VU0_SCALE_VF / eePackRGBAWord), so their SF->GPR reloads advance the spill ring
+   ($2,$3,$4) and the vector-blend site starts at $4 (cc1probe --reload, DDS1 uid650). */
+void kwlnUpdateDrawParameterTransitions(void) {
+    s32 i;
+    u32 mask;
+    f32 ratio;
+
+    for (i = 0, mask = 4; i < 3; i++, mask <<= 2) {
+        if (D_0037F770[i] == NULL) {
+            kwlnDrawControlFlags &= ~(mask | (mask << 1));
+        } else {
+            if (kwlnDrawControlFlags & mask) {
+                ++D_00438DC8[i];
+                ratio = (f32)D_00438DC8[i] / D_00438DD0[i];
+                eeUnpackRGBAWordFloatReadOnly(D_0043E320[i], 0.0078125f);
+                VU0_SCALE_VF(vf10, 1.0f - ratio);
+                VU0_MOVE_VF(vf11, vf10);
+                eeUnpackRGBAWordFloatReadOnly(D_0043E330[i], 0.0078125f);
+                VU0_SCALAR_OP(ratio, "vmulx.xyzw vf10, vf10, vf2x");
+                VU0_ADD(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, D_0037F770[i]);
+                if (D_00438DC8[i] >= D_00438DD0[i]) {
+                    kwlnDrawControlFlags &= ~mask;
+                }
+            }
+            if (kwlnDrawControlFlags & (mask << 1)) {
+                ++D_00438DD8[i];
+                ratio = (f32)D_00438DD8[i] / D_00438DE0[i];
+                VU0_MOVE_VF(vf10, vf0);
+                VU0_SET_W_ONE(vf10);
+                VU0_LOAD_VF(vf11, &D_0043E370[i]);
+                effMiscQuaternionNlerpVU(ratio);
+                effMiscQuaternionToMatrixVU();
+                VU0_LOAD_VF(vf10, &D_0043E340[i]);
+                VU0_APPLY_MATRIX(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, D_0037F770[i] + 4);
+                if (D_00438DD8[i] >= D_00438DE0[i]) {
+                    kwlnDrawControlFlags &= ~(mask << 1);
+                }
+            }
+        }
+    }
+    if (kwlnDrawControlFlags & EVT_BACKGROUND_BLEND_FLAG) {
+        ++D_00438DE6;
+        ratio = (f32)D_00438DE6 / D_00438DE8;
+        eeUnpackRGBAWordFloatReadOnly(D_00438DEC, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - ratio);
+        VU0_MOVE_VF(vf11, vf10);
+        eeUnpackRGBAWordFloatReadOnly(D_00438DF0, 0.0078125f);
+        VU0_SCALAR_OP(ratio, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, kwlnDefaultColorVector);
+        if (D_00438DE6 >= D_00438DE8) {
+            kwlnDrawControlFlags &= ~EVT_BACKGROUND_BLEND_FLAG;
+        }
+    }
+    if (kwlnDrawControlFlags & EVT_DRAW_COLOR_BLEND_FLAG) {
+        ++D_00438DF4;
+        ratio = (f32)D_00438DF4 / D_00438DF6;
+        eeUnpackRGBAWordFloatReadOnly(D_00438DFC, 0.0078125f);
+        VU0_SCALE_VF(vf10, 1.0f - ratio);
+        VU0_MOVE_VF(vf11, vf10);
+        eeUnpackRGBAWordFloatReadOnly(D_00438E00, 0.0078125f);
+        VU0_SCALE_VF(vf10, ratio);
+        VU0_ADD(vf10, vf10, vf11);
+        D_0037F7A0[0] = eePackRGBAWord(128.0f);
+        if (D_00438DF4 >= D_00438DF6) {
+            kwlnDrawControlFlags &= ~EVT_DRAW_COLOR_BLEND_FLAG;
+        }
+    }
+    if (kwlnDrawControlFlags & EVT_DRAW_VECTOR_BLEND_FLAG) {
+        ++D_00438DF8;
+        ratio = (f32)D_00438DF8 / D_00438DFA;
+        VU0_LOAD_VF(vf10, &D_0043E3A0);
+        VU0_LOAD_VF(vf11, &D_0043E3B0);
+        VU0_SCALE_VF(vf10, 1.0f - ratio);
+        VU0_SCALAR_OP(ratio, "vmulx.xyzw vf11, vf11, vf2x");
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_GET_VF10_X(kwlnDrawVector.fogNear);
+        VU0_GET_VF10_Y(kwlnDrawVector.fogFar);
+        VU0_GET_VF10_Z(kwlnDrawVector.depthNear);
+        VU0_GET_VF10_W(kwlnDrawVector.depthFar);
+        if (D_00438DF8 >= D_00438DFA) {
+            kwlnDrawControlFlags &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
+        }
+    }
+    if (kwlnDrawControlFlags & EVT_SAVED_VECTOR_BLEND_FLAG) {
+        ++D_00438E04;
+        ratio = (f32)D_00438E04 / D_00438E06;
+        D_00438A48 = D_00438E08 * (1.0f - ratio) + D_00438E0C * ratio;
+        D_00438A4C = D_00438E10 * (1.0f - ratio) + D_00438E14 * ratio;
+        if (D_00438E04 >= D_00438E06) {
+            kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
+        }
+    }
+}
 
 /* Replace the two scalar targets immediately, or retain start/end values for their blend. */
 void evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget) {
