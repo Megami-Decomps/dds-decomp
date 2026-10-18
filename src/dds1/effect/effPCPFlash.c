@@ -1284,9 +1284,9 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams 
     return work;
 }
 
-void effFlashRotatingQuadSpawnFromTable(void *data)
+PcpFlashRotatingQuadWork *effFlashRotatingQuadSpawnFromTable(void *data)
 {
-    effFlashRotatingQuadCreate(effParamTableGetBlock(data, 0));
+    return effFlashRotatingQuadCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1538,9 +1538,9 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(PcpFlashRadialTriangleP
     return work;
 }
 
-void effFlashRadialTriangleSpawnFromTable(void *data)
+PcpFlashRadialTriangleWork *effFlashRadialTriangleSpawnFromTable(void *data)
 {
-    effFlashRadialTriangleCreate(effParamTableGetBlock(data, 0));
+    return effFlashRadialTriangleCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -1736,9 +1736,9 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *pa
     return work;
 }
 
-void effFlashRadialStripSpawnFromTable(void *data)
+PcpFlashRadialStripWork *effFlashRadialStripSpawnFromTable(void *data)
 {
-    effFlashRadialStripCreate(effParamTableGetBlock(data, 0));
+    return effFlashRadialStripCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -2004,9 +2004,9 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *pa
     return work;
 }
 
-void effFlashFadingOrbitSpawnFromTable(void *data)
+PcpFlashFadingOrbitWork *effFlashFadingOrbitSpawnFromTable(void *data)
 {
-    effFlashFadingOrbitCreate(effParamTableGetBlock(data, 0));
+    return effFlashFadingOrbitCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
@@ -2240,9 +2240,9 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(PcpFlashOffsetRadia
     return work;
 }
 
-void effFlashOffsetRadialTriangleSpawnFromTable(void *data)
+PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleSpawnFromTable(void *data)
 {
-    effFlashOffsetRadialTriangleCreate(effParamTableGetBlock(data, 0));
+    return effFlashOffsetRadialTriangleCreate(effParamTableGetBlock(data, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */

@@ -129,13 +129,13 @@ EffBossWork *effBossCreate(EffBossParams *bossParams, void *effectParams) {
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-void effPCPBossApplyTwoBlocks(void *parameterTable) {
+EffBossWork *effPCPBossApplyTwoBlocks(void *parameterTable) {
     EffBossParams *bossParams;
     void *effectParams;
 
     bossParams = effParamTableGetBlock(parameterTable, 0);
     effectParams = effParamTableGetBlock(parameterTable, 1);
-    effBossCreate(bossParams, effectParams);
+    return effBossCreate(bossParams, effectParams);
 }
 
 /* Duplicate model parameters and rebuild groups with a fresh frame counter. */
@@ -191,7 +191,7 @@ EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
 }
 
 /* Apply three packed parameter blocks to the boss effect. */
-void effPCPBossApplyThreeBlocks(void *parameterTable) {
+EffPCPBossWork *effPCPBossApplyThreeBlocks(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -199,7 +199,7 @@ void effPCPBossApplyThreeBlocks(void *parameterTable) {
     firstBlock = effParamTableGetBlock(parameterTable, 0);
     secondBlock = effParamTableGetBlock(parameterTable, 1);
     thirdBlock = effParamTableGetBlock(parameterTable, 2);
-    effBossBeamCreate(firstBlock, secondBlock, thirdBlock);
+    return effBossBeamCreate(firstBlock, secondBlock, thirdBlock);
 }
 
 /* Duplicate both parameter works; the clone begins at frame zero. */
@@ -468,13 +468,13 @@ EffBossWork *effBossCreateWithGroups(EffBossParams *bossParams, void *effectPara
     return work;
 }
 
-void effBossCreateGroupsFromPackedParams(void *data) {
+EffBossWork *effBossCreateGroupsFromPackedParams(void *data) {
     EffBossParams *bossParams;
     void *effectParams;
 
     bossParams = effParamTableGetBlock(data, 0);
     effectParams = effParamTableGetBlock(data, 1);
-    effBossCreateWithGroups(bossParams, effectParams);
+    return effBossCreateWithGroups(bossParams, effectParams);
 }
 
 /* Preserve rotation settings, but restart every group's accumulated angle. */

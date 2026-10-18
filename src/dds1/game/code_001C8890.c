@@ -2664,13 +2664,13 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
 }
 
 
-void btlStartOwnerEffectTasks(s32 *arguments) {
+u64 btlStartOwnerEffectTasks(s32 *arguments) {
     BtlUnit *owner = (BtlUnit *)arguments[0x34 / 4];
     BtlRuntimeTask *value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
     value = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((u8 *)owner, 1);
     value->startDelay = 7;
-    btlStartTask(value);
+    return btlStartTask(value);
 }
 
 extern void btlSynchronizePartyActorRecords(BtlUnit *, u8);

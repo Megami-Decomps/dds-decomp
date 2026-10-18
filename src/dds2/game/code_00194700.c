@@ -193,7 +193,7 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
 
 /* Types zero/one dispatch from the payload base; two through four skip its prefix.
    Other types still dispatch with a zero argument; no type bounds check is added. */
-void effAllocSubWork(EffWork *work) {
+EffWork *effAllocSubWork(EffWork *work) {
     u32 type = work->type;
     void *handlerArg = NULL;
 
@@ -216,7 +216,7 @@ void effAllocSubWork(EffWork *work) {
     default:
         break;
     }
-    effAllocDispatch(type, handlerArg);
+    return effAllocDispatch(type, handlerArg);
 }
 
 /* Native node type-three scale slot: no instance state is changed. */
