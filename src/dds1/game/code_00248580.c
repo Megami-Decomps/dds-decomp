@@ -2208,7 +2208,6 @@ s32 evtBDispatchSync(KwlnTask *request) {
 }
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(KwlnTask *task) {
