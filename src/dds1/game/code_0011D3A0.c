@@ -10,6 +10,7 @@
 #include "fld_encounter_runtime_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
+#include "fld_named_camera_table.h"
 #include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
@@ -794,7 +795,7 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011ECC8);
 
-extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032F510[], D_0032E5C8[];
+extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032E5C8[];
 extern FldCamRow fldCameraFollowRows[];
 extern FldNpcMotion D_00336A60[];
 
