@@ -14666,3 +14666,34 @@ header-clear store written before `command->address` is read blocks the load
 (possible alias) in `sched2`; moving the store after the load makes the load
 issue before the constant materialisation instead (retail has constant, load,
 `or`, store), so source order alone does not close it.
+
+## sched1 region limit: one extra pre-scheduling insn turns interblock motion off
+
+Pre-reload scheduling (`haifa-sched.c`, `MAX_RGN_BLOCKS` 10, `MAX_RGN_INSNS` 100;
+the constants are the same in the 2.95.3 and 2.96 trunk sources under
+`sandbox_cc1probe/src`) builds one interblock region from several basic blocks
+only if `too_large()` stays below both limits. The insn estimate is the sum over
+the region's blocks of `INSN_LUID(BLOCK_END) - INSN_LUID(BLOCK_HEAD)`. In the
+2.96 trunk notes do not receive a luid, so it counts insns, calls, jumps and
+labels present at sched1 (after `ce`, before register allocation), minus one
+per block. An estimate of 101 or more falls back to single-block scheduling.
+
+Inside a region, ready insns from a later block that post-dominates the branch
+(constants, shifts, `or` chains) are hoisted above the branch when their
+priority beats the leading block's candidates. Retail code that keeps those
+insns after the branch, with constants materialised in the later block, was
+usually scheduled without a region.
+
+Recognising it: `cc1probe --sched` prints `block bb=0 n_insns=N`; N equal to the
+whole-function count means a region formed, N equal to the first block means
+per-block scheduling. A short function whose count is 98 to 100 is on the edge.
+
+Lever: any natural source change that adds one insn that disappears later pushes
+the estimate over 100 without changing the final code. Pre-sched insns that
+vanish are register copies that coalesce and `sign_extend:DI` of an SImode value.
+DDS2 `mnuSubmitMovieDrawPacket` (98 insns, 3 blocks): writing
+`((u64)heightBits << 30) | ((u64)widthBits << 26) | 0x400000000ULL` instead of
+`(widthBits << 26) | ((u64)heightBits << 30) | ...` adds that extension; the
+`uvLast` shifts and the bb2 constants then stay after the `audioMode` branch as
+in retail, size unchanged at 512 bytes. Dead stores, unused locals and redundant
+assignments do not move the estimate: they are removed before sched1.
