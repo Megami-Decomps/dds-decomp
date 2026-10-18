@@ -453,12 +453,12 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         break;
     case 11: {
         EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(sizeof(*draw));
-        draw->x = kwlnDrawVector.fogFar;
-        draw->mode = kwlnDrawVector.fogColor;
+        draw->parameters.vec[0] = kwlnDrawVector.fogFar;
+        draw->parameters.color = kwlnDrawVector.fogColor;
         key->payload = draw;
-        draw->y = kwlnDrawVector.fogNear;
-        draw->z = kwlnDrawVector.depthNear;
-        draw->w = kwlnDrawVector.depthFar;
+        draw->parameters.vec[1] = kwlnDrawVector.fogNear;
+        draw->parameters.vec[2] = kwlnDrawVector.depthNear;
+        draw->parameters.vec[3] = kwlnDrawVector.depthFar;
         key->p08.h[0] = 1;
         break;
     }
