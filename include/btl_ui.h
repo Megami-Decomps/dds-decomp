@@ -120,7 +120,7 @@ typedef struct BattleSelectionWork {
     u8 pad01;
     s16 rowFade[4]; /* +0x02; one-based selection indexes rowFade[row - 1]. */
     u8 pad0A[2];
-    BattleSelectionPosition positions[4]; /* +0x0C */
+    s32 positions[4][2]; /* +0x0C: row, then signed x/y components. */
     s16 backdropFade; /* +0x2C */
     u8 pad2E[2];
 } BattleSelectionWork;
