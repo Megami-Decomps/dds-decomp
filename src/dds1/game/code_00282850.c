@@ -39,6 +39,22 @@
 #include "dat_command.h"
 #include "eff.h"
 #include "kwln_task_lifecycle.h"
+#include "btl.h"
+#include "dds3_world_primary.h"
+#include "prf_profile_cap.h"
+/* Declared before first use (were implicit int). */
+extern u16 btlCheckPartyCommandCounterEligibility(s32 commandId, u32 memberMask);
+extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
+extern void evtDestroySecondaryWorldNode(void);
+extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
+extern void kwlnDebugGraphSetEnabled(s8 enabled);
+extern void * memset(void *, s32, u32);
+extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
+extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
+extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern void sndDestroyFileQueueWrapper(u32 handle);
+/* Original-style implicit int, kept: matched code depends on it: itfGridStorePosition, sndCreateSystemEffectHandle. */
 
 struct FrFontGlyph;
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);

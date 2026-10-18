@@ -18,6 +18,10 @@
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+/* Declared before first use (were implicit int). */
+extern s32 SignalSema(s32);
+extern s32 WaitSema(s32);
+extern s32 sdfFormatBitsPerPixelB(u32 format);
 /* Polled in a spin-wait below; its writer is outside this C unit. */
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);

@@ -31,6 +31,11 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "sdf_dma_tag.h"
+/* Declared before first use (were implicit int). */
+extern s32 SignalSema(s32);
+extern s32 WaitSema(s32);
+extern s32 sdfFormatBitsPerPixelB(u32 format);
+extern void sdfSleepThreadCount(s32 requestedSleepCount);
 
 /* DMAC tag IDs occupy the high nibble of the header byte at offset three. */
 #define SDF_DMA_TAG_NEXT_BYTE 0x20

@@ -15,6 +15,9 @@
 #include "mnu_scene.h"
 #include "mdl_flag_api.h"
 #include "prf_requirement_fallback.h"
+/* Declared before first use (were implicit int). */
+extern void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *outInstance);
+extern void * memset(void *, s32, u32);
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15

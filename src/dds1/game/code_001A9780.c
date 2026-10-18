@@ -1,4 +1,17 @@
 #include "common.h"
+#include "dsp_message_window_api.h"
+#include "fr_font_context.h"
+/* Declared before first use (were implicit int). */
+extern void btlClearNodeFlags(void);
+extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
+extern u32 btlNextScaledRandom(u32 limit);
+extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
+extern s32 fldGetSceneObjectState(void);
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
+extern void * memset(void *, s32, u32);
+extern u32 strlen(const char *s);
+/* Original-style implicit int, kept: matched code depends on it: btlCountEligibleLinkedActors, btlRefreshUnitMaximumHpAndClampCurrentHp, btlRefreshUnitMaximumMpAndClampCurrentMp. */
 
 extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_actor_status_table_api.h"

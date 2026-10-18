@@ -65,6 +65,38 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
+#include "kwln_fade_timing.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
+extern s32 btlGetSelectedUnitProperty(s32 unitAddress);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
+extern void effBTLFieldColorResetFlags(void);
+extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern void effSweepFloorModelList(void);
+extern void effTickSlotVolumeFade(void);
+extern void evtDestroySecondaryWorldNode(void);
+extern void evtDrainSecondaryWorldNodes(void);
+extern void fileResetRenderFlags(void);
+extern void fldDrawSkyGradient(void);
+extern u32 fldGetSkyDrawState(void);
+extern void fldSetSkyDrawState(u32 drawState);
+extern void fldUpdateSelectedValueTransition(void);
+extern void fldUpdateSwayOffset(void);
+extern void mdlClearListedObjectFlag(void);
+extern void mdlMarkAndProcessObjectNodes(void);
+extern void mdlSetListedObjectFlag(void);
+extern void * memset(void *, s32, u32);
+extern void mnuAdvanceTitleStateUnderSemaphore(void);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
+extern u32 sdfSoundIsCommandBusy(void);
+extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
+extern void sndEnsureMidiBankResident(s32 packed);
+extern s32 sndGetMixerBankCallbackFrame(SoundMixer *mixer, u16 kind);
+extern s32 sndHasActiveFileLoad(void);
+extern s32 sndIsCommandBusySigned(void);
+extern char * strcpy(char *, const char *);
+extern u32 strlen(const char *s);
+/* Original-style implicit int, kept: matched code depends on it: effDrawSolidRectangle. */
 
 extern void sndQueueNoPayloadCommand1A0(void);
 extern void sndQueueNoPayloadCommand210(void);

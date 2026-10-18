@@ -18,6 +18,8 @@
 
 #include "eff.h"
 #include "par_table.h"
+/* Declared before first use (were implicit int). */
+extern void effDestroyResources(EffEmitterHead *owner);
 
 struct ParSystem;
 struct EffTrackPolyList;

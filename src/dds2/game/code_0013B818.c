@@ -35,6 +35,13 @@
 #include "mdl.h"
 #include "fld_player_scene_state.h"
 #include "mdl_world_object_source_vector_api.h"
+#include "dds3_world_counter.h"
+/* Declared before first use (were implicit int). */
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
+extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
+extern char * strcpy(char *, const char *);
+/* Original-style implicit int, kept: matched code depends on it: itfSetTextDrawLimit. */
 
 extern u32 fldPlayerObject;
 extern s32 D_003897C0[];

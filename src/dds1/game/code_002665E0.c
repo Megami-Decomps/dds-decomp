@@ -12,6 +12,15 @@
 #include "mnu_result.h"
 #include "brs_result_counter.h"
 #include "dds3_world_counter.h"
+#include "snd_track_playback_api.h"
+/* Declared before first use (were implicit int). */
+extern void FlushCache(s32);
+extern void mnuAdvanceTitleStateUnderSemaphore(void);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
+extern s32 sceSifDmaStat(s32);
+extern s32 sceSifSetDma(void *, s32);
+extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
+extern void sdfSoundStopNamedPlayback(void);
 
 
 

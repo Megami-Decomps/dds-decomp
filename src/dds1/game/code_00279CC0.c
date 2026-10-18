@@ -13,6 +13,14 @@
 #include "eff_resource_records.h"
 #include "itf.h"
 #include "fr_font.h"
+#include "mnu_staff.h"
+/* Declared before first use (were implicit int). */
+extern void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *outInstance);
+extern s32 mnuCloseItemSelectionState(KwlnTask *contextArg);
+extern void uiDrawTexturedSurfaceAtFarDepth(s32 surface);
+extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
+extern void uiPrepareMenuBackgroundSurface(s32 unused, s32 surface);
+/* Original-style implicit int, kept: matched code depends on it: mnuAdvanceListSelection, mnuReverseListSelection. */
 
 extern EffPayload *effCreatePayload(u32);
 extern u32 effDestroyPayload(EffPayload *);

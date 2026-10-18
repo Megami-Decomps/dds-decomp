@@ -21,6 +21,9 @@
 #include "pcp_vu0.h"
 #include "dat_command.h"
 #include "eff.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration);
+extern s32 btlGetRegisteredTaskValueOrDefault(void);
 
 
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);

@@ -21,6 +21,14 @@
 #include "pcp_vu0.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
+#include "btl.h"
+#include "dds3_world_selection.h"
+#include "evt_action_object.h"
+/* Declared before first use (were implicit int). */
+extern void fldDispatchDeferredFieldCommand(void);
+extern void * memset(void *, s32, u32);
+extern void mnuClearInactiveSoundBufferState(void);
+extern void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex);
 
 
 

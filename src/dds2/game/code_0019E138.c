@@ -18,6 +18,11 @@
 #include "sdf.h"
 #include "itf_panel_draw.h"
 #include "sdf_texture_file.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern FrFontGlyph * frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph);
+extern void frFontFreeEntry(s32 slotId);
+extern void frFontSetEntryFlag(s32 slotId, s32 entryFlag);
 
 
 #define ITF_BYTE_MASK 0xFF

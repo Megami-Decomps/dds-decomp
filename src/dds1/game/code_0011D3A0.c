@@ -25,6 +25,9 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+/* Declared before first use (were implicit int). */
+extern s32 fldFindTableEntry(s32 index);
+extern void * memset(void *, s32, u32);
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {

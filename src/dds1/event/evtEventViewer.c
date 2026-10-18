@@ -42,6 +42,21 @@
 
 #include "eff_dependency.h"
 #include "eff_node.h"
+#include "itf.h"
+#include "sdf_packet_list.h"
+/* Declared before first use (were implicit int). */
+extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
+extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
+extern void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters);
+extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
+extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
+extern void effSetLoadDescA(void *parameters);
+extern void effSetLoadDescD(void *parameters);
+extern s32 fldTitleIsActive(void);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
+extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
+extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
+extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 struct EvtRuntime;
 struct EvtRuntime;
 struct EvtRuntime;

@@ -10,6 +10,7 @@
 #include "mnu_list.h"
 #include "mnu_item_requirement_api.h"
 #include "mdl_flag_api.h"
+#include "btl.h"
 
 /* Classify a party row while no selection is pending: 1 when it is the active
  * list's cursor row (or a highlighted frontline row), 2 when only the primary

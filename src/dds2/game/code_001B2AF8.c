@@ -46,6 +46,16 @@
 #include "btl_command.h"
 #include "fr_font.h"
 #include "mdl_flag_api.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
+extern s32 btlCountEligibleLinkedActors(BtlState *battle);
+extern void * btlGetIndexedUiResource(BtlUnit *unit);
+extern u32 btlNextScaledRandom(u32 limit);
+extern void btlResetBattleHistoryCounters(void);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
+extern void * memset(void *, s32, u32);
+extern u32 strlen(const char *);
+/* Original-style implicit int, kept: matched code depends on it: btlBuildActorLinkageSkillList, itfSetTextDrawLimit. */
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x30];

@@ -17,6 +17,14 @@
 #include "mnu_movie_resource.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
+/* Declared before first use (were implicit int). */
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void frFontUploadClearedTexture(void);
+extern void mnuLoadStaffFonts(void);
+extern void mnuUnloadStaffFonts(void);
+extern void sdfDebugPrintf(const char *fmt, ...);
+extern s32 sdfPacCheckDecoderStatus(MovObj *job);
+extern s32 sprintf(char *, const char *, ...);
 
 
 /* Title menu's selected page, sequence timers and draw-task state. */

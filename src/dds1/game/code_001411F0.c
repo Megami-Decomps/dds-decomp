@@ -53,6 +53,13 @@
 #include "dds3_world_counter.h"
 #include "fr_font.h"
 #include "itf.h"
+#include "btl.h"
+#include "evt_unit.h"
+/* Declared before first use (were implicit int). */
+extern void dds3WorkClear(void);
+extern void * memset(void *, s32, u32);
+extern void sdfWaitSlotReady(void);
+extern void sndSendSingleWordControlPacket(u32 controlWord);
 
 extern void sndQueueNoPayloadCommand1A0(void);
 extern u8 D_00324510[2][2][16];

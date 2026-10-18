@@ -69,6 +69,22 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
+#include "kwln_fade_timing.h"
+#include "sdf_asset_packets.h"
+#include "sdf_chunk.h"
+/* Declared before first use (were implicit int). */
+extern void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames);
+extern void btlInitTintTransitionDefault(u16 soundId);
+extern void btlInitTintTransitionResource(u32 resource, u16 soundId);
+extern void evtDestroySelectionState(void);
+extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue);
+extern void fileReadRecordSecondVector(void *record, u128 *out);
+extern void fileReadVectorPtr20(void *record, u128 *out);
+extern void fileSetRecordSecondVector(void *record, const u128 *value);
+extern void kwlnPadResetMotorLevelsAndOutput(void);
+extern void * memset(void *, s32, u32);
+extern void mnuRecordSetVector(void *record, const u128 *value);
+extern char * strcpy(char *, const char *);
 
 
 

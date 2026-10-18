@@ -19,6 +19,9 @@
 #include "eff_owner_records.h"
 #include "sdf.h"
 #include "sdf_texture_file.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
 
 
 extern u32 D_003BD11C;

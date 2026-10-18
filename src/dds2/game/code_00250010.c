@@ -33,6 +33,11 @@
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
+extern s32 sprintf(char *, const char *, ...);
+/* Original-style implicit int, kept: matched code depends on it: sceWrite. */
 
 extern u32 evtSkyOverlayEnabled;
 

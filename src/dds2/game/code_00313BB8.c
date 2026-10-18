@@ -12,6 +12,9 @@
 #include "eff_curve.h"
 #include "sdf_projection.h"
 #include "mdl_flag_api.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
+extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
 extern void memset();
 
 #include "fpu.h"

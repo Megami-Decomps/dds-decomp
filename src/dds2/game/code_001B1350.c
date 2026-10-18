@@ -30,6 +30,10 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 #include "btl_target_result.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
+extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item);
 
 typedef struct BattleController {
     u8 pad_000[0x214];

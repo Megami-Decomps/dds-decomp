@@ -22,6 +22,7 @@
 #include "menu_fade_entry.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
+#include "btl.h"
 
 struct StaffMenuRuntime;
 

@@ -32,6 +32,10 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "mdl_flag_api.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
+extern s32 btlHasActiveSubtask(void);
+extern s32 ptyRebalanceFrontline(s32 rosterIndex);
 
 
 

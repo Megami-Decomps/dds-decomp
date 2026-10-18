@@ -2,6 +2,10 @@
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
 #include "dds_nested_resource.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
+extern void sdfFreeHeapMemory(SdfListNode *);
 
 #define MNU_WORK_ACTIVE   1
 

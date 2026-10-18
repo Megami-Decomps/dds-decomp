@@ -12,6 +12,11 @@
 #include "sdf_pending.h"
 #include "sdf_tex_copy_image_data_api.h"
 #include "ee_mmi.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern SdfTexResource * sdfTexAllocHead(s32 type, s32 kind, s32 unused);
+extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
+extern SdfTex * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };

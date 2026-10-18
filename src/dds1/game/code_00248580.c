@@ -27,6 +27,11 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "mnu_effect_pair.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void datAddCurrencyClamped(s32 delta);
+extern u32 strlen(const char *s);
+/* Original-style implicit int, kept: matched code depends on it: fileSetPreviewLocation. */
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PERCENT_PAIR_BYTES 0xA8

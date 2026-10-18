@@ -83,6 +83,26 @@
 #include "sdf_primitive_packet_api.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "eff_random_mod.h"
+#include "kwln_fade_timing.h"
+#include "sdf_dev_slot_api.h"
+/* Declared before first use (were implicit int). */
+extern s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition);
+extern void btlInitTintTransitionDefault(u16 soundId);
+extern void btlInitTintTransitionResource(u32 resource, u16 soundId);
+extern u32 effGetGeneralResourceCount(void);
+extern void evtDestroySelectionState(void);
+extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue);
+extern void fileReadRecordSecondVector(u8 *obj, void *dst);
+extern void fileReadVectorPtr20(u8 *obj, void *dst);
+extern void fileSetRecordSecondVector();
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
+extern void kwlnPadResetMotorLevelsAndOutput(void);
+extern void * memset(void *, s32, u32);
+extern void mnuRecordSetVector();
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId);
+extern char * strcpy(char *, const char *);
+/* Original-style implicit int, kept: matched code depends on it: effAllocateStripFromWorkAndRetainTexture, effCreateTexturedStripWithSharedTexture, effRequestResourceByMode. */
 
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 

@@ -11,6 +11,10 @@
 #include "mnu_movie_transfer.h"
 #include "mnu_movie_list.h"
 #include "sce_io.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void kwlnDrawEnableDc8(s32 duration);
+extern void sdfSoundInitIpuStream(void);
 
 extern s32 scrReadIntParameter(s32);
 

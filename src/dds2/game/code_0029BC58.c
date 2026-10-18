@@ -9,6 +9,11 @@
 #include "mdl_flag_api.h"
 
 #include "mnu.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void dspAdvanceMessageWindowControlWithRefresh(u32 value);
+extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context);
+extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions);
 extern const char *D_003D62F0[6];
 extern char (*D_00435E48)[17];
 extern char (*D_00435E5C)[25];

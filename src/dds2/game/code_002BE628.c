@@ -41,6 +41,26 @@
 #include "dat_state.h"
 #include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
+#include "btl.h"
+#include "dds3_world_primary.h"
+#include "itf_draw_grid.h"
+#include "prf_profile_cap.h"
+/* Declared before first use (were implicit int). */
+extern u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask);
+extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
+extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
+extern void evtDestroySecondaryWorldNode(void);
+extern void fldActivatePendingSceneCommand(void);
+extern s32 fldGetSceneCommandState(void);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
+extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
+extern void kwlnDebugGraphSetEnabled(s8 enabled);
+extern void * memset(void *, s32, u32);
+extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
+extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
+extern void sndDestroyFileQueueWrapper(u32 handle);
+/* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
 
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
 struct MenuPanelItem {

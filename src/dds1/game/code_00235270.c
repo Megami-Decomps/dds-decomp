@@ -31,6 +31,11 @@
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
+extern s32 sceWrite(s32, const void *, s32);
+extern u32 strlen(const char *s);
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 extern s32 evtDrawFrameListColumnHeadings();

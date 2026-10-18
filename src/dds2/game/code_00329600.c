@@ -6,6 +6,8 @@
 #include "sdf_pending.h"
 #include "sdf_named_resource_request_api.h"
 #include "sif_rpc_client_prefix.h"
+/* Declared before first use (were implicit int). */
+extern u32 strlen(const char *);
 
 #define SDF_HEAP_BLOCK_FREE 0
 #define SDF_HEAP_BLOCK_USED 1

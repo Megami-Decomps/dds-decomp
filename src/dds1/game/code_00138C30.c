@@ -99,6 +99,12 @@
 #include "fld_trigger_shape.h"
 #include "fld_action_row.h"
 #include "mdl_world_object_source_vector_api.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
+extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
+extern char * strcpy(char *, const char *);
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void datAddCurrencyClamped(s32 delta);

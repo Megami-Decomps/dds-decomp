@@ -9,6 +9,10 @@
 #include "eff_event_draw.h"
 #include "eff_event_work_api.h"
 #include "kwln_task_lifecycle.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
+extern void scrDestroyAllNamedProcesses(void);
 
 #define SOLAR_FADE_DRAW_ENABLED 1
 #define SOLAR_FADE_IN 2

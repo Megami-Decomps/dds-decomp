@@ -28,6 +28,11 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
+#include "btl_unit_tasks.h"
+/* Declared before first use (were implicit int). */
+extern void btlDestroyUnit(u8 *actor);
+extern s32 btlFindScriptResource(char *name);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 

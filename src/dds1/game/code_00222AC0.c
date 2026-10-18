@@ -32,6 +32,9 @@
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
+/* Declared before first use (were implicit int). */
+extern void * effObjCreateEventNode(void *resource, void *position, void *scale);
+/* Original-style implicit int, kept: matched code depends on it: effForwardMagatuhiDescriptor. */
 
 
 

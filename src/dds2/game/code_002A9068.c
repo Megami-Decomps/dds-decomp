@@ -23,6 +23,12 @@
 #include "mnu_scroll_panel.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "btl.h"
+/* Declared before first use (were implicit int). */
+extern void mnuDestroyEffectResources(MenuEffectResources *resources);
+extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
+extern void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, s32 texture);
+extern void sndStopReducedBgm(void);
 
 extern u32 mnuMovieShutdownCounter;
 
