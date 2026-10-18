@@ -4575,7 +4575,7 @@ EffClassWork *effCloneClassWork(EffClassWork *work) {
 }
 
 void effInitializeClassFrame(EffClassWork *work) {
-    effClassWorkOperations[work->kind].initialize();
+    effClassWorkOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 

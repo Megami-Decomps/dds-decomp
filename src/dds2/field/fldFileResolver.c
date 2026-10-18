@@ -31,6 +31,7 @@
 #include "fld_release_texture_slots_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
+#include "fld_named_camera_table.h"
 #include "fld.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_scene_request.h"

@@ -27,9 +27,11 @@ extern SdfPoolNode D_00380588;
 
 
 
-extern void (*D_003AAFB0[])();
+/* Node restarts and scales: retail leaves the dispatch state in a0 (and the
+ * factor in f12) for them. */
+extern void (*D_003AAFB0[])(EffectDispatchState *);
 
-extern void (*D_003AAFC0[])();
+extern void (*D_003AAFC0[])(f32, EffectDispatchState *);
 
 extern BillDispatch effBillConstructorEntries[];
 
@@ -66,7 +68,7 @@ void *effBillCreateDispatch(s32 index, void *arg) {
 }
 
 void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
-    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func();
+    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func(effect);
 
     result->handler = effect->handler;
     result->valueB2 = 1;
@@ -75,21 +77,21 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
 
 /* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
 void billDestroyDispatchedObject(EffectDispatchState *effect) {
-    effBillConstructorEntries[effect->handler].destroy();
+    effBillConstructorEntries[effect->handler].destroy(effect);
 }
 
 /* Invoke the update column of the selected constructor/update/destructor record. */
 void billUpdateDispatchedObject(EffectDispatchState *effect) {
-    effBillConstructorEntries[effect->handler].callback();
+    effBillConstructorEntries[effect->handler].callback(effect);
 }
 
 void effInvokeHandlerAndMarkActive(EffectDispatchState *effect) {
-    D_003AAFB0[effect->handler]();
+    D_003AAFB0[effect->handler](effect);
     effect->valueB2 = 1;
 }
 
-void effRunPreHandlerAndActivate(EffectDispatchState *effect) {
-    D_003AAFC0[effect->handler]();
+void effRunPreHandlerAndActivate(EffectDispatchState *effect, f32 factor) {
+    D_003AAFC0[effect->handler](factor, effect);
     effInvokeHandlerAndMarkActive(effect);
 }
 

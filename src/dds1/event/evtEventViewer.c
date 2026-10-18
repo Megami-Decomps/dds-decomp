@@ -2967,8 +2967,8 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     }
                     case 11: {
                         EvtViewerDrawPayload *parameters = key->payload;
-                        evtSetDrawVectorTarget(0, parameters->y, parameters->x, parameters->z, parameters->w);
-                        kwlnDrawVector.fogColor = parameters->mode;
+                        evtSetDrawVectorTarget(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
+                        kwlnDrawVector.fogColor = parameters->parameters.color;
                         viewer->controlState = kwlnTaskCreate(D_003BBF60, 0x2AF9, 1, 1, evtEventViewerEditDrawVectorTargetTask, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -3562,11 +3562,11 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
         break;
     case 11:
         draw = entry->payload;
-        draw->x = kwlnDrawVector.fogFar;
-        draw->mode = kwlnDrawVector.fogColor;
-        draw->y = kwlnDrawVector.fogNear;
-        draw->z = kwlnDrawVector.depthNear;
-        draw->w = kwlnDrawVector.depthFar;
+        draw->parameters.vec[0] = kwlnDrawVector.fogFar;
+        draw->parameters.color = kwlnDrawVector.fogColor;
+        draw->parameters.vec[1] = kwlnDrawVector.fogNear;
+        draw->parameters.vec[2] = kwlnDrawVector.depthNear;
+        draw->parameters.vec[3] = kwlnDrawVector.depthFar;
         break;
     case 13:
         memcpy(entry->payload, effGetLoadDescA(), 0x28);

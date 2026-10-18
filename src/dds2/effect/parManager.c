@@ -44,7 +44,8 @@ typedef struct {
     f32 previousOrigin[3];       /* 0x178: native updater caches origin here */
 } ParBurstEmitter; /* 0x184 */
 
-extern void (*D_003AAC20[])();
+/* Restart callbacks: each takes the object, which retail leaves in a0. */
+extern void (*D_003AAC20[])(ParObj *);
 
 /* Constructor, update and destructor operations share one 0xC-byte entry,
  * selected by the emitter's 16-bit dispatch index at +0x140. */
@@ -620,7 +621,7 @@ void parCreateIndexed(s32 dispatchIndex, void *creationData) {
 
 /* Invoke the selected destructor with the existing empty argument list. */
 void parDispatchByKind(ParObj *obj) {
-    parKindConstructorEntries[obj->dispatchIndex].destroy();
+    parKindConstructorEntries[obj->dispatchIndex].destroy(obj);
 }
 
 /* Draw live particles after applying the requested number of emitter updates. */
@@ -675,7 +676,7 @@ ParObj *parCloneKind(ParObj *obj) {
 
 /* Reissue the callback, reload the native updater's repeat count, and arm restart. */
 void parRestartKind(ParObj *obj) {
-    D_003AAC20[obj->dispatchIndex]();
+    D_003AAC20[obj->dispatchIndex](obj);
     obj->pendingRestartSteps = obj->restartStepCount;
     obj->restartFlag = 1;
 }
