@@ -1503,7 +1503,8 @@ void func_001411F8(s32 action) {
     FieldSequenceRecord sequence;
     s32 preview[2];
     s32 event;
-    s32 area;
+    s32 area[1];
+    s32 currentArea;
     s32 warp;
     s32 room;
     s32 index;
@@ -1548,11 +1549,11 @@ void func_001411F8(s32 action) {
         if (entry->kind != 9 || entry->motion != action) continue;
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            if (entry->explorationArea == 0) area = fldAreaState.area;
-            else area = entry->explorationArea;
+            if (entry->explorationArea == 0) area[0] = fldAreaState.area;
+            else area[0] = entry->explorationArea;
             room = entry->flags64 >> 2;
             if (room == 0) room = fldAreaState.floor + 1;
-            fldSetFloorFlag(area, room, entry->floorFlagBit);
+            fldSetFloorFlag(area[0], room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
@@ -1596,15 +1597,15 @@ void func_001411F8(s32 action) {
         } else if (entry->variantMode == 0) {
             if (entry->variant == 1) {
                 fldReleaseCurrentBgm();
-                area = fldAreaState.area;
-                dds3AdminSubmitModeRequest(0x1C, &area, 4, 0);
+                area[0] = fldAreaState.area;
+                dds3AdminSubmitModeRequest(0x1C, &area[0], 4, 0);
                 return;
             }
-            if (entry->variant == 0) area = fldAreaState.area;
-            else area = entry->variant;
+            if (entry->variant == 0) area[0] = fldAreaState.area;
+            else area[0] = entry->variant;
             if (entry->warpEntry == 0) room = fldAreaState.floor + 1;
             else room = entry->warpEntry;
-            if (fldAreaState.area != area) fldReleaseCurrentBgm();
+            if (fldAreaState.area != area[0]) fldReleaseCurrentBgm();
             fldApplySceneRoomSelection(entry);
             if (entry->flags54 != 0) {
                 D_00435F24 = entry->flags54;
@@ -1617,13 +1618,13 @@ void func_001411F8(s32 action) {
             if ((u32)((u8)entry->kind - 3) < 2U) {
                 fldAreaState.unk188 = 15;
                 if (entry->linkKind == 1) {
-                    fldInitializeFieldSequenceRecord(&sequence, area, room, entry->warpName,
+                    fldInitializeFieldSequenceRecord(&sequence, area[0], room, entry->warpName,
                         entry->sequenceCode, 1, entry->linkName);
                 } else {
-                    fldInitializeAlternateSequence(&sequence, area, room, entry->warpName);
+                    fldInitializeAlternateSequence(&sequence, area[0], room, entry->warpName);
                 }
             } else {
-                fldInitializeFieldSequenceRecord(&sequence, area, room, entry->warpName,
+                fldInitializeFieldSequenceRecord(&sequence, area[0], room, entry->warpName,
                     entry->sequenceCode, entry->linkKind, entry->linkName);
             }
             dds3AdminSubmitModeRequest(5, &sequence, 0xA0, 0);
@@ -1631,13 +1632,14 @@ void func_001411F8(s32 action) {
         } else if (entry->variantMode == 1) {
             headerIndex = entry->variant - 1;
             headerFloor = entry->warpEntry;
-            area = fldAreaState.area;
+            currentArea = fldAreaState.area;
             room = fldActorWaypointRows.headers[headerIndex].area;
+            area[0] = currentArea;
             D_004361DC = headerIndex;
             D_004361E0 = headerFloor;
-            fldSetFloorFlag(area, fldAreaState.floor + 1,
+            fldSetFloorFlag(area[0], fldAreaState.floor + 1,
                 fldActorWaypointRows.headers[headerIndex].body.data[headerFloor + 6]);
-            fldInitializeSequenceWithNote(&sequence, area, room, D_004134C0, 0, D_004134D0);
+            fldInitializeSequenceWithNote(&sequence, area[0], room, D_004134C0, 0, D_004134D0);
             dds3AdminSubmitModeRequest(5, &sequence, 0xA0, 0);
             return;
         } else if (entry->variantMode == 3) {
