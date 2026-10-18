@@ -299,7 +299,149 @@ flash:
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawLevelProgressDetails);
+#include "eff.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+typedef struct BrsProgressBarCoordinates {
+    s16 fillX;
+    s16 fillY;
+    u8 fillSlot;
+    u8 pad05;
+    s16 tailX;
+    s16 tailY;
+    u8 tailSlot;
+    u8 pad0B;
+} BrsProgressBarCoordinates;
+
+extern s32 sprintf(char *dst, const char *fmt, ...);
+extern const char D_004379F0[];
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+
+/* Draw the EXP remaining and temporarily crop the progress sprites for this
+ * row. Source lineage: Harbor/Luna's 30-word predecessor and the matched
+ * profile renderer's draw-fresh resource/tail-origin ordering.
+ * Capture remaining progress after palette setup; stock EE-GCC sched2
+ * otherwise keeps its load ahead of the three leading palette stores.
+ * Refresh mutable resource fields after drawing before restoring them. */
+void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *work,
+                               BrsProgressRow *row, s32 context, s32 index) {
+    char text[32];
+    typedef struct { u32 values[4]; } BrsProgressBarPalette;
+    extern const BrsProgressBarPalette D_004285B0;
+    BrsProgressBarPalette palette = D_004285B0;
+    extern const BrsProgressBarCoordinates D_004285C0;
+    BrsProgressBarCoordinates coordinates = D_004285C0;
+    s32 fade = 0x100 - work->fadeProgress;
+    s32 fillX = coordinates.fillX;
+    s32 fillY = coordinates.fillY;
+    s32 fillSlot = coordinates.fillSlot;
+    s32 tailX = coordinates.tailX;
+    s32 tailY = coordinates.tailY;
+    s32 tailSlot = coordinates.tailSlot;
+    s32 level = work->levelAnimation[index].level;
+    s16 nextLevel = work->levelAnimation[index].level + 1;
+    s32 remaining;
+    s32 levelDelta;
+    s32 currentTotal;
+    s32 startProgress;
+    s32 endProgress;
+    s32 progress;
+    s32 originalProgress;
+    s32 range;
+    s32 tailOrigin;
+    u32 color = work->levelAnimation[index].alpha | 0x80808000;
+    struct FrFontGlyph *glyph;
+    EffectSlotSet *resources;
+
+    palette.values[0] = color;
+    palette.values[1] = color;
+    palette.values[2] = color;
+    palette.values[3] = color;
+    remaining = work->levelAnimation[index].remaining;
+    nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
+    if (level >= 99) {
+        return;
+    }
+
+    levelDelta = level - row->unit->level;
+    currentTotal = (s32)ptyComputeTotalExp(row->unit, levelDelta);
+    if (remaining < currentTotal) {
+        startProgress = remaining;
+        endProgress = (s32)ptyComputeTotalExp(row->unit, nextLevel - level + levelDelta);
+    } else {
+        startProgress = remaining - currentTotal;
+        endProgress = (s32)ptyComputeTotalExp(row->unit, nextLevel - level + levelDelta) - currentTotal;
+    }
+    if (work->levelAnimation[index].completionFlashActive != 0 &&
+        work->levelAnimation[index].drawPhase == 3) {
+        endProgress = 0;
+        startProgress = 0;
+    }
+    if (row->unit->hp != 0 && !(row->unit->status & 0x4000)) {
+        color = uiBlendColors(0x80808080, 0x80808000, fade);
+    } else {
+        color = uiBlendColors(0x4F4E4E80, 0x4F4E4E00, fade);
+    }
+    sprintf(text, D_004379F0, endProgress - startProgress);
+    glyph = itfCreateFont2TextGlyph(x + 0xC00, y + 0xE0, depth, color, text, 0);
+    frFontDrawGlyphChain(glyph, 1, context);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+
+    if (startProgress > 0 && endProgress != 0) {
+        progress = startProgress * 1000 / endProgress;
+        if (progress >= 1001 && endProgress < startProgress) {
+            progress %= 1000;
+        }
+        originalProgress = progress;
+        if (work->levelAnimation[index].progressInitialized == 0) {
+            work->levelAnimation[index].previousProgress = progress;
+            work->levelAnimation[index].progressInitialized = 1;
+        }
+        if (progress <= 40) {
+            progress = 40;
+        }
+        if (work->levelAnimation[index].applied == 0 &&
+            work->levelAnimation[index].previousProgress < originalProgress &&
+            originalProgress - work->levelAnimation[index].previousProgress < 11) {
+            progress += 10;
+        }
+        progress = progress <= 0 ? 0 : (progress > 1000 ? 1000 : progress);
+        resources = work->teardownResource;
+        resources->workEntries[fillSlot].geometry.bounds[2] =
+            (resources->workEntries[fillSlot].sourceWidth << 4) * progress / 1000;
+        range = resources->descriptions[fillSlot].colors[2] -
+            resources->descriptions[fillSlot].colors[0];
+        range = range * progress / 1000 - range;
+        resources->workEntries[fillSlot].parameters[2] = range;
+        effDrawSpriteWithCornerColors(x + (fillX << 4), y + (fillY << 3),
+                                     depth, palette.values, 0, resources, fillSlot, context);
+        tailOrigin = x + (tailX << 4);
+        resources = work->teardownResource;
+        effDrawSpriteWithCornerColors(tailOrigin +
+                                     resources->workEntries[fillSlot].geometry.bounds[2],
+                                     y + (tailY << 3), depth, palette.values, 0,
+                                     resources, tailSlot, context);
+        {
+            EffectSlotSet *restorationResource = work->teardownResource;
+
+            restorationResource->workEntries[fillSlot].parameters[2] = 0;
+            restorationResource->workEntries[fillSlot].geometry.bounds[2] =
+                restorationResource->workEntries[fillSlot].sourceWidth << 4;
+        }
+    }
+    if (work->levelAnimation[index].completionFlashActive != 0) {
+        color = work->levelAnimation[index].flashOpacity | 0x80808000;
+        palette.values[0] = color;
+        palette.values[1] = color;
+        palette.values[2] = color;
+        palette.values[3] = color;
+        effDrawSpriteWithCornerColors(x + (fillX << 4), y + (fillY << 3),
+                                     depth, palette.values, 0, work->teardownResource,
+                                     fillSlot, context);
+    }
+}
+
+
 
 
 void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 progressRowIndex) {
