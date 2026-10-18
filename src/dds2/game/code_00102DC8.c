@@ -164,11 +164,64 @@ void kwlnDebugTaskCreate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnRegisterNamedSlot);
-
 extern KwlnNamedSlot D_0043D410[];
+extern char D_00411198[];
+extern s32 D_00435C20;
+extern s32 D_00435C24;
+extern s32 D_00435C28;
+extern s32 D_00435C2C;
 
-extern s32 kwlnRegisterNamedSlot(const char *name);
+s32 kwlnFindNamedSlot(const char *name);
+
+s32 kwlnRegisterNamedSlot(const char *name) {
+    s32 slotIndex;
+    s32 characterIndex;
+    s32 previous;
+
+    if (kwlnTaskGetTaskByName(D_00411198) == NULL) {
+        return -1;
+    }
+    if (kwlnFindNamedSlot(name) >= 0) {
+        return -1;
+    }
+    for (slotIndex = 0; slotIndex < 32; slotIndex++) {
+        if (D_0043D410[slotIndex].kind == 0) {
+            break;
+        }
+    }
+    if (slotIndex == 32) {
+        return -1;
+    }
+    D_0043D410[slotIndex].kind = 0;
+    characterIndex = 0;
+    while ((D_0043D410[slotIndex].name[characterIndex] = name[characterIndex]) != '\0') {
+        if (characterIndex == 31) {
+            D_0043D410[slotIndex].name[characterIndex] = '\0';
+            break;
+        }
+        characterIndex++;
+    }
+    D_0043D410[slotIndex].task = NULL;
+    D_0043D410[slotIndex].update = NULL;
+    D_0043D410[slotIndex].destroy = NULL;
+    D_0043D410[slotIndex].setState = NULL;
+    D_0043D410[slotIndex].enabled = 0;
+    D_0043D410[slotIndex].userValue = NULL;
+    D_0043D410[slotIndex].previous = -1;
+    D_0043D410[slotIndex].next = -1;
+    previous = D_00435C24;
+    if (previous < 0) {
+        D_00435C20 = slotIndex;
+        D_00435C24 = slotIndex;
+        D_00435C2C = slotIndex;
+    } else {
+        D_00435C24 = slotIndex;
+        D_0043D410[previous].next = slotIndex;
+        D_0043D410[slotIndex].previous = previous;
+    }
+    D_00435C28++;
+    return slotIndex;
+}
 
 /* One shared initializer for the three configure modes and unregister. */
 static inline void kwlnSetNamedSlotState(s32 index, s32 kind, TaskUpdate update, TaskDestroy destroy,
@@ -181,8 +234,6 @@ static inline void kwlnSetNamedSlotState(s32 index, s32 kind, TaskUpdate update,
     D_0043D410[index].enabled = 0;
     D_0043D410[index].userValue = userValue;
 }
-
-extern s32 D_00435C20;
 
 #define KWLN_PAD_INPUTS_PER_SET 16
 #define KWLN_PAD_REPEAT_BIT 2
@@ -223,11 +274,6 @@ s32 kwlnFindNamedSlot(const char *name) {
     }
     return -1;
 }
-
-extern char D_00411198[];
-extern s32 D_00435C24;
-extern s32 D_00435C28;
-extern s32 D_00435C2C;
 
 /* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
 s32 kwlnUnregisterNamedSlot(const char *name) {
