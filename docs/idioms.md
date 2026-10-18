@@ -14462,3 +14462,32 @@ The battle-index reset owners use the same placement for the `summonId`,
 `battleExperienceReward` and `moneyReward` offset checks. Header-level
 assertions otherwise expand an unrelated alternate effect callback from
 80 to 84 bytes in full-unit compilation. The resetters write all three fields.
+
+## Operand order of a commutative op on two registers: cse register quantities
+
+`cc1probe --cse` on DDS1/DDS2 `sdfModelBuildVisibleNodePackets` (indexed
+reference tag `0x30000000 | count`): retail is `or $16,$4,$16` (constant
+register first, count second); the natural `0x30000000 | assetWord` gives
+`or $16,$16,$4`. At expansion the two registers keep source order, but
+`03.cse` then canonicalises a commutative op of two registers by quantity
+number: the operand with the lower `REG_QTY` goes first. A register not yet
+set in the current extended basic block has a negative quantity (lower for
+higher register numbers), so it sorts before any register set in the block.
+
+Consequences when matching an IOR/AND/ADD of two registers:
+
+- A constant that does not fit an immediate is forced into a pseudo at the
+  statement that uses it. That pseudo is set in the same block as the other
+  operand, which was set earlier, so the other operand sorts first.
+- Naming the constant and setting it once before the loop
+  (`referenceTag = 0x30000000;` at function entry, then
+  `referenceTag | assetWord` inside) makes it unseen in the loop block, so it
+  sorts first. This reproduced the retail operand order in both games; a
+  constant local declared inside the block does not (it is set in the block).
+- Swapping the C operands does not help: cse swaps them back.
+
+The same function shows the scheduling side of a store before a load: a
+header-clear store written before `command->address` is read blocks the load
+(possible alias) in `sched2`; moving the store after the load makes the load
+issue before the constant materialisation instead (retail has constant, load,
+`or`, store), so source order alone does not close it.
