@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_mantra_sprite_draw.h"
 #include "sdf_task_work.h"
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
@@ -96,7 +97,6 @@ void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *gr
 }
 
 
-extern void mnuDrawScaledSpriteAtCoordinatePlacement(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void mnuDrawMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, SdfGridCell *, s32);
 extern void mnuDrawScaledMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
 extern void mnuDrawMantraGridEntryIndicators(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);

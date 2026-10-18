@@ -1,5 +1,6 @@
 #include "mnu_variant_sprite_placement.h"
 #include "common.h"
+#include "mnu_mantra_sprite_draw.h"
 #include "dsp_channel.h"
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
@@ -359,7 +360,7 @@ void mnuDrawScaledScenePlacementSprite(s32 x, s32 y, s32 z, s32 alpha, s32 place
 }
 
 void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+                   s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource =
             mnuMantraSpriteSlots[
@@ -412,7 +413,7 @@ void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s3
 }
 
 void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 flags, s32 context, f32 scaleX, f32 scaleY) {
+                   s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource = mnuMantraSpriteSlots[
             mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
@@ -443,8 +444,7 @@ void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 place
 }
 
 void mnuDrawVariantSpriteBySelector(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                  s32 selector, s32 flags, s32 context,
-                  f32 scaleX, f32 scaleY) {
+                  s32 selector, s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     s8 spriteMap[15] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 17, 18 };
     s32 sprite;
 
@@ -488,8 +488,7 @@ void mnuDrawVariantSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s
 }
 
 void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 spriteIndex, s32 flags, s32 context, f32 scaleX,
-                   f32 scaleY) {
+                   s32 spriteIndex, s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource =
             mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][0]];
