@@ -585,7 +585,8 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
     sdfModelBuildNodeResourcePackets(surfaces, (SdfModel *)base->resourceHandle);
     /* Retail ends in jal + epilogue here (not a sibling jump), like
      * dds3SetObjectSlot1MoverCallback in this unit. The retired pointer is
-     * deleted after the sibcall decision (rtl.01.sibling..02.jump, 03.cse). */
+     * still there at rtl.01.sibling/02.jump/03.cse (cc1probe) and is gone by
+     * rtl.08.gcse. */
     base = NULL;
 }
 
