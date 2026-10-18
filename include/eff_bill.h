@@ -23,6 +23,15 @@ typedef struct EffLensFlareParams {
     u8 pad3D[3];
 } EffLensFlareParams;
 
+/* Lens-flare table row (16 bytes); D_0037E5D0 holds sets of thirteen rows, selected by EffLensFlareParams.flareSet. */
+typedef struct EffLensFlareElement {
+    f32 positionScale; /* 0x00: distance along the line from the screen center */
+    f32 sizeScale;     /* 0x04 */
+    u8 textureIndex;   /* 0x08: effGetBillResourceTexture index */
+    u8 pad09[3];
+    u32 color;         /* 0x0C: RGBA; alpha 0 skips the element */
+} EffLensFlareElement;
+
 typedef struct EffFadeVectorWork {
     f32 vector[4];
     s32 frame;
@@ -31,6 +40,7 @@ typedef struct EffFadeVectorWork {
 } EffFadeVectorWork;
 
 typedef char EffLensFlareParamsSizeCheck[(sizeof(EffLensFlareParams) == 0x40) ? 1 : -1];
+typedef char EffLensFlareElementSizeCheck[(sizeof(EffLensFlareElement) == 0x10) ? 1 : -1];
 typedef char EffLensFlareStrengthOffsetCheck[((u32)&((EffLensFlareParams *)0)->strength == 0x34) ? 1 : -1];
 typedef char EffLensFlareLimitOffsetCheck[((u32)&((EffLensFlareParams *)0)->limit == 0x38) ? 1 : -1];
 typedef char EffLensFlareSetOffsetCheck[((u32)&((EffLensFlareParams *)0)->flareSet == 0x3C) ? 1 : -1];
@@ -236,9 +246,39 @@ typedef struct EffBillCellEntry {
     f32 extent;
 } EffBillCellEntry;
 
+/* Kind-3 particle entry (0x2C bytes), the array behind EffBillFrameState.entries. */
+typedef struct EffBillParticleEntry {
+    s32 age;        /* -1 waiting to spawn, -2 retired, otherwise frames alive */
+    f32 rise;
+    f32 spinRate;
+    f32 angle;
+    f32 radiusA;
+    f32 radiusB;
+    f32 offset;
+    f32 offsetStep;
+    f32 extent;
+    u8 pad24[8];
+} EffBillParticleEntry;
+
 typedef struct EffBillParticleConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x44];
+    u32 colorA;             /* 0x58 */
+    u32 colorB;             /* 0x5C */
+    f32 extent;             /* 0x60 */
+    u8 pad64[4];
+    f32 extentJitter;       /* 0x68 */
+    f32 radius;             /* 0x6C */
+    f32 radiusJitter;       /* 0x70 */
+    f32 offset;             /* 0x74 */
+    f32 offsetJitter;       /* 0x78 */
+    f32 endOffset;          /* 0x7C */
+    f32 endOffsetJitter;    /* 0x80 */
+    f32 spinRate;           /* 0x84 */
+    f32 spinRateJitter;     /* 0x88 */
+    f32 acceleration;       /* 0x8C */
+    f32 rise;               /* 0x90 */
+    f32 riseJitter;         /* 0x94 */
+    f32 gravity;            /* 0x98 */
 } EffBillParticleConfig; /* kind 3, 0x9C */
 
 typedef struct EffBillAnimatedFrameConfig {
@@ -715,6 +755,11 @@ typedef char EffBillFrameHeaderSizeCheck[(sizeof(EffBillFrameHeader) == 0x58) ? 
 typedef char EffBillFrameConfigSizeCheck[(sizeof(EffBillFrameConfig) == 0x80) ? 1 : -1];
 typedef char EffBillCellConfigSizeCheck[(sizeof(EffBillCellConfig) == 0x8C) ? 1 : -1];
 typedef char EffBillParticleConfigSizeCheck[(sizeof(EffBillParticleConfig) == 0x9C) ? 1 : -1];
+typedef char EffBillParticleEntrySizeCheck[(sizeof(EffBillParticleEntry) == 0x2C) ? 1 : -1];
+typedef char EffBillParticleConfigColorAOffsetCheck[
+    ((u32)&((EffBillParticleConfig *)0)->colorA == 0x58) ? 1 : -1];
+typedef char EffBillParticleConfigGravityOffsetCheck[
+    ((u32)&((EffBillParticleConfig *)0)->gravity == 0x98) ? 1 : -1];
 typedef char EffBillAnimatedFrameConfigSizeCheck[(sizeof(EffBillAnimatedFrameConfig) == 0x80) ? 1 : -1];
 typedef char EffBillEmitterFrameConfigSizeCheck[(sizeof(EffBillEmitterFrameConfig) == 0x88) ? 1 : -1];
 typedef char EffBillEmitterFrameConfigFirstColorOffsetCheck[
