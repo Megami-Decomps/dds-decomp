@@ -54,6 +54,21 @@
 #include "kwln_fade.h"
 #include "fr_font.h"
 #include "itf.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_alloc.h"
+
+/* Declared before first use; these were implicit int (the void ones changed $v0 allocation near their calls). */
+extern void *memset(void *, int, unsigned int);
+extern void *memcpy(void *, const void *, unsigned int);
+extern f32 fabsf(f32);
+extern s32 fldTitleIsActive(void);
+extern void sndSendSingleWordControlPacket(u32 controlWord);
+extern void sndQueueNoPayloadCommand1A0(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern void func_00148A98(void);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32);
+extern void dds3WorkClear(void);
+extern void fldAddCameraModelEntry(s32 motionIndex);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
