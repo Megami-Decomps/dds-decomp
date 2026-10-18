@@ -1,3 +1,4 @@
+#include "evt_sel_state.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_dev_cons.h"
@@ -237,18 +238,6 @@ extern s8 evtSelectionStateActive;
 extern void *evtSelectionState;
 
 extern void evtSelStateDestroy(void);
-
-typedef struct EvtSelState {
-    u8 unk_00[4];
-    s32 limit;
-    s32 unk_08;
-    s32 unk_0C;
-    s16 unk_10;
-    s16 unk_12;
-    s16 unk_14;
-    u8 unk_16[2];
-    s32 count;
-} EvtSelState;
 
 extern void evtUpdateSelectionStateInterpolation(void);
 
@@ -917,9 +906,9 @@ s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValu
     }
     ((EvtSelState *)evtSelectionState)->unk_08 = firstValue;
     ((EvtSelState *)evtSelectionState)->unk_0C = secondValue;
-    ((EvtSelState *)evtSelectionState)->unk_10 = frames;
-    ((EvtSelState *)evtSelectionState)->unk_12 = frames;
-    ((EvtSelState *)evtSelectionState)->unk_14 = frames;
+    ((EvtSelState *)evtSelectionState)->amplitude[0] = frames;
+    ((EvtSelState *)evtSelectionState)->amplitude[1] = frames;
+    ((EvtSelState *)evtSelectionState)->amplitude[2] = frames;
     evtSelectionStateActive = 1;
     return 1;
 }

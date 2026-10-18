@@ -466,33 +466,8 @@ void mdlMarkAndProcessObjectNodes(void) {
 }
 
 
-typedef struct EffResourceConfig {
-    u8 unknown00[0x34];
-    s32 plainEntry; /* Duration, also selects plain versus flagged entry. */
-    f32 frameStep;
-} EffResourceConfig;
+#include "eff_resource_owner.h"
 
-typedef struct EffResourceExtendedConfig {
-    EffResourceConfig base;
-    u8 unknown3C[0x38];
-} EffResourceExtendedConfig;
-
-typedef struct EffResourceOwner {
-    u32 count;
-    s32 unk04;
-    EffResourceConfig base;
-    EffResourceExtendedConfig extended;
-    FileQueue **entries;
-    SdfMemBlock *buffer;
-    MdlCtx *model;
-} EffResourceOwner;
-
-typedef char EffResourceConfig_size_check[sizeof(EffResourceConfig) == 0x3C ? 1 : -1];
-typedef char EffResourceExtendedConfig_size_check[sizeof(EffResourceExtendedConfig) == 0x74 ? 1 : -1];
-typedef char EffResourceOwner_size_check[sizeof(EffResourceOwner) == 0xC4 ? 1 : -1];
-typedef char EffResourceOwner_base_check[(u32)&((EffResourceOwner *)0)->base == 8 ? 1 : -1];
-typedef char EffResourceOwner_extended_check[(u32)&((EffResourceOwner *)0)->extended == 0x44 ? 1 : -1];
-typedef char EffResourceOwner_entries_check[(u32)&((EffResourceOwner *)0)->entries == 0xB8 ? 1 : -1];
 typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer == 0xBC ? 1 : -1];
 typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 

@@ -1,3 +1,4 @@
+#include "mnu_variant_sprite_placement.h"
 #include "mnu.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -25,7 +26,6 @@ extern void *memcpy(void *, const void *, u32);
 
 extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
 
-typedef s16 MnuVariantSpritePlacement[6];
 
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern TaskWork *mnuSceneResourceContext;

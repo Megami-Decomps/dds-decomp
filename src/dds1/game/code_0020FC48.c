@@ -1,3 +1,4 @@
+#include "btl_runtime_state.h"
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
@@ -129,30 +130,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s8 D_003D7588[];
 
-typedef struct BattleRuntimeState {
-    s32 counter;
-    u16 state;
-    u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
-    s8 pending;
-    s8 active;
-    u8 pad09[3];
-    u32 options;
-    u32 color10;
-    u32 color14;
-    u32 color18;
-    u32 color1C;
-    f32 phase;      /* 0x20: overlay sweep, advanced each frame by phaseSpeed */
-    f32 phaseSpeed; /* 0x24: decays toward -0.02 */
-    s32 gridWidth;
-    s32 gridHeight;
-    s32 cellWidth;
-    s32 cellHeight;
-    u8 *ownedData;
-    u8 unk_3C[4];
-    RefObj *resource;
-    void *request;
-    void *handle;
-} BattleRuntimeState;
 
 extern BattleRuntimeState btlRuntimeState;
 

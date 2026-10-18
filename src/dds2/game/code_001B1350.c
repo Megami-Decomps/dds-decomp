@@ -245,7 +245,154 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     return value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B1350", btlResolveCommandHitResult);
+/* DDS2 native 001B17E8. DDS1 PiM checkpoint001 is a semantic reference;
+ * DDS2 command-flag, scale-hook, solar and minimum-chance paths are native-led. */
+s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
+
+s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
+    BtlState *runtime;
+    DatPartyRecord *targetRecord;
+    s32 entryFlags;
+    u32 targetFlags;
+    s32 runtimeFlags;
+    s32 attribute;
+    u32 selection;
+    u32 affinity;
+    s32 ailment;
+    s32 chance;
+    f32 hitMultiplier;
+    f32 escapeMultiplier;
+    f32 conditionMultiplier;
+    f32 autoMultiplier;
+    f32 affinityMultiplier;
+
+    runtime = btlGetRuntime();
+    if (runtime->hitResultOverride != NULL) {
+        s32 result = runtime->hitResultOverride(source, target, command);
+        if (result != 0) return result;
+    }
+    targetRecord = &target->partyRecord;
+    /* CONTRIBUTING's dead-code-trace exception: native 001B185C retains
+     * command << 3 before the entry-flags query. Stock GCSE shares this
+     * initialization's shift with the adjacent live command-flags access;
+     * flow deletes its early table/address/flags reads. Real live record-owner
+     * controls instead retain the full address or do not create this trace.
+     * Son2 #6244570135 / BtlSlot #6246044967 document the same mechanism. */
+    entryFlags = datCommandRecords[command].flags;
+    entryFlags = btlGetEntryFlagsUnlessDisabled(targetRecord);
+    targetFlags = target->status.stateFlags;
+    runtimeFlags = runtime->unk220;
+    if (targetFlags & 0x4000) entryFlags |= 0x20;
+    if (runtimeFlags & 0x10) return 0x20000;
+    if (runtimeFlags & 8) return 0x40000;
+    if ((runtimeFlags & 0x20) && !(targetFlags & 0x200))
+        return (entryFlags & 0x20) ? 4 : 2;
+    if (runtimeFlags & 0x40) return 1;
+    if (datCommandRecords[command].flags & 0x10) return 1;
+    attribute = btlGetActorIndexedSignedValue(source, command);
+    selection = btlEncodeActorIndexAsSelectionMask(attribute);
+    if (!(selection & 0x60001)) {
+        affinity = btlGetAdjustedSlotAffinity(target, command, attribute);
+        ailment = target->partyRecord.status;
+        if (!(((ailment & 0x7FFF) == 4 || (source->partyRecord.flags & 0x10)) && (selection & 6))) {
+            if (affinity & 0x20000) return 0x20000;
+            if (affinity & 0x40000) return 0x40000;
+            if (affinity & 0x10000) return 0x10000;
+            if ((ailment & 8) && btlCheckSpecialAbility(targetRecord, 0x26A))
+                return (entryFlags & 0x20) ? 4 : 2;
+        }
+    }
+    switch (datCommandRecords[command].unk30) {
+    case 4:
+        return ((target->partyRecord.status & 0x7FFF) == 8) ? 1 : 4;
+    case 20:
+        if ((target->partyRecord.status & 0x7FFF) == 16) return 1;
+        break;
+    }
+    switch (datCommandRecords[command].effectType) {
+    case 0:
+    case 1:
+        if (target->partyRecord.status & 0x290F) return 1;
+        break;
+    }
+    if (datCommandRecords[command].stat11 >= 100) return 1;
+    conditionMultiplier = 1.0f;
+    hitMultiplier = btlGetActorEntryMultiplier(source, 4, 1);
+    escapeMultiplier = btlGetActorEntryMultiplier(target, 2, 1);
+    if ((source->partyRecord.status & 0x7FFF) == 0x100)
+        conditionMultiplier = 0.25f;
+    autoMultiplier = 1.0f;
+    if (btlDoesEnabledStatusMatchCurrentId(targetRecord, 0xDA) &&
+        !(target->status.flags & 0x1000) && !(targetRecord->flags & 0x10))
+        autoMultiplier = 0.7f;
+    if (runtime->hitChanceScale != NULL)
+        autoMultiplier *= runtime->hitChanceScale(source, target, command);
+    if (datCommandRecords[command].effectType != 2) {
+        if ((source->partyRecord.flags & 0x10) && (source->status.flags & 0x200))
+            escapeMultiplier *= datBattleParameters->unkB84;
+        if ((target->partyRecord.flags & 0x10) && (target->status.flags & 0x200))
+            escapeMultiplier *= datBattleParameters->unkB88;
+    }
+    switch (datCommandRecords[command].effectType) {
+    case 0:
+        chance = evtRunContext(3, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        break;
+    case 1:
+        chance = evtRunContext(8, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        if (datCommandRecords[command].hpType == 8 || datCommandRecords[command].hpType == 10) {
+            affinity = btlGetAdjustedSlotAffinity(target, command, attribute);
+            affinity &= 0xFFFF;
+            affinityMultiplier = (f32)affinity / 100.0f;
+            chance = (s32)(chance * affinityMultiplier);
+            hitMultiplier = 1.0f;
+            escapeMultiplier = 1.0f;
+            conditionMultiplier = 1.0f;
+            autoMultiplier = 1.0f;
+            btlBossDebugPrintf("btl:PERDMG hit=%d%%[%.3f]\n", chance, affinityMultiplier);
+        }
+        break;
+    case 2:
+        if (!btlAreUnitStatusAndEntryFlagsClear(target)) return 4;
+        if ((target->partyRecord.status & 0x7FFF) == 0x800) return 0x10000;
+        if (btlGetAdjustedSlotAffinity(target, command, attribute) & 0x100000) return 4;
+        chance = evtRunContext(11, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        switch (command) {
+        case 0xE7:
+            if (evtGetMirroredSolarPhase() != 8) autoMultiplier *= 0.2f;
+            break;
+        case 0xE8:
+            if (evtGetMirroredSolarPhase() != 0) autoMultiplier *= 0.2f;
+            break;
+        }
+        if (target->status.flags & 0x2000000) chance += 30;
+        if (chance >= 96) chance = 95;
+        break;
+    default:
+        chance = 0;
+        break;
+    }
+    btlBossDebugPrintf("btl:[hit:%.3f,esc:%.3f,bat:%.3f,auto:%.3f]\n",
+                      hitMultiplier, escapeMultiplier, conditionMultiplier, autoMultiplier);
+    chance = (s32)(chance * hitMultiplier * escapeMultiplier * conditionMultiplier * autoMultiplier);
+    if (chance < 0) chance = 0;
+    if (conditionMultiplier == 1.0f && datCommandRecords[command].hpType != 8 &&
+        datCommandRecords[command].hpType != 10 && datCommandRecords[command].effectType != 2) {
+        if ((source->partyRecord.flags & 0x10) && (source->status.flags & 0x200)) {
+            if (chance < datBattleParameters->unkB8C) chance = datBattleParameters->unkB8C;
+        }
+        if ((target->partyRecord.flags & 0x10) && (target->status.flags & 0x200)) {
+            if (chance < datBattleParameters->unkB8D) chance = datBattleParameters->unkB8D;
+        }
+    }
+    btlBossDebugPrintf("btl:hit=%d%%\n", chance);
+    if (target->status.stateFlags & 0x200) return 1;
+    if (btlRollAiBucket() >= chance) {
+        if (datCommandRecords[command].hpType == 8 || datCommandRecords[command].hpType == 10) return 4;
+        return (entryFlags & 0x20) ? 4 : 2;
+    }
+    return 1;
+}
+
 
 void func_001B1F78(void) {
 }

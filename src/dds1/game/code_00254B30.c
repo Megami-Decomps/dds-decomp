@@ -1,3 +1,4 @@
+#include "dsp_entry.h"
 #include "dsp_entry_api.h"
 #include "dsp_name.h"
 #include "common.h"
@@ -34,12 +35,6 @@ extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 pla
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-typedef struct {
-    u8 pad0[4];
-    u16 unitId; /* 0x4: index into the unit-name and unit-sprite tables */
-    u8 pad06[0xE];
-    u16 level; /* 0x14: party level, displayed with the two-column level format */
-} DspEntry;
 
 typedef struct {
     u8 pad0[0x1C];

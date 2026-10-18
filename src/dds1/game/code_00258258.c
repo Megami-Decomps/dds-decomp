@@ -1,3 +1,4 @@
+#include "mnu_variant_sprite_placement.h"
 #include "common.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -13,7 +14,6 @@ extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 
 extern u32 D_003E274C[];
 
-typedef s16 MnuVariantSpritePlacement[6];
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 
 /* Connect prerequisite cells with a straight stroke or a three-stroke bend. */
