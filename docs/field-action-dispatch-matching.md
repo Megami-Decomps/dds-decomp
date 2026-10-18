@@ -38,3 +38,17 @@ This is a fresh reconstruction. A historical Son4 near-match was unavailable;
 its prior eight-byte deficit was not diagnosed or reused. Local collaboration
 supplied the canonical union-view hypothesis and independent provider review.
 There is no claim of recovering the historical original source.
+
+## Request storage and acquisition order
+
+The area request is a real one-word payload, represented by `s32 area[1]`.
+Mode 1 captures current area, reads the selected header's destination room,
+and only then publishes the area payload, matching the native load/store order.
+The temporary current-area value is consumed by that publication.
+
+This form remains exact both before and after the independent canonical
+`SdfColorTrack` key-record correction. The earlier address-taken scalar form
+changed eight mode-1 scheduling words under that unrelated header change.
+The explicit request storage and acquisition/publication phases remove that
+observed context sensitivity. Both gates are 63/0, and both complete retail
+executables retain their expected SHA-1 with the canonical key records applied.
