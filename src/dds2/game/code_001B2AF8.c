@@ -1771,7 +1771,7 @@ s32 btlHasHighPriorityState(void) {
         table = btlLinkedSelectionTaskBuffer;
         index = table->selectedRow;
         if (table->rowFade[index - 1] >= 0x80) {
-            if (table->positions[index - 1].x >= 0xB) {
+            if (table->positions[index - 1][0] >= 0xB) {
                 return 1;
             }
         }
@@ -5924,22 +5924,21 @@ void btlInitializeSelectionWork(void) {
     u8 initial[0x20];
     BattleSelectionWork *allocated;
     u32 *source;
-    s32 *destination;
     s16 *state;
     s32 i;
     memcpy(initial, btlSoundSlotDefaults, sizeof(initial));
     allocated = sdfAllocAndClearQuadwords(0x30);
     btlLinkedSelectionTaskBuffer = allocated;
     state = allocated->rowFade;
-    /* Retail copies coordinate pairs with its cursor on each row's Y word. */
-    destination = &allocated->positions[0].y;
     source = (u32 *)initial;
     for (i = 3; i >= 0; i--) {
+        /* Remaining count 3..0 selects the four rows in forward order. */
+        s32 *destination = &allocated->positions[3 - i][1];
+
         *state = 0;
         state++;
         destination[-1] = source[0];
         destination[0] = source[1];
-        destination += 2;
         source += 2;
     }
     btlSetTrackedTaskHandle(2, 1);
@@ -5961,10 +5960,10 @@ s32 func_001C0EF0(void) {
     case 3:
     case 10:
         for (i = 0; i < 4; i++) {
-            btlLinkedSelectionTaskBuffer->positions[i].x += 0x12;
-            btlLinkedSelectionTaskBuffer->positions[i].x = btlLinkedSelectionTaskBuffer->positions[i].x <= -200 ? -200 :
-                btlLinkedSelectionTaskBuffer->positions[i].x > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i].x;
-            if (btlLinkedSelectionTaskBuffer->positions[i].x >= 11) {
+            btlLinkedSelectionTaskBuffer->positions[i][0] += 0x12;
+            btlLinkedSelectionTaskBuffer->positions[i][0] = btlLinkedSelectionTaskBuffer->positions[i][0] <= -200 ? -200 :
+                btlLinkedSelectionTaskBuffer->positions[i][0] > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i][0];
+            if (btlLinkedSelectionTaskBuffer->positions[i][0] >= 11) {
                 btlLinkedSelectionTaskBuffer->rowFade[i] += 8;
             } else {
                 btlLinkedSelectionTaskBuffer->rowFade[i] += 4;
@@ -5990,16 +5989,16 @@ s32 func_001C0EF0(void) {
     case 8:
         for (i = 0; i < 4; i++) {
             if (i != 1) {
-                btlLinkedSelectionTaskBuffer->positions[i].x -= i;
+                btlLinkedSelectionTaskBuffer->positions[i][0] -= i;
                 btlLinkedSelectionTaskBuffer->rowFade[i] -= 0x18;
-                btlLinkedSelectionTaskBuffer->positions[i].x = btlLinkedSelectionTaskBuffer->positions[i].x <= -24 ? -24 :
-                    btlLinkedSelectionTaskBuffer->positions[i].x > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i].x;
+                btlLinkedSelectionTaskBuffer->positions[i][0] = btlLinkedSelectionTaskBuffer->positions[i][0] <= -24 ? -24 :
+                    btlLinkedSelectionTaskBuffer->positions[i][0] > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i][0];
                 btlLinkedSelectionTaskBuffer->rowFade[i] = btlLinkedSelectionTaskBuffer->rowFade[i] <= 0 ? 0 :
                     btlLinkedSelectionTaskBuffer->rowFade[i] > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->rowFade[i];
             } else {
-                SELECTION_VIEW->pos[i][1] -= 6;
-                SELECTION_VIEW->pos[i][1] = SELECTION_VIEW->pos[i][1] <= btlLinkedSelectionTaskBuffer->positions[0].y ? btlLinkedSelectionTaskBuffer->positions[0].y :
-                    SELECTION_VIEW->pos[i][1] >= btlLinkedSelectionTaskBuffer->positions[0].y + 23 ? btlLinkedSelectionTaskBuffer->positions[0].y + 23 : SELECTION_VIEW->pos[i][1];
+                btlLinkedSelectionTaskBuffer->positions[i][1] -= 6;
+                btlLinkedSelectionTaskBuffer->positions[i][1] = btlLinkedSelectionTaskBuffer->positions[i][1] <= btlLinkedSelectionTaskBuffer->positions[0][1] ? btlLinkedSelectionTaskBuffer->positions[0][1] :
+                    btlLinkedSelectionTaskBuffer->positions[i][1] >= btlLinkedSelectionTaskBuffer->positions[0][1] + 23 ? btlLinkedSelectionTaskBuffer->positions[0][1] + 23 : btlLinkedSelectionTaskBuffer->positions[i][1];
             }
         }
         btlLinkedSelectionTaskBuffer->backdropFade -= 0x18;
@@ -6010,10 +6009,10 @@ s32 func_001C0EF0(void) {
     case 9:
         for (i = 0; i < 4; i++) {
             if (i != 1) {
-                btlLinkedSelectionTaskBuffer->positions[i].x += (6 - i) * 2;
-                btlLinkedSelectionTaskBuffer->positions[i].x = btlLinkedSelectionTaskBuffer->positions[i].x <= -24 ? -24 :
-                    btlLinkedSelectionTaskBuffer->positions[i].x > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i].x;
-                if (btlLinkedSelectionTaskBuffer->positions[i].x >= 11) {
+                btlLinkedSelectionTaskBuffer->positions[i][0] += (6 - i) * 2;
+                btlLinkedSelectionTaskBuffer->positions[i][0] = btlLinkedSelectionTaskBuffer->positions[i][0] <= -24 ? -24 :
+                    btlLinkedSelectionTaskBuffer->positions[i][0] > 11 ? 11 : btlLinkedSelectionTaskBuffer->positions[i][0];
+                if (btlLinkedSelectionTaskBuffer->positions[i][0] >= 11) {
                     btlLinkedSelectionTaskBuffer->rowFade[i] += 0x10;
                 } else {
                     btlLinkedSelectionTaskBuffer->rowFade[i] += 4;
@@ -6021,9 +6020,9 @@ s32 func_001C0EF0(void) {
                 btlLinkedSelectionTaskBuffer->rowFade[i] = btlLinkedSelectionTaskBuffer->rowFade[i] <= 0 ? 0 :
                     btlLinkedSelectionTaskBuffer->rowFade[i] > 0x80 ? 0x80 : btlLinkedSelectionTaskBuffer->rowFade[i];
             } else {
-                SELECTION_VIEW->pos[i][1] += 6;
-                SELECTION_VIEW->pos[i][1] = SELECTION_VIEW->pos[i][1] <= btlLinkedSelectionTaskBuffer->positions[0].y ? btlLinkedSelectionTaskBuffer->positions[0].y :
-                    SELECTION_VIEW->pos[i][1] >= btlLinkedSelectionTaskBuffer->positions[0].y + 23 ? btlLinkedSelectionTaskBuffer->positions[0].y + 23 : SELECTION_VIEW->pos[i][1];
+                btlLinkedSelectionTaskBuffer->positions[i][1] += 6;
+                btlLinkedSelectionTaskBuffer->positions[i][1] = btlLinkedSelectionTaskBuffer->positions[i][1] <= btlLinkedSelectionTaskBuffer->positions[0][1] ? btlLinkedSelectionTaskBuffer->positions[0][1] :
+                    btlLinkedSelectionTaskBuffer->positions[i][1] >= btlLinkedSelectionTaskBuffer->positions[0][1] + 23 ? btlLinkedSelectionTaskBuffer->positions[0][1] + 23 : btlLinkedSelectionTaskBuffer->positions[i][1];
             }
         }
         btlLinkedSelectionTaskBuffer->backdropFade += 0x18;
@@ -6307,11 +6306,11 @@ s32 btlAreLinkedSceneCountersAtThreshold(void) {
                 if (base->rowFade[i] < 0x80) {
                     return 0;
                 }
-                if (base->positions[i].x < 11) {
+                if (base->positions[i][0] < 11) {
                     return 0;
                 }
             }
-            if (base->positions[1].y == base->positions[0].y + 23) {
+            if (base->positions[1][1] == base->positions[0][1] + 23) {
                 return 1;
             }
         }
@@ -7012,7 +7011,119 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C3EC0);
+typedef struct BattleCursorIds {
+    s16 values[3];
+} BattleCursorIds;
+
+typedef struct BattleCursorOffsets {
+    s32 values[3][2];
+} BattleCursorOffsets;
+
+typedef struct BattleCursorEchoOffsets {
+    s32 values[3][2];
+} BattleCursorEchoOffsets;
+
+extern const BattleCursorIds D_00436878[];
+extern const BattleCursorOffsets D_00416840;
+extern const BattleCursorEchoOffsets D_00416858;
+
+void func_001C3EC0(s32 unused, BattleActorPanelWork *work, s32 slot) {
+    BattleCursorIds ids = D_00436878[0];
+    BattleCursorOffsets settle = D_00416840;
+    BattleCursorEchoOffsets echo = D_00416858;
+    s32 settled;
+
+    switch (work->activeEntries[slot].presentation.pendingSceneState) {
+    case 1:
+        break;
+    case 5:
+        if (work->activeEntries[slot].presentation.unkF0 < 0x20) {
+            work->activeEntries[slot].presentation.unkF0 = 0;
+            return;
+        }
+        work->activeEntries[slot].presentation.unkF0 -= 0x20;
+        if (work->activeEntries[slot].presentation.unkF0 < 0x20) {
+            work->activeEntries[slot].presentation.unkF0 = 0;
+        }
+        return;
+    case 3:
+        if (work->activeEntries[slot].presentation.unkF0 < 0x20 ||
+            (work->activeEntries[slot].presentation.unkF0 -= 0x20,
+             work->activeEntries[slot].presentation.unkF0 < 0x20)) {
+            work->activeEntries[slot].presentation.unkF0 = 0;
+            work->activeEntries[slot].presentation.pendingSceneState = 2;
+            work->activeEntries[slot].presentation.cursorSelection =
+                work->activeEntries[slot].presentation.pendingCursorSelection;
+            work->activeEntries[slot].presentation.cursorOffset[0] =
+                settle.values[work->activeEntries[slot].presentation.cursorSelection][0];
+            work->activeEntries[slot].presentation.cursorOffset[1] =
+                settle.values[work->activeEntries[slot].presentation.cursorSelection][1];
+            work->activeEntries[slot].presentation.cursorOption =
+                ids.values[work->activeEntries[slot].presentation.cursorSelection];
+            if (work->activeEntries[slot].presentation.cursorSelection != 0) {
+                work->activeEntries[slot].presentation.cursorPhase = 0;
+            } else {
+                work->activeEntries[slot].presentation.cursorPhase = 180;
+                work->activeEntries[slot].presentation.cursorEchoCount = 0;
+            }
+        }
+        break;
+    case 2:
+        settled = 0;
+        if (work->activeEntries[slot].presentation.cursorSelection != 0) {
+            work->activeEntries[slot].presentation.cursorPhase++;
+            work->activeEntries[slot].presentation.cursorPhase =
+                work->activeEntries[slot].presentation.cursorPhase <= 0 ? 0 :
+                work->activeEntries[slot].presentation.cursorPhase > 0xB ? 0xB :
+                work->activeEntries[slot].presentation.cursorPhase;
+            if (work->activeEntries[slot].presentation.cursorPhase >= 5) {
+                work->activeEntries[slot].presentation.unkF0 += 6;
+                work->activeEntries[slot].presentation.unkF0 =
+                    work->activeEntries[slot].presentation.unkF0 <= 0 ? 0 :
+                    (s8)work->activeEntries[slot].presentation.unkF0 < 0 ? 0x80 :
+                    work->activeEntries[slot].presentation.unkF0;
+                if ((s8)work->activeEntries[slot].presentation.unkF0 < 0) {
+                    settled = 1;
+                }
+            }
+        } else {
+            work->activeEntries[slot].presentation.cursorPhase =
+                (work->activeEntries[slot].presentation.cursorPhase + 0x10) % 360;
+            work->activeEntries[slot].presentation.unkF0 =
+                (sdfSinPoly((f32)((work->activeEntries[slot].presentation.cursorPhase + 90) % 360) /
+                            180.0f * 3.14159f) + 1.0f) * 0.5f * 96.0f + 0.0f;
+            work->activeEntries[slot].presentation.cursorEchoCount++;
+            work->activeEntries[slot].presentation.cursorEchoCount =
+                work->activeEntries[slot].presentation.cursorEchoCount <= 0 ? 0 :
+                work->activeEntries[slot].presentation.cursorEchoCount >= 6 ? 5 :
+                work->activeEntries[slot].presentation.cursorEchoCount;
+            if (work->activeEntries[slot].presentation.cursorEchoCount < 5) {
+                s32 x = work->activeEntries[slot].position[0];
+                s32 y = work->activeEntries[slot].position[1];
+                btlInitializeActionRecordWithScale(
+                    &work->activeEntries[slot].presentation.mirroredSprites[
+                        work->activeEntries[slot].presentation.cursorEchoCount - 1],
+                    work->activeEntries[slot].presentation.cursorOption,
+                    x + echo.values[0][0],
+                    y + echo.values[0][1],
+                    work->activeEntries[slot].presentation.cursorEchoCount - 1,
+                    6.0f - work->activeEntries[slot].presentation.cursorEchoCount);
+            }
+            settled = work->activeEntries[slot].presentation.cursorEchoCount > 4;
+        }
+        if (settled == 1) {
+            work->activeEntries[slot].presentation.cursorOffset[0] =
+                echo.values[work->activeEntries[slot].presentation.cursorSelection][0];
+            work->activeEntries[slot].presentation.cursorOffset[1] =
+                echo.values[work->activeEntries[slot].presentation.cursorSelection][1];
+            work->activeEntries[slot].presentation.pendingSceneState = 1;
+            work->activeEntries[slot].presentation.cursorOption =
+                ids.values[work->activeEntries[slot].presentation.cursorSelection];
+            work->activeEntries[slot].presentation.unkF0 = 0x80;
+        }
+        break;
+    }
+}
 
 extern BtlResBlock *btlResourceBlock;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);

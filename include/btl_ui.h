@@ -120,7 +120,7 @@ typedef struct BattleSelectionWork {
     u8 pad01;
     s16 rowFade[4]; /* +0x02; one-based selection indexes rowFade[row - 1]. */
     u8 pad0A[2];
-    BattleSelectionPosition positions[4]; /* +0x0C */
+    s32 positions[4][2]; /* +0x0C: row, then signed x/y components. */
     s16 backdropFade; /* +0x2C */
     u8 pad2E[2];
 } BattleSelectionWork;
@@ -201,9 +201,9 @@ typedef struct BattleActorPanelPresentation {
         u32 cursorPhase; /* +0xEC: unsigned pulse/fade counter. */
         u8 unkF0;
         u8 padF1[3];
-        s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
-        u8 padF5[3];
     };
+    s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
+    u8 padF5[3];
     BattleMirroredSpriteRecord mirroredSprites[4];
     u8 pad1A8[4];
     s32 hpLevel;
