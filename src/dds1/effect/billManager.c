@@ -871,7 +871,7 @@ BillObj *billCloneObjectRetainingSharedData(const BillObj *source) {
 }
 
 void billDispatchByKind(BillObj *obj) {
-    D_0034E060[obj->kind].destroy();
+    D_0034E060[obj->kind].destroy(obj);
 }
 
 void billInvokeCallback(BillObj *obj) {
