@@ -437,7 +437,7 @@ extern FileJobPayload *effTemporaryFileJob;
 
 extern FileQueue *effAuxiliaryFileQueue;
 
-extern u8 D_00439075;
+extern s8 D_00439075;
 
 extern s32 D_004386F0;
 
@@ -11883,7 +11883,8 @@ typedef struct EffectSlotNode80 {
     f32 angularSpeed;       // 0x24
     f32 speedRandomness;    // 0x28
     f32 angularAcceleration; // 0x2C
-    u8 pad30[0x30];
+    u16 scaleByOpacity;    // 0x30: native LHU in the slot renderer
+    u8 pad32[0x2E];
     MdlCtx *model;           // 0x60
     void *deviceSlot;       // 0x64
     FileQueue **resourceEntries; // 0x68: per-record cloned queues
@@ -12160,7 +12161,194 @@ void effAcquireSlotRecordWhenRuntimeFlagClear(s32 node) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FAD98);
+void func_002FAD98(EffectSlotNode80 *node) {
+    f32 world[4];
+    f32 translation[4];
+    f32 rotation[4];
+    u128 matrix[4];
+    f32 tint[4];
+    u32 baseRGBA[4];
+    u32 modelRGBA[4];
+    u32 modelPacked[4];
+    u32 orientedRGBA[4];
+    u32 orientedPacked[4];
+    u32 queueRGBA[4];
+    u32 queuePacked[4];
+    u32 worldRGBA[4];
+    u32 worldPacked[4];
+    f32 unpackScale;
+    f32 packScale;
+    FileSlotTable *record;
+    FileSlot *slot;
+    f32 *direction;
+    SdfModel *model;
+    FileQueue **queues;
+    u32 color;
+    s32 count;
+    s32 i;
+    f32 scale;
+    f32 unit;
+
+    baseRGBA[0] = node->color;
+    EE_MMI_RGBA_UNPACK(baseRGBA, 1.0f / 128.0f);
+    VU0_STORE_VF(vf10, tint);
+    record = node->record;
+    count = record->count;
+    if (count == 0) {
+        return;
+    }
+    slot = record->slots;
+    direction = (f32 *)node->positions;
+    if (node->opacity != 0.0f) {
+        scale = 1.0f / node->opacity;
+    } else {
+        scale = 1.0f;
+    }
+    switch (node->resourceKind) {
+    case 3:
+        model = node->deviceSlot;
+        if (!(record->flags & 1)) {
+            for (i = 0; i < count; i++, slot++, direction += 6) {
+                if (slot->state == 0) {
+                    effInitializeParticleDirection((u8 *)node, direction);
+                }
+                if (slot->state < 0) {
+                    continue;
+                }
+                modelRGBA[0] = slot->color;
+                EE_MMI_RGBA_UNPACK_READONLY(modelRGBA, 1.0f / 128.0f);
+                VU0_LOAD_VF(vf11, tint);
+                VU0_MUL(vf10, vf10, vf11);
+                unit = 128.0f;
+                EE_MMI_RGBA_PACK_UNIT(modelPacked[0], unit);
+                color = modelPacked[0];
+                model->color = color;
+                VU0_LOAD_VF(vf10, D_003E9100);
+                if (node->scaleByOpacity == 0) {
+                    VU0_SCALE_VF(vf10, slot->scale);
+                } else {
+                    VU0_SCALE_VF(vf10, slot->scale * scale);
+                }
+                VU0_SET_W_ONE(vf10);
+                VU0_STORE_VF(vf10, model->scaleVector);
+                VU0_LOAD_VF(vf10, slot->pos);
+                VU0_SET_W_ONE(vf10);
+                VU0_STORE_VF(vf10, model->matrix[3]);
+                effSetRotationFromAcceleratedFrameAngle((u8 *)node, direction, slot->state);
+                VU0_STORE_VF(vf28, model->matrix[0]);
+                VU0_STORE_VF(vf29, model->matrix[1]);
+                VU0_STORE_VF(vf30, model->matrix[2]);
+                sdfModelUpdateCurrentFrameTransforms(model);
+                sdfModelBuildNodeResourcePackets(D_00380828, model);
+            }
+        } else {
+            fileReadRecordSecondVector((u8 *)record, rotation);
+            fileReadVectorPtr20((u8 *)node->record, translation);
+            VU0_LOAD_VF(vf10, rotation);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf31, translation);
+            VU0_STORE_MATRIX(matrix);
+            for (i = 0; i < count; i++, slot++, direction += 6) {
+                if (slot->state == 0) {
+                    effInitializeParticleDirection((u8 *)node, direction);
+                }
+                if (slot->state < 0) {
+                    continue;
+                }
+                VU0_LOAD_MATRIX(matrix);
+                VU0_LOAD_VF(vf10, slot->pos);
+                VU0_TRANSFORM_POINT(vf10, vf10);
+                VU0_STORE_VF(vf10, world);
+                orientedRGBA[0] = slot->color;
+                EE_MMI_RGBA_UNPACK(orientedRGBA, 1.0f / 128.0f);
+                VU0_LOAD_VF(vf11, tint);
+                VU0_MUL(vf10, vf10, vf11);
+                EE_MMI_RGBA_PACK_UNIT(orientedPacked[0], 128.0f);
+                model->color = orientedPacked[0];
+                VU0_LOAD_VF(vf10, D_003E9100);
+                if (node->scaleByOpacity == 0) {
+                    VU0_SCALE_VF(vf10, slot->scale);
+                } else {
+                    VU0_SCALE_VF(vf10, slot->scale * scale);
+                }
+                VU0_SET_W_ONE(vf10);
+                VU0_STORE_VF(vf10, model->scaleVector);
+                VU0_LOAD_VF(vf10, world);
+                VU0_SET_W_ONE(vf10);
+                VU0_STORE_VF(vf10, model->matrix[3]);
+                effSetRotationFromAcceleratedFrameAngle((u8 *)node, direction, slot->state);
+                VU0_STORE_VF(vf28, model->matrix[0]);
+                VU0_STORE_VF(vf29, model->matrix[1]);
+                VU0_STORE_VF(vf30, model->matrix[2]);
+                sdfModelUpdateCurrentFrameTransforms(model);
+                sdfModelBuildNodeResourcePackets(D_00380828, model);
+            }
+        }
+        break;
+    case 6:
+        queues = node->resourceEntries;
+        if (!(record->flags & 1)) {
+            for (i = 0; i < count; i++, slot++, queues++) {
+                if (slot->state == 0) {
+                    fileQueueNotifyAllJobsComplete(*queues);
+                }
+                if (slot->state < 0) {
+                    continue;
+                }
+                queueRGBA[0] = slot->color;
+                EE_MMI_RGBA_UNPACK_READONLY(queueRGBA, 0x3C000000);
+                VU0_LOAD_VF(vf11, tint);
+                VU0_MUL(vf10, vf10, vf11);
+                EE_MMI_RGBA_PACK_UNIT(queuePacked[0], 0x43000000);
+                color = queuePacked[0];
+                fileQueueSetColor(*queues, color);
+                if (node->scaleByOpacity == 0) {
+                    fileQueueSetScale(*queues, slot->scale);
+                } else {
+                    fileQueueSetScale(*queues, slot->scale * scale);
+                }
+                fileQueueSetPosition(*queues, slot->pos);
+                fileQueueUpdate(*queues);
+            }
+        } else {
+            fileReadRecordSecondVector((u8 *)record, rotation);
+            fileReadVectorPtr20((u8 *)node->record, translation);
+            VU0_LOAD_VF(vf10, rotation);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf31, translation);
+            VU0_STORE_MATRIX(matrix);
+            for (i = 0; i < count; i++, slot++, queues++) {
+                if (slot->state == 0) {
+                    fileQueueNotifyAllJobsComplete(*queues);
+                }
+                if (slot->state < 0) {
+                    continue;
+                }
+                unpackScale = 1.0f / 128.0f;
+                VU0_LOAD_MATRIX(matrix);
+                VU0_LOAD_VF(vf10, slot->pos);
+                VU0_TRANSFORM_POINT(vf10, vf10);
+                VU0_STORE_VF(vf10, world);
+                worldRGBA[0] = slot->color;
+                EE_MMI_RGBA_UNPACK_READONLY(worldRGBA, unpackScale);
+                VU0_LOAD_VF(vf11, tint);
+                VU0_MUL(vf10, vf10, vf11);
+                packScale = 128.0f;
+                EE_MMI_RGBA_PACK_UNIT(worldPacked[0], packScale);
+                color = worldPacked[0];
+                fileQueueSetColor(*queues, color);
+                if (node->scaleByOpacity == 0) {
+                    fileQueueSetScale(*queues, slot->scale);
+                } else {
+                    fileQueueSetScale(*queues, slot->scale * scale);
+                }
+                fileQueueSetPosition(*queues, world);
+                fileQueueUpdate(*queues);
+            }
+        }
+        break;
+    }
+}
 
 /* Acquire the owned slot record unless paused, then invoke its native drawer. */
 void effUpdateSlotRecordAndDraw(u32 node) {
@@ -13275,7 +13463,8 @@ u32 effSelectLinkedFileState(void) {
 extern EffQueuedFileObject effBattleCameraSnapshotSelection;
 
 extern EffEditorRow D_003FF390[], D_003FF3D8[];
-extern u8 D_0045C270[], D_00439074;
+extern u8 D_0045C270[];
+extern s8 D_00439074;
 
 typedef struct EffectBlock90 {
     u32 word[36];
@@ -14095,7 +14284,7 @@ u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     return result;
 }
 
-extern u8 D_00439074;
+extern s8 D_00439074;
 
 void effResetFileResources(void) {
     D_003FFA84[0] = 0;
