@@ -8083,7 +8083,181 @@ void effReleaseCompactRingFadeTable(s32 work) {
     sdfReleaseResourceAllocation(state->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F0A98);
+typedef struct EffSpiralParticle {
+    s32 timer;      /* -1 free, -2 retired */
+    u8 pad04[4];
+    f32 tiltX;      /* 0x08 */
+    f32 tiltY;      /* 0x0C */
+    f32 radius;     /* 0x10 */
+    f32 radiusStep; /* 0x14 */
+    f32 spin;       /* 0x18 */
+    f32 phase;      /* 0x1C */
+    f32 width;      /* 0x20 */
+    f32 sweep;      /* 0x24 */
+    f32 height;     /* 0x28 */
+} EffSpiralParticle;
+
+/* vu0 routine: native matrix, cross/normalize and ribbon extrusion. */
+void func_002F0A98(EffClassWork *work) {
+    EffBillSpiralConfig *config = (EffBillSpiralConfig *)work->payload;
+    EffectNodeHeader *state;
+    EffRibbonWork *asset;
+    EffSpiralParticle *particle;
+    f32 pos[4];
+    u32 *colors;
+    u32 i;
+    u32 count;
+    u32 stride;
+    u32 segments;
+    s32 burst;
+    u32 spawn;
+    u8 respawn;
+    u32 life;
+    f32 (*positions)[4];
+    f32 *heights;
+    u32 j;
+    s32 timer;
+    f32 segmentCount;
+    f32 spinAccel;
+    f32 heightScale;
+    f32 rise;
+    f32 radius;
+    f32 width;
+    f32 angle;
+    f32 step;
+    f32 height;
+    f32 start;
+    f32 time;
+
+    if (config->common.header.timed.time.progress < work->frame && config->common.header.timed.time.progress != 0) {
+        return;
+    }
+    life = config->common.header.life;
+    count = config->common.header.timed.count;
+    if (life == 0) {
+        return;
+    }
+    if (config->common.burst != 0 && work->frame == 0) {
+        burst = 1;
+        spawn = count;
+    } else {
+        burst = 0;
+        spawn = config->common.header.spawnRate;
+    }
+    segments = config->common.header.segments + 1;
+    state = (EffectNodeHeader *)work->resource;
+    /* The creator stores the ribbon address in this actual 12-byte header. */
+    asset = (EffRibbonWork *)state->unk_04;
+    particle = (EffSpiralParticle *)state->entries;
+    respawn = config->common.header.respawn;
+    /* Config reads before the ribbon's buffer loads: in retail the spin acceleration load (+0xD4) precedes the
+     * asset+0x1C positions load (cc1probe --sched, sched1 equal-priority ties decide@luid), which keeps the
+     * positions spill store behind it in sched2. */
+    spinAccel = config->spinAccel;
+    positions = (f32 (*)[4])asset->positions;
+    heights = (f32 *)asset->uvs;
+    colors = asset->colors;
+    stride = asset->rowStride;
+    segmentCount = segments;
+    heightScale = config->common.height;
+    rise = config->common.rise;
+    for (i = 0; i < count; i++, particle++) {
+        timer = particle->timer;
+        if (timer != -2) {
+            if (timer == -1) {
+                if (spawn != 0) {
+                    f32 radiusDelta;
+                    start = config->common.radiusStart * (effMiscRandUnitFloat(effSharedRandomState) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
+                    radiusDelta = (config->common.radiusEnd * (effMiscRandUnitFloat(effSharedRandomState) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
+                    particle->radius = start;
+                    particle->radiusStep = radiusDelta;
+                    particle->tiltX = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->tiltY = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->phase = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
+                    particle->spin = config->spin * (effMiscRandUnitFloat(effSharedRandomState) * config->spinJitter + (1.0f - config->spinJitter));
+                    particle->width = config->common.width * (effMiscRandUnitFloat(effSharedRandomState) * config->common.widthJitter + (1.0f - config->common.widthJitter));
+                    particle->sweep = config->common.extent * (effMiscRandUnitFloat(effSharedRandomState) * config->common.extentJitter + (1.0f - config->common.extentJitter));
+                    particle->height = config->common.height * (effMiscRandUnitFloat(effSharedRandomState) * config->common.heightJitter + (1.0f - config->common.heightJitter));
+                    *colors = 0;
+                    if (burst != 0) {
+                        particle->timer = effMiscRand(effSharedRandomState) % life;
+                        time = (f32)particle->timer;
+                        particle->radius += particle->radiusStep * time;
+                    } else {
+                        particle->timer = 0;
+                    }
+                    spawn--;
+                }
+            } else if ((u32)timer >= life) {
+                *colors = 0;
+                particle->timer = respawn ? -1 : -2;
+            } else {
+                particle->radius += particle->radiusStep;
+                radius = particle->radius;
+                time = (f32)timer;
+                angle = (particle->spin + spinAccel * time * 0.5f) * time;
+                angle += particle->phase;
+                width = particle->width * 0.25f;
+                if (particle->spin >= 0.0f) {
+                    step = particle->sweep / segmentCount;
+                } else {
+                    step = -particle->sweep / segmentCount;
+                }
+                height = particle->height;
+                sdfVuLoadRotationMatrixX(particle->tiltX);
+                sdfVuLoadSecondaryRotationMatrixY(particle->tiltY);
+                sdfMultiplyVuMatrixInPlace();
+                pos[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+                pos[1] = 0.0f;
+                pos[2] = sdfSinPoly(angle);
+                for (j = 0; j < segments; j++) {
+                    f32 rowHeight;
+                    VU0_LOAD_VF(vf10, pos);
+                    VU0_ROTATE_VEC(vf10, vf10);
+                    VU0_SCALE_VF(vf10, radius);
+                    VU0_MOVE_VF(vf12, vf10);
+                    angle += step;
+                    pos[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+                    pos[1] = 0.0f;
+                    pos[2] = sdfSinPoly(angle);
+                    VU0_LOAD_VF(vf10, pos);
+                    VU0_ROTATE_VEC(vf10, vf10);
+                    VU0_SCALE_VF(vf10, radius);
+                    VU0_MOVE_VF(vf11, vf12);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_CROSS_XYZ(vf10, vf10, vf11);
+                    VU0_NORMALIZE_VF10();
+                    VU0_SCALE_VF(vf10, width);
+                    VU0_MOVE_VF(vf11, vf10);
+                    VU0_MOVE_VF(vf10, vf12);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, positions[1]);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, positions[0]);
+                    VU0_MOVE_VF(vf10, vf12);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, positions[2]);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, positions[3]);
+                    positions += 4;
+                    rowHeight = heightScale * ((f32)j / segmentCount) + height;
+                    heights[1] = rowHeight;
+                    heights[3] = rowHeight;
+                    heights[5] = rowHeight;
+                    heights[7] = rowHeight;
+                    heights += 8;
+                }
+                *colors++ = effSampleColorAlphaTracks(&config->common.header.emitterColorTrack, &config->common.header.emitterAlphaTrack, timer, life);
+                particle->height += rise;
+                particle->timer++;
+                continue;
+            }
+        }
+        colors++;
+        positions += stride;
+        heights += stride * 2;
+    }
+}
 
 void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     EffBillSpiralConfig *config = (EffBillSpiralConfig *)((BillCellDrawWork *)work)->config;
