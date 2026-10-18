@@ -878,7 +878,163 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
 
 
 
-INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProfileProgressDetails);
+/* Draw the profile name and its remaining-progress gauge.
+ * Prior algorithm/research lineage: W16_Snd, PurB, LiteC, PurC, PurD, MatchC,
+ * LaneH, NewRule, SdfModelVis, Lite, BtlSlot (dds-collab#17:6237048856).
+ * Reconstructed from native loads/stores and truthful provider declarations.
+ * Keep the draw-fresh resource reads and guard-edge denominator capture.
+ */
+#include "eff.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "fr_font_measure.h"
+#include "prf_profile_cap.h"
+
+extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
+extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
+
+typedef struct BrsProfilePalette { u32 values[4]; } BrsProfilePalette;
+extern const BrsProfilePalette D_003AFC80;
+
+void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *work,
+                                  BrsProgressRow *row, s32 context, s32 index) {
+    BrsProfilePalette palette;
+    u8 *text;
+    s32 currentProfile;
+    s32 cap;
+    s32 progressAmount;
+    s32 phase;
+    u16 profileId;
+    s32 progress, originalProgress, difference, range;
+    s32 textWidth;
+    s32 textOffset;
+    s32 textY;
+    s32 frameX, frameY;
+    u32 color = work->profileAnimation[index].alpha | 0x80808000;
+    u32 barColor;
+    struct FrFontGlyph *glyph;
+    EffectSlotSet *resources;
+    EffectSlotSet *restoreResources;
+    BdWork *bar;
+    EffectSlotDescription *description;
+    s32 fillSlot = 19;
+
+    palette = D_003AFC80;
+    palette.values[0] = color;
+    palette.values[1] = color;
+    palette.values[2] = color;
+    palette.values[3] = color;
+    ptyGetCurrentProfileRecord(row->unit);
+    currentProfile = ptyGetCurrentProfileId(row->unit);
+    if (currentProfile != 0) {
+        profileId = currentProfile;
+        cap = prfGetCapValue(profileId);
+        if (row->unit->hp != 0 && !(row->unit->status & 0x4000)) {
+            color = work->profileAnimation[index].alpha | 0x80808000;
+        } else {
+            color = (work->profileAnimation[index].alpha =
+                work->profileAnimation[index].alpha <= 0 ? 0 :
+                (work->profileAnimation[index].alpha > 128 ? 128 : work->profileAnimation[index].alpha)) | 0x4F4E4E00;
+        }
+        if (mnuIsTitleEntryAvailable(row->unit) || (row->unit->status & 0x40)) {
+            barColor = 0x48644800 | (work->profileAnimation[index].alpha =
+                work->profileAnimation[index].alpha <= 0 ? 0 :
+                (work->profileAnimation[index].alpha > 128 ? 128 : work->profileAnimation[index].alpha));
+            color = (work->profileAnimation[index].alpha =
+                work->profileAnimation[index].alpha <= 0 ? 0 :
+                (work->profileAnimation[index].alpha > 128 ? 128 : work->profileAnimation[index].alpha)) | 0x4F4E4E00;
+            palette.values[0] = barColor;
+            palette.values[1] = barColor;
+            palette.values[2] = barColor;
+            palette.values[3] = barColor;
+        }
+        prfResolveMantraNameOrFallback(profileId, &text);
+        textY = y + 0x60;
+        glyph = itfCreateConvertedTextGlyph(x + 0x14C0, textY, depth, color, text, NULL);
+        textWidth = frFontMeasureLines(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        /* The native name origin uses signed half-width truncation. */
+        textOffset = -(textWidth / 2);
+        textOffset += 0x15D;
+        textOffset <<= 4;
+        glyph = itfCreateConvertedTextGlyph(x + textOffset,
+                                            textY, depth, color, text, NULL);
+        frFontDrawGlyphChain(glyph, 1, context);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    } else {
+        cap = 0;
+    }
+    progressAmount = work->profileAnimation[index].currentProgress;
+    phase = work->profileAnimation[index].state;
+    /* Native signed rejection edges at 00269030/0026903C share the fallback.
+     * The matched DDS2 renderer uses the same ordered signed guards.
+     * Both checks precede the current-progress drawing path. */
+    if (phase < 0) goto fallback;
+    if (phase >= 3) goto fallback;
+    if (cap != 0) {
+        if (progressAmount < cap) {
+            /* The denominator is captured on the positive-progress guard edge:
+             * DDS2 002A0C00/04 and DDS1 00269054/58. CSE forwards the quotient
+             * divisor but retains this snapshot for its divide-zero check. */
+            s32 normalizationBase = cap;
+            if (progressAmount > 0) {
+                progress = progressAmount * 1000 / normalizationBase;
+                originalProgress = progress;
+                if (work->profileAnimation[index].progressInitialized == 0) {
+                    work->profileAnimation[index].previousProgress = progress;
+                    work->profileAnimation[index].progressInitialized = 1;
+                }
+                if (progress <= 40) {
+                    progress = 40;
+                }
+                if (work->profileAnimation[index].remaining == 0 &&
+                    originalProgress >= work->profileAnimation[index].previousProgress &&
+                    originalProgress - work->profileAnimation[index].previousProgress < 41) {
+                    difference = originalProgress - work->profileAnimation[index].previousProgress;
+                    if (difference < 10) {
+                        progress += 9;
+                    } else {
+                        progress += difference;
+                    }
+                }
+                progress = progress <= 0 ? 0 : (progress > 1000 ? 1000 : progress);
+                resources = work->teardownResource;
+                bar = &resources->workEntries[fillSlot];
+                description = &resources->descriptions[fillSlot];
+                bar->geometry.bounds[2] = (bar->sourceWidth << 4) * progress / 1000;
+                range = description->colors[2] - description->colors[0];
+                range = range * progress / 1000 - range;
+                bar->parameters[2] = range;
+                effDrawSpriteWithCornerColors(x + 0x1290, y + 0x120, depth,
+                                             palette.values, 0, resources, fillSlot, context);
+                /* Draw may replace the resource; restore the current fill entry. */
+                restoreResources = work->teardownResource;
+                restoreResources->workEntries[fillSlot].parameters[2] = 0;
+                restoreResources->workEntries[fillSlot].geometry.bounds[2] =
+                    restoreResources->workEntries[fillSlot].sourceWidth << 4;
+            }
+        } else {
+            if (row->unit->hp == 0 || mnuIsTitleEntryAvailable(row->unit) || (row->unit->status & 0x4040)) {
+                barColor = work->profileAnimation[index].alpha | 0x60606000;
+                palette.values[0] = barColor;
+                palette.values[1] = barColor;
+                palette.values[2] = barColor;
+                palette.values[3] = barColor;
+            }
+            effDrawSpriteWithCornerColors(x + 0x13A0, y + 0xF8, depth, palette.values,
+                                         0, work->teardownResource, 10, context);
+        }
+    }
+    return;
+fallback:
+    frameX = x + 0x13A0;
+    frameY = y + 0xF8;
+    effDrawSpriteWithCornerColors(frameX, frameY, depth, palette.values,
+                                 0, work->teardownResource, 11, context);
+    effDrawSpriteWithCornerColors(frameX, frameY, depth, palette.values,
+                                 0, work->teardownResource, 12, context);
+}
+
 
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */
