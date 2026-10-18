@@ -166,7 +166,303 @@ void effBossDestroy(EffBossWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effBossUpdateGeometry);
+#include "eff_math.h"
+#include "sdf_quaternion.h"
+extern u32 effMultiplyPackedColors(u32, u32);
+extern struct SdfPoolNode *D_00380828[];
+extern f32 D_003B1FE0[4];
+extern s32 sdfLoadMapRecordLookAtBasis(struct SdfModel *, s32);
+extern void effSetFanRecordPoolColor(EffRecordPool *, u32);
+extern void effDrawScaledRecordPool(EffRecordPool *);
+
+/* Independent native reconstruction; prior KiB/Opal/Brass algorithms credited. */
+void effBossUpdateGeometry(void *opaque) {
+    EffBossWork *work = opaque;
+    f32 perpendicular[4];
+    f32 direction[4];
+    f32 axis[4];
+    f32 scaleVector[4];
+    f32 widthVector[4];
+    f32 displacement[4];
+    f32 baseVector[4];
+    f32 tipVector[4];
+    MdlCtx *model;
+    struct SdfModel *map;
+    s32 i;
+    s32 colorStart;
+    s32 mode;
+    u32 tint;
+    u32 center;
+    u128 *historyStart;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 ramp;
+    s32 colorFrames;
+    u8 cellCountFromFrame;
+    EffBossGroup *group;
+    EffBossCell *cell;
+    ParCell *historyCell;
+    u128 *positions; /* Position workspace reused for trail history and cell vertices. */
+    u32 *colorWords;
+    s32 frame;
+    s32 groupCount;
+    s32 colorCellCount;
+    s32 j, count;
+    s32 historyCount;
+    s32 age, currentAge;
+    u32 edge, alphaColor;
+    f32 blend, trailLength, cellLength, taperStep;
+    f32 taperRange;
+    f32 baseExtent, tipExtent;
+
+    frame = work->frame;
+    mode = work->head.directionMode;
+    model = effParamWorkGetData(work->paramWork);
+    map = model->inner;
+    VU0_LOAD_VF(vf10, work->head.position);
+    mdlStorePrimaryVectorVU(model);
+    VEC3_SPLAT(scaleVector, work->head.scale);
+    scaleVector[3] = 0.0f;
+    VU0_LOAD_VF(vf10, scaleVector);
+    mdlStoreTertiaryVectorVU(model);
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    if (work->head.drawTrail) {
+        colorStart = work->head.trailColorStartFrame;
+        if (frame > colorStart) {
+            if (work->head.trailColorTransitionFrames > 0) {
+                blend = (f32)(frame - colorStart) / work->head.trailColorTransitionFrames;
+                center = effBlendColor(work->head.trailStartCenterColor, work->head.trailEndCenterColor, blend);
+                edge = effBlendColor(work->head.trailStartEdgeColor, work->head.trailEndEdgeColor, blend);
+            } else {
+                center = work->head.trailEndCenterColor;
+                edge = work->head.trailEndEdgeColor;
+            }
+        } else {
+            center = work->head.trailStartCenterColor;
+            edge = work->head.trailStartEdgeColor;
+        }
+        groupCount = work->groupCount;
+        for (i = 0; i < groupCount; i++) {
+            colorWords = work->system->cells[i].colors;
+            colorCellCount = work->cellCount;
+            if (colorCellCount != 0) {
+                j = colorCellCount;
+                do {
+                    colorWords[0] = edge;
+                    colorWords[1] = center;
+                    colorWords[2] = edge;
+                    colorWords += 3;
+                    --j;
+                } while (j != 0);
+            }
+            groupCount = work->groupCount;
+        }
+    }
+    groupCount = work->groupCount;
+    VEC3_SPLAT(widthVector, (work->head.trailWidth * 0.5f) * scaleVector[0]);
+    widthVector[3] = 0.0f;
+    perpendicular[0] = perpendicular[1] = perpendicular[2] = perpendicular[3] = widthVector[3];
+    tint = work->color;
+    i = 0;
+    if (groupCount > 0) {
+        taperRange = -1.0f;
+        do {
+            historyCell = &work->system->cells[i];
+            positions = historyCell->history;
+            historyCell->color = tint;
+            if (mode == 2) {
+                direction[0] = 0.0f;
+                direction[1] = 0.0f;
+                direction[2] = 1.0f;
+                sdfLoadMapRecordLookAtBasis(map, i);
+                VU0_LOAD_VF(vf10, direction);
+                VU0_ROTATE_VEC(vf10, vf10);
+                VU0_STORE_VF(vf10, direction);
+                work->groups[i].direction[0] = direction[0];
+                work->groups[i].direction[1] = direction[1];
+                work->groups[i].direction[2] = direction[2];
+            }
+            sdfLoadMapRecordPositionVector(map, i);
+            if (frame < work->cellCount) {
+                historyCount = historyCell->vertexCount;
+                VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount);
+                VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount + 1);
+                VU0_STORE_VF_UNCLOBBERED(vf10, positions + historyCount + 2);
+                historyCell->vertexCount += 3;
+                taperStep = taperRange / frame;
+                blend = 1.0f;
+                VU0_LOAD_VF(vf12, D_003B1FE0);
+                if (frame > 0) {
+                    const f32 *trailWidth = widthVector;
+                    j = frame;
+                    do {
+                        VU0_LOAD_VF(vf10, positions + 4);
+                        VU0_LOAD_VF(vf11, positions + 1);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(trailLength);
+                        if (trailLength > 1.0f) {
+                            VU0_MOVE_VF(vf11, vf12);
+                            VU0_CROSS_XYZ(vf10, vf10, vf11);
+                            VU0_NORMALIZE_VF10();
+                            VU0_STORE_VF(vf10, perpendicular);
+                        } else {
+                            VU0_LOAD_VF(vf10, perpendicular);
+                        }
+                        VU0_LOAD_VF(vf11, trailWidth);
+                        VU0_SCALE_VF(vf11, blend);
+                        VU0_MUL(vf10, vf10, vf11);
+                        VU0_MOVE_VF(vf11, vf10);
+                        VU0_LOAD_VF(vf10, positions + 1);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, positions);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, positions + 2);
+                        --j;
+                        blend += taperStep;
+                        positions += 3;
+                    } while (j != 0);
+                }
+            }
+            i++;
+        } while (i < groupCount);
+    }
+    if (work->head.drawTrail) {
+        parPrependCellNode(work->system);
+    }
+    if (work->groupsHandle != NULL) {
+        duration = work->head.cellDuration;
+        count = frame - work->head.cellStartFrame;
+        fadeIn = work->head.cellFadeIn;
+        fadeOut = work->head.cellFadeOut;
+        colorStart = work->head.cellColorStartAge;
+        colorFrames = work->head.cellColorTransitionFrames;
+        cellCountFromFrame = work->head.cellCountFromFrame;
+        if (count > 0) {
+            ramp = work->head.offsetRampFrames;
+            if (cellCountFromFrame == 1) count = frame;
+            if (count > work->cellCount) count = work->cellCount;
+            group = work->groups;
+            for (i = 0; i < groupCount; i++, group++) {
+                historyCell = &work->system->cells[i];
+                historyStart = historyCell->history;
+                cell = group->cells;
+                effSetFanRecordPoolColor(group->drawPool, tint);
+                for (j = 0; j < count - 1; j++, cell++, historyStart += 3) {
+                    positions = effGetIndexedEffectGroupRecord(group->drawPool, j);
+                    colorWords = ((EffBossColorSlot *)effGetIndexedEffectGroupIndexEntry(group->drawPool, j))->color;
+                    age = cell->age;
+                    if (age > colorStart) {
+                        if (work->head.cellColorTransitionFrames > 0 && age < colorStart + colorFrames) {
+                            blend = (f32)(age - colorStart) / colorFrames;
+                            center = effBlendColor(work->head.cellStartCenterColor, work->head.cellEndCenterColor, blend);
+                            edge = effBlendColor(work->head.cellStartEdgeColor, work->head.cellEndEdgeColor, blend);
+                        } else {
+                            center = work->head.cellEndCenterColor;
+                            edge = work->head.cellEndEdgeColor;
+                        }
+                    } else {
+                        center = work->head.cellStartCenterColor;
+                        edge = work->head.cellStartEdgeColor;
+                    }
+                    center &= 0xFFFFFF;
+                    edge &= 0xFFFFFF;
+                    currentAge = cell->age;
+                    if (currentAge >= 0) {
+                        if (currentAge >= ramp) direction[1] = cell->offsetDistance;
+                        else direction[1] = (cell->offsetDistance * currentAge) / ramp;
+                        displacement[0] = group->direction[0] * direction[1];
+                        displacement[1] = group->direction[1] * direction[1];
+                        displacement[2] = group->direction[2] * direction[1];
+                        displacement[3] = 0.0f;
+                        if (mode == 2 && currentAge >= group->rotationStartAge) {
+                            VU0_LOAD_VF(vf10, historyStart + 4);
+                            VU0_LOAD_VF(vf11, historyStart + 1);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_NORMALIZE_VF10();
+                            VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+                            sdfBuildVuRotationFromAxisAngle(group->rotationAngle, (const struct RwV3d *)axis);
+                            VU0_LOAD_VF(vf10, displacement);
+                            VU0_ROTATE_VEC(vf10, vf10);
+                            VU0_STORE_VF(vf10, displacement);
+                            group->rotationAngle += group->angularSpeed;
+                        }
+                        baseExtent = cell->baseExtent;
+                        VEC3_SPLAT(baseVector, baseExtent);
+                        baseVector[3] = 0.0f;
+                        tipExtent = cell->tipExtent;
+                        VEC3_SPLAT(tipVector, tipExtent);
+                        tipVector[3] = 0.0f;
+                        VU0_LOAD_VF(vf10, historyStart + 4);
+                        VU0_LOAD_VF(vf11, historyStart + 1);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(cellLength);
+                        if (cellLength > 1.0f) {
+                            VU0_NORMALIZE_VF10();
+                            VU0_MOVE_VF(vf11, vf10);
+                            VU0_LOAD_VF(vf10, tipVector);
+                            VU0_MUL(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, tipVector);
+                            VU0_LOAD_VF(vf10, baseVector);
+                            VU0_MUL(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, baseVector);
+                            VU0_LOAD_VF(vf12, displacement);
+                            VU0_LOAD_VF(vf10, historyStart + 4);
+                            VU0_LOAD_VF(vf11, baseVector);
+                            VU0_STORE_VF(vf10, positions + 3);
+                            VU0_ADD(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, positions + 2);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, positions + 4);
+                            VU0_LOAD_VF(vf10, historyStart + 4);
+                            VU0_LOAD_VF(vf11, tipVector);
+                            VU0_ADD(vf10, vf10, vf12);
+                            VU0_ADD(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, positions);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_SUB(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, positions + 1);
+                        } else {
+                            VU0_MOVE_VF(vf10, vf0);
+                            VU0_STORE_VF(vf10, positions);
+                            VU0_STORE_VF(vf10, positions + 1);
+                            VU0_STORE_VF(vf10, positions + 2);
+                            VU0_STORE_VF(vf10, positions + 3);
+                            VU0_STORE_VF(vf10, positions + 4);
+                        }
+                        alphaColor = 0;
+                        if (age <= duration) {
+                            if (age < fadeIn && fadeIn != 0) {
+                                blend = (f32)age / fadeIn;
+                                alphaColor = effMultiplyPackedColors(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
+                            } else if (duration - age <= fadeOut && fadeOut != 0) {
+                                blend = (f32)(duration - age) / fadeOut;
+                                alphaColor = effMultiplyPackedColors(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
+                            } else alphaColor = tint;
+                        }
+                        colorWords[0] = effMultiplyPackedColors(edge, alphaColor);
+                        colorWords[1] = effMultiplyPackedColors(edge, alphaColor);
+                        if (cell->flip) {
+                            colorWords[2] = effMultiplyPackedColors(0x80000000, alphaColor);
+                            colorWords[3] = effMultiplyPackedColors(center | 0xFF000000, alphaColor);
+                            colorWords[4] = colorWords[2];
+                        } else {
+                            colorWords[2] = effMultiplyPackedColors(0xFF000000, alphaColor);
+                            colorWords[3] = effMultiplyPackedColors(center | 0x40000000, alphaColor);
+                            colorWords[4] = colorWords[2];
+                        }
+                    }
+                    cell->age++;
+                }
+                effDrawScaledRecordPool(group->drawPool);
+            }
+        }
+    }
+    work->frame++;
+}
+
 
 void effBossSetPosition(void *dst, void *src)
 {

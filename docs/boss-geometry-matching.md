@@ -22,7 +22,7 @@ headers before the following bounded continuation.
    reload carriers while leaving the global work/color allocation order
    unchanged: 87 differing words become 79.
 2. Each flip arm completes all its live color publications, including the
-   fresh slot-2 read copied to slot 4 after the last multiply callback.
+   fresh slot-2 read copied to slot 4 after the last multiply helper call.
    Stock `19.lreg` retains these complete paths through allocation: the
    color cursor changes from 44 references / 235 live instructions to
    50 / 236, while work changes from 76 / 478 to 76 / 481. `20.greg` now
@@ -52,7 +52,7 @@ would also change an allocation product's signed-overflow contract.
 
 The inherited four input-address-only VU stores remain limited to the pinned
 compiler and their audited uses: three complete history append vectors and
-one complete 16-byte axis passed to the immediate quaternion consumer.
+one complete 16-byte axis passed to the immediate axis-angle rotation provider.
 They do not provide a general memory barrier. No scalar readback, buffer
 extent or callback boundary is changed by this continuation.
 
@@ -63,3 +63,9 @@ emitted text bytes exact. The four owned literal bytes are exact. The same
 four final zero text bytes are omitted by the pristine production owner;
 the normal final link supplies its existing alignment padding. No gameplay
 or new full-retail-build claim is made by these owner-level receipts.
+
+The separately qualified DDS2 port uses its actual node-pool and reference-vector
+symbols. Its owner also gates **71 match, 0 differ**, with all 636 target words,
+26 target relocation words, 71 placements, 6,364 emitted text bytes and four
+literal bytes exact at native addresses. Ordinary/stock parity and the same
+pristine-production four-byte zero tail were checked independently for DDS2.
