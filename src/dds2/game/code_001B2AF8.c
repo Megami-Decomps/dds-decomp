@@ -8195,21 +8195,20 @@ void func_001C6648(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
         work->activeEntries[slot].presentation.offset[1] = 0;
         break;
     }
-    if (work->activeEntries[slot].presentation.mpState != 0x11 &&
-        work->activeEntries[slot].presentation.mpState != 0x21) {
-        goto finished;
+    switch (work->activeEntries[slot].presentation.mpState) {
+    default:
+        return;
+    case 0x11:
+    case 0x21:
+        if (++work->activeEntries[slot].presentation.mpEffectTimer >= 20) {
+            work->activeEntries[slot].presentation.mpState = 0;
+            work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+            work->activeEntries[slot].presentation.mpHighlightLevel = 0;
+            work->activeEntries[slot].presentation.mpEffectTimer = 0;
+            btlClearFinishedActorSlotChannels(work, 0);
+        }
+        break;
     }
-    work->activeEntries[slot].presentation.mpEffectTimer++;
-    if (work->activeEntries[slot].presentation.mpEffectTimer < 20) {
-        goto finished;
-    }
-    work->activeEntries[slot].presentation.mpState = 0;
-    work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
-    work->activeEntries[slot].presentation.mpHighlightLevel = 0;
-    work->activeEntries[slot].presentation.mpEffectTimer = 0;
-    btlClearFinishedActorSlotChannels(work, 0);
-finished:
-    return;
 }
 
 extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s16, s8, s8);
