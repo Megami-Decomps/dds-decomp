@@ -5033,7 +5033,7 @@ void fldSetCameraObjectHighlightFlag(void) {
 }
 
 void fldClearSceneModelColors(void) {
-    u8 hasSecondObject;
+    s8 hasSecondObject;
 
     hasSecondObject = fldSecondarySceneObject != 0;
     fldPlayerModelContext->inner->color = 0;
@@ -5043,7 +5043,7 @@ void fldClearSceneModelColors(void) {
 }
 
 void fldRestoreSceneModelColors(void) {
-    u8 hasSecondObject;
+    s8 hasSecondObject;
 
     hasSecondObject = fldSecondarySceneObject != 0;
     fldPlayerModelContext->inner->color = 0x80808080;

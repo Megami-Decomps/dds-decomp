@@ -689,7 +689,7 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
  * status covers the count, payload mode word and cursor result. */
 void fldToggleWorldNodeState(s64 clearMode) {
     WorldIndexNode *valueChain;
-    u32 status;
+    s32 status;
     EffWorldNode *worldObject;
 
     valueChain = dds3GetWorldSecondaryObject();
@@ -1610,7 +1610,7 @@ extern void fldPlayMenuSound(s32);
 
 
 void fldActivatePendingSceneCommand(void) {
-    u32 value;
+    s32 value;
     if (fldAreaState.commandEnabled != 0) {
         if ((datGameState->world.fieldFlags & 8) == 0) {
             fldPlayMenuSound(0x29);
@@ -1638,7 +1638,7 @@ s32 fldGetSceneCommandState(void) {
  * clears. Disable passes transition parameter 0; flag removal passes 20. */
 void fldUpdateSceneCommandSpeed(void) {
     FldAreaWork *scene = &fldAreaState;
-    u32 value;
+    s32 value;
     if (scene->commandEnabled == 0) {
         if (scene->sceneCommand != 0) {
             scene->sceneCommand = 0;

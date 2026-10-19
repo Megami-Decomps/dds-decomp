@@ -672,7 +672,7 @@ void fldResetTaskSlots(void) {
 
 /* Append a display value and return its index; no capacity check is performed. */
 u32 fldPushDisplayValue(u32 value, EffWorldNode *object) {
-    u32 index = D_003BAE28;
+    s32 index = D_003BAE28;
 
     D_003C92E0[index] = value;
     D_003BAE28 = index + 1;

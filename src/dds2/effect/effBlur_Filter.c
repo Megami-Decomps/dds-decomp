@@ -165,7 +165,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
 
 /* Update scale parameters but preserve the allocated destination slot count. */
 void effBlurCopyParamsKeepHeader(EffBlurScaleWork *dst, EffBlurScaleParams *src) {
-    u32 count = dst->params.count;
+    s32 count = dst->params.count;
 
     dst->params = *src;
     dst->params.count = count;

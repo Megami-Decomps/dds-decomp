@@ -63,7 +63,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
             struct MenuListNode *entry = skillPanel->list->cursor;
 
             if ((entry->flags48 & 1) == 0) {
-                u32 index = entry->sortKeyPrimary + 1;
+                s32 index = entry->sortKeyPrimary + 1;
 
                 mnuSetPopupEntry(popup, (void *)(mnuCampCommandDispatchEntries + index * 0x1C));
             } else {

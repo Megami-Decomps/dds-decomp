@@ -6144,7 +6144,7 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
     s128 vec[3];
     s128 *pos;
     BtlUnit *target;
-    u32 count = btlGetIndexListCount(*(struct BtlIndexList **)(action + 0x118));
+    s32 count = btlGetIndexListCount(*(struct BtlIndexList **)(action + 0x118));
     if (count != 0) {
         target = *(BtlUnit **)(*(s32 *)(action + 0xF4) + 0x18);
         if (count == 1) {

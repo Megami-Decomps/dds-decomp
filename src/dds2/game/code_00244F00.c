@@ -45,7 +45,7 @@ INCLUDE_ASM(const s32, "game/code_00244F00", evtDrawFadingSolarOverlayFrame);
 
 /* Seed both noise-state geometries and cache the current solar phase. */
 void evtInitializeVisualData(SolarOverlayWork *overlay) {
-    u8 solarPhase = evtGetSolarPhase();
+    s8 solarPhase = evtGetSolarPhase();
     SolarNoiseState *noise = &overlay->state.firstNoise;
     overlay->state.solarPhase = solarPhase;
     noise->centerX = 0x39;

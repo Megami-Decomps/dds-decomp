@@ -7598,7 +7598,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
 u32 btlCountUnitsByFlags(u32 mask) {
     s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *actor = *(BtlUnit **)(context + 0x228);
-    u32 count = 0;
+    s32 count = 0;
     while (actor != 0) {
         u32 flags = (u32)actor->status.flags;
         if ((flags & 1) != 0 && (flags & mask) != 0 && (flags & 0x20) == 0) {
@@ -11191,7 +11191,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
     BtlUnit *back = 0;
     BtlUnit *target;
     s128 vec[3];
-    u32 count;
+    s32 count;
 
     if (link->unit->status.flags & 0x1000) {
         back = link->unit;

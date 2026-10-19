@@ -750,7 +750,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     BtlUnit *back = 0;
     BtlUnit *target;
     s128 vec[3];
-    u32 count;
+    s32 count;
     if (link->unit->status.flags & 0x1000) {
         back = link->unit;
     } else {

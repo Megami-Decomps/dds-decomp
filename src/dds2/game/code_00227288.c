@@ -1142,7 +1142,7 @@ s32 btlIsSpecialActionKind(BtlLinkedCommand *command) {
 /* Action 0x188 advances when a marked entry is ready, choosing camera keys at
  * step 25. It returns 1 even while waiting; other actions return 0. */
 s32 btlAdvanceMarkedLinkedActionCamera(BtlLinkedCommand *command) {
-    u32 choice;
+    s32 choice;
 
     if (command->actionCode != 0x188) {
         return 0;

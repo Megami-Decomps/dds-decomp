@@ -4078,7 +4078,7 @@ extern EffPacketParams effBeamDrawParams;
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
-    u32 count = segments * 4 + 4;
+    s32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
     SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 20);
     f32 *points = (void *)sdfResourceRetainAddress(allocation);

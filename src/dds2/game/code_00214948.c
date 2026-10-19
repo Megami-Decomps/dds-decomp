@@ -553,7 +553,7 @@ done:
 }
 
 BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matched, u32 *count) {
-    u32 value;
+    s32 value;
     BtlIndexList *indexList;
 
     indexList = btlAllocateIndexList(0xd);
@@ -1627,7 +1627,7 @@ void btlQueueBossScriptResourceAndSound(ActionStateLink *action) {
 
 u32 btlGetSelectionEmptyValue(void) {
     s32 battle;
-    u32 value;
+    s32 value;
 
     battle = (s32)(u32)btlGetRuntime();
     value = 0;
@@ -6763,7 +6763,7 @@ u32 btlStartChaturbhujaCameraStep(BtlLinkedCommand *unit) {
 
 /* Override Desert Wind's effect with 0xE0; zero keeps the normal effect. */
 u32 btlGetDesertWindEffectOverride(u32 unused, s32 motion) {
-    u32 result;
+    s32 result;
 
     result = 0xe0;
     if (motion != 0x12d) {

@@ -37,7 +37,7 @@ extern void mnuDrawListFlagIndicatorsWithFade(s32, s32, s32, s32, u8 *, s32);
 
 
 u32 evtSelectGraphicSlotBySpriteType(MenuTerminalContext *object) {
-    u32 result;
+    s32 result;
 
     result = 0;
     if ((object->type == 1) || (object->type == 3)) {
@@ -51,7 +51,7 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
     s32 frameCount;
     f32 alpha;
     s32 scale;
-    u32 index;
+    s32 index;
     MenuTerminalContext *resources;
 
     if (frames < 0) {
