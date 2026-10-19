@@ -38,7 +38,7 @@ extern s32 func_00202668(BtlTask *, s32);
 extern void func_00202F90(s32, s32);
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
-extern void btlSelectLowestRankTarget(s32, s32);
+extern s32 btlSelectLowestRankTarget(s32, s32);
 extern void func_00203BA8(s32, s32);
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
 extern void btlSelectTargetsByActionMask(s32, s32);
