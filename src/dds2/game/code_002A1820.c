@@ -2,6 +2,7 @@
  * "Title-audio controller transport boundary". */
 
 #include "common.h"
+#include "snd_track_callback.h"
 #include "kwln_background_fade_api.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
@@ -948,7 +949,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     case 0:
         mnuMovieMenuState->cursor = 0;
         mnuMovieMenuState->state = 2;
-        sndEnsureMidiBankResident(0x310000);
+        sndApplyTrackOperation(sndEnsureMidiBankResident, 0x310000);
         break;
     case 1:
     case 22:
@@ -989,7 +990,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             kwlnFadeOutStart(0, 0, 0, 0x14);
             if (mnuMovieMenuState->mode >= 0) {
                 if (mnuMovieMenuState->mode < 2) {
-                    sndStartTrackExtended(0x310000);
+                    sndApplyTrackOperation(sndStartTrackExtended, 0x310000);
                 }
             }
         }
