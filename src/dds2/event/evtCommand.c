@@ -542,8 +542,10 @@ s32 evtCommandHandleChangedSecondaryWorldKey(void)
     return 1;
 }
 
+extern s32 evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 modeValue);
+
 u32 evtCommandSetWorldNodeBaseMode(void) {
-    u64 baseMode;
+    s32 baseMode;
 
     baseMode = scrReadIntParameter(0);
     evtApplyIndexValueToWorldNodes(0, baseMode);
@@ -551,7 +553,7 @@ u32 evtCommandSetWorldNodeBaseMode(void) {
 }
 
 u32 evtCommandSetWorldNodeUpperMode(void) {
-    u64 upperMode;
+    s32 upperMode;
 
     upperMode = scrReadIntParameter(0);
     evtApplyIndexValueToWorldNodes(1, upperMode);
@@ -944,10 +946,14 @@ s32 evtCommandWaitObjectResourceScale(void) {
     }
 }
 
+extern void evtEnableSolarPhaseAdvance(void);
+
 u32 evtCommandEnableSolarAdvance(void) {
     evtEnableSolarPhaseAdvance();
     return 1;
 }
+
+extern void evtDisableSolarPhaseAdvance(void);
 
 u32 evtCommandDisableSolarAdvance(void) {
     evtDisableSolarPhaseAdvance();
@@ -1051,6 +1057,9 @@ s32 evtCommandDestroyCampTask(void) {
 
 /* Create an event/scene movie task using the active camp resource, set bit 0,
  * and return its handle through the VM result. Missing work skips creation. */
+extern KwlnTask * evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+extern void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits);
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
 s32 evtCommandStartPolygonMovie(void) {
@@ -1075,6 +1084,8 @@ s32 evtCommandStartPolygonMovie(void) {
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }
+
+extern void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits);
 
 /* Clear bit 0 and echo the movie ID through the VM result. */
 s32 evtCommandClearPolygonMovieFlag(void)

@@ -195,6 +195,9 @@ extern void evtSetSolarOverlayFullyVisible(void);
 
 void fldFireRoomEffects(void);
 
+extern s32 fldFindTaskRecordId(u32 task);
+extern s32 fldResolvePendingTitleBanner(void);
+
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     EffWorldNode *world = dds3GetWorldObject();
     EffWorldNode *unit = dds3GetWorldPlayerObject(world);
@@ -328,10 +331,14 @@ s32 fldCmdReleaseCurrentObject(void) {
     return 1;
 }
 
+extern void fldSetSceneControlFlags(u32 mask);
+
 u32 fldCmdSetSceneControlFlag(void) {
     fldSetSceneControlFlags(0x10);
     return 1;
 }
+
+extern void fldClearSceneControlFlags(u32 mask);
 
 u32 fldCmdClearSceneControlFlag(void) {
     fldClearSceneControlFlags(0x10);
@@ -483,6 +490,8 @@ s32 fldCmdCaptureObjectPose(void) {
     return 1;
 }
 
+extern char *strcpy(char *, const char *);
+
 s32 fldCmdSetRequestedSceneName(void) {
     char *name;
 
@@ -539,6 +548,8 @@ u32 func_0014DAF8(void) {
     return 1;
 }
 
+extern void fldFreeDisplayObjects(void);
+
 u32 fldCmdFreeDisplayObjects(void) {
     fldFreeDisplayObjects();
     return 1;
@@ -576,6 +587,8 @@ s32 fldCmdSetSceneControlValue(void) {
     D_0032E408[0] = value;
     return 1;
 }
+
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 s32 fldCmdSetFieldParameterPair(void) {
     s32 durationMode;
@@ -1130,9 +1143,11 @@ s32 fldCmdPushSceneParam(void) {
 }
 
 
+extern void fldActivateFlaggedObject(u32 flagIndex);
+
 u32 fldCmdActivateTaskRoomObject(void) {
     ScrData *script;
-    u64 room;
+    s32 room;
 
     script = scrGetCurrentContext();
     room = fldFindRoomByTask((u32)script->task);
@@ -1211,6 +1226,8 @@ u32 fldCmdGetRowValue(void) {
     return 1;
 }
 
+extern void func_0013FA40(s32 index);
+
 u32 fldCmdApplySceneRoomSelection(void) {
     s32 sceneRoomSelection;
 
@@ -1218,6 +1235,8 @@ u32 fldCmdApplySceneRoomSelection(void) {
     func_0013FA40(sceneRoomSelection);
     return 1;
 }
+
+extern void fldConfigureCameraMoveTracking(s32 start, s32 end);
 
 u32 fldCmdConfigureCameraMoveTracking(void) {
     s32 first;
@@ -1228,6 +1247,8 @@ u32 fldCmdConfigureCameraMoveTracking(void) {
     fldConfigureCameraMoveTracking(first, second);
     return 1;
 }
+
+extern void fldResetCameraMoveTracking(void);
 
 u32 fldCmdResetCameraMoveTracking(void) {
     fldResetCameraMoveTracking();

@@ -378,6 +378,9 @@ extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *ent
 
 extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
+extern s32 fldFindTaskRecordId(u32 task);
+extern s32 fldResolvePendingTitleBanner(void);
+
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     EffWorldNode *world = dds3GetWorldObject();
     EffWorldNode *unit = (EffWorldNode *)fldPlayerObject;
@@ -517,10 +520,14 @@ s32 fldCmdForceTargetGuideUpdate(void) {
     return 1;
 }
 
+extern void fldSetSceneControlFlags(u32 mask);
+
 u32 fldCmdSetSceneControlFlag(void) {
     fldSetSceneControlFlags(0x10);
     return 1;
 }
+
+extern void fldClearSceneControlFlags(u32 mask);
 
 u32 fldCmdClearSceneControlFlag(void) {
     fldClearSceneControlFlags(0x10);
@@ -654,6 +661,8 @@ s32 fldCmdCaptureObjectPose(void) {
     return 1;
 }
 
+extern char *strcpy(char *, const char *);
+
 s32 fldCmdSetRequestedSceneName(void) {
     char *name;
 
@@ -710,6 +719,8 @@ u32 func_00154F20(void) {
     return 1;
 }
 
+extern void fldFreeDisplayObjects(void);
+
 u32 fldCmdFreeDisplayObjects(void) {
     fldFreeDisplayObjects();
     return 1;
@@ -743,6 +754,8 @@ s32 fldCmdSetSceneControlValue(void) {
     D_003897C8[0] = value;
     return 1;
 }
+
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
 s32 fldCmdSetFieldParameterPair(void) {
     s32 value;
@@ -824,6 +837,8 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
 }
 
 extern char D_00414090[];
+
+extern int sprintf(char *, const char *, ...);
 
 /* Numeric form of fldCmdApplyRoomModeGroupZero: the room number parameter is
  * formatted to a name and parsed like the string command's argument. */
@@ -1470,15 +1485,19 @@ s32 fldCmdPushSceneParam(void) {
     return 1;
 }
 
+extern void fldActivateFlaggedObject(u32 flagIndex);
+
 u32 fldCmdActivateTaskRoomObject(void) {
     ScrData *script;
-    u64 room;
+    s32 room;
 
     script = scrGetCurrentContext();
     room = fldFindRoomByTask((u32)script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
+
+extern u8 fldTestObjectActivationFlag(u32 flagIndex);
 
 u32 fldCmdTestTaskRoomObjectActive(void) {
     if (fldTestObjectActivationFlag(fldFindRoomByTask((u32)scrGetCurrentContext()->task)) != 0) {
@@ -1503,8 +1522,10 @@ u32 fldCmdSetCurrentTaskScene(void) {
     return 1;
 }
 
+extern void func_001411F8(s32 action);
+
 u32 fldCmdExecuteSceneAction(void) {
-    u64 sceneAction;
+    s32 sceneAction;
 
     sceneAction = scrReadIntParameter(0);
     func_001411F8(sceneAction);
@@ -1551,23 +1572,29 @@ u32 fldCmdGetRowValue(void) {
     return 1;
 }
 
+extern void func_00142670(s32 index);
+
 u32 fldCmdApplySceneRoomSelection(void) {
-    u64 value;
+    s32 value;
 
     value = scrReadIntParameter(0);
     func_00142670(value);
     return 1;
 }
 
+extern void fldConfigureCameraMoveTracking(s32 start, s32 end);
+
 u32 fldCmdConfigureCameraMoveTracking(void) {
-    u64 first;
-    u64 second;
+    s32 first;
+    s32 second;
 
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
     fldConfigureCameraMoveTracking(first, second);
     return 1;
 }
+
+extern void fldResetCameraMoveTracking(void);
 
 u32 fldCmdResetCameraMoveTracking(void) {
     fldResetCameraMoveTracking();
@@ -1584,6 +1611,8 @@ s32 fldCmdQuerySceneValue(void) {
     scrSetIntegerReturnValue(fldQuerySelectedActorMotionState(scrReadIntParameter(0)));
     return 1;
 }
+
+extern void fldApplyActorEntryTrigger(s32 useTaskRecord);
 
 u32 fldCmdUpdateTaskRecordScene(void) {
     s32 scene;
@@ -1775,6 +1804,9 @@ s32 fldCmdRollMirroredSolarThreshold(void) {
     }
     return 1;
 }
+
+extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
+extern void sdfSoundStopNamedPlayback(void);
 
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {

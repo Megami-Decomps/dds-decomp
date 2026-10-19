@@ -132,6 +132,8 @@ u32 evtOpcodeClearTaskContextFlag(void) {
     return 1;
 }
 
+extern void evtDestroyTaskHierarchy(u32 taskHandle);
+
 u32 evtOpcodeDestroyTask(void) {
     u32 task;
     s32 registered;
@@ -143,6 +145,9 @@ u32 evtOpcodeDestroyTask(void) {
     }
     return 1;
 }
+
+extern void fldSetSkyDrawState(u32 drawState);
+extern void fldSetSwayMode(u32 mode);
 
 u32 evtOpcodeSetFadeTarget(void) {
     s32 area;
@@ -176,6 +181,8 @@ u32 evtSetSkyAlpha(void) {
     return 1;
 }
 
+extern void evtSetSkyOverlayEnabled(u32 enabled);
+
 u32 evtShowSky(void) {
     evtSetSkyOverlayEnabled(1);
     return 1;
@@ -201,9 +208,11 @@ u32 evtCommandAwaitBgmPreload(void) {
     return 0;
 }
 
+extern s32 evtPlayBgm(s32 eventId, s32 fade);
+
 u32 evtOpcodePlayBgm(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
@@ -211,9 +220,11 @@ u32 evtOpcodePlayBgm(void) {
     return 1;
 }
 
+extern void evtTransitionBgm(s32 eventId, s32 fade);
+
 u32 evtOpcodeTransitionBgm(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
@@ -221,9 +232,11 @@ u32 evtOpcodeTransitionBgm(void) {
     return 1;
 }
 
+extern s32 evtQueueValidatedBgmSoundCode(s32 eventId, s32 fade);
+
 u32 evtCommandQueueBgmWithFade(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
@@ -231,11 +244,16 @@ u32 evtCommandQueueBgmWithFade(void) {
     return 1;
 }
 
+extern void btlAdvanceTitleStateWithAudioCleanupTask(void);
+extern void sndStartReducedBgm(void);
+
 u32 evtOpcodeStartReducedBgm(void) {
     sndStartReducedBgm();
     btlAdvanceTitleStateWithAudioCleanupTask();
     return 1;
 }
+
+extern void sndStopReducedBgm(void);
 
 u32 evtOpcodeStopReducedBgm(void) {
     sndStopReducedBgm();
@@ -243,9 +261,11 @@ u32 evtOpcodeStopReducedBgm(void) {
     return 1;
 }
 
+extern s32 evtSetBgmVolumePan(s32 eventId, s32 fade);
+
 u32 evtOpcodeSetBgmVolumePan(void) {
-    u64 id;
-    u64 fade;
+    s32 id;
+    s32 fade;
 
     id = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
@@ -253,9 +273,11 @@ u32 evtOpcodeSetBgmVolumePan(void) {
     return 1;
 }
 
+extern s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 fade);
+
 u32 evtCommandStartBgmWithFade(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
@@ -263,15 +285,19 @@ u32 evtCommandStartBgmWithFade(void) {
     return 1;
 }
 
+extern void evtRefreshTaskEffectTexture(s32 taskId, s32 key);
+
 u32 evtOpcodeRefreshTaskData(void) {
-    u64 task;
-    u64 value;
+    s32 task;
+    s32 value;
 
     task = scrReadIntParameter(0);
     value = scrReadIntParameter(1);
     evtRefreshTaskEffectTexture(task, value);
     return 1;
 }
+
+extern void effInitCh72Id(void);
 
 u32 evtOpcodeInitializeEffectSoundChannel(void) {
     effInitCh72Id();
