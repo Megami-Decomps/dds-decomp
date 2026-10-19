@@ -19,6 +19,7 @@ extern EvtFrameTableEntry D_003C9538[];
 #endif
 
 struct SdfTex;
+struct SdfMemBlock;
 
 /* The picture-task allocator creates this complete 0x08-byte state. */
 typedef struct EvtPictureWork {
@@ -40,8 +41,8 @@ typedef char EvtResourcePair_dataAddress_offset_must_be_0x04[((u32)&((EvtResourc
 /* Loaded resource table header: the resource handle, the origin of a
  * 32-byte-stride record array, and its record count. */
 typedef struct EvtLoadedRecord {
-    u32 handle; /* 0x0: released by sdfReleaseResourceAllocation */
-    s32 recordsAddress; /* 0x4: origin of a 32-byte-stride lookup */
+    struct SdfMemBlock *handle; /* 0x0: released by sdfReleaseResourceAllocation */
+    u8 *records; /* 0x4: origin of a 32-byte-stride lookup */
     u32 recordCount; /* 0x8: bound used by the coordinate search */
 } EvtLoadedRecord;
 
@@ -56,7 +57,6 @@ enum {
     EVT_WORLD_SLOT_UNIT = 5   /* unit/group/lip-sync lists: byte offset 0x40 */
 };
 
-struct SdfMemBlock;
 struct BfFlw0Header;
 
 /* The object's 18 per-kind intrusive lists. */

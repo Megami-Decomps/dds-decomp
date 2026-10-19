@@ -69,23 +69,21 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     offset += sizeof(header);
     source = (u8 *)sourceAddress + offset;
     handle = sdfAllocGeneralBlock(header.dataBytes + sizeof(EvtLoadedRecord));
-    record = sdfMemoryGetBlockAddress(handle);
+    record = (EvtLoadedRecord *)sdfMemoryGetBlockAddress(handle);
     record->recordCount = header.recordCount;
     records = (u8 *)record + sizeof(EvtLoadedRecord);
-    record->handle = (u32)handle;
-    record->recordsAddress = (s32)records;
+    record->handle = handle;
+    record->records = records;
     memset(records, 0, header.dataBytes);
     offset = sizeof(EvtLoadedRecord);
-    do {
-        memcpy((u8 *)record + offset, source, header.dataBytes);
-        source += header.dataBytes;
-        relocationHandle = sdfAllocGeneralBlock(header.relocationBytes);
-        relocations = sdfMemoryGetBlockAddress(relocationHandle);
-        memset(relocations, 0, header.relocationBytes);
-        memcpy(relocations, source, header.relocationBytes);
-        dds3ApplyRelocationOffsets(records, (u32)records, relocations, header.relocationBytes);
-        sdfReleaseResourceAllocation(relocationHandle);
-    } while (0);
+    memcpy((u8 *)record + offset, source, header.dataBytes);
+    source += header.dataBytes;
+    relocationHandle = sdfAllocGeneralBlock(header.relocationBytes);
+    relocations = (u32 *)sdfMemoryGetBlockAddress(relocationHandle);
+    memset(relocations, 0, header.relocationBytes);
+    memcpy(relocations, source, header.relocationBytes);
+    dds3ApplyRelocationOffsets(records, (u32)records, relocations, header.relocationBytes);
+    sdfReleaseResourceAllocation(relocationHandle);
     return record;
 }
 
@@ -120,7 +118,7 @@ void mnuLoadMantraNodePositionTable(u32 resourceId) {
 
 /* Release the retained node-position handle and clear the global table address. */
 void mnuReleaseMantraNodePositionTable(void) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(mnuMantraNodePositionTable->handle));
+    sdfReleaseResourceAllocation(mnuMantraNodePositionTable->handle);
     mnuMantraNodePositionTable = 0;
 }
 
@@ -129,7 +127,7 @@ void mnuReleaseMantraNodePositionTable(void) {
 struct MantraNodePos;
 
 struct MantraNodePos *mnuGetMantraNodePositionRecord(s16 index) {
-    return (struct MantraNodePos *)(mnuMantraNodePositionTable->recordsAddress + index * 32);
+    return (struct MantraNodePos *)(mnuMantraNodePositionTable->records + index * 32);
 }
 
 /* Find the first position matching two signed-halfword, staggered-grid keys.
@@ -146,7 +144,7 @@ s32 mnuFindMantraNodePositionRecord(s32 firstCoordinate, s32 secondCoordinate) {
     secondCoordinate = (s16)secondCoordinate;
     firstKey = (s16)(firstCoordinate * 10 + ((secondCoordinate & 1) * 5));
     secondKey = (s16)(secondCoordinate * 10);
-    record = (EvtMantraNodePositionRecord *)loaded->recordsAddress;
+    record = (EvtMantraNodePositionRecord *)loaded->records;
 
     for (index = 0; index < (s32)loaded->recordCount; index++) {
         if (record->firstKey == firstKey && record->secondKey == secondKey) {
@@ -180,7 +178,7 @@ void mnuReleaseMantraPanelPositionTable(void) {
 
 /* Return a 32-byte panel record using the same signed low-halfword index convention. */
 struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
-    return (struct MantraNodePos *)(mnuMantraPanelPositionTable->recordsAddress + ((index << 0x10) >> 0xb));
+    return (struct MantraNodePos *)(mnuMantraPanelPositionTable->records + ((index << 0x10) >> 0xb));
 }
 
 extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
@@ -247,7 +245,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
     evtPrintDeveloperConsoleMessage(D_00425098, rank);
     selected = scrGetSelectedScriptEntryId(unit);
     entry = work->entries;
-    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->recordsAddress;
+    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->records;
     for (; i < (s32)mnuMantraNodePositionTable->recordCount; i++, node++, entry++) {
         *entry = 0;
         if (node->id != 0) {
@@ -491,7 +489,7 @@ void mnuMergePartyMantraProfileCapStates(EvtMantraWork **selectionWorks) {
     s32 remaining;
     s32 profileIndex;
 
-    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->recordsAddress;
+    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->records;
     combinedEntry = selectionWorks[5]->entries;
     recordCount = (s32)mnuGetMantraNodePositionRecordCount();
     if (recordCount <= 0) {
