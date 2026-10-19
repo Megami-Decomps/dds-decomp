@@ -112,7 +112,7 @@ void kwlnSetTaskPauseCount(u32 pauseCount) {
 }
 
 void kwlnSetFrameControlParameters(u32 first, u32 second) {
-    u32 value = D_00435B84;
+    s32 value = D_00435B84;
     D_00435B94 = 1;
     D_00435B98 = first;
     D_00435B9C = value;

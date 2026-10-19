@@ -603,7 +603,7 @@ void btlRecenterUnitsOnLead(void) {
 }
 
 u32 btlMapActionToCode(s32 action) {
-    u32 result;
+    s32 result;
 
     result = 0x7d;
     if (action != 0x143) {

@@ -269,7 +269,7 @@ done:
 }
 
 BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
-    u32 result;
+    s32 result;
     BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
@@ -3792,7 +3792,7 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
 }
 
 u32 btlSelectResponseCodeForEnemyFlag(u32 unused, s32 unit) {
-    u32 result;
+    s32 result;
 
     result = 4;
     if ((((BtlUnit *)unit)->status.flags & 0x400) == 0) {
@@ -5442,7 +5442,7 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
 
 /* Command-sound delay override: two for Millennia Curse, zero for other actions. */
 u32 btlGetMillenniaCurseSoundDelay(s32 action) {
-    u32 result;
+    s32 result;
 
     result = 2;
     if (action != 0x1d7) {

@@ -3917,7 +3917,7 @@ s32 evtAdvanceSlotFlags(void) {
 }
 
 u32 evtUpdateSlotAdvanceCount(KwlnTask *task) {
-    u8 advancedSlots;
+    s8 advancedSlots;
     s32 stateAddress;
 
     stateAddress = kwlnTaskGetUserValue(task);
@@ -4342,7 +4342,7 @@ u32 mnuShopMessageLeaveNoOp(void) {
 }
 
 u32 evtMenuSetProgressFlag(MenuTerminalContext *context) {
-    u32 changed;
+    s32 changed;
     s32 flagSet;
 
     if (((context->type == 2) && (flagSet = mdlFlagTest(4), flagSet != 0)) &&

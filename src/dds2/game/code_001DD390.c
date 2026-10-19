@@ -6338,7 +6338,7 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
     s128 vec[3];
     s128 *pos;
     BtlUnit *target;
-    u32 count = btlGetIndexListCount(action->targetList);
+    s32 count = btlGetIndexListCount(action->targetList);
     if (count != 0) {
         target = action->link->unit;
         if (count == 1) {

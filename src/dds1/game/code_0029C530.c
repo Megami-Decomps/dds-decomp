@@ -1518,7 +1518,7 @@ void effClearBillFrames(u8 *work) {
 
 
 u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 resource) {
-    u32 count = config->frame.output.timed.count;
+    s32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x18 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
@@ -1802,7 +1802,7 @@ void billResetCellIndices(u8 *work) {
 }
 
 u8 *billCreateCellNode(EffBillCellConfig *config, u32 resource) {
-    u32 count = config->frame.output.timed.count;
+    s32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x1C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
@@ -2091,7 +2091,7 @@ void billResetParticleIndices(u8 *work) {
 }
 
 u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 resource) {
-    u32 count = config->frame.output.timed.count;
+    s32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x2C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));

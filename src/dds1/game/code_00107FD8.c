@@ -1077,12 +1077,12 @@ void evtOpenFileMenuModeThree(void) {
 
 u32 evtPollFileMenuModeThree(void) {
     s32 operationResult;
-    u32 status;
+    s32 status;
 
     fileMenuReleaseNoOp();
     fileReleaseMenuResources();
     operationResult = fileMenuOperationSucceeded();
-    status = 0xffffffff;
+    status = -1;
     if (operationResult != 0) {
         status = 0;
     }
@@ -1154,12 +1154,12 @@ void evtOpenFileMenuModeTwo(void) {
 
 u32 evtPollFileMenuModeTwo(void) {
     s32 operationResult;
-    u32 status;
+    s32 status;
 
     fileMenuReleaseNoOp();
     fileReleaseMenuResources();
     operationResult = fileMenuOperationSucceeded();
-    status = 0xffffffff;
+    status = -1;
     if (operationResult != 0) {
         status = 0;
     }
@@ -1180,11 +1180,11 @@ void evtStartAreaFromSelection(u32 selection, u32 area) {
 
 u32 evtPollSelectedAreaReady(void) {
     s32 operationResult;
-    u32 status;
+    s32 status;
 
     fldCleanupFieldScene();
     operationResult = fldIsFieldResourceWaitFinished();
-    status = 0xffffffff;
+    status = -1;
     if (operationResult != 0) {
         status = 0;
     }

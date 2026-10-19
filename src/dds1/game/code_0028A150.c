@@ -1700,8 +1700,8 @@ extern u32 D_003BC894;
 
 s32 fileBeginLabeledSlotWrite(void) {
     s32 slot = fileSelectedSlotIndex + 1;
-    u8 tens = 0x4F + slot / 10;
-    u8 ones = 0x4F + slot % 10;
+    s8 tens = 0x4F + slot / 10;
+    s8 ones = 0x4F + slot % 10;
 
     fileSaveIconSysData[0xD0] = 0x82;
     fileSaveIconSysData[0xD1] = tens;

@@ -118,7 +118,7 @@ extern u32 btlButtonIconTexture;
 
 
 
-extern u16 scrReadIntParameter(u32);
+extern s32 scrReadIntParameter(s32);
 
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
@@ -139,17 +139,17 @@ extern s32 D_00438F6C;
 extern void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action);
 extern void btlPickCommandTargetExcludingActor(s32, s32);
 
-extern void btlPickCommandLowestHpBlockTarget(s32, u16);
+extern void btlPickCommandLowestHpBlockTarget(s32, s32);
 
-extern void btlPickCommandTargetWithoutStatusMask(s32, u16);
+extern void btlPickCommandTargetWithoutStatusMask(s32, s32);
 
-extern void btlFilterCommandTargetsByUnitId(s32, u16);
+extern void btlFilterCommandTargetsByUnitId(s32, s32);
 
-extern void btlPickCommandElementBlockTarget(s32, u16);
+extern void btlPickCommandElementBlockTarget(s32, s32);
 
 extern s8 btlHistoryCounter;
 
-extern void btlRunWeightedAiAction(s32, u16);
+extern void btlRunWeightedAiAction(ActionStateLink *, s32);
 
 extern const char D_00419570[];
 
@@ -187,7 +187,7 @@ extern u32 btlGetEffectValue(void);
 
 extern u32 btlGetSubtaskTargetMode(void);
 
-extern void btlPickCommandTargetWithStatusMask(s32, u16);
+extern void btlPickCommandTargetWithStatusMask(s32, s32);
 
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 
@@ -206,7 +206,7 @@ extern void btlChoosePartyDerivedShadowSkill(s32);
 
 extern void btlCmdAppendCurrentUnitIdToCommandIndices(s32);
 
-extern void btlSelectCommandTargetsByMode(s32, u16);
+extern void btlSelectCommandTargetsByMode(s32, s32);
 
 extern void btlSetSpecialBattleEffectActorByte(u8);
 
@@ -1658,7 +1658,7 @@ u32 btlEnableCommandStateFlag(void) {
 }
 
 u32 btlScriptSetActorUnitParameter(void) {
-    u16 parameterValue;
+    s32 parameterValue;
     void *context;
 
     context = scrGetCurrentCommandWork();
@@ -1688,7 +1688,7 @@ u32 btlScriptChooseActionTargets(void) {
 /* Parameter 0 supplies the group element-check input; return VM success. */
 u32 btlScriptPickElementCheckedTarget(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
+    s32 value = scrReadIntParameter(0);
     btlPickCommandElementCheckedTarget((s32)(u32)context, value);
     return 1;
 }
@@ -1708,7 +1708,7 @@ u32 btlScriptPickLowestHpRatioTarget(void) {
 /* Parameter 0 feeds lowest-HP element-block selection; return VM success. */
 u32 btlScriptPickLowestHpBlockTarget(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
+    s32 value = scrReadIntParameter(0);
     btlPickCommandLowestHpBlockTarget((s32)(u32)context, value);
     return 1;
 }
@@ -1728,7 +1728,7 @@ u32 btlScriptPickLowestLevelTarget(void) {
 /* Parameter 0 is a status-presence mask for command target selection; return VM success. */
 u32 btlScriptPickTargetWithStatusMask(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
+    s32 value = scrReadIntParameter(0);
     btlPickCommandTargetWithStatusMask((s32)(u32)context, value);
     return 1;
 }
@@ -1736,7 +1736,7 @@ u32 btlScriptPickTargetWithStatusMask(void) {
 /* Parameter 0 is a status-absence mask for command target selection; return VM success. */
 u32 btlScriptPickTargetWithoutStatusMask(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
+    s32 value = scrReadIntParameter(0);
     btlPickCommandTargetWithoutStatusMask((s32)(u32)context, value);
     return 1;
 }
@@ -1744,7 +1744,7 @@ u32 btlScriptPickTargetWithoutStatusMask(void) {
 /* Apply script parameter 0 as the target unit-ID filter; return VM success. */
 u32 btlScriptFilterTargetsByUnitId(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
+    s32 value = scrReadIntParameter(0);
     btlFilterCommandTargetsByUnitId((s32)(u32)context, value);
     return 1;
 }
@@ -1795,7 +1795,7 @@ s32 btlScriptAppendSelectedOrCurrentTarget(void) {
 /* Parameter 0 feeds element-block target selection; return VM success. */
 u32 btlScriptPickElementBlockTarget(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
+    s32 value = scrReadIntParameter(0);
     btlPickCommandElementBlockTarget((s32)(u32)context, value);
     return 1;
 }
@@ -2427,7 +2427,7 @@ s32 btlCmdRememberPartyQueuedActionCategory(void) {
 
 s32 btlCmdRememberLowerMissingStatus(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
-    u32 choice = scrReadIntParameter(0);
+    s32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[3] = choice;
@@ -2489,7 +2489,7 @@ u32 btlCmdReturnPartyHeldFlagCheck(void) {
 
 s32 btlCmdRememberNonLowerStatFlag(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
-    u32 choice = scrReadIntParameter(0);
+    s32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choice100 = choice;
@@ -2503,7 +2503,7 @@ s32 btlCmdRememberNonLowerStatFlag(void) {
 
 s32 btlCmdRememberContextSecondaryFlag(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
-    u32 choice = scrReadIntParameter(0);
+    s32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choice108 = choice;
@@ -2755,8 +2755,8 @@ u32 btlCmdRunWeightedAiSelection(void) {
 
 u32 btlScriptSetBattleCommand(void) {
     void *context = scrGetCurrentCommandWork();
-    u16 value = scrReadIntParameter(0);
-    btlRunWeightedAiAction((s32)(u32)context, value);
+    s32 value = scrReadIntParameter(0);
+    btlRunWeightedAiAction(context, value);
     return 1;
 }
 

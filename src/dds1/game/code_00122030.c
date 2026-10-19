@@ -522,7 +522,7 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
  * status covers the count, payload mode word and cursor result. */
 void fldToggleWorldNodeState(s64 clearMode) {
     WorldIndexNode *valueChain;
-    u32 status;
+    s32 status;
     EffWorldNode *worldObject;
 
     valueChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
