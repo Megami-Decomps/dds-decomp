@@ -6460,7 +6460,115 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C1F10);
+extern void btlAdvanceActorSlotEchoAnimation(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlDrawActorPanelCursor(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlDrawActorPanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlDrawActorPanelSecondaryPulse(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlDrawActorPanelTransitionTriangles(void *, BattleActorPanelWork *, s32);
+extern void btlTrackActorVitalChanges(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void btlUpdateActorVitalChangeEffects(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlWriteTriangleHighlightPulse(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001C3EC0(s32, BattleActorPanelWork *, s32);
+extern void func_001C4C58(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001C6648(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
+extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
+extern void func_001B6CA8(s32, s32, u32, const char *, s32);
+extern const char D_00436818[];
+extern s32 sprintf(char *, const char *, ...);
+
+s32 func_001C1F10(KwlnTask *task) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleActorPanelWork *work;
+    BtlUnit *unit;
+    char text[32];
+    s32 i;
+    s32 count;
+    s32 slot;
+    s16 baseFade;
+    s32 highlight;
+    s32 emphasis;
+    u32 color;
+
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+    i = 0;
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    count = btlCountEligibleLinkedActors(battle);
+    unit = battle->units;
+    btlUpdateActorPanelPresentation(battle, work);
+    for (; unit != NULL && i < count; unit = unit->nextActor) {
+        if (btlHasRequiredActorStatusBits(unit)) {
+            slot = unit->lookupId;
+            func_001C6648(unit, work, slot);
+            work->activeEntries[slot].position[0] =
+                work->activeEntries[slot].basePosition[0] + work->activeEntries[slot].presentation.offset[0];
+            work->activeEntries[slot].position[1] =
+                work->activeEntries[slot].basePosition[1] + work->activeEntries[slot].presentation.offset[1];
+            btlUpdateActorPanelHighlights(unit, work, slot, 0);
+            btlDrawActorPanelHighlights(unit, work, slot, 0);
+            btlWriteTriangleHighlightPulse(unit, work, slot);
+            btlDrawActorPanelTransitionTriangles(unit, work, slot);
+            func_001C7020(unit, work, slot, 0, work->activeEntries[slot].presentation.fade,
+                          work->activeEntries[slot].position[0], work->activeEntries[slot].position[1]);
+            btlUpdateActorVitalChangeEffects(unit, work, slot);
+            btlTrackActorVitalChanges(unit, work, slot, 0);
+            btlTrackActorVitalChanges(unit, work, slot, 1);
+            if (work->activeEntries[slot].presentation.fade >= 0x80) {
+                btlUpdateAndDrawVitalBarPulse(unit, &work->activeEntries[slot].presentation.hpBarPulse,
+                                              work->activeEntries[slot].position[0],
+                                              work->activeEntries[slot].position[1],
+                                              work->activeEntries[slot].presentation.fade, slot, 0);
+                btlUpdateActorVitalPulseTrail(unit, work, work->activeEntries[slot].presentation.fade, slot, 0);
+                btlUpdateAndDrawVitalBarPulse(unit, &work->activeEntries[slot].presentation.mpBarPulse,
+                                              work->activeEntries[slot].position[0],
+                                              work->activeEntries[slot].position[1],
+                                              work->activeEntries[slot].presentation.fade, slot, 1);
+                btlUpdateActorVitalPulseTrail(unit, work, work->activeEntries[slot].presentation.fade, slot, 1);
+            }
+            func_001C4C58(unit, work, slot);
+            btlDrawActorPanelPulse(unit, work, slot);
+            btlAdvanceActorSlotEchoAnimation(unit, work, slot);
+            btlDrawActorPanelSecondaryPulse(unit, work, slot);
+            func_001C3EC0((s32)unit, work, slot);
+            btlDrawActorPanelCursor(unit, work, slot);
+            btlUpdateShrinkingMirroredSprites((s32)unit, work->activeEntries[slot].presentation.mirroredSprites, 4);
+            btlDrawMirroredPanelSprites((s32)unit, work->activeEntries[slot].presentation.mirroredSprites, 4);
+
+            baseFade = work->activeEntries[slot].presentation.fade;
+            sprintf(text, D_00436818, unit->partyRecord.hp);
+            if (work->activeEntries[slot].presentation.fade < 0x80) {
+                highlight = 0;
+            } else {
+                highlight = work->activeEntries[slot].presentation.hpHighlightLevel;
+            }
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = ((u32)(baseFade + highlight) << 24) | (color & 0x00FFFFFF);
+            if ((u8)work->activeEntries[slot].presentation.hpState - 0x10U < 0x10U) {
+                emphasis = work->activeEntries[slot].presentation.hpHighlightLevel + 0x100;
+            } else {
+                emphasis = 0x100;
+            }
+            func_001B6CA8(work->activeEntries[slot].position[0] + 0x50,
+                          work->activeEntries[slot].position[1] + 0x26, color, text, emphasis);
+
+            sprintf(text, D_00436818, unit->partyRecord.mp);
+            if (work->activeEntries[slot].presentation.fade < 0x80) {
+                highlight = 0;
+            } else {
+                highlight = work->activeEntries[slot].presentation.mpHighlightLevel;
+            }
+            i++;
+            color = btlGetVitalTextColor(unit, unit->partyRecord.mp, unit->partyRecord.maxMp, 1);
+            color = ((u32)(baseFade + highlight) << 24) | (color & 0x00FFFFFF);
+            func_001B6CA8(work->activeEntries[slot].position[0] + 0x48,
+                          work->activeEntries[slot].position[1] + 0x3D, color, text, 0x100);
+        }
+    }
+    return 0;
+}
 
 void btlReleaseStwrPanelResource(KwlnTask *task) {
     sdfReleaseResourceAllocation(*(struct SdfMemBlock **)kwlnTaskGetUserValue(task));
