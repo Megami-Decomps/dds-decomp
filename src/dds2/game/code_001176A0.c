@@ -189,6 +189,8 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
+extern void *memset(void *, int, unsigned int);
+
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
     struct SdfMemBlock *mem = sdfAllocGeneralBlock(0x1E840);
@@ -222,6 +224,11 @@ s32 sdfBumpTickCounters(KwlnTask *task) {
     runtime->header.secondTick += 1;
     return 0;
 }
+
+extern void btlClearSharedBattleStateWords(void);
+extern void fldResetFieldRuntimeState(s32 mode);
+extern void mtrLoadMantraNodePositions(void);
+extern void ptyInitRuntime(void);
 
 void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
@@ -261,6 +268,8 @@ extern SdfMemBlock *D_00438EA8;
 extern u32 D_00438EAC;
 extern void ptySaveActivePartyTemplates(void);
 extern SdfMemBlock *mtrMantraEventBitPush(void);
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
  * mantra bitmaps, profile records, party templates, high item counts and blocked-item flags. */
@@ -512,6 +521,8 @@ s32 ptyComputeMaxMp(DatPartyRecord *unit) {
     }
     return result;
 }
+
+extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 
 s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;
@@ -849,6 +860,9 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
 extern void datClearUnitStatusBits(void *item, s32 mask);
 /* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+
+extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
 
 s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;

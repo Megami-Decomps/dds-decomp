@@ -3302,6 +3302,9 @@ s32 mnuStartTerminalPanelSecondaryTransition(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
+struct MenuList;
+extern void mnuSelectLastListNode(struct MenuList *list);
+
 u32 evtResetStateProgressTimer(KwlnTask *task) {
     MenuTerminalContext *state;
 

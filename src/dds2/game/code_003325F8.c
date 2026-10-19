@@ -104,6 +104,8 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;
     SdfDrawNode **sourceNodes;
@@ -206,6 +208,9 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
 SdfChunkHeader *sdfChunkFindByTag(const SdfModel *model, s32 tag) {
     return sdfChunkFindById(model->chunkTable, tag);
 }
+
+extern int memcmp(const void *, const void *, unsigned int);
+extern unsigned int strlen(const char *);
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
 s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {

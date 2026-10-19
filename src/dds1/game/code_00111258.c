@@ -64,6 +64,8 @@ EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void) {
     return node;
 }
 
+extern void *memset(void *, int, unsigned int);
+
 s32 dds3AllocateClearedObjectWork(EffWorldNode *obj) {
     obj->data = sdfAllocSizeClassBlock(0x10);
     memset(obj->data, 0, 0x10);

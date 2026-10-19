@@ -52,6 +52,8 @@ typedef char PoolLayoutAssert[
      (unsigned long)&((CompactSlotPool *)0)->slots == 4 &&
      (unsigned long)&((CompactSlotPool *)0)->count == 8) ? 1 : -1];
 
+extern void *memset(void *, int, unsigned int);
+
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
 WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;

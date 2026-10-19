@@ -820,6 +820,9 @@ MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 
 }
 
 
+struct MantraDrawPool;
+extern u32 mnuQueueUnitPanelSelection(struct MantraDrawPool *pool, s8 value);
+
 void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {
     MantraMenuWork *state = &object->menu;
     if (mnuQueueUnitPanelSelection(object->menu.selectionController, selection) != 0) {
@@ -1485,6 +1488,12 @@ void mnuBeginMantraTutorialFromNormalMode(MnuStatusResource *object) {
 }
 
 
+
+struct MantraDrawPool;
+extern void mnuHideMantraLimitLine(struct MantraDrawPool *pool);
+extern void mnuHideMantraScrollCursor(struct MantraDrawPool *ctx);
+extern void mnuShowMantraLimitLine(struct MantraDrawPool *pool);
+extern void mnuShowMantraScrollCursor(struct MantraDrawPool *ctx);
 
 s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
     MantraMenuWork *state = &object->menu;

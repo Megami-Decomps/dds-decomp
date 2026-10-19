@@ -123,6 +123,8 @@ void dds3LoadWorldTransformParams(EffWorldNode *worldNode, const WorldTransformP
 }
 
 
+extern void *memset(void *, int, unsigned int);
+
 s32 dds3AllocateUnitObjectWork(EffWorldNode *obj) {
     obj->data = sdfAllocSizeClassBlock(0x1C);
     memset(obj->data, 0, 0x1C);

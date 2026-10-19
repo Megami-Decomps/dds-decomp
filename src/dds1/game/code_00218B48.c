@@ -397,6 +397,9 @@ static inline s32 debugFileUpper(s32 c) {
     return islower(c) ? c - 'a' + 'A' : c;
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+extern void *memset(void *, int, unsigned int);
+
 void func_00218E20(void) {
     DebugDirectoryEntry directory;
     s32 index;
@@ -1599,6 +1602,8 @@ extern char D_003BBC60[];
 extern char D_003BBC68[];
 
 
+extern void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity);
+
 /* Draw the pending resource details and the current selection in each model node. */
 void mdlDrawViewerAssetSelection(void) {
     SifCommand packet;
@@ -2754,6 +2759,8 @@ extern s8 D_00324532[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern u32 sdfGetLodChunkValue(SdfModel *);
+extern s32 sdfAllocPacketAligned(s32 size);
+
 s32 mdlViewer(KwlnTask *task) {
     SdfModel *model;
     SdfGsPacketHeader *packet;
@@ -3644,6 +3651,10 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
 
 
 
+extern void evtDisableSolarPhaseAdvance(void);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern void evtSetSolarPhase(u8 phase);
+
 void mdlResetViewerFlagsAndSolarOverlay(void) {
     mdlFlagClearAll();
     evtSetSolarPhase(0);
@@ -3785,7 +3796,6 @@ extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rot
 
 extern void dds3EnsureSlotData();
 #include "dds3_world_secondary.h"
-extern void *memset(void *dst, s32 value, u32 size);
 
 void mdlSpawnViewerWorldObject(void) {
     f32 position[4] = { 0.0f, -100.0f, -600.0f, 0.0f };

@@ -347,6 +347,9 @@ BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     return btlFindGroupedEntity(group, id);
 }
 
+extern int SignalSema(int);
+extern int WaitSema(int);
+
 void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     mdlApplyGroupSetup(request->group, request->id, request->options, &request->payload);
     WaitSema(mdlGroupJobSemaphore);
@@ -438,8 +441,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 
 /* The nonblocking API returns 0/-1 status or a ready group address word. */
 extern u32 mdlGroupJobSemaphore;
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id);
 extern char *strrchr(const char *, s32);
 extern s32 strcasecmp(const char *, const char *);
@@ -1186,6 +1187,8 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {
     sdfUpdateActiveResourceListScalars(ctx->inner->assetData, tint, amount);
 }
 
+extern unsigned int strlen(const char *);
+
 /* Copy a resource path's basename without its extension into destination. */
 void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
     MdlResourceSelection *selection;
@@ -1258,6 +1261,8 @@ extern u16 mdlGetRecordPartIndex(MdlRecord *record);
 extern DevRequest *mdlCreateBufferedPartRequest(u32 count);
 extern void mdlAddBillboardPart(DevRequest *list, void *descriptor);
 extern void mdlAddEffectPart(DevRequest *list, struct EffNodeDescriptor *descriptor);
+
+extern void *memset(void *, int, unsigned int);
 
 /* Generic transports preserve the queue/payload alias relationship; see
  * docs/idioms.md, "Pointer transport aliasing: queued model packets". */
@@ -1415,8 +1420,6 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 
 
 extern u32 mdlGroupJobSemaphore;
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */

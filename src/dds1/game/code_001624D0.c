@@ -192,6 +192,8 @@ void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *comma
     }
 }
 
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+
 void dds3AdminSubmitEmptyModeRequest(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }

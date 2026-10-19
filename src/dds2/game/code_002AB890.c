@@ -520,12 +520,16 @@ s32 mnuRefreshOwnedCatalogItemList(s32 itemId, MenuStaffContext *owner) {
     return resources->windows[4]->list->count != 0;
 }
 
+extern void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes);
+
 void mnuSelectStaffDisplayCategory(u32 context) {
     mnuSwitchCampVisualCategory(2, context);
 }
 
 void mnuNoOpStaffDisplayTeardown(s32 object) {
 }
+
+extern void *memset(void *, int, unsigned int);
 
 u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);

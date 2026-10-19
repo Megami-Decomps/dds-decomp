@@ -187,6 +187,8 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 extern EffPacketParams effTrackPolyDrawParams;
 extern const u32 effTrackPolyTriangleIndices[];
 
+extern void *memset(void *, int, unsigned int);
+
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
     s32 bytes = count * (sizeof(u128) + sizeof(u32));

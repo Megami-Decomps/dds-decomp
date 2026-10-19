@@ -124,6 +124,8 @@ loop:
     return dst;
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 char *sdfStrDup(const char *text) {
     u32 length;
     char *copy;

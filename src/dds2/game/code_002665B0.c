@@ -2241,6 +2241,8 @@ s32 evtBSetupDispatchSyncD(KwlnTask *request) {
     return menuSetHandler(state, 2, (void *)request);
 }
 
+extern void mnuSelectLastListNode(MenuList *list);
+
 u32 evtSelectFinalVisualNode(KwlnTask *task) {
     MenuSlotState *state;
 

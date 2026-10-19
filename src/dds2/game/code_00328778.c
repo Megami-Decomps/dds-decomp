@@ -44,9 +44,13 @@ extern s32 D_004389C0;
 extern SdfThreadNode D_004390F0;
 extern u8 D_0045C8A0[0x2000];
 
+extern int iWakeupThread(int);
+
 void sdfWakeAlarmThread(s32 unused0, u16 unused1, void *threadId) {
     iWakeupThread((s32)threadId);
 }
+
+extern int SleepThread(void);
 
 /* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfSleepWithAlarm(u32 delay) {

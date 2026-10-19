@@ -1308,6 +1308,8 @@ void mnuDrawMantraBackgroundSelectionIcons(MantraDrawItem *item) {
     }
 }
 
+extern s32 mnuUpdateAndDrawMantraBackgroundBursts(s32 x, s32 y, u32 z, s32 alpha, MantraBurstPool *pool, s32 wide, u32 packet);
+
 /* Draw the base pulse, transition variant, then freshly sampled fade icons. */
 s32 mnuDrawMantraBackgroundPulse(s32 unused, MantraDrawItem *drawItem) {
     MantraBackgroundState *state = (MantraBackgroundState *)drawItem->data;

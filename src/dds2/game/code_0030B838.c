@@ -712,6 +712,8 @@ void mnuTickMapTimers(void) {
     }
 }
 
+extern int abs(int);
+
 /* DDS2 keeps the map timer hint shaping but no longer draws the hints. */
 void func_0030D3A8(void) {
     SdfCounterTimer *timer = sdfActiveCounterRuntime->state.timer;

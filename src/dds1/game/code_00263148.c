@@ -197,6 +197,8 @@ typedef struct ActiveItemSlots {
     s32 count;
 } ActiveItemSlots;
 
+extern void *memset(void *, int, unsigned int);
+
 void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     ActiveItemSlots active;
     DatPartyRecord *item = scene->selectedRewardRow->unit;

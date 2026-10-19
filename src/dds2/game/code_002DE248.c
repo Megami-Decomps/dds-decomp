@@ -10548,7 +10548,7 @@ typedef struct EffAnimInfo {
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern void btlStartMoveOtherUnitsTask();
+extern void btlStartMoveOtherUnitsTask(BtlUnit *unit, s32 soundId);
 
 void effApplySelectedActorEffects(EffActiveResource *owner) {
     BtlUnit *actor[16];
@@ -11871,6 +11871,8 @@ void effResetParticleStateWord(EffParticleSharedResource *work) {
 
 extern SdfPoolNode D_003805A8;
 
+extern void sdfQueueGouraudTexturedQuad(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
+
 void func_002F9DF0(EffParticleSharedResource *work) {
     s32 limit = work->limit;
     s32 frame = work->state;
@@ -12658,6 +12660,8 @@ void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
 extern SdfPoolNode *D_00380788[13][4];
 extern SdfPoolNode *D_00380808[4];
 extern u64 D_003EA210[4];
+
+extern void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord);
 
 void func_002FB998(EffSharedEffectWork *work) {
     SdfListHead *list;

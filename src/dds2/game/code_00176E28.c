@@ -74,6 +74,8 @@ extern f32 effRingBasisScratchVector[];
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 EffRingWork *effCreateRingFan(source)
 EffRingWork *source;
 

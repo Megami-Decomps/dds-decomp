@@ -352,12 +352,14 @@ s32 mtrMantraSelectUpdate(s32 key) {
     return 0;
 }
 
-/* Run the current mantra resource's drawing path; retain the native u64 work address and zero return. */
-u64 mtrMantraSelectDraw(void) {
-    u64 resourceAddress;
+extern s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *resource);
 
-    resourceAddress = sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
-    mnuDrawMantraPhaseOpacity(resourceAddress);
+/* Draw the current mantra resource and return zero. */
+u64 mtrMantraSelectDraw(void) {
+    MnuStatusResource *resource;
+
+    resource = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
+    mnuDrawMantraPhaseOpacity(resource);
     return 0;
 }
 
@@ -405,6 +407,8 @@ extern void mnuSpawnMantraIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAndStorePanelSoundEntry(struct MantraDrawPool *);
+
+extern void mnuReleaseMenuVisualWorkResources(MenuProgressHost *host);
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426208);
 

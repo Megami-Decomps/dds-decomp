@@ -1075,6 +1075,9 @@ s32 evtCommandDestroyCampTask(void) {
     return 1;
 }
 
+extern KwlnTask * evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+extern void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits);
+
 /* Create an event/scene movie task at the owning task's priority, set bit 0,
  * and return its handle through the VM result. Missing work skips creation. */
 s32 evtCommandStartPolygonMovie(void) {
@@ -1099,6 +1102,8 @@ s32 evtCommandStartPolygonMovie(void) {
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }
+
+extern void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits);
 
 /* Clear bit 0 and echo the movie ID through the VM result. */
 s32 evtCommandClearPolygonMovieFlag(void)

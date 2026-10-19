@@ -557,6 +557,8 @@ void fldDrawCounterMapMarker(void) {
 
 
 
+extern void *memset(void *, int, unsigned int);
+
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;

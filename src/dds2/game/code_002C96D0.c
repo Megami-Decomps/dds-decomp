@@ -3680,6 +3680,8 @@ void fileRestoreSlotFlagsToState(void) {
 
 extern void kwlnPadStartMotor(s32, u8, s32);
 
+extern s32 fileTestSlotFlagsBit(s32 kind, s32 *flags);
+
 s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
     switch (kind) {
     case 0:

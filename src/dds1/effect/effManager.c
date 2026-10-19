@@ -16,6 +16,10 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern void effObjectListCountersReset(void);
 
 
+extern void effBillDispatchAll(void);
+extern void effInitializeEmitterSubsystem(void);
+extern void parInitializeParticleSubsystem(void);
+
 void effManagerInitializeSubsystems(KwlnTask *task) {
     (void)task;
     effInitializeEmitterSubsystem();
@@ -63,6 +67,11 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     effObjectListCountersReset();
     return 0;
 }
+
+extern void billFlushPendingChildPackets(void);
+extern void billFlushPendingRenderPairs(void);
+extern void dds3UpdateCrossfade(void);
+extern void effDispatchActive(void);
 
 s32 effManagerUpdateAndDispatch(KwlnTask *task) {
     (void)task;

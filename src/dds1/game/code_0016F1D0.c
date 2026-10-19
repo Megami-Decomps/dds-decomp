@@ -72,6 +72,8 @@ typedef struct EffectRingBlock {
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 extern EffRandState effDefaultRandomState[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 EffRingWork *effCreateRingFan(EffRingWork *source)
 {

@@ -317,6 +317,9 @@ extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 extern void effBattleUpdate(BattleEffect *);
 
+extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
+
 /* Advance the current event through release, preparation, playback and completion. */
 void btlUpdateEventPlayback(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -1395,6 +1398,9 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
     }
 }
 
+extern SoundSlotOwner * sndAcquireSlotOwner(s32 category, s32 id);
+extern s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId);
+
 /* Finalize the existing kind/id entry's motion-SE pack ownership and ready state.
  * The native DDS2 twin also logs each adopted resource slot. */
 void btlFinalizeModelPackEntry(s32 kind, s32 id) {
@@ -1901,6 +1907,9 @@ void btlClearOverlayBuffers(void) {
     } while (i != 2);
     btlRuntimeState.options |= 2;
 }
+
+extern void kwlnTextureClearReferenceFlag(void);
+extern void kwlnTextureReleaseHeldReference(void);
 
 void btlResetHeldTextureState(void) {
     kwlnTextureClearReferenceFlag();
@@ -2968,6 +2977,8 @@ void btlWriteActorModelTableFile(void) {
     sdfPfsSendPathRequest(D_00436F58, 0);
     sdfFreeMemoryFromEitherHeap(buffer);
 }
+
+extern void dds3WorkClear(void);
 
 /* Reset launch confirmation and the shared work arena before selector polling. */
 void btlResetDebugEncounterSelection(void) {

@@ -74,6 +74,8 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
 }
 
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
     EffResourceRectWork *dst = sdfAllocSizeClassBlock(sizeof(EffResourceRectWork));

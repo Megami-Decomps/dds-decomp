@@ -47,6 +47,8 @@ extern s32 evtStageTestUpdateCamera(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char brsStatConfirmationPopupEntry[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
@@ -271,6 +273,8 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *input) {
     return menuRunPanel((void *)context, 2, (void *)input);
 }
 
+
+extern void *memset(void *, int, unsigned int);
 
 u32 brsPrepareRewardMessage(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);

@@ -48,9 +48,13 @@ extern s32 SignalSema(s32 sema);
 
 extern void _StartThread(s32 threadId, s32 arg);
 
+extern int iWakeupThread(int);
+
 void sdfWakeAlarmThread(s32 unused0, u16 unused1, void *threadId) {
     iWakeupThread((s32)threadId);
 }
+
+extern int SleepThread(void);
 
 /* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfSleepWithAlarm(u32 delay) {

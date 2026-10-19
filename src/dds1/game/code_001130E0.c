@@ -186,6 +186,8 @@ void evtResetObjectPendingValue(EffWorldNode *obj) {
     data->pendingTargetKey = 0;
 }
 
+extern void *memset(void *, int, unsigned int);
+
 s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     EffectObjectData *data;
     void *work;
@@ -210,6 +212,8 @@ s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     dds3SetObjectFlags(object, 0x42);
     return 1;
 }
+
+extern void dds3DestroyObjectBase(ObjBase *base);
 
 void evtDestroyEffectObjectData(EffWorldNode *obj) {
     EffectObjectData *data;

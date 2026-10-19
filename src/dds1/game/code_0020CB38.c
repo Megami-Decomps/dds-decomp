@@ -99,6 +99,8 @@ s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
     return 1;
 }
 
+extern void btlRestoreHaritiFormation(void);
+
 /* Mode 0x10E's update hook reuses the Hariti formation restoration routine. */
 void btlHaritiUpdateCallback(void) {
     btlRestoreHaritiFormation();

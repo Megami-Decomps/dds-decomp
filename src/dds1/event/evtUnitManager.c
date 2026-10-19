@@ -59,6 +59,8 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId);
 extern void kwlnBuildShortestArcQuaternion(void);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY);
 
+extern void *memset(void *, int, unsigned int);
+
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     f32 identity[4];
@@ -552,6 +554,8 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
 
 
 
+extern void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit);
+
 /* Refresh endpoint render work after the value-change flag is cleared; defer
  * to the matching-slot selector when no target or color transition is active. */
 void evtRefreshUnitEndpointWork(EvtUnit *unit) {
@@ -751,6 +755,8 @@ EvtUnit *evtUnitGetNestedValue(EffWorldNode *obj) {
 }
 
 extern const s32 D_003AC060[];
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     EvtUnit *work;

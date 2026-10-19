@@ -459,6 +459,9 @@ s32 fldStartAndPollLocalMapTrack(void) {
     return 0;
 }
 
+extern s32 evtCreateMessageWindowIfMissing(s32 sub);
+extern void evtSetSolarOverlayFullyVisible(void);
+
 void fldInitializeLocalMapScene(void) {
     s32 mask;
     s32 flags;

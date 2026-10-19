@@ -63,6 +63,9 @@ s32 fldCmdQuerySceneValue(void) {
     return 1;
 }
 
+extern s32 fldFindTaskRecordId(u32 task);
+extern void fldApplyActorEntryTrigger(s32 checkTaskRecord);
+
 u32 fldCmdUpdateTaskRecordScene(void) {
     s32 scene;
     if (fldIsSceneStateEight()) {
@@ -99,11 +102,15 @@ s32 fldCmdStartSelectedActorTask(void) {
     return 1;
 }
 
+extern void fldStartSceneBgm(void);
+
 s32 fldCmdStartSceneBgm(void) {
     fldCurrentBgmId[0] = scrReadIntParameter(0);
     fldStartSceneBgm();
     return 1;
 }
+
+extern void fldStartSceneBgmAlternate(void);
 
 s32 fldCmdStartSceneBgmAlternate(void) {
     fldCurrentBgmId[0] = scrReadIntParameter(0);

@@ -74,6 +74,9 @@ s32 fldCmdRollMirroredSolarThreshold(void) {
     return 1;
 }
 
+extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
+extern void sdfSoundStopNamedPlayback(void);
+
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
     s32 commandName;

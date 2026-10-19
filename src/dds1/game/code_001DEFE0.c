@@ -8089,6 +8089,9 @@ void btlStepBlendColor(void) {
     btlStepTintTransition();
 }
 
+struct EffSolidRectParams;
+extern void effDrawSolidRectangle(struct EffSolidRectParams *source);
+
 void btlDrawTintIfVisible(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
 

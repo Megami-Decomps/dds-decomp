@@ -181,6 +181,8 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
     sdfQuaternionNormalize(out);
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
 void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 target[4];

@@ -518,6 +518,8 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
+extern s32 itfMesCountZeroBits(s32 bitCount, u32 remainingMask);
+
 /* Replace the option glyph chain with rows selected by clear panel-mask bits.
  * Item zero is skipped; mode 3 additionally builds the surrounding frame. */
 void itfMesBuildOptionList(s32 window, s32 entryIndex) {

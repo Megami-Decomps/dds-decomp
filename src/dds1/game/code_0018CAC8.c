@@ -311,6 +311,9 @@ void effRunIfEnabled(s32 directory) {
     }
 }
 
+extern char *strcpy(char *, const char *);
+extern unsigned int strlen(const char *);
+
 /* Debug mode delegates to the native iterator. Built-in mode copies the next name,
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
 s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {

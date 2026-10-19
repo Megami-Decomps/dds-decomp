@@ -170,6 +170,8 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
     sdfQuaternionNormalize(out);
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
 void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 target[4];
@@ -269,6 +271,8 @@ void sdfQuatSquadControl(f32 *out, f32 *from, f32 *rotation, f32 *to) {
     sdfQuatMultiply(out, rotation, middle);
 }
 
+extern void *memset(void *, int, unsigned int);
+
 void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     f32 matrix[16];
     f32 vector[4];
@@ -337,6 +341,8 @@ s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *te
     frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
+
+extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 
 s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option) {
     FrFontGlyph *handle = frFontBuildGlyphChain(name, 0, type, 0, 0);
@@ -804,6 +810,8 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
 }
 
 extern s32 sprintf(char *buffer, const char *fmt, ...);
+
+extern unsigned int strlen(const char *);
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {

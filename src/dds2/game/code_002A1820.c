@@ -142,6 +142,8 @@ extern u8 mnuTitleAudioSilenceBuffer[], mnuTitleAudioMixBuffer[];
 void mnuResetTitleStream(void);
 void mnuReleaseSoundBuffer(void);
 
+extern void mnuConfigureTitleAudioStream(s32 transferSize);
+
 void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_00437A3C + 1;
     u8 *source;
@@ -248,6 +250,8 @@ void mnuUpdateTitleAudioStreams(void) {
     }
 }
 
+extern void sdfSleepThreadCount(s32 requestedSleepCount);
+
 void mnuRunTitleStreamThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
@@ -261,6 +265,8 @@ extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 
+extern s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum);
+
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
     sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
@@ -273,6 +279,8 @@ extern u8 mnuTitleAudioSilenceBuffer[];
 extern u32 mnuTitleSoundBufferDecoderState[];
 extern u8 mnuTitleStreamDecodedSamples[];
 extern u8 mnuTitleSoundBufferDecodedSamples[];
+
+extern void *memset(void *, int, unsigned int);
 
 void mnuInitializeTitleAudioStreams(void) {
     memset(mnuTitleAudioSilenceBuffer, 0, 0x1000);
@@ -461,6 +469,8 @@ s32 mnuPollTitleStreamStateLocked(void) {
 }
 
 extern u32 D_00454D68[];
+
+extern void fileWaitIdle(void);
 
 /* Wait/copy a pending file while locked, then prepare a commit for controls
  * other than 1. Unlike DDS1, this entry point has no BGM banner output. */
@@ -699,13 +709,15 @@ void mnuReleaseSoundBufferLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
+extern void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately);
+extern void mnuLoadMovieMenuResourceSlots(void);
+
 void mnuLoadTitleMenuAssets(void) {
     mnuLoadMovieMenuResourceSlots();
     mnuEnsureMovieMenuSpriteHandle(1);
 }
 
 extern void mnuStopTitleMovieDraw(void);
-extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern s32 mnuUpdateTitleMenuTask(KwlnTask *);
@@ -746,6 +758,8 @@ extern void mnuDestroyMovieMenuSelectionList(void);
 
 
 extern u32 D_00435BB0;
+
+extern void mnuReleaseSpriteHandle(void);
 
 void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuStopTitleMovieDraw();
@@ -920,6 +934,10 @@ extern void mnuAdvancePairedSlideBars(SlideBarPair *, s32);
 extern void mnuAdvanceSlideBarValue(SlideBar *, s32);
 extern void mnuAdvanceSlideBar(PickList *, s32);
 extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
+
+extern s32 fileLoadStateChanged(void);
+extern void fileCacheSlotFlagsFromState(void);
+extern void fileRestoreSlotFlagsToState(void);
 
 s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     s32 volume;
@@ -1300,6 +1318,10 @@ u32 mnuOpenTitleMenuDefaultMode(void) {
     mnuCreateTitleMenuTask(0);
     return 0;
 }
+
+extern void evtDestroySecondaryWorldNode(void);
+extern void sdfCreateRuntimeTask(void);
+extern void sdfDestroyRuntimeTask(void);
 
 /* The title-menu callback passes zero; the restart does not use it. */
 void mnuRestartRuntimeAfterViewer(s32 unused) {

@@ -26,6 +26,8 @@ void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
     }
 }
 
+extern float fabsf(float);
+
 s32 dds3TestObjectSphereOverlap(ObjectTransform *left, ObjectTransform *right) {
     f32 length;
     f32 leftLimit;

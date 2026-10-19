@@ -686,6 +686,8 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
 }
 
 
+extern s32 mnuStaffCreateTasks(void);
+
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
     brsUiUpdateAllowed = 0;
@@ -730,12 +732,16 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     }
 }
 
+extern void datAddCurrencyClamped(s32 delta);
+
 void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
 extern s32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(DatPartyRecord *unit) {
@@ -944,6 +950,11 @@ extern s32 brsBuildPartyRewardBatch(BrsRewardBatch *, BrsRewardSummary *);
 extern s32 brsBuildLevelUpList(BrsRewardBatch *);
 extern s32 brsBuildProfileCapList(BrsRewardBatch *);
 extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
+
+extern s32 btlCaptureRewardSummary(BrsRewardSummary *rewards);
+extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *definition);
+extern s32 evtSetMessageWindowPageValue(s32 pageValue);
+extern void *memset(void *, int, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 

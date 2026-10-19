@@ -78,6 +78,10 @@ void evtSwitchWorldValueIfChanged(s32 high, s32 low) {
     }
 }
 
+extern void kwlnDrawEnableCd0(s32 duration);
+extern void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale);
+extern void kwlnDrawSetupC70B(s32 duration);
+
 /* Reset draw offsets and the five enabled screen-effect modes. */
 void evtResetDrawTransitions(void) {
     kwlnDrawSetOverlayTransition(0, 0, 0);
@@ -89,6 +93,8 @@ void evtResetDrawTransitions(void) {
     effDisableFilterBlur();
     effDisableColorRectangle();
 }
+
+extern s32 evtCommandShutdownStage(void);
 
 /* Shut down the stage before clearing its draw transitions. */
 void evtShutdownStageAndResetDrawTransitions(void) {
@@ -250,6 +256,8 @@ s32 dspStartEntry(s32 entry) {
     return 1;
 }
 
+extern s32 dspReadWindowSecondPanelValue(void);
+
 /* Store the caller's opaque value and snapshot the panel's second halfword.
  * This routine itself performs no sound-driver operation. */
 s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue) {
@@ -273,6 +281,8 @@ s8 evtGetMessageWindowOption(void) {
     return evtMessageWindowOption;
 }
 
+extern s32 itfPanelGetPairSecond(s32 windowIndex);
+
 /* Read the second panel halfword, or -1 when no message window exists.
  * Despite the inherited name, this is not a sound-driver query. */
 s32 dspReadWindowSecondPanelValue(void) {
@@ -288,6 +298,8 @@ s8 evtGetCapturedWindowPanelValue(void) {
 }
 
 extern void itfPanelSetStatus(s32 windowIndex, s32 status);
+
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
 /* Reset an open window, optionally notify it first, and report whether it existed.
  * Cleanup leaves the singleton handle intact; dspCloseChannel destroys it. */
@@ -337,6 +349,8 @@ s32 evtGetMessageWindowControlState(void) {
     }
     return (s8)dspWindowControlState;
 }
+
+extern s32 itfPanelGetPairFirst(s32 windowIndex);
 
 /* Snapshot the second panel halfword only after the first halfword is nonnegative. */
 s32 dspCaptureWindowSecondPanelValue(void) {
@@ -436,6 +450,9 @@ void dspSetActive(s32 enabled) {
     }
 }
 
+extern void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
+extern void itfPanelEmitRecord(s32 windowIndex, s32 topDelta);
+
 /* Convert x/y to the window's 16-by-8 coordinate units and set its panel offset.
  * DDS2's original multiplication form is retained rather than copied from DDS1. */
 void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
@@ -482,6 +499,8 @@ u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
     return evtDisplayValues[displayValueIndex];
 }
 
+extern s32 scrReadIntParameter(s32 parameterIndex);
+
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
 s32 evtOpSetActiveEntryFlag(void) {
     s32 flagIndex = scrReadIntParameter(0);
@@ -523,6 +542,8 @@ typedef struct {
     u8 pad0[0x18];
     struct MenuList *list;
 } EvtPanelRecord;
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * DDS2 copies its two colors from the data table rather than using DDS1 literals. */

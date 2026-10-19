@@ -25,6 +25,8 @@ void effFreePairedResources(PairedEffectResources *pair) {
     sdfReleaseChipBlock(pair);
 }
 
+extern u32 effBTLFieldColorGetOriginalSelector(void);
+
 void effUpdatePairedResources(PairedEffectResources *work) {
     s32 total = work->total;
     s32 frame = work->frame;
@@ -420,6 +422,8 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
     effDrawBlurRectangle(&work->source);
 }
 
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {

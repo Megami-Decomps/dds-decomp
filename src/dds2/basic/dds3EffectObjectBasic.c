@@ -70,6 +70,9 @@ EffectObj *effObjCreateNamedScaledEffectObject(const char *name, void *firstVect
 
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 
+extern void dds3DestroyObjectBase(ObjBase *base);
+extern void effObjFreeInner(EffWorldNode *node);
+
 /* Release dependencies, object base, then slot data; the object and data must exist. */
 void effObjReleaseObjectData(u32 object) {
     EffectDependencyState *data;
@@ -288,6 +291,8 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
 
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
+extern void *memset(void *, int, unsigned int);
+
 EffectObj *effObjCreateKindTwo(bill, vec, extra)
     void *bill;
     void *vec;
@@ -515,6 +520,8 @@ EffectObj *effObjCreateBillboardFromFactory(u64 parameter, u64 firstVectorAddres
 }
 
 extern const EffectEventVectorParameters D_00412950;
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     SoundMixer *source;

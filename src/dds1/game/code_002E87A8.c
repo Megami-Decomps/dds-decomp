@@ -291,6 +291,8 @@ void sndDispatchCommandWithoutPayload(u32 command) {
     sndQueueCommandPacket(command | 0x50, 0, 0, 0);
 }
 
+extern unsigned int strlen(const char *);
+
 /* Send a NUL-terminated command string; the transport excludes the terminator. */
 u32 sndSubmitTextCommandPayload(s32 command, char *text) {
     u32 length = strlen(text);

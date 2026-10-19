@@ -1518,6 +1518,8 @@ BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit, BtlOperandEnt
     return task;
 }
 
+extern void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index);
+
 u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *taskArgs) {
     if (0 < taskArgs->operand.entrySelection) {
         btlSetActorSelectedEntryIndex(taskArgs->unit, taskArgs->operand.entrySelection);
@@ -1819,6 +1821,8 @@ BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void) {
     return task;
 }
 
+extern void datAddCurrencyClamped(s32 delta);
+
 u32 btlApplyQueuedCurrencyReward(s32 taskArgs) {
     datAddCurrencyClamped(*(u32 *)(taskArgs + 4));
     return 1;
@@ -1838,6 +1842,8 @@ BtlRuntimeTask *btlCreateCurrencyRewardTask(BtlUnit *actor, s32 option) {
     args->option = option;
     return task;
 }
+
+extern void btlSetTrackedTaskDisplayMode(s32 mode);
 
 void btlUpdateAutoMusic(void) {
     u8 *context = (u8 *)btlGetRuntime();
@@ -2574,6 +2580,8 @@ void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
     }
     mdlRequestAsset(effect, model, 0);
 }
+
+extern void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId);
 
 void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
     s32 available;
@@ -4452,6 +4460,8 @@ BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
 
 extern void effBattleUpdate(BattleEffect *);
 
+extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
 s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
@@ -4515,6 +4525,8 @@ BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     return task;
 }
 
+extern void btlUpdateUnitActors(void);
+
 u32 btlUpdateCommandSoundTask(void) {
     btlUpdateUnitActors();
     return 1;
@@ -4529,6 +4541,8 @@ BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void) {
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     return task;
 }
+
+extern void btlRefreshUnitEffects(void);
 
 u32 btlUpdateCommandSoundTaskSecondary(void) {
     btlRefreshUnitEffects();
@@ -5425,6 +5439,9 @@ typedef char BtlCameraModeDefinitionSize[(sizeof(BtlCameraModeDefinition) == 16)
 
 extern BtlCameraModeDefinition btlCameraModeDefinitions[];
 
+extern void mdlPropagateObjectFlag(void);
+extern void mdlSetListedObjectFlag(void);
+
 void btlSetCameraCommandMode(u32 kind, ActionStateLink *link, BtlUnit *valueA,
                              BtlUnit *valueB, s32 category) {
     BtlState *scene = (BtlState *)btlGetRuntime();
@@ -6183,6 +6200,8 @@ s32 btlGetCameraVectorWork(void) {
     work = (s32)(u32)btlGetRuntime();
     return work + 0x70;
 }
+
+extern void btlFlagAllUnitsDefeatCandidate(void);
 
 void btlFlagAllUnitDefeatCandidatesTask(void) {
     btlFlagAllUnitsDefeatCandidate();

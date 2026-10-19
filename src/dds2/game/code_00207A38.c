@@ -1090,6 +1090,8 @@ extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern void btlSetUnitPosition(BtlUnit *, f32 *);
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
+extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit);
+
 /* Refresh each unit's transform/effect state, then invoke the runtime callback. */
 void btlUpdateUnitActors(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -1597,6 +1599,8 @@ u32 btlScriptSelectActionEntry(void) {
     return 1;
 }
 
+extern s32 btlChoosePartyMemberShadowId(void);
+
 u32 btlScriptSelectByKind(void) {
     BtlCommandCtx *context;
     s32 commandId;
@@ -1614,6 +1618,8 @@ u32 btlScriptSelectByKind(void) {
     context->selectedValue = selectionValue;
     return 1;
 }
+
+extern u32 btlPickWeightedEntry(u16 index);
 
 /* value starts as the weighted-table selector and is then replaced by the chosen entry. */
 u32 btlScriptSelectWeightedEntry(void) {
@@ -1679,6 +1685,8 @@ u32 btlScriptSetBattleWorkParameter(void) {
     return 1;
 }
 
+extern void btlChooseCommandActionTargets(s32 context);
+
 /* Select targets for the current command's action; return VM success. */
 u32 btlScriptChooseActionTargets(void) {
     btlChooseCommandActionTargets(scrGetCurrentCommandWork());
@@ -1693,11 +1701,15 @@ u32 btlScriptPickElementCheckedTarget(void) {
     return 1;
 }
 
+extern void btlPickCommandLowestHpTarget(s32 context);
+
 /* Select the current command's minimum nonzero-HP candidate; return VM success. */
 u32 btlScriptPickLowestHpTarget(void) {
     btlPickCommandLowestHpTarget(scrGetCurrentCommandWork());
     return 1;
 }
+
+extern void btlPickCommandLowestHpRatioTarget(s32 context);
 
 /* Select the current command's minimum HP-percentage candidate; return VM success. */
 u32 btlScriptPickLowestHpRatioTarget(void) {
@@ -1713,11 +1725,15 @@ u32 btlScriptPickLowestHpBlockTarget(void) {
     return 1;
 }
 
+extern void btlPickCommandHighestMpTarget(s32 context);
+
 /* Pick the current command's highest-MP target and return VM completion. */
 u32 btlScriptPickHighestMpTarget(void) {
     btlPickCommandHighestMpTarget(scrGetCurrentCommandWork());
     return 1;
 }
+
+extern void btlPickCommandLowestLevelTarget(s32 context);
 
 /* Run the current command's minimum-value target selector; return VM success. */
 u32 btlScriptPickLowestLevelTarget(void) {
@@ -1755,11 +1771,15 @@ u32 btlScriptChooseActionTargetsDuplicate(void) {
     return 1;
 }
 
+extern void btlPickUnlinkedCommandTarget(u32 task, u32 input);
+
 /* Run unlinked-party selection; the old F/G attribution was reversed in DDS2. */
 u32 btlScriptPickUnlinkedPartyTarget(void) {
     btlPickUnlinkedCommandTarget(scrGetCurrentCommandWork(), 0);
     return 1;
 }
+
+extern void btlPickLinkedCommandTarget(u32 task, u32 input);
 
 /* Run linked-party selection; the old F/G attribution was reversed in DDS2. */
 u32 btlScriptPickLinkedPartyTarget(void) {
@@ -1779,6 +1799,8 @@ s32 btlScriptCmdSelectTargetsByMode(void) {
     btlSelectCommandTargetsByMode((s32)(u32)context, scrReadIntParameter(0));
     return 1;
 }
+
+extern void btlAddEffectActorTargetToCommand(s32 context);
 
 /* Append the global effect actor to this command's targets; return VM success. */
 u32 btlScriptAddEffectActorTarget(void) {
@@ -2520,6 +2542,8 @@ u32 btlScriptBuiltin435NoOp(void) {
     return 1;
 }
 
+extern s32 btlHasEffectActor(void);
+
 u32 btlCmdTestEffectActor(void) {
     if (btlHasEffectActor() != 0) {
         scrSetIntegerReturnValue(1);
@@ -2528,6 +2552,8 @@ u32 btlCmdTestEffectActor(void) {
     }
     return 1;
 }
+
+extern s32 btlIsSpecialEnemyEffectLinkSatisfied(void);
 
 u32 btlCommandReportSpecialEnemyLink(void) {
     if (btlIsSpecialEnemyEffectLinkSatisfied() != 0) {
@@ -2538,6 +2564,8 @@ u32 btlCommandReportSpecialEnemyLink(void) {
     return 1;
 }
 
+extern s32 btlHasActiveSubtask(void);
+
 u32 btlScriptReturnActiveSubtaskPresence(void) {
     if (btlHasActiveSubtask() != 0) {
         scrSetIntegerReturnValue(1);
@@ -2546,6 +2574,8 @@ u32 btlScriptReturnActiveSubtaskPresence(void) {
     }
     return 1;
 }
+
+extern u32 btlIsMarkedActionSceneStateActive(void);
 
 u32 btlScriptReturnMarkedActionSceneActive(void) {
     if (btlIsMarkedActionSceneStateActive() != 0) {
@@ -2748,6 +2778,8 @@ u32 btlScriptBuiltin451NoOp(void) {
     return 1;
 }
 
+extern s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task);
+
 u32 btlCmdRunWeightedAiSelection(void) {
     btlRunRandomWeightedAiTableAction(scrGetCurrentCommandWork());
     return 1;
@@ -2778,10 +2810,14 @@ u32 btlResetCommandContextAndSetStateFlag(void) {
     return 1;
 }
 
+extern void btlBeginScenePanelFadeOut(void);
+
 u32 btlScriptClearSceneTransition(void) {
     btlBeginScenePanelFadeOut();
     return 1;
 }
+
+extern void btlBeginScenePanelFadeIn(void);
 
 u32 btlScriptBeginSceneTransition(void) {
     btlBeginScenePanelFadeIn();
@@ -2936,6 +2972,8 @@ u32 btlCmdReportUnsupportedAllTaikyo(void) {
     return 1;
 }
 
+extern void btlClearSpecialEnemyEntryFlags(void);
+
 u32 btlCmdClearSpecialEnemyFlags(void) {
     btlClearSpecialEnemyEntryFlags();
     return 1;
@@ -3025,6 +3063,9 @@ extern f32 D_00436BA4;
 extern u8 D_00436BA8;
 extern f32 btlDebugCameraPositions[2][4];
 extern f32 btlDebugCameraRotations[2][4];
+
+extern EffWorldNode * dds3GetWorldObject(void);
+extern void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin, const f32 *direction);
 
 /* Battle debug camera: one button saves the world camera's position and
  * rotation into one of two slots (alternating), the other toggles a camera
@@ -3341,6 +3382,9 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
     sceDclose(directoryHandle);
 }
 
+extern char *strcpy(char *, const char *);
+extern unsigned int strlen(const char *);
+
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
@@ -3355,6 +3399,8 @@ s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) 
     btlBuiltinResourceNameIndex++;
     return strlen(reader->name);
 }
+
+extern u32 effGetGeneralResourceCount(void);
 
 /* Build a scan-order list of built-in names and enabled resource-file categories. */
 BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
@@ -3539,6 +3585,8 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
+
+extern void * sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...);
 
 /* Update list selection and submit the visible browser rows to its surface. */
 s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {

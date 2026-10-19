@@ -90,6 +90,8 @@ typedef struct DdsAllocBlock {
     u32 buffer; /* 0x04 */
 } DdsAllocBlock;
 
+extern void *memset(void *, int, unsigned int);
+
 DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     DdsAllocBlock *block = (DdsAllocBlock *)sdfAllocHeapMemory(8);
     u32 buffer;
@@ -107,7 +109,6 @@ void dds3ReleasePackedValueBuffer(u32 node) {
 }
 
 
-extern void *memset(void *, s32, u32);
 
 /* Allocate the named reference and its writable name. */
 DdsNamedRecord *dds3AllocateNamedReference(void) {
@@ -173,6 +174,8 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
 }
 
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Append `bytes` copies of the source data into the object's 0x10000-byte allocation blocks, moving on to a fresh block when one fills up. */
 void dds3AppendPackedBytes(DdsPackedObject *object, const void *source, u32 bytes) {
     DdsAllocBlock *block = (DdsAllocBlock *)dds3GetCurrentPackedValueBuffer((s32)object);
@@ -208,6 +211,8 @@ extern char D_00438960[];
 extern s32 sprintf(char *dst, const char *format, ...);
 extern char *strncpy(char *dst, const char *source, u32 bytes);
 extern char D_00438978[];
+
+extern int strncmp(const char *, const char *, unsigned int);
 
 void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
     DdsNamedNode *node = ((DdsNamedList *)object->namedReferences)->first;
@@ -811,6 +816,8 @@ MnuCallbackList *mnuCreateCallbackNode(u32 userData) {
     node->onDestroy = mnuCallbackNodeNoOp;
     return node;
 }
+
+extern void mnuClearResourceList(MnuCallbackList *list);
 
 void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *node) {
     if (node != 0) {

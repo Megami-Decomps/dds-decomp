@@ -215,6 +215,8 @@ extern void mnuSortItems(struct MenuList *, s32, s32);
 extern void ptySkillMenuDrawEntry();
 extern u8 mnuCampSkillHeadingFrameIndices[];
 
+extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
+
 /* Select the visual category used by the party-selection window. */
 void mnuSelectPartySelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(4, context);
@@ -1705,6 +1707,9 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
         menu->active = 1;
     }
 }
+
+struct MenuPanelState;
+extern void mnuDestroyPanelState(struct MenuPanelState *panel);
 
 void mnuDestroySkillMenuWindows(s32 context) {
     u32 *menu = (u32 *)((CampMenuContext *)context)->menu;

@@ -60,6 +60,8 @@ MnuCallbackList *mnuCreateReleaseCallbackNode(void) {
 }
 extern void mnuClearResourceList(MnuCallbackList *list);
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Rebuild the row's named states and attach its tagged parameter groups. */
 void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord *row) {
     s32 groupIndex;
@@ -150,6 +152,8 @@ void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeLi
         } while (node != NULL);
     }
 }
+
+extern void *memset(void *, int, unsigned int);
 
 /* Allocate a zeroed 0x22-byte record with an eight-byte tag at offset 0xA. */
 MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {

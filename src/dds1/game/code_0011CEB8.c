@@ -136,6 +136,8 @@ s32 frFontDrawOwnedGlyph(void *owner) {
     return frFontDrawGlyphInDefaultMode(node->glyph);
 }
 
+extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
     struct FrFontGlyph *glyph;
     Dds3FontNode *node;

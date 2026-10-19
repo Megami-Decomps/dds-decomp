@@ -1656,6 +1656,8 @@ s32 btlCountSceneSlots(void) {
 
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
 
+extern s32 btlCountEligibleLinkedActors(BtlState *battle);
+
 s32 btlSyncEligibleActorPanelHpMp(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 eligibleCount = btlCountEligibleLinkedActors(battle);
@@ -1686,7 +1688,6 @@ s32 btlSyncEligibleActorPanelHpMp(void) {
     return 1;
 }
 
-extern s32 btlCountEligibleLinkedActors(BtlState *);
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
 
 s32 btlSetEligibleActorPanelTransitionState(void) {

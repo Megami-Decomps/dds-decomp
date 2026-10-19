@@ -24,6 +24,8 @@ ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object) {
     return block->resourceState;
 }
 
+extern void dds3SetObjectFlags(void *object, u32 mask);
+
 /* Allocate the kind-9 light payload and its auxiliary buffer. */
 u32 dds3InitializeInnerVectorEffectObject(EffWorldNode *object) {
     EffLightData *obj;

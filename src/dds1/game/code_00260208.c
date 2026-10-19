@@ -622,6 +622,8 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
 }
 
 
+extern s32 mnuStaffCreateTasks(void);
+
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
     brsUiUpdateAllowed = 0;
@@ -669,6 +671,8 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     }
 }
 
+extern void datAddCurrencyClamped(s32 delta);
+
 void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
@@ -678,6 +682,8 @@ extern s32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(DatPartyRecord *unit) {
@@ -777,6 +783,9 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
 extern void mnuClearEntries(MenuPageWindow *window);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
+
+extern void mnuReleaseAssets(MenuAssets *assets);
+extern void mnuResetWorkFloats(void);
 
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
@@ -894,6 +903,8 @@ extern s32 brsBuildProfileCapList(BrsRewardBatch *);
 extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 extern char D_0036C858[];
 extern char D_003AFAA8[];
+
+extern void *memset(void *, int, unsigned int);
 
 BrsSkillPackageWork *brsCreateTaskContext(void) {
     BrsRewardSummary *rewards;
@@ -1037,6 +1048,8 @@ s32 brsTaskIsFadeIdle(void) {
     }
     return evtStageTestPollModelRequest() != 1;
 }
+
+extern void mnuUpdatePartyPanelPercentDisplays(MenuPageWindow *page);
 
 void mnuRefreshSelectedUnitPanels(DatPartyRecord *unusedPartyRecord, BrsSkillPackageWork *menu) {
     mnuInitPartyPanelSlots(&menu->partyPanel);

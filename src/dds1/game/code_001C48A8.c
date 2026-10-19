@@ -171,6 +171,8 @@ u32 func_001C48B0(void) {
     return 0;
 }
 
+extern void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex);
+
 void fldBattleSceneEnterInit(u8 *scene) {
     BattleSceneWork *work = (BattleSceneWork *)scene;
     u32 id = work->sceneId;
@@ -189,6 +191,11 @@ void fldBattleSceneEnterInit(u8 *scene) {
     VU0_STORE_VF($vf0, scene);
 }
 
+extern s32 btlIsEventSequenceTaskReady(void);
+extern s32 btlIsFadeInPhaseOrIdle(void);
+extern void btlBindEventEffectResources(void);
+extern void sndLoadBattleBank(void);
+
 s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
         btlIsEventSequenceTaskReady() != 0 &&
@@ -199,6 +206,8 @@ s32 btlLoadBankWhenTasksIdle(void) {
     }
     return 0;
 }
+
+extern u8 * btlCreateFloorLoadTask(u32 stage, u32 variant);
 
 u64 fldMarkGridTiles(u8 *context) {
     BtlRuntimeTask *node = (BtlRuntimeTask *)fldCreateSceneTileTask(*(s16 *)(context + 0x288), *(s16 *)(context + 0x28A));
@@ -232,6 +241,11 @@ static inline void initializeBattleUnitHook(BtlState *scene, BtlUnit *unit) {
     void (*initialize)(BtlUnit *) = *(void (**)(BtlUnit *))scene->pad5C0;
     if (initialize != NULL) initialize(unit);
 }
+extern s32 btlSelectPreemptiveOutcome(void);
+extern void btlClearUnitStatusMask(void);
+extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index);
+
 void btlInitializeBattleUnits(BtlState *scene) {
     u32 index;
     u32 slot;
@@ -621,6 +635,9 @@ extern s32 btlAreWorkBuffersReady(void);
 void fldInitializeSceneGroups(void);
 extern s32 btlResetSceneSlotFades(void);
 
+extern s32 btlSelectSerialEncounter(void);
+extern void btlAddItemDrop(u16 item);
+
 s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *scene) {
     BattleSceneWork *work = (BattleSceneWork *)scene;
     u32 i;
@@ -860,6 +877,12 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
 }
 
 void fldEnableSceneGroupAdvancement(void);
+
+struct SoundTask;
+extern s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex);
+extern struct SoundTask * btlCreateFadeStateResetTask(void);
+extern void * btlCreateApplyToActiveActorsTask(u32 sound);
+extern void * btlCreateWaitUnitListIdleTask(u32 sound);
 
 s32 fldSceneStateWaitScriptRelease(u8 *scene) {
     s32 finished = 1;
@@ -1152,6 +1175,20 @@ const char D_003A3510[] __attribute__((aligned(8))) = "btl:end [BTL_END_ESCAPE]\
 const char D_003A3530[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\n";
 const char D_003A3550[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
 extern s8 D_00324510[];
+extern s32 btlAllActiveUnitsReady(void);
+extern s32 btlCountRegisteredTasks(void);
+extern s32 btlReleaseScriptResourceB(void);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern s32 sndIsCommandBusySigned(void);
+extern s32 sndLoadAndPlayStationedSe(u32 soundId);
+extern void btlClearModelFlagRange(void);
+extern void btlRemoveActorsWithFlags(u32 mask);
+extern void btlResetActorEntryState(void);
+extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
+extern void mnuResetTitleStreamLocked(void);
+extern void sndQueueNoPayloadCommand1A0(void);
+extern void sndQueueNoPayloadCommand210(void);
+
 s32 func_001C6888(BtlState *scene) {
     s32 state;
     s32 request;
@@ -1383,6 +1420,8 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
     return 0;
 }
 
+extern void btlFlagTasksForUpdate(void);
+
 void fldMarkLinkedSceneActors(s32 context) {
     BtlTask *entry;
     btlAdvanceTitleStateWithAudioCleanup(context);
@@ -1398,7 +1437,6 @@ void fldMarkLinkedSceneActors(s32 context) {
 
 extern void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId);
 extern void dds3WorkClear(void);
-extern s32 btlCountRegisteredTasks(void);
 
 s32 btlFinishScenePartyRecovery(s32 sceneAddress) {
     BtlState *scene = (BtlState *)sceneAddress;
@@ -1636,6 +1674,8 @@ s32 fldGetSceneGroupIndexByActorFlags(BtlTask *task) {
     return groupId;
 }
 
+extern void fldInitSceneFadeRecords(void);
+
 /* Retail fills thirteen task pointers at sp+0..0x30, then repeats each action number into scene slots. */
 void fldBuildSceneSlotsFromActorTasks(void) {
     BtlTask *selected[13];
@@ -1777,6 +1817,8 @@ void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
         }
     }
 }
+
+extern s32 fldCountSceneSlots(void);
 
 /* Insert half-counter slots for the current variant, clamped to eight entries. */
 void fldInsertSceneSlots(s32 slotCount) {
@@ -2103,6 +2145,8 @@ u32 fldDispatchSceneGroupRequestWhenAllowed(s32 *request) {
     fldConsumeSceneSlotCounters(request[1], counterMode);
     return 1;
 }
+
+extern void * btlAllocTask(s32 size);
 
 /* Allocate a counter request, link the source task's actor owner, and store amount/mode. */
 u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode) {

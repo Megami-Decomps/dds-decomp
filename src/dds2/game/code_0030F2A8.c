@@ -19,6 +19,9 @@ extern f32 fldVectorLength(f32 *);
 
 extern void *memset(void *, s32, u32);
 
+struct FrFontGlyph;
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *glyph, s8 mode);
+
 void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
     struct FrFontGlyph *handle;
 
@@ -272,6 +275,8 @@ void sdfTransposeMatrix(SdfMat4 *destination, SdfMat4 *source) {
 
 /* Transform XYZ without translation. Matching quirk: the fourth copied output word is uninitialized. */
 #include "sdf_vector_transform.h"
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
     f32 transformed[4];

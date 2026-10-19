@@ -21,6 +21,9 @@ extern float acosf(float);
 
 
 
+struct FrFontGlyph;
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *glyph, s8 mode);
+
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
     struct FrFontGlyph *glyph;
 
@@ -75,6 +78,8 @@ void fldRotateVectorAroundZ(f32 *vector, f32 angle) {
 
 
 extern float sdfVec3NormalizeInPlaceAndGetLength(float *vector);
+
+extern void *memset(void *, int, unsigned int);
 
 /* Rotate XYZ about a normalized copy of axis; copy inputs before writing XYZ and leave W untouched. */
 void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {

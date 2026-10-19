@@ -39,6 +39,8 @@ extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
 
+extern s32 scrReadIntParameter(s32 parameterIndex);
+
 s32 scrCommandStoreRandomCondition(void)
 {
     scrSetIntegerReturnValue(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
@@ -61,6 +63,8 @@ s32 scrCommandWaitForTimerLimit(void) {
     }
     return 1;
 }
+
+extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 
 s32 scrCommandPrintInteger(void)
 {
@@ -130,6 +134,8 @@ s32 scrCommandFadeBackgroundOut(void)
     return 1;
 }
 
+extern void kwlnFadeBackgroundStartIn(s32 duration);
+
 s32 scrCommandFadeBackgroundIn(void)
 {
     if (scrGetCommandTimer() == 0)
@@ -139,6 +145,9 @@ s32 scrCommandFadeBackgroundIn(void)
     }
     return 1;
 }
+
+extern u32 scrGetLabelAddress(s32 labelIndex);
+extern void scrSetProgramCounter(u32 address);
 
 s32 scrCommandJumpToIndexedLabel(void)
 {
@@ -169,6 +178,8 @@ s32 scrCommandTestIndexedCodeBit(void)
     scrSetIntegerReturnValue(sdfPadButtonStates[scrReadIntParameter(0)] & 1);
     return 1;
 }
+
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 
 s32 scrCommandStartPadMotor(void)
 {
@@ -267,6 +278,8 @@ u32 scrCommand_SCR_GET_TIMER()
     return 1;
 }
 
+extern void kwlnFadeSetupFrames(s32 fadeMode, s32 frames);
+
 s32 scrCommandSetupFadeFrames(void)
 {
     s32 fadeMode;
@@ -276,6 +289,8 @@ s32 scrCommandSetupFadeFrames(void)
     kwlnFadeSetupFrames(fadeMode, durationFrames);
     return 1;
 }
+
+extern void kwlnCancelConfiguredFadeFrames(void);
 
 s32 scrCommandCancelConfiguredFrameFade(void)
 {
@@ -378,6 +393,8 @@ s32 scrCommandToggleSavedDrawVectors(void)
     return 1;
 }
 
+extern void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale);
+
 s32 scrCommandSetDrawOffsetTransition(void)
 {
     s32 duration;
@@ -412,6 +429,8 @@ s32 scrCmdSetDrawFloatPairByMode(void) {
 }
 
 
+extern void kwlnDrawSetC70Second(u32 rgba);
+
 s32 scrCmdSetPackedDrawComponentBytes(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
@@ -427,6 +446,8 @@ s32 scrCmdSetPackedDrawComponentBytes(void)
     return 1;
 }
 
+extern void kwlnDrawSetC70Triple(u32 extent, u32 centerX, u32 centerY);
+
 s32 scrCmdSetTexturedBlurIntegerParameters(void)
 {
     s32 extent;
@@ -439,17 +460,23 @@ s32 scrCmdSetTexturedBlurIntegerParameters(void)
     return 1;
 }
 
+extern void kwlnDrawSetupC70FromCh71(s32 duration);
+
 s32 scrCmdSetTexturedBlurTransitionMode(void)
 {
     kwlnDrawSetupC70FromCh71(scrReadIntParameter(0));
     return 1;
 }
 
+extern void kwlnDrawSetupC70(s32 duration);
+
 s32 scrCmdBeginTexturedBlurActivation(void)
 {
     kwlnDrawSetupC70(scrReadIntParameter(0));
     return 1;
 }
+
+extern void kwlnDrawSetupC70B(s32 duration);
 
 s32 scrCmdBeginTexturedBlurDeactivation(void)
 {
@@ -492,6 +519,8 @@ s32 scrCmdConfigureFilterBlur(void)
     return 1;
 }
 
+extern void kwlnDrawSetCd0Fourth(u32 rgba);
+
 s32 scrCmdSetFilterBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
@@ -507,6 +536,8 @@ s32 scrCmdSetFilterBlurPackedColor(void)
     return 1;
 }
 
+extern void kwlnDrawSetCd0Triple(u32 positionSpread, u32 x, u32 y);
+
 s32 scrCmdSetFilterBlurIntegerParameters(void)
 {
     s32 positionSpread;
@@ -517,17 +548,23 @@ s32 scrCmdSetFilterBlurIntegerParameters(void)
     return 1;
 }
 
+extern void kwlnSetFilterBlurParameterTransition(s32 duration);
+
 s32 scrCmdSetFilterBlurTransitionMode(void)
 {
     kwlnSetFilterBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
+extern void kwlnDrawSetupCd0(s32 duration);
+
 s32 scrCmdBeginFilterBlurActivation(void)
 {
     kwlnDrawSetupCd0(scrReadIntParameter(0));
     return 1;
 }
+
+extern void kwlnDrawEnableCd0(s32 duration);
 
 s32 scrCmdBeginFilterBlurDeactivation(void)
 {
@@ -571,6 +608,8 @@ s32 scrCmdConfigureStaggeredBlur(void)
     return 1;
 }
 
+extern void kwlnDrawSetD30Fourth(u32 rgba);
+
 s32 scrCmdSetStaggeredBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
@@ -586,6 +625,8 @@ s32 scrCmdSetStaggeredBlurPackedColor(void)
     return 1;
 }
 
+extern void kwlnDrawSetD30Triple(u32 size, u32 x, u32 y);
+
 s32 scrCmdSetStaggeredBlurIntegerParameters(void)
 {
     s32 size;
@@ -596,17 +637,23 @@ s32 scrCmdSetStaggeredBlurIntegerParameters(void)
     return 1;
 }
 
+extern void kwlnSetStaggeredBlurParameterTransition(s32 duration);
+
 s32 scrCmdSetStaggeredBlurTransitionMode(void)
 {
     kwlnSetStaggeredBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
+extern void kwlnDrawSetupD30(s32 duration);
+
 s32 scrCmdBeginStaggeredBlurActivation(void)
 {
     kwlnDrawSetupD30(scrReadIntParameter(0));
     return 1;
 }
+
+extern void kwlnDrawEnableD30(s32 duration);
 
 s32 scrCmdBeginStaggeredBlurDeactivation(void)
 {
@@ -645,6 +692,8 @@ s32 scrCmdConfigureRectangleBlur(void)
 }
 
 
+extern void kwlnDrawSetD88First(u32 rgba);
+
 s32 scrCmdSetRectangleBlurPackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
@@ -660,6 +709,8 @@ s32 scrCmdSetRectangleBlurPackedColor(void)
     return 1;
 }
 
+extern void kwlnDrawSetD88Pair(u32 centerX, u32 centerY);
+
 s32 scrCmdSetRectangleBlurIntegerPair(void)
 {
     s32 centerX;
@@ -668,17 +719,23 @@ s32 scrCmdSetRectangleBlurIntegerPair(void)
     return 1;
 }
 
+extern void kwlnSetRectangleBlurParameterTransition(s32 duration);
+
 s32 scrCmdSetRectangleBlurTransitionMode(void)
 {
     kwlnSetRectangleBlurParameterTransition(scrReadIntParameter(0));
     return 1;
 }
 
+extern void kwlnDrawSetupD88(s32 duration);
+
 s32 scrCmdBeginRectangleBlurActivation(void)
 {
     kwlnDrawSetupD88(scrReadIntParameter(0));
     return 1;
 }
+
+extern void kwlnDrawEnableD88(s32 duration);
 
 s32 scrCmdBeginRectangleBlurDeactivation(void)
 {
@@ -714,6 +771,8 @@ s32 scrCmdSetIndexedDrawMode(void)
     return 1;
 }
 
+extern void kwlnDrawSetDc8First(u32 rgba);
+
 s32 scrCmdSetColorRectanglePackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
@@ -729,17 +788,23 @@ s32 scrCmdSetColorRectanglePackedColor(void)
     return 1;
 }
 
+extern void kwlnDrawSnapshotSolidRect(s32 duration);
+
 s32 scrCmdSetColorRectangleTransitionMode(void)
 {
     kwlnDrawSnapshotSolidRect(scrReadIntParameter(0));
     return 1;
 }
 
+extern void kwlnDrawSetupDc8(s32 duration);
+
 s32 scrCmdBeginColorRectangleActivation(void)
 {
     kwlnDrawSetupDc8(scrReadIntParameter(0));
     return 1;
 }
+
+extern void kwlnDrawEnableDc8(s32 duration);
 
 s32 scrCmdBeginColorRectangleDeactivation(void)
 {
@@ -775,6 +840,8 @@ s32 scrCmdSetTexturedSquareDrawMode(void)
     return 1;
 }
 
+extern void kwlnDrawSetE08Fourth(u32 rgba);
+
 s32 scrCmdSetTexturedSquarePackedColor(void)
 {
     /* Declared out of order: gcc 2.96 fills $16-$18 in declaration order. */
@@ -790,6 +857,8 @@ s32 scrCmdSetTexturedSquarePackedColor(void)
     return 1;
 }
 
+extern void kwlnDrawSetE08Triple(u32 extent, u32 centerX, u32 centerY);
+
 s32 scrCmdSetTexturedSquareIntegerParameters(void)
 {
     s32 extent;
@@ -800,17 +869,23 @@ s32 scrCmdSetTexturedSquareIntegerParameters(void)
     return 1;
 }
 
+extern void kwlnDrawSetupE08FromCh75(s32 duration);
+
 s32 scrCmdSetTexturedSquareTransitionMode(void)
 {
     kwlnDrawSetupE08FromCh75(scrReadIntParameter(0));
     return 1;
 }
 
+extern void kwlnDrawSetupE08(s32 duration);
+
 s32 scrCmdBeginTexturedSquareActivation(void)
 {
     kwlnDrawSetupE08(scrReadIntParameter(0));
     return 1;
 }
+
+extern void kwlnDrawEnableE08(s32 duration);
 
 s32 scrCmdBeginTexturedSquareDeactivation(void)
 {
@@ -828,6 +903,11 @@ s32 scrCommandResetDrawEffects(void)
     effDisableFramebufferQuad();
     return 1;
 }
+
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void fldSetSkyAlpha(u32 alpha);
+extern void fldSetSkyDrawState(u32 drawState);
+extern void fldSetSwayMode(u32 mode);
 
 s32 scrCommandResetFieldEffects(void)
 {
@@ -857,6 +937,8 @@ s32 scrCommandIsProcessControlFlagClear(void)
     return datGameState->processControlFlag == 0;
 }
 
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
+
 s32 scrCommandAdjustItemQuantity(void)
 {
     s32 itemId;
@@ -865,11 +947,15 @@ s32 scrCommandAdjustItemQuantity(void)
     return 1;
 }
 
+extern void datAddCurrencyClamped(s32 delta);
+
 s32 scrCommandAddPartyCurrency(void)
 {
     datAddCurrencyClamped(scrReadIntParameter(0));
     return 1;
 }
+
+extern s32 datHasEnoughCurrency(s32 requiredAmount);
 
 /* Persona 4 scrCommand_SCR_EXISTS @ 00299600 (src/Script/scrCommonCommand.c), recompiled unchanged */
 u32 scrCommand_SCR_EXISTS()

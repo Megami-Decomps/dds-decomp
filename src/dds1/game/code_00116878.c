@@ -66,6 +66,8 @@ Motion *evtAttachScriptToObject(EffWorldNode *object, SdfModel *owner) {
 }
 
 
+extern void *memset(void *, int, unsigned int);
+
 s32 dds3AllocateObjectWork(EffWorldNode *obj) {
     obj->data = sdfAllocSizeClassBlock(0x18);
     memset(obj->data, 0, 0x18);

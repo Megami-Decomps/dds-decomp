@@ -373,6 +373,9 @@ BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     return btlFindGroupedEntity(group, id);
 }
 
+extern int SignalSema(int);
+extern int WaitSema(int);
+
 void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     mdlApplyGroupSetup(request->group, request->id, request->options, &request->payload);
     WaitSema(mdlGroupJobSemaphore);
@@ -1157,6 +1160,8 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {
     sdfUpdateActiveResourceListScalars(ctx->inner->assetData, tint, amount);
 }
 
+extern unsigned int strlen(const char *);
+
 /* Copy a resource path's basename without its extension into destination. */
 void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
     MdlResourceSelection *selection;
@@ -1228,6 +1233,8 @@ extern u16 mdlGetRecordPartIndex(MdlRecord *record);
 extern DevRequest *mdlCreateBufferedPartRequest(u32 count);
 extern void mdlAddBillboardPart(DevRequest *list, void *descriptor);
 extern void mdlAddEffectPart(DevRequest *list, struct EffNodeDescriptor *descriptor);
+
+extern void *memset(void *, int, unsigned int);
 
 /* Generic transports preserve the queue/payload alias relationship; see
  * docs/idioms.md, "Pointer transport aliasing: queued model packets". */

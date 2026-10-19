@@ -985,6 +985,8 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
 void btlUpdateCommandCameraNoOp(void) {
 }
 
+extern void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *startActor, BtlIndexList *indices, s8 mode);
+
 /* Update the action camera from target-policy results once the link reaches state seven. */
 void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
     BtlUnit *unit;

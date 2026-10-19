@@ -91,6 +91,9 @@ u32 mnuGetMovieMenuSelectionIndex(void) {
     return *((SpriteMenuList *)((SpriteMenuState *)mnuMovieMenuState)->list)->selected;
 }
 
+struct MenuList;
+extern void mnuSelectFirstListNode(struct MenuList *list);
+
 void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
     mnuSelectFirstListNode(((SpriteMenuState *)mnuMovieMenuState)->list);
     if (0 < advanceCount) {
@@ -361,6 +364,8 @@ extern void mnuDrawMovieMenuSpritePickList(PickList *, s32);
 extern s16 mnuMovieMenuPickSpritePositions[32][2];
 extern u8 D_00437A50[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Draw the pick list sprites and advance each entry's fade step; drop entries that finished. */
 void mnuDrawMovieMenuSpritePickList(PickList *work, s32 drawContext) {
     u8 palette[5];
@@ -536,6 +541,9 @@ void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
 /* Truthful void return releases V0 for the following flag load;
  * see docs/idioms.md, "Movie path drawing: real outputs and surface return". */
 extern void uiDrawSurfaceAtNearDepth(u32);
+
+extern void uiConfigureSurfaceAlphaState(s32 context);
+extern void uiDrawActiveSurfaceWithTestMode(u32 context);
 
 void mnuDrawAndAdvanceMovieMenuSlidePath(PickList *work, s32 drawContext) {
     s32 offsets[2];

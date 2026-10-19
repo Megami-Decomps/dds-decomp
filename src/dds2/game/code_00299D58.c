@@ -347,6 +347,8 @@ u32 mnuPrimaryRewardPanelLeaveNoOp(void) {
     return 1;
 }
 
+extern void *memset(void *, int, unsigned int);
+
 void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     struct ActiveItemSlots {
         s32 indices[DAT_BASE_STAT_COUNT];

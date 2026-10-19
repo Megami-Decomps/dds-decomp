@@ -213,6 +213,8 @@ u64 *itfCreateVerticalGradientQuadPacket(u32 x, u32 y, u32 depth, u32 width, u32
     return packet;
 }
 
+extern u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes);
+
 u64 *btlCreateGsTestRegisterPacket(u64 owner, s32 alternative) {
     u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
     entry[4] = owner;
@@ -281,6 +283,17 @@ void btlClearModelFlagRange(void) {
     } while (nextFlagIndex < 0xBFF);
 }
 
+extern s32 btlExitWhenAudioAndTasksIdle(void);
+extern void btlPollMotionSoundResources(void);
+extern void btlSweepFinishedTasks(void);
+extern void btlUpdateActionSeqs(void);
+extern void btlUpdateActiveActorModelState(void);
+extern void btlUpdateActiveFrameNoOp(void);
+extern void btlUpdateAutoMusic(void);
+extern void btlUpdateFadeColor(void);
+extern void btlUpdateTintAndWorldLight(void);
+extern void fldAdvanceSceneGroupScheduler(void);
+
 s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlRuntime;
     if (battle == NULL) {
@@ -305,6 +318,15 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
     }
     return 0;
 }
+
+extern void btlClearDeferredTasks(void);
+extern void btlDispatchLinkedEffectWhenBattleGatesClear(void);
+extern void btlSweepFloorModelLists(void);
+extern void btlTickFieldSwayAndTint(void);
+extern void btlUpdateActorModelColorAndLinks(void);
+extern void btlUpdateEventPlayback(void);
+extern void btlUpdateFieldPresentationNoOp(void);
+extern void btlUpdateSceneFlow(void);
 
 s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlRuntime;
@@ -419,6 +441,8 @@ extern void btlAllocatePanelTaskWork(void);
 
 extern void btlInitializeRuntimeNoOp(void);
 
+extern void *memset(void *, int, unsigned int);
+
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {
     btlResetRuntimeSequenceCounter();
@@ -471,6 +495,30 @@ extern char D_003A15A8[];
 extern char D_003A15C8[];
 
 extern void itfMesDestroyWindowIfPresent(s32);
+
+extern s32 btlCountRegisteredTasks(void);
+extern s32 sndHasOccupiedNodeSlots(void);
+extern u32 brsTaskTryDestroy(void);
+extern void btlAdvanceTitleStateWithAudioCleanup(void);
+extern void btlClearPendingSoundList(void);
+extern void btlClearSoundAndModelResources(void);
+extern void btlClearTaskLists(void);
+extern void btlClearTintAndEnableCamera(void);
+extern void btlDestroyAllActionSeqs(void);
+extern void btlDestroyAllUnits(void);
+extern void btlFlagTasksForUpdate(void);
+extern void btlFreeFieldBlocks(void);
+extern void btlGetCurrentSceneRecordValue(void);
+extern void btlReleaseButtonTexture(void);
+extern void btlStopRainSoundTransition(void);
+extern void effResetSlots(void);
+extern void evtDestroySelectionState(void);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern void fldDestroySceneTasksAndBuffers(void);
+extern void itfMesClearFlags(u32 mask);
+extern void kwlnCancelConfiguredFadeFrames(void);
+extern void sndClearList(void);
+extern void sndFreeBattleSoundEntries(void);
 
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A1598);
 
@@ -528,6 +576,8 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 extern void btlSetScene(s32 sceneId);
 extern void itfMesSetFlags(s32 flags);
+
+extern s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter);
 
 /* Start a battle: pick the scene parameters for the encounter and enter the battle scene. */
 void btlStart(s32 mode, s32 pack, s32 encounter) {
@@ -588,6 +638,10 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
     ((BtlState *)btlRuntime)->commandRestrictFlags |= 2;
     btlBossDebugPrintf("** btlStart **************\n");
 }
+
+extern void btlLoadStartupPanelResources(void);
+extern void btlOpenButtonIconResource(void);
+extern void sndLoadSysEffLb(void);
 
 void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();

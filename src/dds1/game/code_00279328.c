@@ -91,6 +91,8 @@ static inline MenuWindowContainer **getSkillPageSlot(MenuWindowContainer **windo
     return windows + index;
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 void ptySkillMenuCopyPageState(s32 context) {
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
@@ -161,6 +163,9 @@ s32 ptySkillMenuDispatchPageRequest(KwlnTask *selection) {
     s32 context = kwlnTaskGetUserValue(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
+
+extern s32 mnuConsumeEntryCost(s32 commandId, DatPartyRecord *actorEntry);
+extern s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actor);
 
 s32 ptySkillMenuUseSelectedInField(id, context)
     u16 id;
@@ -265,6 +270,9 @@ s32 ptySkillMenuOpenPartyPage(KwlnTask *menu) {
     ptySkillMenuInitPages(ctx);
     return 1;
 }
+
+extern u32 mnuDestroySelectedPartyWindow(KwlnTask *task);
+extern void mnuDestroySkillMenuWindows(s32 context);
 
 s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
     s32 context = kwlnTaskGetUserValue(selection);

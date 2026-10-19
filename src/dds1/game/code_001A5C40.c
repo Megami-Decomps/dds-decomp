@@ -155,6 +155,8 @@ extern EffRandState effSharedRandomState[];
 
 extern s32 sdfCalculateCommandVitalDelta(s32, s32, DatPartyRecord *, u32, u8);
 
+extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
+
 /* Clear the supplied party-record status mask. */
 
 s32 func_001A5C40(BtlUnit *attacker, BtlUnit *recipient, s32 command,
@@ -439,6 +441,8 @@ s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     return (s32)btlRollAiBucket() < ratio;
 }
 
+extern s32 btlGetActionRecordLookupValue(s32 actionRecordIndex);
+
 s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
                   u8 useSelectedAction) {
     s32 actionThreshold;
@@ -682,6 +686,8 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
     }
     return 0;
 }
+
+extern void *memset(void *, int, unsigned int);
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
                    BtlOperandGroup *results, s32 command) {

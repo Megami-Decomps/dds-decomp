@@ -921,6 +921,8 @@ void effFlashAccumulatingParticleAdvance(PcpFlashAccumulatingWork *work, s32 ind
 extern void effFlashAccumulatingSetParticleColors(PcpFlashAccumulatingWork *work, s32 index, u32 colorMultiplier);
 extern void effFlashAccumulatingBuildParticleQuads(PcpFlashAccumulatingWork *work, s32 index);
 
+extern void effDrawQuadRecordPool(EffRecordPool *pool);
+
 void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
 {
     s32 index;

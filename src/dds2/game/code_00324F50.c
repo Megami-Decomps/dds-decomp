@@ -55,6 +55,8 @@ void mnuRemoveLinkedResourceByHandle(MnuCallbackListPair *owner, u32 handle) {
     dds3RemoveListNodeAndNotify(owner->second, node);
 }
 
+extern void *memset(void *, int, unsigned int);
+
 DdsNestedHeader *sdfCloneNestedResourceRecord(MnuCallbackListPair *owner, MnuCallbackList **list) {
     SdfListNode *node;
     DdsNestedHeader *buffer;

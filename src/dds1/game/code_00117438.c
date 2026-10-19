@@ -167,6 +167,8 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
 
 }
 
+extern void *memset(void *, int, unsigned int);
+
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
  * and register the "GBWK" tick task that owns it. */
 void sdfCreateRuntimeTask(void) {
@@ -203,6 +205,9 @@ s32 sdfBumpTickCounters(KwlnTask *task) {
     runtime->header.secondTick += 1;
     return 0;
 }
+
+extern void btlClearSharedBattleStateWords(void);
+extern void ptyInitRuntime(void);
 
 void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
@@ -242,6 +247,8 @@ extern SdfMemBlock *D_003BD79C;
 extern u32 D_003BD7A0;
 extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Preserve carried flags and progress before the full runtime reset. */
 void sdfSaveResetSnapshot(void) {
@@ -473,6 +480,8 @@ void sdfResetChannels(void) {
     }
     evtInitializeWorkScriptTask();
 }
+
+extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 
 /* Enemy vitals use a 76-byte base table; party vitals come from a script,
  * a unit-specific bonus, and a maximum of 999. */
@@ -816,6 +825,9 @@ extern s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyReco
 extern void datClearUnitStatusBits(void *item, s32 mask);
 /* These unused-result legacy mutator calls had no prototype in scope. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 minimumValue);
+
+extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
 
 s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;

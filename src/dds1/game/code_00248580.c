@@ -199,6 +199,9 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 
+extern s32 mnuGetSelectionFromFlags(DatPartyRecord *partyRecord);
+extern u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor);
+
 void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct MenuList *list, struct MenuListNode *node, s32 priority) {
     char text[16];
     s32 portraitCodes[8] = {0x1D, 0, 0x1F, 0x23, 0x21, 0x25, 0, 0};
