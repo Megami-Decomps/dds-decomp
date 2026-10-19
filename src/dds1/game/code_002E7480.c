@@ -92,8 +92,10 @@ extern char D_003BD448[]; /* pfs0: */
 extern char D_003BD470[];
 
 /* Clear `count` quadwords at dst: four per pass, then a falling 3/2/1
- * remainder. The pass is a goto loop (no loop notes, so no loop alignment),
- * and its exit test is taken before the four stores. */
+ * remainder. The pass is a goto loop: retail's back-branch (beqz $2 to
+ * 0x002E748C) has no loop alignment, while do-while and while forms emit
+ * `.p2align 3,,7` (cc1probe --loops, 0x7C bytes against retail's 0x78) and
+ * keep the exit test after the four stores. */
 u128 *sdfClearQuadwords(u128 *dst, s32 count) {
     u128 *p = dst;
     s32 done;
