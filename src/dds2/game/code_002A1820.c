@@ -96,7 +96,7 @@ extern char D_00428610[];
 
 extern char D_00428628[];
 
-extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 s32 sndCopyWordsToIopSynchronously(const void *source, u32 iopAddress, u32 wordCount);
 

@@ -15224,3 +15224,26 @@ Both linked-scene callers remain 88 bytes and both complete units gate 66/0;
 the standard canaries are 192/0,158/0,15/0. No provider, header, flags, data or
 expected-object changes are needed.
 
+## The sound-remote SDK API has one fixed argument
+
+The SCE `libsdr.h` interface is `int sceSdRemote(int arg, ...);`.
+`sndDispatchIopAudioCommand`, the project's name for this remote dispatcher,
+therefore has the local declaration:
+
+```c
+extern s32 sndDispatchIopAudioCommand(s32, ...);
+```
+
+The function selector is the first unnamed argument, not a second fixed
+parameter. The SDK 3.0.3 header at `ee/include/libsdr.h:29` and the retail
+varargs prologues (`0x002F5990` / `0x0034E820`) corroborate this boundary:
+`$a1` is saved and read as the first variadic word. Preserve the signed `int`
+return type; the SDK does not provide a boolean or 64-bit return contract.
+
+Replace all six two-fixed-argument declarations across the four caller units
+in both games, rather than retaining a stricter invented prototype because
+present selectors happen to be integer constants. This is a declaration-only
+repair: all 170 caller-unit functions and the three standard canaries
+(192/0,158/0,15/0) remain exact, with no body, layout, flags or SDK ASM changes.
+It does not explain the separate stack-resident core-counter matching issue.
+
