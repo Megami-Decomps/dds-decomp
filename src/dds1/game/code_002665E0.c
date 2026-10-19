@@ -1288,7 +1288,7 @@ u32 mnuAdvanceTitleStreamFromScript(void) {
 }
 
 u8 mnuIsTitleStreamIdle(void) {
-    s64 loadState;
+    s32 loadState;
 
     loadState = mnuPollTitleStreamStateLocked();
     return loadState == MNU_STREAM_LOAD_IDLE;

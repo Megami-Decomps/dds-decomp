@@ -194,7 +194,7 @@ void mdlDestroyOptionalViewerPackageWork(MnuShootingWork *work) {
 
 s32 mdlAdvanceViewerPackageTask(KwlnTask *task) {
     u32 result;
-    s64 status;
+    s32 status;
 
     status = mnuRunShootingInitCallback(D_0043891C);
     if (status == -1) {

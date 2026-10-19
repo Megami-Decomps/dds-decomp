@@ -4343,7 +4343,7 @@ u32 mnuShopMessageLeaveNoOp(void) {
 
 u32 evtMenuSetProgressFlag(MenuTerminalContext *context) {
     u32 changed;
-    s64 flagSet;
+    s32 flagSet;
 
     if (((context->type == 2) && (flagSet = mdlFlagTest(4), flagSet != 0)) &&
           (flagSet = mdlFlagTest(0x290), flagSet == 0)) {

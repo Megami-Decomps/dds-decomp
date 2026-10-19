@@ -448,7 +448,7 @@ void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
 
 /* Return whether model flag 0x902 is clear; its storyline meaning is not asserted. */
 u8 mnuShouldExcludeTerminalMenuEntry(void) {
-    s64 flagSet;
+    s32 flagSet;
 
     flagSet = mdlFlagTest(0x902);
     return flagSet == 0;

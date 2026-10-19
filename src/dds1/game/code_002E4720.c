@@ -1024,7 +1024,7 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
 void sdfDevUnlinkAndFreeState(DevState *state) {
     DevState *prev;
     DevState *next;
-    s64 interrupts;
+    s32 interrupts;
 
     interrupts = DIntr(state);
     prev = state->previous;
@@ -1053,7 +1053,7 @@ void sdfDevRecycleCompletedState(DevState *state) {
     DevWorkerEntry *worker;
     DevState *prev;
     DevState *next;
-    s64 interrupts;
+    s32 interrupts;
 
     interrupts = DIntr(state);
     prev = state->previous;

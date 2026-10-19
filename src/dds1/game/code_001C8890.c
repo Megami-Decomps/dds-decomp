@@ -3175,7 +3175,7 @@ void btlEnterTestActionState(void) {
 }
 
 void btlAdvanceUnitWhenActionGateClears(u32 unit) {
-    s64 temp_v0;
+    s32 temp_v0;
 
     temp_v0 = btlUpdateBattleModelDebugEditor();
     if (temp_v0 == 0) {

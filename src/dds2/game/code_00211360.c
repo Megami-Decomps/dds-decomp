@@ -628,7 +628,7 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
 /* Packed-effect callbacks decode the actor from the generic context word. */
 /* Normalize the scene/status/AI-record gate; the callback's second word is unused. */
 s32 btlPassesSceneAndActorRecordGate(s32 actorAddress, u32 unused) {
-    s64 result;
+    s32 result;
 
     result = btlIsSelectedActorStatusAndRecordClear((BtlUnit *)actorAddress);
     return result != 0;
@@ -896,7 +896,7 @@ s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
 
 /* Normalize the mode-zero action query to a byte boolean; preserve its native result width. */
 u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
-    s64 queryResult;
+    s32 queryResult;
 
     queryResult = btlUnitMatchesEntryCodeCondition((BtlUnit *)unitAddress, (s32)actionQuery, 0);
     return queryResult != 0;
@@ -904,7 +904,7 @@ u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
 
 /* Normalize the mode-one action query to a byte boolean; preserve its native result width. */
 u8 btlCheckUnitActionModeOne(u32 unitAddress, u32 actionQuery) {
-    s64 queryResult;
+    s32 queryResult;
 
     queryResult = btlUnitMatchesEntryCodeCondition((BtlUnit *)unitAddress, (s32)actionQuery, 1);
     return queryResult != 0;
@@ -996,7 +996,7 @@ s32 btlAnyGroup200LacksFlag1000(void) {
 
 /* Normalize entry-code condition 10 to a byte boolean. */
 u8 btlUnitPassesActionTenCheck(u32 unitAddress) {
-    s64 queryResult;
+    s32 queryResult;
 
     queryResult = btlMatchesActorEntryCodeCondition((BtlUnit *)unitAddress, 10);
     return queryResult != 0;
@@ -1120,7 +1120,7 @@ s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
 
 /* Normalize the actor's option-skill availability to a byte boolean. */
 u8 btlQueryActorOptionAvailability(u32 unitAddress) {
-    s64 result;
+    s32 result;
 
     result = btlHasAvailableOption(unitAddress);
     return result != 0;
@@ -1176,7 +1176,7 @@ s32 btlUnitHasFlag1000(s32 unitAddress) {
 }
 
 u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
-    s64 result;
+    s32 result;
 
     result = btlGetCommandUseError(unit, command);
     return result == 0;
@@ -1184,7 +1184,7 @@ u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
 
 /* Normalize the gate requiring status and entry flag 0x40 to be clear. */
 s32 btlPassesStatusEntryGate(BtlUnit *actor, u32 unused) {
-    s64 result;
+    s32 result;
 
     result = btlAreUnitStatusAndEntryFlagsClear(actor);
     return result != 0;

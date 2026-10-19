@@ -2493,7 +2493,7 @@ void btlReleaseActorModelResources(BtlUnit *object) {
 }
 
 void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
-    s64 available;
+    s32 available;
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {
@@ -2504,7 +2504,7 @@ void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
 }
 
 void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
-    s64 available;
+    s32 available;
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {
@@ -3018,7 +3018,7 @@ s32 value;
 }
 
 void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
-    s64 temp_v0;
+    s32 temp_v0;
 
     temp_v0 = btlSetActorEffectParameter(unit, mode);
     if (temp_v0 == 0) {

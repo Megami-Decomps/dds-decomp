@@ -127,7 +127,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
 }
 
 u8 mnuCanDrawMovie(void) {
-    s64 movieState;
+    s32 movieState;
 
     movieState = mnuGetMoviePlaybackMode();
     return movieState == 2;

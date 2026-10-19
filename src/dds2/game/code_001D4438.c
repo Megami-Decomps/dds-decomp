@@ -3923,7 +3923,7 @@ void btlEnterTestActionState(void) {
 }
 
 void btlAdvanceUnitWhenActionGateClears(u32 unit) {
-    s64 status;
+    s32 status;
 
     status = btlUpdateBattleModelDebugEditor();
     if (status == 0) {

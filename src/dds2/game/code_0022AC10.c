@@ -676,7 +676,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
 }
 
 u8 btlAreModelChangeTasksFinished(void) {
-    s64 taskCount;
+    s32 taskCount;
 
     taskCount = btlCountTasksByKind(0x1a);
     return taskCount == 0;
@@ -793,7 +793,7 @@ u32 btlCmdGetIndexedBattleStateValue(void) {
 }
 
 u32 btlCommandCountModelFlags(void) {
-    s64 isSet;
+    s32 isSet;
     s32 flag;
     u32 index;
     s32 count;
