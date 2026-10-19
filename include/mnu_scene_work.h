@@ -99,7 +99,7 @@ typedef struct MenuSceneWork {
     u8 pad5A8[4];
     s8 boundsFlags; /* 0x5AC */
     s8 cursorMoving; /* 0x5AD */
-    u8 pendingPhase13; /* 0x5AE: consumed when the phase-12 handoff completes */
+    s8 pendingPhase13; /* 0x5AE: consumed when the phase-12 handoff completes */
     u8 pad5AF;
 } MenuSceneWork;
 

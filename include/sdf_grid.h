@@ -19,7 +19,7 @@ typedef struct SdfGrid {
     u32 cellCount;
     u32 width;
     void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32);
-    void (*releaseCell)(u32, u32);
+    s32 (*releaseCell)(u32, u32);
     void (*onDestroy)(s32, u32);
     u16 cellWidth;
     u16 cellHeight;

@@ -40,7 +40,8 @@ enum MenuSceneState {
 typedef struct MenuSceneMetadata {
     u8 pad00[0x0C];
     s32 messageWindowResource;
-    u8 pad10[8];
+    u8 pad10[4];
+    s32 entryMessageWindowResource; /* 0x14: selected-entry message resource */
     s32 state;
     u8 pad1C[4];
     s32 messageShadeFrames;
