@@ -2253,6 +2253,36 @@ It is an Atlus-style VU0 routine, not an identified `libvu0` entry point.
 Both complete 7,328-byte functions match; no artificial instruction-count
 padding, pinned registers, or compiler-option exception is needed.
 
+### Numeric opacity and packed shade have different value lifetimes
+
+DDS1 `func_001B3FB0` and DDS2 `func_001BEBD0` draw a four-triangle selection
+trail. Keep the numerical opacity separate from its packed alpha bits and
+derive the shade immediately after acquiring the opacity:
+
+```c
+s32 opacity;
+u32 shade;
+
+/* After the preceding sprite draw, before changing the GS surface/state. */
+opacity = work->fadeCountdowns[i] & 0xFF;
+shade = (opacity >> 1) << 24;
+evtSetDrawSurfaceIndex(0x53);
+```
+
+The triangle arguments combine `shade` with their inline RGB constants.
+The signed countdown-derived value preserves retail's `sra`; unsigned or
+byte opacity leaves one `srl` difference. Reusing one variable for both
+numerical opacity and packed shade, even with the shift moved earlier,
+leaves the original two-word scheduling mismatch.
+
+The qualified ordinary/hooked trace shows why the third triangle now has
+its native Y-before-color order: the RGB constant's low ORI and the Y
+ADDIU issue at clock 54, while the dependent shade/color OR becomes ready
+at clock 55. `sched2` retains Y LUID 159 before OR LUID 160. This avoids
+the earlier ready-list tie in which the OR's three dependents beat Y's two.
+Both 808-byte functions match without precomputing an entire palette,
+changing the drawing API, or adding a false dependency.
+
 ### Geometry vertex counts define the reduced pointer loops
 
 DDS2 `func_002F8648` builds a cylinder from 32 XZ samples and 31 intervals.
