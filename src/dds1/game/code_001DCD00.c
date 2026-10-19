@@ -580,8 +580,8 @@ extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState
 void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlTask *task;
-    s32 hasFlag200;
-    s32 hasFlag400;
+    s8 hasFlag200;
+    s8 hasFlag400;
     u32 i;
     u32 count;
 
@@ -1141,8 +1141,8 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (action->task->unit->status.flags & 0x400) {
         if (work->cameraPoseBlendHook != 0) {
-            s32 hasFlag200 = 0;
-            s32 hasFlag400 = 0;
+            s8 hasFlag200 = 0;
+            s8 hasFlag400 = 0;
             u32 i;
             u32 count = btlGetIndexListCount(action->task->indexWork.indices);
             for (i = 0; i < count; i++) {

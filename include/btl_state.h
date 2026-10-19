@@ -324,7 +324,7 @@ typedef struct BtlState {
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x61C: nonzero handles action-camera setup. */
     u8 pad620[4];
     u32 (*commandSoundDelay)(s32); /* 0x624: action-specific sound delay. */
-    s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
+    u8 (*cameraPoseBlendHook)(BtlLinkedCommand *, s8, s8); /* 0x628: boolean override with side-presence flags. */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x630: linked-list flags 0x200 / 0x400. */
     u8 pad634[4];
