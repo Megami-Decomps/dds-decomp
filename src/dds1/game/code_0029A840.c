@@ -568,7 +568,129 @@ void effResetModelMotionAndOwnerFlag(EffResourceOwner *work) {
     work->unk04 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029B818);
+extern void effGetWorldVector(u32);
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *, s32);
+extern void sdfVuMatrixToQuaternion(f32 [4][4]);
+extern void btlDebugDrawSegment(f32 *, f32 *, u32);
+extern void btlDebugDrawPoint(f32 *);
+extern f32 D_0037E120[4];
+extern f32 D_0037E110[4];
+extern f32 D_0037E100[4];
+extern f32 D_003B2AC0[4];
+
+void func_0029B818(EffResourceOwner *owner) {
+    f32 matrix[4][4];
+    f32 position[4];
+    f32 endpoint[4];
+    f32 rotation[4];
+    f32 scale;
+    f32 distanceScale = 1.0f;
+    f32 frameStep = owner->frameStep;
+    f32 distance;
+    s16 targetKind;
+    u32 count;
+    SdfModel *model;
+    FileQueue **queue;
+    u32 index;
+    u32 sampledColor;
+    u32 color;
+    s32 frame;
+    s32 limit;
+    u32 broadcastColor;
+    u32 byteUnit;
+
+    mdlLoadTertiaryVectorVU(owner->model);
+    VU0_GET_VF10_X(scale);
+    if (btlIsRuntimeAllocated() != 0 &&
+        (owner->alphaTrack.surfaceIndex & 0xFF0000) != 0) {
+        effGetWorldVector(owner->alphaTrack.surfaceIndex >> 16);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        targetKind = owner->alphaTrack.surfaceIndex >> 16;
+        if (targetKind == 5) {
+            position[1] -= 400.0f;
+        }
+        mdlLoadPrimaryVectorVU(owner->model);
+        VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+        sdfVuBuildLookAtBasis(position, endpoint, D_0037E120);
+        sdfInvertRigidVuTransform();
+        VU0_LOAD_VF(vf10, position);
+        VU0_LOAD_VF(vf11, endpoint);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        distanceScale = distance / 800.0f;
+        distanceScale /= scale;
+        VU0_SET_ONES_XYZ(vf10);
+        VU0_SCALAR_OP(distanceScale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALE_MATRIX_ROWS(vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf28, owner->model->inner->matrix[0]);
+        VU0_STORE_VF_UNCLOBBERED(vf29, owner->model->inner->matrix[1]);
+        VU0_STORE_VF_UNCLOBBERED(vf30, owner->model->inner->matrix[2]);
+    }
+    owner->model->first->frameStep = frameStep;
+    mdlProcessContextNodesAndTransforms(owner->model, D_00325828);
+    frame = owner->unk04;
+    count = owner->count;
+    limit = owner->plainEntry;
+    model = owner->model->inner;
+    queue = owner->entries;
+    if (frame < limit || limit == 0) {
+        if (owner->queueAllocation != NULL) {
+            sampledColor = effSampleColorAlphaTracks(&owner->colorTrack,
+                &owner->alphaTrack, owner->unk04, owner->plainEntry);
+            broadcastColor = mdlGetBroadcastValue(owner->model);
+            byteUnit = 0x3C000000;
+            eeUnpackRGBAWord(broadcastColor, byteUnit);
+            VU0_MOVE_VF(vf11, vf10);
+            eeUnpackRGBAWord(sampledColor, byteUnit);
+            VU0_MUL(vf10, vf10, vf11);
+            color = eePackRGBAWord(128.0f);
+            for (index = 0; index < count; index++, queue++) {
+                sdfLoadMapRecordLookAtBasis(model, index);
+                VU0_STORE_VF_UNCLOBBERED(vf31, position);
+                if (scale != 0.0f) {
+                    VU0_SET_ONES_XYZ(vf10);
+                    VU0_SCALE_VF(vf10, 1.0f / scale);
+                    VU0_SCALE_MATRIX_ROWS(vf10);
+                }
+                VU0_STORE_MATRIX(matrix);
+                fileQueueSetPosition(*queue, position);
+                sdfVuMatrixToQuaternion(matrix);
+                VU0_LOAD_VF(vf11, D_003B2AC0);
+                effMiscQuatMultiplyVU();
+                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                fileQueueSetRotation(*queue, rotation);
+                fileQueueSetScale(*queue, scale * distanceScale);
+                fileQueueSetColor(*queue, color);
+                fileQueueUpdate(*queue);
+            }
+        } else {
+            for (index = 0; index < count; index++) {
+                sdfLoadMapRecordLookAtBasis(model, index);
+                VU0_STORE_VF_UNCLOBBERED(vf31, position);
+                VU0_STORE_MATRIX(matrix);
+                VU0_LOAD_VF(vf10, D_0037E110);
+                VU0_SCALE_VF(vf10, 50.0f);
+                VU0_TRANSFORM_POINT(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+                btlDebugDrawSegment(position, endpoint, 0x80006000);
+                VU0_LOAD_MATRIX_MEMORY(matrix);
+                VU0_LOAD_VF(vf10, D_0037E120);
+                VU0_SCALE_VF(vf10, 50.0f);
+                VU0_TRANSFORM_POINT(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+                btlDebugDrawSegment(position, endpoint, 0x80600000);
+                VU0_LOAD_MATRIX_MEMORY(matrix);
+                VU0_LOAD_VF(vf10, D_0037E100);
+                VU0_SCALE_VF(vf10, 50.0f);
+                VU0_TRANSFORM_POINT(vf10, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, endpoint);
+                btlDebugDrawSegment(position, endpoint, 0x80000060);
+                btlDebugDrawPoint(position);
+            }
+        }
+    }
+    owner->unk04++;
+}
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
 void effLoadModelPrimaryVector(EffResourceOwner *work, void *vec) {
