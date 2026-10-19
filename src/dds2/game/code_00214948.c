@@ -3368,7 +3368,230 @@ void btlSetSkillTaskResults(ActionStateLink *task, s32 flags, s32 otherFlags, s3
     task->indexWork.resultKind = btlGetCommandResultKindFromFlags(flags, otherFlags, skillId);
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021B828);
+void func_0021B828(ActionStateLink *task) {
+    BtlUnit *guards[2];
+    BtlState *battle = btlGetRuntime();
+    BattleGuardState *effect = &battle->effect->guard;
+    BtlIndexList *targets;
+    BtlUnit *unit;
+    BtlOperandGroup *group;
+    BtlOperandEntry *entry;
+    u32 guardCount;
+    u32 skillId;
+    u32 targetCount;
+    u32 i;
+    u32 j;
+    u32 affinity;
+    s32 bossIndex;
+    s32 unitId;
+    s32 hpDelta;
+    s32 mpDelta;
+    s32 flags;
+    s32 resultKind;
+
+    effect->guardHandled = 0;
+    effect->alternateTarget = 0;
+    effect->enemyCommand = 0;
+    effect->guard = NULL;
+    if (!(task->pendingFlags & 8)) {
+        return;
+    }
+    skillId = 0;
+    if (task->indexWork.phase != 1) {
+        if (task->indexWork.phase == 4) {
+            skillId = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
+        } else {
+            skillId = task->indexWork.skillId;
+        }
+    }
+    if (skillId >= 0x2A0) {
+        return;
+    }
+    if (task->unit->status.flags & 0x400) {
+        if (task->indexWork.slot == 4) {
+            effect->enemyCommand = 1;
+        }
+        return;
+    }
+    bossIndex = -1;
+    if (!(task->unit->status.flags & 0x200)) {
+        return;
+    }
+    targets = task->indexWork.indices;
+    targetCount = btlGetIndexListCount(targets);
+    for (i = 0; i < targetCount; i++) {
+        unit = btlGetIndexListEntry(targets, i);
+        if (unit->status.flags & 0x400) {
+            if (unit->partyRecord.unitId == 0x110) {
+                bossIndex = i;
+            } else {
+                effect->alternateTarget = 1;
+            }
+        }
+    }
+    if (bossIndex != -1 && effect->alternateTarget == 0) {
+        switch (btlGetActorIndexedSignedValue(task->unit, skillId)) {
+        case 0: mdlFlagSet(0xBE0); break;
+        case 1: mdlFlagSet(0xBE1); break;
+        case 2: mdlFlagSet(0xBE2); break;
+        case 3: mdlFlagSet(0xBE3); break;
+        case 4: mdlFlagSet(0xBE4); break;
+        case 5: mdlFlagSet(0xBE5); break;
+        case 6: mdlFlagSet(0xBE6); break;
+        case 7: mdlFlagSet(0xBE7); break;
+        }
+    }
+    if (bossIndex == -1 && effect->alternateTarget == 0) {
+        return;
+    }
+    guards[0] = NULL;
+    guards[1] = NULL;
+    guardCount = 0;
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        if (!(unit->status.flags & 1)) {
+            continue;
+        }
+        if (!(unit->status.flags & 0x400)) {
+            continue;
+        }
+        if (unit->status.flags & 0xE0) {
+            continue;
+        }
+        if (guardCount >= 2) {
+            continue;
+        }
+        unitId = unit->partyRecord.unitId;
+        if (unitId >= 0x113) {
+            continue;
+        }
+        if (unitId < 0x111) {
+            continue;
+        }
+        guards[guardCount++] = unit;
+    }
+    if (guardCount == 0 || (guards[0] == NULL && guards[1] == NULL)) {
+        return;
+    }
+    if (bossIndex != -1 && effect->alternateTarget == 0) {
+        group = &task->indexWork.groups[bossIndex];
+        hpDelta = 0;
+        mpDelta = 0;
+        if (group->reflected == 0) {
+            for (j = 0; j < group->count; j++) {
+                if (group->entries[j].hpDelta < 0 || group->entries[j].mpDelta < 0) {
+                    hpDelta += group->entries[j].hpDelta;
+                    mpDelta += group->entries[j].mpDelta;
+                    group->entries[j].addedStatus = 0;
+                    group->entries[j].removedStatus = 0;
+                    group->entries[j].entryChangeMask = 0;
+                    group->entries[j].entryChange = 0;
+                    group->entries[j].entrySelection = 0;
+                    group->entries[j].hpRecovery = 0;
+                    group->entries[j].mpRecovery = 0;
+                    group->entries[j].flags = 0;
+                }
+            }
+        }
+        if (hpDelta != 0 || mpDelta != 0) {
+            /* Native s18 carries each target, candidate and chosen guard. */
+            unit = guards[btlRollAiBucket() % guardCount];
+            targets->entries[bossIndex] = unit;
+            affinity = btlGetAdjustedSlotAffinity(unit, skillId,
+                btlGetActorIndexedSignedValue(task->unit, skillId));
+            if (affinity & 0x10000) {
+                group->kind = 0x10000;
+                group->parameter = 1;
+                group->reactionCode = -1;
+                for (j = 0; j < group->count; j++) {
+                    group->entries[j].hpDelta = 0;
+                    group->entries[j].mpDelta = 0;
+                }
+                btlSetSkillTaskResults(task, 0x10000, 1, skillId);
+                btlBossDebugPrintf("btl:VURITO guard [MUKOU][%d]\n", task->indexWork.adjustedValue);
+            } else if (affinity & 0x40000) {
+                group->kind = 0x40000;
+                group->parameter = 1;
+                group->reactionCode = -1;
+                for (j = 0; j < group->count; j++) {
+                    group->entries[j].hpDelta = -group->entries[j].hpDelta;
+                    group->entries[j].mpDelta = -group->entries[j].mpDelta;
+                }
+                btlSetSkillTaskResults(task, 0x40000, 1, skillId);
+                btlBossDebugPrintf("btl:VURITO guard [KYUSYU][%d]\n", task->indexWork.adjustedValue);
+            } else if (affinity & 0x80000000) {
+                group->kind = 1;
+                group->parameter = 4;
+                btlSetSkillTaskResults(task, 1, 4, skillId);
+                btlBossDebugPrintf("btl:VURITO guard [WK][%d]\n", task->indexWork.adjustedValue);
+            } else {
+                resultKind = group->parameter;
+                group->kind = 1;
+                if (resultKind != 2) {
+                    group->parameter = 1;
+                    resultKind = 1;
+                }
+                btlSetSkillTaskResults(task, 1, resultKind, skillId);
+                btlBossDebugPrintf("btl:VURITO guard [NORMAL or CRITICAL][%d]\n", task->indexWork.adjustedValue);
+            }
+            mdlFlagSet(0x832);
+            effect->guardHandled = 1;
+            effect->guard = unit;
+            group->inactive = btlIsUnitDefeatTriggeredByValueDelta(unit, hpDelta) != 0;
+        }
+    } else {
+        group = task->indexWork.groups;
+        targetCount = btlGetIndexListCount(targets);
+        hpDelta = 0;
+        mpDelta = 0;
+        flags = 0;
+        resultKind = 0;
+        for (i = 0; i < targetCount; i++, group++) {
+            for (j = 0; j < group->count; j++) {
+                if (group->entries[j].hpDelta < 0 || group->entries[j].mpDelta < 0) {
+                    hpDelta += group->entries[j].hpDelta;
+                    mpDelta += group->entries[j].mpDelta;
+                }
+            }
+            /* 21BE50 compares the old index before its delay-slot increment. */
+            if (i != bossIndex) {
+                flags |= group->kind;
+                resultKind |= group->parameter;
+            }
+        }
+        if (hpDelta != 0 || mpDelta != 0) {
+            if (bossIndex != -1) {
+                BtlOperandGroup *groups = task->indexWork.groups;
+
+                if (groups[bossIndex].reflected == 0) {
+                    for (i = bossIndex; i < targetCount - 1; i++) {
+                        memcpy(&groups[i], &groups[i + 1], sizeof(BtlOperandGroup));
+                        targets->entries[i] = targets->entries[i + 1];
+                    }
+                    targets->count--;
+                    effect->guardHandled = 1;
+                    if (flags != 0 && resultKind != 0) {
+                        btlSetSkillTaskResults(task, flags, resultKind, skillId);
+                    }
+                    btlBossDebugPrintf("btl:VURITO guard [ALL][%d]\n", task->indexWork.adjustedValue);
+                }
+            } else {
+                s32 type = datCommandRecords[skillId].targetType;
+
+                switch (type) {
+                case 1:
+                case 2:
+                    effect->guardHandled = 1;
+                    break;
+                }
+            }
+        }
+    }
+    if (effect->guardHandled != 0) {
+        for (i = 0; i < guardCount; i++) {
+            guards[i]->effectLink.flags |= 0x40;
+        }
+    }
+}
 
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *, BtlUnit *);

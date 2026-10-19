@@ -5342,7 +5342,7 @@ BtlUnit *btlFindUnitByModeFlagged(s32 unitId) {
 BtlIndexList *btlAllocateIndexList(s32 capacity) {
     BtlIndexList *list = sdfAllocAndClearQuadwords(capacity * 4 + 12);
     list->capacity = capacity;
-    list->entries = (void **)(list + 1);
+    list->entries = (struct BtlUnit **)(list + 1);
     list->count = 0;
     return list;
 }
