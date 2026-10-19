@@ -2214,6 +2214,45 @@ constants, as in its DDS2 counterpart. Compare the actual `savings`, movement
 and `not worth while` records in `09.loop`. Do not pad the loop with unused
 work to cross a threshold, or infer a per-file option from one missed hoist.
 
+### A surface-base accessor preserves the complete invariant address
+
+DDS1 `func_0011ECC8` and DDS2 `func_00120B88` obtain the display-surface
+array base through an inline accessor, then select the current row:
+
+```c
+static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
+    return kwlnDrawSurfaces;
+}
+
+static inline void fldAppendToDisplaySurface(SdfListHead *list) {
+    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[fldDisplayRow];
+    surface->append(surface, list);
+}
+```
+
+This is a base-address contract, not a cached row: the row is read again at
+each dispatch. In the qualified ordinary/hooked compiler trace, expansion
+materializes the base independently of the index. `09.loop` moves the
+complete HIGH/LO_SUM pair out of the outer loop and retains a `REG_EQUAL`
+note identifying `kwlnDrawSurfaces`. Reload can therefore rematerialize the
+whole address at each callback, using `$2` for both halves at the first
+dispatch and `$6` for both halves at the second.
+
+Direct indexing instead moves only HIGH. Its local LOW quantity conflicts
+with the callback quantity's padded live range and gets a separate register.
+The complete-base form also changes the earlier initialization schedule:
+HIGH issues at clock 6 and LOW at clock 7, so the maximum-bound copy issues
+at clock 7 before `pass = 0` at clock 8. Those pre-reload address operations
+explain the ordering even though reload later rematerializes the address.
+
+The four projected endpoints also use the shared branch-free COP2
+`VU0_APPLY_VIEWPORT` routine: component-wise scale followed by offset.
+Grouping that actual VU0 operation reduces the inner loop's pass-two census
+from 235 to 231 RTL instructions and permits the native invariant motion.
+It is an Atlus-style VU0 routine, not an identified `libvu0` entry point.
+Both complete 7,328-byte functions match; no artificial instruction-count
+padding, pinned registers, or compiler-option exception is needed.
+
 ### Geometry vertex counts define the reduced pointer loops
 
 DDS2 `func_002F8648` builds a cylinder from 32 XZ samples and 31 intervals.

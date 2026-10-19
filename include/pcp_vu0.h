@@ -414,6 +414,12 @@ typedef struct {
     ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 #define VU0_MUL(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+
+/* vu0 routine: apply component-wise viewport scale and offset. */
+#define VU0_APPLY_VIEWPORT(dst, src, scale, offset) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw " #dst ", " #src ", " #scale "\n\t" \
+    "vadd.xyzw " #dst ", " #dst ", " #offset "\n\t.set reorder")
+
 /* Convert xyzw floats to signed 28.4 fixed-point integers (vftoi4.xyzw). */
 #define VU0_FTOI4(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvftoi4.xyzw " #dst ", " #src "\n\t.set reorder")

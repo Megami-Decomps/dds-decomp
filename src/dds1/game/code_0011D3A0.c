@@ -791,9 +791,703 @@ void fldSubmitVisibleWorldBackground(void) {
     }
 }
 
+#include "fld_shadow_strip.h"
+#include "fld_area_work.h"
+#include "pcp_vu0.h"
+#include "mdl.h"
+#include "eff_object.h"
+#include "evt_unit.h"
+#include "sdf_primitive.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_list.h"
+#include "sdf.h"
+
+/* All declarations below refer to the existing primary runtime owners. */
+extern EvtUnit *effObjGetTransitionWork(EffWorldNode *);
+extern void *dds3GetWorldObject(void);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
+extern void fldCalcTrianglePlane(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void fldSubmitGsRect(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void fldSubmitPrimaryFramePacket(void);
+extern void fldSubmitAlternateFramePacket(void);
+extern void fldPrepareProjectionMatrix(void);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern u32 fldDisplayRow;
+extern u32 D_003BACEC;
+extern s32 D_003BAB24, D_003BAB28, D_003BAB2C, D_003BAB30;
+extern f32 D_003C2E90[4];
+extern f32 D_003C2EA0[50][3][4];
+extern s8 D_003C3800[26][26][2];
+extern f32 D_003C3D50[26][26][4];
+extern f32 D_003C6790[26][26][4];
+extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
+extern SdfLightSources D_00324770;
+
+extern f32 D_00330670[16];
+extern f32 D_003246B0[16];
+
+extern FldShadowStrip D_0032C880;
+extern FldShadowStrip D_0032C8C0;
+extern const f32 D_0039FA28[18];
+
+/* Packed XYZ geometry, followed by triples of signed vertex indices. */
+extern f32 D_0032B0C0[][3], D_0032B438[][3], D_0032B528[][3];
+extern f32 D_0032B640[][3], D_0032B778[][3], D_0032B820[][3];
+extern f32 D_0032B938[][3], D_0032BA70[][3], D_0032BB88[][3];
+extern f32 D_0032BC88[][3], D_0032BD78[][3], D_0032BE90[][3];
+extern f32 D_0032BF90[][3], D_0032C080[][3], D_0032C180[][3];
+extern f32 D_0032C280[][3], D_0032C380[][3], D_0032C480[][3];
+extern f32 D_0032C598[][3], D_0032C6B0[][3];
+extern s32 D_0032B1F8[][3], D_0032B498[][3], D_0032B598[][3];
+extern s32 D_0032B6B8[][3], D_0032B7C0[][3], D_0032B890[][3];
+extern s32 D_0032B9B0[][3], D_0032BAE0[][3], D_0032BBF8[][3];
+extern s32 D_0032BCE8[][3], D_0032BDE8[][3], D_0032BF00[][3];
+extern s32 D_0032BFF0[][3], D_0032C0F0[][3], D_0032C1F0[][3];
+extern s32 D_0032C2F0[][3], D_0032C3F0[][3], D_0032C4F0[][3];
+extern s32 D_0032C608[][3], D_0032C750[][3];
+
+
+/* Submits the accumulated strip request and starts an empty one. */
+static inline void fldFlushShadowStrip(SdfListHead *list, SdfPrimitiveRequest *request) {
+    sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(request));
+    request->stripWordCount = 0;
+    request->vertexCount = 0;
+}
+
+static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
+    return kwlnDrawSurfaces;
+}
+
+/* Appends a finished packet list to the active display surface. */
+static inline void fldAppendToDisplaySurface(SdfListHead *list) {
+    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[fldDisplayRow];
+
+    surface->append(surface, list);
+}
+
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011ECC8);
+void func_0011ECC8(EffWorldNode *object) {
+    f32 anchorPosition[4];
+    f32 edgeStart[4];
+    f32 edgeEnd[4];
+    f32 extrudedEnd[4];
+    f32 extrudedStart[4];
+    f32 projectedStart[4];
+    f32 projectedEnd[4];
+    f32 projectedExtrudedEnd[4];
+    f32 projectedExtrudedStart[4];
+    f32 firstVertex[4];
+    f32 secondVertex[4];
+    f32 thirdVertex[4];
+    f32 extrusion[4];
+    f32 slotExtrusion[18][4];
+    f32 viewDirection[4];
+    SdfPrimitiveRequest quadRequest;
+    /* Native buffer spans sp+0x230..0x630 in both twins. The two-word
+     * quad strip flushes at eight quads, before this sixteen-quad capacity. */
+    f32 quadVertices[16 * 4][4];
+    SdfPrimitiveRequest triangleRequest;
+    f32 triangleVertices[16 * 3][4];
+    FldShadowStrip triangleStrip;
+    FldShadowStrip quadStrip;
+    f32 extrusionLengths[18];
+    /* The plane workspace occupies sp+0xA30..0xA70 in both twins. */
+    f32 planeVertices[4][4];
+    f32 plane[4];
+    s32 slot;
+    SdfModel *model;
+    ObjBase *base;
+    s32 vertexCount;
+    EffectObjectData *data;
+    EvtUnit *transition;
+    EffWorldNode *target;
+    SdfDrawNode *drawNode;
+    f32 (*vertices)[3];
+    s32 (*triangles)[3];
+    s32 *triangle;
+    s32 triangleCount;
+    s32 face;
+    s32 first;
+    s32 second;
+    s32 minimum;
+    s32 maximum;
+    s32 reversed;
+    s32 pass;
+    s32 i;
+    s32 j;
+    s32 edgeFrom;
+    s32 alpha;
+    SdfListHead *quadList;
+    SdfListHead *triangleList;
+    f32 length = 300.0f;
+    f32 opacity;
+    f32 horizontalDistance;
+    f32 verticalDistance;
+    f32 facing;
+    f32 minimumX;
+    f32 maximumX;
+    f32 minimumY;
+    f32 maximumY;
+
+    memset(anchorPosition, 0, sizeof(anchorPosition));
+    anchorPosition[3] = 1.0f;
+    memset(edgeStart, 0, sizeof(edgeStart));
+    edgeStart[3] = 1.0f;
+    memset(edgeEnd, 0, sizeof(edgeEnd));
+    edgeEnd[3] = 1.0f;
+    memset(extrudedEnd, 0, sizeof(extrudedEnd));
+    extrudedEnd[3] = 1.0f;
+    memset(extrudedStart, 0, sizeof(extrudedStart));
+    extrudedStart[3] = 1.0f;
+    memset(firstVertex, 0, sizeof(firstVertex));
+    firstVertex[3] = 1.0f;
+    memset(secondVertex, 0, sizeof(secondVertex));
+    secondVertex[3] = 1.0f;
+    memset(thirdVertex, 0, sizeof(thirdVertex));
+    thirdVertex[3] = 1.0f;
+    memset(viewDirection, 0, sizeof(viewDirection));
+    viewDirection[3] = 1.0f;
+    memcpy(extrusionLengths, D_0039FA28, sizeof(extrusionLengths));
+    triangleStrip = D_0032C8C0;
+    quadStrip = D_0032C880;
+    opacity = 100.0f;
+    base = dds3GetObjectOwnedHandle(object);
+    model = ((MdlCtx *)dds3GetObjectBaseResourceHandle(object))->inner;
+    if (dds3TestObjectFlags(object, 0x4000)) {
+        transition = effObjGetTransitionWork(object);
+        D_003BAB28 = transition->shadowLevel;
+        D_003BAB2C = 1;
+    } else if (D_003BAB2C == 1) {
+        D_003BAB28 = 16;
+        D_003BAB2C = 0;
+    }
+    firstVertex[0] = 0.0f;
+    firstVertex[1] = 0.0f;
+    firstVertex[2] = 0.0f;
+    firstVertex[3] = 1.0f;
+    secondVertex[0] = 0.0f;
+    secondVertex[1] = 0.0f;
+    secondVertex[2] = 0.0f;
+    secondVertex[3] = 1.0f;
+    fldSelectDisplayBuffer(0x25);
+    if (fldAreaState.area >= 500) {
+        transition = effObjGetTransitionWork(object);
+        if (transition != NULL) {
+            if (transition->flags & 0x40000) {
+                D_003C2E90[0] = transition->vec10[0];
+                D_003C2E90[1] = 2.0f;
+                D_003C2E90[2] = transition->vec10[2];
+                length = 200.0f;
+            } else {
+                D_003C2E90[0] = D_00324770[0][1][0];
+                D_003C2E90[1] = 2.0f;
+                D_003C2E90[2] = D_00324770[0][1][2];
+            }
+        }
+    } else {
+        data = object->data;
+        if (data->activeId != -1) {
+            if (D_003BAB30 == 0) {
+                if (D_003BAB28 > 20) {
+                    D_003BAB28 -= 2;
+                } else {
+                    D_003BAB30 = 1;
+                    D_003BAB28 = 8;
+                }
+                length = 200.0f;
+            } else {
+                target = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), data->activeId, 9);
+                transition = effObjGetTransitionWork(object);
+                if (sdfLoadMapRecordPositionVector(transition->owner->inner, 0)) {
+                    VU0_STORE_VF_UNCLOBBERED(vf10, anchorPosition);
+                    D_003C2E90[0] = anchorPosition[0] - target->inner->position[0];
+                    D_003C2E90[1] = anchorPosition[1] - target->inner->position[1];
+                    D_003C2E90[2] = anchorPosition[2] - target->inner->position[2];
+                } else {
+                    D_003C2E90[0] = fldAreaState.x - target->inner->position[0];
+                    /* Retail 0x0011F134..0x0011F15C uses field Z for both Y and Z. */
+                    D_003C2E90[1] = fldAreaState.z - target->inner->position[1];
+                    D_003C2E90[2] = fldAreaState.z - target->inner->position[2];
+                }
+                horizontalDistance = fsqrtf(D_003C2E90[0] * D_003C2E90[0] + D_003C2E90[2] * D_003C2E90[2]);
+                if (D_003C2E90[1] < 0.0f) {
+                    verticalDistance = -D_003C2E90[1];
+                } else {
+                    verticalDistance = D_003C2E90[1];
+                }
+                if (verticalDistance < 10.0f) verticalDistance = 10.0f;
+                if (verticalDistance > 200.0f) verticalDistance = 200.0f;
+                verticalDistance -= 10.0f;
+                verticalDistance /= 25.0f;
+                if (horizontalDistance < 0.01f) {
+                    D_003C2E90[0] = 0.1f;
+                    D_003C2E90[1] = 2.0f;
+                    D_003C2E90[2] = 0.1f;
+                } else {
+                    D_003C2E90[0] /= horizontalDistance;
+                    D_003C2E90[1] = verticalDistance + 1.0f;
+                    D_003C2E90[2] /= horizontalDistance;
+                }
+                if (horizontalDistance < 100.0f) horizontalDistance = 100.0f;
+                if (horizontalDistance > 300.0f) horizontalDistance = 300.0f;
+                horizontalDistance -= 100.0f;
+                horizontalDistance /= 2.6f;
+                opacity = 100.0f - horizontalDistance;
+                if (D_003BAB28 < 48) D_003BAB28 += 2;
+                length = 200.0f;
+            }
+        } else if (D_003BAB30 == 0) {
+            if (fldAreaState.area < 200) {
+                D_003C2E90[0] = D_00330670[4];
+                D_003C2E90[1] = D_00330670[5];
+                D_003C2E90[2] = D_00330670[6];
+            } else {
+                D_003C2E90[0] = D_003246B0[4];
+                D_003C2E90[1] = D_003246B0[5];
+                D_003C2E90[2] = D_003246B0[6];
+            }
+            horizontalDistance = fsqrtf(D_003C2E90[0] * D_003C2E90[0] + D_003C2E90[2] * D_003C2E90[2]);
+            if (horizontalDistance < 0.01f) {
+                D_003C2E90[0] = 0.2f;
+                D_003C2E90[1] = 2.0f;
+                D_003C2E90[2] = 0.1f;
+            } else {
+                D_003C2E90[0] /= horizontalDistance;
+                D_003C2E90[1] = 2.0f;
+                D_003C2E90[2] /= horizontalDistance;
+            }
+            D_003C2E90[0] += 0.1f;
+            if (D_003BAB28 > 20) D_003BAB28 -= 2;
+            if (D_003BAB28 < 20) D_003BAB28 += 2;
+            length = 200.0f;
+        } else {
+            if (D_003BAB28 > 20) {
+                D_003BAB28 /= 3;
+            } else {
+                D_003BAB30 = 0;
+                D_003BAB28 = 6;
+            }
+            length = 200.0f;
+        }
+    }
+    D_003C2E90[3] = 1.0f;
+    VU0_LOAD_VF_PTR(vf10, D_003C2E90);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, D_003C2E90);
+    /* Retail still stores this full-length vector at11F43C..11F44C;
+     * the later per-slot geometry uses slotExtrusion instead. */
+    extrusion[0] = D_003C2E90[0] * length;
+    extrusion[1] = D_003C2E90[1] * length;
+    extrusion[2] = D_003C2E90[2] * length;
+    extrusion[3] = 1.0f;
+    VU0_LOAD_VF_PTR(vf10, D_003C2E90);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, D_003C2E90);
+    for (slot = 0; slot < base->resourceSlotCount; slot++) {
+        length = extrusionLengths[slot];
+        slotExtrusion[slot][0] = D_003C2E90[0] * length;
+        slotExtrusion[slot][1] = D_003C2E90[1] * length;
+        slotExtrusion[slot][2] = D_003C2E90[2] * length;
+        slotExtrusion[slot][3] = 1.0f;
+    }
+    viewDirection[0] = sdfViewEyeVector[0] - sdfViewTargetVector[0];
+    viewDirection[1] = sdfViewEyeVector[1] - sdfViewTargetVector[1];
+    viewDirection[2] = sdfViewEyeVector[2] - sdfViewTargetVector[2];
+    viewDirection[3] = 1.0f;
+    VU0_LOAD_VF_PTR(vf10, viewDirection);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, viewDirection);
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    fldSetGsAlphaBlendEquation(1);
+    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+
+    for (slot = 0; slot < base->resourceSlotCount; slot++) {
+        i = base->resourceSlots[slot];
+        if (i < 0) continue;
+        drawNode = ((SdfDrawNode **)model->list->buffer)[i];
+        D_003BAB24 = 0;
+        switch (slot) {
+        case 0:
+            if (!(base->resourceSlotFamily & 0xF000)) {
+                vertices = D_0032C180; triangles = D_0032C1F0;
+                triangleCount = 12; vertexCount = 9;
+            } else {
+                vertices = D_0032C080; triangles = D_0032C0F0;
+                triangleCount = 12; vertexCount = 9;
+            }
+            break;
+        case 1:
+            if (!(base->resourceSlotFamily & 0xF000)) {
+                vertices = D_0032C380; triangles = D_0032C3F0;
+                triangleCount = 12; vertexCount = 9;
+            } else {
+                vertices = D_0032C280; triangles = D_0032C2F0;
+                triangleCount = 12; vertexCount = 9;
+            }
+            break;
+        case 2:
+            if (!(base->resourceSlotFamily & 0xF000)) {
+                vertices = D_0032C598; triangles = D_0032C608;
+                triangleCount = 14; vertexCount = 9;
+            } else {
+                vertices = D_0032C480; triangles = D_0032C4F0;
+                triangleCount = 14; vertexCount = 9;
+            }
+            break;
+        case 3:
+            if (fldAreaState.area >= 500) continue;
+            vertices = D_0032B438; triangles = D_0032B498;
+            triangleCount = 12; vertexCount = 8;
+            break;
+        case 4:
+            vertices = D_0032B0C0; triangles = D_0032B1F8;
+            triangleCount = 48; vertexCount = 26;
+            break;
+        case 5:
+            vertices = D_0032B820; triangles = D_0032B890;
+            triangleCount = 14; vertexCount = 9;
+            break;
+        case 6:
+            vertices = D_0032B938; triangles = D_0032B9B0;
+            triangleCount = 16; vertexCount = 10;
+            break;
+        case 8:
+            vertices = D_0032B528; triangles = D_0032B598;
+            triangleCount = 14; vertexCount = 9;
+            break;
+        case 9:
+            vertices = D_0032B640; triangles = D_0032B6B8;
+            triangleCount = 16; vertexCount = 10;
+            break;
+        case 7:
+        case 10:
+            vertices = D_0032B778; triangles = D_0032B7C0;
+            triangleCount = 8; vertexCount = 6;
+            break;
+        case 11:
+            vertices = D_0032BD78; triangles = D_0032BDE8;
+            triangleCount = 14; vertexCount = 9;
+            break;
+        case 12:
+            vertices = D_0032BE90; triangles = D_0032BF00;
+            triangleCount = 12; vertexCount = 9;
+            break;
+        case 13:
+            vertices = D_0032BF90; triangles = D_0032BFF0;
+            triangleCount = 12; vertexCount = 8;
+            break;
+        case 14:
+            vertices = D_0032BA70; triangles = D_0032BAE0;
+            triangleCount = 14; vertexCount = 9;
+            break;
+        case 15:
+            vertices = D_0032BB88; triangles = D_0032BBF8;
+            triangleCount = 12; vertexCount = 9;
+            break;
+        case 16:
+            vertices = D_0032BC88; triangles = D_0032BCE8;
+            triangleCount = 12; vertexCount = 8;
+            break;
+        case 17:
+            vertices = D_0032C6B0; triangles = D_0032C750;
+            triangleCount = 20; vertexCount = 13;
+            break;
+        default:
+            continue;
+        }
+        for (edgeFrom = 0; edgeFrom < vertexCount; edgeFrom++) {
+            for (j = 0; j < vertexCount; j++) {
+                D_003C3800[edgeFrom][j][0] = 0;
+            }
+        }
+        for (i = 0; i < triangleCount; i++) {
+            VU0_LOAD_MATRIX(drawNode->worldMatrix);
+            triangle = triangles[i];
+            firstVertex[0] = vertices[triangle[0]][0];
+            firstVertex[1] = vertices[triangle[0]][1];
+            firstVertex[2] = vertices[triangle[0]][2];
+            VU0_LOAD_VF_PTR(vf10, firstVertex);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, firstVertex);
+            secondVertex[0] = vertices[triangle[1]][0];
+            secondVertex[1] = vertices[triangle[1]][1];
+            secondVertex[2] = vertices[triangle[1]][2];
+            VU0_LOAD_VF_PTR(vf10, secondVertex);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, secondVertex);
+            thirdVertex[0] = vertices[triangle[2]][0];
+            thirdVertex[1] = vertices[triangle[2]][1];
+            thirdVertex[2] = vertices[triangle[2]][2];
+            VU0_LOAD_VF_PTR(vf10, thirdVertex);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, thirdVertex);
+            planeVertices[0][0] = firstVertex[0];
+            planeVertices[0][1] = firstVertex[1];
+            planeVertices[0][2] = firstVertex[2];
+            planeVertices[0][3] = firstVertex[3];
+            planeVertices[1][0] = secondVertex[0];
+            planeVertices[1][1] = secondVertex[1];
+            planeVertices[1][2] = secondVertex[2];
+            planeVertices[1][3] = secondVertex[3];
+            planeVertices[2][0] = thirdVertex[0];
+            planeVertices[2][1] = thirdVertex[1];
+            planeVertices[2][2] = thirdVertex[2];
+            planeVertices[2][3] = thirdVertex[3];
+            fldCalcTrianglePlane(planeVertices[0], &plane[0], &plane[1], &plane[2], &plane[3]);
+            VU0_LOAD_VF_PTR(vf10, plane);
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF_PTR(vf11, D_003C2E90);
+            VU0_DOT_XYZ(facing, vf10, vf11);
+            if (facing < 0.0f) {
+                first = triangle[0]; second = triangle[1];
+                if (first < second) {
+                    minimum = first; maximum = second; reversed = 0;
+                } else {
+                    minimum = second; maximum = first; reversed = 1;
+                }
+                D_003C3800[minimum][maximum][0]++;
+                D_003C3800[minimum][maximum][1] = reversed;
+                if (reversed == 0) {
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], firstVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], secondVertex);
+                } else {
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], secondVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], firstVertex);
+                }
+                first = triangle[1]; second = triangle[2];
+                if (first < second) {
+                    minimum = first; maximum = second; reversed = 0;
+                } else {
+                    minimum = second; maximum = first; reversed = 1;
+                }
+                D_003C3800[minimum][maximum][0]++;
+                D_003C3800[minimum][maximum][1] = reversed;
+                if (reversed == 0) {
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], secondVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], thirdVertex);
+                } else {
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], thirdVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], secondVertex);
+                }
+                second = triangle[2]; first = triangle[0];
+                if (second < first) {
+                    minimum = second; maximum = first; reversed = 0;
+                } else {
+                    minimum = first; maximum = second; reversed = 1;
+                }
+                D_003C3800[minimum][maximum][0]++;
+                D_003C3800[minimum][maximum][1] = reversed;
+                if (reversed == 0) {
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], thirdVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], firstVertex);
+                } else {
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], firstVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], thirdVertex);
+                }
+                PCP_COPY_VECTOR_UNCLOBBERED(D_003C2EA0[D_003BAB24][0], firstVertex);
+                PCP_COPY_VECTOR_UNCLOBBERED(D_003C2EA0[D_003BAB24][1], secondVertex);
+                PCP_COPY_VECTOR_UNCLOBBERED(D_003C2EA0[D_003BAB24][2], thirdVertex);
+                D_003BAB24++;
+            } else {
+                if (fldAreaState.area >= 500) {
+                    switch (slot) {
+                    case 2: case 3: case 4: case 7:
+                    case 10: case 11: case 12: case 13:
+                    case 14: case 15: case 16: case 17:
+                        D_003C2EA0[D_003BAB24][0][0] = firstVertex[0] + slotExtrusion[slot][0];
+                        D_003C2EA0[D_003BAB24][0][1] = firstVertex[1] + slotExtrusion[slot][1];
+                        D_003C2EA0[D_003BAB24][0][2] = firstVertex[2] + slotExtrusion[slot][2];
+                        D_003C2EA0[D_003BAB24][1][0] = secondVertex[0] + slotExtrusion[slot][0];
+                        D_003C2EA0[D_003BAB24][1][1] = secondVertex[1] + slotExtrusion[slot][1];
+                        D_003C2EA0[D_003BAB24][1][2] = secondVertex[2] + slotExtrusion[slot][2];
+                        D_003C2EA0[D_003BAB24][2][0] = thirdVertex[0] + slotExtrusion[slot][0];
+                        D_003C2EA0[D_003BAB24][2][1] = thirdVertex[1] + slotExtrusion[slot][1];
+                        D_003C2EA0[D_003BAB24][2][2] = thirdVertex[2] + slotExtrusion[slot][2];
+                        D_003BAB24++;
+                        break;
+                    }
+                } else {
+                    D_003C2EA0[D_003BAB24][0][0] = firstVertex[0] + slotExtrusion[slot][0];
+                    D_003C2EA0[D_003BAB24][0][1] = firstVertex[1] + slotExtrusion[slot][1];
+                    D_003C2EA0[D_003BAB24][0][2] = firstVertex[2] + slotExtrusion[slot][2];
+                    D_003C2EA0[D_003BAB24][1][0] = secondVertex[0] + slotExtrusion[slot][0];
+                    D_003C2EA0[D_003BAB24][1][1] = secondVertex[1] + slotExtrusion[slot][1];
+                    D_003C2EA0[D_003BAB24][1][2] = secondVertex[2] + slotExtrusion[slot][2];
+                    D_003C2EA0[D_003BAB24][2][0] = thirdVertex[0] + slotExtrusion[slot][0];
+                    D_003C2EA0[D_003BAB24][2][1] = thirdVertex[1] + slotExtrusion[slot][1];
+                    D_003C2EA0[D_003BAB24][2][2] = thirdVertex[2] + slotExtrusion[slot][2];
+                    D_003BAB24++;
+                }
+            }
+        }
+        minimumX = minimumY = 4096.0f;
+        maximumX = maximumY = -4096.0f;
+        fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 3);
+        fldSubmitPrimaryFramePacket();
+        for (pass = 0; pass < 2; pass++) {
+            quadList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+            sdfInitPacketList(quadList);
+            sdfConsAppendClearPacket(quadList, NULL);
+            sdfConsAppendAssetPacket(quadList, (void *)D_003BACEC, NULL);
+            memset(&quadRequest, 0, sizeof(quadRequest));
+            quadRequest.positions = quadVertices;
+            quadRequest.strip = quadStrip.words;
+            quadRequest.stripWordCount = 0;
+            quadRequest.vertexCount = 0;
+            if (pass == 0) quadRequest.color = 0x80000000;
+            else quadRequest.color = 0;
+            triangleList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+            sdfInitPacketList(triangleList);
+            sdfConsAppendClearPacket(triangleList, NULL);
+            sdfConsAppendAssetPacket(triangleList, (void *)D_003BACEC, NULL);
+            memset(&triangleRequest, 0, sizeof(triangleRequest));
+            triangleRequest.positions = triangleVertices;
+            triangleRequest.strip = triangleStrip.words;
+            triangleRequest.stripWordCount = 0;
+            triangleRequest.vertexCount = 0;
+            if (pass == 0) triangleRequest.color = 0x80000000;
+            else triangleRequest.color = 0;
+            for (face = 0; face < D_003BAB24; face++) {
+                if (pass == 0) {
+                    f32 (*output)[4] = &triangleVertices[triangleRequest.vertexCount];
+                    PCP_COPY_VECTOR_UNCLOBBERED(output[0], D_003C2EA0[face][0]);
+                    PCP_COPY_VECTOR_UNCLOBBERED(output[1], D_003C2EA0[face][1]);
+                    PCP_COPY_VECTOR_UNCLOBBERED(output[2], D_003C2EA0[face][2]);
+                    triangleRequest.stripWordCount++;
+                    triangleRequest.vertexCount += 3;
+                } else {
+                    f32 (*output)[4] = &triangleVertices[triangleRequest.vertexCount];
+                    PCP_COPY_VECTOR_UNCLOBBERED(output[0], D_003C2EA0[face][2]);
+                    PCP_COPY_VECTOR_UNCLOBBERED(output[1], D_003C2EA0[face][1]);
+                    PCP_COPY_VECTOR_UNCLOBBERED(output[2], D_003C2EA0[face][0]);
+                    triangleRequest.stripWordCount++;
+                    triangleRequest.vertexCount += 3;
+                }
+                if (triangleRequest.stripWordCount >= 16) {
+                    fldFlushShadowStrip(triangleList, &triangleRequest);
+                }
+            }
+            if (triangleRequest.stripWordCount != 0) {
+                fldFlushShadowStrip(triangleList, &triangleRequest);
+            }
+            fldAppendToDisplaySurface(triangleList);
+            if (pass == 0) fldPrepareProjectionMatrix();
+            for (edgeFrom = 0; edgeFrom < vertexCount; edgeFrom++) {
+                for (j = 0; j < vertexCount; j++) {
+                    if (D_003C3800[edgeFrom][j][0] != 1) continue;
+                    PCP_COPY_VECTOR_UNCLOBBERED(firstVertex, D_003C3D50[edgeFrom][j]);
+                    PCP_COPY_VECTOR_UNCLOBBERED(secondVertex, D_003C6790[edgeFrom][j]);
+                    PCP_COPY_VECTOR_UNCLOBBERED(edgeStart, firstVertex);
+                    PCP_COPY_VECTOR_UNCLOBBERED(edgeEnd, secondVertex);
+                    extrudedEnd[0] = secondVertex[0] + slotExtrusion[slot][0];
+                    extrudedEnd[1] = secondVertex[1] + slotExtrusion[slot][1];
+                    extrudedEnd[2] = secondVertex[2] + slotExtrusion[slot][2];
+                    extrudedStart[0] = firstVertex[0] + slotExtrusion[slot][0];
+                    extrudedStart[1] = firstVertex[1] + slotExtrusion[slot][1];
+                    extrudedStart[2] = firstVertex[2] + slotExtrusion[slot][2];
+                    if (pass == 0) {
+                        VU0_LOAD_VF_PTR(vf10, edgeStart);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedStart);
+                        if (projectedStart[0] < minimumX) minimumX = projectedStart[0];
+                        else if (projectedStart[0] > maximumX) maximumX = projectedStart[0];
+                        if (projectedStart[1] < minimumY) minimumY = projectedStart[1];
+                        else if (projectedStart[1] > maximumY) maximumY = projectedStart[1];
+                        VU0_LOAD_VF_PTR(vf10, edgeEnd);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedEnd);
+                        if (projectedEnd[0] < minimumX) minimumX = projectedEnd[0];
+                        else if (projectedEnd[0] > maximumX) maximumX = projectedEnd[0];
+                        if (projectedEnd[1] < minimumY) minimumY = projectedEnd[1];
+                        else if (projectedEnd[1] > maximumY) maximumY = projectedEnd[1];
+                        VU0_LOAD_VF_PTR(vf10, extrudedEnd);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedExtrudedEnd);
+                        if (projectedExtrudedEnd[0] < minimumX) minimumX = projectedExtrudedEnd[0];
+                        else if (projectedExtrudedEnd[0] > maximumX) maximumX = projectedExtrudedEnd[0];
+                        if (projectedExtrudedEnd[1] < minimumY) minimumY = projectedExtrudedEnd[1];
+                        else if (projectedExtrudedEnd[1] > maximumY) maximumY = projectedExtrudedEnd[1];
+                        VU0_LOAD_VF_PTR(vf10, extrudedStart);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_PERSPECTIVE_DIVIDE_VF10();
+                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, projectedExtrudedStart);
+                        if (projectedExtrudedStart[0] < minimumX) minimumX = projectedExtrudedStart[0];
+                        else if (projectedExtrudedStart[0] > maximumX) maximumX = projectedExtrudedStart[0];
+                        if (projectedExtrudedStart[1] < minimumY) minimumY = projectedExtrudedStart[1];
+                        else if (projectedExtrudedStart[1] > maximumY) maximumY = projectedExtrudedStart[1];
+                    }
+                    {
+                        if (D_003C3800[edgeFrom][j][1]) {
+                            if (pass == 0) {
+                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], edgeEnd);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], extrudedStart);
+                                quadRequest.stripWordCount += 2;
+                                quadRequest.vertexCount += 4;
+                            } else {
+                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], extrudedStart);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], edgeEnd);
+                                quadRequest.stripWordCount += 2;
+                                quadRequest.vertexCount += 4;
+                            }
+                        } else {
+                            if (pass == 0) {
+                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], extrudedStart);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], edgeEnd);
+                                quadRequest.stripWordCount += 2;
+                                quadRequest.vertexCount += 4;
+                            } else {
+                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], edgeEnd);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
+                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], extrudedStart);
+                                quadRequest.stripWordCount += 2;
+                                quadRequest.vertexCount += 4;
+                            }
+                        }
+                    }
+                    if (quadRequest.stripWordCount >= 15) {
+                        fldFlushShadowStrip(quadList, &quadRequest);
+                    }
+                }
+            }
+            if (quadRequest.stripWordCount != 0) {
+                fldFlushShadowStrip(quadList, &quadRequest);
+            }
+            fldAppendToDisplaySurface(quadList);
+        }
+        fldSubmitAlternateFramePacket();
+        fldSubmitFrameQuad(1, 1, 0x80, 1, 1, 1, 1, 3);
+        fldSetGsAlphaBlendEquation(0);
+        alpha = (s32)((f32)D_003BAB28 * opacity / 100.0f);
+        if (alpha < 0) alpha = 0;
+        fldSubmitGsRect((s32)(minimumX * 16.0f), (s32)(minimumY * 16.0f),
+                        (s32)(maximumX * 16.0f), (s32)(maximumY * 16.0f),
+                        0, 0, 0, alpha);
+    }
+    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
+    fldSetGsAlphaBlendEquation(0);
+}
 
 extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032E5C8[];
 extern FldCamRow fldCameraFollowRows[];
