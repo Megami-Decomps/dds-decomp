@@ -16968,13 +16968,19 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_00306030);
 
-extern void func_00306030(u32, u32, u32, u32, u32, const u32 *, const u32 *, u32,
-                          f32, u32, u32, u32, u32, u32);
+/* Geometry is signed; the native packet serializer converts depth with a
+ * logical shift. Texture is a resource pointer and surfaceId a dispatch index. */
+extern void func_00306030(s32 x, s32 y, s32 depth, s32 width, s32 height,
+                          const u32 *textureCoordinates, const u32 *cornerColors,
+                          u32 flipFlags, f32 rotation, u32 blendKind, u32 textureMode,
+                          s32 aspectMode, SdfTex *texture, u32 surfaceId);
 
-void itfDrawRotatedTexturedRect(u32 a, u32 b, u32 c, u32 d, u32 e,
-                   const u32 *textureCoordinates, const u32 *cornerColors, u32 h,
-                   f32 rotation, u32 x, u32 y, u32 width, u32 height) {
-    func_00306030(a, b, c, d, e, textureCoordinates, cornerColors, h, rotation, x, y, 1, width, height);
+void itfDrawRotatedTexturedRect(s32 x, s32 y, s32 depth, s32 width, s32 height,
+                               const u32 *textureCoordinates, const u32 *cornerColors,
+                               u32 flipFlags, f32 rotation, u32 blendKind, u32 textureMode,
+                               SdfTex *texture, u32 surfaceId) {
+    func_00306030(x, y, depth, width, height, textureCoordinates, cornerColors,
+                  flipFlags, rotation, blendKind, textureMode, 1, texture, surfaceId);
 }
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
