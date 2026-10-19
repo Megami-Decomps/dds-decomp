@@ -1,4 +1,5 @@
 #include "mdl_dev_slot_color.h"
+#include "sdf_model_packet_callback.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
@@ -578,7 +579,6 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
     }
 }
 
-extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 
 /* Grow the afterimage list, advance each model, then apply its age and tint. */
 void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
@@ -622,7 +622,7 @@ void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
         VU0_LOAD_VF(vf12, tint);
         color = mdlPackDevSlotColor(remaining - 1, 128.0f);
         model->color = color;
-        sdfModelBuildNodeResourcePackets(surfaces, model);
+        sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, model);
         slot = slot->next;
     }
 }
@@ -700,7 +700,6 @@ void mdlDestroyContext(MdlCtx *ctx) {
 
 struct SdfPoolNode;
 extern void mdlUpdateDevSlotTransforms(MdlCtx *, struct SdfPoolNode **);
-extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
@@ -723,7 +722,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    sdfModelBuildNodeResourcePackets(surfaces, inner);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -808,7 +807,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    sdfModelBuildNodeResourcePackets(surfaces, inner);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }

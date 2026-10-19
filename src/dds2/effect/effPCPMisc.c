@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_packet_callback.h"
 #include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_spawn_range_event_row.h"
@@ -4864,7 +4865,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
-extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **table, SdfModel *model);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
 void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
@@ -4913,7 +4913,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             VU0_LOAD_VF(vf10, vec);
             effPcpCaptureNodeVectors(root);
             sdfModelUpdateCurrentFrameTransforms(model);
-            sdfModelBuildNodeResourcePackets(D_00380828, model);
+            sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380828, model);
         }
     }
     work->frame++;

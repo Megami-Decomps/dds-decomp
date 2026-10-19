@@ -1,4 +1,5 @@
 #include "eff_block128.h"
+#include "sdf_model_packet_callback.h"
 #include "eff_editor_menu.h"
 #include "eff_surface_grid_node.h"
 #include "eff_surface_node.h"
@@ -412,7 +413,6 @@ extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
 
 
 extern struct SdfPoolNode *D_00380828[4];
-extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, struct SdfModel *);
 
 
 typedef struct EffectObjectFlag {
@@ -12358,7 +12358,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
                 sdfModelUpdateCurrentFrameTransforms(model);
-                sdfModelBuildNodeResourcePackets(D_00380828, model);
+                sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380828, model);
             }
         } else {
             fileReadRecordSecondVector((u8 *)record, rotation);
@@ -12400,7 +12400,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
                 sdfModelUpdateCurrentFrameTransforms(model);
-                sdfModelBuildNodeResourcePackets(D_00380828, model);
+                sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380828, model);
             }
         }
         break;
@@ -12800,7 +12800,8 @@ void func_002FB998(EffSharedEffectWork *work) {
     } else {
         ((SdfModel *)work->resource->deviceSlot)->lighting = NULL;
     }
-    sdfModelBuildNodeResourcePackets(D_00380788[8], (SdfModel *)work->resource->deviceSlot);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380788[8],
+                           (SdfModel *)work->resource->deviceSlot);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);

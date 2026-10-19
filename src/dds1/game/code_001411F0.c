@@ -1,4 +1,5 @@
 #include "fld_projected_sprite.h"
+#include "sdf_model_packet_callback.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -1067,7 +1068,6 @@ void fldResetSceneResourceTables(void) {
 
 extern SdfPoolNode *D_00325838[];
 
-extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
@@ -1084,7 +1084,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
         VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    sdfModelBuildNodeResourcePackets(D_00325838, emitter);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00325838, emitter);
 }
 
 extern FldProjectedSprite D_0033EBA0[];
