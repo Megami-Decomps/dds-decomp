@@ -966,7 +966,7 @@ void sdfDevSetFallbackDeviceWorker(s8 worker) {
     D_00438B1E = worker;
 }
 
-extern s64 DIntr();
+extern s32 DIntr();
 
 extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
 
@@ -1053,7 +1053,7 @@ void sdfDevRecycleCompletedState(DevState *state) {
     DevWorkerEntry *worker;
     DevState *prev;
     DevState *next;
-    s64 interrupts;
+    s32 interrupts;
 
     interrupts = DIntr();
     prev = state->previous;
