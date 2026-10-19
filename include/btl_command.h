@@ -108,8 +108,8 @@ typedef struct BtlLinkedCommand {
 #endif /* VERSION_DDS2 */
 
 /* Select the linked-defeat camera pose and optionally rotate its direction.
- * Both title providers return 1, including when the command cannot be resolved. */
-s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
+ * Both title providers report handled, including when the command cannot be resolved. */
+u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 
 void btlScalarRangeSetStartClearEnd(BtlExponentialRange *state, f32 start);
 f32 btlScalarRangeStepExponential(BtlExponentialRange *state);
