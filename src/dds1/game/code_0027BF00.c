@@ -1187,9 +1187,10 @@ void mnuReleaseScrollPanelAnimations(MenuScrollPanel *list) {
     }
 }
 
-MenuScrollPanel *mnuCreateScrollPanel(u32 startX, u32 startY, u32 endX, u32 endY) {
+MenuScrollPanel *mnuCreateScrollPanel(EffectSlotSet *firstResource, s32 firstIndex,
+                                      EffectSlotSet *secondResource, s32 secondIndex) {
     MenuScrollPanel *panel;
-    s32 position;
+    u8 *position;
     s32 remaining;
 
     panel = (MenuScrollPanel *)sdfAllocSizeClassBlock(sizeof(MenuScrollPanel));
@@ -1197,13 +1198,13 @@ MenuScrollPanel *mnuCreateScrollPanel(u32 startX, u32 startY, u32 endX, u32 endY
     panel->firstSprite = 0;
     panel->secondSprite = 0;
     remaining = 1;
-    itfGridStorePosition(&panel->positions[0], startX, startY);
-    itfGridStorePosition(&panel->positions[1], endX, endY);
-    position = (s32)panel;
+    itfGridStorePosition(&panel->positions[0], firstResource, firstIndex);
+    itfGridStorePosition(&panel->positions[1], secondResource, secondIndex);
+    position = (u8 *)panel;
     do {
         remaining = remaining - 1;
-        itfGridStorePosition(position + 0x20, 0, 0);
-        itfGridStorePosition(position + 0x30, 0, 0);
+        itfGridStorePosition((MenuGridSlot *)(position + 0x20), NULL, 0);
+        itfGridStorePosition((MenuGridSlot *)(position + 0x30), NULL, 0);
         position = position + 8;
     } while (-1 < remaining);
     mnuInitScrollHandles(panel);
@@ -1215,29 +1216,31 @@ void mnuDestroyScrollPanel(MenuScrollPanel *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel, u32 x, u32 y, u32 selection) {
-    itfGridStorePosition(&panel->positions[0], x, y);
+void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel,
+                                                  EffectSlotSet *resource,
+                                                  s32 resourceIndex, u32 selection) {
+    itfGridStorePosition(&panel->positions[0], resource, resourceIndex);
     panel->selection = selection;
 }
 
 void mnuActivatePendingPanelResource(MenuScrollPanel *menu) {
-    s32 *activeEffect = &menu->active[0].effect;
-    MenuSpriteRef *pendingSlot = &menu->pending[0];
+    s32 *activeEffect = &menu->active[0].index;
+    MenuGridSlot *pendingSlot = &menu->pending[0];
     s32 remaining = 1;
     do {
-        struct EffectSlotSet *pendingSprite = pendingSlot->sprite;
+        struct EffectSlotSet *pendingSprite = pendingSlot->set;
         /* The corresponding pending effect is four words after activeEffect. */
         u32 pendingEffect = activeEffect[4];
-        pendingSlot[-2].sprite = pendingSprite;
+        pendingSlot[-2].set = pendingSprite;
         *activeEffect = pendingEffect;
-        pendingSlot->sprite = NULL;
+        pendingSlot->set = NULL;
         activeEffect += 2;
         pendingSlot++;
     } while (--remaining >= 0);
-    if (menu->active[0].sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh(menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
-        effConfigureWithDefaultSetting(menu->active[0].sprite,
-                                          menu->active[0].effect,
+    if (menu->active[0].set != 0) {
+        itfSetGridEntryQuantizedAndRefresh(menu->active[0].set, menu->active[0].index, 0, 0, 0x400, 0);
+        effConfigureWithDefaultSetting(menu->active[0].set,
+                                          menu->active[0].index,
                                           menu->handles[2],
                                           0, 10, 2);
     }
@@ -1247,10 +1250,10 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
                                                struct EffectSlotSet *sprite,
                                                s32 y, s32 color) {
     mnuActivatePendingPanelResource(menu);
-    menu->pending[0].sprite = sprite;
-    menu->pending[0].effect = y;
-    menu->pending[1].sprite = sprite;
-    menu->pending[1].effect = color;
+    menu->pending[0].set = sprite;
+    menu->pending[0].index = y;
+    menu->pending[1].set = sprite;
+    menu->pending[1].index = color;
     itfSetGridEntryQuantizedAndRefresh(sprite, y, 0, 0, -0x400, 0);
     effConfigureIndexedSlotResource(sprite, y, menu->handles[0], 0, 3);
     itfSetGridEntryQuantizedAndRefresh(sprite, color, 0, 0, 0, 0);
@@ -1259,14 +1262,14 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
 }
 
 u8 mnuHasScrollPanelOverlay(MenuScrollPanel *panel) {
-    return panel->active[0].sprite != 0;
+    return panel->active[0].set != 0;
 }
 
 void mnuDrawPanelGridAndSubmitSurface(s32 x, s32 y, s32 unused,
                                       MenuScrollPanel *panel, s32 surface) {
     uiDrawActiveSurfaceRegion(surface);
     itfDrawGridWithResolvedSlot(x + 0x10, y + 0xF8, 0xFFFFFF, 1,
-        panel->positions[1].sprite, panel->positions[1].effect, surface);
+        panel->positions[1].set, panel->positions[1].index, surface);
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
 }
 
@@ -1284,15 +1287,15 @@ void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth,
         drawY -= 8;
     }
     itfDrawGridWithResolvedSlot(drawX, drawY, depth, 1,
-        panel->positions[0].sprite, panel->positions[0].effect, surface);
+        panel->positions[0].set, panel->positions[0].index, surface);
     mnuDrawPanelGridAndSubmitSurface(x, y, depth, panel, surface);
 
     drawX = x + panel->firstSprite;
     drawY = y + panel->secondSprite;
     for (i = 0; i < 2; i++) {
-        if (panel->active[i].sprite != NULL) {
-            object = panel->active[i].sprite;
-            effect = panel->active[i].effect;
+        if (panel->active[i].set != NULL) {
+            object = panel->active[i].set;
+            effect = panel->active[i].index;
             itfDrawGridWithResolvedSlot(drawX + 0x2B0, drawY + 0x108,
                 depth, 0, object, effect, surface);
             itfGridLookupValueOrDefault(object, effect);
@@ -1300,9 +1303,9 @@ void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth,
     }
 
     for (i = 0; i < 2; i++) {
-        if (panel->pending[i].sprite != NULL) {
-            object = panel->pending[i].sprite;
-            effect = panel->pending[i].effect;
+        if (panel->pending[i].set != NULL) {
+            object = panel->pending[i].set;
+            effect = panel->pending[i].index;
             itfDrawGridWithResolvedSlot(drawX + 0x2B0, drawY + 0x108,
                 depth, 0, object, effect, surface);
             itfGridLookupValueOrDefault(object, effect);
@@ -1311,8 +1314,8 @@ void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth,
 
     completed = 0;
     for (i = 0; i < 2; i++) {
-        EffectSlotSet *candidate = panel->active[i].sprite;
-        effect = panel->active[i].effect;
+        EffectSlotSet *candidate = panel->active[i].set;
+        effect = panel->active[i].index;
         if (candidate != NULL && candidate->workEntries[effect].states[0].source == NULL) {
             completed++;
         }
@@ -1320,7 +1323,7 @@ void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth,
 
     if (completed == i) {
         for (i--; i >= 0; i--) {
-            panel->active[i].sprite = NULL;
+            panel->active[i].set = NULL;
         }
     }
 }
