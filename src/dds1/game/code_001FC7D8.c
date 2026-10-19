@@ -30,7 +30,7 @@ extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s8 btlHistoryCounter;
 extern BtlAiScratchWork *btlActionScratchWork;
-extern s32 btlIsLowHpActionReady(s32, s32);
+extern s32 btlIsLowHpActionReady(BtlUnit *unit, s32 input);
 
 extern u32 btlRandomState;
 
@@ -1178,7 +1178,7 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
 
 s32 btlAllocAndCheck(s32 object) {
     BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
-    s32 actor = (s32)((BtlTask *)object)->unit;
+    BtlUnit *actor = ((BtlTask *)object)->unit;
 
     btlActionScratchWork = work;
     work->actor = (BtlTask *)object;
@@ -1351,7 +1351,7 @@ void btlPickLinkedCommandTarget(u32 task, u32 input) {
 }
 
 /* Append the command's own actor after the native scan. */
-void btlAppendActorToCommandTargets(s32 actor) {
+void btlAppendActorToCommandTargets(s32 actor, s32 unused) {
     btlAppendSelfAfterTargetScan(actor);
 }
 

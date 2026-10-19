@@ -27,7 +27,7 @@
 extern s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration);
 extern s32 btlGetRegisteredTaskValueOrDefault(void);
 extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
-/* Original-style implicit int, kept: matched code depends on it: btlIsLowHpActionReady. */
+extern s32 btlIsLowHpActionReady(BtlUnit *unit, s32 input);
 
 extern u32 btlRandomState;
 
@@ -1289,7 +1289,7 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
 
 s32 btlAllocAndCheck(s32 object) {
     BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
-    s32 actor = (s32)((ActionStateLink *)object)->unit;
+    BtlUnit *actor = ((ActionStateLink *)object)->unit;
 
     btlActionScratchWork = work;
     work->actor = (ActionStateLink *)object;
@@ -1477,7 +1477,7 @@ void btlPickLinkedCommandTarget(u32 task, u32 input) {
 }
 
 /* Append the command's own actor after the native scan. */
-void btlAppendActorToCommandTargets(s32 battle) {
+void btlAppendActorToCommandTargets(s32 battle, s32 unused) {
     btlAppendSelfAfterTargetScan(battle);
 }
 

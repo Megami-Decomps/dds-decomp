@@ -1153,7 +1153,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
 
 /* Gate the low-HP action on hold, delay, HP ratio, enemy count, bucket roll, and selected-actor status.
  * Preserve native unsigned timing and division behavior, including the absence of a max-HP guard. */
-s32 btlIsLowHpActionReady(BtlUnit *unit) {
+s32 btlIsLowHpActionReady(BtlUnit *unit, s32 unused) {
     s32 conditionMet = 0;
     s16 bucketRoll;
     ActionStateLink *context = btlActionScratchWork->actor;
