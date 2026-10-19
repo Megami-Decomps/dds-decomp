@@ -1845,7 +1845,8 @@ s32 btlGetLoggedIndexedCommandItem(s32 index) {
     return item;
 }
 
-u16 btlGetActorBedAssetIdFromIndex(s32 itemIndex) {
+/* Record IDs are halfwords; the battle operand API returns a word. */
+s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex) {
     return datItemSkillRecords[itemIndex].commandIndex;
 }
 
