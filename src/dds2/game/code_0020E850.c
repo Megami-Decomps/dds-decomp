@@ -54,7 +54,7 @@ extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 
 
-extern void func_002152D8(s32, s32);
+extern s32 func_002152D8(ActionStateLink *, s32);
 
 extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 
@@ -1398,7 +1398,7 @@ void btlShiftActorStateHistory(ActionStateLink *obj, s8 flag) {
 
 /* Choose command-record-driven targets; retain the native zero mode argument. */
 void btlChooseCommandActionTargets(s32 context) {
-    func_002152D8(context, 0);
+    func_002152D8((ActionStateLink *)context, 0);
 }
 
 /* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
