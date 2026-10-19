@@ -2480,7 +2480,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 /* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
-void evtNoOpRGBEditorRow(void) {
+void evtNoOpRGBEditorRow(SdfListHead *list, s32 x, s32 y, s32 index, void *context) {
 }
 
 extern f32 sdfViewMatrix[];
@@ -2525,7 +2525,257 @@ void evtRotateViewerPositionFromPad(f32 *position)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00255818);
+extern u16 D_003C98A8[];
+extern char D_00437728[];
+extern char D_00437730[];
+extern const char D_00424150[];
+extern const char D_00424160[];
+extern const char D_00424170[];
+extern void *func_0011F518(s32, s32, s32, s32);
+extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
+extern void mnuShopSavePrimaryTransform(u8 *);
+extern void mnuShopSaveFullTransform(u8 *);
+extern void mnuShopRestoreTransform(u8 *);
+extern void kwlnSetLightColorTarget(s32, s32, f32 *);
+extern void kwlnSetLightDirectionTarget(s32, s32, f32 *);
+extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424150);
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424160);
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424170);
+
+
+/* Select and draw one light-color bank at the current panel offset. */
+static inline void evtDrawLightRgbComponents(SdfListHead *list, EvtRuntime *runtime,
+                                             s32 selected, s32 y, s32 firstComponent) {
+    if ((u32)selected >= 3U || runtime->unk232C != 1) {
+        selected = -1;
+    }
+    fldDrawRgbEditor(list,
+                     (s32)(0x8740u + ((u32)runtime->lightPanelOffset << 4)),
+                     y, selected, &runtime->commandMatrix[firstComponent]);
+}
+
+/* Convert the panel offset into the fixed-point X origin used by captions. */
+static inline s32 evtLightCaptionX(s32 panelOffset) {
+    return (s32)(0x8740u + ((u32)panelOffset << 4));
+}
+
+s32 func_00255818(s32 x, s32 y, EvtRuntime *runtime) {
+    SdfListHead *list;
+    EvtRuntimeGroup *group;
+    s32 mode;
+    s32 submode;
+    s32 changed;
+    s32 firstRgbMode;
+    EvtUnit *nestedValue = NULL;
+
+    group = runtime->frameGroup;
+    list = sdfCreateResetPacketList();
+    x = (s32)((u32)x + (u32)runtime->lightPanelOffset);
+
+    evtDrawMenuFrame(list, (s32)((u32)x + 0x64u), y, 0xD, 0x10, 0, 1, (u8 *)runtime,
+                     NULL, evtNoOpRGBEditorRow);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        (s32)(0x8680u + ((u32)runtime->lightPanelOffset << 4)),
+        D_003C98A8[runtime->unk2328],
+        0xFF0080, 0, D_00437728));
+
+    {
+        s32 selected;
+        if (runtime->unk2328 == 3 && runtime->unk232C == 1) {
+            selected = 1;
+        } else {
+            selected = 0;
+        }
+        VU0_LOAD_VF(vf10, &runtime->commandMatrix[4]);
+        sdfAppendPacket(list, (u32)func_0011F518(
+            (s32)(0x88C0u + ((u32)runtime->lightPanelOffset << 4)),
+            0x7BD0, 0xFF0080, selected));
+        firstRgbMode = runtime->unk2328;
+    }
+
+    evtDrawLightRgbComponents(list, runtime, firstRgbMode, 0x7A20,
+                              0);
+    evtDrawLightRgbComponents(list, runtime,
+                              (s32)((u32)runtime->unk2328 - 4u), 0x7D80,
+                              8);
+
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[7],
+        0xFF0080, 0, D_00424150));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[8],
+        0xFF0080, 0, D_00424160));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[9],
+        0xFF0080, 0, D_00437730));
+
+    if (runtime->actionMode != 0x12) {
+        return 0;
+    }
+    changed = 0;
+    if (D_0037F510.apply < 0) {
+        return 1;
+    }
+
+    if (D_0037F510.confirm < 0) {
+        switch (runtime->unk2328) {
+        case 7:
+            mnuShopSavePrimaryTransform((u8 *)runtime);
+            break;
+        case 8:
+            mnuShopSaveFullTransform((u8 *)runtime);
+            break;
+        case 9:
+            mnuShopRestoreTransform((u8 *)runtime);
+            break;
+        default:
+            changed = 1;
+            break;
+        }
+    } else if (D_0037F510.cancel < 0) {
+        changed = -1;
+    } else if ((D_0037F510.incTen & 2) != 0 && runtime->unk232C == 0) {
+        if (runtime->unk2328 < 9) {
+            runtime->unk2328++;
+        } else {
+            runtime->unk2328 = 0;
+        }
+    } else if ((D_0037F510.decTen & 2) != 0 && runtime->unk232C == 0) {
+        if (runtime->unk2328 > 0) {
+            runtime->unk2328--;
+        } else {
+            runtime->unk2328 = 9;
+        }
+    } else if (D_0037F510.coarseIncrease != 0) {
+        runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset + 8u);
+    } else if (D_0037F510.coarseDecrease != 0) {
+        runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset - 8u);
+    }
+
+    submode = runtime->unk232C;
+    if (changed == 1) {
+        if (submode == 0) {
+            runtime->unk232C = 1;
+        } else if (submode == 1) {
+            runtime->unk232C = 0;
+        }
+        return 0;
+    } else if (changed == -1) {
+        if (submode == 1) {
+            runtime->unk232C = 0;
+            return 0;
+        }
+    } else if (submode == 1) {
+        mode = runtime->unk2328;
+        if ((u32)mode < 3U) {
+            if ((D_0037F510.incOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] + 0.01f;
+                runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.incTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] + 0.09999999404f;
+                runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.decOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] - 0.01f;
+                runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
+            } else if ((D_0037F510.decTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] - 0.09999999404f;
+                runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
+            }
+        }
+
+        if (mode == 3) {
+            evtRotateViewerPositionFromPad(&runtime->commandMatrix[4]);
+        }
+
+        mode = runtime->unk2328;
+        if (((u32)mode - 4u) < 3U) {
+            if ((D_0037F510.incOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.01f;
+                runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.incTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.09999999404f;
+                runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.decOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.01f;
+                runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
+            } else if ((D_0037F510.decTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.09999999404f;
+                runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
+            }
+        }
+    }
+
+    switch (group->metadata.option) {
+    case 0:
+        break;
+    case 1:
+        kwlnSetLightColorTarget(0, 0, &runtime->commandMatrix[0]);
+        kwlnSetLightDirectionTarget(0, 0, &runtime->commandMatrix[4]);
+        kwlnSetBackgroundColorTarget(0, &runtime->commandMatrix[8]);
+        evtSetSlotVectors(group->setterId, group->metadata.option, 0,
+                          &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
+        break;
+    case 2:
+        evtSetSlotVectors(group->setterId, 2, 0,
+                          &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
+        break;
+    case 3: {
+        EffWorldNode *world = dds3GetWorldObject();
+        EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(
+            world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
+
+        if (node != NULL) {
+            nestedValue = evtUnitGetNestedValue(node);
+        }
+        evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
+                          &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
+        break;
+    }
+    }
+    if (changed == -1) {
+        switch (group->metadata.option) {
+        case 0:
+            break;
+        case 1:
+            kwlnSetLightColorTarget(0, 0, &runtime->savedCommandMatrix[0]);
+            kwlnSetLightDirectionTarget(0, 0, &runtime->savedCommandMatrix[4]);
+            kwlnSetBackgroundColorTarget(0, &runtime->savedCommandMatrix[8]);
+            evtSetSlotVectors(group->setterId, group->metadata.option, 0,
+                              &runtime->savedCommandMatrix[0],
+                              &runtime->savedCommandMatrix[4],
+                              &runtime->savedCommandMatrix[8]);
+            break;
+        case 2:
+            evtSetSlotVectors(group->setterId, 2, 0,
+                              &runtime->savedCommandMatrix[0],
+                              &runtime->savedCommandMatrix[4],
+                              &runtime->savedCommandMatrix[8]);
+            break;
+        case 3: {
+            EffWorldNode *world = dds3GetWorldObject();
+            EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(
+                world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
+            if (node != NULL) {
+                nestedValue = evtUnitGetNestedValue(node);
+            } else {
+                sdfDebugPrintf((char *)D_00424170);
+                break;
+            }
+            evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
+                              &runtime->savedCommandMatrix[0],
+                              &runtime->savedCommandMatrix[4],
+                              &runtime->savedCommandMatrix[8]);
+            break;
+        }
+        }
+    }
+    return changed;
+}
 
 /* The editor draws its own fields; the menu frame's row callback stays blank. */
 void evtNoOpXYSlotVectorEditorRow(void) {
@@ -3590,7 +3840,121 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002582D0);
+#include "sdf_bordered_rectangle_packet.h"
+
+extern void kwlnDrawSpriteCellZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth);
+extern s32 mnuSolveCubicBezierYForX(s32 target, const s32 *x, const s32 *y);
+extern u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
+extern char D_004377B8[];
+
+/* Read the selected signed parameter at its display call boundary. */
+static inline s32 evtReadBezierParameter(s8 *bytes, s32 index) {
+    return bytes[index];
+}
+
+/* Apply the panel's signed-byte editing bounds to the selected parameter. */
+static inline void evtIncrementBezierParameter(s8 *bytes, s32 index) {
+    if (bytes[index] < 126) {
+        bytes[index]++;
+    }
+}
+
+static inline void evtDecrementBezierParameter(s8 *bytes, s32 index) {
+    if (bytes[index] >= 2) {
+        bytes[index]--;
+    }
+}
+
+/* Convert one already-halved curve ordinate to the panel coordinate. */
+static inline s32 evtProjectBezierOrdinate(s32 ordinate) {
+    return (ordinate << 3) + 0x83C0;
+}
+
+s32 func_002582D0(EvtRuntime *runtime) {
+    s32 x[4];
+    s32 y[4];
+    SdfListHead *list;
+    EvtRuntimeChild *node;
+    s32 component;
+    s32 offset;
+    u32 markerDefaultColor;
+    s32 selectedPoint;
+    s32 i = 0;
+
+    markerDefaultColor = 0x80808080;
+    list = sdfCreateResetPacketList();
+    kwlnDrawSpriteCellZ(list, 120, 312, 12, 9, 0xFEFFF);
+    node = evtEventViewerGetPendingNode(runtime);
+    component = runtime->curveComponent;
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x82C0, 0xFEFFFF, 0, D_004377B8));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x82C0, 0xFEFFFF, 0, D_004376F8, component));
+    offset = component * 2;
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x8320, 0xFEFFFF, 0, D_00437780));
+    {
+        s8 *bytes = node->parameterBytes;
+        selectedPoint = component + 1;
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x8320, 0xFEFFFF, 0, D_004376F8, evtReadBezierParameter(bytes, offset + 4)));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7C00, 0x8320, 0xFEFFFF, 0, D_00437788));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7C00, 0x8320, 0xFEFFFF, 0, D_004376F8, evtReadBezierParameter(bytes, offset + 5)));
+
+        x[0] = 0;
+        y[0] = 0;
+        x[1] = node->parameterBytes[4];
+        y[1] = node->parameterBytes[5];
+        x[2] = node->parameterBytes[6];
+        y[2] = node->parameterBytes[7];
+        x[3] = 128;
+        y[3] = 128;
+        for (; i < 4; i++) {
+            u32 color;
+            if (selectedPoint == i) {
+                color = 0x80008000;
+            } else {
+                color = markerDefaultColor;
+            }
+            sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(
+                (x[i] << 4) + 0x77E0, ((y[i] / 2) << 3) + 0x83B0,
+                0xFEFFFF, 0x40, 0x20, 0, color));
+        }
+        for (i = 0; i < 128; i++) {
+            s32 firstY = mnuSolveCubicBezierYForX(i, x, y) / 2;
+            s32 next = i + 1;
+            s32 secondY = mnuSolveCubicBezierYForX(next, x, y) / 2;
+            {
+                s32 x0 = i;
+                s32 y0 = firstY;
+                s32 y1 = secondY;
+                x0 = (x0 << 4) + 0x7800;
+                y0 = evtProjectBezierOrdinate(y0);
+                next = (next << 4) + 0x7800;
+                y1 = evtProjectBezierOrdinate(y1);
+                sdfAppendPacket(list, (u32)fldCreateColoredLinePacket(
+                    x0, y0, 0xFEFFFF, 0x80808080,
+                    next, y1, 0xFEFFFF, 0x80808080, 0));
+            }
+        }
+        kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+
+        if (D_0037F510.incTen & 2) {
+            evtIncrementBezierParameter(bytes, component * 2 + 5);
+        } else if (D_0037F510.decTen & 2) {
+            evtDecrementBezierParameter(bytes, component * 2 + 5);
+        } else if (D_0037F510.decOne & 2) {
+            evtDecrementBezierParameter(bytes, component * 2 + 4);
+        } else if (D_0037F510.incOne & 2) {
+            evtIncrementBezierParameter(bytes, component * 2 + 4);
+        } else if (D_0037F510.decHun & 2) {
+            runtime->curveComponent ^= 1;
+        } else if (D_0037F510.incHun & 2) {
+            runtime->curveComponent ^= 1;
+        }
+        if (D_0037F510.cancel < 0) {
+            runtime->frameGroup->usePendingKey = 0;
+            return 0;
+        }
+        return 1;
+    }
+}
 
 s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     s32 status = 1;
