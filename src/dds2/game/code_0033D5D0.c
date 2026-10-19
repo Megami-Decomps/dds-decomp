@@ -1782,8 +1782,10 @@ void sdfPowerOffLoop(s32 semaphore) {
     }
 }
 
-void sdfPowerOffInterruptCallback(void) {
-    iSignalSema();
+extern int iSignalSema(int);
+
+void sdfPowerOffInterruptCallback(void *semaphore) {
+    iSignalSema((s32)semaphore);
 }
 
 extern u8 sdfPfsDebugMode;
@@ -1800,7 +1802,7 @@ extern void sdfLoadDevModule(void);
 
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
-typedef void (*SdfPowerOffCallback)(void);
+typedef void (*SdfPowerOffCallback)(void *);
 
 extern SdfPowerOffCallback func_0034C270(SdfPowerOffCallback, void *);
 

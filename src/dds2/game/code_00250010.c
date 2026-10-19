@@ -3666,8 +3666,10 @@ s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, EvtRuntime *runtime)
     return D_003C9928[actionIndex](x, y, runtime);
 }
 
+extern int sceWrite(int, const void *, int);
+
 void evtWriteOutputBytes(s32 output, s32 data, s32 size) {
-    sceWrite();
+    sceWrite(output, (const void *)data, size);
 }
 
 s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {

@@ -14981,3 +14981,20 @@ Moving only this declaration preserves all 257 C functions and their data
 exactly. It is an independent type-contract repair, not an authentication of
 the still separately audited `func_001F0CA0` loop; that body is unchanged by
 the declaration-only bundle.
+
+## Progress-host finalization dispatch uses the actual lifecycle destructors
+
+The three finalization hooks in DDS1 `code_00250E88` finalize a progress host
+through `mnuFinalizeProgressHostVia`. The resource-work finalizer uses
+`mnuReleaseStaffMenuContextAndResources`, which also frees the host allocation;
+the resource-task and profile-selection finalizers use
+`mnuReleaseMenuVisualWorkResources`, which releases its children only. Both
+operations have the same truthful `void (MenuProgressHost *)` contract.
+Internal transition releases have a different lifecycle role and are unchanged.
+
+This three-site, two-operation family removes the invalid local `effect = NULL`
+after profile-selection cleanup without changing the call ABI or adding an
+artificial use. The qualified `sandbox_PurBoss/purity_queue/probe_finalizer_lifecycle`
+capture (`--func mnuFinishMantraProfileSelection --cse`) has equal hooked and
+unhooked output. The target remains 180 bytes and the entire unit gates at
+58 match, zero differ. No flags, expected objects or data ownership change.
