@@ -5555,6 +5555,17 @@ the command plus the 0x200/0x400 scan results. The existing
 `btlStartLinkedActionPoseBlendIfEligible` dispatcher uses the same
 interface; it passes its command directly without a second actor view.
 
+DDS1's four providers return only zero or one, so its slot is
+`u8 (*)(BtlLinkedCommand *, s8, s8)`. Keep every provider and import
+consistent, including the unused presence-flag formals of the linked-pair
+provider, and install them with direct typed assignments. The two dispatchers'
+presence locals also contain only zero or one; use the same signed-byte
+domain rather than adding caller-side truncation instructions.
+`btlOffsetSpecialTargetPositionForActionHook` remains a word-result adapter.
+With ee-gcc 2.96, the genuine byte-provider/word-adapter boundary retains the
+ordinary call at the sibling pass and reproduces retail's JAL and epilogue.
+No consumed-pointer clear or raw callback-copy mismatch is needed. This
+family recovery does not change DDS2's separate callback contract.
 
 ## Uniform action-camera builder interface
 

@@ -2742,7 +2742,7 @@ extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
 
 /* Set the linked-pair camera for actions 0x171/0x189; return 1 when handled.
  * Other actions return 0 without the DDS2-only progress reset. */
-s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
+u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused2) {
     BtlTask *scene;
 
     if (command->actionCode != 0x171) {
@@ -5072,7 +5072,7 @@ extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamS
 extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Select Harihara action cameras: party aim poses, fixed boss keys or random fallback. */
-s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
+u8 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
     BtlTask *task = command->task;
     s32 kind;
     u32 shot;

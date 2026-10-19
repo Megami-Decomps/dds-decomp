@@ -465,7 +465,7 @@ s32 btlClassifyBeelzebubAction(BtlUnit *unit, s32 action) {
     return -1;
 }
 
-s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unused1, s32 unused2) {
+u8 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s8 unused1, s8 unused2) {
     BtlTask *link = command->task;
     BtlUnit *other;
     f32 pos[4] __attribute__((aligned(16)));
@@ -488,14 +488,8 @@ s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unuse
     return 0;
 }
 
-extern s32 btlOffsetSpecialTargetPositionForAction();
-
 s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *command, s32 modeA, s32 modeB) {
-    s32 result = btlOffsetSpecialTargetPositionForAction(command, (s8)modeA, (s8)modeB);
-    /* Retail uses JAL plus an epilogue. Qualified cc1probe retains this
-     * consumed local cleanup through sibling selection, then removes it in CSE. */
-    command = NULL;
-    return result;
+    return btlOffsetSpecialTargetPositionForAction(command, modeA, modeB);
 }
 
 /* Classify enabled table actions for Metatron (enemy-name 265): return 11
@@ -799,7 +793,7 @@ extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamS
 
 extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
+u8 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
     s32 kind;
 
     if (btlIsActorCategoryMarked(command) != 0) {
