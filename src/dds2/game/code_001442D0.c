@@ -4695,9 +4695,7 @@ void func_00150800(void) {
     control->scheduledSounds = 0;
     control->unk8 = recordIndex;
     fldAreaState.unk10C = 0.0f;
-    do {
     fldAreaState.score = 0;
-    } while (0);
     } while (0);
     control->entry = record;
     do {
