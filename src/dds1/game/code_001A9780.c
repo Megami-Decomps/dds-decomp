@@ -4956,6 +4956,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
     btlRecordListedLinkageSkills();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
+    /* Retail branches the three arms to one `move v0,zero` after the -1 return (0x2EC/0x308/0x314 -> 0x348); `return 0` per arm lets jump2 cross-jump the phase `sb` stores into a label fall-in (cc1probe --jump, find_cross_jump minimum=1). */
 return_zero:
     return 0;
 }
@@ -5023,6 +5024,9 @@ s32 btlUpdateCommandNoticeTask(KwlnTask *task) {
             colors.values[3] = color;
             if (evtGetMessageWindowControlState() != 1) {
                 work->phase++;
+                /* Retail jump: 0x001B5B14 `b` to the return-0 block 0x001B5B50 placed after the -1 arm.
+                 * Plain return 0 puts that block next to the mode-one arm (7 of 122 words differ);
+                 * `phase < 7 && phase >= 0` folds to one sltu (cc1probe --nohook asm). */
                 goto return_zero;
             }
             dspRequestMessageWindowModeOne();

@@ -222,49 +222,43 @@ void *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 count) 
     start = (btlNextScaledRandom(0x2000) & 0xF) % count;
     pass = 0;
     i = start;
-    goto test;
-step:
-    if (i < count) {
-        i++;
-    } else {
-        i = 0;
-        pass++;
-    }
-    if (pass < 2) {
-        goto test;
-    }
-    for (i = 0; i < count; i++) {
-        fallback[i] = 0;
-        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
-            fallback[i] = 1;
-        }
-    }
-    i = start;
-    pass = 0;
-    do {
-        if (fallback[i] != 0) {
-            break;
-        }
+    while (flags[i] == 0) {
         if (i < count) {
             i++;
         } else {
-            /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
-             * the index unreduced (retail recomputes fallback + i * 2). */
-            do {
-                pass++;
-            } while (0);
             i = 0;
+            pass++;
         }
-    } while (pass < 2);
-    if (i >= count) {
-        i = 0;
+        if (pass >= 2) {
+            for (i = 0; i < count; i++) {
+                fallback[i] = 0;
+                if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+                    fallback[i] = 1;
+                }
+            }
+            i = start;
+            pass = 0;
+            do {
+                if (fallback[i] != 0) {
+                    break;
+                }
+                if (i < count) {
+                    i++;
+                } else {
+                    /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
+                     * the index unreduced (retail recomputes fallback + i * 2). */
+                    do {
+                        pass++;
+                    } while (0);
+                    i = 0;
+                }
+            } while (pass < 2);
+            if (i >= count) {
+                i = 0;
+            }
+            break;
+        }
     }
-    goto done;
-test:
-    if (flags[i] == 0) {
-        goto step;
-    }
-done:
     return btlGetIndexListEntry(list, i);
 }
 
@@ -702,26 +696,25 @@ s32 func_00203E38(s32 actor) {
         btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
         btlFreeIndexList(list);
         result = 1;
-        goto completed;
-    }
-    count = btlGetIndexListCount(list);
-    found = 0;
-    memset(picked, 0, sizeof(picked));
-    for (i = 0; i < count; i++) {
-        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
-            picked[found] = 1;
-            found++;
+    } else {
+        count = btlGetIndexListCount(list);
+        found = 0;
+        memset(picked, 0, sizeof(picked));
+        for (i = 0; i < count; i++) {
+            if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+                picked[found] = 1;
+                found++;
+            }
         }
-    }
-    if (found == 0) {
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
+        if (found == 0) {
+            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
+            btlFreeIndexList(list);
+            return 1;
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, count));
         btlFreeIndexList(list);
-        return 1;
+        result = 1;
     }
-    btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, count));
-    btlFreeIndexList(list);
-    result = 1;
-completed:
     return result;
 }
 
@@ -1902,44 +1895,36 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
     BtlUnit *second;
 
     if (unit == NULL) {
-        if (effect->active != 1) {
-            goto unavailable_pair;
-        }
-        first = NULL;
-        second = NULL;
-        for (node = battle->units; node != NULL; node = node->next) {
-            if (node->status.flags & 1) {
-                if (node->status.flags & 0x400) {
-                    switch (node->partyRecord.unitId) {
-                    case 0x107:
-                        first = node;
-                        break;
-                    case 0x108:
-                        second = node;
-                        break;
+        if (effect->active == 1) {
+            first = NULL;
+            second = NULL;
+            for (node = battle->units; node != NULL; node = node->next) {
+                if (node->status.flags & 1) {
+                    if (node->status.flags & 0x400) {
+                        switch (node->partyRecord.unitId) {
+                        case 0x107:
+                            first = node;
+                            break;
+                        case 0x108:
+                            second = node;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (first != NULL && second != NULL) {
+                if (first->motionId < 0x14) {
+                    if (first->motionId >= 0x12) {
+                        return first->motionId;
+                    }
+                }
+                if (second->motionId < 0x14) {
+                    if (second->motionId >= 0x12) {
+                        return second->motionId;
                     }
                 }
             }
         }
-        if (first == NULL) {
-            goto unavailable_pair;
-        }
-        if (second == NULL) {
-            goto unavailable_pair;
-        }
-        if (first->motionId < 0x14) {
-            if (first->motionId >= 0x12) {
-                return first->motionId;
-            }
-        }
-        if (second->motionId < 0x14) {
-            if (second->motionId >= 0x12) {
-                return second->motionId;
-            }
-        }
-/* Share pair rejections so early conversion does not hoist the return
- * value into the phase test. Keep single-unit rejection paths separate. */
-unavailable_pair:
         return -1;
     }
     if (!(unit->status.flags & 1)) {

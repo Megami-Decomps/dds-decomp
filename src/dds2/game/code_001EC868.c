@@ -7972,6 +7972,9 @@ void func_00201828(ActionStateLink *task, BattleIndexWork *work) {
             entryCount = group->count;
             entryIndex = 0;
             if (entryCount != 0) {
+                /* Retail enters 0x00201A44 with groupKind already in $5; only the back-edge (bnel 0x00201B18) reloads it,
+                 * in the delay slot. A do-while reloading at the end and a for reloading at the top both shift the
+                 * allocation from the prologue (work/task swap $30/$23; 204 of 208 and 201 of 205 words differ). */
                 goto entry_dispatch;
             entry_loop:
                 groupKind = group->kind;

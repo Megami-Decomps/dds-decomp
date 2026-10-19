@@ -96,7 +96,8 @@ extern char D_00438B60[];
 
 /* Clear `count` quadwords at dst: four per pass, then a falling 3/2/1
  * remainder. The pass is a goto loop (no loop notes, so no loop alignment),
- * and its exit test is taken before the four stores. */
+ * and its exit test is taken before the four stores. A do/while here adds
+ * the loop's alignment nops (128 bytes vs 120 retail, 28 of 30 words differ). */
 u128 *sdfClearQuadwords(u128 *dst, s32 count) {
     u128 *p = dst;
     s32 done;

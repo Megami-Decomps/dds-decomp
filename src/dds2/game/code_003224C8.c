@@ -312,7 +312,7 @@ void func_003226D8(MenuWorkEntry *work, MenuShortRecordList *list,
             }
         }
         return;
-        /* Provider paths refresh the bound and finish one record here. */
+        /* Provider paths refresh the bound and finish one record here: retail keeps this separate ++index/++record block outside the inner for; folding it into the for increment (continue/break, one loop) is the same CFG but swaps the work-list/fixed saved registers (s5/s6), 11 of 396 words. */
 provider_complete:
         ++index;
         ++record;
