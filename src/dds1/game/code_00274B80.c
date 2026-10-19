@@ -918,7 +918,7 @@ void mnuConfigurePartyPanelPage(s32 windowAddress, s32 mode, s32 staffImage, s32
         bundle->fade = 0x100;
         bundle->fadeOut = 0;
         mnuResetPartyPanelFade(window, selectedIndex, 0, 0);
-        break;
+        return;
     }
     case 1: {
         MenuIconBundle *bundle = slot->iconBundle;
@@ -931,20 +931,17 @@ void mnuConfigurePartyPanelPage(s32 windowAddress, s32 mode, s32 staffImage, s32
             bundle->fadeOut = fadeDirection;
             mnuResetPartyPanelFade(window, selectedIndex, 1, 0);
         }
-        break;
+        return;
     }
     case 2:
         mnuSetPageParams(slot->windowSprites, 0);
         slot->iconBundle->fadeOut = 0;
         mnuResetPartyPanelFade(window, selectedIndex, 0, 1);
-        break;
+        return;
     case 3:
         mnuSetPageParams(slot->windowSprites, 1);
         slot->iconBundle->fadeOut = fadeDirection;
         mnuResetPartyPanelFade(window, selectedIndex, 0, 1);
-        /* Retail retains this ordinary call. cc1probe: this local reset
-         * survives 01.sibling and 03.cse, then 13.life removes it. */
-        fadeDirection = 0;
         break;
     }
 }
