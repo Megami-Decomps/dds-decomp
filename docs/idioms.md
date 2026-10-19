@@ -4490,6 +4490,22 @@ store the return register in their native `billHandle` word at `+0xA4`.
 The DDS1 provider's void definition omitted a real return contract even
 though its existing consumers use that value.
 
+## Scaly-strip constructors preserve the allocator's pointer return
+
+DDS2 `effAllocateStripFromWorkAndRetainTexture` (`002F3F40`) returns the
+`u8 *` from `effAllocateTexturedStripWork`: native leaves that pointer in
+`$v0` while incrementing the shared reference count with `$v1`. Both owned
+texture preparers store `$v0` into their buffer's address word immediately
+after calling it. A `void` definition therefore omits a consumed return.
+
+`effCreateTexturedStripWithSharedTexture` (`002F3ED8`) likewise preserves
+the allocator's pointer across the retain call and returns it, rather than
+producing an independent `u64` value. Give these two constructors truthful
+pointer-return declarations before their callers. The four preparation
+callers explicitly convert the pointer to `u32` when storing the existing
+32-bit buffer address word; the allocator itself also has its two `u32`
+parameters declared.
+
 
 
 
@@ -14823,8 +14839,8 @@ values are consumed. This preserves the native `lbu` followed by a register
 copy, rather than a second signed load or an extra unsigned mask.
 
 Qualified `cc1probe --cse --expand --alloc` captures in
-`sandbox_PurFAD/field_acquisition/probe_exact_dds1_dispatch` show uid867
-acquiring a zero-extended byte and uid881 rewritten to copy that same
+`sandbox_PurFAD/field_acquisition/probe_exact_typed_dds1_dispatch` show uid864
+acquiring a zero-extended byte and uid878 rewritten to copy that same
 SI value, reg310 (`decisions.log:13659-13699`). Hooked and unhooked output
 are equal. The needed property is a common unsigned byte value for the
 command guard and orientation snapshot, not a fabricated block boundary.
@@ -14833,6 +14849,8 @@ The two name queries and actor-trigger query also share the ordinary
 `fldGetActorRows()` base reader. Keep the normal INCLUDE_ASM-context gate:
 with direct accesses the trigger differed in seven address-setup words
 only in that context; the three-site reader preserves its native 488-byte
-body too. Its separately qualified trace is `probe_exact_dds1_trigger`.
+body too. Its separately qualified trace is `probe_exact_typed_dds1_trigger`.
 The complete unit, including the new dispatcher and all existing C, is
 `59 match, 0 differ`; no header, compiler flag or expected assembly changes.
+The work-clear calls have the truthful `void dds3WorkClear(void)` prototype
+from both `newdata/datCalc.c` providers; no implicit integer return is retained.

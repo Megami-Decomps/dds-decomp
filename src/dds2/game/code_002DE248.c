@@ -111,7 +111,8 @@ extern void * memset(void *, s32, u32);
 extern void mnuRecordSetVector();
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId);
 extern char * strcpy(char *, const char *);
-/* Original-style implicit int, kept: matched code depends on it: effAllocateStripFromWorkAndRetainTexture, effCreateTexturedStripWithSharedTexture, effRequestResourceByMode. */
+extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
+extern u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat);
 
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
@@ -556,7 +557,7 @@ extern u32 D_00437E6C;
 
 
 
-extern u8 *effAllocateTexturedStripWork();
+extern u8 *effAllocateTexturedStripWork(u32 count, u32 repeat);
 
 extern u32 D_00437E7C;
 
@@ -8611,7 +8612,7 @@ void effFillFadeColorRows(u8 *work, u8 *config) {
 
 u32 *effPrepareTextureAnimation(EffBillFlameConfig *src) {
     u32 *buf = (u32 *)effAllocateAnimationBuffer(src);
-    buf[1] = effCreateTexturedStripWithSharedTexture(src->header.timed.count, src->header.segments);
+    buf[1] = (u32)effCreateTexturedStripWithSharedTexture(src->header.timed.count, src->header.segments);
     effFillFadeColorRows(buf, src);
     return buf;
 }
@@ -8620,7 +8621,7 @@ u32 *effPrepareOwnedTextureAnimation(u8 *p) {
     u8 *dst = ((EffClassWork *)p)->payload;
     u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateAnimationBuffer(dst);
-    buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
+    buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
     effFillFadeColorRows(buf, dst);
     return buf;
 }
@@ -8910,7 +8911,7 @@ extern void func_002F3258(u32 *, EffBillQuantizedConfig *);
 
 u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *src) {
     u32 *buf = effAllocateQuantizedBuffer(src);
-    buf[1] = effCreateTexturedStripWithSharedTexture(buf[0], src->samples.quantizedSamples);
+    buf[1] = (u32)effCreateTexturedStripWithSharedTexture(buf[0], src->samples.quantizedSamples);
     func_002F3258(buf, src);
     return buf;
 }
@@ -8919,7 +8920,7 @@ u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
     EffBillQuantizedConfig *config = (EffBillQuantizedConfig *)((EffClassWork *)p)->payload;
     u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = effAllocateQuantizedBuffer(config);
-    buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
+    buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
     func_002F3258(buf, config);
     return buf;
 }
@@ -9141,8 +9142,8 @@ u32 repeat;
 }
 
 /* Create a scaly strip and retain its shared texture reference. */
-u64 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
-    u64 strip;
+u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
+    u8 *strip;
 
     strip = effAllocateTexturedStripWork(count, repeat);
     effRetainScalyTextureReference();
@@ -9156,9 +9157,10 @@ void effReleaseScalyStripResources(u8 *work) {
 }
 
 /* Recreate the source strip's dimensions and retain another shared texture reference. */
-void effAllocateStripFromWorkAndRetainTexture(u8 *work) {
-    effAllocateTexturedStripWork(((EffStripWork *)work)->count, ((EffStripWork *)work)->repeat);
+u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work) {
+    u8 *strip = effAllocateTexturedStripWork(((EffStripWork *)work)->count, ((EffStripWork *)work)->repeat);
     effSharedStripReferenceCount++;
+    return strip;
 }
 
 /* Two GS register writes carried by one complete four-qword packet. */
