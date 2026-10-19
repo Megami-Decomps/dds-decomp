@@ -5,13 +5,6 @@
 
 struct EffMappedResource;
 
-#ifndef VERSION_DDS2
-typedef struct MenuSpriteRef {
-    struct EffectSlotSet *sprite;
-    s32 effect;
-} MenuSpriteRef;
-#endif
-
 /* The retained scroll-panel allocation has title-specific position storage. */
 typedef struct MenuScrollPanel {
     u8 pad00[4];
@@ -43,9 +36,9 @@ void mnuConfigurePanelResource(MenuScrollPanel *menu,
     u32 selection; /* 0x04 */
     u32 firstSprite; /* 0x08 */
     u32 secondSprite; /* 0x0C */
-    MenuSpriteRef positions[2]; /* 0x10 */
-    MenuSpriteRef active[2]; /* 0x20 */
-    MenuSpriteRef pending[2]; /* 0x30 */
+    MenuGridSlot positions[2]; /* 0x10 */
+    MenuGridSlot active[2]; /* 0x20 */
+    MenuGridSlot pending[2]; /* 0x30 */
     struct EffMappedResource *handles[3]; /* 0x40 */
 } MenuScrollPanel;
 
@@ -56,12 +49,14 @@ typedef char MenuScrollPanel_dds1_positions_check[
 typedef char MenuScrollPanel_dds1_handles_check[
     ((u32)&((MenuScrollPanel *)0)->handles == 0x40) ? 1 : -1];
 
-MenuScrollPanel *mnuCreateScrollPanel(u32 startX, u32 startY, u32 endX,
-                                      u32 endY);
+MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *firstResource,
+                                      s32 firstIndex,
+                                      struct EffectSlotSet *secondResource,
+                                      s32 secondIndex);
 void mnuDestroyScrollPanel(MenuScrollPanel *panel);
 void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel,
-                                                  u32 x, u32 y,
-                                                  u32 selection);
+                                                  struct EffectSlotSet *resource,
+                                                  s32 resourceIndex, u32 selection);
 void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
                                                struct EffectSlotSet *sprite,
                                                s32 y, s32 color);

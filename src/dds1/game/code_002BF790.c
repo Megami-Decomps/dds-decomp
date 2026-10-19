@@ -29,11 +29,6 @@ extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
-typedef struct GridPosition {
-    s32 x; // 0x00
-    s32 y; // 0x04
-} GridPosition; // 0x08
-
 /* Four words filled together; their corner/channel interpretation is unknown. */
 typedef struct UiQuadWords {
     u32 unk00[4];
@@ -158,10 +153,10 @@ void itfGridCopyEntryQuad(s32 resource, s32 entryIndex) {
     } while (-1 < remaining);
 }
 
-/* Store the two grid position coordinates. */
-void itfGridStorePosition(GridPosition *position, s32 x, s32 y) {
-    position->x = x;
-    position->y = y;
+/* Cache the actual resource owner and its signed render-slot index. */
+void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 resourceIndex) {
+    slot->set = resource;
+    slot->index = resourceIndex;
 }
 
 s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
