@@ -778,7 +778,7 @@ u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     
-    return packed;
+    return blended[0];
 }
 
 /* vu0 routine: multiply RGBA channels normalized by 128, then pack at the same scale.

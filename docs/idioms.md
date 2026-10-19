@@ -1548,6 +1548,16 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_NORMALIZE_VF10()` | `vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w; vmaddz.w vf2; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q` |
 | `VU0_CROSS_XYZ(dst, a, b)` / `VU0_DOT_XYZ(out, a, b)` | `vopmula.xyz ACC,a,b; vopmsub.xyz dst,b,a` / `vmul.xyz vf2,a,b; vaddy.x; vaddz.x; qmfc2.ni $2,vf2; mtc1 $2,out` (`$2` clobbered) |
 
+### Stored packed-color results
+
+`effBlendColor` in DDS1 `code_0018CAC8` and DDS2 `code_00194700` returns
+`blended[0]` after storing the packed word there, following the neighboring
+`effMultiplyPackedColors` output-buffer pattern. Both whole units remain
+exact. The compiler forwards the C read without emitting a load, preserving
+the retail store at DDS1 `0x0018DDEC` / DDS2 `0x00195A24` and the `0x30` frame.
+`EE_MMI_RGBA_PACK` returns a GPR value and does not read that buffer; an unread
+output store is not covered by the bare-address VU0 scratch exception.
+
 ### Float inputs through GPR constraints
 
 The EE compiler accepts an `f32` value as an inline-asm `"r"` input and
