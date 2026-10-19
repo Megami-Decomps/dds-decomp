@@ -1818,6 +1818,7 @@ INCLUDE_ASM(const s32, "game/code_00138C30", func_0013DF60);
 extern s32 D_003BAE58;
 extern s32 D_003BAE24;
 extern char D_003A0270[], D_003A0280[];
+extern void dds3WorkClear(void);
 extern void fldReleaseCurrentBgm(void);
 extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind,
                                              const char *name, s32 code, s32 link,
