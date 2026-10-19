@@ -2650,17 +2650,115 @@ const s32 D_00414E20[7][4] __attribute__((aligned(8))) = {
     { 2, 0x3C, 3, 2 },
 };
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfUpdateSoundSelectorOptions);
+extern s32 D_00438F2C;
+extern u8 D_00438F36;
+extern s16 D_00452E60[8];
+
+void itfUpdateSoundSelectorOptions(void) {
+    char text[0x10];
+    s32 cursorDigit;
+    u32 value = D_00438F2C;
+    s16 fade = D_00438F34;
+    s32 digit;
+    s32 x;
+    s32 step;
+
+    itfMesDrawWindowBackground(0);
+    cursorDigit = 0;
+    step = 1;
+    x = 0xAF;
+    for (digit = 7; digit >= 0; digit--) {
+        FrFontGlyph *glyph;
+        s32 left = x * 16;
+
+        left += 0x9F0;
+        x -= 0x19;
+        sprintf(text, D_004365F0, value % 10);
+        glyph = itfCreateFont3TextGlyph(left, 0x8E8, 0, fade | 0xA09DC300, text, NULL);
+        frFontSetChildChainFirstOption(glyph, 4);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frFontSetChildColors(glyph, ((u32)(D_00452E60[digit] * fade) >> 7) | 0xA09DC300);
+        frFontSetChildChainFirstOption(glyph, 3);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        if (D_00438F30 < digit) {
+            step *= 10;
+        }
+        if (digit == D_00438F30) {
+            cursorDigit = value % 10;
+        }
+        value /= 10;
+    }
+    itfMesDrawWindowBackground(1);
+    if (D_0037F510.prev & 2) {
+        if (cursorDigit == 9) {
+            D_00438F2C -= step * 9;
+        } else {
+            D_00438F2C += step;
+        }
+        D_00452E60[D_00438F30] = 0x100;
+        sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+    }
+    if (D_0037F510.next & 2) {
+        if (cursorDigit == 0) {
+            D_00438F2C += step * 9;
+        } else {
+            D_00438F2C -= step;
+        }
+        D_00452E60[D_00438F30] = 0x100;
+        sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+    }
+    if (D_0037F510.alternatePrev & 2) {
+        if (D_00438F30 > 0) {
+            D_00438F30--;
+            D_00438F38 = 0x80;
+            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        } else {
+            sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
+        }
+    }
+    if (D_0037F510.alternateNext & 2) {
+        if (D_00438F30 < 7) {
+            D_00438F30++;
+            D_00438F38 = 0x80;
+            sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        } else {
+            sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
+        }
+    }
+    if (D_00438F36 == 0) {
+        if (D_00438F34 < 0x80) {
+            D_00438F34 += 0x10;
+        }
+        if (D_00438F34 > 0x80) {
+            D_00438F34 = 0x80;
+        }
+    } else {
+        if (D_00438F34 > 0) {
+            D_00438F34 -= 0x10;
+        }
+        if (D_00438F34 < 0) {
+            D_00438F34 = 0;
+        }
+    }
+    if (D_00438F38 > 0) {
+        D_00438F38 -= 8;
+    }
+    if (D_00438F38 < 0) {
+        D_00438F38 = 0;
+    }
+    for (digit = 0; digit < 8; digit++) {
+        if (D_00452E60[digit] > 0) {
+            D_00452E60[digit] -= 8;
+        }
+        if (D_00452E60[digit] < 0) {
+            D_00452E60[digit] = 0;
+        }
+    }
+}
 
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void itfPanelSetStatus(s32 windowIndex, s8 status);
-extern void itfUpdateSoundSelectorOptions(void);
-extern s32 D_00438F2C;
-extern s32 D_00438F30;
-extern s16 D_00438F34;
-extern u8 D_00438F36;
-extern s16 D_00438F38;
-extern u8 D_00452E60[0x10];
 extern s8 D_0037F531[];
 
 /* Start the window entry, then poll completion and restore its normal flags. */
