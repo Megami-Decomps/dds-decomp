@@ -16,11 +16,12 @@ extern void func_0013DF60(const char *name);
 #include "fld_player_scene_state.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
+#include "scr_integer_return_value_api.h"
 #include "fld_activation_entry.h"
 
 
 
-extern u64 fldEvaluateCameraMoveTracking(void);
+extern s32 fldEvaluateCameraMoveTracking(void);
 
 extern s32 fldGetRowValue(s32);
 
@@ -1256,7 +1257,7 @@ u32 fldCmdResetCameraMoveTracking(void) {
 }
 
 u32 fldCmdQueryCameraMoveTracking(void) {
-    u64 result;
+    s32 result;
 
     result = fldEvaluateCameraMoveTracking();
     scrSetIntegerReturnValue(result);
