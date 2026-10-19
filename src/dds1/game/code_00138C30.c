@@ -1813,7 +1813,216 @@ void fldApplySceneRoomSelection(FldActorEntry *entry) {
     fldAreaState.rowIdx = entry->rowIndex;
 }
 
-INCLUDE_ASM(const s32, "game/code_00138C30", func_0013DF60);
+extern s32 D_003BAE58;
+extern char D_003A0270[], D_003A0280[];
+extern void dds3WorkClear(void);
+extern void fldReleaseCurrentBgm(void);
+extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind,
+                                             const char *name, s32 code, s32 link,
+                                             const char *subname);
+extern void fldInitializeAlternateSequence(FieldSequenceRecord *, s32, s32, const char *);
+extern void fldInitializeSequenceWithNote(FieldSequenceRecord *, s32, s32, const char *, s32, const char *);
+
+void func_0013DF60(const char *name) {
+    FieldSequenceRecord sequence;
+    s32 vr[2];
+    s32 event;
+    s32 area[1];
+    s32 command;
+    s32 floor;
+    s32 row;
+    s32 headerFloor;
+    s32 currentArea;
+    s32 i;
+    FldActorEntry *entry;
+    const char *entryName;
+    s32 match;
+    u32 floorFlags;
+    u32 flags;
+
+    if (name == NULL && !fldIsSceneStateEight()) {
+        return;
+    }
+    for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
+        if (fldIsSceneStateEight()) {
+            i = D_003BAB40;
+        }
+        entry = &fldActorWaypointRows.actors[i];
+        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind == 0) {
+            continue;
+        }
+        entryName = entry->name;
+        if (entry->floor != fldAreaState.floor + 1) {
+            continue;
+        }
+        match = 0;
+        if (fldIsSceneStateEight()) {
+            match = 1;
+        }
+        if (!match && strcmp(name, entryName) == 0) {
+            match = 1;
+        }
+        if (!match) {
+            continue;
+        }
+        if (entry->kind == 3) {
+            if (entry->motion != 0) {
+                fldSetFlagBit(fldAreaState.area, fldAreaState.floor + 1,
+                                entry->motion);
+            }
+        } else if (entry->kind == 10) {
+            if (entry->secondaryMotion != 0) {
+                fldSetFlagBit(fldAreaState.area, fldAreaState.floor + 1,
+                                entry->secondaryMotion);
+            }
+        } else if (entry->kind == 11) {
+            if (entry->secondaryMotion != 0) {
+                fldSetFlagBit(fldAreaState.area, fldAreaState.floor + 1,
+                                entry->secondaryMotion);
+            }
+        }
+        floorFlags = entry->flags64;
+        if (floorFlags & 1) {
+            if (entry->explorationArea != 0) {
+                area[0] = entry->explorationArea;
+            } else {
+                area[0] = fldAreaState.area;
+            }
+            floor = floorFlags >> 2;
+            if (floor == 0) {
+                floor = fldAreaState.floor + 1;
+            }
+            fldSetFlagBit(area[0], floor, entry->floorFlagBit);
+        }
+        flags = entry->flags64;
+        if (flags & 2) {
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor,
+                entry->explorationColumn, entry->explorationRow,
+                entry->explorationColumnCount, entry->explorationRowCount);
+        }
+        if (entry->variantMode == 2) {
+            fldSetDeferredFieldCommand(0, 0);
+            fldSetFlagBit(fldAreaState.area, fldAreaState.floor + 1,
+                            entry->sequenceValue);
+            D_003BAE54 = fldAreaState.area;
+            D_003BAE58 = fldAreaState.floor + 1;
+            D_003BAE5C = entry->variant;
+            D_003BAE60 = entry->sequenceKind;
+            dds3WorkClear();
+            switch (entry->variant) {
+            case 0:
+                fldReleaseCurrentBgm();
+                event = entry->sequenceKind;
+                dds3AdminSubmitModeRequest(0x14, &event, sizeof(event), 0);
+                return;
+            case 3:
+                fldReleaseCurrentBgm();
+                vr[0] = 0;
+                vr[1] = entry->sequenceKind;
+                if (D_0032EF18[vr[1]].requiredModelFlag != 0) {
+                    mdlFlagSet(D_0032EF18[vr[1]].requiredModelFlag);
+                }
+                datGameState->vr.previewX = vr[0];
+                datGameState->vr.previewY = vr[1];
+                dds3AdminSubmitModeRequest(0x15, vr, sizeof(vr), 0);
+                return;
+            case 4:
+                vr[0] = 1;
+                vr[1] = entry->sequenceKind;
+                datGameState->vr.previewX = vr[0];
+                datGameState->vr.previewY = vr[1];
+                dds3AdminSubmitModeRequest(0x15, vr, sizeof(vr), 0);
+                return;
+            }
+            return;
+        }
+        if (entry->variantMode == 0) {
+            if (entry->variant == 1) {
+                dds3WorkClear();
+                fldReleaseCurrentBgm();
+                area[0] = fldAreaState.area;
+                dds3AdminSubmitModeRequest(0x1C, &area[0], sizeof(area[0]), 0);
+                return;
+            }
+            if (entry->variant == 0) {
+                area[0] = fldAreaState.area;
+            } else {
+                area[0] = entry->variant;
+            }
+            if (entry->sequenceKind == 0) {
+                floor = fldAreaState.floor + 1;
+            } else {
+                floor = entry->sequenceKind;
+            }
+            if (fldAreaState.area != area[0]) {
+                fldReleaseCurrentBgm();
+            }
+            fldApplySceneRoomSelection(entry);
+            if (entry->flags54 != 0) {
+                D_003BAB3C = entry->flags54;
+                strcpy((char *)D_0032C9A0, entry->taskName);
+                D_003BAB40 = i + 1;
+            }
+            if (entry->flags31 & 1) {
+                fldAreaState.commandEnabled = 1;
+            } else {
+                fldAreaState.commandEnabled = 0;
+            }
+            if (entry->flags31 & 2) {
+                fldAreaState.unk100 = 1;
+            } else if (entry->flags31 & 4) {
+                fldAreaState.unk100 = -1;
+            } else {
+                fldAreaState.unk100 = 0;
+            }
+            if (entry->kind == 3 || entry->kind == 4) {
+                fldAreaState.unk17C = 15;
+                kwlnFadeInStart(0, 0, 0, 0);
+                if (entry->linkKind == 1 || entry->linkKind == 2) {
+                    fldInitializeFieldSequenceRecord(&sequence, area[0], floor, entry->sequenceName, entry->sequenceCode,
+                                                     entry->linkKind, entry->linkName);
+                } else {
+                    fldInitializeAlternateSequence(&sequence, area[0], floor, entry->sequenceName);
+                }
+            } else {
+                fldInitializeFieldSequenceRecord(&sequence, area[0], floor, entry->sequenceName, entry->sequenceCode,
+                                                 entry->linkKind, entry->linkName);
+            }
+            dds3AdminSubmitModeRequest(5, &sequence, sizeof(sequence), 0);
+            return;
+        }
+        if (entry->variantMode == 1) {
+            row = entry->variant - 1;
+            headerFloor = entry->sequenceKind;
+            currentArea = fldAreaState.area;
+            area[0] = currentArea;
+            floor = fldActorWaypointRows.headers[row].area;
+            D_003BAE4C = row;
+            D_003BAE50 = headerFloor;
+            fldAreaState.commandEnabled = 0;
+            fldSetFlagBit(area[0], fldAreaState.floor + 1,
+                            fldActorWaypointRows.headers[row].payload[headerFloor + 8]);
+            entryName = D_003A0270;
+            name = D_003A0280;
+            fldInitializeSequenceWithNote(&sequence, area[0], floor, entryName, 0, name);
+            dds3AdminSubmitModeRequest(5, &sequence, sizeof(sequence), 0);
+            return;
+        }
+        if (entry->variantMode == 3) {
+            command = entry->variant;
+            fldSetDeferredFieldCommand(fldAreaState.area, command);
+            fldReleaseCurrentBgm();
+            if (entry->sequenceKind == 0 && entry->sequenceValue != 0) {
+                fldSetDeferredFieldCommand(entry->sequenceValue, command);
+            }
+            dds3AdminSubmitModeRequest(6, &command, sizeof(command), 0);
+            return;
+        }
+    }
+}
 
 extern s32 D_003BAE58;
 extern s32 D_003BAE24;
