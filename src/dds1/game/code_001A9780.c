@@ -4082,9 +4082,124 @@ void btlReleaseBattleScratchBlocks(void) {
     sdfReleaseChipBlock((void *)btlCommandOptionAnimationWork);
 }
 
+extern const BattlePanelColors D_003A29F0;
+extern u32 btlGetCommandOptionCount(s32, s8, s8);
+extern void btlResetActorSlotPresentationValue(BtlUnit *, BattleSceneObject *);
+extern void btlCreateSelectionTrailTask(s32, s32, s32);
+extern void func_001B3300(BattleSceneObject *, s32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A29F0);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B2D80);
+void func_001B2D80(BattleSceneObject *object, s32 kind) {
+    /* Retail copies the rodata colors at 001B2DBC..001B2DD8. */
+    BattlePanelColors colors = D_003A29F0;
+    s32 row = 0;
+    s32 entry;
+    s32 cursor;
+    s32 state;
+    s32 y;
+    s32 optionCount;
+    u32 opacity;
+    u32 color;
+    u32 shade;
+
+    switch (object->state) {
+    case 1:
+    case 7:
+    case 9:
+        D_003BD834->alpha += 16;
+        D_003BD834->alpha = D_003BD834->alpha <= 0 ? 0 : D_003BD834->alpha <= 128 ? D_003BD834->alpha : 128;
+        entry = object->selections[kind].entry;
+        cursor = object->selections[kind].cursor;
+        row = entry - cursor;
+        D_003BD834->phase = 0;
+        D_003BD834->entry = entry;
+        D_003BD834->cursor = cursor;
+        D_003BD834->row = row;
+        break;
+    case 10:
+        D_003BD834->alpha += 16;
+        D_003BD834->alpha = D_003BD834->alpha <= 0 ? 0 : D_003BD834->alpha <= 128 ? D_003BD834->alpha : 128;
+        break;
+    case 2:
+    case 3:
+        D_003BD834->phase = (D_003BD834->phase + 16) % 360;
+        D_003BD834->alpha = (s32)((sdfSinPoly((f32)((D_003BD834->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
+        entry = object->selections[kind].entry;
+        cursor = object->selections[kind].cursor;
+        row = entry - cursor;
+        state = object->state;
+        if (state == 2 && (optionCount = btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
+            if ((D_00324510.prev & 2) || (D_00324510.next & 2)) {
+                /* Retail compares cached entry with the relative row at 001B2FE4. */
+                if (D_003BD834->cursor != cursor || D_003BD834->entry != row || D_003BD834->row != row) {
+                    D_003BD834->alpha = 128;
+                    D_003BD834->phase = 0;
+                    if (D_003BD834->entry != entry && D_003BD834->row != row) {
+                        btlCreateSelectionTrailTask(entry, D_003BD834->row, row);
+                    }
+                }
+                if (kind == 4) {
+                    btlSetActionActorPanelPresentation(object->owner, 1, 0);
+                    if (D_00359160.entries[entry].first != NULL) {
+                        btlResetActorSlotPresentationValue(D_00359160.entries[entry].first, object);
+                    }
+                    if (D_00359160.entries[entry].second != NULL) {
+                        btlResetActorSlotPresentationValue(D_00359160.entries[entry].second, object);
+                    }
+                }
+            }
+        } else if (state != 2 || object->state != state) {
+            D_003BD834->alpha = 128;
+            D_003BD834->phase = 0;
+        }
+        D_003BD834->entry = entry;
+        D_003BD834->cursor = cursor;
+        D_003BD834->row = row;
+        break;
+    case 11:
+        D_003BD834->alpha -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        D_003BD834->alpha = D_003BD834->alpha <= 0 ? 0 : D_003BD834->alpha <= 128 ? D_003BD834->alpha : 128;
+        entry = object->selections[kind].entry;
+        cursor = object->selections[kind].cursor;
+        row = entry - cursor;
+        break;
+    case 6:
+    case 8:
+        D_003BD834->alpha -= 32;
+        D_003BD834->alpha = D_003BD834->alpha <= 0 ? 0 : D_003BD834->alpha <= 128 ? D_003BD834->alpha : 128;
+        entry = object->selections[kind].entry;
+        cursor = object->selections[kind].cursor;
+        row = entry - cursor;
+        break;
+    }
+    func_001B3300(object, kind);
+    color = ((u8)D_003BD834->alpha) | 0x80808000;
+    colors.values[0] = color;
+    colors.values[1] = color;
+    colors.values[2] = color;
+    colors.values[3] = color;
+    y = row * 23;
+    effDrawSpriteWithCornerColors(0x90, (y + 0x14F) << 3, 0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
+    opacity = (u8)D_003BD834->alpha;
+    shade = (opacity >> 2) << 24;
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSubmitGradientTriangle(0x1F, y + 0x14C, 0xB9, y + 0x14C, 0x11, y + 0x15A,
+        shade | 0xFF2400U, shade | 0xA00200U, shade | 0xFF2200U);
+    evtSubmitGradientTriangle(0x11, y + 0x15A, 0xB9, y + 0x14C, 0x15, y + 0x15E,
+        shade | 0xFF2200U, shade | 0xA00200U, shade | 0xFF2000U);
+    evtSubmitGradientTriangle(0x15, y + 0x15E, 0xB9, y + 0x14C, 0xBD, y + 0x150,
+        shade | 0xFF2000U, shade | 0xA00200U, shade | 0xC00400U);
+    evtSubmitGradientTriangle(0x15, y + 0x15E, 0xBD, y + 0x150, 0xAF, y + 0x15E,
+        shade | 0xFF2000U, shade | 0xC00400U, shade | 0xE00800U);
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A30);
 
