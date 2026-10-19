@@ -2363,7 +2363,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 /* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
-void evtNoOpRGBEditorRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *runtime) {
+void evtNoOpRGBEditorRow(SdfListHead *list, s32 x, s32 y, s32 row, void *runtime) {
 }
 
 extern f32 sdfViewMatrix[];
