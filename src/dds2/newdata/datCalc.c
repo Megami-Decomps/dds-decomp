@@ -1346,7 +1346,66 @@ s32 ptyAddUnit(s32 rosterIndex) {
     return ptyAddUnitWithFlags(rosterIndex, 0);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", ptyRemoveUnitWithFlags);
+s32 ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
+    s32 partyIndex;
+    s32 i;
+    s32 completeSlotCount;
+    s32 *modelFlags;
+    s32 result;
+    u16 itemId;
+
+    partyIndex = dds3FindEntryIndex(unitId);
+    if (partyIndex < 0) {
+        return 0;
+    }
+
+    itemId = datGameState->party[partyIndex].itemId;
+    if (flags == 0 && itemId != 0) {
+        datGameState->inventory.counts[itemId] = 1;
+        datGameState->party[partyIndex].itemId = 0;
+    }
+
+    memcpy(&datGameState->templates[unitId], &datGameState->party[partyIndex], sizeof(DatPartyRecord));
+    for (i = partyIndex; i < 4; i++) {
+        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(DatPartyRecord));
+    }
+    memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+
+    modelFlags = D_00386048[unitId];
+    for (i = 0; i < 4U; i++) {
+        s32 modelFlag = *modelFlags++;
+        if (modelFlag != 0) {
+            mdlFlagClear(modelFlag);
+        }
+    }
+
+    completeSlotCount = 0;
+    for (i = 0; i < 5; i++) {
+        if ((datGameState->party[i].flags & 3) == 3) {
+            completeSlotCount++;
+        }
+    }
+    /* One shared "return 1" tail for the no-complete-slot fallthrough and the
+     * complete-slot case: the join block keeps two predecessors, so the last
+     * rebalance test stays a branch instead of if-converting to a conditional
+     * move (the split-tail form reached noce_try_cmove; cc1probe --ifcvt on
+     * this form shows no noce conversion, hooked==unhooked verify OK). */
+    if (completeSlotCount == 0) {
+        result = ptyRebalanceFrontline(1);
+        if (result == 1) {
+            return result;
+        }
+        result = ptyRebalanceFrontline(2);
+        if (result == 1) {
+            return result;
+        }
+        result = ptyRebalanceFrontline(5);
+        if (result == 1) {
+            return result;
+        }
+    }
+    return 1;
+}
 
 s32 ptyRemoveUnit(s32 unitId) {
     return ptyRemoveUnitWithFlags(unitId, 0);
