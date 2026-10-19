@@ -14998,3 +14998,17 @@ artificial use. The qualified `sandbox_PurBoss/purity_queue/probe_finalizer_life
 capture (`--func mnuFinishMantraProfileSelection --cse`) has equal hooked and
 unhooked output. The target remains 180 bytes and the entire unit gates at
 58 match, zero differ. No flags, expected objects or data ownership change.
+
+## Actor MP presentation is a two-state channel switch
+
+DDS1 `func_001BB440` and DDS2 `func_001C6648` update the HP channel first,
+then switch on the MP presentation state. Only 0x11 and 0x21 advance its
+20-frame timer; the default arm returns immediately. An expired timer clears
+the MP presentation and its finished actor-slot channels. This mirrors the
+real state-machine operation, without a `goto finished` tail label.
+
+The explicit default return is significant: an implicit switch fall-through
+produces an extra epilogue and 676 bytes, while the actual early-return state
+machine retains the retail 648-byte function and ordinary final call.
+Both whole units gate exactly (238 DDS1 and 277 DDS2 functions), as do the
+three standard canaries. No ABI, flags, expected assembly or data changes.
