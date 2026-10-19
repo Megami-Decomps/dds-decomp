@@ -20,4 +20,12 @@ typedef char MnuSpritePlacementXOffsetCheck[
 typedef char MnuSpritePlacementYOffsetCheck[
     ((u32)&((MnuSpritePlacement *)0)->y == 0x06) ? 1 : -1];
 
+/* Placement-backed renderers share pixel coordinates, opacity, flags and an image index. */
+typedef void (*MnuIndexedSpriteDraw)(s32, s32, s32, s32, s32, s32, s32);
+static inline void mnuDrawIndexedSpriteWith(MnuIndexedSpriteDraw draw,
+                                          s32 x, s32 y, s32 z, s32 alpha,
+                                          s32 flags, s32 index, s32 context) {
+    draw(x, y, z, alpha, flags, index, context);
+}
+
 #endif
