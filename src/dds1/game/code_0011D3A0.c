@@ -656,6 +656,13 @@ void fldDrawPercentValue(s32 x, s32 y, s32 value) {
         strcat(text, fldNumberGlyphText(10));
         value = -value;
     }
+    /* One-pass block (CONTRIBUTING "A one-pass block inside a function").
+     * cc1probe (compile with the block removed vs. kept, rtl.14.combine/
+     * rtl.19.lreg, sandbox_H2/f1/ca and cb, hooked == unhooked): the block adds
+     * NOTE_INSN_LOOP_BEG/CONT/END around the division, which gives `digit`
+     * loop-depth weight. Without it `digit` is tied to the divide result and
+     * loses its own register (retail keeps `move $4,$3` after mflo and
+     * `move $4,$16` after mfhi); 39 of 82 words differ. */
     do {
         digit = value / 10;
     } while (0);

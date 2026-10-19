@@ -1370,8 +1370,13 @@ extern char D_003BC720[];
 
 /* Draw a party page: the slot sprites for the page layout, then the two
  * numeric labels formatted from the page values. The compact layout sits in a
- * loop scope, so its last glyph call carries no tail-call placeholder and both
- * layouts share it (retail's cross-jumped label call). */
+ * one-pass block with a forward goto (CONTRIBUTING "A one-pass block inside a
+ * function"). cc1probe --jump (sandbox_H2/f5/pl vs pj, hooked == unhooked):
+ * with the block, find_cross_jump(uid360, uid509) => MATCH and do_cross_jump
+ * merges the first layout's final glyph call into the compact layout's;
+ * with a plain if/else the join carries a `(use 0)` after the call/copy pair
+ * (rtl.25.sched2 uid680) and find_cross_jump reports "no usable common tail",
+ * leaving 73 of 144 words different. */
 void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources *page, s32 drawArg) {
     char text[0x10];
     FrFontGlyph *glyph;
