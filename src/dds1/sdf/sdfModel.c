@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_packet_callback.h"
 #include "sdf_measure_command.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -545,7 +546,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
 
     model->flags &= (u8)~0x10;
     if (model->flags & SDF_MODEL_ALTERNATE_ITEM_SETUP) {
-        sdfModelBuildVisibleNodePackets(surfaces, model);
+        sdfBuildModelPacketsVia(sdfModelBuildVisibleNodePackets, surfaces, model);
     }
 
     frame = (s8)sdfCurrentBufferIndex;

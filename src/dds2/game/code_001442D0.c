@@ -1,4 +1,5 @@
 #include "fld_projected_sprite.h"
+#include "sdf_model_packet_callback.h"
 #include "fld_label_rows.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -512,7 +513,6 @@ extern s32 D_004361D0;
 
 extern SdfPoolNode *D_00380838[4];
 
-extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 s32 fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
@@ -1262,7 +1262,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    sdfModelBuildNodeResourcePackets(D_00380838, emitter);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, D_00380838, emitter);
 }
 
 extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,

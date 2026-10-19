@@ -1,4 +1,5 @@
 #include "dds3_path.h"
+#include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
@@ -3297,7 +3298,6 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
-extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
@@ -3354,7 +3354,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     } else {
         overlay->lighting = NULL;
     }
-    sdfModelBuildNodeResourcePackets(surfaces, overlay);
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);

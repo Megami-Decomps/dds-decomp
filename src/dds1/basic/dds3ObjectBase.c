@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
@@ -406,7 +407,6 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
 
 #include "fld_area_work.h"
 extern s32 fldTestRoomObjectModeFlag(s32, u32, s32);
-extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 extern void mdlBlendEntryPitchYawAndUpdate(MdlCtx *, struct SdfPoolNode **, s32, f32, f32);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
@@ -570,12 +570,8 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
         }
     }
     ((SdfModel *)base->resourceHandle)->color = object->color;
-    sdfModelBuildNodeResourcePackets(surfaces, (SdfModel *)base->resourceHandle);
-    /* Retail ends in jal + epilogue here (not a sibling jump), like
-     * dds3SetObjectSlot1MoverCallback in this unit. The retired pointer is
-     * still there at rtl.01.sibling/02.jump/03.cse (cc1probe) and is gone by
-     * rtl.08.gcse. */
-    base = NULL;
+    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces,
+                           (SdfModel *)base->resourceHandle);
 }
 
 /* Create and attach kind-3 slot data only when the data slot is empty.

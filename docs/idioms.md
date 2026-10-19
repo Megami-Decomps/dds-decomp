@@ -14923,3 +14923,24 @@ external bank symbols remain intentional native interfaces, not invented
 aliases. The unit is `64/0`; all five header consumers and all three
 canaries gate exactly (`flat_format_gates.json`). No flags, expected
 assembly, data ownership or inline assembly change.
+
+## Model packet dispatch uses both real builders
+
+The visible-node and per-node-resource builders append packets to the same
+surface-pool interface. `sdfBuildModelPacketsVia` retains that typed operation:
+there are eight DDS1 call sites and eleven DDS2 call sites, and each game
+actually uses both `sdfModelBuildVisibleNodePackets` and
+`sdfModelBuildNodeResourcePackets`. Keep their common `void` return contract.
+The visible builder's native exit leaves either the outer-loop test or the
+updated model flags in `$v0`; its caller overwrites that register without
+consuming a result. An implicit integer declaration is not a status API.
+
+The qualified `sandbox_PurBoss/purity_queue/probe_packet_dispatch` capture
+(`--func effObjApplyTransformParameters --cse`, hooked/unhooked equal) shows
+the inlined dispatch as ordinary `call_insn/i` uid1065 in `rtl.01.sibling`,
+with its genuine inline block end following it. No retired-base assignment is
+needed to retain the retail `jal` and epilogue in either transform updater.
+Both remain 1120 bytes and differ in zero native words. All thirteen family
+units, including every includer of `sdf_model_packet_callback.h`, gate at
+2520 match and zero differ; the three standard canaries also gate exactly.
+No unit flags, expected assembly, data ownership or VU assembly are changed.
