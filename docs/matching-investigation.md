@@ -471,3 +471,27 @@ unchanged source/dependency/configuration inputs; refresh checks affected by
 actual changes. Administrative work or documentation edits do not invalidate
 an unchanged successful source check. A focused match, near-match or matching
 subset never replaces the complete acceptance gate.
+
+## Compiler-local function names
+
+GNU C nested functions can be emitted as a local `name.N` even when the
+curated retail symbol is simply `name`. For example, the two channel-loader
+units emit `sdfLoadChannelFileSegment.0`. An unresolved name also makes a call
+into that local function look like a wrong retail call target; it does not by
+itself establish a game-source regression.
+
+`check_unit.py` resolves this case only when both the C-only and ASM-inclusive
+objects independently identify one local `STT_FUNC` in `.text`, with matching
+`nm` and `objdump` extents, and the unsuffixed stem is explicitly a retail
+function. Plain/suffixed peers, multiple suffixes, conflicting metadata, and
+non-function or global definitions do not receive this inferred alias. An
+explicit configured name always wins. Existing address-derived names retain
+their separate resolution rules.
+
+The inferred address does not rename the emitted function. Focused selection
+still requires the exact emitted name: use `--func sdfLoadChannelFileSegment.0`,
+not its unsuffixed stem. Body bytes, real call targets, and full-context
+comparisons remain mandatory. Compiler-free regressions cover both successful
+resolution and failures for changed bodies/calls, ambiguous identities, and
+conflicting explicit mappings. The two original channel-loader units verify
+44/0 (DDS1) and 45/0 (DDS2); correcting this diagnostic adds no matching credit.

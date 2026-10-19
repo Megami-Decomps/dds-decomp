@@ -939,5 +939,190 @@ class InitializedDataTests(unittest.TestCase):
         self.assertTrue(any("STT_OBJECT inventories differ" in p for p in problems))
 
 
+class CompilerLocalFunctionAliasTests(unittest.TestCase):
+    def aliases(self, funcs=None, metadata=None, syms=None, function_names=None):
+        return check_unit.compiler_local_function_aliases(
+            "00000000 l F .text 00000008 helper.0\n" if metadata is None else metadata,
+            [(0, 8, "helper.0")] if funcs is None else funcs,
+            {"helper": 0x1000} if syms is None else syms,
+            {"helper"} if function_names is None else function_names)
+
+    def test_unique_local_function_gets_exact_canonical_address(self):
+        self.assertEqual(self.aliases(), {"helper.0": 0x1000})
+        self.assertIsNone(check_unit.address("helper.0", {"helper": 0x1000}))
+
+    def test_explicit_suffixed_symbol_wins(self):
+        syms = {"helper": 0x1000, "helper.0": 0x2000}
+        self.assertEqual(self.aliases(syms=syms), {})
+        self.assertEqual(check_unit.address("helper.0", syms), 0x2000)
+
+    def test_plain_peer_other_suffix_and_duplicate_are_ambiguous(self):
+        for peer in ((8, 8, "helper"), (8, 8, "helper.1"), (0, 8, "helper.0")):
+            with self.subTest(peer=peer):
+                self.assertEqual(self.aliases(funcs=[(0, 8, "helper.0"), peer]), {})
+
+    def test_zero_size_definition_peers_are_ambiguous_even_when_nm_omits_them(self):
+        for peer in ("helper", "helper.1"):
+            for flags in ("l F", "g F"):
+                with self.subTest(peer=peer, flags=flags):
+                    self.assertEqual(self.aliases(metadata=(
+                        "0 l F .text 8 helper.0\n"
+                        f"8 {flags} .text 0 {peer}\n")), {})
+
+    def test_exact_suffixed_address_survives_zero_size_peer(self):
+        syms = {"helper": 0x1000, "helper.0": 0x2000}
+        self.assertEqual(self.aliases(
+            metadata="0 l F .text 8 helper.0\n8 g F .text 0 helper\n",
+            syms=syms), {})
+        self.assertEqual(check_unit.address("helper.0", syms), 0x2000)
+
+    def test_requires_an_explicit_retail_function_stem(self):
+        for syms, names in (({}, {"helper"}), ({"helper": 0x1000}, set())):
+            with self.subTest(syms=syms, names=names):
+                self.assertEqual(self.aliases(syms=syms, function_names=names), {})
+
+    def test_requires_local_function_type_text_section_and_matching_extent(self):
+        for row in (
+            "", "0 g F .text 8 helper.0", "0 l O .text 8 helper.0",
+            "0 l F .data 8 helper.0", "4 l F .text 8 helper.0",
+            "0 l F .text 4 helper.0", "0 l F .text 0 helper.0",
+            "0 l F .text 8 helper.0\n0 l F .text 8 helper.0",
+        ):
+            with self.subTest(row=row):
+                self.assertEqual(self.aliases(metadata=row), {})
+
+    def test_nonnumeric_and_compound_clone_suffixes_remain_unresolved(self):
+        for name in ("helper.isra.0", "helper.clone", "helper.", "helper.0x1"):
+            with self.subTest(name=name):
+                self.assertEqual(self.aliases(
+                    funcs=[(0, 8, name)], metadata=f"0 l F .text 8 {name}"), {})
+
+
+class NestedFunctionCheckerTests(unittest.TestCase):
+    def run_checker(self, requested=None, *, helper_word=0x03E00008,
+                    full_helper_word=None, retail_call=0x0C000400,
+                    metadata_flags="l F", full_name="helper.0",
+                    full_flags="l F", extra_full=(), extra_skip=(),
+                    explicit_address=None):
+        """Run the complete checker with fake objects; never invoke cc.sh."""
+        compiled = struct.pack("<IIII", helper_word, 0, 0x0C000000, 0)
+        full_code = struct.pack("<IIII", helper_word if full_helper_word is None
+                                else full_helper_word, 0, 0x0C000000, 0)
+        retail = struct.pack("<IIII", 0x03E00008, 0, retail_call, 0)
+        skip_funcs = [(0, 8, "helper.0"), (8, 8, "caller"), *extra_skip]
+        full_funcs = [(0, 8, full_name), (8, 8, "caller"), *extra_full]
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root / "src/dds1/game/unit.c"
+            unit.parent.mkdir(parents=True)
+            unit.write_text("void caller(void) {\n    void helper(void) {}\n}\n")
+            config = root / "config/dds1"
+            config.mkdir(parents=True)
+            declarations = "helper = 0x1000; // type:func\ncaller = 0x1008; // type:func\n"
+            if explicit_address is not None:
+                declarations += f"helper.0 = 0x{explicit_address:X}; // type:func\n"
+            (config / "symbol_addrs.txt").write_text(declarations)
+            (config / "SLUS_209.74.yaml").write_text("")
+            original = root / check_unit.RETAIL["dds1"]
+            original.parent.mkdir(parents=True)
+            original.write_bytes(retail)
+            argv = ["check_unit.py", str(unit)]
+            if requested is not None:
+                argv.extend(["--func", requested])
+            stack.enter_context(patch.object(check_unit, "ROOT", root))
+            stack.enter_context(patch.object(check_unit.sys, "argv", argv))
+            stack.enter_context(patch("eeas_compat.lit4_range", return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
+            stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
+            stack.enter_context(patch.object(check_unit, "text_section", side_effect=lambda obj: full_code if str(obj).endswith("full.o") else compiled))
+            stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
+            stack.enter_context(patch.object(check_unit, "relocations", return_value={
+                ".text": {8: ("R_MIPS_26", ".text")}, ".rodata": {}, ".sdata": {}}))
+
+            def object_output(*args):
+                full = str(args[-1]).endswith("full.o")
+                functions = full_funcs if full else skip_funcs
+                if "-S" in args:
+                    # Real nm -S omits the size column for zero-size symbols.
+                    return "".join(
+                        f"{offset:x} " + (f"{size:x} " if size else "")
+                        + f"{'T' if name == 'caller' else 't'} {name}\n"
+                        for offset, size, name in functions)
+                if "-t" in args:
+                    flags = full_flags if full else metadata_flags
+                    return "".join(f"{offset:x} {'g F' if name == 'caller' else flags} .text {size:x} {name}\n"
+                                   for offset, size, name in functions)
+                return ""
+
+            stack.enter_context(patch.object(check_unit, "run", side_effect=object_output))
+            stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code, output.getvalue()
+
+    def test_whole_unit_resolves_nested_body_and_local_call(self):
+        status, report = self.run_checker()
+        self.assertEqual(status, 0, report)
+        self.assertIn("OK   helper.0 @ 0x00001000", report)
+        self.assertIn("OK   caller @ 0x00001008", report)
+        self.assertIn("2 match, 0 differ", report)
+
+    def test_focused_selection_still_requires_exact_emitted_name(self):
+        status, report = self.run_checker("helper.0")
+        self.assertEqual(status, 0, report)
+        self.assertIn("1 match, 0 differ", report)
+        status, report = self.run_checker("helper")
+        self.assertEqual(status, 1, report)
+        self.assertIn("MISSING helper: requested function not emitted", report)
+
+    def test_real_helper_difference_is_not_masked(self):
+        status, report = self.run_checker(helper_word=0x03E00009)
+        self.assertEqual(status, 1, report)
+        self.assertIn("DIFF helper.0", report)
+        self.assertIn("1 match, 1 differ", report)
+
+    def test_real_call_target_difference_is_not_masked(self):
+        status, report = self.run_checker(retail_call=0x0C000402)
+        self.assertEqual(status, 1, report)
+        self.assertIn("DIFF caller", report)
+        self.assertIn("retail calls a different function", report)
+
+    def test_full_unit_helper_difference_keeps_context_failure(self):
+        status, report = self.run_checker(full_helper_word=0x03E00009)
+        self.assertEqual(status, 1, report)
+        self.assertIn("CONTEXT helper.0", report)
+        self.assertIn("full unit vs retail: 1 of 2 words differ", report)
+
+    def test_both_objects_must_prove_unique_local_identity(self):
+        for arguments in (
+            {"metadata_flags": "g F"}, {"metadata_flags": "l O"},
+            {"full_flags": "g F"}, {"full_name": "helper.1"},
+            {"extra_full": [(0, 8, "helper.1")]},
+            {"extra_skip": [(0, 8, "helper.1")]},
+            {"extra_full": [(0, 8, "helper")]},
+            {"extra_skip": [(0, 8, "helper")]},
+        ):
+            with self.subTest(arguments=arguments):
+                status, report = self.run_checker(**arguments)
+                self.assertEqual(status, 1, report)
+                self.assertIn("helper.0: no address", report)
+
+    def test_zero_size_peer_in_either_object_blocks_alias_and_call_resolution(self):
+        for context in ("extra_skip", "extra_full"):
+            for peer in ("helper", "helper.1"):
+                with self.subTest(context=context, peer=peer):
+                    status, report = self.run_checker(**{context: [(8, 0, peer)]})
+                    self.assertEqual(status, 1, report)
+                    self.assertIn("helper.0: no address", report)
+                    self.assertIn("DIFF caller", report)
+                    self.assertIn("0 match, 2 differ", report)
+
+    def test_explicit_symbol_mapping_is_not_overridden_by_stem(self):
+        status, report = self.run_checker(explicit_address=0x1008)
+        self.assertEqual(status, 1, report)
+        self.assertIn("DIFF helper.0 @ 0x00001008", report)
+
+
 if __name__ == "__main__":
     unittest.main()
