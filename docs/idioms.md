@@ -11531,11 +11531,42 @@ The names do not guess what category 11 means to the consumer.
 stream cancellation. It remains a distinct entry point from the standalone
 named-playback stop, despite using the same packet.
 
-`sdfPrintTextLine` forwards the native incoming `$a0` to libc's `puts`
-entry. Its reentrant worker builds two I/O vectors for the input string
-and one newline byte; the literal is `0x0A` at DDS1 `0x003B7AA0` and DDS2
-`0x00431BE0`. The zero-formal, void C definitions are deliberately retained
-for matching; this naming closure does not repair that source-level ABI.
+`sdfPrintTextLine(const char *text)` explicitly forwards its string to libc's
+`puts` entry: DDS1 `func_003004E8`, DDS2 `puts`. The reentrant worker builds
+two I/O vectors for the input string and one newline byte; the literal is
+`0x0A` at DDS1 `0x003B7AA0` and DDS2 `0x00431BE0`. Both pointer-taking
+definitions and their actual argument expressions match the whole native
+units. A zero-formal wrapper that merely leaves the string in `$a0` is not
+an acceptable representation of this call.
+
+The same explicit-forwarding rule applies to the stored-bill entry index,
+party-record status mask, AI-counter threshold, device seek operation,
+power-off semaphore context and selected autoattack unit. These values
+belong in the wrapper's real formals and call expressions, not in an
+unprototyped call that depends on incoming `$a0`-`$a2` surviving.
+DDS2 `evtWriteOutputBytes` likewise passes all three arguments to the SDK
+`sceWrite`; its existing 32-bit address word is converted to `const void *`
+at that API boundary. The power-off callback receives its registered
+`void *` context and converts the semaphore ID to the SDK's `int`.
+
+Both device-worker selector APIs take an `s32` worker index, as the DDS1
+definitions and existing DDS2 caller declaration already show. Their byte
+stores constrain the state fields, not the API argument width. Restoring
+the two DDS2 formals and the fallback declaration to `s32` permits explicit
+worker forwarding without the spurious call-site sign-narrowing pair.
+
+A genuinely load-bearing original C89 prototype scope is a separate case.
+Publishing the true `void` declaration for `effRequestResourceByMode`
+changes `effPollResourceList`'s post-call flag value from `$3` to `$2`
+at `+0x68` and `+0x70`. Publishing `frFontListInsert`'s true `void`
+declaration similarly changes the three post-call cache-counter operations
+at `+0x5C`, `+0x60` and `+0x64` in both interface-font TUs.
+Those native-proven implicit scopes may remain; they do not justify a
+false return declaration, omitted consumed arguments or a dummy barrier.
+
+The memory-card directory API uses the SDK 2.4 `sceMcStDateTime` and
+`sceMcTblGetDir` names, layout and 64-byte alignment in `mc_path_api.h`,
+with the original six-parameter `sceMcGetDir` prototype.
 
 ## Roster hooks, viewer setup and packed-list ownership names
 
