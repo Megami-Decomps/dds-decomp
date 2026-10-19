@@ -3413,7 +3413,88 @@ void fldResetObjectSlots(void) {
     D_0043630C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldInitializeHuntSparkUnit);
+extern s32 D_00389784[];
+extern FldNpcPalette D_0044FD90;
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+void fldInitializeHuntSparkUnit(EvtUnit *unit) {
+    EffWorldNode *object;
+    MdlCtx *resource;
+    FldNpcPaletteEntry *row;
+    s32 index;
+    f32 angle, height, radians;
+    f32 direction[4];
+    u32 colorA, colorB;
+    s32 red, green, blue;
+
+    object = unit->effObj;
+    resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(object);
+    VU0_LOAD_VF(vf10, object->inner->rotation);
+    index = D_00389784[0] + 1;
+    if (index >= 64) {
+        index = 63;
+    }
+    row = &D_0044FD90.entries[index];
+    height = 0.0f;
+    angle = -effMiscComputeQuaternionRotatedReferenceAngle();
+    if (row->phase >= 20) {
+        angle = (f32)((row->phase - 20) % 20);
+        angle = angle * 360.0f * 0.0625f;
+        angle += 180.0f;
+        if (row->phase >= 60) {
+            height = -0.6f;
+        } else if (row->phase >= 40) {
+            height = 0.6f;
+        }
+    } else {
+        if (row->phase == 0) {
+            angle = angle * 180.0f / 3.14f;
+            angle += 70.0f;
+            height = 0.6f;
+        } else if (row->phase == 1) {
+            angle = angle * 180.0f / 3.14f;
+            angle -= 70.0f;
+            height = 0.6f;
+        } else if (row->phase == 2) {
+            angle = angle * 180.0f / 3.14f;
+            angle -= 70.0f;
+            height = -0.6f;
+        } else if (row->phase == 3) {
+            angle = angle * 180.0f / 3.14f;
+            angle += 70.0f;
+            height = -0.6f;
+        } else {
+            angle = angle * 180.0f / 3.14f;
+            angle += 70.0f;
+            height = 0.6f;
+        }
+    }
+    evtSetUnitStatusFlags(unit);
+    radians = angle * 3.14f;
+    dds3SetObjectFlags(object, 0x100);
+    sdfSetModelScalarOverrides(resource->inner, (f32)(row->textPair >> 4), (f32)(row->textPair & 15));
+    radians /= 180.0f;
+    direction[0] = sdfSinPoly(radians);
+    direction[1] = height;
+    direction[2] = sdfEvaluateCosineViaSinePhaseShift(radians);
+    direction[3] = 0.0f;
+    VU0_LOAD_VF(vf10, direction);
+    VU0_NORMALIZE_VF10();
+    evtSetUnitNormalizedDirection(unit, 0);
+    red = row->colorA[0];
+    green = row->colorA[1];
+    blue = row->colorA[2];
+    colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+    red = row->colorB[0];
+    green = row->colorB[1];
+    blue = row->colorB[2];
+    colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+    evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+    VU0_LOAD_VF(vf10, direction);
+    VU0_NORMALIZE_VF10();
+    evtSetUnitNormalizedDirection(unit, 0);
+    evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+}
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413AE8);
 
