@@ -3198,7 +3198,96 @@ void func_001AF5D0(BtlLinkedCommand *unused, BtlAnalysisPanelWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AFF78);
+extern const BattlePanelColors D_003A25C0;
+
+/* Draw the analysis panel's two-piece HP/MP bar and restore each cropped slot. */
+void func_001AFF78(BtlAnalysisPanelWork *work, s32 stat, s32 x, s32 y, s32 alpha) {
+    s32 frames[][2][3] = {
+        {{119, 30, 0x30}, {170, 30, 0x31}},
+        {{119, 54, 0x36}, {170, 54, 0x37}}
+    };
+    s32 bars[][2][3] = {
+        {{119, 30, 0x2E}, {170, 30, 0x2F}},
+        {{119, 54, 0x34}, {170, 54, 0x35}}
+    };
+    /* Retail retains this default copy before all four corner overrides. */
+    BattlePanelColors colors = D_003A25C0;
+    s32 current;
+    s32 maximum;
+    s32 count;
+    s32 i;
+    s32 j;
+    f32 ratio;
+    f32 divisor;
+    f32 span;
+    f32 secondRatio;
+    f32 pixelWidth;
+    f32 spriteWidth;
+
+    if (stat == 0) {
+        current = ((BtlUnit *)work->entry)->partyRecord.hp;
+        maximum = ((BtlUnit *)work->entry)->partyRecord.maxHp;
+        divisor = (f32)maximum;
+        ratio = (f32)current;
+    } else {
+        current = ((BtlUnit *)work->entry)->partyRecord.mp;
+        maximum = ((BtlUnit *)work->entry)->partyRecord.maxMp;
+        divisor = (f32)maximum;
+        ratio = (f32)current;
+    }
+    ratio /= divisor;
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 4; j++) {
+            colors.values[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA,
+                frames[stat][i][2], j, alpha);
+        }
+        effDrawSpriteWithCornerColors((x + frames[stat][i][0]) << 4,
+            (y + frames[stat][i][1]) << 3, 0, colors.values, 0,
+            btlResourceBlock->resA, frames[stat][i][2], 0x53);
+    }
+    if (ratio < 0.5f) {
+        count = 1;
+    } else {
+        count = 2;
+    }
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < 4; j++) {
+            colors.values[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA,
+                bars[stat][i][2], j, alpha);
+        }
+        if (i == 0) {
+            if (ratio < 0.5f) {
+                span = (f32)(btlResourceBlock->resA->descriptions[bars[stat][i][2]].colors[2] -
+                    btlResourceBlock->resA->descriptions[bars[stat][i][2]].colors[0]);
+                btlResourceBlock->resA->workEntries[bars[stat][i][2]].parameters[2] =
+                    (s32)(span * ratio * 2.0f - span);
+                spriteWidth = (f32)btlResourceBlock->resA->workEntries[bars[stat][i][2]].sourceWidth;
+                pixelWidth = spriteWidth * ratio * 2.0f;
+                btlResourceBlock->resA->workEntries[bars[stat][i][2]].geometry.bounds[2] =
+                    (s32)(pixelWidth * 16.0f);
+            }
+        } else {
+            if (ratio < 1.0f) {
+                secondRatio = ratio - 0.5f;
+                span = (f32)(btlResourceBlock->resA->descriptions[bars[stat][i][2]].colors[2] -
+                    btlResourceBlock->resA->descriptions[bars[stat][i][2]].colors[0]);
+                btlResourceBlock->resA->workEntries[bars[stat][i][2]].parameters[0] =
+                    (s32)-(span * secondRatio * 2.0f - span);
+                spriteWidth = (f32)btlResourceBlock->resA->workEntries[bars[stat][i][2]].sourceWidth;
+                pixelWidth = spriteWidth * secondRatio * 2.0f;
+                btlResourceBlock->resA->workEntries[bars[stat][i][2]].geometry.bounds[2] =
+                    (s32)(pixelWidth * 16.0f);
+            }
+        }
+        effDrawSpriteWithCornerColors((x + bars[stat][i][0]) << 4,
+            (y + bars[stat][i][1]) << 3, 0, colors.values, 0,
+            btlResourceBlock->resA, bars[stat][i][2], 0x53);
+        btlResourceBlock->resA->workEntries[bars[stat][i][2]].geometry.bounds[2] =
+            btlResourceBlock->resA->workEntries[bars[stat][i][2]].sourceWidth << 4;
+        btlResourceBlock->resA->workEntries[bars[stat][i][2]].parameters[0] = 0;
+        btlResourceBlock->resA->workEntries[bars[stat][i][2]].parameters[2] = 0;
+    }
+}
 
 typedef struct BtlPanelStrip {
     s32 x;
