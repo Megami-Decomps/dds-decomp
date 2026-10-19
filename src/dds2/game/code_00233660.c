@@ -3711,7 +3711,7 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
 
 extern void evtDisableSolarPhaseAdvance(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
-extern void evtSetSolarPhase(u8 phase);
+extern void evtSetSolarPhase(s32 phase);
 
 void mdlResetViewerFlagsAndSolarOverlay(void) {
     mdlFlagClearAll();
