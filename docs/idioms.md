@@ -11573,6 +11573,19 @@ and `s32` arguments, and its effect caller publishes that same prototype.
 Task-list user data is a signed 32-bit address word in `sdf_task_work.h`;
 convert that word once to the real menu-resource pointer at the boundary.
 
+The pending-work graph query and its interrupt-preserving wrapper are boolean
+queries: their definitions return only `0` or `1`. Use `s32` consistently for
+both return contracts, the wrapper's saved result and its consumers. Narrowing
+only the local while retaining a false `u64` provider contract adds conversions;
+it is not evidence that the original local needed 64 bits.
+
+The DDS2 actor-owner selector callback occupies the
+`s32 (*unk6E4)(BtlUnit *)` slot in `btl_state.h`. Its argument is the actor
+pointer and its result is either zero or that pointer encoded as the existing
+32-bit selector word. Recover that callback signature and perform the explicit
+pointer-to-word conversion at the result boundary; do not represent the
+argument and result as unrelated `u64` scalars.
+
 A genuinely load-bearing original C89 prototype scope is a separate case.
 Publishing the true `void` declaration for `effRequestResourceByMode`
 changes `effPollResourceList`'s post-call flag value from `$3` to `$2`

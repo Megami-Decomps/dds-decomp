@@ -94,7 +94,7 @@ extern s32 sdfPendingQueueSemaphore;
 
 extern s32 sdfCreateSemaphore(u32, u32, u32);
 
-extern u64 sdfGraphHasPendingWork(void);
+extern s32 sdfGraphHasPendingWork(void);
 
 extern s32 DIntr(void);
 
@@ -500,7 +500,7 @@ void sdfRotatePendingSlots(void) {
 }
 
 /* Test all three pending-work sources: flag, chain, and two slots. */
-u64 sdfGraphHasPendingWork(void) {
+s32 sdfGraphHasPendingWork(void) {
     u32 slotIndex;
     s32 *slotCursor;
     if (sdfPendingQueueRotationActive != 0) {
@@ -522,9 +522,9 @@ u64 sdfGraphHasPendingWork(void) {
 }
 
 /* Preserve interrupt state while querying pending work. */
-u64 sdfCheckPendingWorkWithInterrupts(void) {
+s32 sdfCheckPendingWorkWithInterrupts(void) {
     s32 interruptState;
-    u64 pendingWork;
+    s32 pendingWork;
 
     interruptState = DIntr();
     pendingWork = sdfGraphHasPendingWork();

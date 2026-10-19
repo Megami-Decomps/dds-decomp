@@ -2523,7 +2523,7 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
     evtStageTestSelectEntry(entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetOption);
 }
 
-extern u64 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfCheckPendingWorkWithInterrupts(void);
 /* Poll model requests: 0 for an empty queue, 1 while handling a request, 2 otherwise. */
 s32 evtStageTestPollModelRequest(void) {
     StageTestSlot *slot = evtStageTestState.queue.slot;

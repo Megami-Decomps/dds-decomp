@@ -1501,7 +1501,7 @@ extern s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index);
 extern void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit);
 extern void btlMarkSpecialActionUnit(BtlUnit *actor);
 extern void btlMarkUnitActionAndStatusForMode(BtlUnit *unit);
-extern u64 btlMaskValueWhenSubtaskInactive(u64 value);
+extern s32 btlMaskValueWhenSubtaskInactive(BtlUnit *actor);
 extern s32 btlMotionOffsetForActor(s32 actor, s32 base);
 extern u32 btlOffsetSpecialActionValue(BtlUnit *unit, u32 base);
 extern s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command);
