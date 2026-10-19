@@ -34,7 +34,7 @@ extern s32 btlIsLowHpActionReady(s32, s32);
 
 extern u32 btlRandomState;
 
-extern void func_00202668(s32, s32);
+extern s32 func_00202668(BtlTask *, s32);
 extern void func_00202F90(s32, s32);
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
@@ -1292,7 +1292,7 @@ void btlShiftActorStateHistory(u8 *work, s8 flag) {
 
 /* Choose command-record-driven targets; retain the native zero mode argument. */
 void btlChooseCommandActionTargets(s32 context) {
-    func_00202668(context, 0);
+    func_00202668((BtlTask *)context, 0);
 }
 
 /* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
