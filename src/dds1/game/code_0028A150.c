@@ -539,6 +539,8 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     frFontQueueGlyphForCurrentDrawBuffer(fileMenuConvertedTextGlyph);
 }
 
+extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
     fileMenuStringGlyph = frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
@@ -3247,6 +3249,8 @@ void fileCacheSlotFlagsFromState(void) {
 void fileRestoreSlotFlagsToState(void) {
     datGameState->world.slotFlags = fileSavedSlotFlags;
 }
+
+extern s32 fileTestSlotFlagsBit(s32 kind, s32 *flags);
 
 s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
     switch (kind) {

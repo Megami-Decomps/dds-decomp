@@ -1352,6 +1352,8 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }
 
+extern int sceSdRemoteInit(void);
+
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();
     sndInitializeStreamTransferBuffers(wordCount);

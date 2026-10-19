@@ -607,6 +607,9 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     }
 }
 
+extern void btlClearMatchingUnitDefeatCandidates(s32 mask);
+extern void btlFlagAllUnitsDefeatCandidate(void);
+
 void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
     f32 center[4];

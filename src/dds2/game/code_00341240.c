@@ -116,6 +116,8 @@ s32 sndTryDispatchQueuedCommand(void) {
     return 0;
 }
 
+extern int SleepThread(void);
+
 void sdfServiceUnblockedWorkerThread(void) {
     for (;;) {
         do {

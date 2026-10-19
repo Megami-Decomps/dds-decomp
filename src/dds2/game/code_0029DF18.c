@@ -53,6 +53,9 @@ void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
 void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *progressRow, s32 surfaceIndex, s32 rowIndex);
 
+struct EffectSlotSet;
+extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags, struct EffectSlotSet *set, s32 slotIndex, s32 layer);
+
 void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, BrsProgressRow *row,
                    BrsActiveProgressList *list, s32 context, s32 progressRowIndex) {
     u32 color[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
@@ -1349,6 +1352,8 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
     sndDispatchIopAudioCommand(1, 0x8010, 0xF80, 0x7FFF);
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }
+
+extern int sceSdRemoteInit(void);
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();

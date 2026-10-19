@@ -139,6 +139,8 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
     }
 }
 
+extern void *memset(void *, int, unsigned int);
+
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
@@ -240,12 +242,14 @@ typedef struct MnuResourceTask {
 
 extern void mnuDrawMantraPartyListEntry();
 
-extern void *memset(void *, s32, u32);
 
 typedef char MnuResourceTask_size_must_be_0x10[(sizeof(MnuResourceTask) == 0x10) ? 1 : -1];
 
 typedef char MnuResourceTask_menuList_offset_must_be_0x0C[
     ((u32)&((MnuResourceTask *)0)->menuList == 0x0C) ? 1 : -1];
+
+struct MenuList;
+extern struct MenuList * mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing);
 
 /* Build party selections in unit-ID order from the five present rows.
  * i honestly serves first as a row index, then as the remaining order-table counter. */
@@ -297,6 +301,8 @@ static inline struct MenuListNode *mnuMoveResourceListCursor(
         struct MenuList *list, struct MenuListNode *(*move)(struct MenuList *)) {
     return move(list);
 }
+
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 void mnuStopResourceAnimation(void) {
     s32 taskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
@@ -828,7 +834,6 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
 }
 
 /* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 
 extern u32 mnuGetSelectedNodeValue(void);
 #define MNU_SCENE_WORK_SIZE 0x5B0
@@ -1116,7 +1121,6 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 }
 
 
-extern void *memset(void *, s32, u32);
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 MenuSceneWork *mnuCreateSceneWork(void) {
@@ -1152,6 +1156,8 @@ extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
 extern void mnuHandleMantraGridInput(MenuSceneWork *);
 extern void mnuReinitializeSceneGrid(s32);
+
+extern s32 evtCreateMessageWindowIfMissing(s32 sub);
 
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF810);
 
@@ -1622,7 +1628,6 @@ MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
     return (MnuMantraGridEntry *)(u32)scene->gridHandle->cursor->value;
 }
 
-extern s32 evtCreateMessageWindowIfMissing(s32);
 extern void *memcpy(void *, const void *, u32);
 
 s32 mnuBeginMantraProfileSelection(void) {
@@ -2204,7 +2209,6 @@ typedef struct DspTableWindowContext {
 
 extern DspUnitSpriteTable D_003BC440[];
 extern DspMantraName *D_003BAA78;
-extern void *memset(void *, s32, u32);
 extern u32 strlen(const char *);
 extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
 

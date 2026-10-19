@@ -468,6 +468,9 @@ extern u32 D_0034E090[],D_0034E0A0[];
 extern SdfPoolNode *D_0034E0B0[];
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
+extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
+extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
+
 void func_001528C0(EffUnitObject *instance) {
     EffPacketParams params;
     s32 modeValues[3];

@@ -44,6 +44,8 @@ extern s32 sdfConsMeasurePacketWithHeader(s32 address);
 
 #include "sdf_packet_alloc.h"
 
+extern void effDrawSpriteWithWorkCornerColors(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer);
+
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *resource, s32 resourceIndex, s32 surfaceIndex) {
     void *renderEntry = effGetSlotWorkOrOverride(resource, resourceIndex);
@@ -796,6 +798,8 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
+
+extern void *memset(void *, int, unsigned int);
 
 /* vu0 routine: the SDK quadword copies are present at 002C12F0..002C130C. */
 void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f32 *third,

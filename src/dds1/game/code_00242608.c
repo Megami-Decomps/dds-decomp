@@ -860,6 +860,9 @@ void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
 }
 
 extern s32 D_00368BD8[];
+struct FrFontGlyph;
+extern struct FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
+
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
@@ -1289,6 +1292,8 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
 }
 
 
+
+extern void mnuDestroyWindowContainer(MenuWindowContainer *window);
 
 void mnuShopReleaseSprites(ShopScene *scene) {
     MenuWindowContainer **slot = scene->ownedWindows;

@@ -153,6 +153,8 @@ void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
     actor->selectedEntryIndex = -1;
 }
 
+extern void *memset(void *, int, unsigned int);
+
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
 void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {
     u32 count;
@@ -1160,6 +1162,8 @@ s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
+extern s32 evtGetMirroredSolarPhase(void);
+
 s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag) {
     if (datUnitHasSkill(object, flag) == 0) {
         return 0;
@@ -1175,6 +1179,8 @@ s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag) {
 }
 
 extern EffRandState effSharedRandomState[];
+
+extern s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode);
 
 s32 btlSelectActorAction(s32 object) {
     s32 result = btlSelectEnemyDropItem(object, 1);

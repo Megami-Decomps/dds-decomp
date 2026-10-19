@@ -223,6 +223,8 @@ EffWork *effAllocSubWork(EffWork *work) {
 void effDispatchNodeScaleNoOp(void) {
 }
 
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+
 void effSubmitAdminModeRequestZero(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
@@ -318,6 +320,9 @@ void effRunIfEnabled(s32 directory) {
         sceDclose(directory);
     }
 }
+
+extern char *strcpy(char *, const char *);
+extern unsigned int strlen(const char *);
 
 /* Debug mode delegates to the native iterator. Built-in mode copies the next name,
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */

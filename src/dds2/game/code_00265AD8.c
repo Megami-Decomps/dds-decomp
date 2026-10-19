@@ -228,6 +228,9 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
     return result;
 }
 
+extern void mnuDrawShopPanelDecorations(MenuTerminalContext *scene);
+extern void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFrames);
+
 s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
 
@@ -288,6 +291,9 @@ s32 evtAdvanceTerminalMenuMessage(KwlnTask *callback) {
     dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
 }
+
+extern void evtClearActiveFlag(s32 flagIndex);
+extern void sndReleaseTrackHandle(u32 trackHandle);
 
 u32 mnuStartReturnFadeAndRestoreDisplay(void) {
     evtClearActiveFlag(0);

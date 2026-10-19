@@ -74,6 +74,8 @@ extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32, s32);
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Interleave rows from both color buffers into the queued destination. */
 void sdfCaptureDeferredGsImage(void) {
     s32 width;
@@ -297,6 +299,8 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
 }
 
 extern vu8 sdfCurrentBufferIndex;
+
+extern void sdfSelectDoubleBuffer(s32 bufferIndex);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {

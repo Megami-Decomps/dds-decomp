@@ -26,6 +26,8 @@ void effBlurSecondInitSlots(EffBlurScaleWork *work) {
     }
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
 EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
     s32 count = src->count;

@@ -93,6 +93,8 @@ extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32, s32);
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Interleave rows from both color buffers into the queued destination. */
 void sdfCaptureDeferredGsImage(void) {
     s32 width;
@@ -288,6 +290,8 @@ extern void sdfResizeDoubleBuffer(s32);
 extern void sdfResetPacketSlotState(void);
 extern void sdfRegisterTextureReleaseRequestHandler(void);
 
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+
 /* Reset GS/buffer state and start graphics workers; packetBufferBytes sizes each packet-buffer half. */
 void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
     s32 thread;
@@ -312,6 +316,8 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
     sdfStartTrackedThread(&sdfGraphicsBufferThread, sdfServiceGraphicsBuffers, sdfGraphicsBufferThreadStack,
                           0x1000, 0x40, 0);
 }
+
+extern void sdfSelectDoubleBuffer(s32 bufferIndex);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {
@@ -390,6 +396,8 @@ s32 sdfTexListContains(SdfTex *target) {
     } while (node != NULL);
     return 0;
 }
+
+extern int EIntr(void);
 
 SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
     SdfTexResource *block;
@@ -878,6 +886,8 @@ s32 sdfTexGetPrimaryBufferSize(const SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
+extern void sdfTexCreateSecondPacket(SdfTex *texture);
+
 SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buffer;
 
@@ -987,6 +997,8 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
     }
     buffer->samplingState = (minFilter << SDF_MIN_FILTER_SHIFT) | ((magFilter << SDF_MAG_FILTER_SHIFT) | (buffer->samplingState & ~SDF_TEX_FILTER_MASK));
 }
+
+extern void sdfTexRefreshResourcePackets(SdfTex *texture);
 
 void sdfTexSetClampMode(SdfTex *texture, SdfTextureClampMode mode) {
     texture->clampMode = mode;

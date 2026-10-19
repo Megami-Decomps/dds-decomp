@@ -130,6 +130,9 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
 
 extern s8 mnuCampTaskState;
 
+extern void mnuReleaseAssets(MenuAssets *assets);
+extern void sndStopReducedBgm(void);
+
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
 void mnuDestroyStaffMenuTask(KwlnTask *task) {
@@ -151,6 +154,8 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     sndStopReducedBgm();
 }
 
+extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
+
 s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     s32 context;
 
@@ -162,6 +167,9 @@ s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
 void mnuDestroyCampTasks(void);
+
+extern s32 evtStageTestPollModelRequest(void);
+extern s32 fileConsumeConfigTaskReady(void);
 
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
@@ -277,6 +285,8 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
 
 extern const StaffGridLabelRow D_003B2100[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
     StaffGridLabelRow rows[7];
     s32 i;
@@ -314,6 +324,9 @@ void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 contex
 void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 drawOption, s32 layer) {
     mnuDrawCampGridAndLabel(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
+
+extern void mnuDrawBackdrop(MenuAssets *assets, s32 option);
+extern void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth, MenuScrollPanel *panel, s32 surface);
 
 void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);

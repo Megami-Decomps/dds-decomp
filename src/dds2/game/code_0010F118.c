@@ -29,6 +29,8 @@ u32 ptyScriptApplyEventPenalty(void) {
     return 1;
 }
 
+extern void ptyRecoverAllUnits(void);
+
 u32 ptyScriptRestoreEntireParty(void) {
     ptyRecoverAllUnits();
     return 1;

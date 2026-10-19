@@ -338,6 +338,8 @@ void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *entry, Ef
     entry->entryOption = option;
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
 void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom) {
@@ -655,6 +657,8 @@ void mnuInitializeWindowSpriteGroup(MenuWindowSpriteGroup *group, u32 source, u3
 }
 
 extern void mnuInitializeWindowSpriteGroup(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
+
+extern void *memset(void *, int, unsigned int);
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
@@ -1264,6 +1268,9 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
 u8 mnuHasScrollPanelOverlay(MenuScrollPanel *panel) {
     return panel->active[0].set != 0;
 }
+
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex);
+extern void uiDrawActiveSurfaceRegion(s32 surfaceIndex);
 
 void mnuDrawPanelGridAndSubmitSurface(s32 x, s32 y, s32 unused,
                                       MenuScrollPanel *panel, s32 surface) {
@@ -2337,6 +2344,8 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
 }
 
 extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
+
+extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];

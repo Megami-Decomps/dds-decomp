@@ -60,6 +60,8 @@ void sdfPacResetOutputToAllocationEntry(PacState *state);
 
 
 
+extern void sdfPacAdvanceCallbackBoundary(PacState *state);
+
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
 s32 sdfPacFeedInput(PacState *state, const u8 *input, s32 inputByteCount) {
     s32 consumeBytes;

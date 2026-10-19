@@ -491,11 +491,17 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     return 0;
 }
 
+struct EffWorldNode;
+extern s32 dds3InvokeWorldCallbackFirst(struct EffWorldNode *holder);
+
 /* Invoke the active world's first callback column; this task step returns zero. */
 s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task) {
     dds3InvokeWorldCallbackFirst(dds3ActiveWorld);
     return 0;
 }
+
+struct EffWorldNode;
+extern s32 dds3InvokeWorldCallbackSecond(struct EffWorldNode *holder);
 
 /* Invoke the active world's second callback column; this task step returns zero. */
 s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task) {

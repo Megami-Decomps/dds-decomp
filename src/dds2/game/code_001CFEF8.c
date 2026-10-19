@@ -215,6 +215,12 @@ void fldBattleSceneEnterInit(u8 *scene) {
     VU0_STORE_VF($vf0, scene);
 }
 
+extern s32 btlIsEventSequenceTaskReady(void);
+extern s32 btlIsFadeInPhaseOrIdle(void);
+extern u8 sndIsStreamStatusTwoOrThree(void);
+extern void btlBindEventEffectResources(void);
+extern void sndLoadBattleBank(void);
+
 s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
         btlIsEventSequenceTaskReady() != 0 &&
@@ -225,6 +231,9 @@ s32 btlLoadBankWhenTasksIdle(void) {
     }
     return 0;
 }
+
+extern BtlRuntimeTask * btlCreateFloorLoadTask(s32 stage, s32 variant);
+extern BtlRuntimeTask * fldCreateSceneTileTask(s32 value, s32 option);
 
 u64 fldMarkGridTiles(BtlState *scene) {
     BtlRuntimeTask *tile = (BtlRuntimeTask *)fldCreateSceneTileTask(scene->background.ids.major, scene->background.ids.minor);
@@ -262,6 +271,15 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
 
 extern void btlReleaseUnitResources(BtlUnit *);
 extern BtlUnit *btlCreateUnit(void);
+extern s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *record);
+extern s32 btlSelectPreemptiveOutcome(void);
+extern s8 btlChooseStartVoice(void);
+extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
+extern void btlClearUnitStatusMask(void);
+extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index);
+extern void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index);
+
 void btlInitializeBattleUnits(BtlState *scene) {
     s32 battleMode;
     u32 index;
@@ -453,7 +471,6 @@ extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
 extern BtlRuntimeTask *sndCreateEarringTask(void);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
-extern s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *);
 
 void btlQueueSceneActorModelEntry(BtlState *scene) {
     BtlUnit *unit;
@@ -1213,6 +1230,21 @@ const char D_004171E0[] __attribute__((aligned(8))) = "btl:end [BTL_END_ESCAPE]\
 const char D_00417200[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\n";
 const char D_00417220[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
 extern s8 D_0037F510[];
+extern s32 btlAllActiveUnitsReady(void);
+extern s32 btlCountRegisteredTasks(void);
+extern s32 btlReleaseScriptResourceB(void);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern s32 sndIsCommandBusySigned(void);
+extern s32 sndLoadAndPlayStationedSe(u32 soundId);
+extern s8 brsTaskIsUpdateBlocked(void);
+extern void btlClearModelFlagRange(void);
+extern void btlRemoveActorsWithFlags(u32 mask);
+extern void btlResetActorEntryState(void);
+extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
+extern void mnuResetTitleStreamLocked(void);
+extern void sndQueueNoPayloadCommand1A0(void);
+extern void sndQueueNoPayloadCommand210(void);
+
 s32 func_001D22D8(BtlState *scene) {
     s32 state;
     s32 request;
@@ -1439,6 +1471,8 @@ u32 fldStepAreaLoad(BtlState *work) {
     return 0;
 }
 
+extern void btlFlagTasksForUpdate(void);
+
 void fldMarkLinkedSceneActors(u8 *scene) {
     u8 *node;
     btlAdvanceTitleStateWithAudioCleanup(scene);
@@ -1454,7 +1488,6 @@ void fldMarkLinkedSceneActors(u8 *scene) {
 
 extern void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId);
 extern void dds3WorkClear(void);
-extern s32 btlCountRegisteredTasks(void);
 
 /* Restore the party after all scene tasks finish, then clear battle activity. */
 s32 btlFinishScenePartyRecovery(BtlState *scene) {
@@ -1858,6 +1891,8 @@ void fldConsumeSceneSlotCounters(s32 amount, u8 mode) {
         }
     }
 }
+
+extern s32 fldCountSceneSlots(void);
 
 /* Insert half-counter slots for the current variant, clamped to eight entries. */
 void fldInsertSceneSlots(s32 slotCount) {

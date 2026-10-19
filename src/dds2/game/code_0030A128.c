@@ -352,6 +352,8 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
     return 0;
 }
 
+extern void *memset(void *, int, unsigned int);
+
 void fldStartLmapTask(s32 mode) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(0x88);
     LmapTaskState *taskData = (LmapTaskState *)sdfMemoryGetBlockAddress(allocation);

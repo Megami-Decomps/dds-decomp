@@ -28,6 +28,8 @@ extern u32 effResourceDefaultTriangleColors[];
 
 extern SdfPoolNode *effResourceDrawSurfaces[];
 
+extern void *memset(void *, int, unsigned int);
+
 /* Create an effect resource work with count entries, its entry list inline at +0x74. */
 EffResourceWork *effCreateResourceEntryWork(u32 count) {
     struct SdfMemBlock *allocation;

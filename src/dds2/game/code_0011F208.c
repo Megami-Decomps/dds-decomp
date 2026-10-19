@@ -872,6 +872,8 @@ static inline void fldAppendToDisplaySurface(SdfListHead *list) {
     surface->append(surface, list);
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412BB8);
 
 void func_00120B88(EffWorldNode *object) {

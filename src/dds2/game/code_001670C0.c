@@ -271,6 +271,8 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
 
 extern u32 D_003AAFD0[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
 void *effCreateVertexDrawPacket(EffPacketParams *params) {
     s32 parameterCount = params->parameterCount;
@@ -535,7 +537,6 @@ void dds3EndCrossfade(void) {
     sdfDebugPrintf(D_00414430);
 }
 
-extern void *memcpy(void *dst, const void *src, u32 size);
 extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
@@ -600,6 +601,9 @@ extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
 /* Create a voice on the mixer bank selected by kind (0/1: first bank, 2+:
  * second): link it into the mixer, duplicate each parameter row's work (with
  * the optional unit-scale callback) and count it as active. */
+extern void * sdfAllocSizeClassBlock(s32 size);
+extern void *memset(void *, int, unsigned int);
+
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
 
 BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value) {

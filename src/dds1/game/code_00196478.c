@@ -239,6 +239,8 @@ advanceLine:
 
 extern s8 frFontEncodedTextGlyphSpacing;
 
+extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+
 FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
@@ -1014,6 +1016,11 @@ void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
 
+
+struct EffSpriteUV;
+struct SdfTex;
+union EffSpriteColor;
+extern void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height, const struct EffSpriteUV *uvRect, const union EffSpriteColor *color, u32 flipFlags, u32 blendKind, s32 mode, struct SdfTex *texture, s32 surfaceId);
 
 /* Draw only when a texture is present; native X/Y extent scaling differs. */
 void itfDrawBackgroundSprite(void) {

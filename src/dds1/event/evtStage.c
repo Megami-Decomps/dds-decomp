@@ -92,6 +92,8 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     return 1;
 }
 
+extern u64 sdfCheckPendingWorkWithInterrupts(void);
+
 /* Build a field world object from the supplied resource parameters. */
 s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                      const SdfTextureOffsetListHeader *textureOffsets, s32 flags)

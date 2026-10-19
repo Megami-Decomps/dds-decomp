@@ -453,6 +453,10 @@ extern u32 D_003B21A0[4];
 extern SdfPoolNode D_00380028;
 extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
+extern void *memset(void *, int, unsigned int);
+extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
+extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
+
 void effDrawRotatingTriangleAtPosition(f32 *position) {
     SdfAsset *asset = D_00436458;
     SdfListHead *list;
@@ -1099,6 +1103,8 @@ struct EffEventWork {
 };
 extern void effBattleSetScale(BattleEffect *effect, f32 scale);
 
+extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
     const EffEventInit *init = (const EffEventInit *)params;
@@ -1583,6 +1589,8 @@ struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
 extern SdfPoolNode D_003802A8;
+
+extern s32 billGetChildValue(BillObj *effect);
 
 /* DDS2 event-bill renderer, reconstructed from the native owner and its
  * current providers. The VIF position stream consumes XYZ only: native never

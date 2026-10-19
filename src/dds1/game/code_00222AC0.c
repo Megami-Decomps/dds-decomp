@@ -1475,6 +1475,10 @@ u32 evtCmdCreateEffectObjectFromResource(void) {
     return 1;
 }
 
+struct EffNodeDescriptor;
+struct EffWorldNode;
+extern struct EffWorldNode * effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
+
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC588);
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC5B0);

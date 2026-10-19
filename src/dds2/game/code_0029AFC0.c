@@ -58,6 +58,8 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char brsStatConfirmationPopupEntry[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;

@@ -223,9 +223,13 @@ void mnuDrawStaffRollFrame(s32 surface) {
     i = 0;
 }
 
+extern void mnuLoadStaffFonts(void);
+
 void mnuPrepareStaffRollText(void) {
     mnuLoadStaffFonts();
 }
+
+extern void mnuUnloadStaffFonts(void);
 
 void mnuReleaseStaffRollText(void) {
     mnuUnloadStaffFonts();
@@ -532,6 +536,8 @@ void mnuStopMovieDrawTask(void) {
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
+
+extern s32 sdfPacCheckDecoderStatus(MovObj *job);
 
 s32 mnuCheckMovieDecoderStatus(void) {
     sdfPacCheckDecoderStatus(&mnuMovieDrawContext);

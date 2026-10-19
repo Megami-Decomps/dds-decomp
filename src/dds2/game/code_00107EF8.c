@@ -1167,6 +1167,9 @@ u8 evtWaitFileMenuTaskExit(void) {
     return operationResult == 0;
 }
 
+struct FieldSequenceRecord;
+extern void fldStartFieldSceneTasks(struct FieldSequenceRecord *record, u32 mode);
+
 void evtStartAreaFromSelection(u32 selection, u32 area) {
     kwlnFadeBackgroundStartOut(0);
     fldStartFieldSceneTasks(area, selection);

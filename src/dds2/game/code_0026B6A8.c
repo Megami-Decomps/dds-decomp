@@ -184,6 +184,10 @@ u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
     return 1;
 }
 
+struct MenuSlotState;
+extern void mnuReleaseWorkResources(u8 *work);
+extern void mnuTerminalBuildMenus(struct MenuSlotState *host);
+
 s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
     s32 *state = (s32 *)kwlnTaskGetUserValue(task);
 
@@ -244,6 +248,8 @@ s32 mnuFirstPresentMainCharacterIndex(void) {
 s32 mnuGetScrollingStripCountForLayout(s32 layout) {
     return layout == 1 ? 4 : 6;
 }
+
+extern void *memset(void *, int, unsigned int);
 
 void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
                                 EffectSlotSet *resource, s32 firstFrame,

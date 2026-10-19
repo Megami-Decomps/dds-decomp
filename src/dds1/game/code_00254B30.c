@@ -247,6 +247,8 @@ extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(u16);
 
+extern u32 mnuGetSelectedNodeValue(void);
+
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
@@ -688,7 +690,6 @@ void func_00256E90(s32 frame, s32 unused, s32 alpha, s32 context) {
 
 #undef MANTRA_COMMON_SPRITE
 
-extern s32 mnuGetSelectedNodeValue(void);
 
 void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32 context) {
     MnuProfileProgress *target = (MnuProfileProgress *)mnuGetSelectedNodeValue();

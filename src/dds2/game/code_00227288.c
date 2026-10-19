@@ -1250,6 +1250,8 @@ u32 btlMode313KeepDefaultSceneVariant(void) {
     return 0xffffffff;
 }
 
+extern s32 btlFindScriptResource(char *name);
+
 s32 btlConsumeReadyEventScriptResource(void) {
     s32 result = -1;
     s32 state;
@@ -1265,6 +1267,8 @@ s32 btlConsumeReadyEventScriptResource(void) {
     }
     return result;
 }
+
+extern s32 ptyRebalanceFrontline(s32 rosterIndex);
 
 /* Promote Sera when present but not frontline, with fewer than four occupied
  * entries and fewer than three frontline entries. */

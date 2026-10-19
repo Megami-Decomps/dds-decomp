@@ -566,6 +566,8 @@ extern void btlFlagUserAndTargetDefeat(BtlLinkedCommand *, BtlLinkedCommand *);
 
 extern void btlSetupActionCameraPair(BtlLinkedCommand *);
 
+extern void btlFrameCommandTargetGroups(BtlLinkedCommand *action);
+
 /* Select the linked command's initial cursor step and prepare its camera. */
 void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
     s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk648;
@@ -1101,6 +1103,8 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
 
 void btlUpdateCommandCameraNoOp(void) {
 }
+
+extern void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *startActor, BtlIndexList *indices, s8 mode);
 
 /* Update the action camera from target-policy results once the link reaches state seven. */
 void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {

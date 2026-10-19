@@ -131,6 +131,9 @@ extern TitleAudioStreamState mnuTitleSoundBufferState;
 void mnuResetTitleStream(void);
 void mnuReleaseSoundBuffer(void);
 
+extern void *memcpy(void *, const void *, unsigned int);
+extern void mnuConfigureTitleAudioStream(s32 transferSize);
+
 void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_003BC5CC + 1;
     u8 *source;
@@ -234,6 +237,10 @@ void mnuUpdateTitleAudioStreams(void) {
 }
 
 
+extern int SignalSema(int);
+extern int WaitSema(int);
+extern void sdfSleepThreadCount(s32 requestedSleepCount);
+
 void mnuRunTitleStreamThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
@@ -249,6 +256,8 @@ extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 
+extern s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum);
+
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
     sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
@@ -260,6 +269,8 @@ extern u32 mnuTitleStreamDecoderState[];
 extern u32 mnuTitleSoundBufferDecoderState[];
 extern u8 mnuTitleStreamDecodedSamples[];
 extern u8 mnuTitleSoundBufferDecodedSamples[];
+
+extern void *memset(void *, int, unsigned int);
 
 void mnuInitializeTitleAudioStreams(void) {
     memset(mnuTitleAudioSilenceBuffer, 0, 0x1000);
@@ -292,9 +303,7 @@ void mnuInitializeTitleAudioStreams(void) {
     mnuCreateTitleStreamThread();
 }
 
-extern s32 WaitSema(u32);
 
-extern s32 SignalSema(u32);
 
 /* Read state words 0, 1 and 3; the frame-byte word 2 is not in this snapshot. */
 void mnuReadTitleStreamStatusLocked(TitleAudioStreamStatusSnapshot *statusSnapshot) {
@@ -680,6 +689,8 @@ void mnuReleaseSoundBufferLocked(void) {
     mnuReleaseSoundBuffer();
     SignalSema(mnuTitleStreamSemaphore);
 }
+
+extern void mnuLoadMovieMenuResourceSlots(void);
 
 void mnuLoadTitleMenuAssets(void) {
     mnuLoadMovieMenuResourceSlots();

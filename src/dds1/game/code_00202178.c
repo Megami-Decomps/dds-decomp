@@ -3222,6 +3222,8 @@ void btlDestroySpecialUnitSlot(void) {
     }
 }
 
+extern u8 * btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value);
+
 /* Launch a subtask from the active slot and return its new scheduler handle.
  * Zero leaves the constructor's condition intact; otherwise wait for the
  * prerequisite task to disappear. The fixed high-bit owner value is preserved.

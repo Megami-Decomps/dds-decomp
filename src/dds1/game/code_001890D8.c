@@ -6,6 +6,8 @@
 
 extern s16 D_003D6670[];
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
     EffMagatuhiOwner *effect;
 
@@ -20,6 +22,8 @@ void effReleaseMagatuhiOwner(EffMagatuhiOwner *resource) {
     effMagatuhiReleaseResource(resource->valueWork);
     sdfReleaseChipBlock(resource);
 }
+
+extern void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work);
 
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *resource) {
     effMagatuhiDrawHistoryTrails(resource->valueWork);

@@ -146,6 +146,8 @@ void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
                                   (struct EffMappedResource *)context->spriteResource);
 }
 
+extern void mnuDestroyWindowContainer(MenuWindowContainer *window);
+
 void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
     StaffWindowResources *resources;
 
@@ -255,6 +257,9 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, void *owner) {
     node->sortKeyPrimary = quantity;
     return window->list->count != 0;
 }
+
+struct StaffMenuWork;
+extern void mnuSetStaffDisplayMode(s32 nextCategory, struct StaffMenuWork *menu);
 
 void mnuSelectStaffDisplayCategory(u32 context) {
     mnuSetStaffDisplayMode(2, context);

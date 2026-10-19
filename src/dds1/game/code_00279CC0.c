@@ -74,6 +74,9 @@ typedef struct MenuPartyRuntime {
     s32 selectedPage;   /* 0x2C */
 } MenuPartyRuntime;
 
+extern MenuListNode * mnuAdvanceListSelection(MenuWindowContainer *window, s32 direction);
+extern MenuListNode * mnuReverseListSelection(MenuWindowContainer *window, s32 direction);
+
 /* Shift the chosen child window to target's row; the cursor index selects its slot. */
 void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
     s32 *entry = (s32 *)menu + **(s32 **)(((MenuPartyRuntime *)menu)->selectionList + 0x1C);
@@ -387,6 +390,8 @@ void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
     mnuSortItems(windows[0]->list, 0, 1);
     *selectedWindow = windows[0];
 }
+
+extern void mnuDestroyWindowContainer(MenuWindowContainer *window);
 
 u32 mnuDestroySkillSelectionWindow(KwlnTask *task) {
     s32 window;

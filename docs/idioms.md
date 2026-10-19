@@ -11555,6 +11555,15 @@ stores constrain the state fields, not the API argument width. Restoring
 the two DDS2 formals and the fallback declaration to `s32` permits explicit
 worker forwarding without the spurious call-site sign-narrowing pair.
 
+Check the producer's real return declaration and the local value width before
+calling an implicit scope load-bearing. The field, BGM and world-node command
+adapters read signed 32-bit VM parameters or room indices and pass 32-bit
+arguments. Holding those values in `u64` makes a newly visible real callee
+prototype introduce `dsll32`/`dsra32` narrowing. Restoring the actual `s32`
+locals together with the true declarations removes that artifact and matches
+all five affected units; preserving the `u64` carrier is not justified by the
+prototype-only failure.
+
 A genuinely load-bearing original C89 prototype scope is a separate case.
 Publishing the true `void` declaration for `effRequestResourceByMode`
 changes `effPollResourceList`'s post-call flag value from `$3` to `$2`

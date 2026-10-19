@@ -446,6 +446,8 @@ extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
  * others roll a script-supplied chance (capped at 70, scaled by ability 0x232). */
+extern SoundTask * btlCreateCommandSoundUpdateTask(void);
+
 /* Roll ailment recovery, queue status removal and advance the acting unit's state. */
 void btlProcessStatusRecoveryAction(BtlTask *link) {
     BtlOperandEntry spec;
@@ -598,6 +600,8 @@ void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
     }
     *(u32 *)(battleTask + 8) |= 0x200;
 }
+
+extern void btlOpenBattleCommandPanel(BtlTask *task);
 
 /* Enter COMMAND by clearing its one-shot audio flag and opening the command panel. */
 void btlEnterCommandSelectionState(u32 task) {

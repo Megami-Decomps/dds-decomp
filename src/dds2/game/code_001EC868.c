@@ -146,7 +146,7 @@ typedef struct BtlCameraVectors {
     f32 target[3];
 } BtlCameraVectors;
 
-extern struct BtlRuntimeTask *btlCreateHookedUnitSoundTask();
+extern struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *unit, s32 option);
 
 extern u32 D_00436AD4;
 
@@ -7365,6 +7365,9 @@ void btlStepBlendColor(void) {
     btlStepTintTransition();
 }
 
+struct EffSolidRectParams;
+extern void effDrawSolidRectangle(struct EffSolidRectParams *source);
+
 void btlDrawTintIfVisible(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;
     if (transition->currentColor & 0xFF000000) {
@@ -9549,10 +9552,12 @@ void sndReleaseAllSlotOwners(void) {
     }
 }
 
-void btlStartMoveOtherUnitsTask(void) {
-    u64 task;
+extern u64 btlStartTask(void *taskObject);
 
-    task = btlCreateHookedUnitSoundTask();
+void btlStartMoveOtherUnitsTask(BtlUnit *unit, s32 soundId) {
+    struct BtlRuntimeTask *task;
+
+    task = btlCreateHookedUnitSoundTask(unit, soundId);
     btlStartTask(task);
 }
 

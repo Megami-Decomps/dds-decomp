@@ -72,6 +72,9 @@ void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *work) {
     sdfDebugPrintf("************************Score Reset!![%d]\n", pendingScore);
 }
 
+struct SoundSlot;
+extern struct SoundSlot * dds3ClaimSoundSlot(u32 sequence, u32 frames);
+
 /* Clamp/quantize progress; reaching the last band starts the timed completion state. */
 void mnuUpdateShootingProgressTier(MnuShootingWork *timer) {
     s32 progress;

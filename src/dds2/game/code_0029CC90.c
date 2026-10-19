@@ -47,6 +47,9 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *skillPackage) {
     brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5], 0, color, res, 0x53, skillPackage);
 }
 
+extern void brsAnimateSkillIconRows(BrsSkillPackageWork *work);
+extern void brsDrawResultPanelSprites(BrsSkillPackageWork *work);
+
 void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
     s32 remaining = 0x100 - work->fadeProgress;
 
@@ -174,6 +177,8 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
 s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
     return 0;
 }
+
+extern void *memset(void *, int, unsigned int);
 
 s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;

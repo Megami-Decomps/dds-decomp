@@ -23,6 +23,9 @@ extern s32 D_003BC5A8;
 extern s32 D_003BC5AC;
 
 
+extern void sdfCreateRuntimeTask(void);
+extern void sdfDestroyRuntimeTask(void);
+
 /* The title-menu callback passes zero; the restart does not use it. */
 void mnuRestartRuntimeAfterViewer(s32 unused) {
     evtDestroySecondaryWorldNode();

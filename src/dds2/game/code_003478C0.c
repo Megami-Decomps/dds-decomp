@@ -121,6 +121,9 @@ enum {
 extern s32 D_00439220;
 extern const u8 *D_0047BC80[16];
 
+extern void *memcpy(void *, const void *, unsigned int);
+extern void *memset(void *, int, unsigned int);
+
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
 s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {

@@ -2,6 +2,8 @@
 #include "ui_color.h"
 #include "mnu.h"
 
+extern void mnuClearPanelWorkState(u32 panel);
+
 void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     s32 remaining;
     s32 entry;

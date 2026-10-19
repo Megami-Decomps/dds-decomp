@@ -156,6 +156,8 @@ extern void effParamWorkCallback3(EffParamWork *, u32); extern void effParamWork
 extern void effParamWorkCallback5(EffParamWork *, f32); extern void effParamWorkInvokeCallback(EffParamWork *);
 extern void fileSetRenderFlag(u32); extern void fileClearRenderFlag(u32);
 extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode);
+extern void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame);
+
 INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DE0);
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DF0);

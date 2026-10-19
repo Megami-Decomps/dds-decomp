@@ -218,6 +218,8 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
     }
 }
 
+extern void *memset(void *, int, unsigned int);
+
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
 struct SdfMemBlock *mtrMantraEventBitPush(void) {
@@ -350,6 +352,8 @@ extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern struct MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
+
 void mtrSynchronizeMantraFlagsAcrossParty(void) {
     DatPartyRecord first;
     DatPartyRecord second;

@@ -103,6 +103,8 @@ void kwlnDrawCopyRow128(u128 *source) {
     PCP_COPY_VECTOR(&kwlnDefaultColorVector, source);
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Copy the five-word draw vector parameter body, without interpreting its words. */
 void kwlnDrawCopyWords20(KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
@@ -878,6 +880,9 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         }
     }
 }
+
+extern float fabsf(float);
+extern void *memset(void *, int, unsigned int);
 
 /* vu0 routine: shortest-arc quaternion rotating direction vf10 to vf11. */
 void kwlnBuildShortestArcQuaternion(void) {

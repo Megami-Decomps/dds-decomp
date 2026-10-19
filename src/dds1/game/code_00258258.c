@@ -16,6 +16,8 @@ extern u32 D_003E274C[];
 
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 
+extern void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
+
 /* Connect prerequisite cells with a straight stroke or a three-stroke bend. */
 void mnuDrawMantraPrerequisiteLink(s32 x, s32 y, s32 z, s32 cellWidth,
                                  s32 cellHeight, u32 color, s32 direction,

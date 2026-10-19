@@ -24,6 +24,8 @@ typedef struct MenuRenderState {
     u8 snapshot[0x1C4]; /* 0x54 */
 } MenuRenderState;
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Tear the panel's effect down, snapshot the live list, then bring the panel
  * back with the snapshot in front of it. */
 void mnuRebuildProfilePanelFromRenderSnapshot(MenuRenderState *state) {

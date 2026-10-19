@@ -59,6 +59,8 @@ extern void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA,
                                        f32 blueA, f32 redB, f32 greenB, f32 blueB,
                                        f32 x, f32 y, f32 z);
 
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+
 /* Apply the selected scene-light set with the requested transition duration. */
 void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
     FldLightSet *light;

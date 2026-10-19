@@ -272,6 +272,8 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 extern void *_gp;
 extern s32 CreateThread(SdfKernelThreadParam *);
 
+extern void *memset(void *, int, unsigned int);
+
 /* Create a kernel thread from a zeroed descriptor that uses the caller's
  * workspace as its stack and the program's GP. */
 s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {

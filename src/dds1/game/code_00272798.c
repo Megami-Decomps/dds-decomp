@@ -116,6 +116,8 @@ s32 mnuFinishStaffConfigPopup(KwlnTask *request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
+extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
+
 s32 mnuStartStaffDisplay(KwlnTask *task) {
     StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     mnuSetStaffDisplayMode(5, context);

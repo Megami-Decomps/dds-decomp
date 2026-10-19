@@ -37,6 +37,8 @@ extern s32 sdfMoviePacRingSemaphore;
 extern s32 D_003BDABC;
 extern u8 D_003BD638[];
 
+extern void *memset(void *, int, unsigned int);
+
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
 void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
     SoundFormat soundFormat;

@@ -479,6 +479,9 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 extern u32 D_003AA9C0[],D_003AA9D0[];
 extern SdfPoolNode *D_003AA9E0[];
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
+extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
+
 /* vu0 routine: native instance matrix composition before billboard geometry. */
 
 void func_0015A4B0(EffInstance *instance) {

@@ -444,6 +444,8 @@ static inline s32 debugFileUpper(s32 c) {
     return islower(c) ? c - 'a' + 'A' : c;
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 void mdlRefreshDebugModelWorkFileList(void) {
     DebugDirectoryEntry directory;
     s32 index;
@@ -1632,6 +1634,8 @@ extern char D_00437098[];
 extern char D_004370A0[];
 extern char D_004370A8[];
 
+extern void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity);
+
 /* Draw the pending resource details and the current selection in each model node. */
 void mdlDrawViewerAssetSelection(void) {
     SifCommand packet;
@@ -2790,6 +2794,8 @@ extern s8 D_0037F532[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern u32 sdfGetLodChunkValue(SdfModel *);
+extern s32 sdfAllocPacketAligned(s32 size);
+
 s32 mdlViewer(KwlnTask *task) {
     SdfModel *model;
     SdfGsPacketHeader *packet;
@@ -3702,6 +3708,10 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
 
 
 
+
+extern void evtDisableSolarPhaseAdvance(void);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern void evtSetSolarPhase(u8 phase);
 
 void mdlResetViewerFlagsAndSolarOverlay(void) {
     mdlFlagClearAll();

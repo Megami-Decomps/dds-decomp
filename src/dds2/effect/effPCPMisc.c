@@ -2962,6 +2962,8 @@ void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 value) {
 }
 
 
+extern void *memset(void *, int, unsigned int);
+
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
 EffPCPBlockSetWork *effPcpCreateBlockSetWork(const EffPCPBlockSetParams *params, void **blocks) {
     EffPCPBlockSetWork *work;
@@ -3060,7 +3062,6 @@ void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork
 }
 
 
-extern void *memset(void *s, int c, u32 n);
 
 
 /* Clone of a block-set work that shares the source's blocks (no back pointer). */

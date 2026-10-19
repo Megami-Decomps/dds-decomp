@@ -112,7 +112,8 @@ extern s32 sprintf(char *buffer, const char *format, ...);
 
 extern u8 D_003BB820[];
 
-extern u64 btlCreateCommandSoundUpdateTask(void);
+struct SoundTask;
+extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
 
 
 typedef struct BtlActor {
@@ -155,9 +156,9 @@ typedef union BtlVec4 {
     u128 q;
 } BtlVec4;
 
-extern u64 btlCreateSecondaryCommandSoundTask(void);
+extern u8 *btlCreateSecondaryCommandSoundTask(void);
 
-extern u64 btlCreateCommandSoundTask(u64, u64);
+extern void *btlCreateCommandSoundTask(s32 owner, s32 variant);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -1565,6 +1566,8 @@ u32 btlScriptSetBattleWorkParameter(void) {
     return 1;
 }
 
+extern void btlChooseCommandActionTargets(s32 context);
+
 /* Select targets for the current command's action; return VM success. */
 u32 btlScriptChooseActionTargets(void) {
     btlChooseCommandActionTargets(scrGetCurrentCommandWork());
@@ -1579,11 +1582,15 @@ u32 btlScriptPickElementCheckedTarget(void) {
     return 1;
 }
 
+extern void btlPickCommandLowestHpTarget(s32 context);
+
 /* Select the current command's minimum nonzero-HP candidate; return VM success. */
 u32 btlScriptPickLowestHpTarget(void) {
     btlPickCommandLowestHpTarget(scrGetCurrentCommandWork());
     return 1;
 }
+
+extern void btlPickCommandLowestHpRatioTarget(s32 context);
 
 /* Select the current command's minimum HP-percentage candidate; return VM success. */
 u32 btlScriptPickLowestHpRatioTarget(void) {
@@ -1599,11 +1606,15 @@ u32 btlScriptPickLowestHpBlockTarget(void) {
     return 1;
 }
 
+extern void btlPickCommandHighestMpTarget(s32 context);
+
 /* Pick the current command's highest-MP target and return VM completion. */
 u32 btlScriptPickHighestMpTarget(void) {
     btlPickCommandHighestMpTarget(scrGetCurrentCommandWork());
     return 1;
 }
+
+extern void btlPickCommandLowestLevelTarget(s32 context);
 
 /* Run the current command's minimum-value target selector; return VM success. */
 u32 btlScriptPickLowestLevelTarget(void) {
@@ -1641,11 +1652,15 @@ u32 btlScriptChooseActionTargetsDuplicate(void) {
     return 1;
 }
 
+extern void btlPickUnlinkedCommandTarget(u32 task, u32 input);
+
 /* Run the current script command's unlinked-party target selection; return script success. */
 u32 btlScriptPickUnlinkedPartyTarget(void) {
     btlPickUnlinkedCommandTarget(scrGetCurrentCommandWork(), 0);
     return 1;
 }
+
+extern void btlPickLinkedCommandTarget(u32 task, u32 input);
 
 /* Run the current script command's linked-party target selection; return script success. */
 u32 btlScriptPickLinkedPartyTarget(void) {
@@ -1658,6 +1673,8 @@ u32 btlScriptAppendActorToTargets(void) {
     btlAppendActorToCommandTargets(scrGetCurrentCommandWork(), 0);
     return 1;
 }
+
+extern void btlAddEffectActorTargetToCommand(s32 context);
 
 /* Append the global effect actor to this command's targets; return VM success. */
 u32 btlScriptAddEffectActorTarget(void) {
@@ -2242,6 +2259,8 @@ u32 btlCmdRememberContextSecondaryFlag(void) {
     return 1;
 }
 
+extern s32 btlHasBossEffectOption(void);
+
 u32 btlCommandReportBossEffectOption(void) {
     if (btlHasBossEffectOption() != 0) {
         scrSetIntegerReturnValue(1);
@@ -2251,6 +2270,8 @@ u32 btlCommandReportBossEffectOption(void) {
     return 1;
 }
 
+extern s32 btlHasEffectActor(void);
+
 u32 btlCmdTestEffectActor(void) {
     if (btlHasEffectActor() != 0) {
         scrSetIntegerReturnValue(1);
@@ -2259,6 +2280,8 @@ u32 btlCmdTestEffectActor(void) {
     }
     return 1;
 }
+
+extern s32 btlIsSpecialEnemyEffectLinkSatisfied(void);
 
 u32 btlCommandReportSpecialEnemyLink(void) {
     if (btlIsSpecialEnemyEffectLinkSatisfied() != 0) {
@@ -2296,6 +2319,8 @@ u32 btlCmdCheckHpPercent(void) {
     return 1;
 }
 
+
+extern s32 btlHasFirstSpecialEnemySpecies(void);
 
 u32 btlScriptReturnFirstSpecialEnemySpecies(void) {
     if (btlHasFirstSpecialEnemySpecies() != 0) {
@@ -2448,6 +2473,8 @@ u32 btlCommandReportEventEffectValue(void) {
     return 1;
 }
 
+extern s32 btlRunRandomWeightedAiTableAction(BtlTask *task);
+
 u32 btlCmdRunWeightedAiSelection(void) {
     btlRunRandomWeightedAiTableAction(scrGetCurrentCommandWork());
     return 1;
@@ -2472,10 +2499,14 @@ u32 btlResetCommandContextAndSetStateFlag(void) {
     return 1;
 }
 
+extern void btlBeginScenePanelFadeOut(void);
+
 u32 btlScriptClearSceneTransition(void) {
     btlBeginScenePanelFadeOut();
     return 1;
 }
+
+extern void btlBeginScenePanelFadeIn(void);
 
 u32 btlScriptBeginSceneTransition(void) {
     btlBeginScenePanelFadeIn();
@@ -2499,8 +2530,10 @@ u32 btlScriptFlagEnemyDefeatCandidates(void) {
     return 1;
 }
 
-extern s32 btlCreateFloatTask28(s32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern s32 btlScheduleContextReset(void);
+extern u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h);
+extern struct SoundTask *btlScheduleContextReset(void);
+
+extern u64 btlStartTask(void *taskObject);
 
 u32 btlCmdCameraMove(void) {
     f32 pos[3];
@@ -2521,7 +2554,7 @@ u32 btlCmdCameraMove(void) {
 
 
 u32 btlScriptQueueActorCommandSound(void) {
-    u64 task;
+    void *task;
 
     task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
@@ -2533,7 +2566,7 @@ u32 btlScriptQueueActorCommandSound(void) {
 }
 
 u32 btlScriptQueueUnboundCommandSound(void) {
-    u64 task;
+    void *task;
 
     task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
@@ -2638,6 +2671,8 @@ u32 btlCmdReportUnsupportedAllTaikyo(void) {
     return 1;
 }
 
+extern void btlClearSpecialEnemyEntryFlags(void);
+
 u32 btlCmdClearSpecialEnemyFlags(void) {
     btlClearSpecialEnemyEntryFlags();
     return 1;
@@ -2645,6 +2680,8 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 
 extern u8 *D_003BAAA8;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
+
+extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -3038,6 +3075,9 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
 
 extern char *btlBuiltinResourceNames[];
 
+extern char *strcpy(char *, const char *);
+extern unsigned int strlen(const char *);
+
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
@@ -3053,6 +3093,8 @@ s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) 
     return strlen(reader->name);
 }
 
+
+extern u32 effGetGeneralResourceCount(void);
 
 /* Build a scan-order list of built-in names and enabled resource-file categories. */
 BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
@@ -3242,6 +3284,8 @@ extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
+
+extern void * sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...);
 
 /* Update list selection and submit the visible browser rows to its surface. */
 s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {

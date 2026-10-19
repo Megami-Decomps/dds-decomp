@@ -45,6 +45,30 @@ extern s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task);
 extern void frFontReleaseAll(KwlnTask *task);
 extern s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task);
 
+struct EffWorldNode;
+extern struct EffWorldNode * dds3CreateActiveWorldWithValueCapacity(s32 capacity);
+extern void btlInitializeCommandSemaphoreSlots(void);
+extern void btlLoadInputIconsAndSystemSounds(void);
+extern void evtEnsureSolarOverlayTaskAndResetPhase(void);
+extern void evtResetDisplayProjectionAndVectorState(void);
+extern void fileManInit(void);
+extern void fldCreateEncounterTask(void);
+extern void fldCreateFieldEffectTask(void);
+extern void fldInitializeDisplayAndSceneSound(void);
+extern void frFontInitializeSystem(s32 rowBudget, s32 poolCount);
+extern void itfMesInit(void);
+extern void kwlnDebugTaskCreate(void);
+extern void kwlnFadeClear(void);
+extern void kwlnInitMagicState(void);
+extern void kwlnResetPadInputAndMotorState(void);
+extern void kwlnRuntimeStartupHook(void);
+extern void mnuCreateMovieManagerTask(void);
+extern void mnuInitializeTitleAudioAndEffects(void);
+extern void mnuLoadCampResources(void);
+extern void sdfCreateRuntimeTask(void);
+extern void sdfDevConsInit(void);
+extern void sdfResetChannels(void);
+
 s32 kwlnInitializeRuntime(void) {
     evtResetDisplayProjectionAndVectorState();
     kwlnResetPadInputAndMotorState();
@@ -154,6 +178,8 @@ extern void sdfPadBuildButtonStates(void);
 extern void sdfRaiseDeviceThreadPriority(void);
 extern void sdfRestoreDeviceThreadPriority(void);
 extern void LoadExecPS2(const char *, s32, char **);
+
+extern s32 kwlnTaskTickScheduler(void);
 
 void kwlnRunMainLoop(void) {
     u32 startTick;

@@ -825,6 +825,8 @@ DatPartyRecord *dds3FindEntry(s32 rosterIndex) {
     return NULL;
 }
 
+extern void *memcpy(void *, const void *, unsigned int);
+
 /* Promote the selected roster entry into the current frontline boundary. */
 s32 ptyRebalanceFrontline(s32 rosterIndex) {
     DatGameState *scanState;

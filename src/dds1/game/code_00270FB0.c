@@ -211,6 +211,8 @@ void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
     } while (batchIndex < MNU_STAFF_STATUS_BATCH_COUNT);
 }
 
+extern void mnuDrawPartyPageGauges(MenuPageWindow *window, s32 texture);
+
 void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resources,
                                    u32 unused, PartyPanel *partyPanel) {
     mnuInitPageWindow(container, partyPanel, resources->baseResources[3], 7,

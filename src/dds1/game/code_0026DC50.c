@@ -9,6 +9,8 @@ extern void mnuRequestIndexedMovieResource(s32);
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
                           s32 drawContext);
 
+extern void fldDrawCameraColorLayerPass(void);
+
 void mnuDrawFixedSpriteLayerGroup(void) {
     fldDrawCameraColorLayerPass();
     mnuDrawSprite(0, 0, 0, 0, 0, 8, 0x52);
@@ -24,6 +26,8 @@ void mnuRequestDefaultMovieResource(void) {
 
 extern char D_003AFEC8[];
 
+
+extern void *memset(void *, int, unsigned int);
 
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
 SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {

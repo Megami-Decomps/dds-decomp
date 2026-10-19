@@ -102,6 +102,10 @@ s32 itfSetWidgetFlagsAndActivateChild(GridTextWidget *widget, u32 flags) {
     return 1;
 }
 
+extern unsigned int strlen(const char *);
+extern void *memcpy(void *, const void *, unsigned int);
+extern void *memset(void *, int, unsigned int);
+
 /* Own a NUL-terminated text copy; store X scaled by 16 and Y scaled by 8. */
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                u32 reference) {
@@ -470,7 +474,6 @@ s32 itfGetGridChildLayoutMode(GridTextWidget *widget, GridTextListItem *target) 
     return 0;
 }
 
-extern s32 strlen(const char *);
 
 extern char *strcpy(char *, const char *);
 

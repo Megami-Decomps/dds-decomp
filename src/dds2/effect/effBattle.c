@@ -154,6 +154,8 @@ extern void effParamWorkCallback0(EffParamWork *, void *); extern void effParamW
 extern void effParamWorkCallback3(EffParamWork *, u32); extern void effParamWorkCallback4(EffParamWork *, void *);
 extern void effParamWorkCallback5(EffParamWork *, f32); extern void effParamWorkInvokeCallback(EffParamWork *);
 
+extern void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame);
+
 INCLUDE_RODATA(const s32, "effect/effBattle", D_004144A0);
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_004144B0);

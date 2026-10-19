@@ -165,6 +165,8 @@ s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 
+extern void *memset(void *, int, unsigned int);
+
 s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;
     /* Value blocks are interleaved with each row's party-record pointer. */

@@ -20,6 +20,8 @@ s32 btlFindScriptResource(char *name) {
     return bfFindScriptIndexByName((BfFlw0Header *)battle->scriptHandle, path);
 }
 
+extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
+
 /* Start the requested skill script as a child of the battle owner task.
  * The new task uses the owner's scheduler priority minus one. */
 void btlStartSkillEventTask(s32 skill) {
@@ -63,7 +65,6 @@ s32 btlCanStartPrimaryScriptTask(void) {
     return btlFindScriptResource(btlPrimaryScriptResourceName) != -1;
 }
 
-extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 
 /* Find the primary script entry, launch it at owner priority minus one, and mark it started. */
 void btlStartPrimaryScriptTask(void) {

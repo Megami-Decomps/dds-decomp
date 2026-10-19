@@ -194,6 +194,8 @@ extern void sprintf(char *, const char *, ...);
 /* Preserve the complete native format record, including its trailing zeros. */
 const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
+extern void *memset(void *, int, unsigned int);
+
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
 KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];

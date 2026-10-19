@@ -676,6 +676,10 @@ extern s32 btlIsUnitInActiveList(u8 *);
 extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(u16);
 
+extern s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource);
+extern s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
+extern u32 sndGetResourceStatus(SoundResourceNode *sound);
+
 /* Returns nonzero when the scene is idle: frees every actor's unreferenced
  * resource node, then the caller's list node, and requires no waiting actor
  * or scene task of the listed kinds. */

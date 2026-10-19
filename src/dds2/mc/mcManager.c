@@ -27,6 +27,8 @@ McPollResult mcPollStrictSuccess(void) {
     return MC_POLL_ERROR;
 }
 
+extern int sceMcChdir(int, int, const char *, char *);
+
 /* Start a directory change on slot zero using the supplied path. */
 void mcChangeCurrentDirectory(u32 port, const char *path) {
     sceMcChdir(port, MC_CARD_SLOT, path, 0);
@@ -46,6 +48,8 @@ McPollResult mcPollSyncResult(void) {
     }
     return MC_POLL_PENDING;
 }
+
+extern int sceMcMkdir(int, int, const char *);
 
 /* Start directory creation on slot zero using the supplied path. */
 void mcMakeDirectory(u32 port, const char *path) {
@@ -98,6 +102,8 @@ McPollResult mcPollNonnegativeResult(s32 *commandResultOut) {
     return MC_POLL_PENDING;
 }
 
+extern int sceMcDelete(int, int, const char *);
+
 /* Start removal of the supplied path on slot zero; no completion wait here. */
 void mcDeleteFilePath(u32 port, const char *path) {
     sceMcDelete(port, MC_CARD_SLOT, path);
@@ -116,6 +122,8 @@ McPollResult mcPollNormalizedCommandStatus(void) {
     }
     return MC_POLL_PENDING;
 }
+
+extern int sceMcOpen(int, int, const char *, int);
 
 /* Start opening a path on slot zero. The last operand is numeric open flags,
  * not a data-buffer address (callers use 1 and 0x203). */

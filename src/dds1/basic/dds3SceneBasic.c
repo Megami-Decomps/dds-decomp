@@ -11,6 +11,8 @@ struct SdfMemBlock;
 
 extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
 
+extern void fldReleaseFieldResources(void);
+
 /* Release field resources before clearing the scene object's state word.
  * The scene resource handle/address are released separately. */
 void dds3ClearSceneObjectState(EffWorldNode *worldNode) {

@@ -5662,6 +5662,8 @@ s32 btlIsLinkageTutorialEligible(void) {
 }
 
 
+extern s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table);
+
 /* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
 u8 btlHasUnmarkedLinkageSkill(s32 unit) {
     s32 count;
@@ -6527,6 +6529,8 @@ extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const char D_00436818[];
 extern s32 sprintf(char *, const char *, ...);
 
+extern void func_001C7020(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 bank, s16 alpha, s32 x, s32 y);
+
 s32 func_001C1F10(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleActorPanelWork *work;
@@ -6959,7 +6963,6 @@ extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
 extern s32 sprintf(char *, const char *, ...);
 extern void btlDrawReservePanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
-extern void func_001C7020(BtlUnit *, BattleActorPanelWork *, s32, s8, s16, s32, s32);
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const BattlePanelColors D_00416830;
 extern const char D_00436818[];
@@ -8679,7 +8682,6 @@ extern u32 btlGetActorCommandClass(s32, s8);
 
 extern s32 btlCountFlaggedSceneActors(void);
 
-extern s32 btlBuildActorLinkageSkillList(s32, void *);
 
 extern s32 D_004367C0;
 
@@ -9595,6 +9597,8 @@ static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
     colors->values[2] = color;
     colors->values[3] = color;
 }
+
+extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
 void func_001C9EA0(s32 sceneContext) {
     BattleSceneObject *object = (BattleSceneObject *)sceneContext;

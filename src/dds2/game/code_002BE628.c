@@ -3084,6 +3084,8 @@ s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
 
 extern const u16 D_0042B518[];
 
+extern void qsort(void *, unsigned int, unsigned int, int (*)(const void *, const void *));
+
 s32 func_002C6008(PartyPanel *partyPanel, MenuPageWindow *page,
                   DatPartyRecord *caster, s32 commit) {
     DatPartyRecord *targets[5];
@@ -3735,6 +3737,9 @@ void evtStageTestAdvanceMotionQueue(void) {
         }
     }
 }
+
+struct SoundHandleNode;
+extern struct SoundHandleNode * sndCreateSystemEffectHandle(void *actor, s32 index);
 
 /* Replace the attached model effect with the native fixed request; argument is unused. */
 void evtStageTestCreateModelEffect(s32 unused) {

@@ -148,6 +148,13 @@ static inline u32 packMagatuhiTrailColor(void) {
     EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
+extern SdfTexBuf * sdfTexGetPrimaryBuffer(SdfTex *texture);
+extern s32 sdfAllocPacketAligned(s32 size);
+extern s32 sdfTexGetPrimaryBufferSize(const SdfTex *texture);
+extern void sdfAppendPacket(SdfListHead *list, u32 packet);
+extern void sdfAppendReferencePacket(SdfListHead *list, u32 packetAddress);
+extern void sdfInitPacketList(SdfListHead *list);
+
 void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work) {
     f32 positions[15][4];
     u32 colors[15];

@@ -2810,6 +2810,9 @@ void evtStageTestAdvanceMotionQueue(void) {
     }
 }
 
+struct SoundHandleNode;
+extern struct SoundHandleNode * sndCreateSystemEffectHandle(void *actor, s32 index);
+
 /* Replace the attached model effect with the native fixed request; argument is unused. */
 void evtStageTestCreateModelEffect(s32 unused) {
     if (evtStageTestState.effect != 0) {

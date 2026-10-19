@@ -100,6 +100,8 @@ extern u8 *D_003BAA84;
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
+extern s32 evtCreateMessageWindowIfMissing(s32 sub);
+
 /* Close the current display channel before ensuring a replacement window.
  * DDS1 retains the legacy argument taken from the context's resource pair. */
 void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
@@ -282,6 +284,10 @@ u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
     return 1;
 }
 
+struct MenuTerminalWork;
+extern void mnuReleaseWorkResources(u8 *work);
+extern void mnuTerminalBuildMenus(struct MenuTerminalWork *host);
+
 /* Release the current task's menu resources before rebuilding its terminal menus. */
 s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
     s32 *work = (s32 *)kwlnTaskGetUserValue(task);
@@ -335,6 +341,10 @@ void evtSwitchWorldValueIfChanged(s32 high, s32 low) {
     }
 }
 
+extern void kwlnDrawEnableCd0(s32 duration);
+extern void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale);
+extern void kwlnDrawSetupC70B(s32 duration);
+
 /* Reset draw offsets and the five enabled screen-effect modes. */
 void evtResetDrawTransitions(void) {
     kwlnDrawSetOverlayTransition(0, 0, 0);
@@ -346,6 +356,8 @@ void evtResetDrawTransitions(void) {
     effDisableFilterBlur();
     effDisableColorRectangle();
 }
+
+extern s32 evtCommandShutdownStage(void);
 
 /* Shut down the stage before clearing its draw transitions. */
 void evtShutdownStageAndResetDrawTransitions(void) {
@@ -382,6 +394,8 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
         }
     }
 }
+
+extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
@@ -464,6 +478,9 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)record->handle);
 }
 
+struct ItfMesSub;
+extern s32 itfMesCreateWindow(struct ItfMesSub *sub);
+
 /* Create the singleton message window only when its handle is negative. */
 s32 evtCreateMessageWindowIfMissing(s32 sub) {
     if (dspWindowHandle < 0) {
@@ -495,6 +512,8 @@ s32 dspStartEntry(s32 entry) {
     return 1;
 }
 
+extern s32 dspReadWindowSecondPanelValue(void);
+
 /* Store the caller's opaque value and snapshot the panel's second halfword.
  * This routine itself performs no sound-driver operation. */
 s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue) {
@@ -518,6 +537,8 @@ s8 evtGetMessageWindowOption(void) {
     return evtMessageWindowOption;
 }
 
+extern s32 itfPanelGetPairSecond(s32 windowIndex);
+
 /* Read the second panel halfword, or -1 when no message window exists.
  * Despite the inherited name, this is not a sound-driver query. */
 s32 dspReadWindowSecondPanelValue(void) {
@@ -531,6 +552,8 @@ s32 dspReadWindowSecondPanelValue(void) {
 s8 evtGetCapturedWindowPanelValue(void) {
     return dspCapturedSoundMode;
 }
+
+extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
 /* Reset an open window, optionally notify it first, and report whether it existed.
  * Cleanup leaves the singleton handle intact; dspCloseChannel destroys it. */
@@ -581,6 +604,8 @@ s32 evtGetMessageWindowControlState(void) {
     }
     return (s8)dspWindowControlState;
 }
+
+extern s32 itfPanelGetPairFirst(s32 windowIndex);
 
 /* Snapshot the second panel halfword only after the first halfword is nonnegative. */
 s32 dspCaptureWindowSecondPanelValue(void) {
@@ -669,6 +694,9 @@ void dspSetActive(s32 enabled) {
     }
 }
 
+extern void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
+extern void itfPanelEmitRecord(s32 windowIndex, s32 topDelta);
+
 /* Convert x/y to the window's 16-by-8 coordinate units and set its panel offset.
  * The original signed shifts are retained, including their input assumptions. */
 void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
@@ -711,6 +739,8 @@ u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
     displayValueIndex = (displayValueIndex < EVT_DISPLAY_VALUE_COUNT) ? displayValueIndex : EVT_LAST_DISPLAY_VALUE;
     return evtDisplayValues[displayValueIndex];
 }
+
+extern s32 scrReadIntParameter(s32 parameterIndex);
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
 s32 evtOpSetActiveEntryFlag(void) {
@@ -785,6 +815,8 @@ void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, EvtLi
     uiDrawUniformRgbRange(coordinates[0], coordinates[1], 0,
                           (flags & EVT_SCROLL_BOTTOM_FLAG) ? colors[0] : colors[1], EVT_PANEL_DRAW_COMMAND);
 }
+
+extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtListPanelRecord *record) {
     s32 height = mnuGetListViewportHeight(record->list) + 0x80;
