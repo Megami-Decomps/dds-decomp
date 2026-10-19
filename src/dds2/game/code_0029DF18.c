@@ -1336,7 +1336,7 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[1], wordCount);
 }
 
-extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 /* Send the per-core parameter commands for both sound cores, then the IOP
  * stream buffer with the transfer size. */
@@ -1361,7 +1361,7 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     D_00437A2C = 0;
 }
 
-extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, ...);
 extern u64 D_00438FD0;
 
 s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {

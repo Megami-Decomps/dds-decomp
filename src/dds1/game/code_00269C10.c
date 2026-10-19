@@ -74,7 +74,7 @@ extern u32 D_003BC5B8;
 
 extern void mnuInitializeTitleAudioStreams(void);
 
-extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 s32 sndCopyWordsToIopSynchronously(const void *source, u32 iopAddress, u32 wordCount);
 
