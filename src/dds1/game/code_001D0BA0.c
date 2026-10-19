@@ -2497,12 +2497,14 @@ void btlReleaseActorModelResources(BtlUnit *object) {
     *(u32 *)((u8 *)object + 0x118) = state;
 }
 
+extern s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 input);
+
 void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
     s32 available;
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {
-        btlEnsureModelAndSoundReady(effect, model);
+        btlEnsureModelAndSoundReady(effect, model, 0);
         return;
     }
     mdlRequestAsset(effect, model, 0);

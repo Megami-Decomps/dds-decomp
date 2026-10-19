@@ -1668,6 +1668,8 @@ u32 btlScriptPickLinkedPartyTarget(void) {
     return 1;
 }
 
+extern void btlAppendActorToCommandTargets(s32 context, s32 input);
+
 /* Append this command's own actor after target scan; return VM success. */
 u32 btlScriptAppendActorToTargets(void) {
     btlAppendActorToCommandTargets(scrGetCurrentCommandWork(), 0);

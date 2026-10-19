@@ -24,7 +24,6 @@
 /* Declared before first use (were implicit int). */
 extern u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex);
 extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
-/* Original-style implicit int, kept: matched code depends on it: scrFindSlot, scrRemoveSlot. */
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -717,12 +716,14 @@ s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId) {
     return 0;
 }
 
+extern s32 scrFindSlot(DatPartyRecord *unit, u16 skillId);
+
 void ptyRemoveProfileSkills(DatPartyRecord *unit, u16 profileId) {
     u32 wordIndex, bitShift;
     u32 index = 0;
     s32 skill;
     u32 state;
-    u32 flagId;
+    u16 flagId;
 
     do {
         skill = prfGetSkillAtIndex(profileId, index);

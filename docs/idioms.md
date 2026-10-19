@@ -9835,14 +9835,15 @@ bit `0x20` set; its callee averages `partyRecord.level`, falling back to `1`
 for an empty group. The mask-average forwarding functions return `s32`
 consistently with the script getters; see "Masked-average tail-call return types".
 
-The functions currently labeled `__udivdi3` at `0x001A95B0` and `0x001B3B10`
-are game actor-attribute averaging wrappers, not libgcc division helpers.
+`btlAverageActorAttribute` at `0x001A95B0` and `0x001B3B10` was previously
+misnamed `__udivdi3`; these are game averaging wrappers, not libgcc helpers.
 Native code tail-jumps `btlSumOrAverageActorAttribute(mask, statIndex, 0)`;
 the real wrapper contract is `s32 (u32, s32)`. The VM command in
 `newdata/datCalc.c` calls that wrapper explicitly and stores an `s32` average.
 Do not express this call as `u64` division to manufacture a compiler libcall,
-or infer 64-bit width from the misleading retained symbol name. The explicit
-call and truthful wrapper return match without assembly or linker changes.
+or infer 64-bit width from a runtime-looking symbol name. The explicit call,
+truthful return and normal symbol/provenance rename match without changing
+native code or compiler flags.
 
 ## Trace-justified skill-camera path selection
 
@@ -11587,6 +11588,13 @@ pointer and its result is either zero or that pointer encoded as the existing
 32-bit selector word. Recover that callback signature and perform the explicit
 pointer-to-word conversion at the result boundary; do not represent the
 argument and result as unrelated `u64` scalars.
+
+Publish `scrGetCommandTimer`'s real `u32` return rather than preserving an
+unnecessary implicit declaration. VM timer limits use signed words, so the
+comparison explicitly converts the timer with `(s32)scrGetCommandTimer()`.
+Both games' native comparison at `+0x30` is `slt`, not `sltu`; the conversion
+expresses that nonredundant signedness boundary, while timer-zero tests need
+no conversion.
 
 A genuinely load-bearing original C89 prototype scope is a separate case.
 Publishing the true `void` declaration for `effRequestResourceByMode`
@@ -15139,3 +15147,23 @@ then enqueue the effect under the genuine positive-mode guard. This preserves
 the native two signed tests, ordinary `jal` and shared epilogue without the
 bogus assignment from a void setter. The complete DDS1 unit is 34/0 and the
 212-byte function is unchanged. No provider's return type is invented.
+
+## Preserve the actual reserved selector and ready-query inputs
+
+The native script adapters explicitly load `$a1 = 0` before calling
+`btlAppendActorToCommandTargets`. The low-HP selector caller passes the same
+second input. Keep that real unused `s32` parameter in both games' providers
+and declare the complete two-argument contracts before the callers. The low-HP
+predicate's first argument is the primary `BtlUnit *`, not a pointer round-trip
+through an integer local. Neighboring command-target adapters already share
+this two-input convention; no fake use of the ignored input is required.
+
+Likewise, `btlEnsureModelAndSoundReady` accepts a third unused word. Both native
+mode wrappers clear `$a2` in the mode-selection branch delay slot, including
+the source call that previously spelled only two arguments. Pass zero there
+explicitly and give every provider/caller the same three-argument prototype.
+The callee itself overwrites `$a2` before forwarding its own asset request.
+
+All ten affected units gate exactly (1456 functions), and the standard canaries
+are exact (192/0,158/0,15/0). No K&R short-call workaround, variadic declaration,
+new instruction, header, compiler flag or expected-object change is needed.

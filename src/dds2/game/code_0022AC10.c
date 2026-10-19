@@ -1463,7 +1463,7 @@ s32 btlIsModelEntryReady(s32 kind, s32 id) {
 extern void btlFinalizeModelPackEntry(s32, s32);
 
 /* Return 1 once model and motion-sound work are ready; request/poll them otherwise. */
-s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
+s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     BattleModelEntry *entry;
 
     if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&
