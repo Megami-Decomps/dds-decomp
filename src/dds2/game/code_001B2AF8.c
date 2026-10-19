@@ -5130,7 +5130,63 @@ void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
     btlSetTrackedTaskHandle(5, (s32)task);
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BEBD0);
+extern const BattlePanelColors D_004165A0;
+s32 func_001BEBD0(KwlnTask *task) {
+    BattlePanelColors colors = D_004165A0;
+    BattleSelectionTrailWork *work = (BattleSelectionTrailWork *)kwlnTaskGetUserValue(task);
+    s32 i;
+    s32 opacity;
+    u32 shade;
+
+    if (work->fadeCountdowns[0] <= 0 || D_0037F510.confirm < 0 ||
+        D_0037F510.primaryCancel < 0) {
+        return -1;
+    }
+    for (i = 0; i < 4; i++) {
+        if (work->fadeCountdowns[i] > 0) {
+            work->fadeCountdowns[i]--;
+        }
+        work->fadeCountdowns[i] = work->fadeCountdowns[i] <= 0 ? 0 :
+            work->fadeCountdowns[i] > 0x80 ? 0x80 : work->fadeCountdowns[i];
+        if (work->direction == 1) {
+            work->positions[i]++;
+            if (work->positions[i] >= work->targetRow * 23) {
+                work->positions[i] = work->targetRow * 23;
+            }
+        } else {
+            work->positions[i]--;
+            if (work->positions[i] <= work->targetRow * 23) {
+                work->positions[i] = work->targetRow * 23;
+            }
+        }
+        colors.values[0] = 0x80808000U | (work->fadeCountdowns[i] & 0xFF);
+        colors.values[1] = 0x80808000U | (work->fadeCountdowns[i] & 0xFF);
+        colors.values[2] = 0x80808000U | (work->fadeCountdowns[i] & 0xFF);
+        colors.values[3] = 0x80808000U | (work->fadeCountdowns[i] & 0xFF);
+        effDrawSpriteWithCornerColors(0x90, (work->positions[i] + 0x14F) << 3, 0,
+            colors.values, 0, btlResourceBlock->resA, 0xC, 0x53);
+        opacity = work->fadeCountdowns[i] & 0xFF;
+        shade = (opacity >> 1) << 24;
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        evtSubmitGradientTriangle(0x1F, work->positions[i] + 0x14C,
+            0xB9, work->positions[i] + 0x14C, 0x11, work->positions[i] + 0x15A,
+            shade | 0xFF2400U, shade | 0xA00200U, shade | 0xFF2200U);
+        evtSubmitGradientTriangle(0x11, work->positions[i] + 0x15A,
+            0xB9, work->positions[i] + 0x14C, 0x15, work->positions[i] + 0x15E,
+            shade | 0xFF2200U, shade | 0xA00200U, shade | 0xFF2000U);
+        evtSubmitGradientTriangle(0x15, work->positions[i] + 0x15E,
+            0xB9, work->positions[i] + 0x14C, 0xBD, work->positions[i] + 0x150,
+            shade | 0xFF2000U, shade | 0xA00200U, shade | 0xC00400U);
+        evtSubmitGradientTriangle(0x15, work->positions[i] + 0x15E,
+            0xBD, work->positions[i] + 0x150, 0xAF, work->positions[i] + 0x15E,
+            shade | 0xFF2000U, shade | 0xC00400U, shade | 0xE00800U);
+        evtSubmitPrimaryAlphaBlendMode(0);
+    }
+
+    return 0;
+}
 
 void btlReleaseCmsleffPanelWork(KwlnTask *task) {
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
