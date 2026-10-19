@@ -2,8 +2,13 @@
 #define ITF_DRAW_GRID_H
 
 #include "common.h"
+#include "itf_grid_slot.h"
 
 struct EffectSlotSet;
+
+/* Bind a cached resource set and signed slot index. */
+void itfGridStorePosition(MenuGridSlot *slot,
+                          struct EffectSlotSet *resource, s32 resourceIndex);
 
 #ifdef VERSION_DDS2
 void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z,

@@ -2,6 +2,7 @@
 #define MNU_H
 
 #include "common.h"
+#include "itf_grid_slot.h"
 #include "dat_stat.h"
 #include "evt_world.h"
 #include "mnu_transition.h"
@@ -350,14 +351,6 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth,
                                  struct DatPartyRecord *entry,
                                  MenuPanelGroup *group, s32 drawFlags);
 #endif
-
-/* An indexed render slot owned by an effect resource set. */
-typedef struct MenuGridSlot {
-    struct EffectSlotSet *set;
-    s32 index;
-} MenuGridSlot;
-
-typedef char MenuGridSlot_size_must_be_8[(sizeof(MenuGridSlot) == 8) ? 1 : -1];
 
 /* Native profile-progress panel, including its cached sprite-slot pairs. */
 typedef struct MenuProfilePanel {

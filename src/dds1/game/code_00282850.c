@@ -54,7 +54,7 @@ extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuP
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
 extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
 extern void sndDestroyFileQueueWrapper(u32 handle);
-/* Original-style implicit int, kept: matched code depends on it: itfGridStorePosition, sndCreateSystemEffectHandle. */
+/* Original-style implicit int, kept: matched code depends on it: sndCreateSystemEffectHandle. */
 
 struct FrFontGlyph;
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
@@ -1173,10 +1173,10 @@ void mnuFreeProfilePanelWork(MenuProfilePanel *panel) {
 
 void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fillIndex,
                                      u32 backgroundIndex, u32 completedIndex) {
-    itfGridStorePosition(&panel->fill, grid, fillIndex);
+    itfGridStorePosition(&panel->fill, (EffectSlotSet *)grid, fillIndex);
     itfSetGridEntryQuantizedAndRefresh((s32)panel->fill.set, panel->fill.index, 0, 0, 0, 0);
-    itfGridStorePosition(&panel->background, grid, backgroundIndex);
-    itfGridStorePosition(&panel->completed, grid, completedIndex);
+    itfGridStorePosition(&panel->background, (EffectSlotSet *)grid, backgroundIndex);
+    itfGridStorePosition(&panel->completed, (EffectSlotSet *)grid, completedIndex);
 }
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
