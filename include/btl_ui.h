@@ -63,8 +63,7 @@ typedef struct BattleCmdPanelSlot {
     u8 unk01; /* Initialized to 0/1 by bank; no consumer read established. */
     s16 fadeValue; /* Signed narrow ramp; rendering uses its low color byte. */
     u8 pad04[4];
-    s32 x;
-    s32 y;
+    s32 position[2]; /* Signed X/Y coordinates owned by this slot. */
 } BattleCmdPanelSlot;
 
 typedef struct BattleCmdPanel {
@@ -81,6 +80,12 @@ typedef struct BattleCmdPanel {
     s16 cornerFade[4]; /* Four low-byte color levels used by the backdrop. */
     u32 cornerPhase[4]; /* Advanced by 8 modulo 360 before the sine pulse. */
 } BattleCmdPanel;
+typedef char BattleCmdPanelSlot_size_must_be_0x10[(sizeof(BattleCmdPanelSlot) == 0x10) ? 1 : -1];
+typedef char BattleCmdPanelSlot_position_at_0x08[((u32)&((BattleCmdPanelSlot *)0)->position[0] == 0x08) ? 1 : -1];
+typedef char BattleCmdPanelSlot_y_at_0x0C[((u32)&((BattleCmdPanelSlot *)0)->position[1] == 0x0C) ? 1 : -1];
+typedef char BattleCmdPanel_size_must_be_0xCC[(sizeof(BattleCmdPanel) == 0xCC) ? 1 : -1];
+typedef char BattleCmdPanel_slotsA_at_0x14[((u32)&((BattleCmdPanel *)0)->slotsA == 0x14) ? 1 : -1];
+typedef char BattleCmdPanel_slotsB_at_0x64[((u32)&((BattleCmdPanel *)0)->slotsB == 0x64) ? 1 : -1];
 
 /* Native 0x58-byte command UI work in both games. The first 0x38 bytes
  * are fourteen 32-bit task handles; they are not the whole allocation.
