@@ -91,8 +91,10 @@ extern void sdfCreateRuntimeTask(void);
 extern void sdfDevConsInit(void);
 extern void sdfResetChannels(void);
 
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+
 /* Kernel startup: create the frame/draw/font tasks and initialize every subsystem, logging each step. */
-s32 kwlnInitializeRuntime(void) {
+void kwlnInitializeRuntime(void) {
     sdfDebugPrintf(D_003BA738);
     evtResetDisplayProjectionAndVectorState();
     sdfDebugPrintf(D_003BA740);
@@ -148,7 +150,7 @@ s32 kwlnInitializeRuntime(void) {
     evtStartSolarOverlay();
     fldCreateEncounterTask();
     sdfDebugPrintf(D_003BA7F8);
-    return dds3AdminSubmitModeRequest(1, 0, 0, 0);
+    dds3AdminSubmitModeRequest(1, 0, 0, 0);
 }
 
 void kwlnRequestMainLoopExit(void) {

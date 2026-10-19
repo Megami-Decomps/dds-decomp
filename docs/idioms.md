@@ -15116,3 +15116,26 @@ exactly (86 units, 4655 C functions). The complete manifest and receipts are
 `sandbox_PurBoss/purity_queue/counter_includers.json` and
 `counter_all_includer_gates.json`. No flags, expected objects or data change.
 
+
+## Runtime startup does not return the admin request's scratch register
+
+`kwlnInitializeRuntime` is a `void` initializer in both games. Its only caller,
+`kwlnRunMainLoop`, ignores the result; retail ends the initializer with a sibling
+jump to the administrative request API and never reads that API's `$v0`.
+A decompiler's `return dds3AdminSubmitModeRequest(...)` is not evidence that either
+function has a returned status contract. Keep the existing truthful `void`
+request prototype visible and call it normally at the end of the initializer.
+
+This removes both consumed-void source conflicts without fabricating an admin
+result, changing its provider or adding work. DDS1 remains 804 bytes and DDS2
+528 bytes; both complete units gate 16/0 and all three standard canaries are
+exact (192/0,158/0,15/0). No header, flags, data or expected objects change.
+
+DDS1 `mnuStartRewardDialogAndMotion` is also `void`, as its DDS2 twin already
+is. Its sole caller ignores any result, and `evtStageTestSetPendingEffect`
+only leaves the store address's HIGH in `$v0` (0x003E0000 in DDS1 and
+0x00450000 in DDS2), not a setter status. Reject reward modes at least four,
+then enqueue the effect under the genuine positive-mode guard. This preserves
+the native two signed tests, ordinary `jal` and shared epilogue without the
+bogus assignment from a void setter. The complete DDS1 unit is 34/0 and the
+212-byte function is unchanged. No provider's return type is invented.

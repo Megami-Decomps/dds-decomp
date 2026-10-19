@@ -293,9 +293,10 @@ u32 brsAcknowledgeRewardMessage(void) {
     return 1;
 }
 
-s32 mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
+extern void evtStageTestSetPendingEffect(u32 requestValue);
+
+void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     DatPartyRecord *entry = work->selectedRewardRow->unit;
-    s32 result;
 
     switch (work->rewardMode) {
     case 4: {
@@ -316,11 +317,12 @@ s32 mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     }
 
     evtStageTestQueueMotion(2, 1);
-    result = work->rewardMode < 4;
-    if (result != 0 && work->rewardMode > 0) {
-        result = evtStageTestSetPendingEffect(0);
+    if (work->rewardMode >= 4) {
+        return;
     }
-    return result;
+    if (work->rewardMode > 0) {
+        evtStageTestSetPendingEffect(0);
+    }
 }
 
 #include "common.h"
