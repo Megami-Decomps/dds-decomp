@@ -344,7 +344,7 @@ s32 evtGetSolarPhase(void) {
     return datGameState->world.phase;
 }
 
-void evtSetSolarPhase(u8 phase) {
+void evtSetSolarPhase(s32 phase) {
     datGameState->world.phase = phase & 0xf;
     datGameState->world.phaseTimer = 0;
 }

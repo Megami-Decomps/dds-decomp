@@ -972,6 +972,8 @@ s32 evtCommandReadSolarPhase(void)
     return 1;
 }
 
+extern void evtSetSolarPhase(s32 phase);
+
 u32 evtCommandSetSolarPhase(void) {
     s32 phase;
 
