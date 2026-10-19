@@ -100,7 +100,7 @@ extern s32 sdfPacketBuffers[2];
 extern s32 sdfPacketCursor;
 extern s32 sdfPacketBufferEnd;
 
-extern u64 sdfGraphHasPendingWork(void);
+extern s32 sdfGraphHasPendingWork(void);
 extern s32 DIntr(void);
 
 extern s32 sdfPendingQueueSemaphore;
@@ -471,7 +471,7 @@ void sdfRotatePendingSlots(void) {
 }
 
 /* Return one for an active rotation, a queued chain, or either delayed slot. */
-u64 sdfGraphHasPendingWork(void) {
+s32 sdfGraphHasPendingWork(void) {
     u32 slotIndex;
     s32 *slotCursor;
     if (sdfPendingQueueRotationActive != 0) {
@@ -492,9 +492,9 @@ u64 sdfGraphHasPendingWork(void) {
     return 0;
 }
 
-u64 sdfCheckPendingWorkWithInterrupts(void) {
+s32 sdfCheckPendingWorkWithInterrupts(void) {
     s32 interruptState;
-    u64 pendingWork;
+    s32 pendingWork;
 
     interruptState = DIntr();
     pendingWork = sdfGraphHasPendingWork();

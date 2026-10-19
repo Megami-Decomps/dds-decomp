@@ -4445,14 +4445,14 @@ BtlUnit *btlFindUnitByMode() {
     return 0;
 }
 
-u64 btlMaskValueWhenSubtaskInactive(u64 value) {
+s32 btlMaskValueWhenSubtaskInactive(BtlUnit *actor) {
     BattleWork *work;
-    u64 result;
+    s32 result;
 
     work = btlGetRuntime();
     result = 0;
     if (work->sub->b.active != '\0') {
-        result = value;
+        result = (s32)actor;
     }
     return result;
 }

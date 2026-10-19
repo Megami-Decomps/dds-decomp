@@ -973,7 +973,7 @@ s32 evtCommandReadSolarPhase(void)
 }
 
 u32 evtCommandSetSolarPhase(void) {
-    u64 phase;
+    s32 phase;
 
     phase = scrReadIntParameter(0);
     evtSetSolarPhase(phase);
