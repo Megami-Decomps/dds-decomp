@@ -2424,10 +2424,6 @@ extern void kwlnSetLightDirectionTarget(s32, s32, f32 *);
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
 extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB40);
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB50);
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB60);
-
 
 /* Select and draw one light-color bank at the current panel offset. */
 static inline void evtDrawLightRgbComponents(SdfListHead *list, EvtRuntime *runtime,
@@ -2913,6 +2909,12 @@ void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 first, s32 second, s32 
 }
 
 extern char D_003BC300[]; /* "CURRENT" */
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB40);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB50);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB60);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB90);
 
