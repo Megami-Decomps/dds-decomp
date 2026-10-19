@@ -65,7 +65,10 @@ extern void func_001F0CA0(BtlTask *task, BattleIndexWork *work);
 extern void func_001FF0C8(BtlTask *task, u32 mode);
 extern void * memset(void *, s32, u32);
 extern s32 sndHasActiveActor(void);
-/* Original-style implicit int, kept: matched code depends on it: btlCreateCommandSoundUpdateTask, btlFlagUnitDefeatCandidate. */
+/* Original-style implicit int, kept: matched code depends on it: btlCreateCommandSoundUpdateTask. */
+/* btlFlagUnitDefeatCandidate is void in its provider TU; preserve C89 call
+ * scope here. An early void declaration moves the $16/$17/$31 restores before
+ * the final dispatcher call (retail JAL +0xE4 becomes tail J +0xF4). */
 
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 

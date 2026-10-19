@@ -1110,7 +1110,7 @@ void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
     btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 1);
 }
 
-s32 __udivdi3(u32 partyRecordFlagsMask, s32 statIndex) {
+s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, s32 statIndex) {
     return btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 0);
 }
 

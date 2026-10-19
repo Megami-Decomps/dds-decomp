@@ -717,6 +717,7 @@ s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId) {
 }
 
 extern s32 scrFindSlot(DatPartyRecord *unit, u16 skillId);
+extern s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId);
 
 void ptyRemoveProfileSkills(DatPartyRecord *unit, u16 profileId) {
     u32 wordIndex, bitShift;

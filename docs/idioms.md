@@ -11596,6 +11596,16 @@ Both games' native comparison at `+0x30` is `slt`, not `sltu`; the conversion
 expresses that nonredundant signedness boundary, while timer-zero tests need
 no conversion.
 
+Storage width does not by itself fix an API's argument or result width.
+`evtSetSolarPhase` takes an `s32` phase, masks it with `0xF` and stores the
+byte; its full-word VM callers need no artificial `u8` argument conversion.
+The existing DDS1 declaration corroborates that contract. Likewise,
+`btlGetActorBedAssetIdFromIndex` returns an `s32` word in the DDS1 twin:
+the source record's halfword `commandIndex` and native `lhu` establish the
+stored ID's width, not a narrow return API. Publish the word getter to the
+signed battle-operand resolver instead of preserving an unnecessary implicit
+scope to avoid a caller-side truncation.
+
 A genuinely load-bearing original C89 prototype scope is a separate case.
 Publishing the true `void` declaration for `effRequestResourceByMode`
 changes `effPollResourceList`'s post-call flag value from `$3` to `$2`
@@ -15167,3 +15177,19 @@ The callee itself overwrites `$a2` before forwarding its own asset request.
 All ten affected units gate exactly (1456 functions), and the standard canaries
 are exact (192/0,158/0,15/0). No K&R short-call workaround, variadic declaration,
 new instruction, header, compiler flag or expected-object change is needed.
+
+## Saving the caller's argument is not passing an argument to cleanup
+
+`fldMarkLinkedSceneActors` calls the zero-argument
+`btlAdvanceTitleStateWithAudioCleanup` in both games. Retail's `jal` delay slot
+copies the incoming scene pointer from `$a0` to `$s0` for the subsequent list
+walk; it does not set up a new cleanup argument. The cleanup provider never
+reads `$a0`, and all its other call sites already use the zero-argument API.
+Remove the decompiler's surplus context argument and declare the existing
+`void (void)` contract before this call, rather than inventing an ignored
+callee parameter from the register's incidental contents.
+
+Both linked-scene callers remain 88 bytes and both complete units gate 66/0;
+the standard canaries are 192/0,158/0,15/0. No provider, header, flags, data or
+expected-object changes are needed.
+

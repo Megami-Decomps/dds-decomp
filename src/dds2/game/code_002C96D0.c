@@ -3051,7 +3051,7 @@ u32 fileGetLoadSelectionState(void) {
     return D_00437D04;
 }
 
-void fileSetPreviewLocation(s16 x, s16 y) {
+void fileSetPreviewLocation(s32 x, s32 y) {
     DatGameState *state = datGameState;
 
     state->vr.previewX = x;

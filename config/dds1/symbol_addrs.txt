@@ -34,6 +34,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlAverageActorAttribute = 0x001A95B0; // type:func
 frFontSubmitAtlasSetupPackets = 0x00196BE8; // type:func
 evtViewCmdSetObjectTarget = 0x00232108; // type:func
 evtNextCameraSlotViewerKey = 0x003BC368; // type:s32
@@ -8821,7 +8822,6 @@ btlResolveBattleTerminalOutcome = 0x001A8188; // type:func
 btlRollEscapeChance = 0x001A8640; // type:func
 btlCollectAvailableOptionSkills = 0x001A8DD8; // type:func
 btlAverageAllLevelsForMask = 0x001A94A0; // type:func
-__udivdi3 = 0x001A95B0; // type:func
 btlSelectPreemptiveOutcome = 0x001A95C8; // type:func
 btlRollSurpriseAttack = 0x001A99B0; // type:func
 btlRollStoneDeathChance = 0x001A9D38; // type:func
