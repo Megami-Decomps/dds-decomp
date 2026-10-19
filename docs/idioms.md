@@ -15058,3 +15058,28 @@ in `code_0020CB38` gate exactly. The three standard canaries were also exact
 in the same header state (192, 158 and 15 functions). No header, call contract,
 flags, data ownership or expected assembly changes.
 
+## Single owned slots are real arrays, with sizeof-derived bounds
+
+The shop and terminal teardown loops in both games retain genuine native
+counter increments, four-byte slot advances and backward conditional branches.
+DDS2 already describes the shop owner as `ownedWindows[1]`. DDS1 `ShopScene`
+uses that same primary array shape; the terminal work owners expose their
+owned `commandLists[1]`. Every scalar consumer now selects element zero, and
+teardown walks the actual arrays instead of a raw word or a scalar's address.
+No alias union, alternate view or compatibility field remains.
+
+All four teardown indices are ordinary `s32`. Their bounds are
+`sizeof(owner->array) / sizeof(owner->array[0])`, whose unsigned size type
+naturally supplies the retail comparison. The project's existing
+`ARRAY_COUNT` deliberately casts to `s32`, so it is not equivalent here.
+A hardcoded signed `i < 1` folds the native loop away; an arbitrary `u32`
+index is not needed once the real array and bound are restored. Final cleanup
+calls already are native sibling jumps; this is not a tail-call barrier.
+
+The four functions are exact: DDS1 shop 148 bytes, DDS2 shop 216 bytes, and
+both terminal work releases 112 bytes. All 83 conservative quoted/angle
+header includers, both local-owner units and the three standard canaries gate
+exactly (86 units, 4655 C functions). The complete manifest and receipts are
+`sandbox_PurBoss/purity_queue/counter_includers.json` and
+`counter_all_includer_gates.json`. No flags, expected objects or data change.
+

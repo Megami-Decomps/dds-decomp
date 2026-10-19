@@ -179,7 +179,7 @@ typedef struct ShopScene {
     EvtResourcePair messageResource;
     struct EffectSlotSet *spriteResource;
     s32 batchState;
-    MenuWindowContainer *sprite;
+    MenuWindowContainer *ownedWindows[1];
     MenuWindowContainer *window;
     struct EffMappedResource *batches[2];
     s32 initialSelection;

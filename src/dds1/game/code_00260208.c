@@ -221,14 +221,14 @@ s32 mnuDrawShopCommandPanel(ShopScene *scene) {
         }
         mnuDrawStatusIconAndCompanion(0, (s32)(position * 64.0f) << 3, 0, scene,
                                      (s32)((1.0f - progress) * 256.0f), 0x53);
-        mnuDrawListChildrenWithCountdown(0, 0, 0, scene->sprite->list, 0x53);
+        mnuDrawListChildrenWithCountdown(0, 0, 0, scene->ownedWindows[0]->list, 0x53);
         mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
         brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
         break;
     case 1:
     case 3:
         mnuDrawStatusIconAndCompanion(0, 0, 0, scene, 0x100, 0x53);
-        mnuDrawListChildrenWithCountdown(0, 0, 0, scene->sprite->list, 0x53);
+        mnuDrawListChildrenWithCountdown(0, 0, 0, scene->ownedWindows[0]->list, 0x53);
         mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
         brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 4, 0x53);
         break;
@@ -288,9 +288,9 @@ s32 mnuDrawShopPanelTransition(ShopScene *scene) {
     f32 position;
 
     if (scene->extraOption != 0) {
-        category = scene->sprite->list->cursor->index;
+        category = scene->ownedWindows[0]->list->cursor->index;
     } else {
-        category = categoryMap[scene->sprite->list->cursor->index];
+        category = categoryMap[scene->ownedWindows[0]->list->cursor->index];
     }
     mnuDrawShopPanelWithPulsingIcon(0, 0, 0, scene, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
@@ -315,7 +315,7 @@ s32 mnuDrawShopPanelTransition(ShopScene *scene) {
         mnuDrawStatusIconAndCompanion(0, (s32)(position * 64.0f) << 3, 0, scene,
                       (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawListChildrenWithCountdown(0, 0, 0,
-                                         scene->sprite->list, 0x53);
+                                         scene->ownedWindows[0]->list, 0x53);
         brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
 
         if ((f32)scene->frames > 0.0f) {
@@ -528,9 +528,9 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
     f32 progress;
 
     if (scene->extraOption != 0) {
-        category = scene->sprite->list->cursor->index;
+        category = scene->ownedWindows[0]->list->cursor->index;
     } else {
-        category = categoryMap[scene->sprite->list->cursor->index];
+        category = categoryMap[scene->ownedWindows[0]->list->cursor->index];
     }
     mnuDrawShopPanelWithPulsingIcon(0, 0, 0, scene, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(scene, 0xA09DC380);

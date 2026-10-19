@@ -1207,7 +1207,7 @@ MenuWindowContainer *mnuCreateShopListWindow(const void *unused, s32 count, Shop
 
 
 void mnuShopInitializeOptionList(ShopScene *scene) {
-    scene->sprite = mnuCreateShopListWindow(D_00368C40, 3, scene);
+    scene->ownedWindows[0] = mnuCreateShopListWindow(D_00368C40, 3, scene);
 }
 
 typedef struct CampFlagRow {
@@ -1291,10 +1291,10 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
 
 
 void mnuShopReleaseSprites(ShopScene *scene) {
-    MenuWindowContainer **slot = &scene->sprite;
-    u32 i;
+    MenuWindowContainer **slot = scene->ownedWindows;
+    s32 i;
 
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < sizeof(scene->ownedWindows) / sizeof(scene->ownedWindows[0]); i++) {
         MenuWindowContainer *sprite = *slot;
 
         if (sprite->list->context != NULL) {
@@ -1549,9 +1549,9 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
 
     memcpy(operations, D_003BC3A8, sizeof(operations));
     if (extraOption != 0) {
-        operation = scene->sprite->list->cursor->index + 1;
+        operation = scene->ownedWindows[0]->list->cursor->index + 1;
     } else {
-        operation = operations[scene->sprite->list->cursor->index];
+        operation = operations[scene->ownedWindows[0]->list->cursor->index];
     }
     capacity = scene->activePartyCount;
     switch (operation) {
@@ -2105,11 +2105,11 @@ s32 evtInitializeActiveMenuState(KwlnTask *task) {
 
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
-    if (((ShopScene *)stateAddress)->sprite == 0) {
+    if (((ShopScene *)stateAddress)->ownedWindows[0] == 0) {
         ((ShopScene *)stateAddress)->extraOption = mnuShopHasExtraOption(stateAddress);
         mnuShopInitializeOptionList((ShopScene *)stateAddress);
     }
-    windowData = ((ShopScene *)stateAddress)->sprite->list->context;
+    windowData = ((ShopScene *)stateAddress)->ownedWindows[0]->list->context;
     pendingSelection = mnuShopHasPendingFlag((ShopScene *)stateAddress);
     ((ShopScene *)stateAddress)->previousValue = datGameState->header.currency;
     windowData->pendingSelection = pendingSelection;
@@ -2139,7 +2139,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
     s32 allowed = 1;
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
     s32 input = mnuMapPadMaskToFlags(0x33);
-    struct MenuList *list = state->sprite->list;
+    struct MenuList *list = state->ownedWindows[0]->list;
     s32 result;
 
     result = menuRunPanel(state, EVT_DISPATCH_OPERATION_POLL, task);
@@ -2156,9 +2156,9 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
     case 1:
         if (state->extraOption != 0) {
             mnuSetPopupEntryFlagged(&state->dispatchState,
-                                   mnuShopCatalogPopupEntries + state->sprite->list->cursor->index);
+                                   mnuShopCatalogPopupEntries + state->ownedWindows[0]->list->cursor->index);
         } else {
-            s32 index = state->sprite->list->cursor->index;
+            s32 index = state->ownedWindows[0]->list->cursor->index;
             if (index + 1 >= 2) {
                 mnuSetPopupEntryFlagged(&state->dispatchState, mnuShopFilteredCatalogPopupEntries + index);
             } else {
@@ -2176,11 +2176,11 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
             if (input & 1) {
                 if (state->pendingSelection == 0) {
                     if (state->extraOption != 0) {
-                        if (state->sprite->list->cursor->index == 2) {
+                        if (state->ownedWindows[0]->list->cursor->index == 2) {
                             allowed = 0;
                         }
                     } else {
-                        allowed = state->sprite->list->cursor->index != 1;
+                        allowed = state->ownedWindows[0]->list->cursor->index != 1;
                     }
                 }
                 if (allowed != 0) {
@@ -2193,14 +2193,14 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
                 mnuSetCommandPhase(state, 2);
                 mnuSetSelectionListTransition(list, 4);
             } else if (!(input & 0x300000)) {
-                    mnuClearWindowListSelectionFlags(state->sprite);
+                    mnuClearWindowListSelectionFlags(state->ownedWindows[0]);
             } else if (input & 0x10) {
-                mnuRetreatWindowListSelection(state->sprite);
+                mnuRetreatWindowListSelection(state->ownedWindows[0]);
             } else if (input & 0x20) {
-                mnuAdvanceWindowListSelection(state->sprite);
+                mnuAdvanceWindowListSelection(state->ownedWindows[0]);
             }
         }
-        mnuPlayInputSound(0, input, &state->sprite->list->stateFlags);
+        mnuPlayInputSound(0, input, &state->ownedWindows[0]->list->stateFlags);
         return 0;
     }
 }
@@ -2280,7 +2280,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
             break;
         case 5:
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
-            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
+            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->ownedWindows[0]->list, 10);
             break;
         case 7:
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
@@ -2401,7 +2401,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
             break;
         case 5:
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
-            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
+            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->ownedWindows[0]->list, 10);
             break;
         case 7:
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
@@ -2517,7 +2517,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
             break;
         case 5:
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
-            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
+            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->ownedWindows[0]->list, 10);
             break;
         case 7:
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
@@ -2574,7 +2574,7 @@ u32 evtResetStateProgressTimer(KwlnTask *task) {
 
     stateAddress = kwlnTaskGetUserValue(task);
     ((ShopScene *)stateAddress)->progressTicks = 0;
-    mnuSelectLastListNode(((ShopScene *)stateAddress)->sprite->list);
+    mnuSelectLastListNode(((ShopScene *)stateAddress)->ownedWindows[0]->list);
     return 1;
 }
 
@@ -2656,7 +2656,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         mnuSetCommandPhase((ShopScene *)stateAddress, 11);
         break;
     case 10: {
-        struct MenuList *primaryTask = ((ShopScene *)stateAddress)->sprite->list;
+        struct MenuList *primaryTask = ((ShopScene *)stateAddress)->ownedWindows[0]->list;
         mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCatalogPopupEntries + primaryTask->cursor->index);
         break;
     }
@@ -2748,9 +2748,9 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     s32 message;
 
     if (scene->extraOption != 0) {
-        operation = scene->sprite->list->cursor->index + 1;
+        operation = scene->ownedWindows[0]->list->cursor->index + 1;
     } else {
-        operation = options[scene->sprite->list->cursor->index];
+        operation = options[scene->ownedWindows[0]->list->cursor->index];
     }
     message = 7;
     scene->previousValue = datGameState->header.currency;
@@ -2780,9 +2780,9 @@ s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
     s32 itemId;
 
     if (scene->extraOption != 0) {
-        operation = scene->sprite->list->cursor->index + 1;
+        operation = scene->ownedWindows[0]->list->cursor->index + 1;
     } else {
-        operation = options.values[scene->sprite->list->cursor->index];
+        operation = options.values[scene->ownedWindows[0]->list->cursor->index];
     }
     itemId = values->id;
     if (operation == 3) {
@@ -2827,9 +2827,9 @@ s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
         values = &scene->window->list->cursor->camp;
         itemId = values->id;
         if (scene->extraOption != 0) {
-            operation = scene->sprite->list->cursor->index + 1;
+            operation = scene->ownedWindows[0]->list->cursor->index + 1;
         } else {
-            operation = options[scene->sprite->list->cursor->index];
+            operation = options[scene->ownedWindows[0]->list->cursor->index];
         }
         switch (operation) {
         case 1:
@@ -2873,9 +2873,9 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
     }
     if (*dispatchSlot == 0 && evtGetMessageWindowControlState() == 0) {
         if (state->extraOption != 0) {
-            selectedOperation = state->sprite->list->cursor->index + 1;
+            selectedOperation = state->ownedWindows[0]->list->cursor->index + 1;
         } else {
-            selectedOperation = options.values[state->sprite->list->cursor->index];
+            selectedOperation = options.values[state->ownedWindows[0]->list->cursor->index];
         }
         if (evtGetCapturedWindowPanelValue() == 0) {
             mnuApplyShopSelectionTransaction(task);
@@ -2912,9 +2912,9 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     MenuSelectionPair options = *(MenuSelectionPair *)D_003BC3D8;
 
     if (state->extraOption != 0) {
-        selectedIndex = state->sprite->list->cursor->index;
+        selectedIndex = state->ownedWindows[0]->list->cursor->index;
     } else {
-        selectedIndex = options.values[state->sprite->list->cursor->index];
+        selectedIndex = options.values[state->ownedWindows[0]->list->cursor->index];
     }
 
     mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
@@ -3019,14 +3019,14 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         if (state->stateTable == (s32)mnuShopCommandPopupEntries) {
             mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
-            mnuDrawListChildrenWithCountdown(0, 0, 0, state->sprite->list, 0x53);
+            mnuDrawListChildrenWithCountdown(0, 0, 0, state->ownedWindows[0]->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
         } else {
             mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
             mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
-            mnuClearWindowPanelTransitionFlag(state->sprite);
+            mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
             mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             brsDrawResultIconPairWithAlpha((s32)state, 0x100, 2, 0x53);

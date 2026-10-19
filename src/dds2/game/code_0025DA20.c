@@ -1570,9 +1570,9 @@ s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *scene, s32 itemClass) {
 void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
     MenuWindowContainer **slot = scene->ownedWindows;
     MenuWindowContainer *sprite;
-    u32 i;
+    s32 i;
 
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < sizeof(scene->ownedWindows) / sizeof(scene->ownedWindows[0]); i++) {
         sprite = *slot;
         if (sprite != NULL) {
             if (sprite->list->context != NULL) {

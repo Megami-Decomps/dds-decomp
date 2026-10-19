@@ -19,7 +19,7 @@ typedef struct MenuTerminalWork {
     EffectSlotSet *batch;  /* 0x64 */
     EffectSlotSet *secondResource;     /* 0x68 */
     EffectSlotSet *alternateBatch; /* 0x6C */
-    struct MenuList *listResource; /* 0x70 */
+    struct MenuList *commandLists[1]; /* 0x70: owned command-list array */
     struct MenuList *list; /* 0x74 */
     struct MenuList *owner;/* 0x78 */
     s32 mode;                /* 0x7C */

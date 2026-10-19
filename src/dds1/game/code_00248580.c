@@ -514,7 +514,7 @@ void mnuHighlightProgressNodeFromOwnerSelection(MenuTerminalWork *host) {
         }
         if (host->owner->count == 0) {
             struct MenuListNode *selected = mnuWalkNodeList(2 - mnuShouldExcludeTerminalMenuEntry(),
-                                                              host->listResource);
+                                                              host->commandLists[0]);
             ((struct MenuListNode *)selected)->flags48 |= 1;
         }
     }
@@ -535,7 +535,7 @@ void mnuHighlightProgressNodeByMode(MenuTerminalWork *host) {
     }
     if (host->list->count == 0) {
         struct MenuListNode *node = mnuWalkNodeList(selectedIndex,
-                                                    host->listResource);
+                                                    host->commandLists[0]);
         ((struct MenuListNode *)node)->flags48 |= 1;
     }
 }
@@ -575,7 +575,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         count = 2;
         break;
     }
-    host->listResource = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, (s32)host);
+    host->commandLists[0] = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, (s32)host);
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles(host->imageHandles);
     mnuUpdateGroupResources((u8 *)host);
@@ -587,17 +587,18 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
 extern void mnuReleaseStaffImageHandles(u32 *);
 
 /* Release command/progress lists, child percentage panels and staff image handles.
- * Preserve their existing order and the single-iteration list loop. */
+ * Release the owned command-list array before the remaining resources. */
 void mnuReleaseWorkResources(u8 *work) {
-    u32 i;
+    MenuTerminalWork *host = (MenuTerminalWork *)work;
+    s32 i;
 
-    for (i = 0; i < 1; i++) {
-        mnuDestroyListState((struct MenuList *)*(u32 *)(work + 0x70 + i * 4));
+    for (i = 0; i < sizeof(host->commandLists) / sizeof(host->commandLists[0]); i++) {
+        mnuDestroyListState(host->commandLists[i]);
     }
-    mnuDestroyThresholdNodePanels((MenuTerminalWork *)work);
-    mnuReleaseStaffImageHandles(((MenuTerminalWork *)work)->imageHandles);
-    mnuReleaseProgressWorkList((s32)work);
-    mnuDestroyListState(((MenuTerminalWork *)work)->owner);
+    mnuDestroyThresholdNodePanels(host);
+    mnuReleaseStaffImageHandles(host->imageHandles);
+    mnuReleaseProgressWorkList((s32)host);
+    mnuDestroyListState(host->owner);
 }
 
 
@@ -1355,7 +1356,7 @@ void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
 
 
 s32 mnuGetTerminalListSlotForCount(MenuTerminalWork *terminalWork) {
-    s32 value = terminalWork->listResource->count;
+    s32 value = terminalWork->commandLists[0]->count;
 
     switch (value) {
     case 2:
@@ -1432,25 +1433,25 @@ void mnuDrawTerminalSelectionListAndStep(s32 close, MenuTerminalWork *work) {
     memcpy(positions, D_003AF6E0, sizeof(positions));
     itfDrawGridWithResolvedSlot(positions[1][0], positions[1][1], 0, 0x80,
         work->batch, mnuGetTerminalListSlotForCount(work), 0x53);
-    mnuCallInitWide(0x330, 0x340, 0, (s32)work->listResource, 0x53);
+    mnuCallInitWide(0x330, 0x340, 0, (s32)work->commandLists[0], 0x53);
     itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x80,
         work->batch, 8, 0x53);
     frames = work->batch;
     progress = ((u32)(*(u8 *)&frames->workEntries[8].geometry.cornerColors[0]) << 8) /
                (*(u8 *)&frames->workEntries[8].savedColors[0]);
     if (close != 0) {
-        if (work->listResource->scale > 0) {
-            work->listResource->scale -= 0x40;
+        if (work->commandLists[0]->scale > 0) {
+            work->commandLists[0]->scale -= 0x40;
         }
-        if (work->listResource->scale < 0) {
-            work->listResource->scale = 0;
+        if (work->commandLists[0]->scale < 0) {
+            work->commandLists[0]->scale = 0;
         }
     } else if (progress == 0x100) {
-        if (work->listResource->scale < 0x100) {
-            work->listResource->scale += 0x40;
+        if (work->commandLists[0]->scale < 0x100) {
+            work->commandLists[0]->scale += 0x40;
         }
-        if (work->listResource->scale > 0x100) {
-            work->listResource->scale = 0x100;
+        if (work->commandLists[0]->scale > 0x100) {
+            work->commandLists[0]->scale = 0x100;
         }
     }
 }
@@ -1700,7 +1701,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
     MenuTerminalWork *context = (MenuTerminalWork *)kwlnTaskGetUserValue(input);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->popupState;
-    s32 kind = context->listResource->cursor->index;
+    s32 kind = context->commandLists[0]->cursor->index;
     s32 frames;
     s32 action;
     struct MenuListNode *node;
@@ -1714,12 +1715,12 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
     if (frames != 2) {
         return 0;
     }
-    if (context->listResource->scale < 0x100) {
+    if (context->commandLists[0]->scale < 0x100) {
         return 0;
     }
     if (*state == 0) {
         if (buttons & 1) {
-            node = context->listResource->cursor;
+            node = context->commandLists[0]->cursor;
             action = mnuTerminalActionTable[mnuShouldExcludeTerminalMenuEntry() * 5 + context->mode * 10 + kind];
             if (!(node->flags48 & 1) || action == 3 || action == frames) {
                 if (mnuOpenTerminalPopupForAction(action, (s32)context) == 0) {
@@ -1746,15 +1747,15 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
             mnuSetPopupEntryFlagged(state, mnuTerminalSelectionCancelPopupEntry);
         }
         if (!(buttons & 0x300000)) {
-            mnuClearListFlagsOneAndTwo(&context->listResource->stateFlags);
+            mnuClearListFlagsOneAndTwo(&context->commandLists[0]->stateFlags);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault(context->listResource);
+            mnuRetreatListCursorDefault(context->commandLists[0]);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault(context->listResource);
+            mnuAdvanceListCursorDefault(context->commandLists[0]);
         }
-        mnuPlayInputSound(0, buttons, &context->listResource->stateFlags);
+        mnuPlayInputSound(0, buttons, &context->commandLists[0]->stateFlags);
     }
     return 0;
 }
@@ -1785,7 +1786,7 @@ s32 evtBClearAndReset(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
     evtRememberDispatchCallback(0, (MenuTerminalWork *)context);
-    ((MenuTerminalWork *)context)->listResource->scale = 0;
+    ((MenuTerminalWork *)context)->commandLists[0]->scale = 0;
     mnuSetWorldObjectAndMenuEnabled(0);
     evtFinishMessageWindowAndNotify();
     return 1;
@@ -2060,7 +2061,7 @@ u32 evtSelectFinalVisualNode(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
-    mnuSelectLastListNode(((MenuTerminalWork *)context)->listResource);
+    mnuSelectLastListNode(((MenuTerminalWork *)context)->commandLists[0]);
     return 1;
 }
 
