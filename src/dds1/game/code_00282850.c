@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "brs_level_progress_api.h"
 #include "mnu_input.h"
 #include "sdf_packet_list.h"
 #include "itf_draw_grid.h"
@@ -586,7 +587,85 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     effDrawSpriteWithCornerFade(x, y, depth, color, 1, drawArg, rangeIndex * 2 + variant, texture);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyInfoSprites);
+extern const u8 *D_003BAA8C;
+
+/* The source table holds text and empty-slot XY banks, each with two columns. */
+void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
+                             MenuSpriteState *spriteState, s32 surface) {
+    u32 opacity;
+    s32 step;
+    s32 rowCount;
+    s32 frameId;
+    s32 horizontal;
+    s32 vertical;
+    s32 remainingRows;
+    u16 skillId;
+    struct FrFontGlyph *glyph;
+
+    opacity = spriteState->initialValue;
+    step = brsGetLevelStepForValue(entry->level);
+    {
+        s32 frameIds[3] = {0x34, 0x33, 0x21};
+        s32 origin[2] = {0xED0, 0x9C8};
+        s32 headings[][2] = {{0xE40, 0x960}, {0xF30, 0x928}};
+        s32 rows[2][2][2] = {
+            {{0xF70, 0x9F0}, {0x17E0, 0x9F0}},
+            {{0xF70, 0xA18}, {0x17E0, 0xA18}}
+        };
+        switch (step) {
+        case 4:
+            rowCount = 2;
+            frameId = frameIds[0];
+            break;
+        case 6:
+            rowCount = 3;
+            frameId = frameIds[1];
+            break;
+        default:
+            rowCount = 4;
+            frameId = frameIds[2];
+            break;
+        }
+        horizontal = x + origin[0];
+        vertical = y + origin[1];
+        effDrawSpriteWithCornerFade(horizontal, vertical, depth, opacity, 1,
+                                   spriteState->resourceSets[0], frameId, surface);
+        vertical += 0xB8;
+        if (rowCount != 0) {
+            remainingRows = rowCount;
+            do {
+                effDrawSpriteWithCornerFade(horizontal, vertical, depth, opacity, 1,
+                                           spriteState->resourceSets[0], 0x22, surface);
+                vertical += 0xA8;
+            } while (--remainingRows != 0);
+        }
+        effDrawSpriteWithCornerFade(x + headings[0][0], y + headings[0][1],
+                                   depth, opacity, 1, spriteState->resourceSets[2],
+                                   0x38, surface);
+        effDrawSpriteWithCornerFade(x + headings[1][0], y + headings[1][1],
+                                   depth, opacity, 1, spriteState->resourceSets[2],
+                                   0x39, surface);
+        /* Coordinate workspaces are reset for the bounded column/row traversal. */
+        for (horizontal = 0; horizontal < 2; horizontal++) {
+            for (vertical = 0; vertical < rowCount; vertical++) {
+                skillId = entry->effectData[horizontal * rowCount + vertical];
+                if (skillId != 0) {
+                    glyph = itfCreateConvertedTextGlyph(
+                        x + rows[0][horizontal][0],
+                        y + rows[0][horizontal][1] + vertical * 0xA8,
+                        depth, 0xA09DC380, D_003BAA8C + skillId * 17, 0);
+                    frFontDrawGlyphChain(glyph, 1, surface);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                } else {
+                    effDrawSpriteWithCornerFade(
+                        x + rows[1][horizontal][0],
+                        y + rows[1][horizontal][1] + vertical * 0xA8,
+                        depth, opacity, 1, spriteState->resourceSets[1], 9, surface);
+                }
+            }
+        }
+    }
+}
 
 /* Create the DDS1 sprite record, including its five resource sets and blend weight. */
 MenuSimpleSpriteState *mnuAllocateSimpleSprite(
@@ -887,10 +966,6 @@ void mnuInitPairedPanelResources(MenuEffectPair *pair, s32 initialValue, s32 *se
     mnuCreatePairedEffects(pair);
     mnuCyclePairedEffectSetting(pair);
 }
-
-INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2420);
-
-INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2430);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2450);
 
@@ -3015,8 +3090,6 @@ s32 btlStageTaskCleanupCallback(void *request) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2608);
-
-INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC778);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC780);
 
