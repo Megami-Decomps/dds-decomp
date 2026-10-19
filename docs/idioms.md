@@ -11596,6 +11596,12 @@ Both games' native comparison at `+0x30` is `slt`, not `sltu`; the conversion
 expresses that nonredundant signedness boundary, while timer-zero tests need
 no conversion.
 
+The profile-skill loop's `flagId` is a real 16-bit value: the existing
+`skill & 0xFFFF` mask produces it, and the slot APIs and arrays consume it
+as a `u16`. Declare that ID as `u16`, retain the existing mask and publish
+the true `scrFindSlot` and `scrRemoveSlot` prototypes. A previously
+overwide local is not a reason to preserve their implicit declarations.
+
 Storage width does not by itself fix an API's argument or result width.
 `evtSetSolarPhase` takes an `s32` phase, masks it with `0xF` and stores the
 byte; its full-word VM callers need no artificial `u8` argument conversion.
@@ -11605,6 +11611,13 @@ the source record's halfword `commandIndex` and native `lhu` establish the
 stored ID's width, not a narrow return API. Publish the word getter to the
 signed battle-operand resolver instead of preserving an unnecessary implicit
 scope to avoid a caller-side truncation.
+
+`fileSetPreviewLocation` likewise accepts `s32` coordinates. Both menu
+callers load complete state words with `lw`; the providers narrow them
+with `sh` when assigning the existing serialized `s16` `previewX` and
+`previewY` fields. Correct the shared API and both providers together,
+without changing that layout or introducing caller-side truncation.
+Gate every direct and transitive `file.h` consumer after the header change.
 
 A genuinely load-bearing original C89 prototype scope is a separate case.
 Publishing the true `void` declaration for `effRequestResourceByMode`
