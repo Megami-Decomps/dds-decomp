@@ -76,6 +76,11 @@ extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 
+static inline void mnuFinalizeProgressHostVia(
+        MenuProgressHost *work, void (*release)(MenuProgressHost *)) {
+    release(work);
+}
+
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 
 extern MnuSpriteResourceGroup *mnuCreateSpriteResource(s32, u8, u8);
@@ -166,7 +171,7 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuResourceTaskWork *resourceWork)
     mnuReleaseResourceSlots(resourceWork);
     mnuDestroyMantraDrawPool(resourceWork->drawPool);
     if (resourceWork->staffMenuContext != NULL) {
-        mnuReleaseStaffMenuContextAndResources(resourceWork->staffMenuContext);
+        mnuFinalizeProgressHostVia(resourceWork->staffMenuContext, mnuReleaseStaffMenuContextAndResources);
     }
     dspCloseChannel();
     sdfQueueGeneralAllocationRelease(resourceWork->messageResource1);
@@ -331,7 +336,7 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
     }
     sdfReleaseChipBlock(list->context);
     mnuDestroyListState(list);
-    mnuReleaseMenuVisualWorkResources(sceneMetadata->attachedEffect);
+    mnuFinalizeProgressHostVia(sceneMetadata->attachedEffect, mnuReleaseMenuVisualWorkResources);
     sdfReleaseResourceAllocation(task->allocation);
     task = NULL;
 }
@@ -1641,7 +1646,6 @@ extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
-    struct MenuProgressHost *effect;
 
     scene->messageShadeFrames = 0;
     if (scene->pendingProfileId != 0) {
@@ -1659,10 +1663,7 @@ void mnuFinishMantraProfileSelection(void) {
     }
 
     evtFinishMessageWindowAndNotify();
-    effect = scene->attachedEffect;
-    mnuReleaseMenuVisualWorkResources(effect);
-    /* Post-final-call exception: retail keeps jal + epilogue; this clear survives 01.sibling..11.cfg and is deleted in 13.life (cc1probe trace). */
-    effect = NULL; /* handle released by the call above */
+    mnuFinalizeProgressHostVia(scene->attachedEffect, mnuReleaseMenuVisualWorkResources);
 }
 
 extern s8 D_00324510[];
