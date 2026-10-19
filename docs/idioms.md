@@ -14944,3 +14944,27 @@ Both remain 1120 bytes and differ in zero native words. All thirteen family
 units, including every includer of `sdf_model_packet_callback.h`, gate at
 2520 match and zero differ; the three standard canaries also gate exactly.
 No unit flags, expected assembly, data ownership or VU assembly are changed.
+
+## Loaded-record descriptors retain their real runtime pointers
+
+`EvtLoadedRecord` is the runtime 0x0C-byte descriptor, not the packed resource
+information header. Its first two words are a `SdfMemBlock *` allocation handle
+and a byte pointer to the 32-byte-stride record array; the third is the unsigned
+record count. Release the typed handle directly and use `records` as the byte
+origin. `sdfMemoryGetBlockAddress` truthfully returns `u8 *`, so casts at the two
+fresh-allocation boundaries select the record or relocation-word element type.
+
+Both pointer fields are needed to recover `evtCreateLoadedRecord` without its
+old one-pass loop. Correcting only the handle leaves the +0x9C/+0xA4 count/data
+store swap; correcting only the data pointer leaves the +0x94/+0x98 record-base
+addition/handle-store swap. With both real types, the existing output-offset
+phase follows the runtime descriptor header and every instruction matches.
+The normal block construction, payload copy, relocation copy and release stay
+straight-line C; no artificial loop or compiler flag is needed.
+
+DDS2 `0x0026CD50` remains 320 bytes: `check_unit` is `21 match, 0 differ` and the
+warning-free final object is 100% in objdiff. The complete conservative quoted/
+angle include closure has 120 C units; all of those and the additional standard
+canary gate exactly (121 units, 6433 C functions total). The final qualified
+`probe_typed_record_final` capture in `sandbox_PurBoss/purity_queue` has equal
+hooked/unhooked output. No expected object, assembly, data or flag is changed.
