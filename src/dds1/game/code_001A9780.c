@@ -1129,7 +1129,56 @@ void btlUpdateCommandPanelRowFades(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AB558);
+extern const s16 D_003BB3F0[];
+extern const u32 D_003A2090[];
+extern const s32 D_003A20A0[][2];
+extern const s32 D_003A20D0[][2];
+extern BtlResBlock *btlResourceBlock;
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+/* Publish and draw visible command-slot positions in the two panel banks. */
+void func_001AB558(void) {
+    s16 sprites[2];
+    u32 colors[4];
+    s32 positionsA[6][2];
+    s32 positionsB[6][2];
+    s32 i;
+
+    memcpy(sprites, D_003BB3F0, sizeof(sprites));
+    memcpy(colors, D_003A2090, sizeof(colors));
+    memcpy(positionsA, D_003A20A0, sizeof(positionsA));
+    memcpy(positionsB, D_003A20D0, sizeof(positionsB));
+    if (btlCommandPanelWork->state < 5) {
+        if (btlCommandPanelWork->state > 0) {
+            for (i = 0; i < 5; i++) {
+                if (btlCommandPanelWork->slotsA[i].hidden == 0) {
+                    colors[0] = btlCommandPanelWork->slotsA[i].fadeValue | 0x80808000;
+                    colors[1] = colors[0];
+                    colors[2] = colors[0];
+                    colors[3] = colors[0];
+                    btlCommandPanelWork->slotsA[i].position[0] = positionsA[i][0];
+                    btlCommandPanelWork->slotsA[i].position[1] = positionsA[i][1];
+                    effDrawSpriteWithCornerColors((btlCommandPanelWork->slotsA[i].position[0] + 5) << 4,
+                                                 (btlCommandPanelWork->slotsA[i].position[1] + 0x12D) << 3,
+                                                 0, colors, 0, btlResourceBlock->resA,
+                                                 sprites[0], 0x53);
+                }
+                if (btlCommandPanelWork->slotsB[i].hidden == 0) {
+                    colors[0] = btlCommandPanelWork->slotsB[i].fadeValue | 0x80808000;
+                    colors[1] = colors[0];
+                    colors[2] = colors[0];
+                    colors[3] = colors[0];
+                    btlCommandPanelWork->slotsB[i].position[0] = positionsB[i][0];
+                    btlCommandPanelWork->slotsB[i].position[1] = positionsB[i][1];
+                    effDrawSpriteWithCornerColors((btlCommandPanelWork->slotsB[i].position[0] + 5) << 4,
+                                                 (btlCommandPanelWork->slotsB[i].position[1] + 0x12D) << 3,
+                                                 0, colors, 0, btlResourceBlock->resA,
+                                                 sprites[1], 0x53);
+                }
+            }
+        }
+    }
+}
 
 
 typedef struct BattleCornerFadeDefaults {
