@@ -2052,7 +2052,82 @@ void fldDrawAutomapScene(void) {
     VU0_LOAD_MATRIX(sdfViewMatrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00148188);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
+extern void sdfVuLoadRotationMatrixY(f32);
+extern SdfPoolNode *fldGetDisplayTableRow(void);
+extern SdfTex *D_0044F7F0[];
+
+/* Rotate the map quad and project its X/Z plane into screen coordinates. */
+void func_00148188(f32 centerX, f32 centerY, f32 angle) {
+    f32 corners[4][4];
+    SdfListHead *packet;
+    s32 u0 = 0;
+    s32 v0 = 0;
+    s32 u3 = 0x800;
+    s32 v3 = 0x800;
+    s32 u1 = 0x800;
+    s32 v1 = 0;
+    s32 u2 = 0;
+    s32 v2 = 0x800;
+
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    sdfConsCreateDrawPacket(packet, D_0044F7F0[1], 0);
+
+    corners[0][0] = -4720.0f;
+    corners[0][1] = 0.0f;
+    corners[0][2] = -4080.0f;
+    corners[3][0] = 4720.0f;
+    corners[3][1] = 0.0f;
+    corners[3][2] = 4080.0f;
+    corners[1][0] = 4720.0f;
+    corners[1][1] = 0.0f;
+    corners[1][2] = -4080.0f;
+    corners[2][0] = -4720.0f;
+    corners[2][1] = 0.0f;
+    corners[2][2] = 4080.0f;
+
+    sdfVuLoadRotationMatrixY((angle + 180.0f) * 3.14f / 180.0f);
+    VU0_LOAD_VF(vf10, corners[0]);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, corners[0]);
+    VU0_LOAD_VF(vf10, corners[1]);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, corners[1]);
+    VU0_LOAD_VF(vf10, corners[2]);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, corners[2]);
+    VU0_LOAD_VF(vf10, corners[3]);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, corners[3]);
+
+    corners[0][2] *= 0.5f;
+    corners[0][0] += centerX * 16.0f;
+    corners[0][2] += centerY * 8.0f;
+
+    corners[1][2] *= 0.5f;
+    corners[1][0] += centerX * 16.0f;
+    corners[1][2] += centerY * 8.0f;
+
+    corners[2][2] *= 0.5f;
+    corners[2][0] += centerX * 16.0f;
+    corners[2][2] += centerY * 8.0f;
+
+    corners[3][2] *= 0.5f;
+    corners[3][0] += centerX * 16.0f;
+    corners[3][2] += centerY * 8.0f;
+
+    sdfQueueTexturedQuad(
+        packet, 0x80808080, 0x44,
+        (s32)(corners[0][0] + 28672.0f), (s32)(corners[0][2] + 30976.0f), u0, v0,
+        (s32)(corners[1][0] + 28672.0f), (s32)(corners[1][2] + 30976.0f), u1, v1,
+        (s32)(corners[2][0] + 28672.0f), (s32)(corners[2][2] + 30976.0f), u2, v2,
+        (s32)(corners[3][0] + 28672.0f), (s32)(corners[3][2] + 30976.0f), u3, v3,
+        0, 0);
+    fldGetDisplayTableRow()->append(fldGetDisplayTableRow(), packet);
+}
 
 extern f32 D_004362B0;
 extern f32 D_004362B4;
@@ -2060,7 +2135,6 @@ extern f32 D_00384790[16];
 extern f32 sdfViewMatrix[16];
 extern SdfTex *D_0044F7F8[8];
 extern void sdfInvertScaledVuTransform(void);
-extern void func_00148188(f32 centerX, f32 centerY, f32 angle);
 extern void fldSelectDisplayBuffer(u32 buffer);
 extern void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17);
 extern void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3);
