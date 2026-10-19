@@ -321,10 +321,10 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     itfSetFadeMode(&work->strip, 1, 0x80);
     itfDrawFadeGlyphStrip(&work->strip);
     itfSetFadeMode(&work->lowerNumber.fade, 1, 0x80);
-    itfDrawLowerFadeGlyphPair(&work->lowerNumber);
+    mnuDrawNumberFadeWith(itfDrawLowerFadeGlyphPair, &work->lowerNumber);
     itfSetLowerFadeNumberDisplayValue(&work->lowerNumber, work->currentScore);
     itfSetFadeMode(&work->upperNumber.fade, 1, 0x80);
-    itfDrawUpperFadeGlyphPair(&work->upperNumber);
+    mnuDrawNumberFadeWith(itfDrawUpperFadeGlyphPair, &work->upperNumber);
     itfSetUpperFadeNumberDisplayValue(&work->upperNumber, work->peakScore);
     itfSetFadeMode(&work->gauge.fade, 1, 0x80);
     itfSetFadeParameter(&work->gauge, 100);

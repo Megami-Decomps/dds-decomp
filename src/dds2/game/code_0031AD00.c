@@ -36,7 +36,7 @@ void itfDispatchObjectFadeSequenceMode(MnuShootingWork *object) {
     case 10:
     case 11:
     case 12:
-        mnuDrawFadeSequenceTwo(&object->choiceFade);
+        mnuDrawNumberFadeWith(mnuDrawFadeSequenceTwo, &object->choiceFade);
         break;
     }
 }
@@ -153,11 +153,7 @@ void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
     } else {
         itfSetFadeMode(&fade->fade, 0, 8);
     }
-    mnuDrawFadeSequenceThree(fade);
-    /* End the local fade borrow after drawing. Retail JAL 0031B0DC:
-     * 01.sibling keeps ordinary call94 and reset98; reset98 survives
-     * 11.cfg, then disappears in 13.life. Without it, call90 is a sibling. */
-    fade = NULL;
+    mnuDrawNumberFadeWith(mnuDrawFadeSequenceThree, fade);
 }
 
 /* Create and attach the shooting scene camera with its fixed field of view. */

@@ -7069,12 +7069,25 @@ loader body is matching C.
 
 ## Shooting pause choice uses a complete fade-number owner
 
-DDS2 `func_0031B080` passes `MnuShootingWork +0x14C` to both the
-`func_0031ED68` display-value setter and `mnuDrawFadeSequenceThree`. Their
-`FadeNumber.displayValue` access at `+0x18` identifies the work's `+0x164`
-word; the resetters clear the complete `0x1C` bytes. Keep this payload as
-`pauseFade`, not a byte pad cast to its fade-state prefix. This owner closure
-does not solve the retained caller's retail JAL-versus-sibling-jump frontier.
+DDS2 `mnuUpdateAndDrawPauseChoiceFade` (`0x0031B080`) passes
+`MnuShootingWork +0x14C` to both `mnuSetPauseFadeChoice` and
+`mnuDrawFadeSequenceThree`. Their `FadeNumber.displayValue` access at
+`+0x18` identifies the work's `+0x164` word; the resetters clear the complete
+`0x1C` bytes. Keep this payload as `pauseFade`, not a byte pad cast to its
+fade-state prefix.
+
+The lower/upper score drawers and the two-/three-choice drawers form a real
+`void (*)(FadeNumber *)` renderer family. The shared
+`mnuDrawNumberFadeWith` inline operation has four actual sites across the
+HUD and pause consumers. Calling its renderer parameter prevents an early
+sibling alternative; later constant folding still produces the native
+direct JAL. This removes the dead `fade = NULL` tail blocker without
+changing argument types, owner layout or readonly data.
+
+Keep the offset and frame renderers' genuine direct sibling paths direct.
+The triplet renderer takes `FadeEntry *` and is not adapted into the numeric
+family. The recurring operation and native call forms support this shared
+inline hypothesis; they do not prove the original source spelling.
 
 
 ## DDS1 result-animation rows start at their phase byte

@@ -62,4 +62,12 @@ extern void itfSetFadeParameter(FadeGauge *, u32);
 extern void itfSetFadeSecondaryParameter(FadeGauge *, u32);
 extern void itfSetFadeGaugeDisplayValue(FadeGauge *, u32);
 extern void func_0031E8F0(FadeGauge *);
+
+/* Renderers for numeric fade blocks share this callback interface. */
+typedef void (*MnuNumberFadeDraw)(FadeNumber *);
+static inline void mnuDrawNumberFadeWith(MnuNumberFadeDraw draw,
+                                        FadeNumber *entry) {
+    draw(entry);
+}
+
 #endif
