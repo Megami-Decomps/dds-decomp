@@ -506,49 +506,43 @@ void *btlSelectRandomUnitFromMask(BtlIndexList *list, u16 *flags, u16 count) {
     start = (btlNextScaledRandom(0x2000) & 0xF) % count;
     pass = 0;
     i = start;
-    goto test;
-step:
-    if (i < count) {
-        i++;
-    } else {
-        i = 0;
-        pass++;
-    }
-    if (pass < 2) {
-        goto test;
-    }
-    for (i = 0; i < count; i++) {
-        fallback[i] = 0;
-        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
-            fallback[i] = 1;
-        }
-    }
-    i = start;
-    pass = 0;
-    do {
-        if (fallback[i] != 0) {
-            break;
-        }
+    while (flags[i] == 0) {
         if (i < count) {
             i++;
         } else {
-            /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
-             * the index unreduced (retail recomputes fallback + i * 2). */
-            do {
-                pass++;
-            } while (0);
             i = 0;
+            pass++;
         }
-    } while (pass < 2);
-    if (i >= count) {
-        i = 0;
+        if (pass >= 2) {
+            for (i = 0; i < count; i++) {
+                fallback[i] = 0;
+                if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+                    fallback[i] = 1;
+                }
+            }
+            i = start;
+            pass = 0;
+            do {
+                if (fallback[i] != 0) {
+                    break;
+                }
+                if (i < count) {
+                    i++;
+                } else {
+                    /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
+                     * the index unreduced (retail recomputes fallback + i * 2). */
+                    do {
+                        pass++;
+                    } while (0);
+                    i = 0;
+                }
+            } while (pass < 2);
+            if (i >= count) {
+                i = 0;
+            }
+            break;
+        }
     }
-    goto done;
-test:
-    if (flags[i] == 0) {
-        goto step;
-    }
-done:
     return btlGetIndexListEntry(list, i);
 }
 
@@ -1051,26 +1045,25 @@ s32 func_00216B40(s32 actor) {
         btlCopyIndexList(((ActionStateLink *)actor)->indexWork.indices, list);
         btlFreeIndexList(list);
         result = 1;
-        goto completed;
-    }
-    count = btlGetIndexListCount(list);
-    found = 0;
-    memset(picked, 0, sizeof(picked));
-    for (i = 0; i < count; i++) {
-        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
-            picked[found] = 1;
-            found++;
+    } else {
+        count = btlGetIndexListCount(list);
+        found = 0;
+        memset(picked, 0, sizeof(picked));
+        for (i = 0; i < count; i++) {
+            if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+                picked[found] = 1;
+                found++;
+            }
         }
-    }
-    if (found == 0) {
-        btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, ((ActionStateLink *)actor)->unit);
+        if (found == 0) {
+            btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, ((ActionStateLink *)actor)->unit);
+            btlFreeIndexList(list);
+            return 1;
+        }
+        btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlSelectRandomUnitFromMask(list, picked, count));
         btlFreeIndexList(list);
-        return 1;
+        result = 1;
     }
-    btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlSelectRandomUnitFromMask(list, picked, count));
-    btlFreeIndexList(list);
-    result = 1;
-completed:
     return result;
 }
 
@@ -2634,14 +2627,8 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
 s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, s32 unusedGroup400) {
     ActionStateLink *link = command->link;
 
-    if (btlIsActorCategoryMarked(command)) {
-        goto rejected;
-    }
-    if (link->unit->status.flags & 0x200) {
-        goto rejected;
-    }
-    if (command->actionCode != 0x17E) {
-        goto rejected;
+    if (btlIsActorCategoryMarked(command) || (link->unit->status.flags & 0x200) || command->actionCode != 0x17E) {
+        return 0;
     }
     btlBuildInsetExchangeCameraPair(command, &command->frontCamera, &command->backCamera,
                   0, 0, 1.0f, 2.5f, 0.5f, 0.075f);
@@ -2652,9 +2639,6 @@ s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, 
     btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
     btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
     return 1;
-
-rejected:
-    return 0;
 }
 
 extern s32 btlHasMarkedEntry14();
@@ -6291,47 +6275,45 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
         }
         /* A matching tail entry still exits without setting the camera. */
         candidate = candidate->nextActor;
-        if (candidate == NULL) {
-            goto done;
-        }
-        if (speciesPreset != -1) {
+        if (candidate == NULL || speciesPreset != -1) {
             break;
         }
     }
 
-    btlFlagAllUnitDefeatCandidatesTask();
-    btlInitMotionTransformFromComponents(camera,
-        D_003BF768[speciesPreset][cameraPreset].x,
-        D_003BF768[speciesPreset][cameraPreset].y,
-        D_003BF768[speciesPreset][cameraPreset].z,
-        D_003BF768[speciesPreset][cameraPreset].qx,
-        D_003BF768[speciesPreset][cameraPreset].qy,
-        D_003BF768[speciesPreset][cameraPreset].qz,
-        D_003BF768[speciesPreset][cameraPreset].qw, 40.0f);
+    if (candidate != NULL) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlInitMotionTransformFromComponents(camera,
+            D_003BF768[speciesPreset][cameraPreset].x,
+            D_003BF768[speciesPreset][cameraPreset].y,
+            D_003BF768[speciesPreset][cameraPreset].z,
+            D_003BF768[speciesPreset][cameraPreset].qx,
+            D_003BF768[speciesPreset][cameraPreset].qy,
+            D_003BF768[speciesPreset][cameraPreset].qz,
+            D_003BF768[speciesPreset][cameraPreset].qw, 40.0f);
 
-    if (rotate == 1 && battle->unk268 == 3) {
-        switch (cameraPreset) {
-        case 0:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
-            break;
-        case 1:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
-            break;
-        case 2: {
-            f32 angle = -0.13089969f;
-            sdfVuLoadRotationMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
-            break;
+        if (rotate == 1 && battle->unk268 == 3) {
+            switch (cameraPreset) {
+            case 0:
+                sdfVuLoadRotationMatrixX(-0.13089969f);
+                sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
+                sdfComposeVuMatrixFromRegisters();
+                break;
+            case 1:
+                sdfVuLoadRotationMatrixX(-0.13089969f);
+                break;
+            case 2: {
+                f32 angle = -0.13089969f;
+                sdfVuLoadRotationMatrixX(angle);
+                sdfVuLoadSecondaryRotationMatrixY(angle);
+                sdfComposeVuMatrixFromRegisters();
+                break;
+            }
+            }
+            VU0_LOAD_VF(vf10, camera->direction);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, camera->direction);
         }
-        }
-        VU0_LOAD_VF(vf10, camera->direction);
-        VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->direction);
     }
-done:
     return 1;
 }
 

@@ -5847,7 +5847,9 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
     btlRecordListedLinkageSkills();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
-
+    /* Retail jumps: b 0x001C0570 / 0x001C057C reach the return-0 block 0x001C05B0 placed after the -1 arm. Plain
+     * `return 0` in the arms puts that block beside the mode-one arm (16 of 225 words differ), and
+     * `phase < 7 && phase >= 0` folds to one sltu, so the -1 arm cannot be an else. */
 dialog_active:
     return 0;
 }
@@ -5925,6 +5927,7 @@ s32 btlUpdateCommandNoticeTask(KwlnTask *task) {
     dspCloseChannel();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
+    /* Retail's phase++ arm `b 0x1C0810` (slot sb) targets one `move v0,zero` after the -1 return; `return 0`/else forms let jump2 cross-jump into a label fall-in (same trace as DDS1 btlUpdateLinkageNoticeTask; 7 of 122 words differ). */
 return_zero:
     return 0;
 }

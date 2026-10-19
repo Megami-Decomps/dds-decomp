@@ -214,44 +214,36 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
     BtlUnit *second;
 
     if (unit == NULL) {
-        if (effect->active != 1) {
-            goto unavailable_pair;
-        }
-        first = NULL;
-        second = NULL;
-        for (node = battle->units; node != NULL; node = node->nextActor) {
-            if (node->status.flags & 1) {
-                if (node->status.flags & 0x400) {
-                    switch (node->partyRecord.unitId) {
-                    case 0x12F:
-                        first = node;
-                        break;
-                    case 0x12E:
-                        second = node;
-                        break;
+        if (effect->active == 1) {
+            first = NULL;
+            second = NULL;
+            for (node = battle->units; node != NULL; node = node->nextActor) {
+                if (node->status.flags & 1) {
+                    if (node->status.flags & 0x400) {
+                        switch (node->partyRecord.unitId) {
+                        case 0x12F:
+                            first = node;
+                            break;
+                        case 0x12E:
+                            second = node;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (first != NULL && second != NULL) {
+                if (first->motionId < 0x14) {
+                    if (first->motionId >= 0x12) {
+                        return first->motionId;
+                    }
+                }
+                if (second->motionId < 0x14) {
+                    if (second->motionId >= 0x12) {
+                        return second->motionId;
                     }
                 }
             }
         }
-        if (first == NULL) {
-            goto unavailable_pair;
-        }
-        if (second == NULL) {
-            goto unavailable_pair;
-        }
-        if (first->motionId < 0x14) {
-            if (first->motionId >= 0x12) {
-                return first->motionId;
-            }
-        }
-        if (second->motionId < 0x14) {
-            if (second->motionId >= 0x12) {
-                return second->motionId;
-            }
-        }
-/* Share pair rejections so early conversion does not hoist the return
- * value into the phase test. Keep single-unit rejection paths separate. */
-unavailable_pair:
         return -1;
     }
     if (!(unit->status.flags & 1)) {

@@ -709,7 +709,12 @@ s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
 
 extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
 
-/* Initialize and link count pool nodes, terminating the last; count must be at least one. */
+/* Initialize and link count pool nodes, terminating the last; count must be at least one.
+ * The link loop is a goto loop: retail's loop (bnez $5 back to 0x0032D128) recomputes
+ * both %lo values on every pass, i.e. loop.c never scanned it. Guarded do-while, while
+ * and for(;;) forms keep loop notes and cc1probe's 09.loop dump shows the %lo sums
+ * "moved" to the preheader (16 of 27 words differ); a tail-recursive form folds the
+ * first block into the loop (18 words). */
 void sdfInitPacketPoolNodeChain(SdfPoolNode *nodes, s32 count) {
     SdfPoolNode *node = nodes;
     SdfPoolNode *next;

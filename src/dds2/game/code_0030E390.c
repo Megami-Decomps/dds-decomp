@@ -333,6 +333,7 @@ void fldAdvanceMapRequestAges(MapRequestState *ring) {
 
 advance:
     node = node->next;
+    /* Retail's head arms `b 0x30EFE4` into the --remaining test and the loop keeps its (s16)limit extend inside (no loop.c hoist); for(;;)/while forms hoist it and differ by 20-28 words (DDS1 twin: cc1probe 09.loop). */
 loop:
     if (--remaining == -1) {
         goto done;
@@ -367,6 +368,8 @@ void fldDispatchMapRequestCallbacks(MapRequestState *ring) {
     remaining = ring->count;
     end = -1;
     one = 1.0f;
+    /* Twin of DDS1 0x002C7C88: retail enters the loop with a `b` to the top-of-loop test; while, for(;;) and
+     * for-with-increment spellings all get rotated into guard + do-while (39 of 48 words differ). */
     goto loop;
 
 advance:

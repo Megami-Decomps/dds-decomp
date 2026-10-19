@@ -694,6 +694,7 @@ void sdfInitPacketPoolNodeChain(SdfPoolNode *nodes, s32 count) {
         node->next = NULL;
         return;
     }
+    /* Retail's loop (backedge `bnez` to 0x2D4278) re-derives the handler addresses inside it; a do/while here gets loop.c hoists (cc1probe 09.loop: moved insns; 16 of 27 words differ), the goto form has no loop notes. */
 link:
     next = node + 1;
     remaining--;

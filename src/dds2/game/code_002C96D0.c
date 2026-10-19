@@ -3024,6 +3024,8 @@ restartRequest:
     D_00437D40 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
     return (s32)filePollSlotDetectionAndBranch;
+    /* Retail's gotos reach one shared `return 0` block at 0x002CEE58 (twin of DDS1 0x0028FB30);
+     * a plain `return 0` per site lets the compiler reuse v0 == 0 from the fileReqPoll test (26 of 322 words differ). */
 idle:
     return 0;
 }

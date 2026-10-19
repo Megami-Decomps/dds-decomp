@@ -8743,6 +8743,7 @@ void func_001F0CA0(BtlTask *task, BattleIndexWork *work) {
             entryCount = group->count;
             entryIndex = 0;
             if (entryCount != 0) {
+                /* Retail enters at 0x1F0EC8 (`b`, slot li v0,4) past the loop-top `group->kind` reload at 0x1F0EC4 and keeps unreduced entry indexing; for/while/do forms get loop.c givs and a different frame (cc1probe 09.loop; 205 of 208 words differ). */
                 goto entry_dispatch;
             entry_loop:
                 groupKind = group->kind;
