@@ -5663,7 +5663,7 @@ s32 btlIsLinkageTutorialEligible(void) {
 
 
 /* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
-s32 btlHasUnmarkedLinkageSkill(s32 unit) {
+u8 btlHasUnmarkedLinkageSkill(s32 unit) {
     s32 count;
     s32 i;
 
@@ -5677,9 +5677,10 @@ s32 btlHasUnmarkedLinkageSkill(s32 unit) {
         }
         return 0;
     }
-    return count;
+    return 0;
 }
 
+/* The byte predicate result keeps retail's JAL + epilogue at 001C0144. */
 s32 btlGetTaskState6(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     BattleSceneObject *scene;
@@ -5690,10 +5691,6 @@ s32 btlGetTaskState6(void) {
     }
     scene = (BattleSceneObject *)kwlnTaskGetUserValue(task);
     count = btlHasUnmarkedLinkageSkill((s32)scene->owner->unit);
-    /* Retail tails 001B54AC/001C0144 use JAL plus an epilogue.
-     * cc1probe retains this local-reference reset through 01.sibling
-     * and 11.cfg, then deletes it in 13.life. */
-    scene = NULL;
     return count;
 }
 
