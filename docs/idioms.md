@@ -14968,3 +14968,16 @@ angle include closure has 120 C units; all of those and the additional standard
 canary gate exactly (121 units, 6433 C functions total). The final qualified
 `probe_typed_record_final` capture in `sandbox_PurBoss/purity_queue` has equal
 hooked/unhooked output. No expected object, assembly, data or flag is changed.
+
+## Declare the defeat-clear API before camera callers
+
+`btlClearAllUnitDefeatCandidates` has the actual provider contract
+`void (void)` in DDS1 `code_001F6110`. Keep its existing declaration ahead
+of every camera caller in `code_001DEFE0`, rather than below the first three
+uses. A late declaration lets gcc manufacture implicit integer results at
+those earlier calls even though no result is part of the API.
+
+Moving only this declaration preserves all 257 C functions and their data
+exactly. It is an independent type-contract repair, not an authentication of
+the still separately audited `func_001F0CA0` loop; that body is unchanged by
+the declaration-only bundle.
