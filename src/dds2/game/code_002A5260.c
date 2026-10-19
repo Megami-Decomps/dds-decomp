@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "snd_track_callback.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -258,10 +259,7 @@ void mnuResetTitleMovieMenuStateAndStartTrack(void) {
     state->phase = 0;
     state->selectedPage = 0;
     state->sequenceTimer = 0;
-    sndStartTrackExtended(0x310000);
-    /* Retire the local title cursor; see docs/idioms.md,
-     * "Post-call local cleanup: title menu cursor". */
-    state = NULL;
+    sndApplyTrackOperation(sndStartTrackExtended, 0x310000);
 }
 
 void mnuClearGlobalMenuStateFields(void) {
