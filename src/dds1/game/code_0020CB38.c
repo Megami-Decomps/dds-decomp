@@ -284,60 +284,53 @@ void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
 
     if ((unit->status.flags & 0x400) == 0 || battle->currentScene == 5 ||
         (unit->status.flags & 2) == 0) {
-        goto done;
+        return;
     }
     unitId = unit->partyRecord.unitId;
     payload = (BtlUnitScaleTransition *)battle->effect;
     if (unitId >= 0x143) {
-        goto done;
+        return;
     }
     if (unitId < 0x13D) {
-        goto done;
+        return;
     }
 
-    actor = battle->units;
-    while (actor != 0) {
+    for (actor = battle->units; actor != 0; actor = actor->next) {
         if ((actor->status.flags & 1) == 0) {
-            goto next_actor;
+            continue;
         }
         if ((actor->status.flags & 0x400) == 0) {
-            goto next_actor;
+            continue;
         }
         if (actor->partyRecord.unitId == 0x11B) {
             break;
         }
-next_actor:
-        actor = actor->next;
     }
-    if (actor == 0) {
-        goto done;
-    }
+    if (actor != 0) {
+        evtSetUnitAlphaTransition(unit->ext, 0, 0);
+        unit->overlayColor = unit->baseColor & 0xFFFFFF;
+        transitionUnitId = unit->partyRecord.unitId;
+        switch (transitionUnitId) {
+        case 0x13D:
+        case 0x13E:
+            unit->scale = 1.3333333f;
+            break;
+        case 0x13F:
+        case 0x140:
+            unit->scale = 1.0f;
+            break;
+        case 0x141:
+        case 0x142:
+            unit->scale = 0.7142857f;
+            break;
+        }
 
-    evtSetUnitAlphaTransition(unit->ext, 0, 0);
-    unit->overlayColor = unit->baseColor & 0xFFFFFF;
-    transitionUnitId = unit->partyRecord.unitId;
-    switch (transitionUnitId) {
-    case 0x13D:
-    case 0x13E:
-        unit->scale = 1.3333333f;
-        break;
-    case 0x13F:
-    case 0x140:
-        unit->scale = 1.0f;
-        break;
-    case 0x141:
-    case 0x142:
-        unit->scale = 0.7142857f;
-        break;
+        payload->active = 1;
+        payload->unitId = transitionUnitId;
+        payload->scale = unit->scale;
+        payload->modelValue = (s32)btlGetUnitModelCurrentFrame(actor);
+        btlScalarRangeInitQuadratic(&payload->range, 80.0f);
     }
-
-    payload->active = 1;
-    payload->unitId = transitionUnitId;
-    payload->scale = unit->scale;
-    payload->modelValue = (s32)btlGetUnitModelCurrentFrame(actor);
-    btlScalarRangeInitQuadratic(&payload->range, 80.0f);
-done:
-    return;
 }
 
 extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
