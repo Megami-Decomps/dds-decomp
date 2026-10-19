@@ -50,6 +50,7 @@ extern char D_004126B0[];
 extern ScrComGlobals *datGameState;
 
 extern s32 scrReadIntParameter(s32 parameterIndex);
+extern u32 scrGetCommandTimer(void);
 
 s32 scrCommandStoreRandomCondition(void)
 {
@@ -67,7 +68,8 @@ s32 scrCommandWaitForTimerLimit(void) {
     if (scrReadIntParameter(0) <= 0) {
         return 1;
     }
-    if (scrGetCommandTimer() < scrReadIntParameter(0)) {
+    /* VM timer limits use signed words; retail +0x30 is slt, not sltu. */
+    if ((s32)scrGetCommandTimer() < scrReadIntParameter(0)) {
         return 0;
     }
     return 1;
