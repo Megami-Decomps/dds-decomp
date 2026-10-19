@@ -14806,3 +14806,33 @@ state all have hooked/unhooked equality. Whole-unit gates are `15/0` and
 `58/0`. All 88 other transitive consumers of the three recovered headers,
 and all three canaries, are exact. Complete object data compares to retail
 with zero differing bytes, including 58 relocated readonly entries.
+
+## Actor-control byte API: acquire the command selector before publishing flags
+
+DDS1 `fldDispatchSceneAction` (`0x0013E5A8`, 1636 bytes) follows the matched
+DDS2 transition dispatcher: mode order 2, 0, 1, 3; a real one-word area
+request; and header selectors captured before callback-visible publication.
+DDS1 additionally fades in and publishes `commandEnabled`.
+
+The packed actor member remains `s8`: other native consumers use `lb`.
+The bitset reader is instead a shared `static inline u8
+fldGetActorControlFlags(const FldActorEntry *)`, used by both name searches
+and twice by the dispatcher. Acquire `commandFlag = getter(entry) & 1`,
+then the orientation flags, then publish `commandEnabled`. Both acquired
+values are consumed. This preserves the native `lbu` followed by a register
+copy, rather than a second signed load or an extra unsigned mask.
+
+Qualified `cc1probe --cse --expand --alloc` captures in
+`sandbox_PurFAD/field_acquisition/probe_exact_dds1_dispatch` show uid867
+acquiring a zero-extended byte and uid881 rewritten to copy that same
+SI value, reg310 (`decisions.log:13659-13699`). Hooked and unhooked output
+are equal. The needed property is a common unsigned byte value for the
+command guard and orientation snapshot, not a fabricated block boundary.
+
+The two name queries and actor-trigger query also share the ordinary
+`fldGetActorRows()` base reader. Keep the normal INCLUDE_ASM-context gate:
+with direct accesses the trigger differed in seven address-setup words
+only in that context; the three-site reader preserves its native 488-byte
+body too. Its separately qualified trace is `probe_exact_dds1_trigger`.
+The complete unit, including the new dispatcher and all existing C, is
+`59 match, 0 differ`; no header, compiler flag or expected assembly changes.
