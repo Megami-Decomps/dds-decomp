@@ -31,7 +31,7 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 
 
-extern s32 btlSetLinkedDefeatCameraPresetA();
+extern u8 btlSetLinkedDefeatCameraPresetA();
 
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
@@ -680,7 +680,7 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
 extern f32 D_003BB8B0[];
 
-s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -741,11 +741,9 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
+/* The byte handled result preserves retail's JAL + epilogue. */
 s32 btlDefeatCameraHookPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetB(command, camera, rotate);
-    /* Retail uses JAL plus an epilogue. Qualified cc1probe retains this
-     * consumed local cleanup through sibling selection, then removes it in CSE. */
-    rotate = 0;
     return result;
 }
 

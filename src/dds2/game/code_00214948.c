@@ -3310,7 +3310,7 @@ extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
 
 
-extern s32 btlSetLinkedDefeatCameraPresetA();
+extern u8 btlSetLinkedDefeatCameraPresetA();
 
 extern void btlDestroyUnit(BtlUnit *);
 
@@ -3525,7 +3525,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     return 1;
 }
 
-s32 btlSetLinkedDefeatCameraPresetA(command, camera, rotate)
+u8 btlSetLinkedDefeatCameraPresetA(command, camera, rotate)
 BtlLinkedCommand *command;
 BtlCamState *camera;
 s32 rotate;
@@ -3590,13 +3590,9 @@ s32 rotate;
     return 1;
 }
 
-/* Forward the linked defeat preset, preserving its signed result and consumed-command staging. */
+/* The byte handled result preserves retail's JAL + epilogue at 0021C800. */
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
-    /* Retail 0021C800 uses JAL plus restores. This consumed-command reset
-     * is the function-owned state exception in CONTRIBUTING: qualified
-     * cc1probe retains it in 01.sibling, then deletes it in a later pass. */
-    command = NULL;
     return result;
 }
 
@@ -4509,7 +4505,7 @@ extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void btlSetSpecialEnemyGeometry(void);
 
-extern s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *, BtlCamState *, s32);
+extern u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *, BtlCamState *, s32);
 
 
 typedef struct BattleActionFlagState {
@@ -6246,8 +6242,8 @@ typedef struct BtlBossCameraPreset {
 
 extern BtlBossCameraPreset D_003BF768[5][3];
 
-/* Select party/formation presets for five Brahman forms; return one even without a matching preset. */
-s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+/* Select party/formation presets for five Brahman forms; report handled even without a matching preset. */
+u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *target;
     BtlUnit *candidate;
@@ -6339,12 +6335,9 @@ done:
     return 1;
 }
 
-/* Forward the Brahman preset, retaining its signed result and native consumed-mode reset. */
+/* The byte handled result preserves retail's JAL + epilogue. */
 s32 btlUpdateBrahmanDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetBrahmanPartyCameraPreset(command, camera, rotate);
-    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
-     * mode reset survives sibling-call selection and disappears in CSE. */
-    rotate = 0;
     return result;
 }
 
@@ -6941,7 +6934,7 @@ s32 btlUpdatePartyApproachCameraStep(s32 object) {
     return 0;
 }
 
-s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -7002,11 +6995,9 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
+/* The byte handled result preserves retail's JAL + epilogue at 002247B8. */
 s32 btlUnitWrapB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetB(command, camera, rotate);
-    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
-     * mode reset survives sibling-call selection and disappears in CSE. */
-    rotate = 0;
     return result;
 }
 
@@ -7340,7 +7331,7 @@ void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
 
 
 
-s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     BattleActionContext *runtime = (BattleActionContext *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -7418,12 +7409,9 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-/* Forward the Satan preset, retaining its signed result and native consumed-mode reset. */
+/* The byte handled result preserves retail's JAL + epilogue at 00225780. */
 s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetSpecialDefeatCameraPreset(command, camera, rotate);
-    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
-     * mode reset survives sibling-call selection and disappears in CSE. */
-    rotate = 0;
     return result;
 }
 
@@ -7720,7 +7708,7 @@ s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit) {
     return 0;
 }
 
-extern s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *, BtlCamState *, s32);
+extern u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *, BtlCamState *, s32);
 
 /* Finish flag-selected Satan camera paths; clear runtime flag 0x2000 when handled. */
 s32 btlFinishSatanActionCamera(BtlLinkedCommand *unit) {

@@ -317,7 +317,7 @@ typedef struct BtlState {
     s32 (*serialOverride)(void); /* 0x5EC: -1 cancels a scripted follow-up encounter. */
     void (*updateCallback)(void); /* 0x5F0 */
     u8 pad5F4[0x14];
-    s32 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x608: mode-specific pose override. */
+    u8 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x608: boolean mode-specific pose override. */
     s32 (*defeatCameraHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x60C: linked-defeat camera override. */
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x610 */
     u8 pad614[8];
@@ -577,7 +577,7 @@ typedef struct BtlState {
     u8 pad634[4];
     void (*commandTurnEndHook)(struct ActionStateLink *);
     s32 (*commandHook)(s32, s32);
-    s32 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x640: mode-specific pose override. */
+    u8 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x640: boolean mode-specific pose override. */
     s32 (*defeatCameraHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x644: same linked-defeat camera override. */
     s32 (*unk648)(BtlUnit *);
     s32 (*unk64C)(BtlUnit *);

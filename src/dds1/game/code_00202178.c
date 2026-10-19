@@ -79,7 +79,7 @@ extern const s32 D_003A5D50[];
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern s32 btlSetLinkedDefeatCameraPresetA();
+extern u8 btlSetLinkedDefeatCameraPresetA();
 
 extern u8 D_00360EE0[];
 
@@ -1466,17 +1466,14 @@ s32 btlSetFirstCriticalHpUnitSideFlag(void) {
     return -1;
 }
 
-s32 btlInitializeResources(s32 unused, s32 resource) {
-    btlInitMotionTransformFromVectors((BtlCamState *)resource, (f32 *)D_00360EE0, (f32 *)D_00360EF0);
+u8 btlInitializeResources(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    btlInitMotionTransformFromVectors(camera, (f32 *)D_00360EE0, (f32 *)D_00360EF0);
     return 1;
 }
 
+/* The byte handled result preserves retail's JAL + epilogue at 002056C8. */
 s32 btlInitResourcesWrap(BtlLinkedCommand *command, BtlCamState *camera, s32 unused) {
-    s32 result = btlInitializeResources((s32)command, (s32)camera);
-    /* Retail 002056C8 uses JAL plus restores. This consumed-camera reset
-     * is the function-owned state exception in CONTRIBUTING: qualified
-     * cc1probe retains it in 01.sibling, then deletes it in a later pass. */
-    camera = NULL;
+    s32 result = btlInitializeResources(command, camera, unused);
     return result;
 }
 
@@ -4929,7 +4926,7 @@ void btlSetLinkedCameraForCommandMode(BtlLinkedCommand *command, BtlUnit *target
 
 
 
-s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -4990,13 +4987,9 @@ s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-/* Forward the linked defeat preset, preserving its signed result and consumed-command staging. */
+/* The byte handled result preserves retail's JAL + epilogue at 0020B568. */
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
-    /* Retail 0020B568 uses JAL plus restores. This consumed-command reset
-     * is the function-owned state exception in CONTRIBUTING: qualified
-     * cc1probe retains it in 01.sibling, then deletes it in a later pass. */
-    command = NULL;
     return result;
 }
 

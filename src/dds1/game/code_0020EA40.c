@@ -180,7 +180,7 @@ extern s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command);
 extern s32 btlHandleTargetedDefeatAction(u8 *unit);
 extern s32 btlHasDifferentActiveTarget(BtlUnit *target);
 extern void btlInitRandomBossSelection(void);
-extern s32 btlInitializeResources(s32 unused, s32 resource);
+extern u8 btlInitializeResources(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 extern void btlInitializeUnitDisplaySpeciesAndFlags(u8 *unit);
 extern u8 btlIsCommandCodeF(u32 unused, s32 command);
 extern s32 btlIsEffectActor(BtlUnit *actor);
@@ -215,7 +215,7 @@ extern s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 
 extern s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 any400);
 extern s32 btlSetLinkFlagOff(BtlUnit *requestedUnit);
 extern s32 btlSetLinkFlagOn(BtlUnit *requestedUnit);
-extern s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
+extern u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 extern void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied, u64 ownerId, u64 prerequisiteHandle, s32 condition);
 extern u64 btlStartSubtaskWithInput(u64 prerequisiteHandle);
 extern void btlStepFocusAngle(void);
