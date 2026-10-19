@@ -344,7 +344,126 @@ void mnuDrawMantraEntryStatusOverlays(s32 x, s32 y, s32 depth, s32 amount, MnuPr
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", mnuDrawMantraProfileGridEntry);
+typedef struct MnuProfileMarkerIds {
+    s8 ids[5];
+} MnuProfileMarkerIds;
+
+extern MnuProfileMarkerIds D_003BC4D0[];
+extern u32 prfGetCapValue(u16);
+extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
+extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *,
+                                        MnuMantraNodeState *, MnuProfileProgress *);
+
+/* Draw the capped profile's entry and its available prerequisite connections. */
+void mnuDrawMantraProfileGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
+                                  s32 sceneWorkAddress,
+                                  MnuProfileProgress *profileOwner,
+                                  MnuMantraGridEntry *scene, s32 context) {
+    u32 prerequisiteFlags[4];
+    s32 prerequisiteIds[4];
+    MnuProfileMarkerIds markerIds;
+    SdfGrid *grid = ((MenuSceneWork *)sceneWorkAddress)->gridHandle;
+    MantraPrerequisiteRecord *record;
+    MnuMantraNodeState *states;
+    s8 i;
+    u32 cap;
+    u32 packedFlags = 0;
+
+    cap = prfGetCapValue(scene->sceneId);
+    if (cap != ptyGetProfileRecordValue(profileOwner->partyRecord,
+                                       scene->sceneId)) {
+        return;
+    }
+    memset(prerequisiteIds, 0, sizeof(prerequisiteIds));
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
+    states = (MnuMantraNodeState *)(u32)grid->userData;
+    if (record->kind != 0) {
+        return;
+    }
+    i = 0;
+    if (record->ids[i] != 0) {
+        do {
+            if (states[record->ids[i]].state != 0) {
+                prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene,
+                                                                   states, profileOwner);
+                prerequisiteIds[i] = record->ids[i];
+                if (prerequisiteFlags[i] & 4) {
+                    packedFlags |= 1 << (i * 8);
+                }
+                if (prerequisiteFlags[i] & 2) {
+                    packedFlags |= 2 << (i * 8);
+                }
+                if (prerequisiteFlags[i] & 0x10) {
+                    packedFlags |= 4 << (i * 8);
+                }
+            }
+            i++;
+            if (i >= 4) {
+                break;
+            }
+        } while (record->ids[i] != 0);
+    }
+
+    mnuDrawSceneEntrySpriteWithOffset(x, y, depth, alpha, scene->sceneId,
+                                       0, context);
+    markerIds = D_003BC4D0[0];
+    for (i = 0; i < 5; i++) {
+        if (scene->sceneId == markerIds.ids[i] && (packedFlags & 4)) {
+            mnuDrawMantraSceneSpriteAtPlacement(x, y, depth, alpha, i + 0x26,
+                                                0, context);
+            break;
+        }
+    }
+    if (scene->sceneId == 0x43) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, scene->sceneId,
+                                            0xA, 0, context);
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, scene->sceneId,
+                                            0xB, 0, context);
+        return;
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 4) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, scene->sceneId,
+                                            1, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 2) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, scene->sceneId,
+                                            0, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 1) {
+        if (prerequisiteIds[0] != 0 && (packedFlags & 4)) {
+            mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha,
+                                                prerequisiteIds[0], 0, 0, context);
+        }
+        if (prerequisiteIds[1] != 0 && (packedFlags & 0x400)) {
+            mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha,
+                                                prerequisiteIds[1], 0, 0, context);
+        }
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 0x10) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, prerequisiteIds[0],
+                                            2, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 0x20) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, prerequisiteIds[0],
+                                            3, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 0x100) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, prerequisiteIds[0],
+                                            6, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 0x200) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, prerequisiteIds[0],
+                                            5, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 0x400) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, prerequisiteIds[0],
+                                            7, 0, context);
+    }
+    if (mnuMantraEntrySpritePlacements[scene->sceneId][5] & 0x800) {
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, alpha, prerequisiteIds[0],
+                                            8, 0, context);
+    }
+}
 
 typedef struct MnuProfileIdList {
     s8 ids[22];
