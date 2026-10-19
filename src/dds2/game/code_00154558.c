@@ -499,7 +499,7 @@ s32 fldCmdRestoreCameraNodeMode(void) {
 
 extern s32 D_003898B0[];
 
-extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
+extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 s32 fldCmdReleaseCurrentObject(void) {
     if (fldPlayerObject == 0) {
