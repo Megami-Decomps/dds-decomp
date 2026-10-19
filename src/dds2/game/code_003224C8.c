@@ -163,7 +163,161 @@ MenuShortRecord *mnuFindMarkedShortListRecord(MenuShortRecordList *list) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_003224C8", func_003226D8);
+extern void sdfVec3SetComponents(f32 *, f32, f32, f32);
+extern f32 sdfVec3Normalize(f32 *);
+extern void sdfVectorScale(f32, f32 *);
+extern f32 atan2f(f32, f32);
+extern f64 cos(f64);
+extern f64 sin(f64);
+
+static inline f32 mnuGetShortRecordInterpolationFactor(MenuWorkEntry *work,
+                                                       MenuShortRecord *fixed)
+{
+    f32 fraction = 1.0f;
+    if (fixed->parameters[0] != 0) {
+        fraction = (f32)work->frameCounter / (f32)fixed->parameters[0];
+    }
+    return fraction;
+}
+
+void func_003226D8(MenuWorkEntry *work, MenuShortRecordList *list,
+                   MenuShortRecord *fixed)
+{
+    MenuWorkEntry *active = mnuGetActiveEffectWorkEntry();
+    MenuRegistryTable *table = mnuGetMenuRecordRegistryEntry(work->tag)->table;
+    MenuProgressState *progress = mnuGetResourceProgressStepState();
+    MenuShortRecord *record = list->records;
+    s32 count = list->count;
+    s32 index;
+    f32 direction[3];
+    f32 fraction;
+    f32 x;
+    f32 y;
+
+    index = 0;
+    /* Call-free records share a count snapshot until a provider completes. */
+    while (index < count) {
+        for (; index < count; ++index, ++record) {
+            switch (record->kind) {
+            case 0x22:
+                fraction = mnuGetShortRecordInterpolationFactor(work, fixed);
+                if (table->flags & 1) {
+                    x = (f32)record->parameters[0];
+                    y = (f32)(record->parameters[1] - (s32)progress->progress);
+                } else {
+                    x = (f32)record->parameters[0];
+                    y = (f32)record->parameters[1];
+                }
+                work->currentX = work->segmentStartX + (x - work->segmentStartX) * fraction;
+                work->currentY = work->segmentStartY + (y - work->segmentStartY) * fraction;
+                break;
+            case 0x21:
+                fraction = mnuGetShortRecordInterpolationFactor(work, fixed);
+                work->currentX = work->segmentStartX + record->parameters[0] * fraction;
+                work->currentY = work->segmentStartY + record->parameters[1] * fraction;
+                break;
+            case 0x24:
+                if (active != NULL) {
+                    sdfVec3SetComponents(direction, active->currentX - work->currentX,
+                                        active->currentY - work->currentY, 0.0f);
+                    sdfVec3Normalize(direction);
+                    sdfVectorScale((f32)record->parameters[0], direction);
+                    work->currentX += direction[0];
+                    work->currentY += direction[1];
+                    count = list->count;
+                    goto provider_complete;
+                }
+                /* Without an active target, this record uses the rotated delta. */
+            case 0x23:
+                work->currentX += (f32)(
+                    record->parameters[0] * cos(work->currentAngleRadians + 0x1.921fb4p+0f) +
+                    record->parameters[1] * sin(work->currentAngleRadians + 0x1.921fb4p+0f));
+                work->currentY += (f32)(
+                    record->parameters[1] * cos(work->currentAngleRadians + 0x1.921fb4p+0f) -
+                    record->parameters[0] * sin(work->currentAngleRadians + 0x1.921fb4p+0f));
+                count = list->count;
+                goto provider_complete;
+            case 0x25:
+                if (active != NULL) {
+                    if (active->currentX > work->currentX) {
+                        if ((f32)record->parameters[0] < active->currentX - work->currentX) {
+                            work->currentX += (f32)record->parameters[0];
+                        } else {
+                            work->currentX = active->currentX;
+                        }
+                    } else if (active->currentX < work->currentX) {
+                        if ((f32)record->parameters[0] < work->currentX - active->currentX) {
+                            work->currentX -= (f32)record->parameters[0];
+                        } else {
+                            work->currentX = active->currentX;
+                        }
+                    }
+                    if (active->currentY > work->currentY) {
+                        if ((f32)record->parameters[1] < active->currentY - work->currentY) {
+                            work->currentY += (f32)record->parameters[1];
+                        } else {
+                            work->currentY = active->currentY;
+                        }
+                    } else if (active->currentY < work->currentY) {
+                        if ((f32)record->parameters[1] < work->currentY - active->currentY) {
+                            work->currentY -= (f32)record->parameters[1];
+                        } else {
+                            work->currentY = active->currentY;
+                        }
+                    }
+                }
+                break;
+            case 0x31:
+                fraction = mnuGetShortRecordInterpolationFactor(work, fixed);
+                work->currentAngleRadians = work->segmentStartAngleRadians +
+                    ((f32)record->parameters[0] * 0x1.921fb4p+1f / 180.0f) * fraction;
+                break;
+            case 0x32:
+                fraction = mnuGetShortRecordInterpolationFactor(work, fixed);
+                work->currentAngleRadians = work->segmentStartAngleRadians +
+                    ((f32)record->parameters[0] * 0x1.921fb4p+1f / 180.0f -
+                     work->segmentStartAngleRadians) * fraction;
+                break;
+            case 0x33:
+                if (active != NULL) {
+                    f32 targetAngle = atan2f(active->currentX - work->currentX,
+                                             active->currentY - work->currentY) - 0x1.921fb4p+0f;
+                    f32 angle = work->currentAngleRadians;
+                    f32 delta = targetAngle - angle;
+                    f32 step;
+                    if (delta > 0x1.921fb4p+1f) {
+                        delta -= 0x1.921fb4p+1f;
+                    } else if (delta < -0x1.921fb4p+1f) {
+                        delta += 0x1.921fb4p+1f;
+                    }
+                    step = (f32)record->parameters[0] * 0x1.921fb4p+1f / 180.0f;
+                    if (step < delta) {
+                        count = list->count;
+                        work->currentAngleRadians = angle + step;
+                    } else if (delta < step) {
+                        count = list->count;
+                        work->currentAngleRadians = angle - step;
+                    } else {
+                        count = list->count;
+                        work->currentAngleRadians = angle + delta;
+                    }
+                    goto provider_complete;
+                }
+                break;
+            /* Native dispatch includes these no-op bounds. The tag is not a repeat command. */
+            case MENU_REPEAT_DIRECTIVE_KIND_TAG:
+            case MENU_SHORT_RECORD_KIND_FIXED:
+            default:
+                break;
+            }
+        }
+        return;
+        /* Provider paths refresh the bound and finish one record here. */
+provider_complete:
+        ++index;
+        ++record;
+    }
+}
 
 void mnuRegisterWorkEntryPool(u32 entries, u32 count) {
     mnuWorkEntryPool = entries;
