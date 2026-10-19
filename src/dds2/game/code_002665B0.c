@@ -2005,6 +2005,7 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileStartMemoryCardMenuForMode(s32 mode);
+extern void fileSetPreviewLocation(s32 x, s32 y);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {

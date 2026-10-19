@@ -42,7 +42,9 @@ extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern char * strcpy(char *, const char *);
-/* Original-style implicit int, kept: matched code depends on it: itfSetTextDrawLimit. */
+/* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
+ * An early void declaration moves fldUpdateTitleBannerTask's position update
+ * at +0x11C/+0x124/+0x12C from retail $3 to $2. */
 
 extern u32 fldPlayerObject;
 extern s32 D_003897C0[];

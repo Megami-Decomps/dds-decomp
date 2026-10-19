@@ -1422,9 +1422,11 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
 
 extern void btlFlagTasksForUpdate(void);
 
+extern void btlAdvanceTitleStateWithAudioCleanup(void);
+
 void fldMarkLinkedSceneActors(s32 context) {
     BtlTask *entry;
-    btlAdvanceTitleStateWithAudioCleanup(context);
+    btlAdvanceTitleStateWithAudioCleanup();
     entry = ((BattleSceneWork *)context)->linkedNodes;
     while (entry != 0) {
         if (entry->state != 30) {

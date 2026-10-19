@@ -1473,9 +1473,11 @@ u32 fldStepAreaLoad(BtlState *work) {
 
 extern void btlFlagTasksForUpdate(void);
 
+extern void btlAdvanceTitleStateWithAudioCleanup(void);
+
 void fldMarkLinkedSceneActors(u8 *scene) {
     u8 *node;
-    btlAdvanceTitleStateWithAudioCleanup(scene);
+    btlAdvanceTitleStateWithAudioCleanup();
     node = (u8 *)((BtlState *)scene)->tasks;
     while (node != 0) {
         if (((ActionStateLink *)node)->state != 0x1F) {

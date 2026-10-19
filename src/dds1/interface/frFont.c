@@ -21,7 +21,9 @@ extern void frFontFreeEntry(s32 slotId);
 extern void * memset(void *, s32, u32);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern u32 strlen(const char *s);
-/* Original-style implicit int, kept: matched code depends on it: frFontListInsert. */
+/* frFontListInsert is void in the game font TU; preserve C89 call scope here.
+ * An early void declaration moves the cache-count update at +0x5C/+0x60/+0x64
+ * from retail $3 to $2 in frFontReleaseUnreferencedGlyphItem. */
 
 
 

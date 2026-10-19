@@ -67,7 +67,8 @@ FileJobPayload *fileCreateJob(FileJobType type);
 void fileJobDestroy(FileJobPayload *job);
 void fileJobNotifyComplete(FileJobPayload *job);
 void fileJobInvokeTypeCallback(FileJobPayload *job);
-void fileSetPreviewLocation(s16 x, s16 y);
+/* Word coordinates narrow only at the serialized reset-view fields. */
+void fileSetPreviewLocation(s32 x, s32 y);
 void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]);
 void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]);
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale);

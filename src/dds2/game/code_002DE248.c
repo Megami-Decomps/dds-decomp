@@ -16126,6 +16126,9 @@ s32 effPollResourceList(EffectList *list) {
         switch (list->mode) {
         case 0:
             if (node->state == 0) {
+                /* C89 scope: the void helper is defined below. An earlier
+                 * declaration changes the state-one carrier at +0x68/+0x70
+                 * from retail $3 to $2. */
                 effRequestResourceByMode(node->value, node->length, node->kind, node->reference);
                 node->state = 1;
             } else if (*node->reference != NULL) {

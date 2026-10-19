@@ -58,7 +58,10 @@ extern void btlResetBattleHistoryCounters(void);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void * memset(void *, s32, u32);
 extern u32 strlen(const char *);
-/* Original-style implicit int, kept: matched code depends on it: btlBuildActorLinkageSkillList, itfSetTextDrawLimit. */
+/* Original-style implicit int, kept: matched code depends on it: btlBuildActorLinkageSkillList. */
+/* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
+ * An early void declaration recolors btlDrawItemCommandRows' loop carriers:
+ * retail row $21, y $22, total $30 become $20, $21, $23 respectively. */
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x30];
@@ -817,7 +820,7 @@ void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
     btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 1);
 }
 
-s32 __udivdi3(u32 partyRecordFlagsMask, s32 statIndex) {
+s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, s32 statIndex) {
     return btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 0);
 }
 

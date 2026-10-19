@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x001B3B10	btlAverageActorAttribute	inferred	Native wrapper averages a requested actor attribute for a party-record flags mask by tail-jumping btlSumOrAverageActorAttribute with skip-down zero; not a division runtime helper.
 0x0024C650	evtViewerStoreMenuValueInPendingKey	inferred	Stores the edited menu value into the selected pending timeline key field; counterpart of DDS1 00231950.
 0x001206D0	fldConfigureCameraMoveTracking	inferred	DDS2 twin of DDS1 0x0011E810: resolves two table selectors into tracking endpoints and configures the camera move mode for a valid ordered range.
 0x0014BF98	fldInitializeHuntSparkUnit	inferred	Configures a nested field unit for the hunt spark objects: applies phase-derived direction, status, object flags, text float override, and color transitions. Retail callers include creation of HUNT_MDL_UNIT spark objects.
