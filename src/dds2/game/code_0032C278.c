@@ -523,7 +523,7 @@ u64 sdfGraphHasPendingWork(void) {
 
 /* Preserve interrupt state while querying pending work. */
 u64 sdfCheckPendingWorkWithInterrupts(void) {
-    s64 interruptState;
+    s32 interruptState;
     u64 pendingWork;
 
     interruptState = DIntr();

@@ -7874,7 +7874,7 @@ void btlReleaseWorkBuffers(void) {
 }
 
 void btlWaitForPendingWorkAndReleaseBuffers(void) {
-    s64 temp_v0;
+    s32 temp_v0;
     s32 temp_v1;
 
     evtDrainSecondaryWorldNodes();
@@ -10518,7 +10518,7 @@ void sndLoadBattleBank(void) {
 }
 
 u8 sndIsBattleBankLoaded(void) {
-    s64 temp_v0;
+    s32 temp_v0;
 
     temp_v0 = sndFindPackedTrackLoadStatus(0x10000);
     return temp_v0 != 0;

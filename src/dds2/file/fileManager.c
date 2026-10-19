@@ -225,7 +225,7 @@ s32 fileRequestIsReady(const FileRequest *request) {
 /* Pump the device scheduler and file manager while the kind-specific readiness
  * predicate is zero. No timeout or NULL-request guard is introduced. */
 void fileWaitReady(FileRequest *request) {
-    s64 readyResult;
+    s32 readyResult;
 
     while (readyResult = fileIsRequestReadyInCurrentMode(request), readyResult == 0) {
         sdfRestoreDeviceThreadPriority();

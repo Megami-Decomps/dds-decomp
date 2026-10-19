@@ -100,7 +100,7 @@ void itfUpdateFade(FadeEntry *entry) {
 
 /* Draw the four-part strip only while the fade is visible or in progress. */
 void itfDrawFadeGlyphStrip(FadeEntry *entry) {
-    s64 active;
+    s32 active;
 
     active = itfIsFadeActive(entry);
     if (active != 0) {
@@ -138,7 +138,7 @@ void itfSetLowerFadeNumberDisplayValue(FadeNumber *entry, u32 displayValue) {
 }
 
 void itfDrawLowerFadeGlyphPair(FadeNumber *entry) {
-    s64 active;
+    s32 active;
 
     active = itfIsFadeActive(&entry->fade);
     if (active != 0) {
@@ -156,7 +156,7 @@ void itfSetUpperFadeNumberDisplayValue(FadeNumber *entry, u32 displayValue) {
 }
 
 void itfDrawUpperFadeGlyphPair(FadeNumber *entry) {
-    s64 active;
+    s32 active;
 
     active = itfIsFadeActive(&entry->fade);
     if (active != 0) {
@@ -343,7 +343,7 @@ void mnuDrawFadeSequenceOffset(FadeNumber *entry) {
 }
 
 void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
-    s64 active;
+    s32 active;
 
     active = itfIsFadeActive(entry);
     if (active != 0) {
@@ -362,7 +362,7 @@ void itfSetFrameFadeDisplayValue(FadeNumber *entry, u32 displayValue) {
 
 /* Select optional glyphs from the display value; every choice advances the fade. */
 void itfDrawFadeGlyphForFrame(FadeNumber *entry) {
-    s64 active;
+    s32 active;
 
     active = itfIsFadeActive(&entry->fade);
     if (active == 0) {

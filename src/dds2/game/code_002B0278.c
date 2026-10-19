@@ -1223,7 +1223,7 @@ s32 mnuStepPartySelectionControl(KwlnTask *callback) {
 }
 
 u8 mnuIsStateNotOne(void) {
-    s64 state;
+    s32 state;
 
     state = evtStageTestAdvanceResourceWork();
     return state != 1;

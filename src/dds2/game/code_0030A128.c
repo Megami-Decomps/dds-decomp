@@ -415,7 +415,7 @@ s32 fldLocalMapTrackSlotFromMode(s32 mode) {
 
 /* The 0x1C flag takes precedence over 0x13 when selecting the map variant. */
 void fldInitializeLmapTaskVariant(LmapTaskState *task) {
-    s64 flagSet;
+    s32 flagSet;
     u32 variant;
 
     D_0043908C = 0;

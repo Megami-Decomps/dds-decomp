@@ -387,7 +387,7 @@ s32 evtCommandCallEvent(void)
 }
 
 u32 evtCommandSignalAdminAtTimerZero(void) {
-    s64 timer;
+    s32 timer;
 
     timer = scrGetCommandTimer();
     if (timer == 0) {

@@ -106,7 +106,7 @@ s32 kwlnItemDismissOverlay(BrsSkillPackageWork *scene) {
 
 /* Record the first visit to the item-selection scene. */
 u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
-    s64 alreadyVisited;
+    s32 alreadyVisited;
 
     alreadyVisited = mdlFlagTest(0x911);
     if (alreadyVisited == 0) {

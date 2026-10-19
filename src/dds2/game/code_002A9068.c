@@ -960,7 +960,7 @@ s32 mnuAcknowledgeCampState(void) {
 
 /* Return 1 exactly when the kernel reports no active fade. */
 u8 mnuIsFadeIdle(void) {
-    s64 fadeActive;
+    s32 fadeActive;
 
     fadeActive = kwlnFadeIsActive();
     return fadeActive == 0;

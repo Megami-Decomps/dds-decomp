@@ -902,7 +902,7 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
 }
 
 u8 btlHasAvailableOption(u32 actorAddress) {
-    s64 availableOptionCount;
+    s32 availableOptionCount;
 
     availableOptionCount = btlCollectAvailableOptionSkills(actorAddress, 0);
     return availableOptionCount != 0;

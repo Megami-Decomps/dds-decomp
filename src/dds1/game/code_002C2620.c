@@ -417,7 +417,7 @@ s32 fldLocalMapTrackSlotFromMode(s32 mode) {
 }
 
 void fldInitializeLmapState(void) {
-    s64 flagSet;
+    s32 flagSet;
 
     D_003BD25C = 1;
     D_003BD970 = 0;
@@ -647,7 +647,7 @@ s32 mdlCollectFlagBitsIntoMask(void) {
 /* Highest set flag wins; the final 0x410 test is still executed even
  * though its result does not affect the returned stage. */
 u32 fldGetLmapStage(void) {
-    s64 flagSet;
+    s32 flagSet;
     u32 stage;
 
     flagSet = mdlFlagTest(0x412);

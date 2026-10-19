@@ -740,7 +740,7 @@ s32 mnuStepPartySelectionControl(KwlnTask *callback) {
 }
 
 u8 mnuIsStateNotOne(void) {
-    s64 result;
+    s32 result;
 
     result = evtStageTestPollModelRequest();
     return result != 1;

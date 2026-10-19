@@ -222,7 +222,7 @@ void mnuDestroyTerminalCampAnimation(MenuCampEffect *context) {
 
 /* Return whether model flag 0x31 is set; its storyline meaning is not asserted. */
 u8 mnuIsReducedTerminalModeEnabled() {
-    s64 unlocked;
+    s32 unlocked;
 
     unlocked = mdlFlagTest(0x31);
     return unlocked != 0;

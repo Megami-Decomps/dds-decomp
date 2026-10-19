@@ -429,7 +429,7 @@ s32 mnuStaffImageProc(KwlnTask *task) {
 }
 
 void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
-    s64 pendingWork;
+    s32 pendingWork;
 
     mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();

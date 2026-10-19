@@ -493,7 +493,7 @@ u64 sdfGraphHasPendingWork(void) {
 }
 
 u64 sdfCheckPendingWorkWithInterrupts(void) {
-    s64 interruptState;
+    s32 interruptState;
     u64 pendingWork;
 
     interruptState = DIntr();

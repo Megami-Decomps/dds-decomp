@@ -1632,7 +1632,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
 }
 
 void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
-    s64 pending;
+    s32 pending;
 
     mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();

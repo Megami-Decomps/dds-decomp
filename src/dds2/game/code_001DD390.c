@@ -2562,7 +2562,7 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
 }
 
 void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
-    s64 available;
+    s32 available;
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {
@@ -2573,7 +2573,7 @@ void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
 }
 
 void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
-    s64 available;
+    s32 available;
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {

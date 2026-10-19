@@ -1797,7 +1797,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *view
 }
 
 void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
-    s64 active;
+    s32 active;
 
     active = evtViewerHasUpdateFlag(viewer);
     if (active != 0) {

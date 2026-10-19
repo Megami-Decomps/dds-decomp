@@ -1076,7 +1076,7 @@ void evtOpenFileMenuModeThree(void) {
 }
 
 u32 evtPollFileMenuModeThree(void) {
-    s64 operationResult;
+    s32 operationResult;
     u32 status;
 
     fileMenuReleaseNoOp();
@@ -1090,7 +1090,7 @@ u32 evtPollFileMenuModeThree(void) {
 }
 
 u8 evtWaitFileMenuTaskThree(void) {
-    s64 operationResult;
+    s32 operationResult;
 
     operationResult = fileMenuTaskExists();
     return operationResult == 0;
@@ -1128,7 +1128,7 @@ s32 evtCheckSelectionInput(void) {
 }
 
 u8 evtIsFileMenuTaskAbsent(void) {
-    s64 operationResult;
+    s32 operationResult;
 
     operationResult = fileMenuTaskExists();
     return operationResult == 0;
@@ -1153,7 +1153,7 @@ void evtOpenFileMenuModeTwo(void) {
 }
 
 u32 evtPollFileMenuModeTwo(void) {
-    s64 operationResult;
+    s32 operationResult;
     u32 status;
 
     fileMenuReleaseNoOp();
@@ -1167,7 +1167,7 @@ u32 evtPollFileMenuModeTwo(void) {
 }
 
 u8 evtWaitFileMenuTaskExit(void) {
-    s64 operationResult;
+    s32 operationResult;
 
     operationResult = fileMenuTaskExists();
     return operationResult == 0;
@@ -1179,7 +1179,7 @@ void evtStartAreaFromSelection(u32 selection, u32 area) {
 }
 
 u32 evtPollSelectedAreaReady(void) {
-    s64 operationResult;
+    s32 operationResult;
     u32 status;
 
     fldCleanupFieldScene();
@@ -1252,7 +1252,7 @@ u32 evtDestroyCampTasks(void) {
 }
 
 u8 evtWaitCampStateAcknowledged(void) {
-    s64 campState;
+    s32 campState;
 
     campState = mnuAcknowledgeCampState();
     return campState == 0;
@@ -1297,7 +1297,7 @@ u32 evtDestroyStaffTasks(void) {
 }
 
 u8 evtWaitStaffTaskDone(void) {
-    s64 taskResult;
+    s32 taskResult;
 
     taskResult = brsTaskConsumeDone();
     return taskResult == 0;
@@ -1313,7 +1313,7 @@ u32 evtDestroyConfigTasks(void) {
 }
 
 u8 evtWaitConfigTaskDone(void) {
-    s64 taskResult;
+    s32 taskResult;
 
     taskResult = fileConsumeConfigTaskReady();
     return taskResult == 0;
@@ -1429,7 +1429,7 @@ u32 evtExitCampTaskGroup(void) {
 }
 
 u8 mnuCheckCampStateAndAcknowledge(void) {
-    s64 campState;
+    s32 campState;
 
     campState = mnuAcknowledgeCampState();
     return campState == 0;
@@ -1448,7 +1448,7 @@ u32 evtDestroySkyAndCampTasks(void) {
 }
 
 u8 evtWaitSkyCampTaskState(void) {
-    s64 taskState;
+    s32 taskState;
 
     taskState = mnuPollTaskState();
     return taskState == 0;
@@ -1469,7 +1469,7 @@ u32 evtDestroySkyAndFieldTasks(void) {
 }
 
 u8 evtWaitFieldSceneState(void) {
-    s64 sceneState;
+    s32 sceneState;
 
     sceneState = fldPollSceneState();
     return sceneState == 0;
@@ -1485,7 +1485,7 @@ u32 evtDestroyStaffTasksAlternate(void) {
 }
 
 u8 evtWaitStaffTaskDoneAlternate(void) {
-    s64 taskResult;
+    s32 taskResult;
 
     taskResult = brsTaskConsumeDone();
     return taskResult == 0;
@@ -1576,7 +1576,7 @@ u32 evtDestroyLmapTask(void) {
 }
 
 u8 evtWaitLmapTaskGone(void) {
-    s64 taskExists;
+    s32 taskExists;
 
     taskExists = fldLmapTaskExists();
     return taskExists == 0;
