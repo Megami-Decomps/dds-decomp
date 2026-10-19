@@ -106,7 +106,7 @@ extern s32 btlRollAiBucket(void);
 extern u32 btlNextScaledRandom(u32);
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
-extern void func_002152D8(s32, s32);
+extern s32 func_002152D8(ActionStateLink *, s32);
 
 extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 
