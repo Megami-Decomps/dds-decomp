@@ -3164,9 +3164,279 @@ s32 mnuDrawMantraFadeIcon2(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *
     return 0;
 }
 
+typedef struct MantraIconOffsets {
+    s8 points[6][2];
+} MantraIconOffsets;
+extern const MantraIconOffsets D_00425828;
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425828);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraStandardIcon);
+u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {
+    MantraIconOffsets offsets = D_00425828;
+    s32 first = 0;
+    s32 timer;
+    s32 alpha;
+    s32 lastX;
+    f32 progress;
+    f32 middle;
+    f32 end;
+    f32 brightness;
+
+    if (!icon->unk7) {
+        first = 3;
+    }
+    switch (icon->state) {
+    case 1:
+    case 5: {
+        timer = icon->timer;
+        if (timer < 5) {
+            end = (f32)timer / 5.0f;
+        } else {
+            end = 1.0f;
+        }
+        progress = 0.0f;
+        if (timer >= 2) {
+            progress = (f32)(timer - 2) * 0.125f;
+        }
+        x += icon->x;
+        y += icon->y;
+        brightness = amount * sdfSinPoly(((f32)icon->timer / 10.0f) * 1.5707963f);
+        alpha = brightness;
+        mnuDrawMantraSprite(x, y, depth, alpha, 0x9C, 0, 0x52);
+        alpha = (f32)amount * progress;
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * end, (f32)y + offsets.points[first][1] * end, depth, alpha, 0x9D, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * end, (f32)y + offsets.points[first + 1][1] * end, depth, alpha, 0x9E, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + offsets.points[first + 2][1] * end, depth, alpha, 0x9F, 0, 0x53);
+        alpha = brightness;
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * end, (f32)y + offsets.points[first][1] * end, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * end, (f32)y + offsets.points[first + 1][1] * end, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + offsets.points[first + 2][1] * end, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        timer = icon->timer;
+        if (timer < 2) {
+            middle = 0.0f;
+        } else {
+            middle = (f32)(timer - 2) * 0.125f;
+        }
+        alpha = amount * sdfSinPoly((1.0f - middle) * 1.5707963f);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * end, (f32)y + offsets.points[first][1] * end, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * end, (f32)y + offsets.points[first + 1][1] * end, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + offsets.points[first + 2][1] * end, depth, alpha, 0xA2, 0, 0x53);
+        if (icon->unk7) {
+            timer = icon->timer;
+            end = 1.0f;
+            if (timer < 2) {
+                middle = 0.0f;
+            } else if (timer < 8) {
+                middle = (f32)(timer - 2) / 6.0f;
+            } else {
+                middle = 1.0f;
+            }
+            alpha = amount * sdfSinPoly((1.0f - middle) * 1.5707963f);
+            mnuDrawMantraSprite((f32)x + (offsets.points[first][0] - 1) * end, (f32)y + (offsets.points[first][1] - 1) * end, depth, (f32)alpha * 0.6f, 0xA0, 0, 0x53);
+            mnuDrawMantraSprite((f32)x + (offsets.points[first + 1][0] + 1) * end, (f32)y + (offsets.points[first + 1][1] - 1) * end, depth, (f32)alpha * 0.6f, 0xA1, 0, 0x53);
+            mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + (offsets.points[first + 2][1] + 2) * end, depth, (f32)alpha * 0.6f, 0xA2, 0, 0x53);
+        }
+        break;
+    }
+    case 2: {
+        alpha = amount;
+        x += icon->x;
+        y += icon->y;
+        mnuDrawMantraSprite(x, y, depth, alpha, 0x9C, 0, 0x52);
+        progress = (f32)icon->timer / 40.0f;
+        progress = (sdfSinPoly(progress * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0x9D, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0x9E, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0x9F, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, amount * (progress * 0.3f + 0.1f), 0xA0, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, amount * (progress * 0.3f + 0.1f), 0xA1, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, amount * (progress * 0.3f + 0.1f), 0xA2, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, (f32)amount * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, (f32)amount * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, (f32)amount * 0.5f, 0xA5, 0, 0x53);
+        break;
+    }
+    case 3:
+    case 6:
+        progress = (f32)icon->timer / 5.0f;
+        if ((f32)icon->timer < 2.5f) {
+            middle = 1.0f - (f32)icon->timer / 2.5f;
+        } else {
+            middle = 0.0f;
+        }
+        x += icon->x;
+        y += icon->y;
+        mnuDrawMantraSprite(x, y, depth, (f32)amount * middle * 0.5f, 0x9C, 0, 0x52);
+        alpha = (f32)amount * (1.0f - progress) * 0.5f;
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0x9D, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0x9E, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0x9F, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        break;
+    case 8: {
+        timer = icon->timer;
+        progress = 0.0f;
+        if (timer >= 8) {
+            if (timer < 20) {
+                progress = (f32)(timer - 8) / 12.0f;
+            } else {
+                progress = 1.0f;
+            }
+        }
+        if (timer < 14) {
+            middle = 1.0f;
+        } else if (timer < 22) {
+            middle = (f32)(timer - 14) * 0.125f;
+        } else {
+            middle = 1.0f;
+        }
+        end = 0.0f;
+        if (icon->timer >= 20) {
+            end = (f32)(icon->timer - 20) / 10.0f;
+        }
+        middle = 1.0f - middle;
+        x += icon->x;
+        y += icon->y;
+        mnuDrawMantraSprite(x, y, depth, (f32)amount * end, 0x9C, 0, 0x52);
+        alpha = amount * ((sdfSinPoly(progress * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f) * 0.7f;
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 5.0f, (f32)y + offsets.points[first][1] * 5.0f, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 5.0f, (f32)y + offsets.points[first + 1][1] * 5.0f, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 5.0f, (f32)y + offsets.points[first + 2][1] * 5.0f, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 5.0f, (f32)y + offsets.points[first][1] * 5.0f, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 5.0f, (f32)y + offsets.points[first + 1][1] * 5.0f, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 5.0f, (f32)y + offsets.points[first + 2][1] * 5.0f, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        alpha = amount * sdfSinPoly(middle * 1.5707963f) * 0.7f;
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 4.0f * middle, (f32)y + offsets.points[first][1] * 4.0f * middle, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 4.0f * middle, (f32)y + offsets.points[first + 1][1] * 4.0f * middle, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 4.0f * middle, (f32)y + offsets.points[first + 2][1] * 4.0f * middle, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 4.0f * middle, (f32)y + offsets.points[first][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 4.0f * middle, (f32)y + offsets.points[first + 1][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 4.0f * middle, (f32)y + offsets.points[first + 2][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        alpha = amount * sdfSinPoly(end * 1.5707963f);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        break;
+    }
+    case 7: {
+        f32 scaledY;
+        timer = icon->timer;
+        if (timer < 10) {
+            progress = (f32)timer / 10.0f;
+        } else {
+            progress = 1.0f;
+        }
+        middle = sdfSinPoly(progress * 1.5707963f);
+        progress = 1.0f - progress;
+        x += icon->x;
+        y += icon->y;
+        alpha = (f32)amount * progress;
+        mnuDrawMantraSprite(x, y, depth, alpha, 0x9C, 0, 0x52);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 4.0f * middle, (f32)y + offsets.points[first][1] * 4.0f * middle, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 4.0f * middle, (f32)y + offsets.points[first + 1][1] * 4.0f * middle, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 4.0f * middle, (f32)y + offsets.points[first + 2][1] * 4.0f * middle, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 4.0f * middle, (f32)y + offsets.points[first][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 4.0f * middle, (f32)y + offsets.points[first + 1][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        lastX = (f32)x + offsets.points[first + 2][0] * 4.0f * middle;
+        scaledY = (f32)y + offsets.points[first + 2][1] * 4.0f * middle;
+        mnuDrawMantraSprite(lastX, scaledY, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        break;
+    }
+    case 11: {
+        timer = icon->timer;
+        progress = 0.0f;
+        if (timer >= 8) {
+            if (timer < 20) {
+                progress = (f32)(timer - 8) / 12.0f;
+            } else {
+                progress = 1.0f;
+            }
+        }
+        if (timer < 14) {
+            middle = 1.0f;
+        } else if (timer < 22) {
+            middle = (f32)(timer - 14) * 0.125f;
+        } else {
+            middle = 1.0f;
+        }
+        end = 0.0f;
+        if (icon->timer >= 20) {
+            end = (f32)(icon->timer - 20) / 10.0f;
+        }
+        progress = 1.0f - progress;
+        x += icon->x;
+        y += icon->y;
+        mnuDrawMantraSprite(x, y, depth, (f32)amount * end, 0x9C, 0, 0x52);
+        alpha = amount * sdfSinPoly(progress * 1.5707963f) * 0.7f;
+        mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 7.0f, (f32)y + offsets.points[0][1] * 7.0f, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 7.0f, (f32)y + offsets.points[1][1] * 7.0f, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 7.0f, (f32)y + offsets.points[2][1] * 7.0f, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 7.0f, (f32)y + offsets.points[0][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 7.0f, (f32)y + offsets.points[1][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 7.0f, (f32)y + offsets.points[2][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        middle = 1.0f - middle;
+        alpha = amount * sdfSinPoly(middle * 1.5707963f) * 0.7f;
+        mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 6.0f * middle, (f32)y + offsets.points[0][1] * 6.0f * middle, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 6.0f * middle, (f32)y + offsets.points[1][1] * 6.0f * middle, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 6.0f * middle, (f32)y + offsets.points[2][1] * 6.0f * middle, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 6.0f * middle, (f32)y + offsets.points[0][1] * 6.0f * middle, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 6.0f * middle, (f32)y + offsets.points[1][1] * 6.0f * middle, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 6.0f * middle, (f32)y + offsets.points[2][1] * 6.0f * middle, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        alpha = amount * sdfSinPoly(end * 1.5707963f);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        break;
+    }
+    case 10: {
+        f32 scaledY;
+        timer = icon->timer;
+        if (timer < 10) {
+            progress = (f32)timer / 10.0f;
+            middle = sdfSinPoly(progress * 1.5707963f);
+            progress = 1.0f - progress;
+        } else {
+            progress = 0.0f;
+            middle = 1.0f;
+        }
+        first = 0;
+        x += icon->x;
+        y += icon->y;
+        mnuDrawMantraSprite(x, y, depth, (f32)amount * progress, 0x9C, 0, 0x52);
+        alpha = amount;
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 7.0f * middle, (f32)y + offsets.points[first][1] * 7.0f * middle, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 7.0f * middle, (f32)y + offsets.points[first + 1][1] * 7.0f * middle, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 7.0f * middle, (f32)y + offsets.points[first + 2][1] * 7.0f * middle, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 7.0f * middle, (f32)y + offsets.points[first][1] * 7.0f * middle, depth, (f32)amount * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 7.0f * middle, (f32)y + offsets.points[first + 1][1] * 7.0f * middle, depth, (f32)amount * 0.5f, 0xA4, 0, 0x53);
+        lastX = (f32)x + offsets.points[first + 2][0] * 7.0f * middle;
+        scaledY = (f32)y + offsets.points[first + 2][1] * 7.0f * middle;
+        mnuDrawMantraSprite(lastX, scaledY, depth, (f32)amount * 0.5f, 0xA5, 0, 0x53);
+        break;
+    }
+    case 12: {
+        alpha = amount;
+        first = 0;
+        x += icon->x;
+        y += icon->y;
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 7.0f, (f32)y + offsets.points[first][1] * 7.0f, depth, alpha, 0xA0, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 7.0f, (f32)y + offsets.points[first + 1][1] * 7.0f, depth, alpha, 0xA1, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 7.0f, (f32)y + offsets.points[first + 2][1] * 7.0f, depth, alpha, 0xA2, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 7.0f, (f32)y + offsets.points[first][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 7.0f, (f32)y + offsets.points[first + 1][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
+        mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 7.0f, (f32)y + offsets.points[first + 2][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
+        break;
+    }
+    }
+    return 0;
+}
 
 s32 mnuDrawMantraShortLoopIcon(s32 x, s32 y, s32 z, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {
     s8 offsets[3][2] = {{0, -5}, {-4, 3}, {4, 3}};
