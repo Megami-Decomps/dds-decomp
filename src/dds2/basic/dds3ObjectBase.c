@@ -604,17 +604,15 @@ void dds3EnsureSlotData(void *object) {
     }
 }
 
-s32 dds3SetSlot1HandlerCallback(void *, Dds3MoverUpdate);
+u8 dds3SetSlot1HandlerCallback(void *, Dds3MoverUpdate);
 
-void dds3SetObjectSlot1MoverCallback(EffWorldNode *object, Dds3MoverUpdate update) {
-    dds3SetSlot1HandlerCallback(object, update);
-    /* Retail 001127A8/001129D0 use JAL plus an epilogue.
-     * cc1probe keeps this consumed-callback reset through 01.sibling
-     * and 02.jump, then deletes it in 03.cse. */
-    update = NULL;
+u8 dds3SetObjectSlot1MoverCallback(EffWorldNode *object, Dds3MoverUpdate update) {
+    return dds3SetSlot1HandlerCallback(object, update);
 }
 
-s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update) {
+/* Returns whether a slot-1 handler took the callback (0/1). The bool-width result is why
+ * the wrapper above stays jal + epilogue in retail (001129D0, not a sibling j). */
+u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update) {
     void *handler;
 
     handler = dds3GetSlot(object, 1);

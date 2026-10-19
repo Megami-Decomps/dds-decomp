@@ -100,7 +100,7 @@ extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
-extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
+extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 

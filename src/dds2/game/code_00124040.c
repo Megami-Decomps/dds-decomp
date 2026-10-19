@@ -372,7 +372,7 @@ void fldSetSceneControlFlags(u32 mask);
 
 s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
 
-extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
+extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 extern void fldUpdateCameraTarget(void);
 

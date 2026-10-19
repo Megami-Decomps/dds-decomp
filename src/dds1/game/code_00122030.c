@@ -1184,7 +1184,7 @@ EffWorldNode *fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
-extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
+extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
 
