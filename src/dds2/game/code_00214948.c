@@ -914,7 +914,8 @@ s32 btlSelectTargetsByAiPredicateKinds(s32 actor) {
 }
 
 
-s32 btlSelectLowestRankTarget(s32 task) {
+/* AI operation 10 ignores its operand; the direct wrapper passes zero. */
+s32 btlSelectLowestRankTarget(s32 task, s32 unusedOperand) {
     u32 matched;
     u32 count;
     BtlIndexList *list;
