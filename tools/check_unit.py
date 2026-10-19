@@ -69,6 +69,55 @@ def address(name, syms):
     return int(m.group(1), 16) if m else None
 
 
+def compiler_local_function_aliases(objdump_text, funcs, syms, function_names):
+    """Resolve only unambiguous local STT_FUNC numeric compiler suffixes.
+
+    Keep exact configured names authoritative. A numeric suffix alone is not
+    identity evidence: the object must define one local text function with the
+    same extent reported by nm, and no plain or other suffixed definition may
+    compete for its canonical, explicitly typed retail function name. Use the
+    complete objdump inventory for competitors: nm omits the size column for
+    zero-size symbols, so they are absent from the sized-function list.
+    """
+    grouped = {}
+    for offset, size, name in funcs:
+        stem = re.sub(r"\.\d+$", "", name)
+        grouped.setdefault(stem, []).append((offset, size, name))
+    definitions = {}
+    definition_stems = {}
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if ".text" not in parts:
+            continue
+        section = parts.index(".text")
+        if section == 0 or section + 2 >= len(parts):
+            continue
+        try:
+            offset = int(parts[0], 16)
+            size = int(parts[section + 1], 16)
+        except ValueError:
+            continue
+        flags = parts[1:section]
+        local_function = "l" in flags and "F" in flags and "g" not in flags
+        name = parts[section + 2]
+        definitions.setdefault(name, []).append((offset, size, local_function))
+        stem = re.sub(r"\.\d+$", "", name)
+        definition_stems.setdefault(stem, []).append(name)
+    aliases = {}
+    for stem, entries in grouped.items():
+        if len(entries) != 1 or stem not in function_names or stem not in syms:
+            continue
+        offset, size, name = entries[0]
+        if name in syms or not re.fullmatch(r"[A-Za-z_]\w*\.\d+", name):
+            continue
+        if definition_stems.get(stem) != [name]:
+            continue
+        if size <= 0 or definitions.get(name) != [(offset, size, True)]:
+            continue
+        aliases[name] = syms[stem]
+    return aliases
+
+
 def run(*cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw).stdout
 
@@ -672,8 +721,10 @@ def main():
     sys.path.insert(0, str(ROOT / "tools"))
     from eeas_compat import lit4_range
     lit4_lo, lit4_hi = lit4_range((ROOT / RETAIL[version]).read_bytes())
-    func_starts = sorted({int(m.group(2), 16) for m in re.finditer(
-        r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)})
+    function_rows = list(re.finditer(
+        r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M))
+    function_names = {m.group(1) for m in function_rows}
+    func_starts = sorted({int(m.group(2), 16) for m in function_rows})
     gp = int(VERSIONS[version]["gp"], 16)
     retail = (ROOT / RETAIL[version]).read_bytes()
     segs = load_segments(retail)
@@ -715,9 +766,15 @@ def main():
         defined_symbols = run(
             str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)
         )
+        funcs = []
+        for line in defined_symbols.splitlines():
+            parts = line.split()
+            if len(parts) == 4 and parts[2] in "Tt":
+                funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
         has_nobits = any(emitted.get(section) for section in (".sbss", ".bss"))
         needs_object_symbols = has_nobits or bool(
-            emitted.get(".sdata") or emitted.get(".rodata") or emitted.get(".data"))
+            emitted.get(".sdata") or emitted.get(".rodata") or emitted.get(".data")) or any(
+                re.fullmatch(r"[A-Za-z_]\w*\.\d+", name) for _, _, name in funcs)
         object_symbols = run(
             str(BIN / "mips-ps2-decompals-objdump"), "-t", str(obj)
         ) if needs_object_symbols else ""
@@ -728,11 +785,6 @@ def main():
         sdata_symbols = section_symbols(object_symbols, ".sdata")
         rodata_symbols = section_symbols(object_symbols, ".rodata")
         data_symbols = section_symbols(object_symbols, ".data")
-        funcs = []
-        for line in defined_symbols.splitlines():
-            parts = line.split()
-            if len(parts) == 4 and parts[2] in "Tt":
-                funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
         common = common_symbols(defined_symbols)
         undefined = {l.split()[-1] for l in run(str(BIN / "mips-ps2-decompals-nm"), "-u", str(obj)).splitlines() if l.strip()}
         # The build compiles the unit with its asm included, not with SKIP_ASM.
@@ -755,6 +807,18 @@ def main():
             fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
                 l.split() for l in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only",
                                        str(full)).splitlines()) if len(p) == 4 and p[2] in "Tt"}
+
+            full_objdump = run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full))
+            skip_aliases = compiler_local_function_aliases(
+                object_symbols, funcs, syms, function_names)
+            full_aliases = compiler_local_function_aliases(
+                full_objdump,
+                [(off, size, name) for name, (off, size) in fsyms.items()],
+                syms, function_names)
+            # Both compilation contexts must independently establish identity.
+            # Retain emitted names so --func selection stays strictly exact.
+            syms.update({name: addr for name, addr in skip_aliases.items()
+                         if full_aliases.get(name) == addr})
 
             def masked(code, base, rels):
                 words = list(struct.unpack_from(f"<{len(code) // 4}I", code))
@@ -788,7 +852,6 @@ def main():
             # retail's, in retail order. Catches string literals and
             # INCLUDE_RODATA items that come out in a different order.
             fdata, fsecs = sections(full)
-            full_objdump = run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full))
             if emitted.get(".data") and not args.func and data_range is not None:
                 owned_data_checked = True
                 data_start, data_end = data_range
