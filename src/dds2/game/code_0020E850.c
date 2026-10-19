@@ -60,7 +60,7 @@ extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 
-extern void btlSelectLowestRankTarget(s32, s32);
+extern s32 btlSelectLowestRankTarget(s32, s32);
 
 extern s32 btlSelectHighestCurrentMpTarget(s32, s32);
 

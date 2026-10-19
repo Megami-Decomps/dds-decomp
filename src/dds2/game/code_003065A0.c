@@ -37,8 +37,10 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
     }
 }
 
-extern void itfDrawRotatedTexturedRect(u32, u32, u32, u32, u32, const u32 *, const u32 *, u32,
-                                      f32, u32, u32, u32, u32);
+extern void itfDrawRotatedTexturedRect(s32 x, s32 y, s32 depth, s32 width, s32 height,
+                                      const u32 *textureCoordinates, const u32 *cornerColors,
+                                      u32 flipFlags, f32 rotation, u32 blendKind, u32 textureMode,
+                                      SdfTex *texture, u32 surfaceId);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
 void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 height,
@@ -67,7 +69,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                                    dimensions[0], dimensions[1],
                                    textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
-                                   texture, buffer);
+                                   (SdfTex *)texture, buffer);
         textureCoordinates[3] = savedTextureCoordinates[3];
     }
 
@@ -83,7 +85,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                                    dimensions[0], dimensions[1],
                                    textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
-                                   texture, buffer);
+                                   (SdfTex *)texture, buffer);
         textureCoordinates[1] = savedTextureCoordinates[1];
     }
 
@@ -99,7 +101,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                                    dimensions[0], dimensions[1],
                                    textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
-                                   texture, buffer);
+                                   (SdfTex *)texture, buffer);
         textureCoordinates[2] = savedTextureCoordinates[2];
     }
 
@@ -115,7 +117,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                                    dimensions[0], dimensions[1],
                                    textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
-                                   texture, buffer);
+                                   (SdfTex *)texture, buffer);
         textureCoordinates[0] = savedTextureCoordinates[0];
     }
 }
