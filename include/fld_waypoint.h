@@ -22,9 +22,15 @@ typedef union FldWaypointHeaderValues {
 
 typedef struct FldWaypointHeader {
     s32 area;       /* +0x00: also read as a word by actor-trigger setup. */
-    s16 sound;      /* +0x04: elevator sound selector. */
-    s16 floorCount; /* +0x06: number of usable floor/block pairs. */
-    FldWaypointHeaderValues body; /* +0x08: six floors, then six block IDs. */
+    union {
+        /* Serialized halfword payload, including its sound/count prefix. */
+        s16 payload[14];
+        struct {
+            s16 sound;      /* +0x04: elevator sound selector. */
+            s16 floorCount; /* +0x06: number of usable floor/block pairs. */
+            FldWaypointHeaderValues body; /* +0x08: six floors, then six block IDs. */
+        };
+    };
 } FldWaypointHeader;
 
 typedef struct FldWaypointBlock {
@@ -32,6 +38,10 @@ typedef struct FldWaypointBlock {
     FldActorEntry actors[256];
 } FldWaypointBlock;
 
+typedef char FldWaypointHeaderPayloadSizeCheck[
+    (sizeof(((FldWaypointHeader *)0)->payload) == 0x1C) ? 1 : -1];
+typedef char FldWaypointHeader_payload_offset_check[
+    ((u32)&((FldWaypointHeader *)0)->payload == 0x04) ? 1 : -1];
 typedef char FldWaypointHeaderSizeCheck[(sizeof(FldWaypointHeader) == 0x20) ? 1 : -1];
 typedef char FldWaypointHeader_area_offset_check[
     ((u32)&((FldWaypointHeader *)0)->area == 0x00) ? 1 : -1];
