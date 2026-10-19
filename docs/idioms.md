@@ -11336,6 +11336,23 @@ Inactive or empty work returns `NULL`. Keep the descriptor explicitly `u32`,
 as discussed in the packet-field width idiom above; the name does not assert
 an unsupported interpretation of the trailing word.
 
+### Normalize selected float inputs after the HP/MP join
+
+DDS1 `func_001AFF78` and DDS2 `func_001BAB90` select and convert the current and
+maximum HP/MP values inside their two stat arms, then divide the two `f32` inputs
+once after the join.
+Keeping a separate division in each arm looks equivalent in the final common
+tail, but leaves the first frame-loop setup in a different scheduling block.
+The common division occupies the first issue slot beside `SLL(stat,1)`; the
+dependent row-index `ADD` and the real loop-counter clear then issue together
+in the next cycle. This recovers the retail `SLL; ADD; clear; SLL3; base ADD`
+order without an artificial dependency, extra cursor, or helper.
+
+The function also retains the native 16-byte default-palette copy before its
+four per-corner overrides (`001B0098..001B00B8`). That is an observed redundant
+initialization, not a live palette input; do not invent a read to justify it.
+
+
 ## Trace-justified task roles: special pre-action callbacks
 
 The DDS1/DDS2 `btlQueueLinkedPairModelSwapTasks` routines are 1,400-byte callbacks for
