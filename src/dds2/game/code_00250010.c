@@ -2525,7 +2525,257 @@ void evtRotateViewerPositionFromPad(f32 *position)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00255818);
+extern u16 D_003C98A8[];
+extern char D_00437728[];
+extern char D_00437730[];
+extern const char D_00424150[];
+extern const char D_00424160[];
+extern const char D_00424170[];
+extern void *func_0011F518(s32, s32, s32, s32);
+extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
+extern void mnuShopSavePrimaryTransform(u8 *);
+extern void mnuShopSaveFullTransform(u8 *);
+extern void mnuShopRestoreTransform(u8 *);
+extern void kwlnSetLightColorTarget(s32, s32, f32 *);
+extern void kwlnSetLightDirectionTarget(s32, s32, f32 *);
+extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
+
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424150);
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424160);
+INCLUDE_RODATA(const s32, "game/code_00250010", D_00424170);
+
+
+/* Select and draw one light-color bank at the current panel offset. */
+static inline void evtDrawLightRgbComponents(SdfListHead *list, EvtRuntime *runtime,
+                                             s32 selected, s32 y, s32 firstComponent) {
+    if ((u32)selected >= 3U || runtime->unk232C != 1) {
+        selected = -1;
+    }
+    fldDrawRgbEditor(list,
+                     (s32)(0x8740u + ((u32)runtime->lightPanelOffset << 4)),
+                     y, selected, &runtime->commandMatrix[firstComponent]);
+}
+
+/* Convert the panel offset into the fixed-point X origin used by captions. */
+static inline s32 evtLightCaptionX(s32 panelOffset) {
+    return (s32)(0x8740u + ((u32)panelOffset << 4));
+}
+
+s32 func_00255818(s32 x, s32 y, EvtRuntime *runtime) {
+    SdfListHead *list;
+    EvtRuntimeGroup *group;
+    s32 mode;
+    s32 submode;
+    s32 changed;
+    s32 firstRgbMode;
+    EvtUnit *nestedValue = NULL;
+
+    group = runtime->frameGroup;
+    list = sdfCreateResetPacketList();
+    x = (s32)((u32)x + (u32)runtime->lightPanelOffset);
+
+    evtDrawMenuFrame(list, (s32)((u32)x + 0x64u), y, 0xD, 0x10, 0, 1, (u8 *)runtime,
+                     NULL, evtNoOpRGBEditorRow);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        (s32)(0x8680u + ((u32)runtime->lightPanelOffset << 4)),
+        D_003C98A8[runtime->unk2328],
+        0xFF0080, 0, D_00437728));
+
+    {
+        s32 selected;
+        if (runtime->unk2328 == 3 && runtime->unk232C == 1) {
+            selected = 1;
+        } else {
+            selected = 0;
+        }
+        VU0_LOAD_VF(vf10, &runtime->commandMatrix[4]);
+        sdfAppendPacket(list, (u32)func_0011F518(
+            (s32)(0x88C0u + ((u32)runtime->lightPanelOffset << 4)),
+            0x7BD0, 0xFF0080, selected));
+        firstRgbMode = runtime->unk2328;
+    }
+
+    evtDrawLightRgbComponents(list, runtime, firstRgbMode, 0x7A20,
+                              0);
+    evtDrawLightRgbComponents(list, runtime,
+                              (s32)((u32)runtime->unk2328 - 4u), 0x7D80,
+                              8);
+
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[7],
+        0xFF0080, 0, D_00424150));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[8],
+        0xFF0080, 0, D_00424160));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[9],
+        0xFF0080, 0, D_00437730));
+
+    if (runtime->actionMode != 0x12) {
+        return 0;
+    }
+    changed = 0;
+    if (D_0037F510.apply < 0) {
+        return 1;
+    }
+
+    if (D_0037F510.confirm < 0) {
+        switch (runtime->unk2328) {
+        case 7:
+            mnuShopSavePrimaryTransform((u8 *)runtime);
+            break;
+        case 8:
+            mnuShopSaveFullTransform((u8 *)runtime);
+            break;
+        case 9:
+            mnuShopRestoreTransform((u8 *)runtime);
+            break;
+        default:
+            changed = 1;
+            break;
+        }
+    } else if (D_0037F510.cancel < 0) {
+        changed = -1;
+    } else if ((D_0037F510.incTen & 2) != 0 && runtime->unk232C == 0) {
+        if (runtime->unk2328 < 9) {
+            runtime->unk2328++;
+        } else {
+            runtime->unk2328 = 0;
+        }
+    } else if ((D_0037F510.decTen & 2) != 0 && runtime->unk232C == 0) {
+        if (runtime->unk2328 > 0) {
+            runtime->unk2328--;
+        } else {
+            runtime->unk2328 = 9;
+        }
+    } else if (D_0037F510.coarseIncrease != 0) {
+        runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset + 8u);
+    } else if (D_0037F510.coarseDecrease != 0) {
+        runtime->lightPanelOffset = (s32)((u32)runtime->lightPanelOffset - 8u);
+    }
+
+    submode = runtime->unk232C;
+    if (changed == 1) {
+        if (submode == 0) {
+            runtime->unk232C = 1;
+        } else if (submode == 1) {
+            runtime->unk232C = 0;
+        }
+        return 0;
+    } else if (changed == -1) {
+        if (submode == 1) {
+            runtime->unk232C = 0;
+            return 0;
+        }
+    } else if (submode == 1) {
+        mode = runtime->unk2328;
+        if ((u32)mode < 3U) {
+            if ((D_0037F510.incOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] + 0.01f;
+                runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.incTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] + 0.09999999404f;
+                runtime->commandMatrix[mode] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.decOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] - 0.01f;
+                runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
+            } else if ((D_0037F510.decTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[mode] - 0.09999999404f;
+                runtime->commandMatrix[mode] = (0.0f < candidate) ? candidate : 0.0f;
+            }
+        }
+
+        if (mode == 3) {
+            evtRotateViewerPositionFromPad(&runtime->commandMatrix[4]);
+        }
+
+        mode = runtime->unk2328;
+        if (((u32)mode - 4u) < 3U) {
+            if ((D_0037F510.incOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.01f;
+                runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.incTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] + 0.09999999404f;
+                runtime->commandMatrix[8 + mode - 4] = (candidate < 2.0f) ? candidate : 2.0f;
+            } else if ((D_0037F510.decOne & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.01f;
+                runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
+            } else if ((D_0037F510.decTen & 2) != 0) {
+                f32 candidate = runtime->commandMatrix[8 + mode - 4] - 0.09999999404f;
+                runtime->commandMatrix[8 + mode - 4] = (0.0f < candidate) ? candidate : 0.0f;
+            }
+        }
+    }
+
+    switch (group->metadata.option) {
+    case 0:
+        break;
+    case 1:
+        kwlnSetLightColorTarget(0, 0, &runtime->commandMatrix[0]);
+        kwlnSetLightDirectionTarget(0, 0, &runtime->commandMatrix[4]);
+        kwlnSetBackgroundColorTarget(0, &runtime->commandMatrix[8]);
+        evtSetSlotVectors(group->setterId, group->metadata.option, 0,
+                          &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
+        break;
+    case 2:
+        evtSetSlotVectors(group->setterId, 2, 0,
+                          &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
+        break;
+    case 3: {
+        EffWorldNode *world = dds3GetWorldObject();
+        EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(
+            world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
+
+        if (node != NULL) {
+            nestedValue = evtUnitGetNestedValue(node);
+        }
+        evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
+                          &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
+        break;
+    }
+    }
+    if (changed == -1) {
+        switch (group->metadata.option) {
+        case 0:
+            break;
+        case 1:
+            kwlnSetLightColorTarget(0, 0, &runtime->savedCommandMatrix[0]);
+            kwlnSetLightDirectionTarget(0, 0, &runtime->savedCommandMatrix[4]);
+            kwlnSetBackgroundColorTarget(0, &runtime->savedCommandMatrix[8]);
+            evtSetSlotVectors(group->setterId, group->metadata.option, 0,
+                              &runtime->savedCommandMatrix[0],
+                              &runtime->savedCommandMatrix[4],
+                              &runtime->savedCommandMatrix[8]);
+            break;
+        case 2:
+            evtSetSlotVectors(group->setterId, 2, 0,
+                              &runtime->savedCommandMatrix[0],
+                              &runtime->savedCommandMatrix[4],
+                              &runtime->savedCommandMatrix[8]);
+            break;
+        case 3: {
+            EffWorldNode *world = dds3GetWorldObject();
+            EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(
+                world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
+            if (node != NULL) {
+                nestedValue = evtUnitGetNestedValue(node);
+            } else {
+                sdfDebugPrintf((char *)D_00424170);
+                break;
+            }
+            evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
+                              &runtime->savedCommandMatrix[0],
+                              &runtime->savedCommandMatrix[4],
+                              &runtime->savedCommandMatrix[8]);
+            break;
+        }
+        }
+    }
+    return changed;
+}
 
 /* The editor draws its own fields; the menu frame's row callback stays blank. */
 void evtNoOpXYSlotVectorEditorRow(void) {
