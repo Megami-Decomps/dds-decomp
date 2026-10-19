@@ -5989,7 +5989,7 @@ void func_001E9DE0(BtlLinkedCommand *action, BtlCamState *pose,
                 }
                 memcpy(savedPose, pose, sizeof(*savedPose));
                 btlBuildPresetCameraPose(action, &savedPose->pose, 1, instruction->parameterIndex);
-            
+
                     VU0_LOAD_VF(vf10, CURSOR->pathEnd);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedParameters->pathEnd);
                     VU0_LOAD_VF(vf10, CURSOR->pathStart);
@@ -6053,7 +6053,7 @@ void func_001E9DE0(BtlLinkedCommand *action, BtlCamState *pose,
                     savedPose = &D_0035F560;
                 }
                 memcpy(pose, savedPose, sizeof(*savedPose));
-                
+
                 VU0_LOAD_VF(vf10, savedParameters->pathEnd);
                 VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
                 VU0_LOAD_VF(vf10, savedParameters->pathStart);
@@ -11497,4 +11497,3 @@ INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6B0);
-
