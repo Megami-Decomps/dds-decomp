@@ -940,8 +940,10 @@ u32 sdfDevQueueControlAndWait(DevState *state) {
     return sdfDevControlReplyValue;
 }
 
-u32 sdfDevQueueOperationAndWait(void) {
-    sdfDevQueueOperation();
+extern s32 sdfDevQueueOperation(DevState *state, s32 seekOffset, s32 seekOrigin);
+
+u32 sdfDevQueueOperationAndWait(DevState *state, s32 seekOffset, s32 seekOrigin) {
+    sdfDevQueueOperation(state, seekOffset, seekOrigin);
     WaitSema(sdfDevReplySemaphore);
     return sdfDevOperationReplyValue;
 }

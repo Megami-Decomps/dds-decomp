@@ -584,9 +584,11 @@ s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
     return 0;
 }
 
-/* Reset the scratch-context counter only when its query succeeds; retain the native no-argument query. */
-s32 btlResetAiCounterAtLimit() {
-    if (btlAiCounterReachedLimit()) {
+extern s32 btlAiCounterReachedLimit(s32 unused, u32 minimumCount);
+
+/* Reset the scratch-context counter only when its query succeeds. */
+s32 btlResetAiCounterAtLimit(s32 unused, u32 minimumCount) {
+    if (btlAiCounterReachedLimit(unused, minimumCount)) {
         btlActionScratchWork->actor->aiCounter = 0;
         return 1;
     }

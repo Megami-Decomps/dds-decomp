@@ -480,11 +480,13 @@ s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 healthPercent) {
     return 0;
 }
 
-/* Reset the scratch-context counter only when its query succeeds; retain the native no-argument query. */
-u32 btlResetAiCounterAtLimit(void) {
+extern s32 btlAiCounterReachedLimit(s32 unused, u32 minimumCount);
+
+/* Reset the scratch-context counter only when its query succeeds. */
+u32 btlResetAiCounterAtLimit(s32 unused, u32 minimumCount) {
     u32 limitReached;
 
-    limitReached = btlAiCounterReachedLimit();
+    limitReached = btlAiCounterReachedLimit(unused, minimumCount);
     if (limitReached == 0) {
         return limitReached;
     }

@@ -336,6 +336,8 @@ s32 btlIsSupportedCommandKind(s32 *state) {
     }
 }
 
+extern s32 btlSelectRandomAutoAttackSkill(BtlUnit *unit);
+
 s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     s32 value;
     switch (work->phase) {
@@ -346,7 +348,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
         if (work->skillId > 0) {
             return work->skillId;
         }
-        value = btlSelectRandomAutoAttackSkill();
+        value = btlSelectRandomAutoAttackSkill(unit);
         if (value > 0) {
             return value;
         }

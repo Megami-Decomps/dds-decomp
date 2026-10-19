@@ -928,8 +928,10 @@ u32 sdfDevQueueControlAndWait(DevState *state) {
     return sdfDevControlReplyValue;
 }
 
-u32 sdfDevQueueOperationAndWait(void) {
-    sdfDevQueueOperation();
+extern s32 sdfDevQueueOperation(DevState *state, s32 seekOffset, s32 seekOrigin);
+
+u32 sdfDevQueueOperationAndWait(DevState *state, s32 seekOffset, s32 seekOrigin) {
+    sdfDevQueueOperation(state, seekOffset, seekOrigin);
     WaitSema(sdfDevReplySemaphore);
     return sdfDevOperationReplyValue;
 }
@@ -953,16 +955,18 @@ char *sdfDevGetPathBuffer(void) {
     return sdfDevCurrentDirectory;
 }
 
+extern void sdfDevSetFallbackDeviceWorker(s32 worker);
+
 /* Select the default path-construction worker and the no-prefix fallback worker. */
-void sdfDevSetDefaultDeviceWorker(s8 worker) {
+void sdfDevSetDefaultDeviceWorker(s32 worker) {
     D_00438AE0 = worker;
-    sdfDevSetFallbackDeviceWorker();
+    sdfDevSetFallbackDeviceWorker(worker);
 }
 
 extern s8 D_00438B1E;
 
 /* Select the worker used when a file path has no explicit device prefix. */
-void sdfDevSetFallbackDeviceWorker(s8 worker) {
+void sdfDevSetFallbackDeviceWorker(s32 worker) {
     D_00438B1E = worker;
 }
 

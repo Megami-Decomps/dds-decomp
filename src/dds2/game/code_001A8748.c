@@ -1351,9 +1351,11 @@ void btlRaisePartyRecordStatusValue(DatPartyRecord *item, u32 minimumValue) {
     sdfRaisePackedChannelValue(item, minimumValue);
 }
 
+extern void datClearUnitStatusBits(DatPartyRecord *unit, s32 mask);
+
 /* Forward the legacy record/mask arguments to the party-record status clear. */
-void btlClearPartyRecordStatusBits(void) {
-    datClearUnitStatusBits();
+void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask) {
+    datClearUnitStatusBits(record, mask);
 }
 
 /* Set the actor's selected entry index. */

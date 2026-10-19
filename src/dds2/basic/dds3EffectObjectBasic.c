@@ -346,9 +346,11 @@ EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 
     return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
+extern void billSetKind1Entry(BillObj *effect, u32 entryIndex);
+
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
-void effObjSelectStoredBill(EffectObj *obj) {
-    billSetKind1Entry((u32)obj->data->handle);
+void effObjSelectStoredBill(EffectObj *obj, u32 entryIndex) {
+    billSetKind1Entry(obj->data->handle, entryIndex);
 }
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
