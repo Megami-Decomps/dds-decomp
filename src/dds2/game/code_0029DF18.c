@@ -11,6 +11,8 @@
 #include "brs_result_counter.h"
 #include "sdf.h"
 #include "snd_track_playback_api.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 /* Declared before first use (were implicit int). */
 extern void FlushCache(s32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
@@ -99,8 +101,66 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, B
     }
 }
 
-/* Shared gray palette retained for the still-ASM unit-info renderer. */
-INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowUnitInfo);
+/* Level-label and icon placement tables are separate 4-byte-per-row owners; the
+ * gray palette is the same D_00428590 template that brsDrawProgressRowOverlays copies. */
+typedef struct BrsRowPosition { s16 x; s16 y; } BrsRowPosition;
+typedef struct BrsLevelPlacement { BrsRowPosition values[2]; } BrsLevelPlacement;
+typedef struct BrsIconPlacement { BrsRowPosition values[2]; } BrsIconPlacement;
+typedef struct BrsIconFrames { s8 values[8]; } BrsIconFrames;
+typedef struct BrsCornerColors { u32 values[4]; } BrsCornerColors;
+extern const BrsLevelPlacement D_004379D0[];
+extern const BrsIconPlacement D_004379D8[];
+extern const BrsIconFrames D_004379E0[];
+extern const BrsCornerColors D_00428590[];
+extern char D_004379E8[];
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern s32 sprintf(char *, const char *, ...);
+
+void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                              BrsProgressRow *row, s32 context, s32 rowIndex) {
+    char text[16];
+    BrsLevelPlacement levelPositions = D_004379D0[0];
+    BrsIconPlacement iconPositions = D_004379D8[0];
+    BrsIconFrames iconFrames = D_004379E0[0];
+    BrsCornerColors colors = D_00428590[0];
+    DatPartyRecord *unit;
+    struct FrFontGlyph *glyph;
+    u32 color;
+    s32 kind;
+    s32 drawX;
+    s32 drawY;
+
+    color = work->fadeAnimation[rowIndex].backgroundOpacity | 0x80808000;
+    unit = row->unit;
+    colors.values[0] = color;
+    colors.values[1] = color;
+    colors.values[2] = color;
+    colors.values[3] = color;
+    if (work->teardownResource != NULL) {
+        if (unit->flags & DAT_PARTY_FLAG_FRONTLINE) {
+            kind = 0;
+        } else {
+            kind = 1;
+        }
+        if (unit->hp == 0 || (unit->status & 0x4000)) {
+            color = work->fadeAnimation[rowIndex].portraitOpacity | 0x4F4E4E00;
+        }
+        drawX = levelPositions.values[kind].x;
+        drawY = levelPositions.values[kind].y;
+        sprintf(text, D_004379E8, work->levelAnimation[rowIndex].level);
+        glyph = itfCreateFont2TextGlyph(x + (drawX << 4), y + (drawY << 3),
+                                       0xFF0000, color, text, NULL);
+        frFontDrawGlyphChain(glyph, 1, context);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        drawX = iconPositions.values[kind].x;
+        drawY = iconPositions.values[kind].y;
+        if (work->teardownResource != NULL) {
+            effDrawSpriteWithCornerColors(x + (drawX << 4), y + (drawY << 3), z,
+                                          colors.values, 0, work->teardownResource,
+                                          iconFrames.values[unit->unitId - 1], context);
+        }
+    }
+}
 
 /* Fade a result row's portrait in; the row is ready once the opacity reaches 0x60. */
 void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
