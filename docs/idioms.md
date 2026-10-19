@@ -14823,6 +14823,39 @@ state all have hooked/unhooked equality. Whole-unit gates are `15/0` and
 and all three canaries, are exact. Complete object data compares to retail
 with zero differing bytes, including 58 relocated readonly entries.
 
+## Section-model and indexed-image translation units
+
+DDS2's section-model unit starts at `0x0031C8B0` and ends at
+`0x0031CDE8` (`code_0031C8B0`, default `-O2 -G8`). Defining
+`mnuSetNodeModelBroadcastByte` before `mnuUpdateSectionModelWork`
+(`0x0031CBC8`, 544 bytes) gives the updater the native `bc1fl` at
+`+0xD8`; an external-only setter declaration does not. No nothrow attribute
+or per-function option is substituted for the local body knowledge.
+
+The indexed-image/model-instance suffix begins with bank installation at
+`0x0031CDE8` and retains the `code_0031CA10` owner name and its existing
+`-fno-optimize-sibling-calls` option through `0x0031D680`. Its two thin draw
+forwarders retain native `jal` tails without callback adapters. Shooting's
+two direct scaled draws are unchanged: wrapping their literal scales in a
+uniform callback removes the native SF movables and `$f20/$f21` loop caches.
+
+Independent data agrees with this split: the projection unit owns the two
+`1.3f` words at `0x00435A84` and `0x00435A88`; the indexed-image suffix owns
+the degree factor at `0x00435A8C` and its 32-byte `SpriteWork Object Size`
+readonly group at `0x0042DB10`. There is no new sdata owner. All 884 native
+text words and their order are conserved. No original `__FILE__` attribution
+is claimed.
+
+The only shared callback family is the three-site model-broadcast operation:
+the prefix, section-model setter and effect renderer. Whole-unit gates are
+`44/0`, `6/0`, `15/0` and `48/0`; the untouched shooting owner is `32/0`.
+The updater is also 100% in objdiff with current symbol-name mappings.
+
+The pre-existing sampler is moved unchanged by explicit scope ruling, not
+introduced or endorsed as a new consumed-parameter cleanup. Its legacy frame
+clear remains a separate purity-audit item. A diagnostic without that clear
+still leaves the updater exact, so the new match does not depend on it.
+
 ## Actor-control byte API: acquire the command selector before publishing flags
 
 DDS1 `fldDispatchSceneAction` (`0x0013E5A8`, 1636 bytes) follows the matched

@@ -2,54 +2,11 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu_shooting.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 
-extern f32 tanf(f32);
-
-extern f32 D_0037F5EC[];
-
-extern f32 sdfViewEyeVector[4];
-
-extern f32 sdfViewTargetVector[4];
-
+extern void *memset(void *, s32, u32);
 void itfDeactivateModelInstance(ModelInstance *item);
-
 void itfDrawModelInstanceImage(ModelInstance *item);
-
-extern void itfDrawUniformlyScaledIndexedImage(s32, s32, s32, s32, s32, s32, s32, f32);
-
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-
-/* Map a screen point onto the view plane using the eye/target Z separation. */
-void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
-    f32 halfViewAngle;
-    f32 eyeTargetDepth;
-
-    halfViewAngle = D_0037F5EC[0] * 0.5f;
-    eyeTargetDepth = sdfViewEyeVector[2] - sdfViewTargetVector[2];
-    position[0] = eyeTargetDepth * tanf(halfViewAngle * 1.3f) *
-        ((f32)(screenX - 256) * 0.00390625f);
-    position[1] = eyeTargetDepth * tanf(halfViewAngle) *
-        ((f32)(screenY - 224) / 224.0f);
-    position[2] = 0.0f;
-}
-
-/* Variant of the screen-point projection with a fixed -300 eye depth and Z. */
-void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) {
-    f32 halfViewAngle;
-    f32 depth;
-
-    halfViewAngle = D_0037F5EC[0] * 0.5f;
-    depth = -300.0f - sdfViewTargetVector[2];
-    position[0] = depth * tanf(halfViewAngle * 1.3f) *
-        ((f32)(screenX - 256) * 0.00390625f);
-    position[1] = depth * tanf(halfViewAngle) *
-        ((f32)(screenY - 224) / 224.0f);
-    position[2] = -300.0f;
-}
-
-INCLUDE_ASM(const s32, "game/code_0031CA10", mnuUpdateSectionModelWork);
 
 extern u32 itfIndexedImageResourceBanks[];
 

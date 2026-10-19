@@ -11,6 +11,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "mdl_broadcast_callback.h"
 #include "btl_grouped_entity_api.h"
 #include "sdf.h"
 #include "sdf_texture_submit.h"
@@ -298,7 +299,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     SdfPoolNode *surface;
     s32 index;
 
-    mdlBroadcastMasked(owner->model,
+    mdlApplyBroadcastVia(mdlBroadcastMasked, owner->model,
                        (mdlGetBroadcastValue(owner->model) & 0xFFFFFF) | 0x80000000);
 
     for (index = 0; index != 4; index++) {

@@ -9803,3 +9803,4 @@ INCLUDE_SDATA(const s32, "game/code_001EC868", btlTintTransitionHoldCount);
 INCLUDE_SDATA(const s32, "game/code_001EC868", D_00436AE0);
 
 INCLUDE_SDATA(const s32, "game/code_001EC868", D_00436AE8);
+

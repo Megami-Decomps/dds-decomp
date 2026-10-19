@@ -8,6 +8,7 @@
 #include "eff_update_flags.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "mdl_broadcast_callback.h"
 #include "mnu_shooting.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
@@ -48,6 +49,7 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 
 extern u32 *dds3SoundSlotPool;
+extern void fileSetRenderFlag(u32 mask);
 extern u32 fileClearRenderFlag(u32 mask);
 
 
@@ -768,27 +770,11 @@ void mnuSetNodeScaleVector(u8 *node, f32 value) {
 }
 
 void mnuBroadcastNodeModelState(u8 *node, u32 color) {
-    mdlBroadcastMasked(((MnuModelNode *)node)->model, color);
+    mdlApplyBroadcastVia(mdlBroadcastMasked, ((MnuModelNode *)node)->model, color);
 }
 
 
 void mnuSetModelNodeBroadcastAlpha(void) {
-}
-
-/* Replace only the high byte of the model's broadcast word. */
-void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
-    u32 broadcastLowBytes = mdlGetBroadcastValue(node->model) & 0xFFFFFF;
-
-    mdlBroadcastMasked(node->model, broadcastLowBytes | ((u32)highByte << 24));
-}
-
-void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
-    MnuModelNode *entry = (MnuModelNode *)node;
-    if (selector == 1) {
-        entry->model->flags &= ~MDL_SKIP_TRANSFORMS;
-    } else {
-        entry->model->flags |= MDL_SKIP_TRANSFORMS;
-    }
 }
 
 INCLUDE_RODATA(const s32, "game/code_0031B188", D_0042DAE8);
