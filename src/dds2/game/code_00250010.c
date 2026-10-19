@@ -3590,7 +3590,121 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002582D0);
+#include "sdf_bordered_rectangle_packet.h"
+
+extern void kwlnDrawSpriteCellZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth);
+extern s32 mnuSolveCubicBezierYForX(s32 target, const s32 *x, const s32 *y);
+extern u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
+extern char D_004377B8[];
+
+/* Read the selected signed parameter at its display call boundary. */
+static inline s32 evtReadBezierParameter(s8 *bytes, s32 index) {
+    return bytes[index];
+}
+
+/* Apply the panel's signed-byte editing bounds to the selected parameter. */
+static inline void evtIncrementBezierParameter(s8 *bytes, s32 index) {
+    if (bytes[index] < 126) {
+        bytes[index]++;
+    }
+}
+
+static inline void evtDecrementBezierParameter(s8 *bytes, s32 index) {
+    if (bytes[index] >= 2) {
+        bytes[index]--;
+    }
+}
+
+/* Convert one already-halved curve ordinate to the panel coordinate. */
+static inline s32 evtProjectBezierOrdinate(s32 ordinate) {
+    return (ordinate << 3) + 0x83C0;
+}
+
+s32 func_002582D0(EvtRuntime *runtime) {
+    s32 x[4];
+    s32 y[4];
+    SdfListHead *list;
+    EvtRuntimeChild *node;
+    s32 component;
+    s32 offset;
+    u32 markerDefaultColor;
+    s32 selectedPoint;
+    s32 i = 0;
+
+    markerDefaultColor = 0x80808080;
+    list = sdfCreateResetPacketList();
+    kwlnDrawSpriteCellZ(list, 120, 312, 12, 9, 0xFEFFF);
+    node = evtEventViewerGetPendingNode(runtime);
+    component = runtime->curveComponent;
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x82C0, 0xFEFFFF, 0, D_004377B8));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x82C0, 0xFEFFFF, 0, D_004376F8, component));
+    offset = component * 2;
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x8320, 0xFEFFFF, 0, D_00437780));
+    {
+        s8 *bytes = node->parameterBytes;
+        selectedPoint = component + 1;
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7780, 0x8320, 0xFEFFFF, 0, D_004376F8, evtReadBezierParameter(bytes, offset + 4)));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7C00, 0x8320, 0xFEFFFF, 0, D_00437788));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7C00, 0x8320, 0xFEFFFF, 0, D_004376F8, evtReadBezierParameter(bytes, offset + 5)));
+
+        x[0] = 0;
+        y[0] = 0;
+        x[1] = node->parameterBytes[4];
+        y[1] = node->parameterBytes[5];
+        x[2] = node->parameterBytes[6];
+        y[2] = node->parameterBytes[7];
+        x[3] = 128;
+        y[3] = 128;
+        for (; i < 4; i++) {
+            u32 color;
+            if (selectedPoint == i) {
+                color = 0x80008000;
+            } else {
+                color = markerDefaultColor;
+            }
+            sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(
+                (x[i] << 4) + 0x77E0, ((y[i] / 2) << 3) + 0x83B0,
+                0xFEFFFF, 0x40, 0x20, 0, color));
+        }
+        for (i = 0; i < 128; i++) {
+            s32 firstY = mnuSolveCubicBezierYForX(i, x, y) / 2;
+            s32 next = i + 1;
+            s32 secondY = mnuSolveCubicBezierYForX(next, x, y) / 2;
+            {
+                s32 x0 = i;
+                s32 y0 = firstY;
+                s32 y1 = secondY;
+                x0 = (x0 << 4) + 0x7800;
+                y0 = evtProjectBezierOrdinate(y0);
+                next = (next << 4) + 0x7800;
+                y1 = evtProjectBezierOrdinate(y1);
+                sdfAppendPacket(list, (u32)fldCreateColoredLinePacket(
+                    x0, y0, 0xFEFFFF, 0x80808080,
+                    next, y1, 0xFEFFFF, 0x80808080, 0));
+            }
+        }
+        kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+
+        if (D_0037F510.incTen & 2) {
+            evtIncrementBezierParameter(bytes, component * 2 + 5);
+        } else if (D_0037F510.decTen & 2) {
+            evtDecrementBezierParameter(bytes, component * 2 + 5);
+        } else if (D_0037F510.decOne & 2) {
+            evtDecrementBezierParameter(bytes, component * 2 + 4);
+        } else if (D_0037F510.incOne & 2) {
+            evtIncrementBezierParameter(bytes, component * 2 + 4);
+        } else if (D_0037F510.decHun & 2) {
+            runtime->curveComponent ^= 1;
+        } else if (D_0037F510.incHun & 2) {
+            runtime->curveComponent ^= 1;
+        }
+        if (D_0037F510.cancel < 0) {
+            runtime->frameGroup->usePendingKey = 0;
+            return 0;
+        }
+        return 1;
+    }
+}
 
 s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     s32 status = 1;
