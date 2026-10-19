@@ -15043,3 +15043,18 @@ produces an extra epilogue and 676 bytes, while the actual early-return state
 machine retains the retail 648-byte function and ordinary final call.
 Both whole units gate exactly (238 DDS1 and 277 DDS2 functions), as do the
 three standard canaries. No ABI, flags, expected assembly or data changes.
+
+## Boss scale initialization uses the successful actor-search guard
+
+DDS1 `btlInitializeBossUnitScaleTransition` rejects unsupported units early,
+searches the active lead with a normal `for` loop and `continue`, then initializes
+the transition only under `if (actor != 0)`. The positive success guard retains
+the real shared completion edge; it does not need a `goto done` return join.
+Moving that last guard to `if (actor == 0) return` instead changes the tail-call
+choice and eighteen native words. No dummy post-call work is necessary.
+
+The fully structured initializer is the retail 372 bytes and all 29 functions
+in `code_0020CB38` gate exactly. The three standard canaries were also exact
+in the same header state (192, 158 and 15 functions). No header, call contract,
+flags, data ownership or expected assembly changes.
+
