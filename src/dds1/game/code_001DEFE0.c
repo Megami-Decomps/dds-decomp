@@ -356,6 +356,7 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode);
 
 /* Check actor status, linked-group marks, and owner restrictions before use. */ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor);
 
+extern void btlClearAllUnitDefeatCandidates(void);
 void btlClearAllUnitDefeatCandidatesTask(void);
 
 void btlClearUnitDefeatCandidate(BtlUnit *object);
@@ -896,7 +897,6 @@ void btlBeginActionEndCameraPullback(BtlLinkedCommand *action, BtlCamState *pose
     }
 }
 
-extern void btlClearAllUnitDefeatCandidates(void);
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
@@ -1133,7 +1133,6 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
 }
 
 extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
-extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
 void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back) {
