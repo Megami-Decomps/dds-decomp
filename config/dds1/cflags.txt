@@ -4,7 +4,6 @@ game/code_00254B30  -fno-optimize-sibling-calls  # 30 tail calls in 43 functions
 game/code_002C97E8  -fno-optimize-sibling-calls  # 13 tail calls in 84 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_0025BC38  -fno-optimize-sibling-calls  # 16 tail calls in 36 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_0026BD80  -fno-optimize-sibling-calls  # 14 tail calls in 31 functions, all jal+epilogue, no j to a function; neighbours sibcall
-game/code_0024E1C8  -fno-optimize-sibling-calls  # 11 tail calls in 37 functions, all jal+epilogue, no j to a function; neighbours sibcall (find_nosibcall.py)
 game/code_00228B38  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_00257200  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_0025DF68  -fno-optimize-sibling-calls  # 12 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)

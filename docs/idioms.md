@@ -14766,3 +14766,43 @@ DDS2 `mnuSubmitMovieDrawPacket` (98 insns, 3 blocks): writing
 `uvLast` shifts and the bb2 constants then stay after the `audioMode` branch as
 in retail, size unchanged at 512 bytes. Dead stores, unused locals and redundant
 assignments do not move the estimate: they are removed before sched1.
+
+## Mantra resource boundary: local body knowledge, not a global no-sibling flag
+
+DDS1's demonstrated resource/mantra unit starts at `0x0024F4F0`
+(`mnuRequestMantraResources`) and ends at `0x002549F0`; it retains the
+`code_00250E88` owner name. The preceding fifteen placement renderers remain
+in `code_0024E1C8`. Both units compile with default flags.
+
+The earliest necessary provider is `mnuAreResourceSlotsOccupied` at
+`0x0024F570`. Its earlier definition preserves the native plain branch in
+`mnuUpdateResourceTaskState`. Likewise, definitions of the stop/reset cursor
+operations at `0x0024FA48`/`0x0024FA88` before
+`mnuUpdateMantraSceneTaskState` remove the incorrect annulled branch. Q0's
+reorg trace observes `can_throw` and target-live-register differences for
+the extern-only form; adding a nothrow attribute is not a substitute.
+
+The source reasons for the remaining `jal` tails are ordinary recurring
+operations: a four-site placement draw callback and a four-site resource
+list-cursor callback. Both follow the established inline-callback idiom
+above. The two resource destructors also invalidate their local owner only
+after releasing the allocation from which that owner was obtained. These
+are the actual freed-owner exception, not clears of arguments merely
+consumed by a draw/init call. `mnuFreeTaskData` retains its integer,
+fall-through-after-a-join definition; changing it to void creates an
+incorrect sibling jump. `SdfGrid.releaseCell` has that same integer return
+type, although the grid ignores its result.
+
+The data boundary matters too: `.rodata` starts at `0x003AF740` for the
+resource unit, moving its sprite-directory literal together with the two
+message paths and `MantraCalc` task name. A later text-only split at
+`0x0024F570` can compile exactly but leaves those resource strings in the
+renderer owner. The earlier, semantically consistent split keeps all
+resource strings together and the first jump table at native
+`0x003AF7C0`. No new original `__FILE__` attribution is claimed.
+
+Qualified probes for the placement dispatch, cursor dispatch and scene
+state all have hooked/unhooked equality. Whole-unit gates are `15/0` and
+`58/0`. All 88 other transitive consumers of the three recovered headers,
+and all three canaries, are exact. Complete object data compares to retail
+with zero differing bytes, including 58 relocated readonly entries.
