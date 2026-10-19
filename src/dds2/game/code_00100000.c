@@ -69,7 +69,9 @@ extern void sdfCreateRuntimeTask(void);
 extern void sdfDevConsInit(void);
 extern void sdfResetChannels(void);
 
-s32 kwlnInitializeRuntime(void) {
+extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+
+void kwlnInitializeRuntime(void) {
     evtResetDisplayProjectionAndVectorState();
     kwlnResetPadInputAndMotorState();
     kwlnTaskCreate(D_00435BB8, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
@@ -102,7 +104,7 @@ s32 kwlnInitializeRuntime(void) {
     kwlnFadeClear();
     evtEnsureSolarOverlayTaskAndResetPhase();
     fldCreateEncounterTask();
-    return dds3AdminSubmitModeRequest(1, 0, 0, 0);
+    dds3AdminSubmitModeRequest(1, 0, 0, 0);
 }
 
 void kwlnRequestMainLoopExit(void) {
