@@ -15264,3 +15264,40 @@ repair: all 170 caller-unit functions and the three standard canaries
 (192/0,158/0,15/0) remain exact, with no body, layout, flags or SDK ASM changes.
 It does not explain the separate stack-resident core-counter matching issue.
 
+
+## Party-info sprites: owned tables and staged coordinate workspaces
+
+DDS1 `mnuDrawPartyInfoSprites` (`0x002833B0`, 980 bytes) closes with ordinary
+C for the real two-kind × two-column × XY row bank and column-major skills.
+`effectData[column * rowCount + row]` exposes both induction families; the
+second loop pass discovers the skill cursor after its reversal decision,
+preserving the native ascending inner row and original-record `+34` address.
+The fixed row counts 2/3/4 access only elements 0..7 of the actual 24-element array.
+
+The four target-exclusive literal pools are automatic initialized arrays in
+a lexical block after the level-step call. This replaces conservative
+`memcpy` output dependencies with the actual objects' alias relationships.
+For the two heading records, `s32 headings[][2] = {{...}, {...}}` retains the
+same completed 16-byte object while removing the pinned frontend's unwanted
+heading-to-row output dependency. The second scheduler then emits the native
+origin, frame IDs, row banks, headings order. No extra padding element or
+alignment attribute is needed; literal bytes and relocations remain exact.
+
+The frame X/Y workspaces are reset for the later column/row loops, following
+the exact profile-panel sibling's coordinate-to-counter idiom. Both phases
+consume real values. The measured horizontal quantity has 11 references over
+91 live instructions, just ahead of text-Y's 11/92; vertical has 21/82 and
+conflicts with the glyph's S0 home. This recovers native S3 and S1 respectively,
+along with the complete saved-register and coordinate-pointer spill mapping.
+
+A separate remaining-row countdown is initialized only inside the real
+`rowCount != 0` guard, then consumed by a `do/while`. Its 7-reference lifetime
+falls from 16 to 14 instructions. Native's V1-to-S0 copy remains after the
+guard, and ordinary loop alignment restores the missing eight bytes.
+Resource fields, skill elements and the text base keep their callback-fresh reads.
+
+The 245 target words and all 159 existing owner functions match; ordinary and
+stock-observed compilation agree across all 17 listed object-section entries and
+normalized assembly. This builds on Son3, SdfModelVis and BigB's investigations
+and the documented profile-panel idiom. It reconstructs equivalent ordinary
+source; the original lexical source and unavailable historical parks are not claimed.
