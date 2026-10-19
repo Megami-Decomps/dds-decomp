@@ -243,7 +243,7 @@ extern void datAdjustCurrentHp();
 extern s32 btlResolveBattleTerminalOutcome(void);
 
 
-extern s64 mnuGetSoundBufferStateLocked(void);
+extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(EffRandState *state);
 extern EffRandState effSharedRandomState[];

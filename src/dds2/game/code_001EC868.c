@@ -116,7 +116,7 @@ extern void btlClearAllUnitDefeatCandidatesTask(void);
 
 extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
-extern s64 mnuGetSoundBufferStateLocked(void);
+extern s32 mnuGetSoundBufferStateLocked(void);
 
 extern void sdfVuLoadRotationMatrixX(f32);
 
