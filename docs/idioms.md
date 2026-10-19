@@ -14854,3 +14854,39 @@ The complete unit, including the new dispatcher and all existing C, is
 `59 match, 0 differ`; no header, compiler flag or expected assembly changes.
 The work-clear calls have the truthful `void dds3WorkClear(void)` prototype
 from both `newdata/datCalc.c` providers; no implicit integer return is retained.
+
+## Consumed name epochs: local string HIGHs also preserve the reload ring
+
+DDS2 `func_00140BC8` (`0x00140BC8`, 1580 bytes) finishes actor-name lookup
+before constructing its elevator request. The matching C then gives the
+two consumed text pointers their request roles: `entryName` receives
+`"01pos_01"` and `name` receives `"elvstart_label"`, and both are passed to
+`fldInitializeSequenceWithNote`. No constant-only scratch locals are added.
+
+This closes all four residual words through one mechanism. With literal
+addresses directly in the call, the first name's HIGH has life 7 on loop
+pass two and moves out of the loop. Its spill is reloaded into `$2`,
+advancing the reload ring; the following const-3 reload then takes `$4`
+instead of retail's `$5`. With the consumed pointer epochs, both name
+HIGHs have life 1 in both loop passes and remain local. The unwanted HIGH
+reload disappears, and const 3 takes `$5` from the unchanged ring cursor.
+This is not instruction-count inflation: even the revised loop count
+would still admit the old life-7 HIGH.
+
+Qualified commands use `tools/cc1probe.sh` with `--as-unit
+src/dds2/game/code_0013B818.c --version dds2 --func func_00140BC8`.
+The old `probe_renewed_dds2_reload` capture (`--reload --sched`) shows the
+HIGH/ring dependency at `decisions.log:1326-1335`. The matching
+`probe_renewed_exact_name_epochs` capture (`--cse --alloc --reload`) shows
+life-1 HIGHs at `rtl.09.loop:21236-21237,21270-21271`, followed by the
+const-3 reload into `$5` at `decisions.log:34255`. Both captures are in
+`sandbox_PurFAD/field_acquisition`; hooked and unhooked outputs agree.
+
+The header format also exposes the actual 14-halfword payload at +4,
+including sound/count before the existing twelve-halfword body. Its raw
+array and named fields share one primary union; existing named-field
+callers keep their API and offsets. The separate pre-existing +4/+6
+external bank symbols remain intentional native interfaces, not invented
+aliases. The unit is `64/0`; all five header consumers and all three
+canaries gate exactly (`flat_format_gates.json`). No flags, expected
+assembly, data ownership or inline assembly change.
