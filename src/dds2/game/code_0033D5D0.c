@@ -981,7 +981,7 @@ extern void EIntr(void);
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     DevWorkerEntry *worker;
-    s64 interrupts;
+    s32 interrupts;
     s32 wake = 0;
     DevState *last;
 
@@ -1024,7 +1024,7 @@ extern s16 D_00438B10;
 void sdfDevUnlinkAndFreeState(DevState *state) {
     DevState *prev;
     DevState *next;
-    s64 interrupts;
+    s32 interrupts;
 
     interrupts = DIntr();
     prev = state->previous;
