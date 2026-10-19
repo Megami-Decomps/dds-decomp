@@ -41,7 +41,7 @@
 
 extern void btlClearAllUnitDefeatCandidates(void);
 
-extern s64 mnuGetSoundBufferStateLocked(void);
+extern s32 mnuGetSoundBufferStateLocked(void);
 
 typedef struct BtlUnit BtlUnit;
 
@@ -162,7 +162,7 @@ s32 sndHasOccupiedNodeSlots(void) {
 
 s32 sndWaitForEarringPlayback(void) {
     s32 ready;
-    s64 status;
+    s32 status;
 
     status = mnuGetSoundBufferStateLocked();
     ready = 1;
