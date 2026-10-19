@@ -9835,12 +9835,14 @@ bit `0x20` set; its callee averages `partyRecord.level`, falling back to `1`
 for an empty group. The mask-average forwarding functions return `s32`
 consistently with the script getters; see "Masked-average tail-call return types".
 
-The `__udivdi3` name is load-bearing in both games. The `u64` division in
-`newdata/datCalc.c`'s `evtPushAvailableChoiceRatio` compiles to a call bearing
-that name; native calls resolve to `0x001A95B0` and `0x001B3B10`. Do not rename
-it merely because its retained C body forwards actor-attribute averaging.
-This is a symbol-binding constraint, not proof of a general-purpose division
-implementation.
+The functions currently labeled `__udivdi3` at `0x001A95B0` and `0x001B3B10`
+are game actor-attribute averaging wrappers, not libgcc division helpers.
+Native code tail-jumps `btlSumOrAverageActorAttribute(mask, statIndex, 0)`;
+the real wrapper contract is `s32 (u32, s32)`. The VM command in
+`newdata/datCalc.c` calls that wrapper explicitly and stores an `s32` average.
+Do not express this call as `u64` division to manufacture a compiler libcall,
+or infer 64-bit width from the misleading retained symbol name. The explicit
+call and truthful wrapper return match without assembly or linker changes.
 
 ## Trace-justified skill-camera path selection
 

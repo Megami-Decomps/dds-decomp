@@ -1110,9 +1110,8 @@ void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
     btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 1);
 }
 
-/* Keep this name: evtPushAvailableChoiceRatio in newdata/datCalc.c lowers its u64 division to __udivdi3. */
-void __udivdi3(u32 arg0, u32 arg1) {
-    btlSumOrAverageActorAttribute(arg0, arg1, 0);
+s32 __udivdi3(u32 partyRecordFlagsMask, s32 statIndex) {
+    return btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 0);
 }
 
 extern void btlPreemptiveChanceHook();
