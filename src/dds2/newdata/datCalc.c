@@ -2073,20 +2073,22 @@ s32 scrGetBattleAverageActorStatForGroup(void) {
     return 1;
 }
 
-/* Divide the numeric group mask, not an actor stat; preserve native unsigned division. */
+extern s32 __udivdi3(u32 partyRecordFlagsMask, s32 statIndex);
+
+/* Push the selected actor-group average for the requested attribute. */
 s32 evtPushAvailableChoiceRatio(void) {
     s32 battleAvailable = btlIsRuntimeAllocated();
-    u64 quotient;
+    s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrReadIntParameter(0);
-        s32 divisor = scrReadIntParameter(1);
+        s32 statIndex = scrReadIntParameter(1);
         s32 selectedMask = groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK;
-        quotient = (u64)selectedMask / divisor;
+        averageValue = __udivdi3(selectedMask, statIndex);
     }
     else {
-        quotient = 0;
+        averageValue = 0;
     }
-    scrSetIntegerReturnValue(quotient);
+    scrSetIntegerReturnValue(averageValue);
     return 1;
 }
 
