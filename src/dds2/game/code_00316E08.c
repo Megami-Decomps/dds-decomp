@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_sprite_placement.h"
 #include "sdf_chip.h"
 #include "mnu_title_stream.h"
 #include "mdl_flag_api.h"
@@ -1191,25 +1192,25 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
                 case 2: {
                     s32 drawX = x + originX;
                     s32 drawY = y + originY;
-                    itfDrawCenteredIndexedImage(drawX, drawY, 0, 0x80, 0, 0x42, 0x53);
-                    itfDrawCenteredIndexedImage(drawX, drawY, 0, 0x80, 0, 0x43, 0x53);
+                    mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, drawX, drawY, 0, 0x80, 0, 0x42, 0x53);
+                    mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, drawX, drawY, 0, 0x80, 0, 0x43, 0x53);
                     break;
                 }
                 case 3:
-                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x44, 0x53);
+                    mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, x + originX, y + originY, 0, 0x80, 0, 0x44, 0x53);
                     break;
                 case 4:
-                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x45, 0x53);
+                    mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, x + originX, y + originY, 0, 0x80, 0, 0x45, 0x53);
                     break;
                 }
                 break;
             case 5:
                 switch ((s32)(stateWord >> 1) & 0xF) {
                 case 3:
-                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x48, 0x53);
+                    mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, x + originX, y + originY, 0, 0x80, 0, 0x48, 0x53);
                     break;
                 case 4:
-                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x49, 0x53);
+                    mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, x + originX, y + originY, 0, 0x80, 0, 0x49, 0x53);
                     break;
                 }
                 break;
@@ -1217,7 +1218,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
                 mnuUpdateTimedEffectPosition();
                 break;
             default:
-                itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 6, 0x53);
+                mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, x + originX, y + originY, 0, 0x80, 0, 6, 0x53);
                 break;
             }
         }
@@ -1244,7 +1245,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
                 itfDrawScaledIndexedImage(x + originX, y + originY, 0, 0x80, 2.0f, 2.0f, 0, 1, 0x53);
                 break;
             case 3:
-                itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x4A, 0x53);
+                mnuDrawIndexedSpriteWith(itfDrawCenteredIndexedImage, x + originX, y + originY, 0, 0x80, 0, 0x4A, 0x53);
                 break;
             default:
                 itfDrawScaledIndexedImage(x + originX, y + originY, 0, 0x80, 4.0f, 4.0f, 0, 0, 0x53);

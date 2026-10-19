@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "mnu_sprite_placement.h"
 #include "snd_track_callback.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -150,7 +151,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
             factor = (30 - frame) / 20.0f;
             alpha = factor * 64.0f + 48.0f;
         }
-        mnuDrawSprite(0, 0, 0, (s32)alpha, 0, 4, 0x53);
+        mnuDrawIndexedSpriteWith(mnuDrawSprite, 0, 0, 0, (s32)alpha, 0, 4, 0x53);
         if (frame < 5) {
             factor = 0.0f;
         } else if (frame < 10) {
@@ -176,7 +177,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     } else {
         factor = 0.0f;
     }
-    mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
+    mnuDrawIndexedSpriteWith(mnuDrawSprite, 0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
     if (frame < 5) {
         factor = frame / 5.0f;
         factor = sdfSinPoly(factor * 1.5707963f);
@@ -186,10 +187,7 @@ void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     } else {
         factor = 0.0f;
     }
-    mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
-    /* Local fade cleanup; see docs/idioms.md,
-     * "Post-call local cleanup: movie backdrop frame". */
-    frame = 0;
+    mnuDrawIndexedSpriteWith(mnuDrawSprite, 0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
 }
 
 void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
