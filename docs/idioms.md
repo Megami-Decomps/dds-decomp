@@ -11564,6 +11564,15 @@ locals together with the true declarations removes that artifact and matches
 all five affected units; preserving the `u64` carrier is not justified by the
 prototype-only failure.
 
+The DDS1 camera-tracking query also has a real `s32` producer, not a `u64`
+return. Battle task factories return their actual task-pointer types; use
+those declarations instead of integer return declarations and `u64` address
+carriers. The task starter's separate handle return is not its input pointer.
+The DDS2 hooked-sound wrapper explicitly receives the factory's `BtlUnit *`
+and `s32` arguments, and its effect caller publishes that same prototype.
+Task-list user data is a signed 32-bit address word in `sdf_task_work.h`;
+convert that word once to the real menu-resource pointer at the boundary.
+
 A genuinely load-bearing original C89 prototype scope is a separate case.
 Publishing the true `void` declaration for `effRequestResourceByMode`
 changes `effPollResourceList`'s post-call flag value from `$3` to `$2`

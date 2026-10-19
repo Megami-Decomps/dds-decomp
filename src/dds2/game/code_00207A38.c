@@ -44,7 +44,7 @@
 extern s32 sceDclose(s32 directory);
 extern s32 sceDread(s32 directory, SceDirent *entry);
 
-extern u64 btlStartTask();
+extern u64 btlStartTask(void *taskObject);
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
@@ -123,11 +123,11 @@ extern s32 scrReadIntParameter(s32);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
-extern u64 btlCreateCommandSoundUpdateTask(void);
+extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
-extern u64 btlCreateSecondaryCommandSoundTask(void);
+extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern u64 btlCreateCommandSoundTask(u64, u64);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode);
 
 extern u32 D_00436B00;
 
@@ -214,7 +214,7 @@ extern s32 btlIsLinkedActionSceneStateActive(void);
 
 extern BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern s32 btlScheduleContextReset(void);
+extern BtlRuntimeTask *btlScheduleContextReset(void);
 
 extern f32 D_00452F90[];
 
@@ -2859,7 +2859,7 @@ u32 btlCmdCameraMove(void) {
 }
 
 u32 btlScriptQueueActorCommandSound(void) {
-    u64 task;
+    BtlRuntimeTask *task;
 
     task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
@@ -2871,7 +2871,7 @@ u32 btlScriptQueueActorCommandSound(void) {
 }
 
 u32 btlScriptQueueUnboundCommandSound(void) {
-    u64 task;
+    BtlRuntimeTask *task;
 
     task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
