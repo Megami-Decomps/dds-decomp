@@ -12504,7 +12504,10 @@ typedef struct EffectBlob {
     u8 flagged;
     u8 pad0B;
     u32 frame;
-    u8 pad10[0x10];
+    u32 maxAlpha;
+    u8 pad14[4];
+    f32 fadeInRatio;
+    f32 fadeOutRatio;
     f32 amounts[0xFF];
     u8 pad41C[0x30];
 } EffectBlob;
@@ -12652,7 +12655,167 @@ void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB998);
+extern SdfPoolNode *D_00380788[13][4];
+extern SdfPoolNode *D_00380808[4];
+extern u64 D_003EA210[4];
+
+void func_002FB998(EffSharedEffectWork *work) {
+    SdfListHead *list;
+    EffGsPacket *packet;
+    SdfPoolNode *surface;
+    MdlCtx *model;
+    MdlResourceItem *item;
+    u32 tint, baseColor[4], trackColor[4], blendedColor[4];
+    u32 frame, alpha, packed, unit, bits;
+    u16 savedFlags;
+    s32 count, limit, fadeInEnd, fadeOutStart, i;
+    f32 ratio, scale;
+
+    if (work->resource == NULL) {
+        return;
+    }
+    frame = kwlnGetFrameCounter();
+    if (work->resource->unk0C == frame) {
+        return;
+    }
+    work->resource->unk0C = frame;
+    if (work->resource->model == NULL) {
+        work->resource->model = effLoadViewerModelWithVUState(work->resource->entries, work->resource->entriesSize);
+        VU0_SET_ONES_XYZ(vf10);
+        VU0_SCALAR_OP(work->data.scale, "vmulx.xyzw vf10, vf10, vf2x");
+        mdlStoreTertiaryVectorVU(work->resource->model);
+        effApplySharedModelParameters(work);
+        return;
+    }
+    if (work->resource->model->flags & MDL_SKIP_TRANSFORMS) {
+        return;
+    }
+    if (work->resource->deviceSlot == 0) {
+        work->resource->deviceSlot = (u32)sdfModelCreateWithItems(work->resource->model->sub->resourceList, work->resource->model->sub->itemList);
+        return;
+    }
+    count = work->unk28;
+    limit = work->data.unk00;
+    if (limit < count) {
+        count = limit;
+    }
+    VU0_LOAD_VF(vf10, work->position);
+    mdlStorePrimaryVectorVU(work->resource->model);
+    VU0_LOAD_VF(vf10, work->rotation);
+    mdlUpdateContextRotationBasisFromQuaternion(work->resource->model);
+    mdlBroadcastMasked(work->resource->model, work->unk20);
+    VU0_SET_ONES_XYZ(vf10);
+    scale = work->unk24;
+    VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
+    mdlStoreTertiaryVectorVU(work->resource->model);
+    work->unk28++;
+    fadeInEnd = (s32)(work->data.fadeInRatio * (f32)limit);
+    fadeOutStart = (s32)(work->data.fadeOutRatio * (f32)limit);
+    if (count < fadeInEnd) {
+        ratio = (f32)count / (f32)fadeInEnd;
+    } else if (fadeOutStart < count) {
+        ratio = (f32)(limit - count) / (f32)(limit - fadeOutStart);
+    } else {
+        ratio = 1.0f;
+    }
+    alpha = (u32)((f32)work->data.maxAlpha * ratio);
+    tint = (alpha << 24) | 0x808080;
+    if (alpha == 0) {
+        return;
+    }
+    if (work->resource->deviceSlot == 0) {
+        if (work->data.pad0B != 0) {
+            mdlProcessContextNodesAndTransforms(work->resource->model, D_00380808);
+        } else {
+            mdlProcessContextNodesAndTransforms(work->resource->model, D_00380828);
+        }
+        return;
+    }
+    mdlBroadcastMasked(work->resource->model, tint);
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x72801;
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00380788[0][i];
+        surface->append(surface, list);
+    }
+    model = work->resource->model;
+    model->flags |= MDL_SKIP_ANCHORS;
+    savedFlags = model->inner->drawFlags;
+    model->inner->drawFlags = 0x2000;
+    mdlProcessContextNodesAndTransforms(model, D_00380788[0]);
+    work->resource->model->flags &= ~MDL_SKIP_ANCHORS;
+    work->resource->model->inner->drawFlags = savedFlags;
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = D_003EA210[i];
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00380788[0][i];
+        surface->append(surface, list);
+    }
+    baseColor[0] = work->data.frame;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(baseColor, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    trackColor[0] = tint;
+    EE_MMI_RGBA_UNPACK(trackColor, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK_UNCLOBBERED(packed);
+    blendedColor[0] = packed;
+    mdlSetAllResourceFrames(work->resource->model, blendedColor[0]);
+    for (item = work->resource->model->resourceItems; item != NULL; item = item->next) {
+        mdlDispatchViewerAnchorRecord(work->resource->model, item);
+    }
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x51801;
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00380788[8][i];
+        surface->append(surface, list);
+    }
+    sdfModelCopyRuntimeState((SdfModel *)work->resource->deviceSlot, work->resource->model->inner);
+    if (effComputeLightDirectionVU(work->resource->model, work->resource->data)) {
+        ((SdfModel *)work->resource->deviceSlot)->lighting = (struct SdfDmaTagHeader *)work->resource->data;
+    } else {
+        ((SdfModel *)work->resource->deviceSlot)->lighting = NULL;
+    }
+    sdfModelBuildNodeResourcePackets(D_00380788[8], (SdfModel *)work->resource->deviceSlot);
+    for (i = 0; i != 4; i++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = D_003EA210[i];
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00380788[8][i];
+        surface->append(surface, list);
+    }
+}
 
 /* Copy the vector consumed by the retained model's primary-vector setter. */
 void effCopySharedEffectPrimaryVector(s128 *dst, s128 *src) {
