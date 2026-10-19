@@ -7332,7 +7332,86 @@ void func_001BBE18(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
         x + offsets.values[4][0], y + offsets.values[4][1], alpha, 0, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BC540);
+extern const BattlePanelColors D_003A2DD8;
+
+/* Crop the HP/MP sprite to the selected amount, draw its change overlay, then
+ * restore the resource-owned geometry and crop parameters for later users. */
+void func_001BC540(BtlUnit *unit, s32 current, s32 displayed, s32 maximum,
+                   s32 sprite, s32 x, s32 y, s16 alpha, s8 mode, s8 stat) {
+    BattlePanelColors colors = D_003A2DD8;
+    s32 flags = 0;
+    s32 offset = 0;
+    s32 displayedWidth = 0;
+    s32 span;
+    s32 currentWidth;
+    f32 ratio;
+    u32 color;
+    s32 i;
+
+    if (displayed == 0) {
+        span = btlResourceBlock->resA->descriptions[sprite].colors[0] - btlResourceBlock->resA->descriptions[sprite].colors[2];
+        btlResourceBlock->resA->workEntries[sprite].geometry.bounds[2] = 0;
+        btlResourceBlock->resA->workEntries[sprite].parameters[2] = span;
+    } else {
+        ratio = (f32)displayed;
+        ratio /= (f32)maximum;
+        span = btlResourceBlock->resA->descriptions[sprite].colors[2] - btlResourceBlock->resA->descriptions[sprite].colors[0];
+        displayedWidth = (s32)((f32)btlResourceBlock->resA->workEntries[sprite].sourceWidth * ratio);
+        btlResourceBlock->resA->workEntries[sprite].geometry.bounds[2] = displayedWidth << 4;
+        span = (s32)((f32)span * ratio) - span;
+        btlResourceBlock->resA->workEntries[sprite].parameters[2] = span;
+    }
+    if (mode != 0 && current != displayed) {
+        ratio = (f32)current;
+        ratio /= (f32)maximum;
+        span = btlResourceBlock->resA->descriptions[sprite].colors[2] - btlResourceBlock->resA->descriptions[sprite].colors[0];
+        currentWidth = (s32)((f32)btlResourceBlock->resA->workEntries[sprite].sourceWidth * ratio);
+        btlResourceBlock->resA->workEntries[sprite].parameters[0] = (s32)((f32)span * ratio);
+        btlResourceBlock->resA->workEntries[sprite].geometry.bounds[2] = (displayedWidth - currentWidth) << 4;
+        offset = currentWidth;
+    }
+    switch (mode) {
+    case 0:
+        if ((unit->status.flags & 0x20) || (unit->partyRecord.status & 0x4800)) {
+            color = stat ? 0x20204000 : 0x30202000;
+        } else {
+            color = 0x80808000;
+        }
+        colors.values[3] = colors.values[2] = colors.values[1] = colors.values[0] = color | alpha;
+        flags = 0;
+        break;
+    case 1:
+        colors.values[3] = colors.values[2] = colors.values[1] = colors.values[0] = 0xFFFFFF00 | alpha;
+        effDrawSpriteWithCornerColors((x + offset) << 4, y << 3, 0,
+                                      colors.values, 0, btlResourceBlock->resA, sprite, 0x53);
+        flags = 0x60;
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 1, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        break;
+    case 2:
+        colors.values[3] = colors.values[2] = colors.values[1] = colors.values[0] = 0xFFFFFF00 | alpha;
+        flags = 0x60;
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        break;
+    }
+    effDrawSpriteWithCornerColors((x + offset) << 4, y << 3, 0,
+                                  colors.values, flags, btlResourceBlock->resA, sprite, 0x53);
+    if (mode == 2) {
+        for (i = 0; i < 4; i++) {
+            colors.values[3] = colors.values[2] = colors.values[1] = colors.values[0] =
+                0xFFFFFF00 | (alpha >> (i + 1));
+            effDrawSpriteWithCornerColors((x + offset) << 4, y << 3, 0,
+                                          colors.values, 0, btlResourceBlock->resA, sprite, 0x53);
+        }
+    }
+    btlResourceBlock->resA->workEntries[sprite].geometry.bounds[2] = btlResourceBlock->resA->workEntries[sprite].sourceWidth << 4;
+    btlResourceBlock->resA->workEntries[sprite].geometry.bounds[3] = btlResourceBlock->resA->workEntries[sprite].sourceHeight << 3;
+    btlResourceBlock->resA->workEntries[sprite].parameters[2] =
+        btlResourceBlock->resA->workEntries[sprite].parameters[0] = 0;
+}
 
 extern SdfPoolNode D_003255A8;
 
