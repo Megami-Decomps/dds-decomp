@@ -20,6 +20,7 @@
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
+#include "eff_anim.h"
 #include "eff_bill_column_particle.h"
 #include "eff_ribbon_work.h"
 #include "eff_class_work_api.h"
@@ -10468,7 +10469,119 @@ void effResetParticleStateWord(EffParticleSharedResource *work) {
     work->state = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B4BA0);
+extern SdfPoolNode D_003255A8;
+
+void func_002B4BA0(EffParticleSharedResource *work) {
+    s32 limit = work->limit;
+    s32 frame = work->state;
+    BillSnapshot snapshot;
+    s32 corners[4][2];
+    EffAnimSample sample;
+    SdfListHead *list;
+    EffGsPacket *packet;
+    SdfPoolNode *surface;
+    f32 size, angle, halfWidth, halfHeight, centerX, centerY, cosine, sine, coordX, coordY;
+    u32 color, packed;
+
+    if (limit <= frame && limit != 0) {
+        return;
+    }
+    surface = &D_003255A8;
+    color = effSampleColorAlphaTracks(&work->colorTrack, &work->alphaTrack, frame, limit);
+    eeUnpackRGBAWordFloat(work->color, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    eeUnpackRGBAWordFloat(color, 1.0f / 128.0f);
+    VU0_MUL(vf10, vf10, vf11);
+    packed = eePackRGBAWord(128.0f);
+    size = effSampleScalarCurve(&work->scaleTrack.curve, frame, limit);
+    angle = effSampleScalarCurve(&work->rotationTrack.curve, frame, limit);
+    if (work->billHandle != NULL) {
+        billSetAnimationFrameForImmediateAdvance(work->billHandle, frame);
+        billCopyCurrentRecordToSnapshot(work->billHandle, &snapshot);
+    } else {
+        s32 width, height;
+
+        effSampleAnimSet(work->reference, frame, &sample);
+        snapshot.texture = effAssignSampledSegmentReference(work->reference, surface, &sample);
+        width = snapshot.texture->width << 4;
+        height = snapshot.texture->height << 4;
+        angle += sample.angle;
+        snapshot.uv.components[0] = 0;
+        snapshot.uv.components[1] = 0;
+        snapshot.uv.components[2] = width;
+        snapshot.uv.components[3] = 0;
+        snapshot.uv.components[4] = width;
+        snapshot.uv.components[5] = height;
+        snapshot.uv.components[6] = 0;
+        snapshot.uv.components[7] = height;
+        snapshot.x = 0;
+        snapshot.y = 0;
+        width = (s32)((f32)width * sample.scaleX);
+        height = (s32)((f32)height * sample.scaleY);
+        snapshot.halfHeight = (f32)(height >> 5) * 0.0625f;
+        snapshot.halfWidth = (f32)(width >> 5) * 0.0625f;
+    }
+    centerX = snapshot.x * 16.0f * size;
+    centerY = snapshot.y * 16.0f * size;
+    halfWidth = snapshot.halfWidth * 16.0f * size;
+    halfHeight = snapshot.halfHeight * 16.0f * size;
+    cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+    sine = sdfSinPoly(angle);
+    coordX = centerX + halfWidth;
+    coordY = centerY + halfHeight;
+    corners[0][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[0][1] = (s32)(coordX * sine + coordY * cosine);
+    coordX = centerX - halfWidth;
+    corners[1][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[1][1] = (s32)(coordX * sine + coordY * cosine);
+    coordY = centerY - halfHeight;
+    corners[3][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[3][1] = (s32)(coordX * sine + coordY * cosine);
+    coordX = centerX + halfWidth;
+    corners[2][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[2][1] = (s32)(coordX * sine + coordY * cosine);
+    coordX = (f32)(work->x << 4);
+    coordY = (f32)(work->y << 3);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+    packet->dmaTag = 2;
+    packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+    packet->registerList = 0xE;
+    switch (work->alphaTrack.surfaceIndex) {
+    case 2:
+        packet->registerValue = 0x48;
+        break;
+    case 3:
+    case 4:
+        packet->registerValue = 0x42;
+        break;
+    case 5:
+    case 6:
+        packet->registerValue = 6;
+        break;
+    case 0:
+    case 1:
+        packet->registerValue = 0x44;
+        break;
+    }
+    packet->registerAddress = 0x42;
+    sdfAppendPacket(list, (u32)packet);
+    sdfConsCreateDrawPacket(list, snapshot.texture, 0);
+    sdfQueueGouraudTexturedQuad(list, 0x40,
+        (s32)((f32)(corners[3][0] + 0x7000) + coordX), (s32)((f32)((corners[3][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[0], snapshot.uv.components[1], packed,
+        (s32)((f32)(corners[2][0] + 0x7000) + coordX), (s32)((f32)((corners[2][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[2], snapshot.uv.components[3], packed,
+        (s32)((f32)(corners[1][0] + 0x7000) + coordX), (s32)((f32)((corners[1][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[6], snapshot.uv.components[7], packed,
+        (s32)((f32)(corners[0][0] + 0x7000) + coordX), (s32)((f32)((corners[0][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[4], snapshot.uv.components[5], packed,
+        0xFF0000, NULL);
+    surface->append(surface, list);
+    work->state++;
+}
 
 /* The shared particle header keeps its packed color in its first word. */
 void effSetParticleSharedColor(u32 *dst, u32 value) {
