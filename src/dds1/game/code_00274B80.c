@@ -961,7 +961,7 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
 
     effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)context->resource);
     mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)context->display,
-                                               (s32)context->staffVariant, 0x3D, 1);
+                                               context->staffVariant, 0x3D, 1);
     mnuSetWindowResource(index, page, (s32)context->staffVariant, context->staffParam);
     mnuAttachPartyIconBundle(index, page, (s32)context->staffVariant);
     context->sceneGroup = mnuCreatePanelGroup(context->staffVariant);
@@ -1025,7 +1025,8 @@ s32 mnuStaffReleasePanelScene(KwlnTask *task) {
     }
     mnuReleaseResourceList(menu->resourceList);
     effResolveAndReleaseResource(work->resource);
-    mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)work->display, work->resource, 0, 0);
+    mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)work->display,
+                                               (EffectSlotSet *)(u32)work->resource, 0, 0);
     return 1;
 }
 
