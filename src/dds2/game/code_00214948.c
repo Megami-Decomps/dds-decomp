@@ -4076,7 +4076,8 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
         if (count >= 2 && side == 0 && targetSide == 1) {
             if (btlCanUseActorCategoryFlag4(command)) {
                 btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
-                goto flag_defeat_candidates;
+                btlFlagAllUnitDefeatCandidatesTask();
+                return 1;
             }
             if (btlCanUseLinkedActor(command)) {
                 cameraMode = 0;
@@ -4089,7 +4090,6 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (cameraMode == 0) {
                 btlBossDebugPrintf("VURI:TP-P ++++\n");
                 btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
-flag_defeat_candidates:
                 btlFlagAllUnitDefeatCandidatesTask();
                 return 1;
             } else {
