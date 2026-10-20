@@ -120,7 +120,7 @@ KwlnTask *evtCreateTask(s32 taskId, const char *path) {
 
     data = evtAllocateContext();
     evtSetConvertedContextValue(data, path);
-    return kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
+    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
 }
 
 
@@ -129,7 +129,7 @@ KwlnTask *evtCreateTaskWithValue(s32 taskId, SdfTex *texture) {
 
     data = evtAllocateContext();
     data->texture = texture;
-    return kwlnTaskCreate(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
+    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
@@ -187,9 +187,9 @@ void evtResetSkyTaskFlags(KwlnTask *task) {
 void evtDestroySkyTask(void) {
     KwlnTask *task;
 
-    task = kwlnTaskGetTaskByName(evtSkyTaskName);
+    task = dds3SearchProcessName(evtSkyTaskName);
     if (task != 0) {
-        kwlnTaskDestroyWithHierarchy(task, 1);
+        dds3KillProcess(task, 1);
     }
 }
 
@@ -198,19 +198,19 @@ s32 evtCreateSkyTask(void) {
     fldSetSkyDrawState(0x80);
     fldSetSkyAlpha(0);
     fldSetFadeTarget(0, 1, 0);
-    return (s32)kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
+    return (s32)dds3StartProcess(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
 s32 evtUpdateFrameVariableTask(KwlnTask *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
-    kwlnTaskGetUserValue(task->parent);
+    dds3GetProcessData(task->parent);
     return 0;
 }
 
 KwlnTask *evtCreateFrameVariableTask(void) {
-    return kwlnTaskCreate("FrameVar", 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
+    return dds3StartProcess("FrameVar", 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
 }
 
 typedef s32 (*EvtMenuHeaderFn)();
@@ -416,7 +416,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-s32 mnuDrawFrameChangeLabel(SdfListHead *target, s32 x, s32 y) {
+s32 evtFrameChangeHead(SdfListHead *target, s32 x, s32 y) {
     sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
@@ -457,7 +457,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     s32 step;
 
     list = sdfCreateResetPacketList();
-    evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, ctx, mnuDrawFrameChangeLabel, evtViewerDrawFrameChangeRow);
+    evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtViewerDrawFrameChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 6) {
         return 0;
@@ -1329,7 +1329,7 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
 extern void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 
 /* Draw an indexed child of the selected group, or its trailing new-frame row. */
-s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+s32 evtFrameListItem(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
     s32 i;
@@ -1377,7 +1377,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
-                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtDrawFrameListRow);
+                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtFrameListItem);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 5) {
         return 0;
@@ -3122,12 +3122,12 @@ extern s32 evtActiveEntryFlags;
 /* Cache nonzero entry selections, publishing first-tick flags only at timer zero.
  * A zero setup status clears runtime control and returns -1. */
 s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
-    EvtRuntime *runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
     if (effEventAdvanceResourceTemplateSetup() == 0) {
         runtime->controlState = 0;
         return -1;
     }
-    if (kwlnTaskGetTimer(task) == 0) {
+    if (dds3GetProcessRunTime(task) == 0) {
         s32 selected = runtime->selectedEntry;
         evtActiveEntryFlags = selected;
         if (selected != 0) {
@@ -3147,7 +3147,7 @@ s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
 s32 evtPollRuntimeControlReady(KwlnTask *task) {
     EvtRuntime *runtime;
 
-    runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    runtime = (EvtRuntime *)dds3GetProcessData(task);
     if (effEventAdvanceSolidRectangleSetup() == 0) {
         runtime->controlState = 0;
         return -1;
@@ -3778,7 +3778,7 @@ s32 evtPollEffectFrameControl(s32 x, s32 y, EvtRuntime *runtime) {
         return 0;
     }
     if (runtime->controlState != 0) {
-        kwlnTaskDestroyWithHierarchy(runtime->controlState, 1);
+        dds3KillProcess(runtime->controlState, 1);
         runtime->controlState = 0;
     }
     return 1;
@@ -5485,7 +5485,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (runtime->pendingResource != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->pendingResource);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->pendingResource);
         runtime->pendingResource = 0;
         runtime->pendingWork = 0;
     }
@@ -5624,7 +5624,7 @@ KwlnTask *evtFindTaskById(u32 taskId) {
     char taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return kwlnTaskGetTaskByName((const char *)taskName);
+    return dds3SearchProcessName((const char *)taskName);
 }
 
 /* Return this event task's loaded state, or -1 when it does not exist. */
@@ -5633,7 +5633,7 @@ s32 evtGetEventPackLoadedState(u32 taskId) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
+        EvtPackLoadState *state = (EvtPackLoadState *)dds3GetProcessData(task);
         return state->loaded;
     }
     return -1;
@@ -5644,7 +5644,7 @@ EvtPackLoadState *evtGetEventPackLoadState(u32 taskId) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return (EvtPackLoadState *)kwlnTaskGetUserValue(task);
+        return (EvtPackLoadState *)dds3GetProcessData(task);
     }
     return NULL;
 }
@@ -5657,7 +5657,7 @@ void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        data = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
+        data = (EvtPackLoadState *)dds3GetProcessData(task);
         if (data->loaded != 2) {
             return 0;
         }

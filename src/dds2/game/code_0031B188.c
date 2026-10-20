@@ -77,7 +77,7 @@ void mnuUpdateShootingCameraVectors(void) {
     EffWorldNode *camera;
 
     dds3SetCameraVector((EffWorldNode *)D_00438944, (u128 *)D_0040ABD0);
-    effObjSetInnerPosition((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
+    dds3SetPosPoseSet((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
     camera = (EffWorldNode *)D_00438944;
     camera->ops->update(camera);
     cameraData = (CameraData *)((EffWorldNode *)D_00438944)->data;
@@ -91,7 +91,7 @@ void dds3InitSoundSlotPool(void) {
     if (dds3SoundSlotPool != 0) {
         dds3ReleaseSoundSlotPool();
     }
-    handle = (u32)sdfAllocGeneralBlock(0x32c);
+    handle = (u32)sdfMemAllocDirect(0x32c);
     dds3SoundSlotPool = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(dds3SoundSlotPool, 0, 0x32c);
     pool = (SoundSlotPool *)dds3SoundSlotPool;
@@ -102,7 +102,7 @@ void dds3InitSoundSlotPool(void) {
 
 void dds3ReleaseSoundSlotPool(void) {
     if (dds3SoundSlotPool != (u32 *)0x0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*dds3SoundSlotPool));
+        sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*dds3SoundSlotPool));
         dds3SoundSlotPool = (u32 *)0x0;
     }
 }
@@ -214,7 +214,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
 
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
     evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
-    allocation = sdfAllocGeneralBlock(allocationSize);
+    allocation = sdfMemAllocDirect(allocationSize);
     work = (MnuEffectWork *)sdfMemoryGetBlockAddress(allocation);
     memset(work, 0, allocationSize);
     work->allocation = allocation;
@@ -385,8 +385,8 @@ s32 mnuStartPositionedEffectBurst(MnuEffectList *list, MnuEffectPositionStep *st
     for (i = 0; i < preset->count; i++) {
         delay = i * preset->spacing + baseDelay;
         mnuClaimPositionedEffectRecord(list,
-                                       x + preset->jitterX * (2.0f * effMiscRandUnitFloat(0) - 1.0f),
-                                       y + preset->jitterY * (2.0f * effMiscRandUnitFloat(0) - 1.0f), z, step, scale, delay);
+                                       x + preset->jitterX * (2.0f * sdfGetRandFloat(0) - 1.0f),
+                                       y + preset->jitterY * (2.0f * sdfGetRandFloat(0) - 1.0f), z, step, scale, delay);
         dds3ClaimSoundSlot(0x01E00002, delay);
     }
     return 0;
@@ -408,7 +408,7 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     struct SdfMemBlock *data = sdfReadNamedResource((const char *)(u32)resource, &handle, &other);
     *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
     fileQueueNotifyAllJobsComplete((FileQueue *)*owner);
-    sdfReleaseResourceAllocation(data);
+    sdfMemFreeDirect(data);
     return *owner;
 }
 
@@ -515,7 +515,7 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
 
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
     evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
-    handle = (u32)sdfAllocGeneralBlock(allocationSize);
+    handle = (u32)sdfMemAllocDirect(allocationSize);
     work = (MnuSectionModelWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(work, 0, allocationSize);
     work->allocation = (struct SdfMemBlock *)handle;

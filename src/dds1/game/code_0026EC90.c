@@ -248,7 +248,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    return frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    return frDestroyFontRequestAfter(glyph);
 }
 
 extern char D_003BC628[];
@@ -280,7 +280,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
     case 1:
         mnuPrepareStaffRollText();
         mnuInitializeMovieRollViewport();
-        kwlnTaskCreate(D_003B1140, 0x2B19, 0, 0, mnuStaffImageProc,
+        dds3StartProcess(D_003B1140, 0x2B19, 0, 0, mnuStaffImageProc,
                        mnuReleaseMovieResourceAfterPendingWork, 0);
         mnuTitleStreamUpdateAndLogBgm();
         kwlnFadeOutStart(0, 0, 0, 0x1E);
@@ -442,7 +442,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    sdfQueueGeneralAllocationRelease(mnuMovieWork->allocation);
+    sdfMemFreeDelayedDirect(mnuMovieWork->allocation);
     mnuMovieWork = NULL;
 }
 
@@ -488,15 +488,15 @@ void mnuMovieCreateTask(void) {
     MnuStaffMovieWork *movie;
 
     D_003BA8EC = 0x80000000;
-    allocation = sdfAllocGeneralBlock(0x20);
-    movie = (MnuStaffMovieWork *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(0x20);
+    movie = (MnuStaffMovieWork *)sdfMemLock(allocation);
     mnuMovieWork = movie;
     movie->allocation = allocation;
     movie->phase = 0;
     movie->scrollTicks = 0;
     mnuQueueTitleSoundStreamEntry(0x13);
     mnuMovieTaskState = 1;
-    kwlnTaskCreate(D_003B1168, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
+    dds3StartProcess(D_003B1168, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }
 
 u32 mnuStartStaffMovieRequest(void) {
@@ -505,8 +505,8 @@ u32 mnuStartStaffMovieRequest(void) {
 }
 
 s32 mnuStopStaffTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_003B1140, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_003B1168, 1);
+    dds3KillProcessName(D_003B1140, 0);
+    dds3KillProcessName(D_003B1168, 1);
     return 0;
 }
 
@@ -518,7 +518,7 @@ s32 mnuMovieDraw(KwlnTask *task) {
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
         sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
-        mnuMovieDrawTask = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+        mnuMovieDrawTask = dds3StartProcess(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
 
@@ -533,7 +533,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleaseMovieStreamWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    dds3KillProcess(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

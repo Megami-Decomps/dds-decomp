@@ -126,7 +126,7 @@ s32 dds3SelectSlotForObjectKind(u32 kind)
 /* Initialize a kind-3 slot state and its index node.
  * Every slot and currentSlot start unused (-1). */
 ObjBase *dds3CreateSlotResourceState(void *owner) {
-    ObjBase *state = sdfAllocSizeClassBlock(sizeof(ObjBase));
+    ObjBase *state = sdfChipAllocDirect(sizeof(ObjBase));
     s32 i;
     WorldIndexNode *node;
 

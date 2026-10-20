@@ -7,11 +7,11 @@
 
 void *memset(void *s, s32 c, u32 n);
 
-void effFreeBuffers(struct EffPrimitiveCurve *primitive);
+void effSplRelease(struct EffPrimitiveCurve *primitive);
 
 void dds3FreePathObject(Dds3PathCurveWork *path) {
-    effFreeBuffers(path->primitiveCurve);
-    sdfReleaseChipBlock(path);
+    effSplRelease(path->primitiveCurve);
+    sdfChipFreeDirect(path);
 }
 
 /* vu0 routine: interpolate the path's XYZ keys into vf10. */

@@ -212,7 +212,7 @@ void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
     index = 0;
     do {
         if (slots->addresses[index] != 0) {
-            sdfReleaseResourceAllocation(slots->handles[index]);
+            sdfMemFreeDirect(slots->handles[index]);
             slots->addresses[index] = 0;
         }
         remaining = remaining - 1;
@@ -985,9 +985,9 @@ extern s32 sndUpdateTestMsgTask(KwlnTask *task);
 void sndCreateTestMsgTasks(void) {
     D_003BA8EC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->resourceIndex, itfPrintTestMessageCallback);
-    kwlnTaskCreate(D_003A14F0, 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
-    kwlnTaskCreate(D_003A1500, 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
+    itfMesSetWindowCallbackAddress(((ScrData *)dds3GetProcessData(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->resourceIndex, itfPrintTestMessageCallback);
+    dds3StartProcess(D_003A14F0, 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
+    dds3StartProcess(D_003A1500, 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
 
 void sndCycleTestMessageResource(void) {

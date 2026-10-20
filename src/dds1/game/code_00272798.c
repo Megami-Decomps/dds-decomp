@@ -46,7 +46,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     u32 input;
     s32 state;
 
-    context = (StaffMenuWork *)kwlnTaskGetUserValue(callback);
+    context = (StaffMenuWork *)dds3GetProcessData(callback);
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->pendingPopupEntry;
     state = mnuDispatchPopupTransition(&context->panel, popup, 0, (void *)callback);
@@ -94,7 +94,7 @@ extern void mnuDrawStaffCampSlotsAndCurrency(s32, s32, s32, struct EffectSlotSet
 extern const u8 mnuCampCommandHelpTextBank[];
 
 s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     s32 state;
 
     mnuDrawCampScreenDefault(task);
@@ -112,14 +112,14 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
 
 /* Submit a request to the active menu dispatcher in mode 2. */
 s32 mnuFinishStaffConfigPopup(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
 
 s32 mnuStartStaffDisplay(KwlnTask *task) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     mnuSetStaffDisplayMode(5, context);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel, context->singleResource, 0, 1);
     mnuCreateConfigTasks(0);
@@ -128,7 +128,7 @@ s32 mnuStartStaffDisplay(KwlnTask *task) {
 
 /* Switch the staff display to the fourth base resource. */
 u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel,
                                                context->staffSlots.baseResources[3], 0, 1);
     return 1;
@@ -136,7 +136,7 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
 s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state == 0) {
@@ -149,7 +149,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
 }
 
 s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(callback);
+    StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(callback);
     mnuDrawBackdrop((s32)(context->background), 0x20);
     mnuDrawStaffScrollPanel(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x14);
@@ -158,7 +158,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
 }
 
 s32 mnuFinishStaffImagePopup(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -185,13 +185,13 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
         }
         label = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x810, y + 0x10, z, color,
                                           D_003BC6C8, 0);
-        frFontSetChildChainFirstOption(label, 0);
+        frSetFontColorNo(label, 0);
         sprintf(buffer, D_003BC6D0,
                        datGameState->inventory.counts[node->sortKeySecondary]);
         count = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         frFontDrawGlyphChain(count, 1, drawArg);
-        frFontQueueGlyphForCurrentDrawBuffer(count);
+        frDestroyFontRequestAfter(count);
     } else {
         s32 selected = (list->cursor == node);
 

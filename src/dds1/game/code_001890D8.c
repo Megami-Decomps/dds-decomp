@@ -11,7 +11,7 @@ extern void *memcpy(void *, const void *, unsigned int);
 EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
     EffMagatuhiOwner *effect;
 
-    effect = sdfAllocSizeClassBlock(sizeof(*effect));
+    effect = sdfChipAllocDirect(sizeof(*effect));
     memcpy(&effect->params, source, sizeof(effect->params));
     effect->valueWork = effCreateMagatuhiValueWork(effect->params.count, effect->params.historyCount, effect->params.historyDistanceScale, effect->params.unk14, effect->params.historyAngleStep);
     effMagatuhiFillColorTable(effect->valueWork, effect->params.colorA, effect->params.colorB);
@@ -20,7 +20,7 @@ EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
 
 void effReleaseMagatuhiOwner(EffMagatuhiOwner *resource) {
     effMagatuhiReleaseResource(resource->valueWork);
-    sdfReleaseChipBlock(resource);
+    sdfChipFreeDirect(resource);
 }
 
 extern void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work);
@@ -63,8 +63,8 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f3
     frameTerm = countFrames + historyCount;
     countTerm = (countFrames << 2) + count;
     allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + sizeof(EffMagatuhiValueWork);
-    allocation = sdfAllocGeneralBlock(allocationSize);
-    positions = sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(allocationSize);
+    positions = sdfMemLock(allocation);
     colorTable = positions + (countFrames << 4);
     historyScalars = colorTable + (historyCount << 2);
     values = historyScalars + (countFrames << 2);

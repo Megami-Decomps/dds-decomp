@@ -32,7 +32,7 @@ void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
 
 SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
-    SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
+    SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
 
     sdfSelectMotionPointerEntry(entry, motion, &sdfMotionSlotPairDispatch, entryIndex);
     return entry;

@@ -13,7 +13,7 @@ extern EffRandState effDefaultRandomState[];
 
 
 void effReleaseBlurTemplate(EffBlurTemplate *owner) {
-    sdfReleaseChipBlock(owner);
+    sdfChipFreeDirect(owner);
 }
 
 extern u32 fldIsUpdateInhibited(void);
@@ -72,7 +72,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    slot->delay = effMiscRand((EffRandState *)effDefaultRandomState) % (work->params.delaySpread + 1);
+    slot->delay = sdfGetRand((EffRandState *)effDefaultRandomState) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
     quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->color = work->params.color;
@@ -80,10 +80,10 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     spread = work->params.positionSpread;
     halfSize = work->params.size;
     quad->position[0] = work->params.position[0] +
-        (s32)(spread * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f));
+        (s32)(spread * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f));
     halfSize >>= 1;
     quad->position[1] = work->params.position[1] +
-        (s32)(spread * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f));
+        (s32)(spread * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f));
     centerX = quad->position[0] + 256;
     quad->corners[0][0] = centerX - halfSize;
     quad->corners[1][0] = centerX + halfSize;
@@ -99,8 +99,8 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     EffBlurScatterSlot *slot;
     s32 slotIndex;
 
-    allocation = sdfAllocGeneralBlock(sizeof(EffBlurScatterWork) + 100 * sizeof(EffBlurScatterSlot));
-    work = (EffBlurScatterWork *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(sizeof(EffBlurScatterWork) + 100 * sizeof(EffBlurScatterSlot));
+    work = (EffBlurScatterWork *)sdfMemLock(allocation);
     work->params = *params;
     work->allocation = allocation;
     work->slots = (EffBlurScatterSlot *)(work + 1);
@@ -115,7 +115,7 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
 
 /* Release the first variant's owned effect resource. */
 void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 

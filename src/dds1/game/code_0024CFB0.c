@@ -156,7 +156,7 @@ s32 dspStartFlagEvent(s32 context) {
 
 /* Initialize the current terminal task's resource bank and mode-zero fade track. */
 s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
-    struct MenuTerminalWork *work = (struct MenuTerminalWork *)kwlnTaskGetUserValue(task);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)dds3GetProcessData(task);
 
     mnuTerminalSelectResourceBank(work);
     mnuApplyFadeTrackMode(0, work);
@@ -171,7 +171,7 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
 /* Propagate the panel worker's nonzero result before considering a flag-event popup.
  * When its popup slot and message control are idle, fall back if no event starts. */
 s32 dspUpdateFlagEvent(KwlnTask *request) {
-    s32 workAddress = kwlnTaskGetUserValue(request);
+    s32 workAddress = dds3GetProcessData(request);
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     if (result != 0) {
@@ -189,14 +189,14 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
 
 /* Prepare the current terminal work and dispatch panel mode one. */
 s32 mnuDispatchTerminalPanel(KwlnTask *request) {
-    s32 workAddress = kwlnTaskGetUserValue(request);
+    s32 workAddress = dds3GetProcessData(request);
     mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Request the message-window transition before dispatching terminal panel mode two. */
 s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
-    s32 workAddress = kwlnTaskGetUserValue(request);
+    s32 workAddress = dds3GetProcessData(request);
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
@@ -208,7 +208,7 @@ void evtClearActiveFlag(); /* no prototype: called here without its index */
 u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
     s32 workAddress;
 
-    workAddress = kwlnTaskGetUserValue(task);
+    workAddress = dds3GetProcessData(task);
     if (*(s32 *)(workAddress + 0xdc) == 0) {
         evtClearActiveFlag();
         evtSetBoundedDisplayValue(0, 1);
@@ -222,7 +222,7 @@ u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
 
 /* Select the terminal's mode-one fade track before starting the black fade-out. */
 s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
-    struct MenuTerminalWork *work = (struct MenuTerminalWork *)kwlnTaskGetUserValue(task);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)dds3GetProcessData(task);
 
     mnuApplyFadeTrackMode(1, work);
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -237,7 +237,7 @@ extern char D_0036AE48[];
  * Kind zero waits for the named task unless active flag zero overrides the wait;
  * other kinds wait for the fade to finish. */
 s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
-    s32 workAddress = kwlnTaskGetUserValue(request);
+    s32 workAddress = dds3GetProcessData(request);
     s32 *popupSlot = (s32 *)(workAddress + 0x54);
     s32 result = menuRunPanel((void *)workAddress, 0, (void *)request);
     s32 ready;
@@ -247,7 +247,7 @@ s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
     }
     if (*popupSlot == 0) {
         if (*(s32 *)(workAddress + 0x7C) == 0) {
-            ready = kwlnTaskGetTaskByName(D_003AF710) == NULL;
+            ready = dds3SearchProcessName(D_003AF710) == NULL;
             if (evtIsActiveFlagSet(0) != 0) {
                 ready = 1;
             }
@@ -263,14 +263,14 @@ s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
 
 /* Draw the available terminal effect, then dispatch panel mode one. */
 s32 mnuDispatchTerminalPanelModeOne(KwlnTask *request) {
-    s32 workAddress = kwlnTaskGetUserValue(request);
+    s32 workAddress = dds3GetProcessData(request);
     mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
 /* Dispatch the current work in terminal panel mode two. */
 s32 mnuDispatchTerminalPanelModeTwo(KwlnTask *request) {
-    s32 workAddress = kwlnTaskGetUserValue(request);
+    s32 workAddress = dds3GetProcessData(request);
 
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
@@ -279,7 +279,7 @@ s32 mnuDispatchTerminalPanelModeTwo(KwlnTask *request) {
 u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
     s32 workAddress;
 
-    workAddress = kwlnTaskGetUserValue(task);
+    workAddress = dds3GetProcessData(task);
     *(u32 *)(workAddress + 0x90) = 0;
     return 1;
 }
@@ -290,7 +290,7 @@ extern void mnuTerminalBuildMenus(struct MenuTerminalWork *host);
 
 /* Release the current task's menu resources before rebuilding its terminal menus. */
 s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
-    s32 *work = (s32 *)kwlnTaskGetUserValue(task);
+    s32 *work = (s32 *)dds3GetProcessData(task);
 
     mnuReleaseWorkResources(work);
     mnuTerminalBuildMenus(work);
@@ -389,8 +389,8 @@ void evtFillQuadRecordFields(s32 firstWord, s32 secondWord, s32 thirdWord, s32 f
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
-        if (kwlnTaskGetRegisteredState((KwlnTask *)task)) {
-            kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 0);
+        if (dds3GetProcessStat((KwlnTask *)task)) {
+            dds3KillProcess((KwlnTask *)task, 0);
         }
     }
 }
@@ -457,8 +457,8 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
     s32 swapIndex;
     for (swapIndex = 0; swapIndex < swapCount; swapIndex++) {
-        u8 *first = buffer + effMiscRand(0) % length;
-        u8 *second = buffer + effMiscRand(0) % length;
+        u8 *first = buffer + sdfGetRand(0) % length;
+        u8 *second = buffer + sdfGetRand(0) % length;
         u8 value = *first;
         *first = *second;
         *second = value;
@@ -475,7 +475,7 @@ void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)record->handle);
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)record->handle);
 }
 
 struct ItfMesSub;
@@ -706,13 +706,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 /* Clear one active-entry flag; the caller supplies a valid index. */
@@ -768,7 +768,7 @@ u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 allocation = (u32)sdfReadNamedResource((const char *)(u32)path, info, &info[1]);
     u32 texture = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
 
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(allocation));
     return texture;
 }
 

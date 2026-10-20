@@ -50,7 +50,7 @@ PcpFlashTrianglePulseWork *effFlashTrianglePulseClone(PcpFlashTrianglePulseParam
 
 void effFlashTrianglePulseDestroy(PcpFlashTrianglePulseWork *work) {
     effReleaseRecordPoolResourceAndBuffer(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashTrianglePulseCopyVector(void *dst, void *src) {
@@ -216,8 +216,8 @@ extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     PcpFlashStreakParams *src;
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
-    PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
+    PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfMemLock(handle);
     EffRecordPool *record;
     u32 range;
     u32 particleIndex;
@@ -236,7 +236,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     record->drawMode = work->drawMode;
     range = work->randomRange;
     for (particleIndex = 0; particleIndex < work->particleCount; particleIndex++) {
-        work->parts[particleIndex].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+        work->parts[particleIndex].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
@@ -255,7 +255,7 @@ PcpFlashStreakWork *effFlashRotatingStreakClone(PcpFlashStreakParams *src) {
 
 void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work) {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashRotatingStreakCopyVector(void *dst, void *src) {
@@ -305,9 +305,9 @@ void effFlashSpawnRotatingParticle(PcpFlashStreakWork *work, s32 index, void *or
     f32 factor;
     f32 scale;
 
-    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     /* Two plain quadword loads, no memory clobber: retail keeps `direction`
      * and `orientation` CSE'd across them. */
     VU0_LOAD_VF(vf10, direction);
@@ -318,14 +318,14 @@ void effFlashSpawnRotatingParticle(PcpFlashStreakWork *work, s32 index, void *or
     part->position[0] = direction[0];
     part->position[1] = direction[1];
     part->position[2] = direction[2];
-    factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.3f + 0.7f;
+    factor = sdfGetRandFloat(effDefaultRandomState) * 0.3f + 0.7f;
     scale = work->maxScale * factor;
     part->initialScale = scale;
     part->scale = scale;
-    factor = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * 0.5f;
+    factor = (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f) * 0.5f;
     part->upSpan = work->upSpan * factor;
     part->acrossSpan = work->acrossSpan * factor;
-    part->rotationStep = work->rotationStepRange * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    part->rotationStep = work->rotationStepRange * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
 }
 
 /* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
@@ -451,7 +451,7 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
         } else {
             if (part->age >= lifetime) {
                 if (restart != 0) {
-                    part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+                    part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
                 }
                 color = 0;
                 effFlashRotatingStreakSetParticleColors(work, index, color);
@@ -489,8 +489,8 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
 
 PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashScalingOrbitWork));
-    PcpFlashScalingOrbitWork *work = (PcpFlashScalingOrbitWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashScalingOrbitWork));
+    PcpFlashScalingOrbitWork *work = (PcpFlashScalingOrbitWork *)sdfMemLock(handle);
     EffRecordPool *record;
     f32 angle;
     f32 step;
@@ -514,7 +514,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams 
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+        work->parts[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
         work->parts[i].angle = angle;
         angle += step;
     }
@@ -536,7 +536,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingClone(PcpFlashScalingOrbitParams *
 
 void effFlashOrbitScalingDestroy(PcpFlashScalingOrbitWork *work) {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashOrbitScalingCopyVector(void *dst, void *src) {
@@ -597,7 +597,7 @@ void effFlashArcQuadScaling(PcpFlashScalingOrbitWork *work, s32 index)
     widthC = work->upSpan * ratio;
     VEC3_SPLAT(scaleB, widthB);
     VEC3_SPLAT(scaleC, widthC);
-    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
+    unit[0] = sdfCos(part->angle);
     unit[1] = 0;
     sinv = sdfSinPoly(part->angle);
     unit[2] = sinv;
@@ -690,7 +690,7 @@ void effFlashOrbitScalingUpdate(PcpFlashScalingOrbitWork *work) {
         } else {
             if (part->age >= lifetime) {
                 if (restart != 0) {
-                    part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+                    part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
                 }
                 color = 0;
                 effFlashOrbitScalingSetParticleColors(work, index, color);
@@ -731,8 +731,8 @@ extern EffRecordPool *effRecordPoolCreate(s32 quadCount);
 /* Clone the 0x50-byte parameter block, then spread the particles evenly around the orbit from -pi/2 with random negative start ages (two handle slots per particle). */
 PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashAccumulatingParticle) + sizeof(PcpFlashAccumulatingWork));
-    PcpFlashAccumulatingWork *work = (PcpFlashAccumulatingWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashAccumulatingParticle) + sizeof(PcpFlashAccumulatingWork));
+    PcpFlashAccumulatingWork *work = (PcpFlashAccumulatingWork *)sdfMemLock(handle);
     EffRecordPool *record;
     f32 angle;
     f32 step;
@@ -756,7 +756,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+        work->parts[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
         work->parts[i].orbitAngle = angle;
         angle += step;
     }
@@ -778,7 +778,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingParticleClone(PcpFlashAccumulating
 
 void effFlashAccumulatingParticleDestroy(PcpFlashAccumulatingWork *work) {
     effReleaseRecordGroupResources(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashAccumulatingParticleCopyVector(void *dst, void *src) {
@@ -845,7 +845,7 @@ void effFlashAccumulatingBuildParticleQuads(PcpFlashAccumulatingWork *work, s32 
     part->radius = part->radius + work->radialStep;
     span = part->span;
     VEC3_SPLAT(size, span);
-    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->orbitAngle);
+    unit[0] = sdfCos(part->orbitAngle);
     unit[1] = 0;
     sinv = sdfSinPoly(part->orbitAngle);
     unit[2] = sinv;
@@ -942,15 +942,15 @@ void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
             effFlashAccumulatingBuildParticleQuads(work, index);
             effFlashAccumulatingSetParticleColors(work, index, 0);
             part->color = 0x80808080;
-            factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
+            factor = sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f;
             part->radialHalfThickness = work->radialHalfThicknessBase * factor;
-            factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.7f + 0.3f;
+            factor = sdfGetRandFloat(effDefaultRandomState) * 0.7f + 0.3f;
             part->span = work->spanBase * factor;
             part->unk10 = work->unk34 * factor;
             part->radius = 0;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
+                part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashAccumulatingSetParticleColors(work, index, color);
@@ -992,8 +992,8 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     u32 spread;
     u32 i;
 
-    handle = sdfAllocGeneralBlock((u32)params->particleCount * 16 + 0x80);
-    block = (PcpFlashOrbitArcBlock *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect((u32)params->particleCount * 16 + 0x80);
+    block = (PcpFlashOrbitArcBlock *)sdfMemLock(handle);
     ring = &block->header;
     memcpy(ring, params, 0x58);
     ring->parts = block->parts;
@@ -1015,7 +1015,7 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     step = EFFECT_RING_FULL_TURN / (u32)ring->particleCount;
     spread = ring->randomRange;
     for (i = 0; i < (u32)ring->particleCount; i++) {
-        ring->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        ring->parts[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         ring->parts[i].accumulator = angle;
         angle += step;
     }
@@ -1037,7 +1037,7 @@ PcpFlashOrbitArcWork *effFlashOrbitArcClone(PcpFlashOrbitArcParams *params)
 
 void effFlashOrbitArcDestroy(PcpFlashOrbitArcWork *work) {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashOrbitArcCopyVector(void *dst, void *src) {
@@ -1090,7 +1090,7 @@ void effFlashArcQuad(PcpFlashOrbitArcWork *work, s32 index)
     VEC3_SPLAT(scaleA, work->normalSpan);
     VEC3_SPLAT(scaleB, work->acrossSpan);
     VEC3_SPLAT(scaleC, work->upSpan);
-    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
+    unit[0] = sdfCos(part->accumulator);
     unit[1] = 0;
     sinv = sdfSinPoly(part->accumulator);
     unit[2] = sinv;
@@ -1213,7 +1213,7 @@ void effFlashOrbitArcUpdate(PcpFlashOrbitArcWork *work)
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
+                part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashOrbitArcSetParticleColors(work, index, color);
@@ -1249,8 +1249,8 @@ void effFlashOrbitArcUpdate(PcpFlashOrbitArcWork *work)
 
 PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashRotatingQuadParticle) + sizeof(PcpFlashRotatingQuadWork));
-    PcpFlashRotatingQuadWork *work = (PcpFlashRotatingQuadWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashRotatingQuadParticle) + sizeof(PcpFlashRotatingQuadWork));
+    PcpFlashRotatingQuadWork *work = (PcpFlashRotatingQuadWork *)sdfMemLock(handle);
     EffRecordPool *record;
     u32 range;
     u32 i;
@@ -1269,7 +1269,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams 
     record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+        work->parts[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
@@ -1289,7 +1289,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadClone(PcpFlashRotatingQuadParams *
 
 void effFlashRotatingQuadDestroy(PcpFlashRotatingQuadWork *work) {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashRotatingQuadCopyVector(void *dst, void *src) {
@@ -1333,15 +1333,15 @@ void effFlashRotatingQuadSpawnParticle(PcpFlashRotatingQuadWork *work, s32 index
     f32 factor;
     f32 scale;
 
-    part->angle = effMiscRandUnitFloat(effDefaultRandomState) * 6.2831853f;
-    factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.3f + 0.7f;
+    part->angle = sdfGetRandFloat(effDefaultRandomState) * 6.2831853f;
+    factor = sdfGetRandFloat(effDefaultRandomState) * 0.3f + 0.7f;
     scale = work->maxScale * factor;
     part->initialScale = scale;
     part->scale = scale;
-    factor = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * 0.5f;
+    factor = (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f) * 0.5f;
     part->upSpan = work->upSpan * factor;
     part->acrossSpan = work->acrossSpan * factor;
-    part->angularStep = work->angularStepRange * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    part->angularStep = work->angularStepRange * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
 }
 
 /* vu0 routine: corner offsets of a flash particle's billboard, turned around the view axis by the particle's angle */
@@ -1460,7 +1460,7 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
         } else {
             if (part->age >= lifetime) {
                 if (restart != 0) {
-                    part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+                    part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
                 }
                 color = 0;
                 effFlashRotatingQuadSetParticleColors(work, index, color);
@@ -1507,8 +1507,8 @@ extern EffRecordPool *effRecordPoolCreateTriple(s32 count);
 
 PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(PcpFlashRadialTriangleParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashRadialTriangleWork));
-    PcpFlashRadialTriangleWork *work = (PcpFlashRadialTriangleWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashRadialTriangleWork));
+    PcpFlashRadialTriangleWork *work = (PcpFlashRadialTriangleWork *)sdfMemLock(handle);
     EffRecordPool *record;
     u32 i;
 
@@ -1542,7 +1542,7 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleClone(PcpFlashRadialTrianglePa
 
 void effFlashRadialTriangleDestroy(PcpFlashRadialTriangleWork *work) {
     effReleaseRecordPoolResourceAndBuffer(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashRadialTriangleCopyVector(void *dst, void *src) {
@@ -1700,8 +1700,8 @@ void effFlashRadialTriangleUpdate(PcpFlashRadialTriangleWork *work) {
 /* Clone the 0xD0-byte parameter block, then give every particle a random negative start age (two handle slots per particle). */
 PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashRadialStripParticle) + sizeof(PcpFlashRadialStripWork));
-    PcpFlashRadialStripWork *work = (PcpFlashRadialStripWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashRadialStripParticle) + sizeof(PcpFlashRadialStripWork));
+    PcpFlashRadialStripWork *work = (PcpFlashRadialStripWork *)sdfMemLock(handle);
     EffRecordPool *record;
     u32 range;
     u32 i;
@@ -1721,7 +1721,7 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *pa
     work->resourceHandle = record;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+        work->parts[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
@@ -1741,7 +1741,7 @@ PcpFlashRadialStripWork *effFlashRadialStripClone(PcpFlashRadialStripParams *par
 
 void effFlashRadialStripDestroy(PcpFlashRadialStripWork *work) {
     effReleaseRecordGroupResources(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashRadialStripCopyVector(void *dst, void *src) {
@@ -1781,12 +1781,12 @@ void effFlashSpawnStripParticle(PcpFlashRadialStripWork *work, s32 index, void *
     PcpFlashRadialStripParticle *part = work->parts + index;
     f32 factor;
 
-    part->angle = effMiscRandUnitFloat(effDefaultRandomState) * 6.2831853f;
-    factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.3f + 0.7f;
+    part->angle = sdfGetRandFloat(effDefaultRandomState) * 6.2831853f;
+    factor = sdfGetRandFloat(effDefaultRandomState) * 0.3f + 0.7f;
     part->thickness = work->maxThickness * factor;
     factor = work->spanVariation;
-    part->span = work->spanBase * (effMiscRandUnitFloat(effDefaultRandomState) * factor + (1.0f - factor));
-    part->angularStep = work->angularStepRange * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    part->span = work->spanBase * (sdfGetRandFloat(effDefaultRandomState) * factor + (1.0f - factor));
+    part->angularStep = work->angularStepRange * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
 }
 
 /* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
@@ -1940,7 +1940,7 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
                 effFlashRadialStripSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), tintColor));
             }
             if (age == lifetime && restart != 0) {
-                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+                part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
                 effFlashRadialStripSetParticleColors(work, index, 0);
             } else {
                 part->age = part->age + 1;
@@ -1959,8 +1959,8 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
 /* Clone the 0x50-byte parameter block, then spread the particles evenly around the orbit from -pi/2 with random negative start ages. */
 PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashFadingOrbitWork));
-    PcpFlashFadingOrbitWork *work = (PcpFlashFadingOrbitWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashOrbitParticle) + sizeof(PcpFlashFadingOrbitWork));
+    PcpFlashFadingOrbitWork *work = (PcpFlashFadingOrbitWork *)sdfMemLock(handle);
     EffRecordPool *record;
     f32 angle;
     f32 step;
@@ -1984,7 +1984,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *pa
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+        work->parts[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
         work->parts[i].angle = angle;
         angle += step;
     }
@@ -2006,7 +2006,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitClone(PcpFlashFadingOrbitParams *par
 
 void effFlashFadingOrbitDestroy(PcpFlashFadingOrbitWork *work) {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashFadingOrbitCopyVector(void *dst, void *src) {
@@ -2067,7 +2067,7 @@ void effFlashFadingOrbitWriteCorners(PcpFlashFadingOrbitWork *work, s32 index)
     widthC = work->upSpan * ratio;
     VEC3_SPLAT(scaleB, widthB);
     VEC3_SPLAT(scaleC, widthC);
-    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
+    unit[0] = sdfCos(part->angle);
     unit[1] = 0;
     sinv = sdfSinPoly(part->angle);
     unit[2] = sinv;
@@ -2187,7 +2187,7 @@ void effFlashFadingOrbitUpdate(PcpFlashFadingOrbitWork *work) {
                 effFlashFadingOrbitSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), tintColor));
             }
             if (age == lifetime && restart != 0) {
-                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
+                part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % range);
                 effFlashFadingOrbitSetParticleColors(work, index, 0);
             } else {
                 part->age = part->age + 1;
@@ -2205,8 +2205,8 @@ void effFlashFadingOrbitUpdate(PcpFlashFadingOrbitWork *work) {
 
 PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(PcpFlashOffsetRadialParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashOffsetRadialWork));
-    PcpFlashOffsetRadialWork *work = (PcpFlashOffsetRadialWork *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashOffsetRadialWork));
+    PcpFlashOffsetRadialWork *work = (PcpFlashOffsetRadialWork *)sdfMemLock(handle);
     EffRecordPool *record;
     u32 i;
 
@@ -2240,7 +2240,7 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleClone(PcpFlashOffsetRadial
 
 void effFlashOffsetRadialTriangleDestroy(PcpFlashOffsetRadialWork *work) {
     effReleaseRecordPoolResourceAndBuffer(work->resourceHandle);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 void effFlashOffsetRadialTriangleCopyVector(void *dst, void *src) {

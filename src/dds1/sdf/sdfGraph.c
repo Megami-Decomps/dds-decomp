@@ -18,7 +18,7 @@ extern u8 D_003BD9DC;
 
 void sdfGraphSetDisplayMode(s32 displayModeIndex) {
     D_003BD2E8 = (u8)displayModeIndex;
-    sdfGraphApplyModeDefaults(&D_003980E0, displayModeIndex, 0);
+    sdfGrSetFrameSetMode(&D_003980E0, displayModeIndex, 0);
     D_003BD9DC = 1;
 }
 

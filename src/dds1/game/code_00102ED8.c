@@ -93,7 +93,7 @@ extern u16 kwlnBackgroundFadeDuration;
 
 extern s32 kwlnCurrentIncompleteResource;
 extern EffRandState effSharedRandomState[];
-extern void effMiscSeedRandom(void *data, u32 tag);
+extern void sdfRandomize(void *data, u32 tag);
 extern s32 kwlnTextureViewerHandlePad(void);
 extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
 
@@ -153,8 +153,8 @@ void kwlnDebugTaskCreate(void) {
     AdminWork *work;
     s32 i;
 
-    if (kwlnTaskGetTaskByName(dds3AdminTaskName) == NULL) {
-        work = sdfAllocSizeClassBlock(sizeof(AdminWork));
+    if (dds3SearchProcessName(dds3AdminTaskName) == NULL) {
+        work = sdfChipAllocDirect(sizeof(AdminWork));
         work->flags = 0;
         work->value = 0;
         work->activeMode = -1;
@@ -166,7 +166,7 @@ void kwlnDebugTaskCreate(void) {
         }
         work->requestData = 0;
         work->requestSizeLowByte = 0;
-        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, (u32)work);
+        dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, (u32)work);
     }
 }
 
@@ -184,7 +184,7 @@ s32 kwlnRegisterNamedSlot(const char *name) {
     s32 characterIndex;
     s32 previous;
 
-    if (kwlnTaskGetTaskByName(D_0039E018) == NULL) {
+    if (dds3SearchProcessName(D_0039E018) == NULL) {
         return -1;
     }
     if (kwlnFindNamedSlot(name) >= 0) {
@@ -285,7 +285,7 @@ s32 kwlnFindNamedSlot(const char *name) {
 s32 kwlnUnregisterNamedSlot(const char *name) {
     s32 slotIndex;
 
-    if (kwlnTaskGetTaskByName(D_0039E018) == NULL) {
+    if (dds3SearchProcessName(D_0039E018) == NULL) {
         return 0;
     }
     slotIndex = kwlnFindNamedSlot(name);
@@ -294,8 +294,8 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
     }
     if (D_003C1C90[slotIndex].kind > 0) {
         if (D_003C1C90[slotIndex].kind < 3) {
-            if (kwlnTaskIsRegistered(D_003C1C90[slotIndex].task) == 1) {
-                kwlnTaskDestroyWithHierarchy(D_003C1C90[D_003BA85C].task, 1);
+            if (dds3ExistProcess(D_003C1C90[slotIndex].task) == 1) {
+                dds3KillProcess(D_003C1C90[D_003BA85C].task, 1);
             }
         }
     }
@@ -465,9 +465,9 @@ void kwlnDrawSpriteCellZ(SdfListHead *packetList, s32 column, s32 row, s32 colum
 
 /* Periodically pulses both pad motors, varying the large-motor level. */
 s32 kwlnDebugPulsePadMotors(KwlnTask *task) {
-    if (kwlnTaskGetTimer(task) % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
+    if (dds3GetProcessRunTime(task) % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
         kwlnPadStartMotor(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
-        kwlnPadStartMotor(KWLN_PAD_LARGE_MOTOR, (u8)(effMiscRandMod(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
+        kwlnPadStartMotor(KWLN_PAD_LARGE_MOTOR, (u8)(sdfGetRandInt(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
     }
     return 0;
 }
@@ -756,7 +756,7 @@ s32 kwlnTaskNoopCallback(KwlnTask *task) {
 
 /* Seed the shared effect random state with the fixed initialization seed. */
 void kwlnInitMagicState(void) {
-    effMiscSeedRandom(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
+    sdfRandomize(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
 }
 
 extern s16 D_003BA728;
@@ -831,9 +831,9 @@ void kwlnDebugGraphTaskDestroy(KwlnTask *task) {
 /* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */
 void kwlnDebugGraphSetEnabled(s8 enabled) {
     if (enabled == 1) {
-        kwlnDebugGraphTask = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, kwlnDebugGraphUpdate, kwlnDebugGraphTaskDestroy, NULL);
+        kwlnDebugGraphTask = dds3StartProcess("DebugTimeGrph", 0x2710, 1, 1, kwlnDebugGraphUpdate, kwlnDebugGraphTaskDestroy, NULL);
     } else if (enabled == 0) {
-        kwlnTaskDestroyWithHierarchy(kwlnDebugGraphTask, 0);
+        dds3KillProcess(kwlnDebugGraphTask, 0);
     }
 }
 
@@ -1212,7 +1212,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
                                         &D_00325870[bufferIndex].programReference);
     sdfInitPacketList(&D_00325870[bufferIndex].sceneList);
     sdfClearLinkedPacketList(&D_00325870[bufferIndex].linkedList);
-    sdfInitSceneNode(&D_00325870[bufferIndex].scene, &D_003980E0);
+    sdfGrSetStdDrawEnv(&D_00325870[bufferIndex].scene, &D_003980E0);
     /* Update the RGBAQ color word while retaining its floating-point Q word. */
     *(u32 *)&D_00325870[bufferIndex].scene.centeredBounds.rgbaq.value = D_003BA8EC;
     if (kwlnDrawControlFlags & 0x10000000) {
@@ -1282,7 +1282,7 @@ void kwlnInitHeldTextureScenePackets(void) {
     sdfCameraBuildProjection(&D_003247B0.camera);
     for (i = 0; i != 2; i++) {
         sdfInitPacketList(&D_00325870[i].heldTexture.list);
-        sdfBuildTextureScenePacket(&D_00325870[i].heldTexture.scene, &kwlnHeldTextureDrawTarget, 0);
+        sdfGrSetDrawEnv(&D_00325870[i].heldTexture.scene, &kwlnHeldTextureDrawTarget, 0);
         *(u32 *)&D_00325870[i].heldTexture.scene.centeredBounds.rgbaq.value = D_003BA900;
         sdfAppendPacket(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.scene);
         sdfConsBuildMatrixPacket(&D_00325870[i].heldTexture.matrix, &D_003247B0, kwlnHeldTextureViewMatrix);
@@ -1386,7 +1386,7 @@ void kwlnAdvanceShakeOffsets(void) {
     limits[1] = D_003BA91E * 0.01f;
     for (axis = 0; axis < 2; axis++) {
         if (limits[axis] != 0.0f) {
-            f32 step = effMiscRandUnitFloat(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
+            f32 step = sdfGetRandFloat(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
 
             if (limits[axis] * weights[axis] <= fabsf(D_00324590[axis])) {
                 if (D_00324590[axis] <= 0.0f) {
@@ -1395,7 +1395,7 @@ void kwlnAdvanceShakeOffsets(void) {
                     D_00324590[axis] -= step;
                 }
             } else {
-                D_00324590[axis] += 2.0f * (step * (effMiscRandUnitFloat(0) - 0.5f));
+                D_00324590[axis] += 2.0f * (step * (sdfGetRandFloat(0) - 0.5f));
             }
             if (D_00324590[axis] < -limits[axis]) {
                 D_00324590[axis] = -limits[axis];

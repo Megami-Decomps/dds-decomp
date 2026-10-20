@@ -310,7 +310,7 @@ void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackSt
 
 
 static inline s16 mnuRandomPulseDuration(void *state) {
-    return effMiscRandUnitFloat(state) * 120.0f + 30.0f;
+    return sdfGetRandFloat(state) * 120.0f + 30.0f;
 }
 
 void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
@@ -323,7 +323,7 @@ void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
         return;
     }
     pulse->timer = 0;
-    random = effMiscRandUnitFloat(0);
+    random = sdfGetRandFloat(0);
     switch (pulse->mode) {
     case 1:
         if (random < 0.3f) {
@@ -343,7 +343,7 @@ void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
         pulse->duration = mnuRandomPulseDuration(0);
         return;
     case 3:
-        if (effMiscRandUnitFloat(0) < 0.1f) {
+        if (sdfGetRandFloat(0) < 0.1f) {
             pulse->mode = 4;
             pulse->duration = 50;
             return;

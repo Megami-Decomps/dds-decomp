@@ -969,8 +969,8 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    allocation = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = (void *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(sizeof(BrsSkillPackageWork));
+    work = (void *)sdfMemLock(allocation);
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
@@ -1002,7 +1002,7 @@ extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 
 /* Release the panel and task resources, then mark the result task finished. */
 void brsStaffTaskDestroy(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (context->teardownResource != NULL) {
         effDestroyResourceSlotSet(context->teardownResource);
@@ -1013,7 +1013,7 @@ void brsStaffTaskDestroy(KwlnTask *task) {
     }
     effDestroyEffectList(context->resourceList);
     dspCloseChannel();
-    sdfReleaseResourceAllocation(context->allocation);
+    sdfMemFreeDirect(context->allocation);
     brsTaskState = 2;
 }
 
@@ -1027,9 +1027,9 @@ s32 mnuStaffCreateTasks(void) {
     s32 secondaryPanelTaskHandle;
     BrsSkillPackageWork *work = brsCreateRewardTaskWork();
 
-    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
-    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
-    secondaryPanelTaskHandle = (s32)kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
+    dds3StartProcess(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
+    dds3StartProcess(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
+    secondaryPanelTaskHandle = (s32)dds3StartProcess(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
     brsTaskState = 1;
     return secondaryPanelTaskHandle;
 }
@@ -1038,9 +1038,9 @@ u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;
 
     if (state == 1) {
-        kwlnTaskDestroyWithHierarchyByName(brsStaffInputTaskName, 0);
-        kwlnTaskDestroyWithHierarchyByName(mnuStaffPrimaryPanelTaskName, 0);
-        kwlnTaskDestroyWithHierarchyByName(mnuStaffSecondaryPanelTaskName, 0);
+        dds3KillProcessName(brsStaffInputTaskName, 0);
+        dds3KillProcessName(mnuStaffPrimaryPanelTaskName, 0);
+        dds3KillProcessName(mnuStaffSecondaryPanelTaskName, 0);
         brsUpdateBlocked = state;
         return 1;
     }
@@ -1073,11 +1073,11 @@ s32 brsIsPrimaryPanelUpdateReady(void) {
     KwlnTask *task;
     BrsSkillPackageWork *work;
 
-    task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
+    task = dds3SearchProcessName(mnuStaffPrimaryPanelTaskName);
     if (task == 0) {
         return task;
     }
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     if (256 - work->fadeProgress <= 0 && brsTaskIsUiUpdateAllowed(work) != 0) {
         if (work->opacityReady == 1) {
             return 1;
@@ -1118,7 +1118,7 @@ extern s32 D_003D6308[];
 
 /* Choose a reward bucket using this mode's cumulative thresholds. */
 s32 mnuStaffPickRollByMode(u32 mode) {
-    u32 roll = effMiscRand(0) & 0xFF;
+    u32 roll = sdfGetRand(0) & 0xFF;
     u32 i;
 
     for (i = 0; i < 5; i++) {

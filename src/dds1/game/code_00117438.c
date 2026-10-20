@@ -172,14 +172,14 @@ extern void *memset(void *, int, unsigned int);
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
  * and register the "GBWK" tick task that owns it. */
 void sdfCreateRuntimeTask(void) {
-    struct SdfMemBlock *mem = sdfAllocGeneralBlock(0x33600);
-    DatGameState *state = (void *)sdfResourceRetainAddress(mem);
+    struct SdfMemBlock *mem = sdfMemAllocDirect(0x33600);
+    DatGameState *state = (void *)sdfMemLock(mem);
 
     memset(state, 0, 0x33600);
     state->header.backingAllocation = mem;
     state->header.firstTick = 0;
     state->header.secondTick = 0;
-    kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
+    dds3StartProcess(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
     datGameState = state;
     evtResetWorldAndProfileRuntime();
 }
@@ -189,11 +189,11 @@ void sdfCreateRuntimeTask(void) {
 void sdfDestroyRuntimeTask(void) {
     struct SdfMemBlock *allocation;
 
-    kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
+    dds3KillProcessName(sdfRuntimeTaskName, 0);
     sdfRuntimeTaskTeardownHook();
     allocation = datGameState->header.backingAllocation;
-    sdfDecrementAllocationReferenceCount(allocation);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemUnlock(allocation);
+    sdfMemFreeDirect(allocation);
     datGameState = 0;
 }
 
@@ -294,14 +294,14 @@ void sdfSaveResetSnapshot(void) {
     D_0032A200.words[1] = datGameState->header.saveFlags1;
     D_0032A200.words[2] = datGameState->header.saveFlags2;
     D_003BD790 = mnuCreateFlagEntries();
-    D_003BD794 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
+    D_003BD794 = sdfMemAllocDirect(sizeof(datGameState->mantraBits));
     copy = (void *)sdfMemoryGetBlockAddress(D_003BD794);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
-    D_003BD798 = sdfAllocGeneralBlock(sizeof(datGameState->profileRecords));
+    D_003BD798 = sdfMemAllocDirect(sizeof(datGameState->profileRecords));
     copy = (void *)sdfMemoryGetBlockAddress(D_003BD798);
     memcpy(copy, datGameState->profileRecords, sizeof(datGameState->profileRecords));
     ptySaveActiveUnitsToStock();
-    D_003BD79C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
+    D_003BD79C = sdfMemAllocDirect(sizeof(datGameState->templates));
     copy = (void *)sdfMemoryGetBlockAddress(D_003BD79C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
     memset(D_003C2E40, 0, sizeof(D_003C2E40));
@@ -346,16 +346,16 @@ void sdfRestoreResetSnapshot(void) {
     datGameState->header.saveFlags1 = D_0032A200.words[1];
     datGameState->header.saveFlags2 = D_0032A200.words[2];
     mnuApplyFlagEntries(D_003BD790);
-    sdfReleaseResourceAllocation((SdfMemBlock *)D_003BD790);
+    sdfMemFreeDirect((SdfMemBlock *)D_003BD790);
 
     memcpy(datGameState->mantraBits, (void *)sdfMemoryGetBlockAddress(D_003BD794), sizeof(datGameState->mantraBits));
-    sdfReleaseResourceAllocation(D_003BD794);
+    sdfMemFreeDirect(D_003BD794);
 
     memcpy(datGameState->profileRecords, (void *)sdfMemoryGetBlockAddress(D_003BD798), sizeof(datGameState->profileRecords));
-    sdfReleaseResourceAllocation(D_003BD798);
+    sdfMemFreeDirect(D_003BD798);
 
     memcpy(datGameState->templates, (void *)sdfMemoryGetBlockAddress(D_003BD79C), sizeof(datGameState->templates));
-    sdfReleaseResourceAllocation(D_003BD79C);
+    sdfMemFreeDirect(D_003BD79C);
 
     for (index = 0; index < 16; index++) {
         datGameState->templates[index].level = 0;
@@ -458,13 +458,13 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     command = sdfDevCreateCommandState(table->path);
     size = sdfDevQueueControlAndWait(command);
     block = sdfAllocGeneralBlockHigh(size);
-    address = (u8 *)sdfResourceRetainAddress(block);
+    address = (u8 *)sdfMemLock(block);
     sdfDevQueueReadAndWait(command, address, size);
     sdfDevWaitThenReleaseCommandState(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
         address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
-    sdfReleaseResourceAllocation(block);
+    sdfMemFreeDirect(block);
     sdfDebugPrintf(D_0039F930, table->path);
 }
 
@@ -616,7 +616,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
         healing = power + base;
         break;
     case 15:
-        healing = effMiscRandMod(0, power) + base;
+        healing = sdfGetRandInt(0, power) + base;
         break;
     case 9:
         healing = current * power / 100 + base;
@@ -736,7 +736,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
                 count++;
             }
         }
-        mask = 1 << list[effMiscRandMod(0, count)];
+        mask = 1 << list[sdfGetRandInt(0, count)];
     }
     if (mask != 0 &&
         (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
@@ -788,7 +788,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
         sdfDebugPrintf(D_0039F980, scaled, ratio, mask);
-        hit = (s32)effMiscRandMod(0, 100) < scaled;
+        hit = (s32)sdfGetRandInt(0, 100) < scaled;
     }
     return hit ? mask : 0;
 }

@@ -24,8 +24,8 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
 
     kwlnFadeBackgroundStartOut(0);
     mnuStopMovieDrawTask();
-    allocation = sdfAllocGeneralBlock(0x40);
-    mnuMovieMenuState = (void *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(0x40);
+    mnuMovieMenuState = (void *)sdfMemLock(allocation);
     memset(mnuMovieMenuState, 0, 0x40);
     mnuMovieMenuState->allocation = allocation;
     mnuRecreateMenuSelectionList();
@@ -44,7 +44,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     mnuLoadTitleMenuAssets();
     mnuMovieMenuState->resources = mnuCreateMovieSpriteResource(0x3C, 8, 0);
     D_003BA8EC = 0x80000000;
-    return kwlnTaskCreate(D_003AFD80, 0x2B19, 1, 0, mnuUpdateMovieMenuTask, 0, 0);
+    return dds3StartProcess(D_003AFD80, 0x2B19, 1, 0, mnuUpdateMovieMenuTask, 0, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026B050", D_003AFD80);

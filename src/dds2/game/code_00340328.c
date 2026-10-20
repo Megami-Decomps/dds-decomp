@@ -136,7 +136,7 @@ char *sdfStrDup(const char *text) {
         return NULL;
     }
     length = strlen(text);
-    copy = sdfAllocSizeClassBlock(length + 1);
+    copy = sdfChipAllocDirect(length + 1);
     memcpy(copy, text, length);
     copy[length] = 0;
     return copy;
@@ -172,15 +172,15 @@ s32 sdfDecimalToPackedDigits(s32 number) {
 
 /* Allocate element storage with a fixed element stride and growth increment. */
 DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32 growthStep) {
-    DevRequest *request = sdfAllocSizeClassBlock(sizeof(*request));
+    DevRequest *request = sdfChipAllocDirect(sizeof(*request));
 
     request->growStep = growthStep;
     request->usedCount = 0;
     request->capacity = elementCount;
     request->stride = elementStride;
     if (elementCount != 0) {
-        request->backingAllocation = sdfAllocGeneralBlock(elementStride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
+        request->backingAllocation = sdfMemAllocDirect(elementStride * elementCount);
+        request->buffer = (void *)sdfMemLock(request->backingAllocation);
     } else {
         request->backingAllocation = 0;
         request->buffer = 0;
@@ -190,8 +190,8 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
 
 /* Release the backing allocation and the request object. */
 void sdfDestroyDevRequest(DevRequest *request) {
-    sdfReleaseResourceAllocation(request->backingAllocation);
-    sdfReleaseChipBlock(request);
+    sdfMemFreeDirect(request->backingAllocation);
+    sdfChipFreeDirect(request);
 }
 
 extern void sdfResizeResourceAllocation(struct SdfMemBlock *allocation, s32 size);
@@ -202,10 +202,10 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
         sdfDevResizeBufferedRequest(request, request->growStep);
         return;
     }
-    sdfDecrementAllocationReferenceCount(request->backingAllocation);
+    sdfMemUnlock(request->backingAllocation);
     request->capacity = request->capacity + request->growStep;
     sdfResizeResourceAllocation(request->backingAllocation, (s16)request->capacity * request->stride);
-    request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
+    request->buffer = (void *)sdfMemLock(request->backingAllocation);
 }
 
 /* Resize storage and clamp the live entry count to the new capacity. */
@@ -213,20 +213,20 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     if (request->backingAllocation == 0) {
         if (elementCount > 0) {
             request->capacity = elementCount;
-            request->backingAllocation = sdfAllocGeneralBlock(request->stride * elementCount);
-            request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
+            request->backingAllocation = sdfMemAllocDirect(request->stride * elementCount);
+            request->buffer = (void *)sdfMemLock(request->backingAllocation);
         }
     } else if (elementCount <= 0) {
-        sdfReleaseResourceAllocation(request->backingAllocation);
+        sdfMemFreeDirect(request->backingAllocation);
         request->backingAllocation = 0;
         request->usedCount = 0;
         request->capacity = 0;
         request->buffer = 0;
     } else {
-        sdfDecrementAllocationReferenceCount(request->backingAllocation);
+        sdfMemUnlock(request->backingAllocation);
         request->capacity = elementCount;
         sdfResizeResourceAllocation(request->backingAllocation, request->stride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
+        request->buffer = (void *)sdfMemLock(request->backingAllocation);
         if (elementCount < request->usedCount) {
             request->usedCount = elementCount;
         }
@@ -264,7 +264,7 @@ f32 sdfSinPoly(f32 angle) {
 }
 
 /* Apply a quarter-turn phase shift to the existing sine approximation. */
-f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
+f32 sdfCos(f32 angle) {
     return sdfSinPoly(angle + SDF_TRIG_HALF_PI);
 }
 

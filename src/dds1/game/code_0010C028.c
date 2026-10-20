@@ -7,25 +7,25 @@
 void scrSetCurrentActor(KwlnTask *task, void *actor) {
     ScrData *context;
 
-    context = (ScrData *)kwlnTaskGetUserValue(task);
+    context = (ScrData *)dds3GetProcessData(task);
     context->actor = actor;
 }
 
 void *scrGetCurrentActor(KwlnTask *task) {
     ScrData *context;
 
-    context = (ScrData *)kwlnTaskGetUserValue(task);
+    context = (ScrData *)dds3GetProcessData(task);
     return context->actor;
 }
 
 void scrReplaceCurrentTask(KwlnTask *task) {
     ScrData *previousContext;
 
-    previousContext = (ScrData *)kwlnTaskGetUserValue(task);
+    previousContext = (ScrData *)dds3GetProcessData(task);
     if (previousContext != NULL) {
         scrProcDestroyTask(previousContext);
     }
-    kwlnTaskSetUserValue(task, 0);
+    dds3SetProcessData(task, 0);
 }
 
 void bfStepContext(ScrData *context) {
@@ -33,7 +33,7 @@ void bfStepContext(ScrData *context) {
 }
 
 s32 bfTaskUpdate(KwlnTask *task) {
-    switch (bfContextStep((ScrData *)kwlnTaskGetUserValue(task))) {
+    switch (bfContextStep((ScrData *)dds3GetProcessData(task))) {
     case 0:
         return -1;
     case 2:

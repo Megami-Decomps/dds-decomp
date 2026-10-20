@@ -51,9 +51,9 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     color = uiBlendColors(0xA09DC380, 0xA09DC300, iconFade);
     sprintf(text, D_004379B0, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
-    frFontSetChildChainFirstOption(glyph, 3);
+    frSetFontColorNo(glyph, 3);
     frFontDrawGlyphChain(glyph, 1, 0x53);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     if (mnuKindIsSelectable(item->unitId) != 0) {
         if (context->iconFade < 0x100) {
             context->iconFade += 0x20;
@@ -97,7 +97,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
 }
 
 s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -108,7 +108,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
 }
 
 s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -127,7 +127,7 @@ u32 mnuResetSelectionWidthsFromConfig(KwlnTask *task) {
     s32 selectionWidth;
     s32 reservedWidth;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     reservedWidth = 0;
     remaining = DAT_BASE_STAT_COUNT - 1;
     selectionWidth = context->selectedRewardRow->values.amount * 3;

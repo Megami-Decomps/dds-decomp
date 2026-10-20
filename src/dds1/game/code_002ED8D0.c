@@ -29,7 +29,7 @@ typedef struct PacAlloc {
     s32 resource;
 } PacAlloc;
 
-extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
+extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *strrchr(const char *text, s32 delimiter);
 extern s32 strcasecmp(const char *text, const char *suffix);
@@ -70,16 +70,16 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     if (!isPac) {
         stream = sdfAllocAndClearQuadwords(sizeof(MovLinearStream));
         owner->stream.linear = stream;
-        allocation = sdfAllocGeneralBlock(0x20000);
+        allocation = sdfMemAllocDirect(0x20000);
         stream->allocation = allocation;
         {
-            u8 *buffer = (u8 *)sdfResourceRetainAddress(allocation);
+            u8 *buffer = (u8 *)sdfMemLock(allocation);
             stream->bufferStart = buffer;
             stream->readCursor = buffer;
             stream->writeCursor = buffer;
         }
         owner->state = SDF_MOVIE_STATE_INITIAL;
-        owner->deviceState = sdfDevCreateCallbackState(name,
+        owner->deviceState = sdfFileCmdReadOpen(name,
                                                         (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
                                             sdfMovieLinearStreamReadCallback, owner, descriptor->source);
@@ -92,10 +92,10 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     D_003BDABC = -1;
     pacWork = sdfAllocAndClearQuadwords(sizeof(MovPacStream));
     owner->stream.pac = pacWork;
-    allocation = sdfAllocGeneralBlock(0x24000);
+    allocation = sdfMemAllocDirect(0x24000);
     pacWork->allocation = allocation;
     {
-        u32 resource = sdfResourceRetainAddress(allocation);
+        u32 resource = sdfMemLock(allocation);
         pacWork->pacInputBuffer = (u8 *)resource;
         pacWork->pacBuffer = (u8 *)(resource + 0x4000);
         pacWork->ringBuffer = (u8 *)(resource + 0x14000);
@@ -103,7 +103,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     pacWork->scratchSize = 0x20;
     pacWork->scratch = pacWork->scratchBuffer;
     owner->state = SDF_MOVIE_STATE_INITIAL;
-    owner->deviceState = sdfDevCreateCallbackState(name,
+    owner->deviceState = sdfFileCmdReadOpen(name,
                                                     (void *)sdfMovieHandlePacDeviceEvent, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
@@ -122,20 +122,20 @@ void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */
         if (job->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
             job->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-            sdfDevQueueActiveOperation(job->deviceState);
+            sdfFileCmdClose(job->deviceState);
         }
         while (job->state != SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK) {
             sdfCreateSemaphoreFromOptions();
         }
         if (job->isPac == 0) {
             MovLinearStream *stream = job->stream.linear;
-            sdfReleaseResourceAllocation(stream->allocation);
-            sdfReleaseChipBlock(stream);
+            sdfMemFreeDirect(stream->allocation);
+            sdfChipFreeDirect(stream);
         } else {
             MovPacStream *stream = job->stream.pac;
-            sdfReleaseResourceAllocation(stream->payloadAllocation);
-            sdfReleaseResourceAllocation(stream->allocation);
-            sdfReleaseChipBlock(stream);
+            sdfMemFreeDirect(stream->payloadAllocation);
+            sdfMemFreeDirect(stream->allocation);
+            sdfChipFreeDirect(stream);
         }
         sdfDestroyStreamFrameNode(&job->soundNode);
         if (job->pacEnabled != 0) {
@@ -181,7 +181,7 @@ void sdfPacReleasePacketQueueNodes(PacState *state) {
 
     while (cursor != NULL) {
         cursor = cursor->next;
-        sdfReleaseChipBlock(current);
+        sdfChipFreeDirect(current);
         current = cursor;
     }
 }
@@ -264,7 +264,7 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
             /* The multi-item path clears the link without reassigning queueTail here. */
             scanPacket->next = NULL;
         }
-        sdfReleaseChipBlock(tailPacket);
+        sdfChipFreeDirect(tailPacket);
     }
     state->phase = 0;
 }

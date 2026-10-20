@@ -739,7 +739,7 @@ s32 evtCommandSetEffectUnitPosition(void) {
     position[0] = bfWaitReadArgFloat(1);
     position[1] = bfWaitReadArgFloat(2);
     position[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerPosition(effectUnit, (u128 *)position);
+    dds3SetPosPoseSet(effectUnit, (u128 *)position);
     return 1;
 }
 
@@ -765,7 +765,7 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
-    effObjSetInnerRotation(effectUnit, (u128 *)quaternion);
+    dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
     return 1;
 }
 
@@ -785,7 +785,7 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
     quaternion[1] = bfWaitReadArgFloat(2);
     quaternion[2] = bfWaitReadArgFloat(3);
     quaternion[3] = bfWaitReadArgFloat(4);
-    effObjSetInnerRotation(effectUnit, (u128 *)quaternion);
+    dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
     return 1;
 }
 
@@ -996,7 +996,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = "load BE (%d)..\n";
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        kwlnTaskAddChild(commandWork->task, mnuCampCreateTask(taskId));
+        dds3LinkProcess(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -1023,7 +1023,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
-    kwlnTaskAddChild(commandWork->task, mnuCampCreateTask(taskId));
+    dds3LinkProcess(commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -1081,7 +1081,7 @@ s32 evtCommandStartPolygonMovie(void) {
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
-    kwlnTaskAddChild(commandWork->task, movieTask);
+    dds3LinkProcess(commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
@@ -1118,7 +1118,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    kwlnTaskAddChild(commandWork->task, movieTask);
+    dds3LinkProcess(commandWork->task, movieTask);
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }

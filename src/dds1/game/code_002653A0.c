@@ -399,7 +399,7 @@ counted:
             break;
         }
         {
-            s32 recipient = eligible[effMiscRand(NULL) % eligibleCount];
+            s32 recipient = eligible[sdfGetRand(NULL) % eligibleCount];
             gains[recipient] += overflow;
         }
     }
@@ -523,9 +523,9 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
     s32 i;
     s32 count;
 
-    task = kwlnTaskGetTaskByName(D_003AFBA0);
+    task = dds3SearchProcessName(D_003AFBA0);
     if (task != NULL) {
-        work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+        work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     }
     if (((s8)D_00324510[1][0][1] < 0 || (D_00324510[1][0][3] & 2)) && work->opacity >= 0x80) {
         work->skipProgressAnimation = 1;

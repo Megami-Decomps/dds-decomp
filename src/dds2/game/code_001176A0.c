@@ -193,14 +193,14 @@ extern void *memset(void *, int, unsigned int);
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
-    struct SdfMemBlock *mem = sdfAllocGeneralBlock(0x1E840);
-    DatGameState *state = (void *)sdfResourceRetainAddress(mem);
+    struct SdfMemBlock *mem = sdfMemAllocDirect(0x1E840);
+    DatGameState *state = (void *)sdfMemLock(mem);
 
     memset(state, 0, 0x1E840);
     state->header.backingAllocation = mem;
     state->header.firstTick = 0;
     state->header.secondTick = 0;
-    kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
+    dds3StartProcess(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
     datGameState = state;
     evtResetWorldAndProfileRuntime();
 }
@@ -208,11 +208,11 @@ void sdfCreateRuntimeTask(void) {
 void sdfDestroyRuntimeTask(void) {
     struct SdfMemBlock *allocation;
 
-    kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
+    dds3KillProcessName(sdfRuntimeTaskName, 0);
     sdfRuntimeTaskTeardownHook();
     allocation = datGameState->header.backingAllocation;
-    sdfDecrementAllocationReferenceCount(allocation);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemUnlock(allocation);
+    sdfMemFreeDirect(allocation);
     datGameState = 0;
 }
 
@@ -300,20 +300,20 @@ void sdfSaveResetSnapshot(void) {
     D_00385218.words[1] = datGameState->header.saveFlags1;
     D_00385218.words[2] = datGameState->header.saveFlags2;
     D_00438E90 = mnuCreateFlagEntries();
-    D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
+    D_00438E94 = sdfMemAllocDirect(sizeof(datGameState->mantraBits));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E94);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
-    D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileBanks));
+    D_00438E98 = sdfMemAllocDirect(sizeof(datGameState->profileBanks));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E98);
     memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
     ptySaveActivePartyTemplates();
-    D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
+    D_00438E9C = sdfMemAllocDirect(sizeof(datGameState->templates));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E9C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
-    D_00438EA0 = sdfAllocGeneralBlock(0x40);
+    D_00438EA0 = sdfMemAllocDirect(0x40);
     copy = (void *)sdfMemoryGetBlockAddress(D_00438EA0);
     memcpy(copy, &datGameState->inventory.counts[0xC0], 0x40);
-    D_00438EA4 = sdfAllocGeneralBlock(sizeof(datGameState->itemBlockedFlags));
+    D_00438EA4 = sdfMemAllocDirect(sizeof(datGameState->itemBlockedFlags));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438EA4);
     memcpy(copy, datGameState->itemBlockedFlags, sizeof(datGameState->itemBlockedFlags));
     D_00438EA8 = mtrMantraEventBitPush();
@@ -346,26 +346,26 @@ void sdfRestoreResetSnapshot(void) {
     datGameState->header.saveFlags1 = D_00385218.words[1];
     datGameState->header.saveFlags2 = D_00385218.words[2];
     mnuApplyCampResourceFlagEntries(D_00438E90);
-    sdfReleaseResourceAllocation(D_00438E90);
+    sdfMemFreeDirect(D_00438E90);
 
     mantra = datGameState->mantraBits;
     memcpy(mantra, (void *)sdfMemoryGetBlockAddress(D_00438E94), sizeof(datGameState->mantraBits));
-    sdfReleaseResourceAllocation(D_00438E94);
+    sdfMemFreeDirect(D_00438E94);
     profiles = datGameState->profileBanks;
     memcpy(profiles, (void *)sdfMemoryGetBlockAddress(D_00438E98), sizeof(datGameState->profileBanks));
-    sdfReleaseResourceAllocation(D_00438E98);
+    sdfMemFreeDirect(D_00438E98);
     templates = datGameState->templates;
     memcpy(templates, (void *)sdfMemoryGetBlockAddress(D_00438E9C), sizeof(datGameState->templates));
-    sdfReleaseResourceAllocation(D_00438E9C);
+    sdfMemFreeDirect(D_00438E9C);
     for (i = 0; i < 16; i++) datGameState->templates[i].level = 0;
     state = datGameState;
     bytes = (void *)sdfMemoryGetBlockAddress(D_00438EA0);
     memcpy(&state->inventory.counts[0xC0], bytes, 0x40);
-    sdfReleaseResourceAllocation(D_00438EA0);
+    sdfMemFreeDirect(D_00438EA0);
     state = datGameState;
     bytes = (void *)sdfMemoryGetBlockAddress(D_00438EA4);
     memcpy(state->itemBlockedFlags, bytes, sizeof(state->itemBlockedFlags));
-    sdfReleaseResourceAllocation(D_00438EA4);
+    sdfMemFreeDirect(D_00438EA4);
     for (i = 0xC0; (s32)i < 0x100; i++) {
         if (datGameState->inventory.counts[i] != 0) mnuMarkEntryBlocked(i);
     }
@@ -459,13 +459,13 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     command = sdfDevCreateCommandState(table->path);
     size = sdfDevQueueControlAndWait(command);
     block = sdfAllocGeneralBlockHigh(size);
-    address = (u8 *)sdfResourceRetainAddress(block);
+    address = (u8 *)sdfMemLock(block);
     sdfDevQueueReadAndWait(command, address, size);
     sdfDevWaitThenReleaseCommandState(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
         address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
-    sdfReleaseResourceAllocation(block);
+    sdfMemFreeDirect(block);
     sdfDebugPrintf(D_00412AB0, table->path);
 }
 
@@ -644,7 +644,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
         healing = power + base;
         break;
     case 15:
-        healing = effMiscRandMod(0, power) + base;
+        healing = sdfGetRandInt(0, power) + base;
         break;
     case 9:
         healing = current * power / 100 + base;
@@ -769,7 +769,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
                 count++;
             }
         }
-        mask = 1 << list[effMiscRandMod(0, count)];
+        mask = 1 << list[sdfGetRandInt(0, count)];
     }
     if (mask != 0 &&
         (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
@@ -823,7 +823,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
         sdfDebugPrintf(D_00412B08, scaled, ratio, mask);
-        roll = effMiscRandMod(0, 100);
+        roll = sdfGetRandInt(0, 100);
         hit = roll < scaled;
     }
     return hit ? mask : 0;

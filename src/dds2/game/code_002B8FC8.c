@@ -122,9 +122,9 @@ extern u8 *D_00435E48;
 
 extern void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 
-extern void frFontAddSharedGlyphFlags();
+extern void frEnableMode();
 
-extern void frFontClearFlagBits();
+extern void frDisableMode();
 
 extern char mnuCampPartySelectionReturnPopupEntry[];
 
@@ -844,17 +844,17 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
         if (node->value != NULL) {
             glyph = itfCreateConvertedTextGlyph(x + xOffset, rowY + yOffset, depth, color,
                                                 (const u8 *)node->value, NULL);
-            frFontSetChildChainFirstOption(glyph, chainFlag);
+            frSetFontColorNo(glyph, chainFlag);
             if ((list->id & 1) != 0) {
                 sprintf(text, D_00437C28, (s32)node->sortKeyPrimary);
                 glyph = itfCreateFont2TextGlyph(x + 0x1180, rowY + 0x20, depth,
                                       color, text, glyph);
-                frFontSetChildChainFirstOption(glyph, chainFlag);
+                frSetFontColorNo(glyph, chainFlag);
             }
         }
         if (glyph != NULL) {
             frFontDrawGlyphChain((s32)glyph, 1, drawArg);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {
             list->drawCallback(x, y, depth, list, node, drawArg);
@@ -895,7 +895,7 @@ void mnuDestroyWindowContainer(MenuWindowContainer *menu) {
     if (menu->resource != NULL) {
         mnuReleaseWindowTextures(menu->resource);
     }
-    sdfReleaseChipBlock(menu);
+    sdfChipFreeDirect(menu);
 }
 
 void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, struct EffectSlotSet *sprite) {
@@ -1021,8 +1021,8 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value,
 /* Create an owned three-sprite bundle using the caller's slot-index array. */
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
                     EffectSlotSet *resourceHandle, s32 *indices, u32 unused) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x18);
-    MenuIconSprites *bundle = (void *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x18);
+    MenuIconSprites *bundle = (void *)sdfMemLock(allocation);
     memset(bundle, 0, 0x18);
     bundle->allocation = allocation;
     mnuInitIconSprites(bundle, width, height, value, resourceHandle, indices, unused);
@@ -1036,7 +1036,7 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
         effDestroyResourceSlotSet(menu->sprite[spriteIndex]);
         spriteIndex++;
     } while (spriteIndex < MNU_WINDOW_RESOURCE_SPRITES);
-    sdfReleaseResourceAllocation(menu->allocation);
+    sdfMemFreeDirect(menu->allocation);
 }
 
 void func_002B9A38(void) {
@@ -1272,7 +1272,7 @@ void mnuReleaseResourceList(MenuIconState *list) {
             effDestroyResourceSlotSet(list->sprite[slotIndex]);
         }
     }
-    sdfReleaseChipBlock(list);
+    sdfChipFreeDirect(list);
 }
 
 typedef struct MenuPos {
@@ -1557,8 +1557,8 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
-    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(menu->count * MNU_LIST_POINTER_BYTES);
+    MenuListNode **items = (MenuListNode **)sdfMemLock(allocation);
     MenuListNode **writeCursor = items;
     MenuListNode *node;
 
@@ -1574,7 +1574,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks(menu, 0);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 /* Allocate four native fade records into pointer slots after the list header. */
@@ -1591,7 +1591,7 @@ void mnuFreeListEntries(s32 *list) {
     s32 *entries = list + 1;
     u32 slotIndex = 0;
     do {
-        sdfReleaseChipBlock(*entries++);
+        sdfChipFreeDirect(*entries++);
         slotIndex++;
     } while (slotIndex < MNU_FADING_SLOT_COUNT);
 }
@@ -1755,7 +1755,7 @@ void mnuReleaseScrollPanelAnimations(menu)
 }
 
 MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner) {
-    MenuScrollPanel *menu = (MenuScrollPanel *)sdfAllocSizeClassBlock(0x48);
+    MenuScrollPanel *menu = (MenuScrollPanel *)sdfChipAllocDirect(0x48);
     memset(menu, 0, 0x48);
     menu->firstSprite = 0;
     menu->secondSprite = 0;
@@ -1770,7 +1770,7 @@ MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner) {
 
 void mnuDestroyScrollPanel(MenuScrollPanel *menu) {
     mnuReleaseScrollPanelAnimations(menu);
-    sdfReleaseChipBlock(menu);
+    sdfChipFreeDirect(menu);
 }
 
 
@@ -1932,7 +1932,7 @@ MenuSprites *mnuCreatePageSpriteSet(s32 kind, EffectSlotSet *mainResource,
         {itemResource, 0xB, 0xE20, 0x458, 0},
         {itemResource, 0xF, 0xEB0, 0x330, 0}
     };
-    MenuSprites *page = sdfAllocSizeClassBlock(sizeof(MenuSprites));
+    MenuSprites *page = sdfChipAllocDirect(sizeof(MenuSprites));
     memset(page, 0, sizeof(MenuSprites));
     page->profileLabelOverride = kind;
     for (i = 0; i < 5; i++) {
@@ -1981,7 +1981,7 @@ void mnuFreeIconSprites(MenuSprites *menu) {
             effDestroyResourceSlotSet(menu->cursor[i]);
         }
     }
-    sdfReleaseChipBlock(menu);
+    sdfChipFreeDirect(menu);
 }
 
 
@@ -2047,7 +2047,7 @@ extern const MenuIconLayout D_0042AFD8;
 
 MenuIconBundle *mnuCreateIconBundle(EffectSlotSet *resource) {
     MenuIconLayout layout = D_0042AFD8;
-    MenuIconBundle *set = (MenuIconBundle *)sdfAllocSizeClassBlock(0x20);
+    MenuIconBundle *set = (MenuIconBundle *)sdfChipAllocDirect(0x20);
     u32 i;
     memset(set, 0, 0x20);
     for (i = 0; i < 3; i++) {
@@ -2064,7 +2064,7 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
         effDestroyResourceSlotSet(menu->sprite[i]);
         i++;
     } while (i < 3);
-    sdfReleaseChipBlock(menu);
+    sdfChipFreeDirect(menu);
 }
 
 

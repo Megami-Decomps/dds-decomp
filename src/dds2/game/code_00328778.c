@@ -27,7 +27,7 @@ extern void sdfPadUpdatePorts(void);
 
 extern void sdfPadBuildButtonStates(void);
 
-extern void sdfTickThreadPriorityOverride(void);
+extern void sdfFileCmdThreadCheckPrio(void);
 
 extern void sdfInitChipHeap(u32 heapSize);
 extern void sdfInitializeGraphicsWorkers(u32 resourceAddress);
@@ -81,7 +81,7 @@ void sdfRunTickWorkerThread(void) {
         if (!D_00438A8C) {
             sdfPadBuildButtonStates();
         }
-        sdfTickThreadPriorityOverride();
+        sdfFileCmdThreadCheckPrio();
         if (sdfTickCallback != NULL) {
             sdfTickCallback();
         }
@@ -102,7 +102,7 @@ void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetB
     sdfInitializeGraphicsWorkers(packetBufferBytes);
     sdfInitializeResourceQueuesAndTextureWords(0x40);
     sdfConsUploadDmaProgram(D_004389C0);
-    effMiscSeedRandomFromClock(NULL);
+    sdfRandomizeByTime(NULL);
     sdfStartTrackedThread(&D_004390F0, sdfRunTickWorkerThread, D_0045C8A0, 0x2000, 0x4C, 0);
 }
 

@@ -78,7 +78,7 @@ void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand);
 /* Release the cell system, then the basic node itself. */
 void effPolyDestroyWork(PolyNode *node) {
     parReleaseCellSystem(node->strip);
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* The cell initializer writes the same ages that the basic-ring update reads. */
@@ -196,7 +196,7 @@ void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex) {
     PCP_COPY_VECTOR_F32(origin, node->origin);
     pairs = half - 1;
     for (i = 0; i < pairs; i++) {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+        cosine = sdfCos(angle);
         sine = sdfSinPoly(angle);
         VU0_LOAD_VF(vf11, origin);
         VU0_STORE_VF(vf11, p);
@@ -275,8 +275,8 @@ u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
 /* Create a band from its template: the template body, then the 0x40-byte parameter tail that follows it, with eight-byte records after the header. */
 PolyBand *polyCreateExpandingRingBands(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyBandRecord) + sizeof(PolyBand);
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
-    PolyBand *band = (PolyBand *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    PolyBand *band = (PolyBand *)sdfMemLock(allocation);
 
     memset(band, 0, size);
     memcpy(band, templateHead, templateHead->templateSize);
@@ -299,7 +299,7 @@ PolyBand *polyCreateExpandingRingBands(PolyRingHead *templateHead) {
 /* Release the band's cell system and backing allocation handle, not the node itself. */
 void polyReleaseBandNodeResources(PolyBand *band) {
     parReleaseCellSystem(band->strip);
-    sdfReleaseResourceAllocation(band->allocation);
+    sdfMemFreeDirect(band->allocation);
 }
 
 /* Seed band records with staggered inactive ages. */
@@ -336,9 +336,9 @@ void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {
 
     record += index;
     spread = spawner->initialRadiusJitter;
-    start = spawner->initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    start = spawner->initialRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
     spread = spawner->targetRadiusJitter;
-    end = spawner->targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    end = spawner->targetRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
     record->age = 0;
     if (spawner->head.duration > 0) {
         record->radiusStep = (end - start) / (f32)spawner->head.duration;
@@ -373,7 +373,7 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
     angle = 0.0f;
     VU0_LOAD_VF(vf12, band->head.origin);
     for (i = 0; i < pairs - 1; i++) {
-        radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        radialDirection[0] = sdfCos(angle);
         radialDirection[1] = 0;
         radialDirection[2] = sdfSinPoly(angle);
         VU0_LOAD_VF(vf10, radialDirection);
@@ -421,7 +421,7 @@ void polyStripBuildScaledRing(PolyBand *band, s32 index) {
     VU0_LOAD_MATRIX(band->head.matrix);
     angle = 0.0f;
     for (i = 0; i < pairs - 1; i++) {
-        radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        radialDirection[0] = sdfCos(angle);
         radialDirection[1] = 0;
         radialDirection[2] = sdfSinPoly(angle);
         VU0_LOAD_VF(vf10, radialDirection);
@@ -526,8 +526,8 @@ void polyUpdateBandCells(PolyBand *band) {
 PolyArc *polyCreateArcRingNode(PolyArc *source) {
     s32 tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead);
     s32 size = source->head.entryCount * sizeof(PolyArcRecord) + sizeof(PolyRingHead) + tailBytes;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
-    PolyArc *clone = (PolyArc *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    PolyArc *clone = (PolyArc *)sdfMemLock(allocation);
 
     memset(clone, 0, size);
     memcpy(clone, source, source->head.templateSize);
@@ -550,7 +550,7 @@ PolyArc *polyCreateArcRingNode(PolyArc *source) {
 /* Release the arc's cell system and backing allocation handle, leaving the node alive. */
 void polyReleaseNodeCellSystemAndBuffer(PolyArc *arc) {
     parReleaseCellSystem(arc->strip);
-    sdfReleaseResourceAllocation(arc->allocation);
+    sdfMemFreeDirect(arc->allocation);
 }
 
 /* Seed arc records with staggered inactive ages. */
@@ -579,7 +579,7 @@ void polyRandomizeArcRecord(PolyArc *arc, s32 recordIndex) {
 
     record += recordIndex;
     record->age = 0;
-    record->radius = arc->radius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    record->radius = arc->radius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
 }
 
 
@@ -608,14 +608,14 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 recordIndex) {
     recordRadius = record->radius;
     angle = (f32)record->age / (f32)arc->head.duration * 3.14159265f;
     projectedInnerRadius = recordRadius * sdfSinPoly(angle);
-    verticalOffset = recordRadius * sdfEvaluateCosineViaSinePhaseShift(angle) - recordRadius;
+    verticalOffset = recordRadius * sdfCos(angle) - recordRadius;
     angleStep = 3.14159265f * 2.0f / (f32)arc->segments;
     VU0_LOAD_MATRIX(arc->head.matrix);
     radialWidth = arc->radialWidth;
     angle = 0.0f;
     VU0_LOAD_VF(vf12, arc->head.origin);
     for (i = 0; i < pairs - 1; i++) {
-        innerPointVector[0] = outerPointVector[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        innerPointVector[0] = outerPointVector[0] = sdfCos(angle);
         innerPointVector[2] = sdfSinPoly(angle);
         outerPointVector[1] = verticalOffset;
         outerPointVector[2] = innerPointVector[2] * (projectedInnerRadius + radialWidth);
@@ -717,8 +717,8 @@ void polyUpdateArcCells(PolyArc *arc) {
 /* Rotating-band counterpart of polyCreateExpandingRingBands: twenty-byte records follow the header. */
 PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
-    PolyRotatingBand *band = (PolyRotatingBand *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
+    PolyRotatingBand *band = (PolyRotatingBand *)sdfMemLock(allocation);
 
     memset(band, 0, size);
     memcpy(band, templateHead, templateHead->templateSize);
@@ -741,7 +741,7 @@ PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
 /* Release the rotating band's cell system and backing allocation handle, not the node. */
 void polyReleaseCellBoundNodeResources(PolyRotatingBand *rotatingBand) {
     parReleaseCellSystem(rotatingBand->strip);
-    sdfReleaseResourceAllocation(rotatingBand->allocation);
+    sdfMemFreeDirect(rotatingBand->allocation);
 }
 
 /* Seed rotating-band records, advancing the age after each delay group. */
@@ -774,9 +774,9 @@ void polyRotatingRandomizeRecord(PolyRotatingBand *spawner, u32 index) {
     record += index;
     spread = spawner->initialRadiusJitter;
     record->age = 0;
-    record->radius = spawner->initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    record->radius = spawner->initialRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread));
     spread = spawner->targetRadiusJitter;
-    record->radiusStep = (spawner->targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
+    record->radiusStep = (spawner->targetRadius * (sdfGetRandFloat(effDefaultRandomState) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
     record->rotationXRadians = spawner->rotationXDegrees * 0.017453292f;
     record->rotationYRadians = 6.2831852f / (f32)spawner->spawnDelayGroupSize * (f32)(index % spawner->spawnDelayGroupSize);
 }
@@ -815,7 +815,7 @@ void polyBandLayoutRingRotated(PolyRotatingBand *rotatingBand, s32 index)
     value = 0.0f;
     VU0_LOAD_VF(vf12, rotatingBand->head.origin);
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = sdfEvaluateCosineViaSinePhaseShift(value);
+        dir[0] = sdfCos(value);
         dir[1] = 0;
         dir[2] = sdfSinPoly(value);
         VU0_LOAD_VF(vf10, dir);

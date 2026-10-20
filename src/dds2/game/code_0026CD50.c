@@ -71,7 +71,7 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     memcpy(&header, (u8 *)sourceAddress + offset, sizeof(header));
     offset += sizeof(header);
     source = (u8 *)sourceAddress + offset;
-    handle = sdfAllocGeneralBlock(header.dataBytes + sizeof(EvtLoadedRecord));
+    handle = sdfMemAllocDirect(header.dataBytes + sizeof(EvtLoadedRecord));
     record = (EvtLoadedRecord *)sdfMemoryGetBlockAddress(handle);
     record->recordCount = header.recordCount;
     records = (u8 *)record + sizeof(EvtLoadedRecord);
@@ -81,12 +81,12 @@ EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress) {
     offset = sizeof(EvtLoadedRecord);
     memcpy((u8 *)record + offset, source, header.dataBytes);
     source += header.dataBytes;
-    relocationHandle = sdfAllocGeneralBlock(header.relocationBytes);
+    relocationHandle = sdfMemAllocDirect(header.relocationBytes);
     relocations = (u32 *)sdfMemoryGetBlockAddress(relocationHandle);
     memset(relocations, 0, header.relocationBytes);
     memcpy(relocations, source, header.relocationBytes);
     dds3ApplyRelocationOffsets(records, (u32)records, relocations, header.relocationBytes);
-    sdfReleaseResourceAllocation(relocationHandle);
+    sdfMemFreeDirect(relocationHandle);
     return record;
 }
 
@@ -105,7 +105,7 @@ void mtrLoadMantraNodePositions(void) {
     }
     mnuLoadMantraNodePositionTable((u32)fileGetLoadedDataAddress(request));
     mnuRebuildMantraCategoryAvailability();
-    sdfReleaseResourceAllocation(fileGetResourceHandle(request));
+    sdfMemFreeDirect(fileGetResourceHandle(request));
     filePollEntryCleanup(request);
 }
 
@@ -121,7 +121,7 @@ void mnuLoadMantraNodePositionTable(u32 resourceId) {
 
 /* Release the retained node-position handle and clear the global table address. */
 void mnuReleaseMantraNodePositionTable(void) {
-    sdfReleaseResourceAllocation(mnuMantraNodePositionTable->handle);
+    sdfMemFreeDirect(mnuMantraNodePositionTable->handle);
     mnuMantraNodePositionTable = 0;
 }
 
@@ -175,7 +175,7 @@ void mnuLoadMantraPanelPositionTable(u32 resourceId) {
 
 /* Release the retained panel-position handle and clear the global table address. */
 void mnuReleaseMantraPanelPositionTable(void) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)mnuMantraPanelPositionTable->handle);
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)mnuMantraPanelPositionTable->handle);
     mnuMantraPanelPositionTable = 0;
 }
 
@@ -196,7 +196,7 @@ typedef struct EvtMantraWork {
 /* Allocate/zero the selection work and point its entries at its inline storage.
  * The existing initializer is called only for nonzero initialValue. */
 EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_MANTRA_SELECTION_WORK_BYTES);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_MANTRA_SELECTION_WORK_BYTES);
     EvtMantraWork *work = (EvtMantraWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, MNU_MANTRA_SELECTION_WORK_BYTES);
@@ -211,7 +211,7 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
 
 void evtReleaseMantraSelectionWork(EvtMantraWork *work) {
     if (work != NULL) {
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfMemFreeDirect(work->allocation);
     }
 }
 

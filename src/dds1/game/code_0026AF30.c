@@ -30,8 +30,8 @@ extern void sdfEnableFlagListViewTargetRelativeMode(void);
 extern void fldApplyLightSetIndex(s32);
 
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
-    effObjSetInnerPosition(mnuTitleCameraObject, (u128 *)mnuTitleCameraPosition);
-    effObjSetInnerRotation(mnuTitleCameraObject, (u128 *)mnuTitleCameraRotation);
+    dds3SetPosPoseSet(mnuTitleCameraObject, (u128 *)mnuTitleCameraPosition);
+    dds3SetRotPoseSet(mnuTitleCameraObject, (u128 *)mnuTitleCameraRotation);
     return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
 }
 

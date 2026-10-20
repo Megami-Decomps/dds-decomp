@@ -190,7 +190,7 @@ void func_001FF0C8(BtlTask *task, u32 mode) {
     if (mode == 2) {
         btlSyncEligibleActorPanelHpMp(task);
     }
-    sdfReleaseChipBlock(btlActionScratchWork);
+    sdfChipFreeDirect(btlActionScratchWork);
 }
 
 u32 func_001FF558(void) {

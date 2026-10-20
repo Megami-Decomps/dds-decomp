@@ -67,7 +67,7 @@ extern u8 sdfViewUpVector[];
 
 /* Allocate the dispatch owner before calling the selected payload constructor. */
 EffWork *effAllocDispatch(s32 type, void *params) {
-    EffWork *work = sdfAllocSizeClassBlock(sizeof(*work));
+    EffWork *work = sdfChipAllocDirect(sizeof(*work));
     void *payload = D_00355730[type].handler(params);
 
     work->type = type;
@@ -83,7 +83,7 @@ void effTypeDispatch(EffWork *work) {
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
 void effTypeDispatchFree(EffWork *work) {
     D_00355738[work->type].handler(work->payload);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Return the retained payload passed to this type's callbacks. */
@@ -340,12 +340,12 @@ EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
     s32 length;
     s32 type;
     directory = effOpenDataDir(path);
-    list = sdfAllocSizeClassBlock(sizeof(*list));
+    list = sdfChipAllocDirect(sizeof(*list));
     if (sdfPfsDebugMode != 0) {
-        list->directoryPath = sdfAllocSizeClassBlock(strlen(path) + 1);
+        list->directoryPath = sdfChipAllocDirect(strlen(path) + 1);
         strcpy(list->directoryPath, path);
     } else {
-        list->directoryPath = sdfAllocSizeClassBlock(strlen(path) + 1);
+        list->directoryPath = sdfChipAllocDirect(strlen(path) + 1);
         strcpy(list->directoryPath, path);
     }
     tail = NULL;
@@ -376,7 +376,7 @@ EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
             ((entry.name[length-3]=='p' && entry.name[length-2]=='c' && entry.name[length-1]=='f') ||
              (entry.name[length-3]=='P' && entry.name[length-2]=='C' && entry.name[length-1]=='F'))) type = 0x20;
         if (type == 0) continue;
-        node = sdfAllocSizeClassBlock(sizeof(*node));
+        node = sdfChipAllocDirect(sizeof(*node));
         node->type = type;
         strcpy(node->name, entry.name);
         if (tail != NULL) tail->next = node;
@@ -398,12 +398,12 @@ void effFreeWorkList(EffResourceList *root) {
     if (node != NULL) {
         do {
             EffResourceListNode *next = node->next;
-            sdfReleaseChipBlock(node);
+            sdfChipFreeDirect(node);
             node = next;
         } while (node != NULL);
     }
-    sdfReleaseChipBlock(root->directoryPath);
-    sdfReleaseChipBlock(root);
+    sdfChipFreeDirect(root->directoryPath);
+    sdfChipFreeDirect(root);
 }
 
 
@@ -412,7 +412,7 @@ void effFreeWorkList(EffResourceList *root) {
 /* Copy the source count, duplicate its head pointer, and store the source-list pointer.
    Other descriptor words retain their native defaults; no retain operation occurs here. */
 EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
-    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(sizeof(*resource));
+    EffResourceDescriptor *resource = sdfChipAllocDirect(sizeof(*resource));
 
     resource->x = 0;
     resource->y = 0xC8;
@@ -599,7 +599,7 @@ void effFreeWork(EffResourceDescriptor *work) {
         sdfTexReleaseReferenceViaHandler(texture);
         work->textureHandle = NULL;
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Set the browser screen coordinates. */
@@ -656,7 +656,7 @@ void effSetWorkTextureResource(EffResourceDescriptor *work, const char *textureR
     loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
     texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceWords[0]));
     work->textureHandle = texture;
-    sdfReleaseResourceAllocation(loadedResource);
+    sdfMemFreeDirect(loadedResource);
 }
 
 extern SdfPoolNode D_003255A8;
@@ -828,8 +828,8 @@ f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
 /* Allocate/retain slot storage and return its header after the slots, not the slot base.
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
 EffArrHdr *effAllocSlotArray(s32 count) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
-    void *retainedAddress = (void *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
+    void *retainedAddress = (void *)sdfMemLock(allocation);
     u32 slotIndex = 0;
     EffCubicBezierSlot *slot = retainedAddress;
     u8 *headerAddress = (u8 *)slot + count * EFF_SLOT_BYTES;

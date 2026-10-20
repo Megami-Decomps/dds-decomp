@@ -32,7 +32,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *moverNode)
         if (slotResource->path->flags & DDS3_PATH_POSITION_CHANNEL) {
             dds3InterpolatePathVectorVU(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
-            effObjSetInnerPosition(targetObject, (u128 *)pathVector);
+            dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
             if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
                 PCP_COPY_VECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
             }
@@ -40,7 +40,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *moverNode)
         if (slotResource->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
             dds3InterpolatePathQuaternionVU(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
-            effObjSetInnerRotation(targetObject, (u128 *)pathVector);
+            dds3SetRotPoseSet(targetObject, (u128 *)pathVector);
         }
         if (slotResource->path->flags & DDS3_PATH_SCALAR_CHANNEL) {
             if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {

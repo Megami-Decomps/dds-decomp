@@ -41,7 +41,7 @@ typedef char EvtResourcePair_dataAddress_offset_must_be_0x04[((u32)&((EvtResourc
 /* Loaded resource table header: the resource handle, the origin of a
  * 32-byte-stride record array, and its record count. */
 typedef struct EvtLoadedRecord {
-    struct SdfMemBlock *handle; /* 0x0: released by sdfReleaseResourceAllocation */
+    struct SdfMemBlock *handle; /* 0x0: released by sdfMemFreeDirect */
     u8 *records; /* 0x4: origin of a 32-byte-stride lookup */
     u32 recordCount; /* 0x8: bound used by the coordinate search */
 } EvtLoadedRecord;

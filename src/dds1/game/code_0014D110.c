@@ -389,10 +389,10 @@ s32 fldUpdateLookAtSegment(void) {
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.z = cam->z + sdfCos((cam->angle + 180.0f) * 3.14f / 180.0f);
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + sdfCos(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     fldLookAtNearPoint.x = near.x;
     fldLookAtNearPoint.y = near.y;
     fldLookAtNearPoint.z = near.z;
@@ -423,10 +423,10 @@ s32 fldCmdSetLookAtHeading(void) {
     cam = &fldAreaState;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.z = cam->z + sdfCos((cam->angle + 180.0f) * 3.14f / 180.0f);
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + sdfCos(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     fldLookAtNearPoint.x = near.x;
     fldLookAtNearPoint.y = near.y;
     fldLookAtNearPoint.z = near.z;

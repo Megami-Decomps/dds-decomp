@@ -31,7 +31,7 @@ typedef char SdfGeneralHeapStats_size_must_be_0x18[
 typedef char SdfChipHeapStats_size_must_be_0x30[
     (sizeof(SdfChipHeapStats) == 0x30) ? 1 : -1];
 
-struct SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes);
+struct SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes);
 struct SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes);
 struct SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes);
 struct SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
@@ -49,9 +49,9 @@ void *sdfAllocateBlockBySizeThreshold(s32 size);
 void sdfFreeMemoryFromEitherHeap(void *data);
 void sdfReleaseChipOrRetainedResource(void *data);
 
-u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
-void sdfDecrementAllocationReferenceCount(struct SdfMemBlock *allocation);
-void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
+u32 sdfMemLock(struct SdfMemBlock *allocation);
+void sdfMemUnlock(struct SdfMemBlock *allocation);
+void sdfMemFreeDirect(struct SdfMemBlock *allocation);
 void sdfReleaseMemorySlot(s32 *slot);
 
 /* The optional outputs contain a data address and file size, not a descriptor.
@@ -63,7 +63,7 @@ struct SdfMemBlock *sdfReadNamedResource(
 
 /* Queue the two heap owners separately: the general heap stores descriptors,
  * while the chip heap stores the address of the cell to release. */
-void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *allocation);
+void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation);
 void sdfQueuePendingChipRelease(void *memory);
 
 #endif /* SDF_RESOURCE_H */

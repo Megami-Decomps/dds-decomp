@@ -915,8 +915,8 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    allocation = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = (void *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(sizeof(BrsSkillPackageWork));
+    work = (void *)sdfMemLock(allocation);
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
@@ -945,7 +945,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
 
 
 void brsStaffTaskDestroy(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (context->teardownResource != NULL) {
         effDestroyResourceSlotSet(context->teardownResource);
@@ -956,7 +956,7 @@ void brsStaffTaskDestroy(KwlnTask *task) {
     }
     effDestroyEffectList(context->resourceList);
     dspCloseChannel();
-    sdfReleaseResourceAllocation(context->allocation);
+    sdfMemFreeDirect(context->allocation);
     brsTaskState = 2;
 }
 
@@ -971,9 +971,9 @@ s32 mnuStaffCreateTasks(void) {
     s32 secondaryPanelTaskHandle;
     BrsSkillPackageWork *work = brsCreateTaskContext();
 
-    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
-    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
-    secondaryPanelTaskHandle = (s32)kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
+    dds3StartProcess(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
+    dds3StartProcess(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
+    secondaryPanelTaskHandle = (s32)dds3StartProcess(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
     brsTaskState = 1;
     return secondaryPanelTaskHandle;
 }
@@ -986,9 +986,9 @@ u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;
 
     if (state == 1) {
-        kwlnTaskDestroyWithHierarchyByName(brsStaffInputTaskName, 0);
-        kwlnTaskDestroyWithHierarchyByName(mnuStaffPrimaryPanelTaskName, 0);
-        kwlnTaskDestroyWithHierarchyByName(mnuStaffSecondaryPanelTaskName, 0);
+        dds3KillProcessName(brsStaffInputTaskName, 0);
+        dds3KillProcessName(mnuStaffPrimaryPanelTaskName, 0);
+        dds3KillProcessName(mnuStaffSecondaryPanelTaskName, 0);
         brsUpdateBlocked = state;
         return 1;
     }
@@ -1018,13 +1018,13 @@ u32 brsTaskTryDestroy(void) {
 }
 
 s32 brsIsPrimaryPanelUpdateReady(void) {
-    KwlnTask *task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
+    KwlnTask *task = dds3SearchProcessName(mnuStaffPrimaryPanelTaskName);
     BrsSkillPackageWork *work;
 
     if (task == 0) {
         return 0;
     }
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     if (0x100 - work->fadeProgress <= 0 &&
         brsTaskIsUiUpdateAllowed(work) != 0 &&
         work->opacityReady == 1) {
@@ -1065,7 +1065,7 @@ void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
 extern s32 mnuStaffRollThresholds[];
 
 s32 mnuStaffPickRoll(void) {
-    u32 roll = effMiscRand(0) & 0xFF;
+    u32 roll = sdfGetRand(0) & 0xFF;
     u32 i;
 
     for (i = 0; i < 4; i++) {
@@ -1084,7 +1084,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
     s32 i;
 
     work->rewardMode = 0;
-    if (((s32)effMiscRand(0) & 1) > 0) {
+    if (((s32)sdfGetRand(0) & 1) > 0) {
         return;
     }
 
@@ -1108,7 +1108,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
         return;
     }
 
-    work->rewardIndex = eligible[(u32)effMiscRand(0) % (u32)eligibleCount];
+    work->rewardIndex = eligible[(u32)sdfGetRand(0) % (u32)eligibleCount];
 }
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);

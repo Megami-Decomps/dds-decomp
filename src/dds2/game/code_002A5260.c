@@ -1025,7 +1025,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    return frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    return frDestroyFontRequestAfter(glyph);
 }
 
 
@@ -1172,7 +1172,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
     case 1:
         mnuPrepareStaffRollText();
         mnuInitializeMovieRollViewport();
-        kwlnTaskCreate(D_00429938, 0x2B19, 0, 0, mnuUpdateStaffMoviePresentation,
+        dds3StartProcess(D_00429938, 0x2B19, 0, 0, mnuUpdateStaffMoviePresentation,
                        mnuReleaseMovieResourceAfterPendingWork, 0);
         kwlnFadeOutStart(0, 0, 0, 0x1E);
         mnuMovieWork->state = 3;
@@ -1364,9 +1364,9 @@ void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
     s32 j;
     s32 age;
 
-    if (effMiscRand(0) % 60 == 0 && state->count < 8) {
-        s32 x = effMiscRand(0) % 60 - 100;
-        u32 y = effMiscRand(0) % 448;
+    if (sdfGetRand(0) % 60 == 0 && state->count < 8) {
+        s32 x = sdfGetRand(0) % 60 - 100;
+        u32 y = sdfGetRand(0) % 448;
         state->positions[state->count][0] = x * 16;
         state->positions[state->count][1] = y * 8;
         state->ages[state->count] = 0;
@@ -1479,8 +1479,8 @@ void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s3
     i = 19;
     while (i >= 0) {
         i--;
-        first = effMiscRand(0) % count;
-        second = effMiscRand(0) % count;
+        first = sdfGetRand(0) % count;
+        second = sdfGetRand(0) % count;
         savedSpriteIndex = transition->spriteIndices[first + skip];
         transition->spriteIndices[first + skip] = transition->spriteIndices[second + skip];
         transition->spriteIndices[second + skip] = savedSpriteIndex;
@@ -1564,7 +1564,7 @@ void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     uiDrawSurfaceAtNearDepth(0x53);
     if (state->scrolling == 0) {
         if (state->countdown == 0) {
-            if (effMiscRand(0) % 180U == 0) {
+            if (sdfGetRand(0) % 180U == 0) {
                 state->scrolling = 1;
                 state->y = (sprites->workEntries[7].sourceHeight + 0x1C0) << 3;
             }
@@ -1637,7 +1637,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    sdfQueueGeneralAllocationRelease(mnuMovieWork->handle);
+    sdfMemFreeDelayedDirect(mnuMovieWork->handle);
     mnuMovieWork = NULL;
 }
 
@@ -1665,15 +1665,15 @@ void mnuCreateStaffTask(void) {
     SdfMemBlock *handle;
 
     D_00435CBC = 0x80000000;
-    handle = sdfAllocGeneralBlock(0xD8);
-    mnuMovieWork = (StaffTaskState *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(0xD8);
+    mnuMovieWork = (StaffTaskState *)sdfMemLock(handle);
     memset(mnuMovieWork, 0, 0xD8);
     mnuMovieWork->handle = handle;
     mnuMovieWork->state = 0;
     mnuMovieWork->frame = 0;
     mnuMovieTaskState = 1;
     frFontUploadClearedTexture();
-    kwlnTaskCreate(D_00429968, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
+    dds3StartProcess(D_00429968, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }
 
 u32 mnuStartStaffMovieRequest(void) {
@@ -1682,8 +1682,8 @@ u32 mnuStartStaffMovieRequest(void) {
 }
 
 s32 mnuStopStaffTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_00429938, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_00429968, 1);
+    dds3KillProcessName(D_00429938, 0);
+    dds3KillProcessName(D_00429968, 1);
     return 0;
 }
 
@@ -1697,7 +1697,7 @@ extern char D_0042A338[]; /* "mnuMovieDraw" */
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
         sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
-        mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
 
@@ -1783,11 +1783,11 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         sdfCancelAndReleaseMovieStreamWork(context);
         mnuMoviePlaybackDescriptor.source = D_00437AD8->word;
         D_00437AD0 = 0;
-        return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
+        return dds3StartProcess(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
     } else {
         D_00437AD4 = 0;
         sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &mnuMoviePlaybackDescriptor, file);
-        mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
+        mnuMovieDrawTask = dds3StartProcess(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
     }
     return mnuMovieDrawTask;
 }
@@ -1802,7 +1802,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleaseMovieStreamWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    dds3KillProcess(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

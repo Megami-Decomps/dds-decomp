@@ -9,6 +9,6 @@ void frFontSetContextEncodedByte(struct FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(struct FrFontGlyph *glyph);
 void frFontSetSpacingAndMeasureGlyphs(struct FrFontGlyph *glyph, s32 spacing);
 void frFontSetGlyphPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
-void frFontStoreShiftedRenderValue(struct FrFontGlyph *glyph, u32 unshiftedValue);
+void frSetPriority(struct FrFontGlyph *glyph, u32 unshiftedValue);
 
 #endif

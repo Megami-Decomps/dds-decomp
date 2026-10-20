@@ -356,9 +356,9 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     ItfMesState *mes;
     struct SdfMemBlock *handle;
 
-    handle = sdfAllocGeneralBlock(0x1E0);
+    handle = sdfMemAllocDirect(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfResourceRetainAddress(handle);
+    mes = (ItfMesState *)sdfMemLock(handle);
     node->state = mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
@@ -411,7 +411,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     if (captionBlock->selectedIndex != (u16)table->bitCount) {
         selected = table->bitCount;
         if (captionBlock->glyphChain != NULL) {
-            frFontQueueGlyphForCurrentDrawBuffer(captionBlock->glyphChain);
+            frDestroyFontRequestAfter(captionBlock->glyphChain);
             captionBlock->glyphChain = NULL;
         }
         captionBlock->selectedIndex = selected;
@@ -481,7 +481,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     entryBlock = &mes->entryBlock;
     primaryTextBlock = &mes->blk14;
     if (entryBlock->glyphChain != NULL) {
-        frFontQueueGlyphForCurrentDrawBuffer(entryBlock->glyphChain);
+        frDestroyFontRequestAfter(entryBlock->glyphChain);
         entryBlock->glyphChain = NULL;
     }
     itfMesResetCursorState(entryBlock, 0);
@@ -491,7 +491,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
         return;
     }
     if (primaryTextBlock->glyphChain != NULL) {
-        frFontQueueGlyphForCurrentDrawBuffer(primaryTextBlock->glyphChain);
+        frDestroyFontRequestAfter(primaryTextBlock->glyphChain);
         primaryTextBlock->glyphChain = NULL;
     }
     itfResetCursorPositionAndState(primaryTextBlock, 0);
@@ -539,7 +539,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     s32 firstRowY;
 
     if (optionBlock->glyphChain != NULL) {
-        frFontQueueGlyphForCurrentDrawBuffer(optionBlock->glyphChain);
+        frDestroyFontRequestAfter(optionBlock->glyphChain);
         optionBlock->glyphChain = NULL;
     }
     table = entry->table;
@@ -564,7 +564,7 @@ void itfMesResetWindow(s32 window) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
     if (optionBlock->glyphChain != NULL) {
-        frFontQueueGlyphForCurrentDrawBuffer(optionBlock->glyphChain);
+        frDestroyFontRequestAfter(optionBlock->glyphChain);
         optionBlock->glyphChain = NULL;
     }
     optionBlock->panelValue = 0;
@@ -933,7 +933,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     }
     glyphChain = itfDrawDefaultColorText(0, 0, encodedText, 0);
     textExtent = itfMesMaxGroupedExtent(glyphChain);
-    frFontQueueGlyphForCurrentDrawBuffer(glyphChain);
+    frDestroyFontRequestAfter(glyphChain);
     return textExtent;
 }
 
@@ -960,8 +960,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->state = NULL;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, itfUpdateActiveMessageWindows, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
+    dds3StartProcess("CalcMsgMng", 0x409, 0, 0, itfUpdateActiveMessageWindows, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
+    dds3StartProcess("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
@@ -1129,7 +1129,7 @@ void itfMesDestroyWindow(s32 window) {
         btlReleaseEffectResourceHandles(mes);
         itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
-        sdfReleaseResourceAllocation(windowRecord->resourceHandle);
+        sdfMemFreeDirect(windowRecord->resourceHandle);
         windowRecord->state = NULL;
         itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_00452960 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_00452960 - 0x20))->activeWindowCount -= 1;
@@ -1212,7 +1212,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
 
     previousGlyph = entryBlock->glyphChain;
     if (previousGlyph != NULL) {
-        frFontQueueGlyphForCurrentDrawBuffer(previousGlyph);
+        frDestroyFontRequestAfter(previousGlyph);
         entryBlock->glyphChain = NULL;
     }
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
@@ -1265,21 +1265,21 @@ void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
     s32 allocationBytes;
 
     if (*textAddress != 0) {
-        sdfReleaseResourceAllocation(slots->handles[slotIndex]);
+        sdfMemFreeDirect(slots->handles[slotIndex]);
         *textAddress = 0;
     }
     if (byteCount <= 0) {
         allocationBytes = (strlen(source) + ITF_MES_STRING_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
-        slots->handles[slotIndex] = sdfAllocGeneralBlock(allocationBytes);
-        *textAddress = sdfResourceRetainAddress(slots->handles[slotIndex]);
+        slots->handles[slotIndex] = sdfMemAllocDirect(allocationBytes);
+        *textAddress = sdfMemLock(slots->handles[slotIndex]);
         memset((void *)*textAddress, 0, allocationBytes);
         /* String mode copies the padded span, rather than only strlen + 1. */
         memcpy((void *)*textAddress, source, allocationBytes);
         return;
     }
     allocationBytes = (byteCount + ITF_MES_BINARY_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
-    slots->handles[slotIndex] = sdfAllocGeneralBlock(allocationBytes);
-    *textAddress = sdfResourceRetainAddress(slots->handles[slotIndex]);
+    slots->handles[slotIndex] = sdfMemAllocDirect(allocationBytes);
+    *textAddress = sdfMemLock(slots->handles[slotIndex]);
     memset((void *)*textAddress, 0, allocationBytes);
     memcpy((void *)*textAddress, source, byteCount);
 }
@@ -1360,7 +1360,7 @@ FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *glyph, s32 from, s32 to) {
             glyph->next = NULL;
             glyph->chainHead = glyph;
             glyph->previous = NULL;
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
             glyph = nextNode;
             if (glyph == NULL) {
                 return NULL;
@@ -1379,7 +1379,7 @@ FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *glyph, s32 from, s32 to) {
         glyph->next = NULL;
         glyph->chainHead = glyph;
         glyph->previous = NULL;
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
         glyph = nextNode;
     }
     rowHead->next = NULL;
@@ -1744,7 +1744,7 @@ void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
     remaining = 0x1f;
     do {
         if (*entries != 0) {
-            sdfReleaseResourceAllocation(slots->handles[entries - slots->addresses]);
+            sdfMemFreeDirect(slots->handles[entries - slots->addresses]);
             *entries = 0;
         }
         remaining = remaining - 1;
@@ -2675,12 +2675,12 @@ void itfUpdateSoundSelectorOptions(void) {
         x -= 0x19;
         sprintf(text, D_004365F0, value % 10);
         glyph = itfCreateFont3TextGlyph(left, 0x8E8, 0, fade | 0xA09DC300, text, NULL);
-        frFontSetChildChainFirstOption(glyph, 4);
+        frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, 0x53);
         frFontSetChildColors(glyph, ((u32)(D_00452E60[digit] * fade) >> 7) | 0xA09DC300);
-        frFontSetChildChainFirstOption(glyph, 3);
+        frSetFontColorNo(glyph, 3);
         frFontDrawGlyphChain(glyph, 1, 0x53);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
         if (D_00438F30 < digit) {
             step *= 10;
         }

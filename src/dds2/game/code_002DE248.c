@@ -672,7 +672,7 @@ typedef struct EffFadeHeaderWork {
 typedef char EffFadeHeaderWorkSizeCheck[(sizeof(EffFadeHeaderWork) == 0x0C) ? 1 : -1];
 
 EffFadeHeaderWork *effDuplicateSmallHeader(const void *source) {
-    EffFadeHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffFadeHeaderWork));
+    EffFadeHeaderWork *buffer = sdfChipAllocDirect(sizeof(EffFadeHeaderWork));
     buffer->frame = 0;
     memcpy(buffer->payload, source, sizeof(buffer->payload));
     return buffer;
@@ -687,7 +687,7 @@ EffFadeHeaderWork *effCreateSmallHeaderFromFile(void *work) {
 
 void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
     kwlnCancelConfiguredFadeFrames();
-    sdfReleaseChipBlock(allocation);
+    sdfChipFreeDirect(allocation);
 }
 
 EffFadeHeaderWork *effCloneSmallHeaderFromWork(EffFadeHeaderWork *work) {
@@ -712,7 +712,7 @@ void effFadeFrameAdvance(EffFadeHeaderWork *counter) {
 EffFadeVectorWork *effCreateFadeVectorWork(source)
 const EffLensFlareParams *source;
 {
-    EffFadeVectorWork *effect = sdfAllocSizeClassBlock(sizeof(EffFadeVectorWork));
+    EffFadeVectorWork *effect = sdfChipAllocDirect(sizeof(EffFadeVectorWork));
     memset(effect, 0, sizeof(EffFadeVectorWork));
     VU0_STORE_VF(vf0, effect->vector);
     memcpy(&effect->source, source, sizeof(effect->source));
@@ -727,7 +727,7 @@ EffFadeVectorWork *effCreateFadeVectorFromFile(void *work) {
 }
 
 void effFreeFadeVectorWork(EffFadeVectorWork *work) {
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 EffFadeVectorWork *effCloneFadeVectorWork(EffFadeVectorWork *work) {
@@ -818,7 +818,7 @@ typedef struct EffSelectionHeaderWork {
 typedef char EffSelectionHeaderWorkSizeCheck[(sizeof(EffSelectionHeaderWork) == 0x14) ? 1 : -1];
 
 EffSelectionHeaderWork *effDuplicatePayloadHeader(const void *source) {
-    EffSelectionHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffSelectionHeaderWork));
+    EffSelectionHeaderWork *buffer = sdfChipAllocDirect(sizeof(EffSelectionHeaderWork));
     buffer->frame = 0;
     memcpy(buffer->payload, source, sizeof(buffer->payload));
     return buffer;
@@ -833,7 +833,7 @@ EffSelectionHeaderWork *effCreateSelectionHeaderFromFile(void *work) {
 
 void effReleaseSelectionHeaderAllocation(EffSelectionHeaderWork *allocation) {
     evtDestroySelectionState();
-    sdfReleaseChipBlock(allocation);
+    sdfChipFreeDirect(allocation);
 }
 
 EffSelectionHeaderWork *effCloneSelectionHeaderFromWork(EffSelectionHeaderWork *work) {
@@ -1447,7 +1447,7 @@ void effReleaseKindWork(EffKindWork *work) {
     if (work->target != NULL) {
         effKindAssetReferenceRelease(work->target);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 EffKindWork *effCloneKindWork(EffKindWork *source) {
@@ -1545,7 +1545,7 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
     if (work->target != NULL) {
         effKindAssetReferenceRelease(work->target);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Recreate alternate-kind work, retaining its secondary asset when initialization is supported. */
@@ -1608,7 +1608,7 @@ void effKindAssetReferenceRelease(EffKindAssetHolder *object) {
         if (object->kind != 4) {
             sdfTexReleaseReferenceViaHandler(object->resource);
         }
-        sdfReleaseChipBlock(object);
+        sdfChipFreeDirect(object);
     }
 }
 
@@ -1618,7 +1618,7 @@ EffKindAssetHolder *effRetainKindSecondaryAsset(EffKindAssetHolder *work) {
 }
 
 u8 *effCreateBillboardWork(u8 *source) {
-    u8 *work = (u8 *)sdfAllocSizeClassBlock(0x68);
+    u8 *work = (u8 *)sdfChipAllocDirect(0x68);
     memset(work, 0, 0x68);
     ((EffBillboardWork *)work)->frame = 0;
     ((EffBillboardWork *)work)->color = 0x80808080;
@@ -1642,7 +1642,7 @@ void effBillboardWorkRelease(u32 work) {
     if (billboard != 0) {
         billDispatchByKind(billboard);
     }
-    sdfReleaseChipBlock((void *)work);
+    sdfChipFreeDirect((void *)work);
 }
 
 void effReplaceBillboardClone(s32 dst, s32 src);
@@ -1743,8 +1743,8 @@ void effClearBillFrames(u8 *owner) {
 u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -1757,7 +1757,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
 /* Release the frame node's shared tracks and backing allocation. */
 void effReleaseBillFrameNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 typedef struct EffBillFrameEntry {
@@ -1849,17 +1849,17 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 factor;
-                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
-                if (effMiscRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->radius = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 factor = randomValue * config->widthJitter + (1.0f - config->widthJitter);
                 entry->innerWidth = config->innerWidth * factor;
                 entry->outerWidth = config->outerWidth * factor;
-                if (randomAge != 0) entry->age = (s32)(effMiscRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                if (randomAge != 0) entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
                 else entry->age = 0;
                 remainingSpawn = (s32)((u32)remainingSpawn - 1u);
             }
@@ -1895,7 +1895,7 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             VU0_SCALE_VF(vf11, entry->outerWidth);
             VU0_STORE_VF_UNCLOBBERED(vf10, innerWidth);
             VU0_STORE_VF_UNCLOBBERED(vf11, outerWidth);
-            direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            direction[0] = sdfCos(angle);
             direction[2] = sdfSinPoly(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
@@ -2013,8 +2013,8 @@ void billResetCellIndices(u8 *owner) {
 u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x1C + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(count * 0x1C + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2026,7 +2026,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
 
 void billReleaseCellNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 extern f32 D_003E98E0[12];
@@ -2122,22 +2122,22 @@ void billAdvanceCellInstances(EffClassWork *work) {
                 f32 randomValue;
                 f32 jitter;
                 f32 base;
-                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
+                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
                 jitter = config->radiusJitter;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 base = 1.0f - jitter;
                 entry->radiusA = config->radius * (randomValue * jitter + base);
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->radiusB = config->radius * (randomValue * jitter + base);
                 jitter = config->centerOffsetJitter;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->centerOffset = config->centerOffset * (randomValue * jitter + (1.0f - jitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->velocity = config->velocity * (randomValue * config->velocityJitter + (1.0f - config->velocityJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 jitter = randomValue * config->extentJitter + (1.0f - config->extentJitter);
                 entry->extent = config->extent * jitter;
-                if (randomAge != 0) entry->age = (s32)(effMiscRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                if (randomAge != 0) entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
                 else entry->age = startAge;
                 remainingSpawn = (s32)((u32)remainingSpawn - 1u);
             }
@@ -2180,7 +2180,7 @@ void billAdvanceCellInstances(EffClassWork *work) {
             VU0_LOAD_VF(vf10, D_003E9100);
             VU0_SCALE_VF(vf10, entry->extent);
             VU0_STORE_VF_UNCLOBBERED(vf10, width);
-            direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            direction[0] = sdfCos(angle);
             direction[2] = sdfSinPoly(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
@@ -2302,8 +2302,8 @@ void billResetParticleIndices(u8 *owner) {
 u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(count * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2315,7 +2315,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
 
 void billReleaseParticleNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceParticleInstances);
@@ -2375,8 +2375,8 @@ void effClearAnimatedFrames(u8 *owner) {
 
 u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x18 + headerSize);
-    u8 *node = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x18 + headerSize);
+    u8 *node = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *entries = node + headerSize;
 
     ((EffBillFrameState *)node)->allocation = base;
@@ -2438,7 +2438,7 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
 
 void billReleaseAlternatingTransformNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 extern EffRandState effSharedRandomState[];
@@ -2527,17 +2527,17 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
         if (age == waitingState) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
-                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
-                if (effMiscRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
+                if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
                 entry->radius = 0.0f;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->radiusStep = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter)) / (f32)frames;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
                 if (randomAge != 0) {
-                    entry->age = (s32)(effMiscRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
                     entry->radius += entry->radiusStep * (f32)(entry->age % frames);
                 } else {
                     entry->age = 0;
@@ -2575,7 +2575,7 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             VU0_MOVE_VF(vf10, vf11);
             VU0_SCALE_VF(vf10, entry->width);
             VU0_STORE_VF_UNCLOBBERED(vf10, width);
-            direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            direction[0] = sdfCos(angle);
             direction[2] = sdfSinPoly(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf12, vf10);
@@ -2679,8 +2679,8 @@ void billResetEmitterIndices(u8 *owner) {
 
 u8 *billAllocEmitterNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2740,7 +2740,7 @@ u8 *billCloneEmitterTransform(u8 *owner) {
 
 void billReleaseEmitterNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 extern EffRandState effSharedRandomState[];
@@ -2828,19 +2828,19 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 jitter;
-                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
+                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
                 jitter = config->radiusJitter;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->radius = config->radius * (randomValue * jitter + (1.0f - jitter));
                 jitter = config->offsetJitter;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->offset = config->offset * (randomValue * jitter + (1.0f - jitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->speed = config->speed * (randomValue * config->speedJitter + (1.0f - config->speedJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 jitter = randomValue * config->widthJitter + (1.0f - config->widthJitter);
                 entry->width = config->width * jitter;
-                if (randomAge != 0) entry->age = (s32)(effMiscRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                if (randomAge != 0) entry->age = (s32)(sdfGetRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
                 else entry->age = startAge;
                 remainingSpawn = (s32)((u32)remainingSpawn - 1u);
             }
@@ -2876,7 +2876,7 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             }
             distance = (speed + (acceleration * motionTime) * 0.5f) * motionTime;
             distance += entry->offset;
-            direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            direction[0] = sdfCos(angle);
             direction[2] = sdfSinPoly(angle);
             VU0_LOAD_VF(vf10, direction);
             VU0_MOVE_VF(vf11, vf10);
@@ -2985,8 +2985,8 @@ void effClearStripFrames(u8 *owner) {
 
 u8 *billAllocStripNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -3046,7 +3046,7 @@ u8 *billCloneStripTransform(u8 *owner) {
 
 void billReleaseStripNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 extern EffRandState effSharedRandomState[];
@@ -3133,34 +3133,34 @@ void billAdvanceStripInstances(EffClassWork *work) {
                 f32 start;
                 f32 end;
 
-                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 start = config->lengthStart * (randomValue * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 end = config->lengthEnd * (randomValue * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
                 entry->length = start;
                 entry->lengthStep = (end - start) / (f32)lifetime;
 
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 start = config->radiusStart * (randomValue * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 end = config->radiusEnd * (randomValue * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
                 entry->radius = start;
                 entry->radiusStep = (end - start) / (f32)lifetime;
 
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 start = config->tiltStart * (randomValue * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 end = config->tiltEnd * (randomValue * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
                 entry->tilt = start;
                 entry->tiltStep = (end - start) / (f32)lifetime;
 
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
                 if (randomAge != 0) {
-                    time = (f32)(effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    time = (f32)(sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
                     entry->age = (s32)time;
                     entry->length += entry->lengthStep * time;
                     entry->radius += entry->radiusStep * time;
@@ -3194,7 +3194,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             angle = (entry->spin + (acceleration * time) * 0.5f) * time + entry->angle;
             radius = entry->radius;
             tilt = entry->tilt;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            cosine = sdfCos(angle);
             sine = sdfSinPoly(angle);
 
             center[0] = cosine * radius;
@@ -3321,8 +3321,8 @@ void billResetTrailIndices(u8 *owner) {
 
 u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -3334,7 +3334,7 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
 
 void billReleaseTrailNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceTrailInstances);
@@ -3394,8 +3394,8 @@ void billResetQuadIndices(u8 *owner) {
 
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    struct SdfMemBlock *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -3455,7 +3455,7 @@ u8 *billCloneQuadTransform(u8 *owner) {
 
 void billReleaseQuadNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
 extern EffRandState effSharedRandomState[];
@@ -3565,30 +3565,30 @@ void billAdvanceQuadInstances(EffClassWork *work) {
                 f32 radialStart;
                 f32 radialEnd;
 
-                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
+                entry->angle = sdfGetRandFloat(effSharedRandomState) * 6.28318500518798828125f;
                 randomFactor = config->radiusJitter;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 entry->radius = config->radius * (randomValue * randomFactor + (1.0f - randomFactor));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 heightStartJitter = config->heightStartJitter;
                 radialStart = config->heightStart * (randomValue * heightStartJitter + (1.0f - heightStartJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 heightEndJitter = config->heightEndJitter;
                 radialEnd = config->heightEnd * (randomValue * heightEndJitter + (1.0f - heightEndJitter));
                 entry->height = radialStart;
                 entry->heightStep = (radialEnd - radialStart) / (f32)lifetime;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 velocityJitter = config->velocityJitter;
                 entry->velocity = config->velocity * (randomValue * velocityJitter + (1.0f - velocityJitter));
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 widthJitter = config->widthJitter;
                 randomFactor = randomValue * widthJitter + (1.0f - widthJitter);
                 entry->width = config->width * randomFactor;
-                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                randomValue = sdfGetRandFloat(effSharedRandomState);
                 tiltJitter = config->tiltJitter;
                 entry->tilt = config->tilt * (randomValue * tiltJitter + (1.0f - tiltJitter));
                 if (randomAge != 0) {
-                    entry->timer = (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    entry->timer = (s32)(sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
                 } else {
                     entry->timer = startFrame;
                 }
@@ -3633,7 +3633,7 @@ void billAdvanceQuadInstances(EffClassWork *work) {
             motionDistance = (velocity + (acceleration * time) * 0.5f) * time;
             radialOffset = entry->height + entry->heightStep * time;
             shapeFactor = entry->tilt;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            cosine = sdfCos(angle);
             sine = sdfSinPoly(angle);
 
             center[0] = cosine * shapeFactor;
@@ -3747,7 +3747,7 @@ typedef struct EffClassWorkList {
 EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effActiveInstanceOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
+    u8 *effect = sdfChipAllocDirect(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -3784,7 +3784,7 @@ EffClassWork *effCreateActiveInstanceFromFile(FileJobPayload *request) {
 void effDestroyActiveInstanceWork(EffClassWork *obj) {
 
     effActiveInstanceOperations[obj->kind].destroyResource(obj->resource);
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 EffClassWork *effCreateActiveResource(EffClassWork *obj) {
@@ -3889,8 +3889,8 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     }
     size = ((rows * 2 + cols) * 2 + rows) * 4;
     size = (((size >> 4) + ((size & 0xF) != 0)) << 4);
-    base = sdfAllocGeneralBlock(size + 0x30);
-    trackStorage = (u8 *)sdfResourceRetainAddress(base);
+    base = sdfMemAllocDirect(size + 0x30);
+    trackStorage = (u8 *)sdfMemLock(base);
     set = (EffTrackSet *)(trackStorage + size);
     set->buffer = trackStorage;
     trackStorage += rows * 16;
@@ -4021,7 +4021,7 @@ void effReleaseResourceRefs(EffTrackSet *work) {
         }
     }
     sdfQueueAssetRelease(work->handle);
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
@@ -4239,7 +4239,7 @@ void effResetRingResourceFrame(s32 work) {
 
 /* Create a point-set reference and initialize four colors per segment. */
 u32 *effSegmentPointerSet(u8 *work) {
-    u32 *pointSetRef = sdfAllocSizeClassBlock(4);
+    u32 *pointSetRef = sdfChipAllocDirect(4);
     u32 segments = ((EffRingSource *)work)->segments;
     EffPointSet *pointSet;
     u32 *entry;
@@ -4272,7 +4272,7 @@ u32 *effSegmentPointerSet(u8 *work) {
 
 void effReleaseRingResourceHandle(u32 handle) {
     effAssetQueueRelease((EffPointSet *)(u32)*(u32 *)handle);
-    sdfReleaseChipBlock((void *)handle);
+    sdfChipFreeDirect((void *)handle);
 }
 
 /* Class 1 ring parameters have a distinct 0x6C-byte copied layout. */
@@ -4353,7 +4353,7 @@ void effUpdateExpandingRingPoints(EffClassWork *work) {
     VU0_STORE_VF(vf10, bands[1]);
     VU0_STORE_VF(vf11, bands[2]);
     for (i = 0; i < groups; i++) {
-        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[0] = sdfCos(angle);
         direction[2] = sdfSinPoly(angle);
         VU0_LOAD_VF(vf10, direction);
         VU0_MOVE_VF(vf11, vf10);
@@ -4448,8 +4448,8 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
         count = 3;
     }
     size = count * sizeof(f32);
-    allocation = sdfAllocGeneralBlock(size + sizeof(EffClassDrawState));
-    scales = (f32 *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(size + sizeof(EffClassDrawState));
+    scales = (f32 *)sdfMemLock(allocation);
     state = (EffClassDrawState *)((u8 *)scales + size);
     state->allocation = allocation;
     state->scales = scales;
@@ -4466,7 +4466,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
         colors[2] = (first & second) + (((first ^ second) & 0xFEFEFEFE) >> 1);
         colors[3] = first;
         colors += 4;
-        *scales++ = source->scale * (effMiscRandUnitFloat(effSharedRandomState) * source->scaleRand + (1.0f - source->scaleRand));
+        *scales++ = source->scale * (sdfGetRandFloat(effSharedRandomState) * source->scaleRand + (1.0f - source->scaleRand));
     }
     return state;
 }
@@ -4474,7 +4474,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 void effReleaseClassDrawResources(s32 work) {
     effReleaseResourceRefs(((EffClassDrawState *)work)->trackSet);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
-    sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
+    sdfMemFreeDirect(((EffClassDrawState *)work)->allocation);
 }
 
 typedef struct EffClassFrameResource {
@@ -4614,7 +4614,7 @@ void effResetClassRingFrame(EffClassWork *work) {
 
 /* Create a point-set reference and initialize four colors per segment. */
 EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
-    EffRingResource *pointSetRef = sdfAllocSizeClassBlock(sizeof(EffRingResource));
+    EffRingResource *pointSetRef = sdfChipAllocDirect(sizeof(EffRingResource));
     u32 segments = work->segments;
     EffPointSet *pointSet;
     u32 *entry;
@@ -4647,7 +4647,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
 
 void effReleaseRingHandle(EffRingResource *handle) {
     effAssetQueueRelease(handle->pointSet);
-    sdfReleaseChipBlock(handle);
+    sdfChipFreeDirect(handle);
 }
 
 /* Class 0 ring parameters: the 0x68-byte layout without the extra word. */
@@ -4725,7 +4725,7 @@ void effUpdateRadialFanVertices(EffClassWork *work) {
     VU0_STORE_VF(vf10, bands[1]);
     VU0_STORE_VF(vf11, bands[2]);
     for (i = 0; i < groups; i++) {
-        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[0] = sdfCos(angle);
         direction[2] = sdfSinPoly(angle);
         VU0_STORE_VF(vf0, out[0]);
         VU0_LOAD_VF(vf11, direction);
@@ -4784,7 +4784,7 @@ void billDrawCellBlendB(EffClassWork *work) {
 EffClassWork *effCreateClassWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effClassWorkOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
+    u8 *effect = sdfChipAllocDirect(size + headerSize);
     ((EffClassWork *)effect)->payload = effect + headerSize;
     ((EffClassWork *)effect)->color = 0x80808080;
     ((EffClassWork *)effect)->scale = 1.0f;
@@ -4807,7 +4807,7 @@ EffClassWork *effCreateClassWorkFromFile(FileJobPayload *request) {
 
 void effDestroyClassWork(EffClassWork *work) {
     effClassWorkOperations[work->kind].destroyResource(work->resource);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 EffClassWork *effCloneClassWork(EffClassWork *work) {
@@ -4863,8 +4863,8 @@ EffPointSet *effCreatePointSet4(u32 count) {
     EffPointSet *set;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
-    base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress(base);
+    base = sdfMemAllocDirect(size + 0x20);
+    data = (u8 *)sdfMemLock(base);
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -4884,7 +4884,7 @@ EffPointSet *effCreatePointSet4(u32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(EffPointSet *set) {
     sdfQueueAssetRelease(set->handle);
-    sdfReleaseResourceAllocation(set->allocation);
+    sdfMemFreeDirect(set->allocation);
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
@@ -5079,20 +5079,20 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
-        sdfReleaseResourceAllocation(node->jobAllocation);
+        sdfMemFreeDirect(node->jobAllocation);
     }
     if (node->queueAllocation != 0) {
         count = node->record->count;
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation(node->queueAllocation);
+        sdfMemFreeDirect(node->queueAllocation);
     }
     if (node->index != 0) {
         for (i = 0; i < node->handleCount; i++) {
             effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation(node->handleBuffer);
+        sdfMemFreeDirect(node->handleBuffer);
     }
     if (node->resourceHolder != 0) {
         effReleaseReferenceHolder(node->resourceHolder);
@@ -5100,7 +5100,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
     if (node->record != 0) {
         fileReleaseGridRecordHandle(node->record);
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 s32 effRecreateSurfaceNodeFromWork(u8 *work) {
@@ -5153,7 +5153,7 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(dst->jobs[i]);
             }
-            sdfReleaseResourceAllocation(dst->jobAllocation);
+            sdfMemFreeDirect(dst->jobAllocation);
             dst->jobs = 0;
             dst->jobAllocation = 0;
         }
@@ -5161,8 +5161,8 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
         if (size == 0) {
             return;
         }
-        dst->jobAllocation = sdfAllocGeneralBlock(size);
-        dst->jobs = (FileJobPayload **)sdfResourceRetainAddress(dst->jobAllocation);
+        dst->jobAllocation = sdfMemAllocDirect(size);
+        dst->jobs = (FileJobPayload **)sdfMemLock(dst->jobAllocation);
         for (i = 0; i < count; i++) {
             dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
@@ -5173,7 +5173,7 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
             for (i = 0; i < count; i++) {
                 fileQueueDestroy(dst->queues[i]);
             }
-            sdfReleaseResourceAllocation(dst->queueAllocation);
+            sdfMemFreeDirect(dst->queueAllocation);
             dst->queues = 0;
             dst->queueAllocation = 0;
         }
@@ -5181,8 +5181,8 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
         if (size == 0) {
             return;
         }
-        dst->queueAllocation = sdfAllocGeneralBlock(size);
-        dst->queues = sdfResourceRetainAddress(dst->queueAllocation);
+        dst->queueAllocation = sdfMemAllocDirect(size);
+        dst->queues = sdfMemLock(dst->queueAllocation);
         for (i = 0; i < count; i++) {
             dst->queues[i] = fileQueueClone(src->queues[0]);
         }
@@ -5220,10 +5220,10 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
         for (i = 0; i < node->handleCount; i++) {
             effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation(node->handleBuffer);
+        sdfMemFreeDirect(node->handleBuffer);
     }
-    node->handleBuffer = sdfAllocGeneralBlock(size);
-    node->index = sdfResourceRetainAddress(node->handleBuffer);
+    node->handleBuffer = sdfMemAllocDirect(size);
+    node->index = sdfMemLock(node->handleBuffer);
     for (i = 0; i < node->handleCount; i++) {
         handle = effCreateSurfaceGridNode(params[0], params[1]);
         ((u32 *)node->index)[i] = (u32)handle;
@@ -5284,14 +5284,14 @@ void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
-        sdfReleaseResourceAllocation(node->jobAllocation);
+        sdfMemFreeDirect(node->jobAllocation);
         node->jobs = 0;
         node->jobAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        node->jobAllocation = sdfAllocGeneralBlock(size);
-        node->jobs = (FileJobPayload **)sdfResourceRetainAddress(node->jobAllocation);
+        node->jobAllocation = sdfMemAllocDirect(size);
+        node->jobs = (FileJobPayload **)sdfMemLock(node->jobAllocation);
         node->jobs[0] = fileJobCreateFromJob((FileJobPayload *)source);
         for (i = 1; i < count; i++) {
             node->jobs[i] = fileJobCreateChild(node->jobs[0]);
@@ -5309,14 +5309,14 @@ void effSurfaceNodeCreateQueues(EffectSurfaceNode *node, void *source) {
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation(node->queueAllocation);
+        sdfMemFreeDirect(node->queueAllocation);
         node->queues = 0;
         node->queueAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        node->queueAllocation = sdfAllocGeneralBlock(size);
-        node->queues = sdfResourceRetainAddress(node->queueAllocation);
+        node->queueAllocation = sdfMemAllocDirect(size);
+        node->queues = sdfMemLock(node->queueAllocation);
         node->queues[0] = fileCloneQueueEntries((FileQueue *)source);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);
@@ -5390,8 +5390,8 @@ EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
     EffSurfaceGridNode *node;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
-    base = sdfAllocGeneralBlock(size + 0x4C);
-    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    base = sdfMemAllocDirect(size + 0x4C);
+    data = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     node = (EffSurfaceGridNode *)(data + size);
     node->type = 2;
     node->buffer = (u128 *)data;
@@ -5474,7 +5474,7 @@ void effFillSurfaceGridColorGradient(EffSurfaceGridNode *node, u32 *colors) {
 
 void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *node) {
     sdfQueueAssetRelease(node->handle);
-    sdfReleaseResourceAllocation(node->allocation);
+    sdfMemFreeDirect(node->allocation);
 }
 
 void effResetSurfaceGridFrame(EffSurfaceGridNode *node) {
@@ -5694,7 +5694,7 @@ extern u32 D_003E9CC0[];
 extern u32 D_003E9CD0[];
 
 EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
-    EffQuadWork *work = sdfAllocSizeClassBlock(sizeof(EffQuadWork));
+    EffQuadWork *work = sdfChipAllocDirect(sizeof(EffQuadWork));
     void *buffer;
 
     memset(work, 0, sizeof(EffQuadWork));
@@ -5752,7 +5752,7 @@ void effReleaseRenderResources(EffQuadWork *work) {
     if (work->assetHandle != 0) {
         sdfQueueAssetRelease(work->assetHandle);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 EffQuadWork *effCloneRenderResourceWork(const EffQuadWork *source) {
@@ -5807,7 +5807,7 @@ void effRandomizeParticleFields(EffClassWork *work) {
     EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
     u32 i;
     for (i = 0; i < count; i++, entry++) {
-        entry->key = -1 - (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) & 3);
+        entry->key = -1 - (s32)(sdfGetRand((struct EffRandState *)effSharedRandomState) & 3);
     }
 }
 
@@ -5837,7 +5837,7 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     s32 rampIn;
     s32 rampOut;
 
-    table = (EffPointSetTable *)sdfAllocSizeClassBlock(count * sizeof(EffPointSetRow) + 4);
+    table = (EffPointSetTable *)sdfChipAllocDirect(count * sizeof(EffPointSetRow) + 4);
     table->rows = (EffPointSetRow *)(table + 1);
     if ((u32)src->layers < 3) {
         src->layers = 3;
@@ -5894,7 +5894,7 @@ void effFreeIndexedEntries(EffClassWork *work) {
         effReleasePointSetAsset(entry->set);
         entry++;
     }
-    sdfReleaseChipBlock(table);
+    sdfChipFreeDirect(table);
 }
 
 extern f32 sdfViewTargetVector[4];
@@ -5958,13 +5958,13 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
             if (entry->key == -1) {
                 entry->color = 0xA0808080;
             } else {
-                f32 r = effMiscRandUnitFloat(effSharedRandomState);
+                f32 r = sdfGetRandFloat(effSharedRandomState);
                 f32 bendStep = speed * (r * speedJitter + (1.0f - speedJitter));
                 f32 bend;
 
                 phase = entry->angle;
                 bendStep /= layers;
-                if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
                     bendStep = -bendStep;
                 }
                 bend = bendStep;
@@ -5973,7 +5973,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                 } else {
                     entry->key = -1;
                     if (respawnDelay > 0) {
-                        entry->key -= (u32)effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
+                        entry->key -= (u32)sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
                     }
                     continue;
                 }
@@ -5994,12 +5994,12 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     s32 j;
                     s32 k;
 
-                    if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
                         amplitude = -amplitude;
                     }
                     stepSquared = step * step;
-                    waveAngle = effMiscRandUnitFloat(effSharedRandomState) * 3.14159265f;
-                    waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
+                    waveAngle = sdfGetRandFloat(effSharedRandomState) * 3.14159265f;
+                    waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
                     waveHeight = sdfSinPoly(waveAngle) * waveRadius;
                     waveAngle += waveStep;
                     newHeight = sdfSinPoly(waveAngle) * waveRadius;
@@ -6038,19 +6038,19 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     }
                     vertices += 20;
                     for (k = 1; k < rows; k++) {
-                        f32 tilt = bendScale * (effMiscRandUnitFloat(effSharedRandomState) * 0.75 + 0.25);
+                        f32 tilt = bendScale * (sdfGetRandFloat(effSharedRandomState) * 0.75 + 0.25);
                         f32 slope;
                         f32 tangentScale;
                         f32 sine;
 
-                        if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                        if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
                             bendScale = -bendScale;
                         }
                         waveAngle += waveStep;
                         if (waveAngle >= 3.14159265f) {
                             waveAngle -= 3.14159265f;
                             amplitude = -amplitude;
-                            waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
+                            waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
                         }
                         newHeight = sdfSinPoly(waveAngle) * waveRadius;
                         delta = newHeight - waveHeight;
@@ -6065,7 +6065,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                         waveHeight = newHeight;
                         bend += bendStep;
                         sine = sdfSinPoly(delta);
-                        tangentScale = sine / sdfEvaluateCosineViaSinePhaseShift(delta);
+                        tangentScale = sine / sdfCos(delta);
                         VU0_MOVE_VF(vf12, vf10);
                         for (j = 0; j < 5; j++) {
                             f32 extra = widths[j] * tangentScale;
@@ -6165,7 +6165,7 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 
 EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config) {
     u32 count = config->timed.count;
-    EffClassWorkList *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
+    EffClassWorkList *allocation = sdfChipAllocDirect(count * 4 + 4);
     EffClassWork **entries = (EffClassWork **)(allocation + 1);
     EffBillPointConfig copy;
     u32 index;
@@ -6184,14 +6184,14 @@ EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config
     copy.timed.count = 1;
     copy.totalLength = config->totalLength;
     step = 6.2831852f / (f32)count;
-    position = step * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
+    position = step * ((sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f);
     for (index = 0; index < count; index++) {
         EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
         u8 **resourceSlot = (u8 **)resourceWork->resource;
 
         *entries++ = resourceWork;
         *(f32 *)(*resourceSlot + 0xC) = position;
-        offset = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+        offset = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
         position += step + step * offset * 0.25f;
     }
     return allocation;
@@ -6208,7 +6208,7 @@ void effDestroyRadialClassResourceEntries(EffClassWork *work) {
     for (i = 0; i < count; i++) {
         effDestroyClassResourceWork(*entry++);
     }
-    sdfReleaseChipBlock(header);
+    sdfChipFreeDirect(header);
 }
 
 extern void effAdvanceClassResourceFrame(EffClassWork *);
@@ -6266,7 +6266,7 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
         f32 angle = points->rows->angle;
 
         position[0] = work->vectors.position[0] - sdfSinPoly(angle) * radius;
-        position[1] = work->vectors.position[1] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        position[1] = work->vectors.position[1] - sdfCos(angle) * radius;
         effCopyClassResourcePosition(*entries, position);
         effCopyClassResourceOrientation(*entries, orientation);
         effSetClassResourceMatrixComponent(*entries, scale);
@@ -6290,12 +6290,12 @@ void effSeedBillScaleRange(EffClassWork *work) {
     EffScaleRange *range = (EffScaleRange *)work->resource;
     s32 steps = config->point.timed.time.duration;
     EffScaleRangeEntry *entry = range->entries;
-    f32 start = config->startBase * (effMiscRandUnitFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
+    f32 start = config->startBase * (sdfGetRandFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
     u32 index;
     u32 count;
 
     if (steps > 0) {
-        f32 end = config->endBase * (effMiscRandUnitFloat(effSharedRandomState) * config->endRand + (1.0f - config->endRand));
+        f32 end = config->endBase * (sdfGetRandFloat(effSharedRandomState) * config->endRand + (1.0f - config->endRand));
         range->start = start;
         range->delta = (end - start) / (f32)steps;
     } else {
@@ -6307,7 +6307,7 @@ void effSeedBillScaleRange(EffClassWork *work) {
     if (count != 0) {
         do {
             index++;
-            entry->negativeSeed = -1 - (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) & 7);
+            entry->negativeSeed = -1 - (s32)(sdfGetRand((struct EffRandState *)effSharedRandomState) & 7);
             entry++;
         } while (index < count);
     }
@@ -6328,8 +6328,8 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     s32 rampIn;
     s32 rampOut;
 
-    allocation = sdfAllocGeneralBlock(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
-    table = (EffScaleRange *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    allocation = sdfMemAllocDirect(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
+    table = (EffScaleRange *)sdfMemLock((struct SdfMemBlock *)((u32)allocation));
     table->allocation = allocation;
     table->entries = (EffScaleRangeEntry *)(table + 1);
     if ((u32)src->layers < 3) {
@@ -6385,7 +6385,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
         effReleasePointSetAsset(entry->set);
         entry++;
     }
-    sdfReleaseResourceAllocation(range->allocation);
+    sdfMemFreeDirect(range->allocation);
 }
 
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
@@ -6454,24 +6454,24 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     remaining = count;
     for (; remaining != 0; remaining--, entry++) {
         if (entry->negativeSeed == -1) {
-            f32 r = effMiscRandUnitFloat(effSharedRandomState);
+            f32 r = sdfGetRandFloat(effSharedRandomState);
             f32 jitter = config->angularRand;
             f32 baseSpeed = config->angularBase;
             entry->phase = 0;
             entry->angularRate = baseSpeed * (r * jitter + (1.0f - jitter));
             if (!useHeight) {
-                entry->yaw = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                entry->yaw = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                 entry->height = 0;
             } else {
-                entry->yaw = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
-                entry->height = -config->heightScale * effMiscRandUnitFloat(effSharedRandomState);
+                entry->yaw = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
+                entry->height = -config->heightScale * sdfGetRandFloat(effSharedRandomState);
             }
-            entry->pitch = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+            entry->pitch = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
             sdfVuLoadRotationMatrixX(entry->yaw);
             sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
             sdfMultiplyVuMatrixInPlace();
             phase = entry->phase;
-            position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
+            position[0] = sdfCos(phase) * radius;
             position[1] = 0;
             position[2] = sdfSinPoly(phase) * radius;
             VU0_LOAD_VF(vf10, position);
@@ -6487,7 +6487,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
             } else {
                 entry->negativeSeed = -1;
                 if (respawnDelay > 0) {
-                    entry->negativeSeed -= (u32)effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
+                    entry->negativeSeed -= (u32)sdfGetRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
                 }
                 continue;
             }
@@ -6510,12 +6510,12 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 f32 segmentLength;
                 s32 j;
                 s32 k;
-                if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
                     amplitude = -amplitude;
                 }
                 stepSquared = step * step;
-                waveAngle = effMiscRandUnitFloat(effSharedRandomState) * 3.14159265f;
-                waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
+                waveAngle = sdfGetRandFloat(effSharedRandomState) * 3.14159265f;
+                waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
                 waveHeight = sdfSinPoly(waveAngle) * waveRadius;
                 waveAngle += waveStep;
                 newHeight = sdfSinPoly(waveAngle) * waveRadius;
@@ -6525,7 +6525,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 oldSlope = asinf(delta / segmentLength);
                 inner = config->point.halfWidth;
                 edgeWidth = config->point.edgeWidth;
-                curveSample = effMiscRandUnitFloat(effSharedRandomState);
+                curveSample = sdfGetRandFloat(effSharedRandomState);
                 width = inner + edgeWidth;
                 phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
                 phase = phase + entry->phase;
@@ -6533,7 +6533,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 sdfVuLoadRotationMatrixX(entry->yaw);
                 sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
                 sdfMultiplyVuMatrixInPlace();
-                position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
+                position[0] = sdfCos(phase) * radius;
                 position[1] = 0;
                 position[2] = sdfSinPoly(phase) * radius;
                 VU0_LOAD_VF(vf10, position);
@@ -6580,19 +6580,19 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 entry->position[2] = previous[2];
                 vertices += 20;
                 for (k = 1; k < rows; k++) {
-                    f32 tilt = bendScale * (effMiscRandUnitFloat(effSharedRandomState) * 0.75 + 0.25);
+                    f32 tilt = bendScale * (sdfGetRandFloat(effSharedRandomState) * 0.75 + 0.25);
                     f32 slope;
                     f32 distance;
                     f32 tangentScale;
-                    if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((struct EffRandState *)effSharedRandomState) & 1) {
                         bendScale = -bendScale;
                     }
                     waveAngle += waveStep;
                     if (waveAngle >= 3.14159265f) {
                         waveAngle -= 3.14159265f;
                         amplitude = -amplitude;
-                        waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
-                        curve = bendStep * (effMiscRandUnitFloat(effSharedRandomState) * 0.7f + (1.0f - 0.7f));
+                        waveRadius = amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
+                        curve = bendStep * (sdfGetRandFloat(effSharedRandomState) * 0.7f + (1.0f - 0.7f));
                     }
                     newHeight = sdfSinPoly(waveAngle) * waveRadius;
                     delta = newHeight - waveHeight;
@@ -6715,7 +6715,7 @@ void effSeedBillboardFrameCounters(EffClassWork *work) {
     EffAlternatingPointSetRow *entry = ((EffAlternatingPointSetTable *)work->resource)->rows;
     u32 i;
     for (i = 0; i < count; i++, entry++) {
-        entry->key = -1 - (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) & 3);
+        entry->key = -1 - (s32)(sdfGetRand((struct EffRandState *)effSharedRandomState) & 3);
     }
 }
 
@@ -6736,7 +6736,7 @@ EffAlternatingPointSetTable *effCreateAlternatingAlphaRampPointSetRows(EffBillPo
     s32 rampOut;
     f32 previousRatio;
 
-    table = (EffAlternatingPointSetTable *)sdfAllocSizeClassBlock(count * sizeof(EffAlternatingPointSetRow) + 4);
+    table = (EffAlternatingPointSetTable *)sdfChipAllocDirect(count * sizeof(EffAlternatingPointSetRow) + 4);
     table->rows = (EffAlternatingPointSetRow *)(table + 1);
     if ((u32)src->layers < 3) {
         src->layers = 3;
@@ -6799,7 +6799,7 @@ void effReleaseBillboardFramePointSets(EffClassWork *work) {
     for (i = 0; i < count; i++, entry++) {
         effReleasePointSetAsset(entry->set);
     }
-    sdfReleaseChipBlock(table);
+    sdfChipFreeDirect(table);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002ED3D0);
@@ -6874,7 +6874,7 @@ void effDrawTintedCompactPointGroups(EffClassWork *work) {
 EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effClassResourceWorkOperations[kind].payloadSize;
-    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    EffClassWork *effect = sdfChipAllocDirect(size + headerSize);
     effect->payload = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
     effect->scale = 1.0f;
@@ -6897,7 +6897,7 @@ EffClassWork *effCreateClassResourceFromFile(FileJobPayload *request) {
 
 void effDestroyClassResourceWork(EffClassWork *work) {
     effClassResourceWorkOperations[work->kind].destroyResource(work);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 EffClassWork *effCloneClassResourceWork(EffClassWork *work) {
@@ -6954,8 +6954,8 @@ EffPointSet *effCreatePointSet5(s32 count) {
     EffPointSet *set;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
-    base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress(base);
+    base = sdfMemAllocDirect(size + 0x20);
+    data = (u8 *)sdfMemLock(base);
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -6975,7 +6975,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(EffPointSet *set) {
     sdfQueueAssetRelease(set->handle);
-    sdfReleaseResourceAllocation(set->allocation);
+    sdfMemFreeDirect(set->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -7073,7 +7073,7 @@ void effReleaseModelResources(EffectStripNode *p) {
     if (p->active != 0) {
         fileReleaseGridRecordHandle(p->active);
     }
-    sdfReleaseChipBlock(p);
+    sdfChipFreeDirect(p);
 }
 
 EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
@@ -7349,8 +7349,8 @@ void effResetBillTable(u8 *p) {
 }
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
+    struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -7455,7 +7455,7 @@ void effReleaseRingFadeTable(s32 work) {
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
-    sdfReleaseResourceAllocation(state->allocation);
+    sdfMemFreeDirect(state->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EF1C0);
@@ -7511,8 +7511,8 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
 }
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
+    struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -7614,7 +7614,7 @@ void effReleaseBillFadeTable(s32 work) {
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
-    sdfReleaseResourceAllocation(state->allocation);
+    sdfMemFreeDirect(state->allocation);
 }
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
@@ -7701,33 +7701,33 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
             }
 
             radius = common->radiusStart *
-                (effMiscRandUnitFloat(effSharedRandomState) * common->radiusStartJitter +
+                (sdfGetRandFloat(effSharedRandomState) * common->radiusStartJitter +
                  (one - common->radiusStartJitter));
             radiusStep =
-                (common->radiusEnd * (effMiscRandUnitFloat(effSharedRandomState) * common->radiusEndJitter +
+                (common->radiusEnd * (sdfGetRandFloat(effSharedRandomState) * common->radiusEndJitter +
                                       (one - common->radiusEndJitter)) - radius) /
                 (f32)life;
             particle->radius = radius;
             particle->radiusStep = radiusStep;
             particle->drag = config->drag *
-                (effMiscRandUnitFloat(effSharedRandomState) * config->dragJitter +
+                (sdfGetRandFloat(effSharedRandomState) * config->dragJitter +
                  (one - config->dragJitter));
-            particle->verticalOffset = -config->velocity * effMiscRandUnitFloat(effSharedRandomState);
+            particle->verticalOffset = -config->velocity * sdfGetRandFloat(effSharedRandomState);
             particle->flare = config->flare *
-                (effMiscRandUnitFloat(effSharedRandomState) * config->flareJitter +
+                (sdfGetRandFloat(effSharedRandomState) * config->flareJitter +
                  (one - config->flareJitter));
-            particle->spinPhase = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
+            particle->spinPhase = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
             particle->spin = config->spin *
-                (effMiscRandUnitFloat(effSharedRandomState) * config->spinJitter +
+                (sdfGetRandFloat(effSharedRandomState) * config->spinJitter +
                  (one - config->spinJitter));
             particle->width = common->width *
-                (effMiscRandUnitFloat(effSharedRandomState) * common->widthJitter +
+                (sdfGetRandFloat(effSharedRandomState) * common->widthJitter +
                  (one - common->widthJitter));
             particle->extent = common->extent *
-                (effMiscRandUnitFloat(effSharedRandomState) * common->extentJitter +
+                (sdfGetRandFloat(effSharedRandomState) * common->extentJitter +
                  (one - common->extentJitter)) * 10.0f;
             {
-                f32 random = effMiscRandUnitFloat(effSharedRandomState);
+                f32 random = sdfGetRandFloat(effSharedRandomState);
                 f32 height = common->height *
                     (random * common->heightJitter + (one - common->heightJitter));
                 colors[0] = 0;
@@ -7735,7 +7735,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
             }
 
             if (spawnAll) {
-                s32 birthAge = effMiscRand((EffRandState *)effSharedRandomState) % life;
+                s32 birthAge = sdfGetRand((EffRandState *)effSharedRandomState) % life;
                 f32 gravityDisplacement;
                 ageF = (f32)birthAge;
                 gravityDisplacement = gravity * ageF * ageF * 0.5f;
@@ -7780,7 +7780,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
             flare = particle->flare;
             phaseOffset = ageF / (f32)life - flareCenter;
             radius += phaseOffset * phaseOffset * flare;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            cosine = sdfCos(angle);
             sine = sdfSinPoly(angle);
             center[0] = cosine * radius;
             center[1] = currentY;
@@ -7913,8 +7913,8 @@ void effResetParticleBillFrameCounters(u8 *p) {
 }
 
 u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x2C + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
+    struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * 0x2C + 0xC);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -8015,7 +8015,7 @@ void effReleaseCompactRingFadeTable(s32 work) {
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
-    sdfReleaseResourceAllocation(state->allocation);
+    sdfMemFreeDirect(state->allocation);
 }
 
 typedef struct EffSpiralParticle {
@@ -8102,20 +8102,20 @@ void func_002F0A98(EffClassWork *work) {
             if (timer == -1) {
                 if (spawn != 0) {
                     f32 radiusDelta;
-                    start = config->common.radiusStart * (effMiscRandUnitFloat(effSharedRandomState) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
-                    radiusDelta = (config->common.radiusEnd * (effMiscRandUnitFloat(effSharedRandomState) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
+                    start = config->common.radiusStart * (sdfGetRandFloat(effSharedRandomState) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
+                    radiusDelta = (config->common.radiusEnd * (sdfGetRandFloat(effSharedRandomState) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
                     particle->radius = start;
                     particle->radiusStep = radiusDelta;
-                    particle->tiltX = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                    particle->tiltY = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                    particle->phase = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
-                    particle->spin = config->spin * (effMiscRandUnitFloat(effSharedRandomState) * config->spinJitter + (1.0f - config->spinJitter));
-                    particle->width = config->common.width * (effMiscRandUnitFloat(effSharedRandomState) * config->common.widthJitter + (1.0f - config->common.widthJitter));
-                    particle->sweep = config->common.extent * (effMiscRandUnitFloat(effSharedRandomState) * config->common.extentJitter + (1.0f - config->common.extentJitter));
-                    particle->height = config->common.height * (effMiscRandUnitFloat(effSharedRandomState) * config->common.heightJitter + (1.0f - config->common.heightJitter));
+                    particle->tiltX = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->tiltY = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->phase = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
+                    particle->spin = config->spin * (sdfGetRandFloat(effSharedRandomState) * config->spinJitter + (1.0f - config->spinJitter));
+                    particle->width = config->common.width * (sdfGetRandFloat(effSharedRandomState) * config->common.widthJitter + (1.0f - config->common.widthJitter));
+                    particle->sweep = config->common.extent * (sdfGetRandFloat(effSharedRandomState) * config->common.extentJitter + (1.0f - config->common.extentJitter));
+                    particle->height = config->common.height * (sdfGetRandFloat(effSharedRandomState) * config->common.heightJitter + (1.0f - config->common.heightJitter));
                     *colors = 0;
                     if (burst != 0) {
-                        particle->timer = effMiscRand(effSharedRandomState) % life;
+                        particle->timer = sdfGetRand(effSharedRandomState) % life;
                         time = (f32)particle->timer;
                         particle->radius += particle->radiusStep * time;
                     } else {
@@ -8142,7 +8142,7 @@ void func_002F0A98(EffClassWork *work) {
                 sdfVuLoadRotationMatrixX(particle->tiltX);
                 sdfVuLoadSecondaryRotationMatrixY(particle->tiltY);
                 sdfMultiplyVuMatrixInPlace();
-                pos[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+                pos[0] = sdfCos(angle);
                 pos[1] = 0.0f;
                 pos[2] = sdfSinPoly(angle);
                 for (j = 0; j < segments; j++) {
@@ -8152,7 +8152,7 @@ void func_002F0A98(EffClassWork *work) {
                     VU0_SCALE_VF(vf10, radius);
                     VU0_MOVE_VF(vf12, vf10);
                     angle += step;
-                    pos[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+                    pos[0] = sdfCos(angle);
                     pos[1] = 0.0f;
                     pos[2] = sdfSinPoly(angle);
                     VU0_LOAD_VF(vf10, pos);
@@ -8233,7 +8233,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
 EffClassWork *effAllocateBlock(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effBlockResourceOperations[kind].payloadSize;
-    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    EffClassWork *effect = sdfChipAllocDirect(size + headerSize);
     effect->payload = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
     effect->scale = 1.0f;
@@ -8272,7 +8272,7 @@ EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
 
 void effDestroyBlockResourceWork(EffClassWork *obj) {
     effBlockResourceOperations[obj->kind].destroyResource(obj);
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 EffClassWork *effDuplicateActiveResourceB(EffClassWork *obj) {
@@ -8334,8 +8334,8 @@ EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x1C + 4) * count;
     u32 cells = rowStride * count;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size + 0x34);
-    u8 *p = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size + 0x34);
+    u8 *p = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)allocation));
     EffRibbonWork *work = (EffRibbonWork *)(p + size);
     u32 i;
 
@@ -8393,7 +8393,7 @@ void effSharedAssetReferenceRelease(EffRibbonWork *work) {
         effReleaseSharedReference(work->resource);
     }
     sdfQueueAssetRelease(work->handle);
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
@@ -8557,8 +8557,8 @@ void effResetAnimationFrameEntries(u8 *p) {
 }
 
 u8 *effAllocateAnimationBuffer(EffBillFlameConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
+    struct SdfMemBlock *base = sdfMemAllocDirect(config->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
     u32 count = config->header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -8633,7 +8633,7 @@ void effReleaseTextureAnimationWork(s32 work) {
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)state->asset);
-    sdfReleaseResourceAllocation(state->allocation);
+    sdfMemFreeDirect(state->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F2050);
@@ -8693,8 +8693,8 @@ void effInitializeAnimationPositions(u8 *work) {
 
     fileClearRecordReferences(record);
     for (; i < count; i++) {
-        positions[0] = effMiscRandUnitFloat(effSharedRandomState);
-        positions[1] = effMiscRandUnitFloat(effSharedRandomState);
+        positions[0] = sdfGetRandFloat(effSharedRandomState);
+        positions[1] = sdfGetRandFloat(effSharedRandomState);
         positions += 2;
     }
 }
@@ -8706,8 +8706,8 @@ u32 effClampSlotCount(u8 *p) {
 u32 effRetainScalyTextureReference(void);
 
 EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 8 + 0x10);
-    EffAnimationState *state = (EffAnimationState *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(count * 8 + 0x10);
+    EffAnimationState *state = (EffAnimationState *)sdfMemLock(allocation);
 
     state->allocation = allocation;
     state->positions = (f32 *)(state + 1);
@@ -8737,7 +8737,7 @@ void effReleaseAnimationFrameResources(u8 *work) {
     if (state->record != 0) {
         fileReleaseGridRecordHandle(state->record);
     }
-    sdfReleaseResourceAllocation(state->allocation);
+    sdfMemFreeDirect(state->allocation);
 }
 
 void effSynchronizeFileTransform(u8 *work) {
@@ -8777,8 +8777,8 @@ void effResetSlotAnimationRecord(s32 work) {
 
 
 u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0xC);
-    u32 *buffer = (u32 *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0xC);
+    u32 *buffer = (u32 *)sdfMemLock(allocation);
     u32 count = work->samples.quantizedSamples;
 
     buffer[2] = (u32)allocation;
@@ -8855,7 +8855,7 @@ void func_002F3258(u32 *buffer, EffBillQuantizedConfig *config) {
         angle = segmentAngle;
         for (sample = 0; sample < 4; sample++) {
             radii[sample] = radius * sdfSinPoly(angle);
-            heights[sample] = -radius * sdfEvaluateCosineViaSinePhaseShift(angle);
+            heights[sample] = -radius * sdfCos(angle);
             angle += sampleStep;
         }
         segmentAngle += angleStep;
@@ -8866,7 +8866,7 @@ void func_002F3258(u32 *buffer, EffBillQuantizedConfig *config) {
             f32 *position;
             f32 *texA;
             f32 *texB;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(rowAngle);
+            cosine = sdfCos(rowAngle);
             sine = sdfSinPoly(rowAngle);
             rowFraction = (f32)row / rowCount;
             fraction = (f32)segment / segmentCount;
@@ -8930,7 +8930,7 @@ void effReleaseBillboardFrameAsset(s32 work) {
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)state->asset);
-    sdfReleaseResourceAllocation(state->allocation);
+    sdfMemFreeDirect(state->allocation);
 }
 
 
@@ -9006,7 +9006,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
 EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effModelBlockOperations[kind].payloadSize;
-    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    EffClassWork *effect = sdfChipAllocDirect(size + headerSize);
     effect->payload = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
     effect->scale = 1.0f;
@@ -9034,7 +9034,7 @@ EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
 
 void effDestroyModelBlockWork(EffClassWork *work) {
     effModelBlockOperations[work->kind].destroyResource(work);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 EffClassWork *effRecreateActiveByClass(EffClassWork *obj) {
@@ -9110,8 +9110,8 @@ u32 repeat;
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x24 + 4) * count;
     u32 cells = rowStride * count;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size + 0x34);
-    u8 *p = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size + 0x34);
+    u8 *p = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)allocation));
     EffStripWork *work = (EffStripWork *)(p + size);
     u32 i;
 
@@ -9153,7 +9153,7 @@ u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
 void effReleaseScalyStripResources(u8 *work) {
     effReleaseScalyTextureReference((u32)effSharedScalyStripResource);
     sdfQueueAssetRelease(((EffStripWork *)work)->handle);
-    sdfReleaseResourceAllocation(((EffStripWork *)work)->allocation);
+    sdfMemFreeDirect(((EffStripWork *)work)->allocation);
 }
 
 /* Recreate the source strip's dimensions and retain another shared texture reference. */
@@ -9376,8 +9376,8 @@ void effSeedParticleSpanParameters(EffModelResource *work) {
             if (spans != 0) {
                 do {
                     span++;
-                    entry->first = effMiscRandUnitFloat(effSharedRandomState) * config->firstRand + (1.0f - config->firstRand);
-                    entry->second = config->secondBase * (effMiscRandUnitFloat(effSharedRandomState) * config->rangeRand + (1.0f - config->rangeRand));
+                    entry->first = sdfGetRandFloat(effSharedRandomState) * config->firstRand + (1.0f - config->firstRand);
+                    entry->second = config->secondBase * (sdfGetRandFloat(effSharedRandomState) * config->rangeRand + (1.0f - config->rangeRand));
                     entry->referenceAge = 0;
                     entry++;
                 } while (span < spans);
@@ -9418,9 +9418,9 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     if (config->referenceRampDuration == 0) {
         config->referenceRampDuration = 1;
     }
-    allocation = sdfAllocGeneralBlock(sizeof(EffSpanTable) +
+    allocation = sdfMemAllocDirect(sizeof(EffSpanTable) +
                  count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
-    table = (EffSpanTable *)sdfResourceRetainAddress(allocation);
+    table = (EffSpanTable *)sdfMemLock(allocation);
     table->allocation = allocation;
     table->records = (EffSpanRecord *)(table + 1);
     entries = (EffSpanEntry *)(table->records + count);
@@ -9468,7 +9468,7 @@ void effReleaseParticleList(EffSpanTable *list) {
         }
         entry++;
     }
-    sdfReleaseResourceAllocation(list->allocation);
+    sdfMemFreeDirect(list->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", effUpdateParticleSpanGeometry);
@@ -9537,7 +9537,7 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
 EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
     u32 headerSize = 0x40;
     u32 size = effModelResourceOperations[kind].payloadSize;
-    EffModelResource *effect = (EffModelResource *)sdfAllocSizeClassBlock(size + headerSize);
+    EffModelResource *effect = (EffModelResource *)sdfChipAllocDirect(size + headerSize);
 
     effect->source = (EffSpanConfig *)((u8 *)effect + headerSize);
     effect->color = 0x80808080;
@@ -9565,7 +9565,7 @@ u32 effCreateModelResourceFromFile(FileJobPayload *work) {
 void effDestroyModelResource(EffModelResource *effect) {
     effModelResourceOperations[effect->kind].destroyResource(effect->childResource);
     effDestroyModelContext(effect->model);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
@@ -9627,8 +9627,8 @@ EffPointSet *effCreatePointSet3(s32 count) {
     EffPointSet *set;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
-    base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress(base);
+    base = sdfMemAllocDirect(size + 0x20);
+    data = (u8 *)sdfMemLock(base);
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -9648,7 +9648,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(EffPointSet *set) {
     sdfQueueAssetRelease(set->handle);
-    sdfReleaseResourceAllocation(set->allocation);
+    sdfMemFreeDirect(set->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -10269,8 +10269,8 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
 
 EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
     u32 headerSize = 0x40;
-    SdfMemBlock *base = sdfAllocGeneralBlock(size + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    SdfMemBlock *base = sdfMemAllocDirect(size + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct SdfMemBlock *)((u32)base));
     EffCopiedPayload *node = (EffCopiedPayload *)body;
 
     body += headerSize;
@@ -10322,7 +10322,7 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
         payload->targets[i] = NULL;
     }
     payload->slotCount = count;
-    payload->selectedTargetIndex = effMiscRandMod(0, count);
+    payload->selectedTargetIndex = sdfGetRandInt(0, count);
 }
 
 extern void fldRelocatePackedTransferChunk(u32, FldTransferChunk *);
@@ -10362,7 +10362,7 @@ void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
         }
         tails++;
     }
-    sdfReleaseResourceAllocation(payload->allocation);
+    sdfMemFreeDirect(payload->allocation);
 }
 
 typedef struct EffCameraPathParameters {
@@ -10523,14 +10523,14 @@ s32 func_002F6D00(EffActiveResource *owner) {
     VU0_LOAD_VF(vf10, &D_003E9F60);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, &data->localUp);
-    effObjSetInnerPosition(camera, position);
+    dds3SetPosPoseSet(camera, position);
     VU0_LOAD_VF(vf10, eyeOffset);
     PCP_COPY_VECTOR(&data->localEyeOffset, eyeOffset);
     VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, &data->worldEye);
     dds3SetCameraFieldOfView(camera, D_00437E90);
     data->fovUpdatePending |= 1;
-    effObjSetInnerRotation(camera, &D_003E9F80);
+    dds3SetRotPoseSet(camera, &D_003E9F80);
     return sdfStepWrappingFloatCounter(path);
 }
 
@@ -10781,7 +10781,7 @@ void effApplyKeyframeAngle(u8 *work) {
 }
 
 u32 *effAllocateClassResourceSlot(u32 owner) {
-    u32 *work = (u32 *)sdfAllocSizeClassBlock(4);
+    u32 *work = (u32 *)sdfChipAllocDirect(4);
     *work = 0;
     return work;
 }
@@ -10804,7 +10804,7 @@ void effReleaseOwnedClassResourceWork(u32 handle) {
     if (*(s32 *)handle != 0) {
         effDestroyClassResourceWork((EffClassWork *)*(s32 *)handle);
     }
-    sdfReleaseChipBlock((void *)handle);
+    sdfChipFreeDirect((void *)handle);
 }
 
 /* vu0 routine: orient along the vector between two requested positions and advance the resource. */
@@ -10858,7 +10858,7 @@ void effDrawActiveClassResource(s32 owner) {
 }
 
 u32 *effAllocateSurfaceNodeSlot(u32 owner) {
-    u32 *work = (u32 *)sdfAllocSizeClassBlock(4);
+    u32 *work = (u32 *)sdfChipAllocDirect(4);
     *work = 0;
     return work;
 }
@@ -10883,7 +10883,7 @@ void effReleaseOwnedSurfaceNodeWork(u32 handle) {
     if (*(s32 *)handle != 0) {
         effDestroySurfaceNode(*(EffectSurfaceNode **)handle);
     }
-    sdfReleaseChipBlock((void *)handle);
+    sdfChipFreeDirect((void *)handle);
 }
 
 /* Resolve and apply the surface's endpoint requests, then acquire its retained record. */
@@ -10937,7 +10937,7 @@ void effDrawActiveSurfaceNode(s32 owner) {
 }
 
 MdlCtx **effAllocateModelObjectSlot(u32 owner) {
-    MdlCtx **work = sdfAllocSizeClassBlock(sizeof(*work));
+    MdlCtx **work = sdfChipAllocDirect(sizeof(*work));
     *work = NULL;
     return work;
 }
@@ -10982,7 +10982,7 @@ void effReleaseOwnedModelContextWork(MdlCtx **handle) {
     if (*handle != NULL) {
         effDestroyModelContext(*handle);
     }
-    sdfReleaseChipBlock(handle);
+    sdfChipFreeDirect(handle);
 }
 
 /* Native 0x40-byte payload copied for the model-resource callback table. */
@@ -11048,15 +11048,15 @@ void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);
         sdfVuMatrixToQuaternion(matrix);
         VU0_STORE_VF_UNCLOBBERED(vf10, &quaternion);
-        effObjSetInnerPosition(unit->effectObject, (u128 *)matrix[3]);
-        effObjSetInnerRotation(unit->effectObject, &quaternion);
+        dds3SetPosPoseSet(unit->effectObject, (u128 *)matrix[3]);
+        dds3SetRotPoseSet(unit->effectObject, &quaternion);
         unit->status.stateFlags |= 0x200000;
     }
 }
 
 /* Allocate an empty material/model binding pair; owner is unused in the retail body. */
 EffModelBindings *effAllocateModelBindings(s32 *owner) {
-    EffModelBindings *work = sdfAllocSizeClassBlock(sizeof(*work));
+    EffModelBindings *work = sdfChipAllocDirect(sizeof(*work));
     work->material = 0;
     work->model = NULL;
     return work;
@@ -11118,7 +11118,7 @@ void effDestroyMaterialAndModelEffectWork(EffModelBindings *work) {
     if (work->material != 0) {
         effDestroyClassResourceWork(work->material);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
@@ -11217,7 +11217,7 @@ void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
     if (resource != NULL) {
         sdfQueueAssetRelease(resource);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Empty retail update entry in the drawable-asset operation table. */
@@ -11319,7 +11319,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     request.positions = side;
     angle = 0.0f;
     for (i = 0; i < 32; i++) {
-        circle[i][0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        circle[i][0] = sdfCos(angle);
         circle[i][1] = sdfSinPoly(angle);
         angle += 6.2831852f / 31.0f;
     }
@@ -11508,7 +11508,7 @@ typedef char EffMotionResourceAssetOffsetCheck[
     ((u32)&((EffMotionResource *)0)->asset == 4) ? 1 : -1];
 
 EffMotionResource *effCreateMotionResource(EffMotionResourceConfig *unusedConfig) {
-    EffMotionResource *work = sdfAllocSizeClassBlock(sizeof(*work));
+    EffMotionResource *work = sdfChipAllocDirect(sizeof(*work));
 
     work->billboard = NULL;
     work->asset = sdfCreateAssetWithDrawEntries();
@@ -11558,7 +11558,7 @@ void effDestroyBillboardAndOwnedAssetWork(EffMotionResource *work) {
     if (work->asset != NULL) {
         sdfQueueAssetRelease(work->asset);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 extern SdfPoolNode *D_003EA000[];
@@ -11674,7 +11674,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
 EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effRuntimeResourceOperations[kind].payloadSize;
-    EffActiveResource *effect = sdfAllocSizeClassBlock(size + headerSize);
+    EffActiveResource *effect = sdfChipAllocDirect(size + headerSize);
     effect->payload = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
     effect->scale = 1.0f;
@@ -11713,7 +11713,7 @@ void effDestroyResourceInstance(EffActiveResource *obj) {
             effRuntimeResourceOperations[obj->kind.index].destroyResource(obj->resource);
         }
     }
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
@@ -11790,7 +11790,7 @@ void effSetActiveResourceScale(EffActiveResource *work, f32 value) {
 
 /* Alternate particle handles share a header but occupy distinct slots. */
 EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
-    EffParticleSharedResource *work = sdfAllocSizeClassBlock(sizeof(EffParticleSharedResource));
+    EffParticleSharedResource *work = sdfChipAllocDirect(sizeof(EffParticleSharedResource));
     void *buffer;
 
     memset(work, 0, sizeof(EffParticleSharedResource));
@@ -11834,7 +11834,7 @@ void effReleaseParticleResources(EffParticleSharedResource *p) {
     if (p->reference != 0) {
         effReleaseReferenceHolder(p->reference);
     }
-    sdfReleaseChipBlock(p);
+    sdfChipFreeDirect(p);
 }
 
 void effReplaceSharedResource(EffParticleSharedResource *, EffParticleSharedResource *);
@@ -11927,7 +11927,7 @@ void func_002F9DF0(EffParticleSharedResource *work) {
     centerY = snapshot.y * 16.0f * size;
     halfWidth = snapshot.halfWidth * 16.0f * size;
     halfHeight = snapshot.halfHeight * 16.0f * size;
-    cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+    cosine = sdfCos(angle);
     sine = sdfSinPoly(angle);
     coordX = centerX + halfWidth;
     coordY = centerY + halfHeight;
@@ -12024,9 +12024,9 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
         vector[1] = ((EffectSlotNode80 *)work)->seedDirection[1];
         vector[2] = ((EffectSlotNode80 *)work)->seedDirection[2];
     } else {
-        vector[0] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
-        vector[1] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
-        vector[2] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+        vector[0] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
+        vector[1] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
+        vector[2] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
     }
     VU0_NORMALIZE_PACKED_VECTOR(vector);
     entry[0] = vector[0];
@@ -12034,9 +12034,9 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
     entry[1] = vector[1];
     entry[5] =
         ((EffectSlotNode80 *)work)->angularSpeed *
-        (effMiscRandUnitFloat(effSharedRandomState) * ((EffectSlotNode80 *)work)->speedRandomness +
+        (sdfGetRandFloat(effSharedRandomState) * ((EffectSlotNode80 *)work)->speedRandomness +
          (1.0f - ((EffectSlotNode80 *)work)->speedRandomness));
-    entry[4] = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
+    entry[4] = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
 }
 
 
@@ -12123,15 +12123,15 @@ void effDestroyOwnedResources(s32 *work) {
         for (i = 0; i < count; i++) {
             fileQueueDestroy(((EffectSlotNode80 *)work)->resourceEntries[i]);
         }
-        sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->entryAllocation);
+        sdfMemFreeDirect(((EffectSlotNode80 *)work)->entryAllocation);
     }
     if (((EffectSlotNode80 *)work)->record != NULL) {
         fileReleaseGridRecordHandle(((EffectSlotNode80 *)work)->record);
     }
     if (((EffectSlotNode80 *)work)->positionAllocation != 0) {
-        sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->positionAllocation);
+        sdfMemFreeDirect(((EffectSlotNode80 *)work)->positionAllocation);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 extern s32 *effCreateConfiguredSlotNode(s32 *);
@@ -12179,15 +12179,15 @@ void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 
             for (i = 0; i < count; i++) {
                 fileQueueDestroy(dst->resourceEntries[i]);
             }
-            sdfReleaseResourceAllocation(dst->entryAllocation);
+            sdfMemFreeDirect(dst->entryAllocation);
             dst->resourceEntries = 0;
             dst->entryAllocation = 0;
         }
         if (count * 4 == 0) {
             return;
         }
-        dst->entryAllocation = sdfAllocGeneralBlock(count * 4);
-        dst->resourceEntries = sdfResourceRetainAddress(dst->entryAllocation);
+        dst->entryAllocation = sdfMemAllocDirect(count * 4);
+        dst->resourceEntries = sdfMemLock(dst->entryAllocation);
         for (i = 0; i < count; i++) {
             dst->resourceEntries[i] = fileQueueClone(src->resourceEntries[0]);
         }
@@ -12210,11 +12210,11 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
     ((EffectSlotNode80 *)work)->record = fileAllocateGridRecordSlots(kind, *(s32 *)work, config);
     allocation = ((EffectSlotNode80 *)work)->positionAllocation;
     if (allocation != 0) {
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
     }
     count = ((EffectSlotNode80 *)work)->record->count;
-    ((EffectSlotNode80 *)work)->positionAllocation = sdfAllocGeneralBlock(count * 0x18);
-    ((EffectSlotNode80 *)work)->positions = (u8 *)sdfResourceRetainAddress(((EffectSlotNode80 *)work)->positionAllocation);
+    ((EffectSlotNode80 *)work)->positionAllocation = sdfMemAllocDirect(count * 0x18);
+    ((EffectSlotNode80 *)work)->positions = (u8 *)sdfMemLock(((EffectSlotNode80 *)work)->positionAllocation);
     entries = ((EffectSlotNode80 *)work)->positions;
     for (i = 0; i < count; i++, entries += 0x18) {
         effInitializeParticleDirection(work, (float *)entries);
@@ -12251,14 +12251,14 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) 
         for (i = 0; i < count; i++) {
             fileQueueDestroy(obj->resourceEntries[i]);
         }
-        sdfReleaseResourceAllocation(obj->entryAllocation);
+        sdfMemFreeDirect(obj->entryAllocation);
         obj->resourceEntries = 0;
         obj->entryAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        obj->entryAllocation = sdfAllocGeneralBlock(size);
-        obj->resourceEntries = sdfResourceRetainAddress(obj->entryAllocation);
+        obj->entryAllocation = sdfMemAllocDirect(size);
+        obj->resourceEntries = sdfMemLock(obj->entryAllocation);
         obj->resourceEntries[0] = fileCloneQueueEntries(secondary);
         for (i = 1; i < count; i++) {
             obj->resourceEntries[i] = fileQueueClone(obj->resourceEntries[0]);
@@ -12573,8 +12573,8 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
 
 /* General-heap descriptors and retained buffer addresses are distinct owners. */
 u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(EffSharedEffectWork));
-    EffSharedEffectWork *work = (EffSharedEffectWork *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(EffSharedEffectWork));
+    EffSharedEffectWork *work = (EffSharedEffectWork *)sdfMemLock(allocation);
     void *secondary;
 
     memset(work, 0, sizeof(*work));
@@ -12586,7 +12586,7 @@ u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
     work->unk24 = 1.0f;
     if (source != NULL) {
         work->data = *(EffectBlob *)fileResolvePrimaryBuffer(source);
-        work->resource = sdfAllocSizeClassBlock(sizeof(*work->resource));
+        work->resource = sdfChipAllocDirect(sizeof(*work->resource));
         work->resource->model = NULL;
         work->resource->deviceSlot = 0;
         work->resource->data = NULL;
@@ -12594,9 +12594,9 @@ u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
         work->resource->references = 1;
         work->resource->data = sdfAllocAndClearQuadwords(0xE0);
         secondary = fileResolveSecondaryBuffer(source);
-        work->resource->allocation = sdfAllocGeneralBlock(source->secondary.size);
+        work->resource->allocation = sdfMemAllocDirect(source->secondary.size);
         work->resource->entriesSize = source->secondary.size;
-        work->resource->entries = (void *)sdfResourceRetainAddress(work->resource->allocation);
+        work->resource->entries = (void *)sdfMemLock(work->resource->allocation);
         memcpy(work->resource->entries, secondary, work->resource->entriesSize);
     }
     return (u8 *)work;
@@ -12613,7 +12613,7 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
     if (resource->references == 0) {
         SdfLightingPacketStorage *data = resource->data;
         if (data != NULL) {
-            sdfReleaseChipBlock(data);
+            sdfChipFreeDirect(data);
         }
         resource = work->resource;
         if (resource->model != NULL) {
@@ -12625,11 +12625,11 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
         }
         resource = work->resource;
         if (resource->allocation != 0) {
-            sdfReleaseResourceAllocation(resource->allocation);
+            sdfMemFreeDirect(resource->allocation);
         }
-        sdfReleaseChipBlock(work->resource);
+        sdfChipFreeDirect(work->resource);
     }
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 
@@ -13577,12 +13577,12 @@ u32 effLoadSelectedFileJob(void) {
         u32 payloadSize;
 
         if (request->allocation != NULL) {
-            sdfReleaseResourceAllocation(request->allocation);
+            sdfMemFreeDirect(request->allocation);
         }
-        request->allocation = sdfAllocGeneralBlock(
+        request->allocation = sdfMemAllocDirect(
             effQueuedFileHandle->primary.size);
         {
-            void *output = (void *)sdfResourceRetainAddress(request->allocation);
+            void *output = (void *)sdfMemLock(request->allocation);
             payload = effQueuedFileHandle;
             /* Publish the retained pointer through its object representation. */
             memcpy(&request->output, &output, sizeof(request->output));
@@ -13690,11 +13690,11 @@ u32 effCloneSelectedFileJob(void) {
         memcpy(asset->output, source, asset->size);
     } else {
         if (asset->allocation != NULL) {
-            sdfReleaseResourceAllocation(asset->allocation);
+            sdfMemFreeDirect(asset->allocation);
         }
-        asset->allocation = sdfAllocGeneralBlock(effQueuedFileHandle->primary.size);
+        asset->allocation = sdfMemAllocDirect(effQueuedFileHandle->primary.size);
         {
-            void *buffer = (void *)sdfResourceRetainAddress(asset->allocation);
+            void *buffer = (void *)sdfMemLock(asset->allocation);
             FileJobPayload *payload = effQueuedFileHandle;
             u32 size;
             u32 transferMode;
@@ -13834,8 +13834,8 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     u32 result;
     u32 requestIndex;
 
-    allocation = sdfAllocGeneralBlock(capacity * (sizeof(EffEditorRow) + 0x14));
-    entries = (EffEditorRow *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(capacity * (sizeof(EffEditorRow) + 0x14));
+    entries = (EffEditorRow *)sdfMemLock(allocation);
     nameBuffer = (char *)(entries + capacity);
     for (i = 0; i < capacity; i++) {
         const EffCameraCreateRequest *request = &requests[i].request;
@@ -13868,7 +13868,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     btlDebugMenuBeforeRecordNoOp();
     btlDebugMenuRecordNoOp((u32)state);
     btlDebugMenuAfterRecordNoOp();
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 
     if (sdfPadButtonStates[1] < 0 && count != 0) {
         u32 selected = D_003FFBB0.cursor;
@@ -14387,7 +14387,7 @@ decreaseRoll:
         f32 sampleRadius;
         angle = (f32)i * 0.19634954f;
         point[1] = sdfSinPoly(angle) * -200.0f + center[1];
-        sampleRadius = sdfEvaluateCosineViaSinePhaseShift(angle) * 200.0f;
+        sampleRadius = sdfCos(angle) * 200.0f;
         if ((s8)D_00438758 == i) {
             radius = sampleRadius;
             PCP_COPY_VECTOR(selected, point);
@@ -14398,7 +14398,7 @@ decreaseRoll:
     }
     btlDebugDrawSegment(selected, center, 0x80006060);
     angle = (f32)(s8)D_00438759 * 0.39269908f;
-    point[0] = selected[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    point[0] = selected[0] + sdfCos(angle) * radius;
     point[1] = selected[1];
     point[2] = selected[2] + sdfSinPoly(angle) * radius;
     btlDebugDrawSegment(point, selected, 0x80006060);
@@ -15807,8 +15807,8 @@ u32 effQueueGeneratedFileJob(void) {
         command = sdfDevCreateCommandState(&fileInfo);
         dataLength = sdfDevQueueControlAndWait(command);
         totalLength = dataLength + headerBytes;
-        allocation = sdfAllocGeneralBlock(totalLength);
-        buffer = (u8 *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(totalLength);
+        buffer = (u8 *)sdfMemLock(allocation);
         memset(buffer, 0, headerBytes);
         sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
         sdfDevWaitThenReleaseCommandState(command);
@@ -15822,7 +15822,7 @@ u32 effQueueGeneratedFileJob(void) {
         oldAllocation = resource->allocation;
         effQueuedFileHandle = (FileJobPayload *)queuedFile;
         if (oldAllocation != 0) {
-            sdfReleaseResourceAllocation(oldAllocation);
+            sdfMemFreeDirect(oldAllocation);
         }
         resource->allocation = allocation;
         resource->output = buffer;
@@ -16061,7 +16061,7 @@ u16 effClassifyResourceMask(s32 mask) {
 }
 
 EffectList *mnuAllocateValueRecord(u32 mode) {
-    EffectList *list = sdfAllocSizeClassBlock(sizeof(EffectList));
+    EffectList *list = sdfChipAllocDirect(sizeof(EffectList));
     memset(list, 0, sizeof(EffectList));
     list->mode = mode;
     list->count = 0;
@@ -16071,7 +16071,7 @@ EffectList *mnuAllocateValueRecord(u32 mode) {
 }
 
 void effDestroyEffectList(EffectList *list) {
-    sdfReleaseChipBlock(list);
+    sdfChipFreeDirect(list);
 }
 
 u32 mnuGetValueRecordOwner(const EffectList *list) {
@@ -16086,7 +16086,7 @@ u32 mnuGetValueRecordOwner(const EffectList *list) {
 
 u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
                           u32 kind, u32 reference) {
-    EffectListNode *node = (EffectListNode *)sdfAllocSizeClassBlock(0x18);
+    EffectListNode *node = (EffectListNode *)sdfChipAllocDirect(0x18);
     memset(node, 0, 0x18);
     node->next = 0;
     node->kind = kind;
@@ -16106,7 +16106,7 @@ u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
 u32 effRemoveListEntry(EffectList *list) {
     EffectListNode *node = list->first;
     EffectListNode *next = node->next;
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
     list->first = next;
     list->count -= 1;
     if (list->count == 0) {
@@ -16153,7 +16153,7 @@ s32 effPollResourceList(EffectList *list) {
                         allocation = (struct SdfMemBlock *)item->resourceHandle;
                         *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
                         if (node->kind == 0) {
-                            sdfReleaseResourceAllocation(allocation);
+                            sdfMemFreeDirect(allocation);
                         }
                         effRemoveListEntry(list);
                     }
@@ -16197,7 +16197,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     instance = effCreateResourceSlotSetFromAllocation(allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
     }
     return instance;
 }
@@ -16210,7 +16210,7 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
     allocation = fileGetResourceHandle(job);
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
     filePollEntryCleanup(job);
 }
 
@@ -16246,7 +16246,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
     return mappedResource;
 }
 
@@ -16258,10 +16258,10 @@ void effCompleteMappedResourceJob(struct FileRequest *job,
     EffMappedResource *mappedResource;
 
     allocation = fileGetResourceHandle(job);
-    sourceAddress = sdfResourceRetainAddress(allocation);
+    sourceAddress = sdfMemLock(allocation);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = mappedResource;
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
     filePollEntryCleanup(job);
 }
 
@@ -16276,7 +16276,7 @@ void effRequestMappedResource(const char *base, const char *name,
 
 /* Create an owner list with sixteen initially empty record buckets. */
 EffectOwnerRecord *effCreateOwnerRecordList(u32 ownerAddress) {
-    EffectOwnerRecord *list = (EffectOwnerRecord *)sdfAllocSizeClassBlock(EFF_OWNER_LIST_BYTES);
+    EffectOwnerRecord *list = (EffectOwnerRecord *)sdfChipAllocDirect(EFF_OWNER_LIST_BYTES);
     memset(list, 0, EFF_OWNER_LIST_BYTES);
     list->owner = (void *)ownerAddress;
     return list;
@@ -16291,7 +16291,7 @@ void effInsertSlotRecord(void *owner, EffectOwnerRecord *list, EffectSlotOwner *
     if (bucketIndex >= EFF_RECORD_BUCKETS) {
         bucketIndex = EFF_RECORD_LAST_BUCKET;
     }
-    record = sdfAllocSizeClassBlock(sizeof(*record));
+    record = sdfChipAllocDirect(sizeof(*record));
     record->prev = 0;
     record->owner = owner;
     record->slot = slotIndex;
@@ -16316,7 +16316,7 @@ s32 effRemoveSlotRecord(EffectOwnerRecord *list, EffectSlotOwner *work, s32 slot
             if (record == list->entries[bucketIndex]) {
                 list->entries[bucketIndex] = record->next;
             }
-            sdfReleaseChipBlock(record);
+            sdfChipFreeDirect(record);
             return 1;
         }
         record = record->next;
@@ -16340,7 +16340,7 @@ void effReleaseRecordBuckets(EffectOwnerRecord *list) {
             if (record == *bucketHead) {
                 *bucketHead = record->next;
             }
-            sdfReleaseChipBlock(record);
+            sdfChipFreeDirect(record);
             record = record->next;
         }
     }
@@ -16366,7 +16366,7 @@ s32 effDispatchRecordBuckets(s32 refresh, EffectOwnerRecord *list, s32 drawOptio
 /* Release bucket records before freeing the owner list. */
 u32 effDestroyOwnerRecordList(u32 buckets) {
     effReleaseRecordBuckets((EffectOwnerRecord *)buckets);
-    sdfReleaseChipBlock((void *)buckets);
+    sdfChipFreeDirect((void *)buckets);
     return 1;
 }
 
@@ -16452,8 +16452,8 @@ struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader
 
     memcpy(&header, source, sizeof(header));
     source += sizeof(header);
-    allocation = sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
-    records = (EffMappedRecord *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(header.count * EFF_STATUS_RECORD_BYTES);
+    records = (EffMappedRecord *)sdfMemLock(allocation);
     for (; recordIndex < header.count; recordIndex++) {
         EffMappedRecord *record = &records[recordIndex];
 
@@ -16463,7 +16463,7 @@ struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader
         if (statusBytes < record->statusBytes) {
             statusBytes = record->statusBytes;
         }
-        record->status = sdfAllocSizeClassBlock(statusBytes);
+        record->status = sdfChipAllocDirect(statusBytes);
         memset(record->status, 0, statusBytes);
         memcpy(record->status, source, record->statusBytes);
         source += record->statusBytes;
@@ -16480,33 +16480,33 @@ struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader
 
 /* Build the live batch header from the serialized count and owned record array. */
 EffMappedResource *effCreateMappedResource(const u8 *source) {
-    EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffMappedResource *mappedResource = (EffMappedResource *)sdfChipAllocDirect(EFF_BATCH_HEADER_BYTES);
     EffMappedHeader header;
 
     mappedResource->allocation = effLoadMappedStatusRecords(source, &header);
-    mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
+    mappedResource->records = (EffMappedRecord *)sdfMemLock(mappedResource->allocation);
     mappedResource->count = header.count;
     return mappedResource;
 }
 
 /* Build one zeroed status record and allocate the category's required status storage. */
 EffMappedResource *effCreateStatusBatch(u32 category) {
-    EffMappedResource *batch = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
+    EffMappedResource *batch = (EffMappedResource *)sdfChipAllocDirect(EFF_BATCH_HEADER_BYTES);
     struct SdfMemBlock *allocation;
     u32 statusBytes;
     u8 *statuses;
 
     batch->count = 1;
-    allocation = sdfAllocGeneralBlock(EFF_STATUS_RECORD_BYTES);
+    allocation = sdfMemAllocDirect(EFF_STATUS_RECORD_BYTES);
     batch->allocation = allocation;
-    batch->records = (EffMappedRecord *)sdfResourceRetainAddress(allocation);
+    batch->records = (EffMappedRecord *)sdfMemLock(allocation);
     memset(batch->records, 0, EFF_STATUS_RECORD_BYTES);
     {
         EffMappedRecord *record = batch->records;
         record->category = category;
         statusBytes = effSumRecordStatuses(record);
     }
-    statuses = (u8 *)sdfAllocSizeClassBlock(statusBytes);
+    statuses = (u8 *)sdfChipAllocDirect(statusBytes);
     batch->records->status = statuses;
     memset(statuses, 0, statusBytes);
     batch->records->statusBytes = statusBytes;
@@ -16518,10 +16518,10 @@ s32 effDestroyPackedBatch(EffMappedResource *batch) {
     s32 recordIndex;
 
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
-        sdfReleaseChipBlock(batch->records[recordIndex].status);
+        sdfChipFreeDirect(batch->records[recordIndex].status);
     }
-    sdfReleaseResourceAllocation(batch->allocation);
-    sdfReleaseChipBlock(batch);
+    sdfMemFreeDirect(batch->allocation);
+    sdfChipFreeDirect(batch);
     return 1;
 }
 
@@ -16539,7 +16539,7 @@ typedef struct EffPackedResourceEntry {
 
 
 u32 effReleaseSlotWorkAllocation(EffectSlotSet *owner) {
-    sdfReleaseResourceAllocation(owner->workAllocation);
+    sdfMemFreeDirect(owner->workAllocation);
     return 1;
 }
 
@@ -16683,18 +16683,18 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
 void effResolveAndReleaseResource(EffectSlotSet *owner) {
     if (owner->sourceAllocation != 0) {
         struct SdfMemBlock *resource = owner->sourceAllocation;
-        u8 *mapped = (u8 *)sdfResourceRetainAddress(resource);
+        u8 *mapped = (u8 *)sdfMemLock(resource);
         effResolveResourceSlots(owner, mapped, 0, -1);
-        sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
+        sdfMemUnlock(owner->sourceAllocation);
     }
 }
 
 void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 mapping) {
     if (owner->sourceAllocation != 0) {
         struct SdfMemBlock *resource = owner->sourceAllocation;
-        u8 *mapped = (u8 *)sdfResourceRetainAddress(resource);
+        u8 *mapped = (u8 *)sdfMemLock(resource);
         effResolveResourceSlots(owner, mapped, 0, mapping);
-        sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
+        sdfMemUnlock(owner->sourceAllocation);
     }
 }
 void effReleaseSlotTextureReferencesAndResetWork(EffectSlotSet *owner, s32 preserveWork) {
@@ -16732,19 +16732,19 @@ u8 effHasFirstTextureHandle(const EffectSlotSet *owner) {
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
 EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
-    EffPayload *payload = (EffPayload *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(recordBytes);
+    EffPayload *payload = (EffPayload *)sdfChipAllocDirect(EFF_BATCH_HEADER_BYTES);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(recordBytes);
     payload->count = recordCount;
     payload->allocation = allocation;
-    payload->records = (u8 *)sdfResourceRetainAddress(allocation);
+    payload->records = (u8 *)sdfMemLock(allocation);
     memset(payload->records, 0, recordBytes);
     return payload;
 }
 
 /* Release the record allocation before freeing its small header. */
 u32 effDestroyPayload(EffPayload *payload) {
-    sdfReleaseResourceAllocation(payload->allocation);
-    sdfReleaseChipBlock(payload);
+    sdfMemFreeDirect(payload->allocation);
+    sdfChipFreeDirect(payload);
     return 1;
 }
 
@@ -16755,25 +16755,25 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
     u32 index;
     u32 sourceOffset;
 
-    set = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
+    set = (EffectSlotSet *)sdfChipAllocDirect(0x30);
     memset(set, 0, 0x30);
     set->sharesTextureReferences = 0;
     set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
-    resource = (u8 *)sdfResourceRetainAddress(resourceAllocation);
+    resource = (u8 *)sdfMemLock(resourceAllocation);
     set->textureCount = *(u16 *)(resource + 0x14);
-    set->textureAllocation = sdfAllocGeneralBlock(
+    set->textureAllocation = sdfMemAllocDirect(
         set->textureCount * 4);
-    set->textureReferences = (SdfTex **)sdfResourceRetainAddress(set->textureAllocation);
+    set->textureReferences = (SdfTex **)sdfMemLock(set->textureAllocation);
     memset(set->textureReferences, 0, set->textureCount * 4);
     entries = effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
     set->count = *(u16 *)(resource + 0x16);
     set->descriptionAllocation =
-        sdfAllocGeneralBlock(set->count * 0x80);
-    set->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress(set->descriptionAllocation);
-    set->workAllocation = sdfAllocGeneralBlock(set->count * 0xA0);
-    set->workEntries = (BdWork *)sdfResourceRetainAddress(set->workAllocation);
+        sdfMemAllocDirect(set->count * 0x80);
+    set->descriptions = (EffectSlotDescription *)sdfMemLock(set->descriptionAllocation);
+    set->workAllocation = sdfMemAllocDirect(set->count * 0xA0);
+    set->workEntries = (BdWork *)sdfMemLock(set->workAllocation);
     for (index = 0; index < set->count; index++) {
         sourceOffset = *(u32 *)(entries + 4);
         memcpy(&set->descriptions[index],
@@ -16785,7 +16785,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
 }
 
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
-    EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
+    EffectSlotSet *effect = (EffectSlotSet *)sdfChipAllocDirect(0x30);
     u32 index = 0;
     effect->sharesTextureReferences = 1;
     {
@@ -16797,10 +16797,10 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->sourceAllocation = 0;
     effect->textureAllocation = 0;
     effect->count = count;
-    effect->descriptionAllocation = sdfAllocGeneralBlock(count * 0x80);
-    effect->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress(effect->descriptionAllocation);
-    effect->workAllocation = sdfAllocGeneralBlock(effect->count * 0xA0);
-    effect->workEntries = (BdWork *)sdfResourceRetainAddress(effect->workAllocation);
+    effect->descriptionAllocation = sdfMemAllocDirect(count * 0x80);
+    effect->descriptions = (EffectSlotDescription *)sdfMemLock(effect->descriptionAllocation);
+    effect->workAllocation = sdfMemAllocDirect(effect->count * 0xA0);
+    effect->workEntries = (BdWork *)sdfMemLock(effect->workAllocation);
     if (effect->count != 0) {
         do {
             memcpy(&effect->descriptions[index], &source->descriptions[slot], 0x80);
@@ -16813,15 +16813,15 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
 
 u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
-        sdfReleaseResourceAllocation(set->sourceAllocation);
+        sdfMemFreeDirect(set->sourceAllocation);
     }
     if (set->sharesTextureReferences == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
-        sdfReleaseResourceAllocation(set->textureAllocation);
+        sdfMemFreeDirect(set->textureAllocation);
     }
-    sdfReleaseResourceAllocation(set->descriptionAllocation);
+    sdfMemFreeDirect(set->descriptionAllocation);
     effReleaseSlotWorkAllocation(set);
-    sdfReleaseChipBlock(set);
+    sdfChipFreeDirect(set);
     return 1;
 }
 
@@ -17120,8 +17120,8 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
         aspect = 2.0f;
     }
     adjustedY = (s32)(y * aspect);
-    rotatedX = sdfEvaluateCosineViaSinePhaseShift(radians) * x - sdfSinPoly(radians) * adjustedY;
-    rotatedY = sdfSinPoly(radians) * x + sdfEvaluateCosineViaSinePhaseShift(radians) * adjustedY;
+    rotatedX = sdfCos(radians) * x - sdfSinPoly(radians) * adjustedY;
+    rotatedY = sdfSinPoly(radians) * x + sdfCos(radians) * adjustedY;
     if (rotatedX > 0.0f) {
         rotatedX += 0.1f;
     } else {

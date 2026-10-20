@@ -106,7 +106,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
             radius = 0.0f;
             break;
         }
-        effObjFetchInnerPosition(unit->effectObject);
+        dds3GetPosPoseSet(unit->effectObject);
         VU0_STORE_VF(vf10, ownPosition);
         if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
             VU0_LOAD_VF(vf10, ownPosition);
@@ -1183,10 +1183,10 @@ s32 btlAllocAndCheck(s32 object) {
     btlActionScratchWork = work;
     work->actor = (BtlTask *)object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
-        sdfReleaseChipBlock((void *)btlActionScratchWork);
+        sdfChipFreeDirect((void *)btlActionScratchWork);
         return 1;
     }
-    sdfReleaseChipBlock((void *)btlActionScratchWork);
+    sdfChipFreeDirect((void *)btlActionScratchWork);
     return 0;
 }
 
@@ -1235,7 +1235,7 @@ s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
     work->speciesId = owner->partyRecord.unitId;
     work->actor = (BtlTask *)context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
-    sdfReleaseChipBlock((void *)btlActionScratchWork);
+    sdfChipFreeDirect((void *)btlActionScratchWork);
     return result;
 }
 
@@ -1272,7 +1272,7 @@ s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
     index = btlPickWeightedAiSlot(unit, species, row);
     btlRunAiAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                    datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
-    sdfReleaseChipBlock((void *)btlActionScratchWork);
+    sdfChipFreeDirect((void *)btlActionScratchWork);
     return 1;
 }
 

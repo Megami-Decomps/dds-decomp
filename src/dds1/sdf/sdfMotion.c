@@ -134,7 +134,7 @@ void sdfDestroyMotion(Motion *node)
         sdfInvokeMotionObjectCallback(bindings[i]);
     }
     sdfDestroyDevRequest(node->request);
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Select a motion entry, initialize its timing and state, and bind its setup records. */
@@ -277,7 +277,7 @@ void sdfMotionResume(Motion *motion) {
 }
 
 void sdfMotionReleaseBindingStorage(void *storage) {
-    sdfReleaseChipBlock(storage);
+    sdfChipFreeDirect(storage);
 }
 
 void sdfMotionBindKeyTrack(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track) {
@@ -404,7 +404,7 @@ void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
 SdfMotionDrawBinding *sdfMotionCreateDrawVectorBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionDrawBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
     sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, &D_003981D0, nodeIndex);
     return binding;
 }
@@ -436,7 +436,7 @@ void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fram
 SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionDrawBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
     sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, &D_003981E8, nodeIndex);
     return binding;
 }
@@ -493,7 +493,7 @@ void sdfMotionBlendInterpolatedEulerRotation(SdfMotionDrawBinding *binding, f32 
 SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionDrawBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
     sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, &D_00398200, nodeIndex);
     return binding;
 }
@@ -525,7 +525,7 @@ void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fra
 SdfMotionDrawBinding *sdfMotionCreateQuaternionBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionDrawBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionDrawBinding));
     sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, &D_00398218, nodeIndex);
     return binding;
 }
@@ -580,7 +580,7 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *binding, f32 fram
 SdfMotionKeyFlagBinding *sdfMotionCreateKeyFlagBinding(Motion *motion, s32 unused, s32 nodeIndex) {
     SdfMotionKeyFlagBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionKeyFlagBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionKeyFlagBinding));
     sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, &D_00398230, nodeIndex);
     return binding;
 }
@@ -644,7 +644,7 @@ void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordSecondBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedValueBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_00398270, options);
     return binding;
 }
@@ -675,7 +675,7 @@ void sdfMotionCapturePrimaryWordSecond(SdfMotionIndexedValueBinding *binding) {
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFirstBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedValueBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_00398288, options);
     return binding;
 }
@@ -706,7 +706,7 @@ void sdfMotionCapturePrimaryWordFirst(SdfMotionIndexedValueBinding *binding) {
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordThirdBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedValueBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_003982A0, options);
     return binding;
 }
@@ -737,7 +737,7 @@ void sdfMotionCapturePrimaryWordThird(SdfMotionIndexedValueBinding *binding) {
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFourthBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedValueBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_003982B8, options);
     return binding;
 }
@@ -768,7 +768,7 @@ void sdfMotionCapturePrimaryWordFourth(SdfMotionIndexedValueBinding *binding) {
 SdfMotionIndexedValueBinding *sdfMotionCreateFloatBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedValueBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_003982D0, options);
     return binding;
 }
@@ -795,7 +795,7 @@ void sdfMotionReadBoundFloat(SdfMotionIndexedValueBinding *binding) {
 SdfMotionIndexedTextBinding *sdfMotionCreateTextBlendBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedTextBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_003982E8, options);
     return binding;
 }
@@ -831,7 +831,7 @@ void sdfMotionCapturePrimaryTextParams(SdfMotionIndexedTextBinding *binding) {
 SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedTextBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_00398300, options);
     return binding;
 }
@@ -868,7 +868,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreateSecondaryColorBinding(Motion *motio
                                                                   s32 options) {
     SdfMotionIndexedValueBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedValueBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedValueBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_00398318, options);
     return binding;
 }
@@ -899,7 +899,7 @@ void sdfMotionCaptureSecondaryColor(SdfMotionIndexedValueBinding *binding) {
 SdfMotionIndexedTextBinding *sdfMotionCreateDirectTextKeyBinding(Motion *motion, s32 unused, s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedTextBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_00398330, options);
     return binding;
 }
@@ -926,7 +926,7 @@ SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextSampleBinding(Motion *m
                                                                        s32 options) {
     SdfMotionIndexedTextBinding *binding;
 
-    binding = sdfAllocSizeClassBlock(sizeof(SdfMotionIndexedTextBinding));
+    binding = sdfChipAllocDirect(sizeof(SdfMotionIndexedTextBinding));
     sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, &D_00398348, options);
     return binding;
 }

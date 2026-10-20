@@ -79,7 +79,7 @@ s32 dspStartFlagEvent(void *context) {
 
 
 s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
-    struct MenuSlotState *state = (struct MenuSlotState *)kwlnTaskGetUserValue(task);
+    struct MenuSlotState *state = (struct MenuSlotState *)dds3GetProcessData(task);
 
     mnuTerminalSelectResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
@@ -92,7 +92,7 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
 }
 
 s32 dspUpdateFlagEvent(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     s32 *panel = (s32 *)(state + 0x54);
     s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
     if (result != 0) {
@@ -109,14 +109,14 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
 }
 
 s32 mnuDispatchTerminalPanel(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
 }
 
 s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)state, 2, (void *)request);
@@ -125,7 +125,7 @@ s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
 u32 mnuStartTaskFadeIn(KwlnTask *task) {
     s32 state;
 
-    state = kwlnTaskGetUserValue(task);
+    state = dds3GetProcessData(task);
     /* Both arms are identical in retail; kept as written. */
     if (*(s32 *)(state + 0xe4) == 0) {
         kwlnFadeInStart(0, 0, 0, 0xf);
@@ -137,7 +137,7 @@ u32 mnuStartTaskFadeIn(KwlnTask *task) {
 }
 
 s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
-    struct MenuSlotState *state = (struct MenuSlotState *)kwlnTaskGetUserValue(task);
+    struct MenuSlotState *state = (struct MenuSlotState *)dds3GetProcessData(task);
 
     mnuApplyFadeTrackMode(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -149,7 +149,7 @@ extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
 s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     s32 *panelState = (s32 *)(state + 0x54);
     s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panelState, 0, request);
     if (result == 0) {
@@ -163,7 +163,7 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
 
 /* Draw the backdrop and dispatch phase one of the terminal fade popup. */
 s32 mnuDispatchTerminalFadePanel(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
@@ -171,7 +171,7 @@ s32 mnuDispatchTerminalFadePanel(KwlnTask *request) {
 
 /* Dispatch phase two of the fade popup without changing message-window mode. */
 s32 mnuDispatchTerminalFadePanelExit(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
 
     return menuSetHandler((void *)state, 2, (void *)request);
 }
@@ -179,7 +179,7 @@ s32 mnuDispatchTerminalFadePanelExit(KwlnTask *request) {
 u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
     s32 state;
 
-    state = kwlnTaskGetUserValue(task);
+    state = dds3GetProcessData(task);
     *(u32 *)(state + 0x98) = 0;
     return 1;
 }
@@ -189,7 +189,7 @@ extern void mnuReleaseWorkResources(u8 *work);
 extern void mnuTerminalBuildMenus(struct MenuSlotState *host);
 
 s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue(task);
+    s32 *state = (s32 *)dds3GetProcessData(task);
 
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);
@@ -281,7 +281,7 @@ void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negat
     s32 i = 5;
 
     for (; i >= 0; i--) {
-        s32 offset = effMiscRand(NULL) % range + minimum;
+        s32 offset = sdfGetRand(NULL) % range + minimum;
         if (negate == 0) {
             *offsets = offset;
         } else {

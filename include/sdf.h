@@ -344,7 +344,7 @@ typedef struct SdfGraphObj {
     u8 auxiliaryFormat;
     SdfTexResource *buffers[3];
 } SdfGraphObj;
-void sdfGraphApplyModeDefaults(SdfGraphObj *graph, s32 mode, s32 initializeBuffers);
+void sdfGrSetFrameSetMode(SdfGraphObj *graph, s32 mode, s32 initializeBuffers);
 /* A mode's 12-byte display defaults row, copied into SdfGraphObj. */
 typedef struct SdfGraphModeDefaults {
     s16 width;
@@ -542,8 +542,8 @@ typedef char SdfPacketBuilder_zbuf_at_0x40[
 typedef char SdfPacketBuilder_source_at_0x50[
     ((u32)&((SdfPacketBuilder *)0)->source == 0x50) ? 1 : -1];
 
-void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
-void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source,
+void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex);
+void sdfGrSetFramePacket(SdfPacketBuilder *packet, SdfGraphObj *source,
     u32 frameMask, s32 region, s32 mode);
 
 /* Optional packed or five-float state block owned by an SdfAsset. */

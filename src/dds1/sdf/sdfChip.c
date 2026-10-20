@@ -19,10 +19,10 @@ s32 EIntr(void);
 void sdfSelectNextChipPage(SdfChipClass *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {
-    return sdfClearQuadwords(sdfAllocSizeClassBlock(size), (size + 15) >> 4);
+    return sdfClearQuadwords(sdfChipAllocDirect(size), (size + 15) >> 4);
 }
 
-void sdfReleaseChipBlock(void *memory) {
+void sdfChipFreeDirect(void *memory) {
     SdfChipPage *page;
     SdfChipClass *sizeClass;
     SdfChipCell *cell = memory;

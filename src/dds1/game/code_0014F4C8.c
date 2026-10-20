@@ -66,7 +66,7 @@ extern s32 fldMirroredSolarThresholds[];
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
-    if (solarPhaseThreshold >= (s32)effMiscRandMod(0, 100)) {
+    if (solarPhaseThreshold >= (s32)sdfGetRandInt(0, 100)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -144,13 +144,13 @@ extern EffRandState effDefaultRandomState[];
 extern char D_003BB008[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock((EffRandState *)effDefaultRandomState);
+    sdfRandomizeByTime((EffRandState *)effDefaultRandomState);
     fileManagerResetSubsystems();
     effInitializeBillResourceOwners();
     parSysReset();
     effSeedEmitterDelayRandomState();
-    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
-    kwlnTaskCreate(D_003BB008, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
+    dds3StartProcess("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
+    dds3StartProcess(D_003BB008, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
     effFieldTaskStartupHook();
     effInitWorks();
     effBTLFieldColorResetFlags();

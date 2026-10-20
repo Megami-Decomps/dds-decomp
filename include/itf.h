@@ -212,9 +212,9 @@ void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(FrFontGlyph *glyph);
 void frFontSetSpacingAndMeasureGlyphs(FrFontGlyph *glyph, s32 spacing);
 void frFontSetGlyphPosition(FrFontGlyph *glyph, u32 x, u32 y);
-void frFontStoreShiftedRenderValue(FrFontGlyph *glyph, u32 unshiftedValue);
+void frSetPriority(FrFontGlyph *glyph, u32 unshiftedValue);
 void frFontSetChildColors(FrFontGlyph *parentGlyph, u32 colorWord);
-void frFontSetChildChainFirstOption(FrFontGlyph *glyph, u8 firstOption);
+void frSetFontColorNo(FrFontGlyph *glyph, u8 firstOption);
 void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
 
 typedef struct ItfMesBlk14 {

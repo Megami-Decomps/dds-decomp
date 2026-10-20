@@ -35,7 +35,7 @@ ScrData *scrOpenProcessFromResource(const char *path, s32 option)
 KwlnTask *scrProcCreateTask(u32 priority, ScrData *process)
 {
     KwlnTask *task;
-    task = kwlnTaskCreate(process->procedures[process->procedureIndex].name,
+    task = dds3StartProcess(process->procedures[process->procedureIndex].name,
                           priority, 1, 1, bfTaskUpdate, scrReplaceCurrentTask,
                           (u32)process);
     process->task = task;
@@ -95,19 +95,19 @@ extern void evtUnlinkWorkNode(ScrData *process);
 void scrProcDestroyTask(ScrData *process) {
     evtPrintDeveloperConsoleMessage("end <%s>\n", process->procedures[process->procedureIndex].name);
     if (process->localInt != NULL) {
-        sdfReleaseChipBlock(process->localInt);
+        sdfChipFreeDirect(process->localInt);
     }
     if (process->localFloat != NULL) {
-        sdfReleaseChipBlock(process->localFloat);
+        sdfChipFreeDirect(process->localFloat);
     }
     if (process->resourceIndex >= 0) {
         itfMesDestroyWindowIfPresent(process->resourceIndex);
     }
     if (process->scriptHandle != 0) {
-        sdfReleaseResourceAllocation(process->scriptHandle);
+        sdfMemFreeDirect(process->scriptHandle);
     }
     evtUnlinkWorkNode(process);
-    sdfReleaseChipBlock(process);
+    sdfChipFreeDirect(process);
 }
 
 extern s32 strcmp(const char *a, const char *b);
@@ -126,7 +126,7 @@ void scrDestroyAllNamedProcesses(void)
         nextProcessNode = processNode->next;
         if (scrIsCurrentWorkTask(processNode) == 0) {
             if (processNode->task != NULL) {
-                kwlnTaskDestroyWithHierarchy(processNode->task, 0);
+                dds3KillProcess(processNode->task, 0);
             } else {
                 scrProcDestroyTask(processNode);
             }

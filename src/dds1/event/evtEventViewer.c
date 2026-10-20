@@ -191,11 +191,11 @@ void evtEventViewerReleaseNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node)
     evtUnlinkListNode(entry, node);
     if (node->payload != NULL) {
         if (entry->type != 0x12) {
-            sdfReleaseChipBlock(node->payload);
+            sdfChipFreeDirect(node->payload);
         }
         node->payload = NULL;
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Release the pending node and consume its position in the viewer queue. */
@@ -332,7 +332,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 entryType, EvtRuntime *viewer)
 {
     EvtRuntimeGroup *entry;
 
-    entry = sdfAllocSizeClassBlock(sizeof(EvtRuntimeGroup));
+    entry = sdfChipAllocDirect(sizeof(EvtRuntimeGroup));
     if (entry == NULL) {
         return NULL;
     }
@@ -411,7 +411,7 @@ void evtEventViewerDestroyEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer)
         }
     }
     evtEventViewerUnlinkEntry(entry, viewer);
-    sdfReleaseChipBlock(entry);
+    sdfChipFreeDirect(entry);
 }
 
 void evtViewerSetMinimumFromCurrent(EvtRuntime *range)
@@ -2134,11 +2134,11 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
             }
             if (best == NULL) {
                 if (node->objectAttached == 1) {
-                    effObjSetInnerPosition(node->info,
+                    dds3SetPosPoseSet(node->info,
                         (u128 *)node->savedPosition);
-                    effObjSetInnerRotation(node->info,
+                    dds3SetRotPoseSet(node->info,
                         (u128 *)node->savedRotation);
-                    effObjFetchInnerPosition(node->info);
+                    dds3GetPosPoseSet(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
@@ -2146,11 +2146,11 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                 s16 channel = best->p0C.sh[0];
 
                 if (channel == -1) {
-                    effObjSetInnerPosition(node->info,
+                    dds3SetPosPoseSet(node->info,
                         (u128 *)node->savedPosition);
-                    effObjSetInnerRotation(node->info,
+                    dds3SetRotPoseSet(node->info,
                         (u128 *)node->savedRotation);
-                    effObjFetchInnerPosition(node->info);
+                    dds3GetPosPoseSet(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {
@@ -3375,7 +3375,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         EvtViewerDrawPayload *parameters = key->payload;
                         evtSetDrawVectorTarget(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
                         kwlnDrawVector.fogColor = parameters->parameters.color;
-                        viewer->controlState = kwlnTaskCreate(D_003BBF60, 0x2AF9, 1, 1, evtEventViewerEditDrawVectorTargetTask, NULL, 1);
+                        viewer->controlState = dds3StartProcess(D_003BBF60, 0x2AF9, 1, 1, evtEventViewerEditDrawVectorTargetTask, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     }
@@ -3410,14 +3410,14 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                     case 16:
                         effEventSetSolidRectangleParameters(key->payload);
                         viewer->colorRectangleEnabled = 0;
-                        viewer->controlState = kwlnTaskCreate(D_003BBF68, 0x2AF9, 1, 1, evtPollRuntimeControlReady, NULL, (u32)viewer);
+                        viewer->controlState = dds3StartProcess(D_003BBF68, 0x2AF9, 1, 1, evtPollRuntimeControlReady, NULL, (u32)viewer);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 17:
                         effEventSetResourceTemplateParameters(key->payload);
                         viewer->texturedSquareEnabled = 0;
                         campResolvePendingValue(viewer, key);
-                        viewer->controlState = kwlnTaskCreate(D_003BBF70, 0x2AF9, 1, 1, evtSynchronizeSelectedEntry, NULL, (u32)viewer);
+                        viewer->controlState = dds3StartProcess(D_003BBF70, 0x2AF9, 1, 1, evtSynchronizeSelectedEntry, NULL, (u32)viewer);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 24:
@@ -4004,7 +4004,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
 
 /* Hand control back to the frame update whether or not the task still owns a viewer. */
 s32 evtViewerPickNextHandler(KwlnTask *task) {
-    if (kwlnTaskGetUserValue(task) != 0) {
+    if (dds3GetProcessData(task) != 0) {
         return (s32)evtViewerUpdateFrame;
     }
     return (s32)evtViewerUpdateFrame;
@@ -4020,7 +4020,7 @@ extern s32 evtViewerPickNextHandler(KwlnTask *task);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
 s32 evtViewerUpdateFrame(KwlnTask *task) {
-    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     s32 flags;
 
     D_003BBE7C = 0;
@@ -4098,9 +4098,9 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
 s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
     void *viewer;
 
-    viewer = (void *)kwlnTaskGetUserValue(task);
+    viewer = (void *)dds3GetProcessData(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
-    kwlnTaskAddChild(task, (KwlnTask *)evtCreateFrameVariableTask());
+    dds3LinkProcess(task, (KwlnTask *)evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
 }
@@ -4109,7 +4109,7 @@ s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
 s32 evtViewerInitializeUpdateSequence(KwlnTask *task) {
     struct EvtRuntime *viewer;
 
-    viewer = (struct EvtRuntime *)kwlnTaskGetUserValue(task);
+    viewer = (struct EvtRuntime *)dds3GetProcessData(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
@@ -4118,7 +4118,7 @@ s32 evtViewerInitializeUpdateSequence(KwlnTask *task) {
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
 s32 evtViewerAdvanceUpdate(KwlnTask *task) {
-    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     PolyMovieWork *window;
     s32 windowFlags;
 
@@ -4148,7 +4148,7 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
 }
 
 s32 evtViewerStartUpdate(KwlnTask *task) {
-    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     PolyMovieWork *context;
     u16 eventId;
     u16 sceneId;
@@ -4196,7 +4196,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)viewer->pendingResource);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }
@@ -4207,7 +4207,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     }
     evtEventViewerReleaseGroups(viewer);
     evtEventViewerShutdown(viewer);
-    sdfReleaseResourceAllocation(viewer->resourceHandle);
+    sdfMemFreeDirect(viewer->resourceHandle);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     fldReleaseCameraColorEffect();
@@ -4221,7 +4221,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
 void evtEventViewerDestroyActive(KwlnTask *task) {
     EvtRuntime *viewer;
 
-    viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    viewer = (EvtRuntime *)dds3GetProcessData(task);
     evtViewerReleaseResources(viewer);
 }
 
@@ -4229,7 +4229,7 @@ void evtEventViewerDestroyActive(KwlnTask *task) {
 void evtEventViewerDestroyActiveAlternate(KwlnTask *task) {
     EvtRuntime *viewer;
 
-    viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
+    viewer = (EvtRuntime *)dds3GetProcessData(task);
     evtViewerReleaseResources(viewer);
 }
 
@@ -4249,17 +4249,17 @@ void evtViewerCreateTaskWithSky(void) {
     void *viewerTask;
 
     D_003BA8EC = 0x80000000;
-    viewerHandle = sdfAllocGeneralBlock(0x2490);
-    viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
+    viewerHandle = sdfMemAllocDirect(0x2490);
+    viewer = (EvtRuntime *)sdfMemLock(viewerHandle);
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
-    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    kwlnTaskAddChild(viewerTask, (KwlnTask *)evtCreateSkyTask());
+    viewerTask = dds3StartProcess(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
+    dds3LinkProcess(viewerTask, (KwlnTask *)evtCreateSkyTask());
     evtEventViewerInitCampFontResource(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {
-    kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
+    dds3KillProcessName(evtViewerTaskName, 1);
 }
 
 
@@ -4277,7 +4277,7 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
             return;
         }
         assets->mainResource.handle = fileGetResourceHandle((struct FileRequest *)assets->mainResource.request);
-        assets->mainResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->mainResource.handle);
+        assets->mainResource.address = (PmdHeader *)sdfMemLock(assets->mainResource.handle);
         filePollEntryCleanup(assets->mainResource.request);
         assets->mainResource.request = 0;
         assets->flags &= ~2;
@@ -4289,7 +4289,7 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
             return;
         }
         assets->secondaryResource.handle = fileGetResourceHandle((struct FileRequest *)assets->secondaryResource.request);
-        assets->secondaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->secondaryResource.handle);
+        assets->secondaryResource.address = (PmdHeader *)sdfMemLock(assets->secondaryResource.handle);
         filePollEntryCleanup(assets->secondaryResource.request);
         assets->secondaryResource.request = 0;
         assets->flags &= ~4;
@@ -4301,7 +4301,7 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
             return;
         }
         assets->tertiaryResource.handle = fileGetResourceHandle((struct FileRequest *)assets->tertiaryResource.request);
-        assets->tertiaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->tertiaryResource.handle);
+        assets->tertiaryResource.address = (PmdHeader *)sdfMemLock(assets->tertiaryResource.handle);
         filePollEntryCleanup(assets->tertiaryResource.request);
         assets->tertiaryResource.request = 0;
         assets->flags &= ~0x10;

@@ -288,7 +288,7 @@
       "expected_symbols": 14,
       "expected_shifted_symbols": 0,
       "fallback_symbols": [
-        "sdfGraphApplyModeDefaults"
+        "sdfGrSetFrameSetMode"
       ],
       "retained_sections": [
         {

@@ -68,7 +68,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     s32 changed = 0;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
@@ -137,7 +137,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
 }
 
 s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 1);
@@ -145,7 +145,7 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
 }
 
 s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
@@ -154,7 +154,7 @@ s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *request) {
 u32 mnuResetGroupSelectionAndStartMessage(KwlnTask *task) {
     BrsSkillPackageWork *context;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     mnuSetPanelGroupSelection(context->panelHandle, -1);
     dspStartEntry(0x17);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -176,7 +176,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
     DatPartyRecord *entry;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
     result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, task);
@@ -205,7 +205,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
 }
 
 s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 1);
@@ -213,7 +213,7 @@ s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
 }
 
 s32 mnuAdvanceStatAssignmentPanel(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
@@ -225,7 +225,7 @@ s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     DatPartyRecord *item;
     s32 gain;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     item = context->selectedRewardRow->unit;
     gain = context->selectedRewardRow->values.amount;
     context->crossedSteps = brsGetLevelStepCrossedBy(item->level - gain, gain);
@@ -248,7 +248,7 @@ u32 mnuLevelChangeMessageLeaveNoOp(void) {
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 *panelState = &context->transition.state;
     s32 result;
 
@@ -264,7 +264,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
 }
 
 s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 0);
@@ -272,7 +272,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
 }
 
 s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
@@ -281,7 +281,7 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
 extern u16 mnuExtraLevelWeightedItemPairsView[][17];
 
 s32 mnuChooseWeightedItem(s32 rewardRowIndex) {
-    s32 random = (u8)effMiscRand(NULL);
+    s32 random = (u8)sdfGetRand(NULL);
     u16 *entry = mnuExtraLevelWeightedItemPairsView[rewardRowIndex];
     u32 i;
 
@@ -330,7 +330,7 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
         rollMode = 1;
     }
     work->rewardMode = 0;
-    if ((s32)(effMiscRand(NULL) % modulus) < threshold) {
+    if ((s32)(sdfGetRand(NULL) % modulus) < threshold) {
         work->rewardMode = mnuStaffPickRollByMode(rollMode);
         work->rewardIndex = -1;
         switch (work->rewardMode) {
@@ -344,7 +344,7 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
             if (count == 0) {
                 work->rewardMode = 2;
             } else {
-                work->rewardIndex = candidates[effMiscRand(NULL) % count];
+                work->rewardIndex = candidates[sdfGetRand(NULL) % count];
             }
             break;
         case 5:
@@ -361,7 +361,7 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
 }
 
 u32 brsPrepareRewardMessage(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     DatPartyRecord *item = context->selectedRewardRow->unit;
     s32 mode;
 

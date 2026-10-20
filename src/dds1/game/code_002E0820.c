@@ -212,8 +212,8 @@ void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_003BD350);
-    D_003BD350 = (u32)sdfAllocGeneralBlock(workspaceBytes);
-    D_003BDA20 = sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BD350));
+    D_003BD350 = (u32)sdfMemAllocDirect(workspaceBytes);
+    D_003BDA20 = sdfMemLock((struct SdfMemBlock *)(D_003BD350));
 }
 
 /* Fixed allocation size; the texture is deliberately unused. */
@@ -559,8 +559,8 @@ extern void sdfInitializeTmxImageHeader(SdfTextureFileHeader *, s32, s32, s32, s
 
 /* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
 void sdfConsCreatePowerLookupTexture(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x2440);
-    SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x2440);
+    SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfMemLock(allocation);
     s32 i;
     s32 j;
 
@@ -583,7 +583,7 @@ void sdfConsCreatePowerLookupTexture(void) {
         }
     }
     D_003BD380 = sdfTexAcquireResourceTexture(&texture->header);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 extern u64 D_003BD388;
@@ -1589,8 +1589,8 @@ void sdfDevConsListRemove(ConsNode *node) {
 /* Unlink the console, release its cell-buffer allocation, then free the node. */
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
-    sdfReleaseResourceAllocation(node->bufferAllocation);
-    sdfReleaseChipBlock(node);
+    sdfMemFreeDirect(node->bufferAllocation);
+    sdfChipFreeDirect(node);
 }
 
 /* Reset both cursor coordinates and clear the two-byte character-cell grid. */
@@ -1613,7 +1613,7 @@ ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns
     struct SdfMemBlock *bufferAllocation;
 
     sdfDevConsInit();
-    node = sdfAllocSizeClassBlock(sizeof(ConsNode));
+    node = sdfChipAllocDirect(sizeof(ConsNode));
     node->screenOriginX = screenOriginX;
     node->screenOriginY = screenOriginY;
     node->columns = columns;
@@ -1621,9 +1621,9 @@ ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns
     node->opaque17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferAllocation = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
+    bufferAllocation = sdfMemAllocDirect((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferAllocation = bufferAllocation;
-    node->cells = (u8 *)sdfResourceRetainAddress(bufferAllocation);
+    node->cells = (u8 *)sdfMemLock(bufferAllocation);
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

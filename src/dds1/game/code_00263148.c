@@ -123,7 +123,7 @@ extern char brsPrimaryRewardPopupEntry[];
 
 s32 prfCapTaskStep(KwlnTask *request) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 *dispatchStatus = &scene->transition.state;
 
     result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, request);
@@ -167,20 +167,20 @@ s32 prfCapTaskStep(KwlnTask *request) {
 }
 
 s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, (void *)request);
 }
 
 s32 mnuAdvanceResultPanel(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 /* Clear the scene's two selection-processing markers; return 1. */
 s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     scene->selectedRow = 0;
     scene->resetStateB = 0;
     return 1;
@@ -275,7 +275,7 @@ extern char brsLevelChangePopupEntry[];
 
 s32 brsProcessNextPrimaryReward(KwlnTask *task) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     s32 *dispatchStatus;
     s32 *slots;
 
@@ -354,7 +354,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     sprintf(text, D_003BC550, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 
     if (item->unitId == 1) {
         if (scene->iconFade < 0x100) {
@@ -398,7 +398,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
 
 
 s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -409,7 +409,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
 }
 
 s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -428,7 +428,7 @@ u32 mnuInitializeItemSelectionExtent(KwlnTask *task) {
     s32 extent;
     s32 sum;
 
-    scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     sum = 0;
     remaining = DAT_BASE_STAT_COUNT - 1;
     extent = scene->selectedRewardRow->values.amount * 3;

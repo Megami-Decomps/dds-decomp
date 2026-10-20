@@ -1961,7 +1961,7 @@ void mnuInitPanelSoundEntries(void) {
     MenuPanelEntryPool *pool;
 
     if (mnuPanelSoundEntryPool == 0) {
-        allocation = sdfAllocGeneralBlock(0xAC);
+        allocation = sdfMemAllocDirect(0xAC);
         mnuPanelSoundEntryPool =
             (MenuPanelEntryPool *)(u32)sdfMemoryGetBlockAddress(allocation);
         memset(mnuPanelSoundEntryPool, 0, 0xAC);
@@ -1974,7 +1974,7 @@ void mnuInitPanelSoundEntries(void) {
 
 void mnuReleasePanelEntryPool(void) {
     if (mnuPanelSoundEntryPool != 0) {
-        sdfReleaseResourceAllocation(mnuPanelSoundEntryPool->allocation);
+        sdfMemFreeDirect(mnuPanelSoundEntryPool->allocation);
     }
     mnuPanelSoundEntryPool = 0;
 }

@@ -35,7 +35,7 @@ typedef void (*FileRequestCallback)(void *request, u32 arg);
     s32 totalBytes;                       /* 0x14 */                         \
     Callback completionCallback;          /* 0x18 */                         \
     void *completionArg;                  /* 0x1C */                         \
-    struct SdfMemBlock *allocationHandle; /* 0x20: descriptor passed to sdfResourceRetainAddress */ \
+    struct SdfMemBlock *allocationHandle; /* 0x20: descriptor passed to sdfMemLock */ \
     u32 retainedAddress;                  /* 0x24: a value-pair request's source data */ \
     u32 transferAddress;                  /* 0x28 */                         \
     Link *completionNext;                 /* 0x2C */                         \

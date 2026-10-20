@@ -46,7 +46,7 @@ enum {
 #include "dds3_world_secondary.h"
 extern void effObjFreeInner(EffWorldNode *node);
 extern void evtEndObjectValueTransition(EffWorldNode *object);
-extern void dds3SetObjectFlags(void *, s32);
+extern void dds3ObjectBaseOnFlag(void *, s32);
 
 u32 dds3GetEffectDataHandle(EffWorldNode *obj) {
     return (u32)((EffectObjectData *)obj->data)->handle;
@@ -100,7 +100,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     f32 angleDelta;
     f32 step;
 
-    effObjFetchInnerPosition(obj);
+    dds3GetPosPoseSet(obj);
     VU0_STORE_VF(vf10, position);
     if (position[0] == targetPosition[0] &&
         position[2] == targetPosition[2]) {
@@ -110,7 +110,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     heading = -(sdfAtan2(position[0] - targetPosition[0],
                          position[2] - targetPosition[2]) *
                 EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX);
-    effObjFetchInnerRotationNormalized(obj);
+    dds3GetRotPoseSet(obj);
     referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
     referenceAngle *= EFFECT_HEADING_RADIANS_TO_DEGREES;
     targetAngle = dds3ShortestAngleDelta(referenceAngle, heading);
@@ -136,7 +136,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     data->word34 = 0;
 }
 
-extern void dds3ClearObjectFlags(void *, s32);
+extern void dds3ObjectBaseOffFlag(void *, s32);
 
 void effObjStepFollowAngleTowardZero(EffWorldNode *object) {
     EffectObjectData *data = object->data;
@@ -149,7 +149,7 @@ void effObjStepFollowAngleTowardZero(EffWorldNode *object) {
     } else {
         angle = data->angle;
         if (angle < 0.1f && -0.1f < angle) {
-            dds3ClearObjectFlags(object, 0x2000);
+            dds3ObjectBaseOffFlag(object, 0x2000);
         } else {
             value = dds3ShortestAngleDelta(angle, 0.0f);
             step = 1.0f;
@@ -173,7 +173,7 @@ void evtArmEffectObjectPendingValue(EffWorldNode *obj, s32 value) {
     EffectObjectData *data;
 
     data = obj->data;
-    dds3SetObjectFlags(obj, 0x2000);
+    dds3ObjectBaseOnFlag(obj, 0x2000);
     data->pendingTargetKey = value;
     data->angleReturnDelayFrames = 0;
 }
@@ -193,7 +193,7 @@ s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     void *work;
 
     effObjInnerCreate(object);
-    work = sdfAllocSizeClassBlock(sizeof(EffectObjectData));
+    work = sdfChipAllocDirect(sizeof(EffectObjectData));
     object->data = work;
     memset(work, 0, sizeof(EffectObjectData));
     data = object->data;
@@ -209,7 +209,7 @@ s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     data->word34 = 0;
     data->limitMin38 = -45.0f;
     data->limitMax3C = 45.0f;
-    dds3SetObjectFlags(object, 0x42);
+    dds3ObjectBaseOnFlag(object, 0x42);
     return 1;
 }
 
@@ -230,7 +230,7 @@ void evtDestroyEffectObjectData(EffWorldNode *obj) {
     }
     dds3ReleaseObjectBaseResources(obj);
     dds3DestroyObjectBase(data->modelHolder);
-    sdfReleaseChipBlock(obj->data);
+    sdfChipFreeDirect(obj->data);
 }
 
 typedef struct EffVec4 {
@@ -318,10 +318,10 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         mdlStorePrimaryVectorVU(model);
         effObjInnerVecBackup(obj->inner);
     }
-    if (!dds3TestObjectFlags(obj, 0x100)) {
+    if (!dds3ObjectBaseCheckFlag(obj, 0x100)) {
         effUpdateValueTransitionProximity(obj);
     }
-    if (dds3TestObjectFlags(obj, 0x2000)) {
+    if (dds3ObjectBaseCheckFlag(obj, 0x2000)) {
         if (data->pendingTargetKey != 0) {
             effObjStepFollowAngleTowardPosition(
                 obj, &((EvtWorldSourceTransformPrefix *)dds3GetWorldNodeData(dds3FindWorldObjectNodeByKey(
@@ -347,11 +347,11 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
 
     memset(vec, 0, 0x10);
     vec[3] = 1.0f;
-    if (dds3TestObjectFlags(obj, 1)) {
+    if (dds3ObjectBaseCheckFlag(obj, 1)) {
         return 1;
     }
     target = effObjGetTransitionWork(obj);
-    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
+    if (dds3ObjectBaseCheckFlag(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
         func_0011ECC8(obj);
     }
     if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
@@ -359,22 +359,22 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     } else {
         effObjApplyTransformParameters(D_00325788[(s32)((EffectObjectData *)obj->data)->followParameterIndex], obj);
     }
-    if (!dds3TestObjectFlags(obj, 0x400)) {
+    if (!dds3ObjectBaseCheckFlag(obj, 0x400)) {
         return 1;
     }
-    if (dds3TestObjectFlags(obj, 0x1000)) {
+    if (dds3ObjectBaseCheckFlag(obj, 0x1000)) {
         return 1;
     }
     if (target == NULL) {
         return 1;
     }
     config = (MdlCtx *)dds3GetEffectObjectModelHolder(obj)->resourceHandle;
-    if (dds3TestObjectFlags(obj, 0x4000)) {
+    if (dds3ObjectBaseCheckFlag(obj, 0x4000)) {
         level = target->shadowLevel;
     } else {
         level = config->inner->color >> 24;
     }
-    pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
+    pickMode = dds3ObjectBaseCheckFlag(obj, 0x8000) != 0;
     if (sdfLoadMapRecordPositionVector(target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
         vec[1] = pickMode == 1 ? target->shadowY : obj->inner->position[1];
@@ -484,8 +484,8 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation) {
     obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_TRANSFORM);
     obj->key = (u32)key;
     dds3EnsureSlotData(obj);
-    effObjSetInnerRotation(obj, (u128 *)rotation);
-    effObjSetInnerPosition(obj, (u128 *)zero);
+    dds3SetRotPoseSet(obj, (u128 *)rotation);
+    dds3SetPosPoseSet(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
     ((EffectTransformData *)obj->data)->offset[0] = offset[0];
     ((EffectTransformData *)obj->data)->offset[1] = offset[1];
@@ -542,7 +542,7 @@ s32 effObjInitializeTransformData(EffWorldNode *object) {
     void *work;
 
     effObjInnerCreate(object);
-    work = sdfAllocSizeClassBlock(sizeof(EffectTransformData));
+    work = sdfChipAllocDirect(sizeof(EffectTransformData));
     object->data = work;
     memset(work, 0, sizeof(EffectTransformData));
     data = object->data;
@@ -558,7 +558,7 @@ s32 effObjInitializeTransformData(EffWorldNode *object) {
     data->position[1] = 0.0f;
     data->position[2] = 0.0f;
     data->position[3] = 1.0f;
-    dds3SetObjectFlags(object, 0xE2);
+    dds3ObjectBaseOnFlag(object, 0xE2);
     return 1;
 }
 
@@ -568,7 +568,7 @@ void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
     effObjFreeInner(object);
     data = object->data;
     dds3DestroyObjectBase(data->resourceState);
-    sdfReleaseChipBlock(data);
+    sdfChipFreeDirect(data);
 }
 
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
@@ -674,13 +674,13 @@ s32 effUpdateTransformOpacityMode(EffWorldNode *object) {
         break;
     }
 
-    model = (SdfModel *)dds3GetObjectBaseResourceHandle(object);
+    model = (SdfModel *)dds3ObjectBaseGetModelHandle(object);
     if (model != NULL) {
         effObjClearNodeFlags(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        effObjFetchInnerRotationNormalized(object);
+        dds3GetRotPoseSet(object);
         VU0_STORE_VF(vf10, model->rotationQuaternion);
         dds3LoadOrBuildObjectMatrix(object);
-        effObjFetchInnerPosition(object);
+        dds3GetPosPoseSet(object);
         if (fldStepActorMotionByKey(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
             f32 x = coordinates[0];
             f32 y = coordinates[1];
@@ -730,7 +730,7 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
         if (opacityMode < EFFECT_OPACITY_MODE_ALPHA_FADE_END) {
             if (opacityMode >= EFFECT_OPACITY_MODE_ALPHA_FADE_START) {
                 if (object->color != EFFECT_OPACITY_COLOR_NEUTRAL) {
-                    if (dds3TestObjectFlags((EffWorldNode *)fldPlayerObject, 1)) {
+                    if (dds3ObjectBaseCheckFlag((EffWorldNode *)fldPlayerObject, 1)) {
                         u32 savedColor = object->color;
 
                         object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
@@ -796,7 +796,7 @@ void effObjReleaseStateDependencies(EffectDependencyState *state) {
             data->handle = NULL;
         }
         if (data->vector != NULL) {
-            sdfReleaseChipBlock(data->vector);
+            sdfChipFreeDirect(data->vector);
             data->vector = NULL;
         }
         break;
@@ -807,11 +807,11 @@ void effObjReleaseStateDependencies(EffectDependencyState *state) {
             data->handle = NULL;
         }
         if (data->node != NULL) {
-            sdfReleaseChipBlock(data->node);
+            sdfChipFreeDirect(data->node);
             data->node = NULL;
         }
         if (data->vector != NULL) {
-            sdfReleaseChipBlock(data->vector);
+            sdfChipFreeDirect(data->vector);
             data->vector = NULL;
         }
         break;
@@ -825,11 +825,11 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
     EffectDependencyState *data;
 
     effObjInnerCreate(obj);
-    obj->data = sdfAllocSizeClassBlock(0x50);
+    obj->data = sdfChipAllocDirect(0x50);
     memset(obj->data, 0, 0x50);
     data = obj->data;
     data->objectHandle = dds3CreateSlotResourceState(obj);
-    dds3SetObjectFlags(obj, 0x60);
+    dds3ObjectBaseOnFlag(obj, 0x60);
     return 1;
 }
 

@@ -61,7 +61,7 @@ typedef struct ScrData {
     void *scriptHandle;
     s32 *localInt;
     f32 *localFloat;
-    KwlnTask *task;       /* 0xE4: scheduler object returned by kwlnTaskCreate */
+    KwlnTask *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
     struct ScrData *previous; /* 0xE8: named-process list links */
     struct ScrData *next;     /* 0xEC */
     void *actor;          /* 0xF0: caller-owned command work */

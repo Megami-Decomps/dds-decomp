@@ -588,7 +588,7 @@ void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from,
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quaternion);
-        pose = effMiscRandMod(0, 4);
+        pose = sdfGetRandInt(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -663,7 +663,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quat);
-        pose = effMiscRandMod(0, 4);
+        pose = sdfGetRandInt(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -968,9 +968,9 @@ void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *fro
                 candidates[count++] = i;
             }
         }
-        selected = candidates[effMiscRandMod(0, count) & 0xFFFF];
+        selected = candidates[sdfGetRandInt(0, count) & 0xFFFF];
     } else {
-        selected = effMiscRandMod(0, 8);
+        selected = sdfGetRandInt(0, 8);
     }
     btlCopyUnitRotationQuaternion(unit, quaternion);
     fov = action->camera.fov;
@@ -1054,9 +1054,9 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
                 candidates[count++] = i;
             }
         }
-        selected = candidates[effMiscRandMod(0, count) & 0xFFFF];
+        selected = candidates[sdfGetRandInt(0, count) & 0xFFFF];
     } else {
-        selected = effMiscRandMod(0, 8);
+        selected = sdfGetRandInt(0, 8);
     }
     /* The candidate count is finished; count now describes targets. */
     mask = 0;
@@ -1270,7 +1270,7 @@ f32 angle, f32 blend) {
         btlSetDefaultActionCameraPose(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (effMiscRand((EffRandState *)effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (sdfGetRand((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;
@@ -1966,9 +1966,9 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     }
     scale = (animationFlags & 0x200) ? 320.0f : 300.0f;
     if (animationFlags & 0x200) {
-        pose = effMiscRandMod(0, 2) + 2;
+        pose = sdfGetRandInt(0, 2) + 2;
     } else {
-        pose = effMiscRandMod(0, 2);
+        pose = sdfGetRandInt(0, 2);
     }
     groups = 0;
     count = btlGetIndexListCount(action->targetList);
@@ -3275,7 +3275,7 @@ void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *action, BtlCamSta
     reach = unit->reach * unit->scale;
     height = unit->height;
     height *= unit->scale;
-    pose = effMiscRandMod(0, 2);
+    pose = sdfGetRandInt(0, 2);
     btlCopyUnitRotationQuaternion(unit, quaternion);
     fov = action->camera.fov;
     from->fov = fov;
@@ -7899,17 +7899,17 @@ void btlFreeFieldBlocks(void) {
     BtlState *context = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (context->fieldTBResourceId != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldTBResourceId);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)context->fieldTBResourceId);
         context->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_003A4AD8);
     }
     if (context->fieldF2ResourceId != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldF2ResourceId);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)context->fieldF2ResourceId);
         context->fieldF2ResourceId = 0;
         btlBossDebugPrintf(D_003A4AF0);
     }
     if (context->fieldF1ResourceId != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldF1ResourceId);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)context->fieldF1ResourceId);
         context->fieldF1ResourceId = 0;
         btlBossDebugPrintf(D_003A4B08);
     }
@@ -8305,7 +8305,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                                              args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+                sdfMemFreeDelayedDirect((struct SdfMemBlock *)blocks->fieldTBResourceId);
                 blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_003A4AD8);
             }
@@ -8354,7 +8354,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
                 work->frontFloorResource =
-                    (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->frontHandle));
+                    (void *)sdfMemLock(fileGetResourceHandle(args->frontHandle));
                 filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf(D_003A4BF8);
@@ -8365,7 +8365,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
                 work->sideFloorResource =
-                    (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->sideHandle));
+                    (void *)sdfMemLock(fileGetResourceHandle(args->sideHandle));
                 filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf(D_003A4C10);
@@ -9091,8 +9091,8 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     btlBossDebugPrintf(D_003A4C88, args->name);
     resource = fileGetResourceHandle(args->request);
     effect->resourceHandle =
-        sndMixerClone((void *)sdfResourceRetainAddress(resource));
-    sdfReleaseResourceAllocation(resource);
+        sndMixerClone((void *)sdfMemLock(resource));
+    sdfMemFreeDirect(resource);
     filePollEntryCleanup(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
@@ -9433,7 +9433,7 @@ void sndFreeResourceNode(SoundResourceNode *node) {
     } else {
         ((BtlActorWork *)btlGetRuntime())->soundResourceHead = node->next;
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Advance resource countdowns and battle tint, then tick slot-volume fades. */
@@ -9562,7 +9562,7 @@ void sndFreeResourceLink(SoundResourceLink *node) {
         --node->effect->referenceCount;
         sndDeleteSystemEffect(node->effect);
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DEFE0", func_001F2818);
@@ -9586,7 +9586,7 @@ void sndFreeLink(SoundLink *node) {
         node->effect->referenceCount--;
         sndDeleteSystemEffect(node->effect);
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Blend the linked command effect through the SDK's packed-color vectors. */
@@ -9787,7 +9787,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 void sndDestroyFileQueueWrapper(u32 handle) {
     SoundHandleNode *node = (SoundHandleNode *)handle;
     fileQueueDestroy(node->queue);
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 void func_001F3230(void) {
@@ -10057,7 +10057,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             btlBossDebugPrintf(D_003A50F0, request->filename);
             request->resourceAllocation = fileGetResourceHandle(request->request);
             size = (s32)fileGetResourceSize(request->request);
-            data = sdfResourceRetainAddress(request->resourceAllocation);
+            data = sdfMemLock(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == 0) {
                 func_002E9450(data, size);
                 node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
@@ -10069,7 +10069,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->packedTrackPosition >> 16));
-        sdfReleaseResourceAllocation(request->resourceAllocation);
+        sdfMemFreeDirect(request->resourceAllocation);
         filePollEntryCleanup(request->request);
         node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
                       SOUND_FILE_STATE_COMPLETE;
@@ -10194,7 +10194,7 @@ void sndFreeListNode(ActiveSoundNode *node) {
     } else {
         ((BtlActorWork *)btlGetRuntime())->soundList = node->next;
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Clear active-sound nodes, saving next before each allocation is released. */
@@ -10335,7 +10335,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
                 filePollEntryCleanup(*requests);
             }
             if (*resources != 0) {
-                sdfReleaseResourceAllocation(*resources);
+                sdfMemFreeDirect(*resources);
             }
         }
         if (node->next != 0) {
@@ -10346,7 +10346,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
         } else {
             ((BtlActorWork *)btlGetRuntime())->soundSlotOwners = node->next;
         }
-        sdfReleaseChipBlock(node);
+        sdfChipFreeDirect(node);
     }
 }
 
@@ -10671,11 +10671,11 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetResourceHandle(args->request);
-        data = sdfResourceRetainAddress(resource);
+        data = sdfMemLock(resource);
         size = (s32)fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].volume);
-        sdfReleaseResourceAllocation(resource);
+        sdfMemFreeDirect(resource);
         btlBossDebugPrintf(D_003A5358);
         return 1;
     }
@@ -10744,7 +10744,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
         if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
             args->resourceAllocation =
                 fileGetResourceHandle(args->request);
-            data = sdfResourceRetainAddress(args->resourceAllocation);
+            data = sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetResourceSize(args->request);
             filePollEntryCleanup(args->request);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
@@ -10764,7 +10764,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
 void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *args) {
     u8 *state = (u8 *)btlGetRuntime();
     if (args->resourceAllocation != 0) {
-        sdfReleaseResourceAllocation(args->resourceAllocation);
+        sdfMemFreeDirect(args->resourceAllocation);
     }
     --*(u16 *)(state + 0x260);
 }
@@ -10878,12 +10878,12 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         if (unit->status.flags & 1) {
             position[0] = center[0] - sdfSinPoly(angle) * radius;
             position[1] = center[1];
-            position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            position[2] = center[2] - sdfCos(angle) * radius;
         } else {
             adjustedAngle = angle - step * 0.25f;
             position[0] = center[0] - sdfSinPoly(adjustedAngle) * radius;
             position[1] = center[1];
-            position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(adjustedAngle) * radius;
+            position[2] = center[2] - sdfCos(adjustedAngle) * radius;
         }
         PCP_COPY_VECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
@@ -10994,7 +10994,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
         angle += halfAngle;
         position[0] = sdfSinPoly(angle) * radius;
         position[1] = 0.0f;
-        position[2] = (distance - sdfEvaluateCosineViaSinePhaseShift(angle) * radius) * direction;
+        position[2] = (distance - sdfCos(angle) * radius) * direction;
         PCP_COPY_VECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
         PCP_COPY_VECTOR(unit->rotation, rotation);
@@ -11049,7 +11049,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
         btlSetUnitRotation(slot[1], (s128 *)rotation);
     }
     angle = 30.0f * 0.017453293f;
-    pos[0] = center[0] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    pos[0] = center[0] - sdfCos(angle) * radius;
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
@@ -11057,7 +11057,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[0], (s128 *)rotation);
     }
-    pos[0] = center[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    pos[0] = center[0] + sdfCos(angle) * radius;
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[2], pos);

@@ -434,7 +434,7 @@ extern s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask);
 extern s32 btlAverageAllLevelsForMask(u32 actorMask);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void mdlFlagSet(s32 flagIndex);
-extern s32 effMiscRandMod(u32 stream, u32 modulus);
+extern s32 sdfGetRandInt(u32 stream, u32 modulus);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it. */
@@ -1244,12 +1244,12 @@ void ptySaveActiveUnitsToStock(void) {
 void evtRandomizeEntryValue(DatPartyRecord *entry) {
     s32 randomOffset;
 
-    randomOffset = effMiscRandMod(0, 4);
+    randomOffset = sdfGetRandInt(0, 4);
     entry->randomizedValue = 0x12 - randomOffset;
 }
 
 
-extern s32 effMiscRandMod(u32 stream, u32 modulus);
+extern s32 sdfGetRandInt(u32 stream, u32 modulus);
 
 /* Clear a subset of per-unit status flags on occupied qualifying entries,
  * gated by the event RNG; report whether any flags were cleared. */
@@ -1257,7 +1257,7 @@ s32 evtClearRandomStatusFlags(void) {
     s32 clearedAny = 0;
     s32 remaining;
     DatPartyRecord *entry;
-    s32 roll = (s32)effMiscRandMod(0, 100);
+    s32 roll = (s32)sdfGetRandInt(0, 100);
 
     if (roll >= 51) {
         return 0;
@@ -1566,7 +1566,7 @@ s32 evtPushEntryFlagBitInverted(void) {
 /* For positive ranges, return 1.0 plus a percentage jitter; the upper endpoint is excluded. */
 s32 evtRollRandomScale(void) {
     s32 percentRange = scrReadIntParameter(0);
-    s32 roll = effMiscRandMod(0, percentRange * 2);
+    s32 roll = sdfGetRandInt(0, percentRange * 2);
 
     scrSetFloatReturnValue((f32)(roll - percentRange + 100) / 100.0f);
     return 1;
@@ -1719,10 +1719,10 @@ void evtScriptSelectRandomValue(void) {
     s32 roll;
 
     if ((((DatPartyRecord *)evtWorkScriptContextSecondArgument[0])->flags & 0x20) == 0) {
-        roll = effMiscRandMod(0, 0x20);
+        roll = sdfGetRandInt(0, 0x20);
         resultCode = roll != 0 ? 10 : 0x80;
     } else {
-        roll = effMiscRandMod(0, 0x30);
+        roll = sdfGetRandInt(0, 0x30);
         resultCode = roll != 0 ? 0 : 0x80;
     }
     scrSetIntegerReturnValue(resultCode);
@@ -1936,7 +1936,7 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
     if (interval <= 0) {
         return 0;
     }
-    D_003BAAB8 = effMiscRandMod(0, interval * 2 - 32) + 16;
+    D_003BAAB8 = sdfGetRandInt(0, interval * 2 - 32) + 16;
     return D_003BAAB8;
 }
 
@@ -1973,9 +1973,9 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     datGameState->conditionalEncounterStepRemainder = counter - (f32)count * 100.0f;
     for (i = 0; i < count; i++) {
         if (datGameState->world.fieldFlags & 2) {
-            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + effMiscRandMod(0, 7) + 6;
+            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + sdfGetRandInt(0, 7) + 6;
         } else {
-            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + effMiscRandMod(0, 3) + 2;
+            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + sdfGetRandInt(0, 3) + 2;
         }
     }
     if (datGameState->conditionalEncounterGauge > 0xFDE8) {
@@ -1991,7 +1991,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
         }
     }
     count = 0;
-    roll = effMiscRandMod(0, total);
+    roll = sdfGetRandInt(0, total);
     for (i = 0; i < 20; i++) {
         if (D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
             if (roll < count + D_003BAA3C[encounterIndex].groups[group].entries[i].weight) {

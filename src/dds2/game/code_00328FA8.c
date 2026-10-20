@@ -70,7 +70,7 @@ void sdfInitChipHeap(u32 heapSize) {
         sizeClass->availablePages = NULL;
         sizeClass++;
     } while (pageCount != 0);
-    sdfInitializeSynchronizedRequest(&sdfChipReleaseRequest, sdfReleaseChipBlock);
+    sdfInitializeSynchronizedRequest(&sdfChipReleaseRequest, sdfChipFreeDirect);
 }
 
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
@@ -126,7 +126,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
 
     heap->base = (u32)sdfAllocHeapMemory(heapSize);
     heap->size = heapSize;
-    freeBlock = sdfAllocSizeClassBlock(0x10);
+    freeBlock = sdfChipAllocDirect(0x10);
     alignedStart = (heap->base + SDF_MEM_ALIGNMENT_MASK) & ~SDF_MEM_ALIGNMENT_MASK;
     alignedEnd = (heap->base + heapSize) & ~SDF_MEM_ALIGNMENT_MASK;
     heap->head.prev = NULL;
@@ -145,7 +145,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_004389CC = 0;
-    sdfInitializeSynchronizedRequest(&sdfGeneralReleaseRequest, sdfReleaseResourceAllocation);
+    sdfInitializeSynchronizedRequest(&sdfGeneralReleaseRequest, sdfMemFreeDirect);
 }
 
 u16 sdfGetMemoryBlockState(SdfMemBlock *block) {

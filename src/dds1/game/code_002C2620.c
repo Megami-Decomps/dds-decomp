@@ -359,18 +359,18 @@ void fldStartLmapTask(s32 mode) {
     } else {
         D_003BD23C = 1;
     }
-    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
+    dds3StartProcess(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, 0);
     D_003BD96C = 0;
     fldInitializeLmapState();
 }
 
 void fldStopLmapTask(void) {
     fldShutdownLmapResources();
-    kwlnTaskDestroyWithHierarchyByName(fldLocalMapTaskName, 1);
+    dds3KillProcessName(fldLocalMapTaskName, 1);
 }
 
 s32 fldLmapTaskExists(void) {
-    return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
+    return dds3SearchProcessName(fldLocalMapTaskName) != NULL;
 }
 
 void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
@@ -435,7 +435,7 @@ void fldShutdownLmapResources(void) {
     sdfDisableFlagListViewTargetRelativeMode();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    sdfQueueGeneralAllocationRelease(D_003BD254);
+    sdfMemFreeDelayedDirect(D_003BD254);
     evtDestroySecondaryWorldNode();
 }
 

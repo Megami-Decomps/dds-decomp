@@ -106,8 +106,8 @@ extern void sndStartReducedBgm(void);
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
 StaffMenuWork *mnuCreateStaffCampWork(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuWork));
-    StaffMenuWork *menu = (StaffMenuWork *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(StaffMenuWork));
+    StaffMenuWork *menu = (StaffMenuWork *)sdfMemLock(allocation);
 
     memset(menu, 0, sizeof(*menu));
     menu->resource = allocation;
@@ -136,7 +136,7 @@ extern void sndStopReducedBgm(void);
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
 void mnuDestroyStaffMenuTask(KwlnTask *task) {
-    StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *menu = (StaffMenuWork *)dds3GetProcessData(task);
     if (menu == NULL) {
         return;
     }
@@ -149,7 +149,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
     effDestroyEffectList(menu->resourceQueue);
-    sdfReleaseResourceAllocation(menu->resource);
+    sdfMemFreeDirect(menu->resource);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     sndStopReducedBgm();
 }
@@ -159,7 +159,7 @@ extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
 s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue(task);
+    context = dds3GetProcessData(task);
     mnuDrawAndStepGradientFade(context + 0x914, 0x53);
     return 0;
 }
@@ -210,20 +210,20 @@ void mnuCreateCampTasks(void) {
     KwlnTask *drawTask;
 
     menu = mnuCreateStaffCampWork();
-    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, (u32)menu);
-    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawStaffCampImageScreen, 0, (u32)menu);
-    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, (u32)menu);
-    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
-    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
+    dds3StartProcess(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, (u32)menu);
+    drawTask = dds3StartProcess(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawStaffCampImageScreen, 0, (u32)menu);
+    dds3StartProcess(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, (u32)menu);
+    dds3LinkProcess(drawTask, dds3StartProcess("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
+    dds3LinkProcess(drawTask, dds3StartProcess("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
     kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
 }
 
 /* Destroy the three named camp task hierarchies; owner teardown frees userdata. */
 void mnuDestroyCampTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(mnuCampInputTaskName, 0);
-    kwlnTaskDestroyWithHierarchyByName(mnuCampDrawTaskName, 0);
-    kwlnTaskDestroyWithHierarchyByName(mnuCampOwnerTaskName, 0);
+    dds3KillProcessName(mnuCampInputTaskName, 0);
+    dds3KillProcessName(mnuCampDrawTaskName, 0);
+    dds3KillProcessName(mnuCampOwnerTaskName, 0);
 }
 
 /* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
@@ -270,7 +270,7 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     sprintf(text, D_003BC6C0, datGameState->header.currency);
     glyph = itfCreateTightFont3TextGlyph(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
     frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, drawFlags);
-    frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
+    frDestroyFontRequestAfter((FrFontGlyph *)glyph);
 }
 
 extern u8 *mnuCampSelectionPromptTexts[];
@@ -280,7 +280,7 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
     FrFontGlyph *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       mnuCampSelectionPromptTexts[imageIndex], 0);
     frFontDrawGlyphChain(sprite, 1, 0x54);
-    frFontQueueGlyphForCurrentDrawBuffer(sprite);
+    frDestroyFontRequestAfter(sprite);
 }
 
 extern const StaffGridLabelRow D_003B2100[];
@@ -317,7 +317,7 @@ void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 contex
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
         frFontSetChildColors(glyph, 0xA09DC366);
         frFontDrawGlyphChain(glyph, 0, layer);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
     }
 }
 
@@ -329,7 +329,7 @@ extern void mnuDrawBackdrop(MenuAssets *assets, s32 option);
 extern void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth, MenuScrollPanel *panel, s32 surface);
 
 void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
-    StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);
+    StaffMenuWork *menu = (StaffMenuWork *)dds3GetProcessData(task);
 
     mnuDrawBackdrop((MenuAssets *)menu->background, 0x20);
     if (mnuInitializeCampMenuWhenResourcesReady(task) == 0) {

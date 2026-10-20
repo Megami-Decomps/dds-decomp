@@ -227,7 +227,7 @@ extern SdfSoundRpcRequest *D_003BDA74;
 extern s32 D_003BDA78;
 extern DevState *D_003BDA7C;
 extern SdfSoundResidentBuffer D_003FEA98;
-extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
+extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
@@ -243,14 +243,14 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         }
         sdfSoundCommandBusy = 1;
         mnuBuildVoiceResourcePath(path, D_00398948);
-        state = sdfDevCreateCallbackState(path, sdfSoundHandleRpcEvent, 0);
+        state = sdfFileCmdReadOpen(path, sdfSoundHandleRpcEvent, 0);
         D_003BDA7C = state;
         if (state != NULL) {
             WaitSema(sdfSoundRpcSemaphore);
             state = D_003BDA7C;
             if (state->result != 0) {
-                sdfDevReactivate(state);
-                sdfDevQueueReleaseState(D_003BDA7C);
+                sdfFileCmdClearError(state);
+                sdfFileCmdFree(D_003BDA7C);
                 D_003BDA7C = NULL;
                 state = NULL;
             }
@@ -262,13 +262,13 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         SdfMemBlock *allocation;
         void *buffer;
         D_003BDA74 = request;
-        allocation = sdfAllocGeneralBlock(request->byteCount);
-        buffer = (void *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(request->byteCount);
+        buffer = (void *)sdfMemLock(allocation);
         if (buffer != NULL) {
-            sdfDevQueueRead(D_003BDA7C, buffer, D_003BDA74->byteCount);
+            sdfFileCmdRead(D_003BDA7C, buffer, D_003BDA74->byteCount);
             WaitSema(sdfSoundRpcSemaphore);
             sndCopyToIopAndWait(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
-            sdfReleaseResourceAllocation(allocation);
+            sdfMemFreeDirect(allocation);
             D_003FEAC0[0] = D_003BDA74->byteCount;
         } else {
             D_003FEAC0[0] = 0;
@@ -276,9 +276,9 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         break;
     }
     case 2:
-        sdfDevQueueActiveOperation(D_003BDA7C);
+        sdfFileCmdClose(D_003BDA7C);
         WaitSema(sdfSoundRpcSemaphore);
-        sdfDevQueueReleaseState(D_003BDA7C);
+        sdfFileCmdFree(D_003BDA7C);
         D_003BDA7C = NULL;
         sdfSoundCommandBusy = 0;
         D_003FEAC0[0] = 0;
@@ -1053,15 +1053,15 @@ void sdfPrintChipHeapInfo(void) {
 SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u32 *outSize, s32 extra) {
     DevState *state = sdfDevCreateCommandState(name);
     s32 size = sdfDevQueueControlAndWait(state);
-    SdfMemBlock *handle = sdfAllocGeneralBlock(size + extra);
-    u32 address = sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(size + extra);
+    u32 address = sdfMemLock(handle);
 
     sdfDevQueueReadAndWait(state, (void *)address, size);
     sdfDevWaitThenReleaseCommandState(state);
     if (outData != NULL) {
         *outData = address;
     } else {
-        sdfDecrementAllocationReferenceCount(handle);
+        sdfMemUnlock(handle);
     }
     if (outSize != NULL) {
         *outSize = size;
@@ -1080,7 +1080,7 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
 
     handle = sdfReadNamedResource(name, info, 0);
     resource = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
-    sdfReleaseResourceAllocation(handle);
+    sdfMemFreeDirect(handle);
     return resource;
 }
 
@@ -1108,7 +1108,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 
     handle = sdfReadNamedResource(name, info, 0);
     resource = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)info[0]);
-    sdfReleaseResourceAllocation(handle);
+    sdfMemFreeDirect(handle);
     return resource;
 }
 

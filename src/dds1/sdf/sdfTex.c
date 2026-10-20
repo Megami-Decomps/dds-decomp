@@ -118,8 +118,8 @@ void sdfTexRelease(SdfTex *texture) {
         sdfUpdateTextureHeadsWithInterruptsMasked(texture->primaryResource);
     }
     sdfUpdateTextureHeadsWithInterruptsMasked(texture->secondaryResource);
-    sdfReleaseChipBlock(texture->primaryBuffer);
-    sdfReleaseChipBlock(texture->secondaryBuffer);
+    sdfChipFreeDirect(texture->primaryBuffer);
+    sdfChipFreeDirect(texture->secondaryBuffer);
     next = texture->next;
     prev = texture->prev;
     if (prev != NULL) {
@@ -132,8 +132,8 @@ void sdfTexRelease(SdfTex *texture) {
     }
     sdfFreeMemoryFromEitherHeap(texture->paletteData);
     sdfFreeMemoryFromEitherHeap(texture->intensityMap);
-    sdfReleaseChipBlock(texture->reference);
-    sdfReleaseChipBlock(texture);
+    sdfChipFreeDirect(texture->reference);
+    sdfChipFreeDirect(texture);
 }
 
 /* Release a texture when the final ordinary reference is dropped. */
@@ -176,7 +176,7 @@ SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     u32 primary;
     u32 secondary;
 
-    packet = sdfAllocSizeClassBlock(0x40);
+    packet = sdfChipAllocDirect(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
     sdfBuildTextureStatePacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);

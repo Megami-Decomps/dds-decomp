@@ -180,7 +180,7 @@ u32 dds3InitializeResourceOwner(EffWorldNode *object) {
     ObjBase *handle;
 
     effObjInnerCreate(object);
-    resource = (DdsSlotResourceBlock *)sdfAllocSizeClassBlock(0x10);
+    resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(0x10);
     object->data = resource;
     handle = dds3CreateSlotResourceState(object);
     resource->resourceState = handle;

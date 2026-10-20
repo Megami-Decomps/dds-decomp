@@ -29,7 +29,7 @@ void mnuReleaseMovieMenuState(void) {
     mnuDestroyMovieMenuSelectionList();
     mnuReleaseMovieResourceGroup(mnuMovieMenuState->resources);
     mnuMovieShutdownA();
-    sdfReleaseResourceAllocation(mnuMovieMenuState->allocation);
+    sdfMemFreeDirect(mnuMovieMenuState->allocation);
     mnuMovieMenuState = 0;
     D_003BA730 = 1;
 }
@@ -509,7 +509,7 @@ u32 mnuOpenTitleMenuForMode(s32 mode) {
 
 s32 mnuDestroyTitleMenuTask(void) {
     mnuReleaseMovieMenuState();
-    kwlnTaskDestroyWithHierarchyByName(D_003AFD80, 1);
+    dds3KillProcessName(D_003AFD80, 1);
     return 0;
 }
 

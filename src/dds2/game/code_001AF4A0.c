@@ -371,7 +371,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
         btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE7) &&
         datCommandRecords[command].hpType != 8 &&
         datCommandRecords[command].hpType != 10) {
-        f32 varied = ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f) *
+        f32 varied = ((sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f) *
                      0.5f * automatic + automatic;
         automatic = varied;
     }
@@ -427,9 +427,9 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
     limit = datCommandRecords[command].stat36;
     if (amount < -limit) {
-        amount = -(limit * ((s32)effMiscRandMod(0, 11) + 95)) / 100;
+        amount = -(limit * ((s32)sdfGetRandInt(0, 11) + 95)) / 100;
     } else if (amount > limit) {
-        amount = limit * ((s32)effMiscRandMod(0, 11) + 95) / 100;
+        amount = limit * ((s32)sdfGetRandInt(0, 11) + 95) / 100;
     }
     if (amount == 0 && base != 0) {
         amount = base < 0 ? -1 : 1;
@@ -609,9 +609,9 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
     limit = datCommandRecords[command].stat36;
     if (amount < -limit) {
-        amount = -(limit * ((s32)effMiscRandMod(0, 11) + 95)) / 100;
+        amount = -(limit * ((s32)sdfGetRandInt(0, 11) + 95)) / 100;
     } else if (amount > limit) {
-        amount = limit * ((s32)effMiscRandMod(0, 11) + 95) / 100;
+        amount = limit * ((s32)sdfGetRandInt(0, 11) + 95) / 100;
     }
     if (amount == 0 && base != 0) {
         amount = base < 0 ? -1 : 1;
@@ -795,7 +795,7 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
         maximum = datCommandRecords[command].rangeMax;
     }
     if (minimum < maximum) {
-        result = minimum + effMiscRandMod(0, maximum - minimum + 1);
+        result = minimum + sdfGetRandInt(0, maximum - minimum + 1);
     } else {
         result = minimum;
     }
@@ -928,8 +928,8 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
         } while (sorted == 0);
     } else {
         for (i = 0; i < 13; i++) {
-            randomIndices[0] = effMiscRandMod(0, count);
-            randomIndices[1] = effMiscRandMod(0, count);
+            randomIndices[0] = sdfGetRandInt(0, count);
+            randomIndices[1] = sdfGetRandInt(0, count);
             if (randomIndices[0] != randomIndices[1]) {
                 btlSwapIndexListEntries(targets, randomIndices[0], randomIndices[1]);
             }
@@ -973,7 +973,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
 
     targetCount = btlGetIndexListCount(targets);
     allowConsecutiveHits = targetCount < 2;
-    maximumHits = targetCount + effMiscRandMod(0, 2);
+    maximumHits = targetCount + sdfGetRandInt(0, 2);
     if (allowConsecutiveHits) {
         results[0].hitCount = maximumHits;
         return;
@@ -987,10 +987,10 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
-        index = effMiscRandMod(0, targetCount);
+        index = sdfGetRandInt(0, targetCount);
         entry = btlGetIndexListEntry(copy, index);
         if (!allowConsecutiveHits && entry == previous) {
-            index = (index + effMiscRandMod(0, targetCount - 1) + 1) % targetCount;
+            index = (index + sdfGetRandInt(0, targetCount - 1) + 1) % targetCount;
             entry = btlGetIndexListEntry(copy, index);
         }
         previous = entry;

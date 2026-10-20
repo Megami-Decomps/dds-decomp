@@ -46,7 +46,7 @@ u8 *sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
 
 /* Low-end first-fit with 128-byte rounding; returns an allocation handle.
  * At the end marker, call the optional out-of-memory hook and continue searching. */
-SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
+SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
@@ -68,7 +68,7 @@ SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
+                    SdfMemBlock *splitBlock = sdfChipAllocDirect(sizeof(SdfMemBlock));
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;
@@ -109,7 +109,7 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
+                    SdfMemBlock *splitBlock = sdfChipAllocDirect(sizeof(SdfMemBlock));
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + (availableBytes - alignedBytes);
@@ -153,7 +153,7 @@ SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
 
             if (availableBytes >= alignedBytes) {
                 if (alignedBytes < availableBytes) {
-                    SdfMemBlock *splitBlock = sdfAllocSizeClassBlock(sizeof(SdfMemBlock));
+                    SdfMemBlock *splitBlock = sdfChipAllocDirect(sizeof(SdfMemBlock));
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;

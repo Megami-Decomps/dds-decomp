@@ -274,7 +274,7 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, 
 
 /* Release the chip-cell allocation itself, not a pointer-to-pointer wrapper. */
 void mdlReleaseViewerAllocation(void *memory) {
-    sdfReleaseChipBlock(memory);
+    sdfChipFreeDirect(memory);
 }
 
 /* Release the three copied filename paths, then their tables and backing allocations. */
@@ -289,9 +289,9 @@ void mdlReleaseViewerSlotResources(void) {
         entryIndex = 0;
         do {
             entryIndex++;
-            sdfReleaseChipBlock((void *)slotEntry->path);
-            sdfReleaseChipBlock((void *)slotEntry->resourceListPath);
-            sdfReleaseChipBlock((void *)slotEntry->motionPath);
+            sdfChipFreeDirect((void *)slotEntry->path);
+            sdfChipFreeDirect((void *)slotEntry->resourceListPath);
+            sdfChipFreeDirect((void *)slotEntry->motionPath);
             slotEntry++;
         } while (entryIndex < entryCount);
     }
@@ -316,14 +316,14 @@ void mdlInitializeViewerResourceTable(void) {
     char *copiedText;
 
     mdlReleaseViewerSlotResources();
-    D_003BBB6C = (u32)sdfAllocGeneralBlock(MDL_VIEWER_HEADER_BYTES);
-    D_003BD880 = (MdlResourceSelection *)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB6C));
+    D_003BBB6C = (u32)sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
+    D_003BD880 = (MdlResourceSelection *)sdfMemLock((struct SdfMemBlock *)(D_003BBB6C));
     D_003BD880->pathTable = 5;
     D_003BD880->pathIndex = 0;
     D_003BD880->unk4 = 0x1000;
     D_003BD880->unk6 = 0x3E8;
-    D_003BBB70 = (u32)sdfAllocGeneralBlock(MDL_VIEWER_NAME_TABLE_BYTES);
-    D_003BD884 = (MdlResourcePath *)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB70));
+    D_003BBB70 = (u32)sdfMemAllocDirect(MDL_VIEWER_NAME_TABLE_BYTES);
+    D_003BD884 = (MdlResourcePath *)sdfMemLock((struct SdfMemBlock *)(D_003BBB70));
     for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
         switch (sourceIndex) {
         case 0:
@@ -337,7 +337,7 @@ void mdlInitializeViewerResourceTable(void) {
             break;
         }
         if (sourceText != NULL) {
-            copiedText = sdfAllocSizeClassBlock(strlen(sourceText) + 1);
+            copiedText = sdfChipAllocDirect(strlen(sourceText) + 1);
             strcpy(copiedText, sourceText);
             switch (sourceIndex) {
             case 0:
@@ -442,7 +442,7 @@ void func_00218E20(void) {
                             file = file->next;
                         }
                         if (file == NULL) {
-                            file = sdfAllocSizeClassBlock(sizeof(*file));
+                            file = sdfChipAllocDirect(sizeof(*file));
                             memset(file, 0, sizeof(*file));
                             memcpy(file->name, directory.name, length - 2);
                             file->name[length - 2] = 0;
@@ -477,10 +477,10 @@ void func_00218E20(void) {
         }
         if (count != 0) {
             index = 0;
-            D_003BBB6C = (u32)sdfAllocGeneralBlock(count * sizeof(MdlResourceSelection));
-            D_003BD880 = sdfResourceRetainAddress((SdfMemBlock *)D_003BBB6C);
-            D_003BBB70 = (u32)sdfAllocGeneralBlock(count * sizeof(MdlResourcePath));
-            D_003BD884 = sdfResourceRetainAddress((SdfMemBlock *)D_003BBB70);
+            D_003BBB6C = (u32)sdfMemAllocDirect(count * sizeof(MdlResourceSelection));
+            D_003BD880 = sdfMemLock((SdfMemBlock *)D_003BBB6C);
+            D_003BBB70 = (u32)sdfMemAllocDirect(count * sizeof(MdlResourcePath));
+            D_003BD884 = sdfMemLock((SdfMemBlock *)D_003BBB70);
             memset(D_003BD884, 0, count * sizeof(MdlResourcePath));
             file = D_003BD87C;
             while (file != NULL) {
@@ -495,7 +495,7 @@ void func_00218E20(void) {
                 end = length + 5;
                 for (kind = 0; kind != 3; kind++) {
                     if (file->available[kind]) {
-                        char *path = sdfAllocSizeClassBlock(length + 8);
+                        char *path = sdfChipAllocDirect(length + 8);
 
                         *(DebugWorkPrefix *)path = D_003BBB78[0];
                         memcpy(path + 5, name, length);
@@ -813,8 +813,8 @@ void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
         sdfDestroyStreamFrameNode(&obj->soundNode);
     }
-    sdfReleaseResourceAllocation(obj->backingAllocation);
-    sdfReleaseChipBlock(obj);
+    sdfMemFreeDirect(obj->backingAllocation);
+    sdfChipFreeDirect(obj);
 }
 
 void mdlObjInit(MdlObj *obj, SdfTex *resource, SdfStreamParams *params) {
@@ -1039,7 +1039,7 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
         effTrackPolyRelease(item->payload.part.track);
         break;
     }
-    sdfReleaseChipBlock((void *)item);
+    sdfChipFreeDirect((void *)item);
 }
 
 /* Release all items for this slot without losing the link across consecutive matches. */
@@ -2298,7 +2298,7 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD98);
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABDA8);
 
 s32 mdlIsDebugTimeGraph(void) {
-    return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
+    return dds3SearchProcessName("DebugTimeGrph") != 0;
 }
 
 extern void mdlSaveViewerPresentationConfig(void);
@@ -2742,15 +2742,15 @@ void mdlSubmitViewerResourceDrawPacket(void) {
 
 void mdlViewerTaskDestroy(void) {
     if (mdlViewerState.viewerTask != 0) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)mdlViewerState.viewerTask, 0);
+        dds3KillProcess((KwlnTask *)mdlViewerState.viewerTask, 0);
         mdlViewerState.viewerTask = 0;
     }
 }
 
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
-    mdlViewerState.viewerTask = (s32)kwlnTaskCreate(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
-    kwlnTaskAddChild((KwlnTask *)mdlViewerState.unk00, (KwlnTask *)mdlViewerState.viewerTask);
+    mdlViewerState.viewerTask = (s32)dds3StartProcess(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
+    dds3LinkProcess((KwlnTask *)mdlViewerState.unk00, (KwlnTask *)mdlViewerState.viewerTask);
 }
 
 #include "sdf_gs_header.h"
@@ -3014,7 +3014,7 @@ void mdlLoadViewerPresentationConfig(void) {
         }
         lineOffset = nextLineOffset;
     }
-    sdfReleaseResourceAllocation(resourceHandle);
+    sdfMemFreeDirect(resourceHandle);
 }
 
 const char D_003ABF18[0x60] __attribute__((aligned(8))) = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
@@ -3073,8 +3073,8 @@ void mdlInitializeViewerTasksAndResources(void) {
     for (i = 0, task = D_00367AE0; i != 3; i++, task++) {
         kwlnUnregisterNamedSlot(task->name);
     }
-    mdlViewerState.unk00 = (s32)kwlnTaskCreate(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
-    kwlnTaskCreate(D_003ABF88, 0x2B01, 1, 0, mdlViewerEnd, NULL, 0);
+    mdlViewerState.unk00 = (s32)dds3StartProcess(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
+    dds3StartProcess(D_003ABF88, 0x2B01, 1, 0, mdlViewerEnd, NULL, 0);
     mdlViewerState.viewerTask = 0;
     mdlRestartViewerPhaseTask();
 }
@@ -3099,10 +3099,10 @@ void mdlCleanupViewerTasksAndResources(void) {
     s32 i;
 
     mdlFreeViewResources();
-    kwlnTaskDestroyWithHierarchyByName(D_003ABF78, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_003ABF88, 0);
+    dds3KillProcessName(D_003ABF78, 0);
+    dds3KillProcessName(D_003ABF88, 0);
     for (i = 0; i != 3; i++) {
-        if (kwlnTaskGetTaskByName(D_00367AE0[i].name) == NULL) {
+        if (dds3SearchProcessName(D_00367AE0[i].name) == NULL) {
             kwlnConfigureNamedSlotMode1(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
         }
     }
@@ -3125,7 +3125,7 @@ extern void *func_0011D6B0(s32, s32, s32, s32);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 
 /* vu0 routine: rotate the light editor vector by two degrees about pad-selected camera axes. */
-void mdlRotateLightEditorVectorFromPad(MdlLightEditorState *context, f32 *position)
+void dds3LightEditorAngleEdit(MdlLightEditorState *context, f32 *position)
 {
     if (context->pad->stepUpA != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
@@ -3164,8 +3164,8 @@ void mdlRotateLightEditorVectorFromPad(MdlLightEditorState *context, f32 *positi
 }
 
 /* Update/draw the task-selected light and ambient editor; return zero. */
-s32 mdlUpdateLightEditorTask(KwlnTask *task) {
-    MdlLightEditorState *state = (MdlLightEditorState *)kwlnTaskGetUserValue(task);
+s32 dds3LightEditorProcess(KwlnTask *task) {
+    MdlLightEditorState *state = (MdlLightEditorState *)dds3GetProcessData(task);
     f32 (*light)[4];
     MdlOptionLabel *label;
     s32 changed;
@@ -3234,7 +3234,7 @@ s32 mdlUpdateLightEditorTask(KwlnTask *task) {
             light = state->lights[state->selection >> 2];
             if (light != NULL) {
                 if ((state->selection & 3) == 3) {
-                    mdlRotateLightEditorVectorFromPad(state, light[1]);
+                    dds3LightEditorAngleEdit(state, light[1]);
                 } else {
                     fldStepValueByPad(&light[0][state->selection & 3], (u8 *)state->pad,
                                       0.0f, 2.0f, 0.1f, 0.01f);
@@ -3413,7 +3413,7 @@ s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
     s32 value;
     s32 i;
 
-    if (kwlnTaskGetUserValue(task) == 0) {
+    if (dds3GetProcessData(task) == 0) {
         pad = D_00398638;
     } else {
         pad = D_00324510;
@@ -3542,7 +3542,7 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
     s32 adjustmentStyle;
     const char *format;
 
-    if (kwlnTaskGetUserValue(task) == 0) {
+    if (dds3GetProcessData(task) == 0) {
         pad = D_00398638;
     } else {
         pad = D_00324510;
@@ -3815,7 +3815,7 @@ extern void dds3RebuildObjectModelContext(EffWorldNode *object, s32, s32);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 counter, void *position, void *rotation);
 
-extern void dds3SetObjectFlags(void *object, s32 flags);
+extern void dds3ObjectBaseOnFlag(void *object, s32 flags);
 
 s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 position[4];
@@ -3829,11 +3829,11 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     rotation[3] = 1.0f;
     counter = dds3AdvanceWorldCounter();
     object = dds3SpawnCameraSlotObj5(counter, position, rotation);
-    dds3SetObjectFlags(object, 0x20);
+    dds3ObjectBaseOnFlag(object, 0x20);
     effObjSetInnerFloat(object, 10.0f);
     dds3RebuildObjectModelContext(object, slotKind, resource);
-    if (((s32 *)dds3GetObjectBaseResourceHandle(object))[7] != 0) {
-        mdlAddEntryFlagged((void *)dds3GetObjectBaseResourceHandle(object), 0, 0);
+    if (((s32 *)dds3ObjectBaseGetModelHandle(object))[7] != 0) {
+        mdlAddEntryFlagged((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
     }
     dds3SetObjectSlot1MoverCallback(object, 0);
     return counter;
@@ -3854,14 +3854,14 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     rotation[3] = 1.0f;
     counter = dds3AdvanceWorldCounter();
     object = dds3SpawnCameraSlotObj5(counter, position, rotation);
-    dds3SetObjectFlags(object, 0x20);
+    dds3ObjectBaseOnFlag(object, 0x20);
     effObjSetInnerFloat(object, 10.0f);
     dds3RebuildObjectModelContext(object, slotKind, resource);
-    mdlAddEntryFlagged((void *)dds3GetObjectBaseResourceHandle(object), 0, 0);
+    mdlAddEntryFlagged((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
     dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3RegisterObjectInHandlerIndex(object);
     dds3SetObjectSlot1MoverCallback(object, 0);
-    dds3SetObjectFlags(object, 0x400);
+    dds3ObjectBaseOnFlag(object, 0x400);
     return counter;
 }
 
@@ -3876,14 +3876,14 @@ void mdlAttachWorldObjectToSourceVector(u32 targetKey, u32 sourceKey) {
         source = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceKey, 0x11);
         if (source != NULL) {
             sourceTransform = source->data;
-            effObjSetInnerPosition(target, (u128 *)&sourceTransform->position);
+            dds3SetPosPoseSet(target, (u128 *)&sourceTransform->position);
                         VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
                         VU0_LOAD_VF(vf11, sourceTransform->rotation);
             effMiscQuatMultiplyVU();
                         VU0_STORE_VF(vf10, quaternion);
-            effObjSetInnerRotation(target, (u128 *)quaternion);
-            effObjFetchInnerPosition(target);
+            dds3SetRotPoseSet(target, (u128 *)quaternion);
+            dds3GetPosPoseSet(target);
             VU0_STORE_VF(vf10, target->inner->smoothedPosition);
         }
     }

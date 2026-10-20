@@ -35,18 +35,18 @@ void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value) {
     base->unk44 = value;
 }
 
-extern void dds3SetObjectFlags(void *object, u32 mask);
+extern void dds3ObjectBaseOnFlag(void *object, u32 mask);
 
 s32 dds3CreateCameraData(EffWorldNode *object) {
     CameraData *inner;
     ObjBase *objectBase;
 
     effObjInnerCreate(object);
-    inner = sdfAllocSizeClassBlock(0x90);
+    inner = sdfChipAllocDirect(0x90);
     object->data = inner;
     objectBase = dds3CreateSlotResourceState(object);
     inner->handle = objectBase;
-    dds3SetObjectFlags(object, 0x62);
+    dds3ObjectBaseOnFlag(object, 0x62);
     inner->fovUpdatePending = 0;
     return 1;
 }

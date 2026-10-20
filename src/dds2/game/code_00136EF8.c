@@ -81,7 +81,7 @@ void fldInitializeCameraColorResource(void) {
     fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
@@ -137,28 +137,28 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
-void fldAllocateRecordStorage(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+void fldHitAlloc(void) {
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
     void *storage;
 
     fldValueRecordResource = (u32)allocation;
-    storage = (void *)sdfResourceRetainAddress(allocation);
+    storage = (void *)sdfMemLock(allocation);
     fldValueRecords = (u32)storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
-    allocation = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
+    allocation = sdfMemAllocDirect(FIELD_AUX_RECORD_STORAGE_SIZE);
     fldAuxRecordResource = (u32)allocation;
-    storage = (void *)sdfResourceRetainAddress(allocation);
+    storage = (void *)sdfMemLock(allocation);
     fldAuxRecordBuffer = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
 
 /* Release both retained resources and clear the usable buffer addresses. */
-void fldReleaseRecordStorage(void) {
-    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldValueRecordResource);
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldValueRecordResource);
+void fldHitFree(void) {
+    sdfMemUnlock((struct SdfMemBlock *)fldValueRecordResource);
+    sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldValueRecordResource);
     fldValueRecords = 0;
-    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldAuxRecordResource);
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldAuxRecordResource);
+    sdfMemUnlock((struct SdfMemBlock *)fldAuxRecordResource);
+    sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
 }
 
@@ -210,7 +210,7 @@ void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normal
 }
 
 /* Return the first matching record's world node; NULL also denotes a missing ID. */
-struct EffWorldNode *fldGetRecordWorldNodeById(s32 id) {
+struct EffWorldNode *fldHitGetMatter(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
@@ -227,7 +227,7 @@ struct EffWorldNode *fldGetRecordWorldNodeById(s32 id) {
 }
 
 /* Update every matching ID, including duplicates; leave other records intact. */
-void fldSetRecordWorldNodeById(s32 id, struct EffWorldNode *worldNode) {
+void fldHitLinkMatter(s32 id, struct EffWorldNode *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
@@ -237,7 +237,7 @@ void fldSetRecordWorldNodeById(s32 id, struct EffWorldNode *worldNode) {
     }
 }
 
-void fldResetRecordState(void) {
+void fldClrCollision(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
         ((FldValueRecord *)fldValueRecords)[index].worldNode = 0;
@@ -249,11 +249,11 @@ void fldResetRecordState(void) {
     D_00436188 = 0;
     D_0043617C = 0;
     if (fldValueRecords != 0) {
-        fldReleaseRecordStorage();
+        fldHitFree();
     }
 }
 
-void fldBuildCollisionRecordsFromGeometry(FldCollisionDescriptor *geometry, f32 *translation,
+void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
@@ -285,7 +285,7 @@ void fldBuildCollisionRecordsFromGeometry(FldCollisionDescriptor *geometry, f32 
     s32 i;
     s32 component;
     if (fldValueRecords == 0) {
-        fldAllocateRecordStorage();
+        fldHitAlloc();
     }
     for (pass = 0; pass < 5; pass++) {
         s32 faceCount;
@@ -921,7 +921,7 @@ extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-void fldUpdatePositionZoneHits(f32 *input) {
+void fldHitChkUnitElvOnly(f32 *input) {
     f32 position[4];
     f32 previous[4];
     f32 savedPosition[4];
@@ -1014,7 +1014,7 @@ void fldUpdatePositionZoneHits(f32 *input) {
 
 /* Indexed fields retain index-first addresses; see docs/idioms.md,
  * "Trace-justified indexed field addresses: relative zone motion". */
-void fldApplyRelativeZoneMotion(f32 *position) {
+void fldHitChkUnitElv(f32 *position) {
     f32 newPosition[3];
     f32 previous[3];
     f32 movement[4];
@@ -1024,7 +1024,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
     movement[3] = 1.0f;
     fldAreaState.positionPending = 0;
     if (fldAreaState.unk90 == -1) {
-        fldUpdatePositionZoneHits(position);
+        fldHitChkUnitElvOnly(position);
     }
     index = fldAreaState.unk90;
     if (index != -1) {
@@ -1081,7 +1081,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 extern s32 D_0038988C[];
 
 /* Classify flagged zone faces after checking the current movement. */
-void fldClassifyMovementAgainstZoneFaces(f32 *position) {
+void fldHitChkUnitDamage(f32 *position) {
     f32 point[3];
     f32 reference[3];
     f32 distanceVector[3];
@@ -1121,7 +1121,7 @@ void fldClassifyMovementAgainstZoneFaces(f32 *position) {
     axisDistance[2] = ffabsf(point[2] - reference[2]);
     selectedAxis = axisDistance[2] < axisDistance[0] ? 0 : 2;
 
-    fldUpdatePositionZoneHits(position);
+    fldHitChkUnitElvOnly(position);
 
     /* Linked-node translations accumulate across records and both passes. */
     for (pass = 0; pass < 2; pass++) {
@@ -1262,7 +1262,7 @@ extern void fldToggleWorldNodeState(s32 enabled);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
-s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -1381,7 +1381,7 @@ s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -1496,7 +1496,7 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void fldAddAxisAlignedCollisionBoxVerticalFaces(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+void fldHitProgramAdd(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;
@@ -1608,7 +1608,7 @@ void fldAddAxisAlignedCollisionBoxVerticalFaces(s32 id, f32 x, f32 y, f32 z, f32
     ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].encounter = 0;
     ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[0] = 0;
     ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[1] = 0;
-    fldBuildCollisionRecordsFromGeometry(&((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry,
+    fldAddCollisionPoly(&((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry,
                   origin, dds3AdvanceWorldCounter(), 0, id);
     D_0043617C++;
 }

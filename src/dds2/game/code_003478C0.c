@@ -42,10 +42,10 @@ extern SdfStreamState D_0047BCC0;
 extern u8 D_0047BE40[];
 
 extern s32 D_0047BE00[];
-extern DevState *sdfDevCreateCallbackState(const char *path,
+extern DevState *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(DevState *, s32, s32, s32, s32),
                                           s32 callbackContext);
-extern s32 sdfDevQueueControlRequest();
+extern s32 sdfFileCmdFileSize();
 extern s32 WaitSema(s32);
 extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
@@ -86,7 +86,7 @@ void sdfPacReadListAllocationCount(PacState *state) {
 void sdfQueueAndResetPacketWork(PacState *state,
                                 SdfPacStreamPacketHeader *packet) {
     sdfPacEnqueuePacket(state, packet);
-    state->slot.list = sdfAllocSizeClassBlock(0x30);
+    state->slot.list = sdfChipAllocDirect(0x30);
     state->onInput = sdfPacReadListAllocationCount;
 }
 
@@ -432,7 +432,7 @@ void sdfStreamSendChunk(void) {
     if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
         chunkBytes = SDF_STREAM_CHUNK_BYTES;
     }
-    sdfDevQueueRead(D_0047BCC0.deviceState, D_0047BE40, chunkBytes);
+    sdfFileCmdRead(D_0047BCC0.deviceState, D_0047BE40, chunkBytes);
 }
 
 extern void FlushCache(s32);
@@ -504,13 +504,13 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
-        state->deviceState = sdfDevCreateCallbackState((const char *)request, sdfStreamHandleDeviceEvent, 0);
+        state->deviceState = sdfFileCmdReadOpen((const char *)request, sdfStreamHandleDeviceEvent, 0);
         if (state->deviceState != 0) {
             WaitSema(state->semaphore);
             deviceState = state->deviceState;
             if (deviceState->result != 0) {
-                sdfDevReactivate(deviceState);
-                sdfDevQueueReleaseState(state->deviceState);
+                sdfFileCmdClearError(deviceState);
+                sdfFileCmdFree(state->deviceState);
                 state->deviceState = 0;
                 deviceState = 0;
             }
@@ -520,7 +520,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
         D_0047BE00[0] = (s32)deviceState;
         break;
     case SDF_STREAM_COMMAND_CONTROL:
-        sdfDevQueueControlRequest(state->deviceState, request, request);
+        sdfFileCmdFileSize(state->deviceState, request, request);
         WaitSema(state->semaphore);
         D_0047BE00[0] = state->readResult;
         break;
@@ -533,9 +533,9 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
         D_0047BE00[0] = state->transferredBytes;
         break;
     case SDF_STREAM_COMMAND_RELEASE_STATE:
-        sdfDevQueueActiveOperation(state->deviceState);
+        sdfFileCmdClose(state->deviceState);
         WaitSema(state->semaphore);
-        sdfDevQueueReleaseState(state->deviceState);
+        sdfFileCmdFree(state->deviceState);
         state->deviceState = 0;
         D_0047BE00[0] = 0;
         break;

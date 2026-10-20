@@ -323,7 +323,7 @@ extern s32 fldUpdateLocalMapCounterSelection(void);
 extern void fldDrawLocalMapOverlay(void);
 
 s32 fldLmapTaskUpdate(KwlnTask *task) {
-    LmapTaskState *state = (LmapTaskState *)kwlnTaskGetUserValue(task);
+    LmapTaskState *state = (LmapTaskState *)dds3GetProcessData(task);
     s32 phase = state->phase;
     s32 result;
 
@@ -355,7 +355,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
 extern void *memset(void *, int, unsigned int);
 
 void fldStartLmapTask(s32 mode) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(0x88);
+    SdfMemBlock *allocation = sdfMemAllocDirect(0x88);
     LmapTaskState *taskData = (LmapTaskState *)sdfMemoryGetBlockAddress(allocation);
 
     memset(taskData, 0, 0x88);
@@ -365,16 +365,16 @@ void fldStartLmapTask(s32 mode) {
         D_00438890 = 1;
     }
     fldInitializeLmapTaskVariant(taskData);
-    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, (u32)taskData);
+    dds3StartProcess(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, (u32)taskData);
 }
 
 void fldStopLmapTask(void) {
     fldShutdownLmapResources();
-    kwlnTaskDestroyWithHierarchyByName(fldLocalMapTaskName, 1);
+    dds3KillProcessName(fldLocalMapTaskName, 1);
 }
 
 s32 fldLmapTaskExists(void) {
-    return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
+    return dds3SearchProcessName(fldLocalMapTaskName) != NULL;
 }
 
 void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
@@ -446,7 +446,7 @@ void fldShutdownLmapResources(void) {
     sdfDisableFlagListViewTargetRelativeMode();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    sdfQueueGeneralAllocationRelease(D_004388A4);
+    sdfMemFreeDelayedDirect(D_004388A4);
     evtDestroySecondaryWorldNode();
 }
 
@@ -577,7 +577,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                         } else if (task->variant == 3) {
                             task->spriteSlots[slotIndex + 17] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
                         }
-                        sdfReleaseResourceAllocation(node->resourceHandle);
+                        sdfMemFreeDirect(node->resourceHandle);
                     }
                     node = node->next;
                     slotIndex++;
@@ -586,7 +586,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         }
         evtPrintDeveloperConsoleMessage(D_0042D2A8, files[load->entry].name);
         if (load->file != NULL) {
-            sdfReleaseResourceAllocation(fileGetResourceHandle(load->file));
+            sdfMemFreeDirect(fileGetResourceHandle(load->file));
             filePollEntryCleanup(load->file);
             evtPrintDeveloperConsoleMessage(D_0042D2B8);
         }

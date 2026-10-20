@@ -16,9 +16,9 @@ void lightReleaseObject(EffWorldNode *light) {
     EffLightData *data;
 
     data = light->data;
-    sdfReleaseChipBlock(data->buffer);
+    sdfChipFreeDirect(data->buffer);
     dds3DestroyObjectBase(data->resourceState);
-    sdfReleaseChipBlock(light->data);
+    sdfChipFreeDirect(light->data);
     light->data = NULL;
     effObjFreeInner(light);
 }

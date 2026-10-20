@@ -25,7 +25,7 @@ extern void kwlnTaskFinalizeDestroy(KwlnTask* task);
 
 extern void kwlnTaskRequestDestroy(KwlnTask* task);
 
-extern void kwlnTaskAdvanceDestroyDelays(void);
+extern void dds3EndingProcess(void);
 
 extern KwlnTask* kwlnDelayedDestroyTaskHead;
 
@@ -209,7 +209,7 @@ void kwlnTaskFinalizeDestroy(KwlnTask* task)
     child = task->childList;
     while (child != 0) {
         next = child->next;
-        kwlnTaskDestroyWithHierarchy(child, 0);
+        dds3KillProcess(child, 0);
         child = next;
     }
     kwlnTaskRemoveFromStateQueue(task);
@@ -218,7 +218,7 @@ void kwlnTaskFinalizeDestroy(KwlnTask* task)
     }
     task->flags &= ~KWLN_TASK_STATE_MASK;
     kwlnUnlinkListNode(task);
-    sdfReleaseChipBlock(task);
+    sdfChipFreeDirect(task);
 }
 
 void kwlnTaskRequestDestroy(KwlnTask* task)
@@ -240,7 +240,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     }
 }
 
-void kwlnTaskAdvanceDestroyDelays(void)
+void dds3EndingProcess(void)
 {
     KwlnTask* node;
     KwlnTask* curr;
@@ -324,7 +324,7 @@ void kwlnTaskUpdateFlagsScoped(s32 setFlags, KwlnTask *task, u32 flags, s32 scop
     }
 }
 
-s32 kwlnTaskGetStateList(u32 state)
+s32 dds3GetProcessCount(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
@@ -338,7 +338,7 @@ s32 kwlnTaskGetStateList(u32 state)
     }
 }
 
-KwlnTask *kwlnTaskGetByStateAndIndex(u32 taskState, s32 taskIndex)
+KwlnTask *dds3SearchProcessNumber(u32 taskState, s32 taskIndex)
 {
     KwlnTask *task = kwlnDelayedStartTaskHead;
     s32 listPosition;
@@ -372,7 +372,7 @@ void kwlnTraverseDiagnosticTaskQueue(KwlnTask* task, void* unused)
     } while (task != 0);
 }
 
-void kwlnPrintTaskQueueDiagnostics(void)
+void dds3PrintProcessList(void)
 {
     u8* queueCountFormat;
 
@@ -415,7 +415,7 @@ void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 
 
 /* Blank the task-name buffer, then print each root in the three scheduler lists. */
-void kwlnVisitTaskForestRoots(void)
+void dds3PrintProcessTree(void)
 {
     KwlnTask* task;
     s32 prefixByteIndex;
@@ -443,17 +443,17 @@ void kwlnVisitTaskForestRoots(void)
     }
 }
 
-s32 kwlnTaskTickScheduler(void)
+s32 dds3ProcessMain(void)
 {
     kwlnTaskAdvanceStartDelays();
     kwlnTaskRunScheduledUpdates();
-    kwlnTaskAdvanceDestroyDelays();
+    dds3EndingProcess();
     return 1;
 }
 
-KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
+KwlnTask *dds3StartProcess(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
                          TaskUpdate update, TaskDestroy destroy, u32 userValue) {
-    KwlnTask *task = sdfAllocSizeClassBlock(sizeof(KwlnTask));
+    KwlnTask *task = sdfChipAllocDirect(sizeof(KwlnTask));
     s32 taskNameByteIndex = 0;
 
     if (task == NULL) {
@@ -486,20 +486,20 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
     return task;
 }
 
-s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 delayTicks)
+s32 dds3KillProcessName(const char* name, s32 delayTicks)
 {
     KwlnTask* task;
 
-    task = kwlnTaskGetTaskByName(name);
+    task = dds3SearchProcessName(name);
     if (task == 0) {
         return 0;
     }
-    return kwlnTaskDestroyWithHierarchy(task, delayTicks);
+    return dds3KillProcess(task, delayTicks);
 }
 
 /* Destroy a live task: running tasks queue the request, while a task already
  * being destroyed finalizes at once when the new delay is zero. */
-s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks)
+s32 dds3KillProcess(KwlnTask* task, s32 delayTicks)
 {
     if (task == 0 || task == (KwlnTask*)-1) {
         return 0;
@@ -524,7 +524,7 @@ s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks)
     return 1;
 }
 
-void kwlnTaskMarkDestroyPending(KwlnTask* task)
+void dds3EndProcess(KwlnTask* task)
 {
     if ((task->flags & KWLN_TASK_STATE_MASK) != KWLN_TASK_ACTIVE) {
         return;
@@ -534,7 +534,7 @@ void kwlnTaskMarkDestroyPending(KwlnTask* task)
     kwlnTaskInsertIntoOrderedStateQueue(task);
 }
 
-void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
+void dds3SetShutdownTimer(KwlnTask* task, s32 delayTicks)
 {
     u32 state;
 
@@ -547,18 +547,18 @@ void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
     }
 }
 
-s32 kwlnTaskGetRegisteredState(KwlnTask* task)
+s32 dds3GetProcessStat(KwlnTask* task)
 {
     u32 state;
 
-    if (kwlnTaskIsRegistered(task) == 0) {
+    if (dds3ExistProcess(task) == 0) {
         return KWLN_TASK_DETACHED;
     }
     state = task->flags & KWLN_TASK_STATE_MASK;
     return (state < KWLN_TASK_STATE_LIMIT) ? state : KWLN_TASK_DETACHED;
 }
 
-KwlnTask* kwlnTaskGetTaskByName(const char* name)
+KwlnTask* dds3SearchProcessName(const char* name)
 {
     s32 nameLength;
     s32 nameSum;
@@ -605,7 +605,7 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
     return NULL;
 }
 
-KwlnTask* kwlnTaskFindByPriority(u32 priority)
+KwlnTask* dds3SearchProcessPriority(u32 priority)
 {
     s32 taskListIndex;
     KwlnTask* node;
@@ -635,7 +635,7 @@ KwlnTask* kwlnTaskFindByPriority(u32 priority)
 }
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 kwlnTaskIsRegistered(KwlnTask* target)
+s32 dds3ExistProcess(KwlnTask* target)
 {
     s32 taskListIndex;
     KwlnTask* node;
@@ -672,18 +672,18 @@ u32 func_00101940(KwlnTask* task)
     return task->unk24;
 }
 
-/* Persona 4 kwlnTaskGetTimer @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
-u32 kwlnTaskGetTimer(KwlnTask* task)
+/* Persona 4 dds3GetProcessRunTime @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
+u32 dds3GetProcessRunTime(KwlnTask* task)
 {
     return task->timer;
 }
 
-void kwlnTaskSetUserValue(KwlnTask* task, u32 userValue)
+void dds3SetProcessData(KwlnTask* task, u32 userValue)
 {
     task->userValue = userValue;
 }
 
-u32 kwlnTaskGetUserValue(KwlnTask* task)
+u32 dds3GetProcessData(KwlnTask* task)
 {
     return task->userValue;
 }
@@ -691,7 +691,7 @@ u32 kwlnTaskGetUserValue(KwlnTask* task)
 void func_00101960(void) {
 }
 
-void kwlnTaskAddChild(KwlnTask* parent, KwlnTask* child)
+void dds3LinkProcess(KwlnTask* parent, KwlnTask* child)
 {
     KwlnTask* sibling;
 

@@ -553,7 +553,7 @@ void sdfSetAssetPrimaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
 SdfSubParam *sdfSubParamCreate(void) {
     SdfSubParam *subParameter;
 
-    subParameter = sdfAllocSizeClassBlock(SDF_SUBPARAM_BYTES);
+    subParameter = sdfChipAllocDirect(SDF_SUBPARAM_BYTES);
     /* Packed defaults: center offsets (0, 0), basis scales (1, 1), rotation 0. */
     subParameter->packed.unk8 = 0x3F8000003F800000ULL;
     subParameter->packed.unk0 = 0;
@@ -662,7 +662,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     asset = sdfAllocAndClearQuadwords(SDF_ASSET_BYTES);
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
-        entryWords = sdfAllocSizeClassBlock(SDF_ASSET_DRAW_ENTRY_BYTES);
+        entryWords = sdfChipAllocDirect(SDF_ASSET_DRAW_ENTRY_BYTES);
         asset->drawEntries[entryIndex] = (SdfAssetEntry *)entryWords;
         entryWords[0] = 0x6E05C000;
         entryWords[0x18 / 4] = 0x6005C005;
@@ -745,11 +745,11 @@ void sdfAssetRelease(SdfAsset *asset) {
         return;
     }
     sdfLiveAssetCount--;
-    sdfReleaseChipBlock(asset->drawEntries[0]);
-    sdfReleaseChipBlock(asset->drawEntries[1]);
-    sdfReleaseChipBlock(asset->primarySubParam);
-    sdfReleaseChipBlock(asset->secondarySubParam);
-    sdfReleaseChipBlock(asset);
+    sdfChipFreeDirect(asset->drawEntries[0]);
+    sdfChipFreeDirect(asset->drawEntries[1]);
+    sdfChipFreeDirect(asset->primarySubParam);
+    sdfChipFreeDirect(asset->secondarySubParam);
+    sdfChipFreeDirect(asset);
 }
 
 /* Queue the non-null asset address for deferred release. */
@@ -817,7 +817,7 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
 
     angle = -subParam->transformInputs.rotationInput;
     s = sdfSinPoly(angle);
-    c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    c = sdfCos(angle);
     v0 = subParam->transformInputs.centerOffsetX;
     v1 = subParam->transformInputs.centerOffsetY;
     v2 = subParam->transformInputs.basisScaleX;

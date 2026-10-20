@@ -60,7 +60,7 @@ void effMiscAxisAngleToQuaternionVU(f32 angle)
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf10, vf10, vf2x");
-    trigValue = sdfEvaluateCosineViaSinePhaseShift(halfAngle);
+    trigValue = sdfCos(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf10, vf0, vf2x");
 }
 
@@ -70,7 +70,7 @@ void effMiscAxisAngleToQuaternionVf11(f32 angle)
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf11, vf11, vf2x");
-    trigValue = sdfEvaluateCosineViaSinePhaseShift(halfAngle);
+    trigValue = sdfCos(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf11, vf0, vf2x");
 }
 
@@ -95,13 +95,13 @@ void sdfConvertWrappedEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
     f32 sz;
 
     half = sdfWrapAngle(-x) * 0.5f;
-    cx = sdfEvaluateCosineViaSinePhaseShift(half);
+    cx = sdfCos(half);
     sx = sdfSinPoly(half);
     half = sdfWrapAngle(-y) * 0.5f;
-    cy = sdfEvaluateCosineViaSinePhaseShift(half);
+    cy = sdfCos(half);
     sy = sdfSinPoly(half);
     half = sdfWrapAngle(-z) * 0.5f;
-    cz = sdfEvaluateCosineViaSinePhaseShift(half);
+    cz = sdfCos(half);
     sz = sdfSinPoly(half);
     quaternion[0] = sz * sy * cx + cz * cy * sx;
     quaternion[1] = cz * sy * cx - sz * cy * sx;
@@ -121,13 +121,13 @@ void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
     f32 sz;
 
     half = -x * 0.5f;
-    cx = sdfEvaluateCosineViaSinePhaseShift(half);
+    cx = sdfCos(half);
     sx = sdfSinPoly(half);
     half = -y * 0.5f;
-    cy = sdfEvaluateCosineViaSinePhaseShift(half);
+    cy = sdfCos(half);
     sy = sdfSinPoly(half);
     half = -z * 0.5f;
-    cz = sdfEvaluateCosineViaSinePhaseShift(half);
+    cz = sdfCos(half);
     sz = sdfSinPoly(half);
     quaternion[0] = sz * sy * cx + cz * cy * sx;
     quaternion[1] = cz * sy * cx - sz * cy * sx;
@@ -265,9 +265,9 @@ f32 effMiscComputeQuaternionRotatedReferenceAngle(void)
     return sdfAtan2(rotatedZ, rotatedX);
 }
 
-/* Persona 4 effMiscRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+/* Persona 4 sdfGetRand @ 004BD050 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* Four-word shift-register PRNG; NULL selects the shared effect RNG state. */
-u32 effMiscRand(EffRandState* state)
+u32 sdfGetRand(EffRandState* state)
 {
     u32 x0;
     u32 x1;

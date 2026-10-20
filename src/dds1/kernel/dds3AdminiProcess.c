@@ -10,7 +10,7 @@ extern void *memcpy(void *, void *, s32);
 
 /* Return the named administration task's user state; the task must exist. */
 AdminWork *dds3GetAdminTaskWork(void) {
-    return (AdminWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(dds3AdminTaskName));
+    return (AdminWork *)dds3GetProcessData(dds3SearchProcessName(dds3AdminTaskName));
 }
 
 /* Read the administration state's shared value word, without modifying it. */
@@ -49,12 +49,12 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
         work->flags = flags;
         work->modeTransitionDelay = DDS3_ADMIN_REQUEST_DELAY;
         if (previousRequestData != NULL) {
-            sdfReleaseChipBlock(previousRequestData);
+            sdfChipFreeDirect(previousRequestData);
             work->requestData = NULL;
             work->requestSizeLowByte = 0;
         }
         if (requestData != NULL) {
-            work->requestData = sdfAllocSizeClassBlock(dataBytes);
+            work->requestData = sdfChipAllocDirect(dataBytes);
             memcpy(work->requestData, requestData, dataBytes);
             work->requestSizeLowByte = dataBytes;
         } else {
@@ -121,7 +121,7 @@ u32 dds3AdminReadPreviousUnsignedSample(void)
 
 /* Activate a pending mode request and continue through the mode dispatcher. */
 s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
-    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     u32 flags = work->flags;
     s32 isRestoringHistory;
     void (*modeEntryCallback)(s32, void *);
@@ -166,7 +166,7 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
    the transition delay and the mode cleared. Return the next update address
    as a signed scheduler control word, or zero on failure. */
 s32 dds3AdminPollModeDestruction(KwlnTask *task) {
-    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     s32 activeMode = work->activeMode;
     s32 (*destroy)(void);
     s32 destroyResult;
@@ -186,7 +186,7 @@ s32 dds3AdminPollModeDestruction(KwlnTask *task) {
 }
 
 s32 dds3AdminPollModeCompletion(KwlnTask *task) {
-    AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
+    AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);
     s32 previousHistoryIndex;
@@ -211,7 +211,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
             work->modeTransitionDelay = 2;
             work->flags &= ~4;
             if (requestData != NULL) {
-                sdfReleaseChipBlock(requestData);
+                sdfChipFreeDirect(requestData);
                 work->requestData = NULL;
                 work->requestSizeLowByte = 0;
             }
@@ -230,7 +230,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
 /* Run the mode's destroy callback (the row's second pointer), then release the
  * attached data block and the task's AdminWork block. */
 void dds3AdminReleaseTaskWork(KwlnTask *task) {
-    AdminWork* work = (AdminWork*)kwlnTaskGetUserValue(task);
+    AdminWork* work = (AdminWork*)dds3GetProcessData(task);
     s32 activeMode = work->activeMode;
 
     if (activeMode >= 0) {
@@ -241,9 +241,9 @@ void dds3AdminReleaseTaskWork(KwlnTask *task) {
         }
     }
     if (work->requestData != NULL) {
-        sdfReleaseChipBlock(work->requestData);
+        sdfChipFreeDirect(work->requestData);
     }
-    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
+    sdfChipFreeDirect((void *)dds3GetProcessData(task));
 }
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminTaskName);

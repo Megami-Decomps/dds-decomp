@@ -359,18 +359,18 @@ void btlCreateDrawTasks(void) {
     BtlState *battle = (BtlState *)btlRuntime;
     KwlnTask *mainTask;
     KwlnTask *drawTask;
-    mainTask = kwlnTaskCreate(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
+    mainTask = dds3StartProcess(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
     battle->scriptOwner = mainTask;
-    drawTask = kwlnTaskCreate(D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
-    kwlnTaskAddChild(mainTask, drawTask);
+    drawTask = dds3StartProcess(D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
+    dds3LinkProcess(mainTask, drawTask);
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     KwlnTask *task;
 
-    task = kwlnTaskFindByPriority(0x3f9);
+    task = dds3SearchProcessPriority(0x3f9);
     if (task != NULL) {
-        kwlnTaskDestroyWithHierarchy(((BtlState *)btlRuntime)->scriptOwner, 1);
+        dds3KillProcess(((BtlState *)btlRuntime)->scriptOwner, 1);
         return;
     }
 }
@@ -413,7 +413,7 @@ extern EffRandState effSharedRandomState[];
 
 
 
-extern void effMiscSeedRandom(s8 *, s32);
+extern void sdfRandomize(s8 *, s32);
 
 extern u32 kwlnGetFrameCounter(void);
 
@@ -446,8 +446,8 @@ extern void *memset(void *, int, unsigned int);
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {
     btlResetRuntimeSequenceCounter();
-    D_003BB2E0 = (u32)sdfAllocGeneralBlock(0xE10);
-    btlRuntime = (s32)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BB2E0));
+    D_003BB2E0 = (u32)sdfMemAllocDirect(0xE10);
+    btlRuntime = (s32)sdfMemLock((struct SdfMemBlock *)(D_003BB2E0));
     memset((void *)btlRuntime, 0, 0xE10);
 
     ((BattleInitState *)btlRuntime)->tick = 0;
@@ -471,7 +471,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->backgroundB = 1;
     ((BattleInitState *)btlRuntime)->unk28C = 0;
 
-    effMiscSeedRandom(effSharedRandomState, kwlnGetFrameCounter());
+    sdfRandomize(effSharedRandomState, kwlnGetFrameCounter());
     btlResetActorEntryState();
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
         itfMesCreateWindow(D_003BAAA4);
@@ -566,7 +566,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     effResetSlots();
     evtSetSolarOverlayFullyTransparent();
     itfMesClearFlags(1);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(D_003BB2E0));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(D_003BB2E0));
     D_003BB2E0 = 0;
     btlRuntime = 0;
     btlBossDebugPrintf("** btlExit ***************\n");

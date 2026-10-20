@@ -565,10 +565,10 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
         prev = (i + 350) % 360;
         a = (f32)angle * 3.14f / 180.0f;
         sinA = sdfSinPoly(a) * radius;
-        cosA = sdfEvaluateCosineViaSinePhaseShift(a) * radius;
+        cosA = sdfCos(a) * radius;
         b = (f32)prev * 3.14f / 180.0f;
         sinB = sdfSinPoly(b) * radius;
-        cosB = sdfEvaluateCosineViaSinePhaseShift(b) * radius;
+        cosB = sdfCos(b) * radius;
         fldSubmitGsTriangle(color, 0x80101010, 0x80101010,
                             x + 0.0f, y - 2.0f, z + 0.0f,
                             x + sinA, y - 2.0f, z + cosA,
@@ -623,14 +623,14 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
 }
 
 void fldTestDrawCreate(void) {
-    kwlnTaskCreate(D_0039FA00, 0x2AF8, 0, 0, fldTestDrawUpdate, 0, 0);
+    dds3StartProcess(D_0039FA00, 0x2AF8, 0, 0, fldTestDrawUpdate, 0, 0);
 }
 
 void fldTestDrawDestroy(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_0039FA00, 1);
+    dds3KillProcessName(D_0039FA00, 1);
 }
 
-extern void frFontSetSharedRenderFlags(u32);
+extern void frSetFontDrawOT(u32);
 extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 first, const u8 *second);
 extern char *strcat(char *, const char *);
 extern char D_0032C840[13][4];
@@ -645,7 +645,7 @@ void fldDrawPercentValue(s32 x, s32 y, s32 value) {
     char text[32];
     s32 digit;
 
-    frFontSetSharedRenderFlags(0x54);
+    frSetFontDrawOT(0x54);
     if (value > 1000) {
         s32 halfY = y / 2;
         fldDrawConvertedTextGlyph(x, halfY, 0xA09DC380, (const u8 *)fldNumberGlyphText(12));
@@ -778,8 +778,8 @@ void fldSubmitVisibleWorldBackground(void) {
         if (dds3ResetObjectValueCursor((WorldValueIndices *)objectChain) != 0) {
             do {
                 worldObject = (EffWorldNode *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)objectChain);
-                if (dds3TestObjectFlags(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
-                    if (dds3TestObjectFlags(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
+                if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
+                    if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
                         hasEligibleBackground = 1;
                     }
                 }
@@ -965,8 +965,8 @@ void func_0011ECC8(EffWorldNode *object) {
     quadStrip = D_0032C880;
     opacity = 100.0f;
     base = dds3GetObjectOwnedHandle(object);
-    model = ((MdlCtx *)dds3GetObjectBaseResourceHandle(object))->inner;
-    if (dds3TestObjectFlags(object, 0x4000)) {
+    model = ((MdlCtx *)dds3ObjectBaseGetModelHandle(object))->inner;
+    if (dds3ObjectBaseCheckFlag(object, 0x4000)) {
         transition = effObjGetTransitionWork(object);
         D_003BAB28 = transition->shadowLevel;
         D_003BAB2C = 1;

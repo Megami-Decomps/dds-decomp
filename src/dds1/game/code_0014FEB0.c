@@ -16,7 +16,7 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 extern EffBillResourceInit effBillResourceInitTable[];
 
 EffNode *effCloneSourceWithTypeHandler(const EffNode *source) {
-    EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
+    EffNode *copy = (EffNode *)sdfChipAllocDirect(0x10);
     u32 argument = (u32)source->instance;
 
     copy->type = source->type;
@@ -102,8 +102,8 @@ BillChildPayload *billCreateChildPayloadFromTextureResource(SdfTextureFileHeader
     s16 heightUv;
     s32 pendingIndex;
 
-    allocation = sdfAllocGeneralBlock(0x450);
-    work = (BillPacketWork *)(u32)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(0x450);
+    work = (BillPacketWork *)(u32)sdfMemLock(allocation);
     child = (BillChildPayload *)((u8 *)work + sizeof(*work));
 
     child->refCount = 0;
@@ -146,7 +146,7 @@ void effReleaseSharedTextureRecord(BillChildPayload *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
         sdfTexReleaseReferenceViaHandler(entry->texture);
-        sdfReleaseResourceAllocation(entry->allocation);
+        sdfMemFreeDirect(entry->allocation);
     }
 }
 

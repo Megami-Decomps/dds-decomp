@@ -818,7 +818,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (kwlnTaskIsRegistered((KwlnTask *)scene->boundTask) == 0) {
+                } else if (dds3ExistProcess((KwlnTask *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -3243,7 +3243,7 @@ void btlDestroyActionSeq(BtlTask *object) {
         BtlState *context = (BtlState *)btlGetRuntime();
         context->tasks = object->next;
     }
-    sdfReleaseChipBlock(object);
+    sdfChipFreeDirect(object);
 }
 
 void btlUpdateActionSeqs(void) {

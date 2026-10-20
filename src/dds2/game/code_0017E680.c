@@ -38,8 +38,8 @@ EffResourceWork *effCreateResourceEntryWork(u32 count) {
     SdfAsset *asset;
     u32 i;
 
-    allocation = sdfAllocGeneralBlock(count * 20 + 0x74);
-    work = (EffResourceWork *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(count * 20 + 0x74);
+    work = (EffResourceWork *)sdfMemLock(allocation);
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
     work->backingAllocation = allocation;
@@ -69,7 +69,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count) {
 void effReleaseAttachedResources(EffResourceWork *effect) {
     sdfQueueAssetRelease(effect->drawAsset);
     effReleaseOptionalResource(effect);
-    sdfReleaseResourceAllocation(effect->backingAllocation);
+    sdfMemFreeDirect(effect->backingAllocation);
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
@@ -160,9 +160,9 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     }
     angle = 0.0f;
     recordCount = count * 3;
-    allocation = sdfAllocGeneralBlock(recordCount * 0x24);
+    allocation = sdfMemAllocDirect(recordCount * 0x24);
     work->streamAllocation = allocation;
-    positions = (f32 (*)[4])sdfResourceRetainAddress(allocation);
+    positions = (f32 (*)[4])sdfMemLock(allocation);
     unitVectors = positions + recordCount;
     colors = (u32 *)(unitVectors + recordCount);
     work->vertexCount = recordCount;
@@ -174,7 +174,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         f32 sine;
 
         negativeHeight = -height;
-        unitVectors[0][0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        unitVectors[0][0] = sdfCos(angle);
         unitVectors[0][1] = sdfSinPoly(angle);
         unitVectors[0][2] = 0.0f;
         halfStep = step * 0.5f;
@@ -187,7 +187,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         positions[0][1] = sine * radiusScale;
         positions++;
         unitVectors[0][0] =
-            sdfEvaluateCosineViaSinePhaseShift(middleAngle);
+            sdfCos(middleAngle);
         unitVectors[0][1] = sdfSinPoly(middleAngle);
         unitVectors[0][2] = 0.0f;
         positions[0][0] = 0.0f;
@@ -195,7 +195,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         positions[0][2] = 0.0f;
         unitVectors++;
         positions++;
-        unitVectors[0][0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        unitVectors[0][0] = sdfCos(angle);
         unitVectors[0][1] = sdfSinPoly(angle);
         unitVectors[0][2] = 0.0f;
         positions[0][0] = unitVectors[0][0] * radiusScale;
@@ -212,7 +212,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
 
 void effReleaseOptionalResource(EffResourceWork *effect) {
     if (effect->streamAllocation != NULL) {
-        sdfReleaseResourceAllocation(effect->streamAllocation);
+        sdfMemFreeDirect(effect->streamAllocation);
         return;
     }
 }
@@ -243,7 +243,7 @@ void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src) {
 
 /* Create the shared billboard set with its default colour and scale. */
 EffBillboardSetWork *effCreateBillboardResourceWork(EffBillboardSetParams *params) {
-    EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfAllocSizeClassBlock(0x20);
+    EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfChipAllocDirect(0x20);
 
     billboard->mode = params->mode;
     billboard->handle = effCreateBillboardSharingIndexedResource(2);

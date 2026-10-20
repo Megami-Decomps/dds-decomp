@@ -20,7 +20,7 @@ void effTrackPolyFreeData(EffTrackPolyData *data);
 /* Release both owned resources before freeing this track. */
 void effTrackPolyRelease(EffTrackPolyWork *work) {
     effTrackPolyFreeData(work->data);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 void effTrackPolyInitData(EffTrackPolyData *data);
@@ -85,8 +85,8 @@ void effTrackPolyUpdate(EffTrackPolyWork *work) {
 
 /* Clone count tracks from one parameter block, each with its own data. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
-    EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
+    EffTrackPolyList *list = (EffTrackPolyList *)sdfMemLock(handle);
     u32 workIndex;
 
     list->handle = handle;
@@ -106,7 +106,7 @@ void effTrackPolyDestroyModelWorkList(EffTrackPolyList *list) {
         effTrackPolyRelease(list->items[workIndex]);
         workIndex++;
     }
-    sdfReleaseResourceAllocation(list->handle);
+    sdfMemFreeDirect(list->handle);
 }
 
 void effTrackPolyPushIndexedWorkEndpoints(EffTrackPolyList *list, s32 index, const u128 *endpoints) {
@@ -192,8 +192,8 @@ extern void *memset(void *, int, unsigned int);
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
     s32 bytes = count * (sizeof(u128) + sizeof(u32));
-    SdfMemBlock *handle = sdfAllocGeneralBlock(bytes + sizeof(EffTrackPolyData));
-    u8 *cursor = (u8 *)sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(bytes + sizeof(EffTrackPolyData));
+    u8 *cursor = (u8 *)sdfMemLock(handle);
     EffTrackPolyData *data = (EffTrackPolyData *)(cursor + bytes);
 
     data->points = (u128 *)cursor;
@@ -216,7 +216,7 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
 
 void effTrackPolyFreeData(EffTrackPolyData *data) {
     sdfQueueAssetRelease((SdfAsset *)data->nodeHandle);
-    sdfReleaseResourceAllocation(data->resourceHandle);
+    sdfMemFreeDirect(data->resourceHandle);
 }
 
 void effTrackPolyInitData(EffTrackPolyData *data) {

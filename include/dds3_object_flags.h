@@ -6,6 +6,6 @@
 struct EffWorldNode;
 
 /* Test whether any requested object flag bit is set. */
-u8 dds3TestObjectFlags(struct EffWorldNode *object, u32 mask);
+u8 dds3ObjectBaseCheckFlag(struct EffWorldNode *object, u32 mask);
 
 #endif

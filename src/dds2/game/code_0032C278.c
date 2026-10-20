@@ -409,7 +409,7 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry) {
         WaitSema(sdfPendingQueueSemaphore);
         pendingNode = owner->pending;
         if (pendingNode == NULL) {
-            pendingNode = (SdfPendingNode *)sdfAllocSizeClassBlock(SDF_PENDING_NODE_BYTES);
+            pendingNode = (SdfPendingNode *)sdfChipAllocDirect(SDF_PENDING_NODE_BYTES);
             pendingNode->remaining = 0;
             pendingNode->next = sdfPendingQueueHead;
             pendingNode->buffer = NULL;
@@ -420,7 +420,7 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, void *entry) {
         freeEntries = pendingNode->remaining;
         entryBuffer = pendingNode->buffer;
         if (freeEntries == 0) {
-            SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfAllocSizeClassBlock(SDF_PENDING_BUFFER_BYTES);
+            SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfChipAllocDirect(SDF_PENDING_BUFFER_BYTES);
             newBuffer->next = entryBuffer;
             pendingNode->buffer = newBuffer;
             entryBuffer = newBuffer;
@@ -471,13 +471,13 @@ void sdfPendingQueueFlush(SdfPendingNode *pendingNode) {
                         entryIndex++;
                     } while (entryIndex < entryCount);
                     nextEntryBuffer = entryBuffer->next;
-                    sdfReleaseChipBlock(entryBuffer);
+                    sdfChipFreeDirect(entryBuffer);
                     entryBuffer = nextEntryBuffer;
                     entryCount = SDF_PENDING_BUFFER_CAPACITY;
                 } while (entryBuffer != NULL);
             }
             nextPendingNode = pendingNode->next;
-            sdfReleaseChipBlock(pendingNode);
+            sdfChipFreeDirect(pendingNode);
             pendingNode = nextPendingNode;
         } while (pendingNode != NULL);
     }
@@ -485,7 +485,7 @@ void sdfPendingQueueFlush(SdfPendingNode *pendingNode) {
 
 /* Hand the oldest pending slot to the worker, shift the slot list down and
  * refill the last slot with the newly detached list. */
-void sdfRotatePendingSlots(void) {
+void sdfDelayedResrcProc(void) {
     u32 slotIndex;
 
     sdfPendingQueueRotationActive = 1;
@@ -535,23 +535,23 @@ s32 sdfCheckPendingWorkWithInterrupts(void) {
 }
 
 /* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
-void sdfResizeDoubleBuffer(s32 bufferBytes) {
+void sdfGrMakePacketBuff(s32 bufferBytes) {
     s32 allocationAddress;
 
     if (sdfDoubleBufferAllocation != 0) {
-        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
+        sdfMemFreeDirect(sdfDoubleBufferAllocation);
         sdfDoubleBufferAllocation = 0;
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
     sdfPacketBufferSize = bufferBytes;
-    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
-    allocationAddress = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
+    sdfDoubleBufferAllocation = sdfMemAllocDirect(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    allocationAddress = sdfMemLock(sdfDoubleBufferAllocation);
     sdfPacketBuffers[0] = allocationAddress;
     sdfPacketBuffers[1] = allocationAddress + bufferBytes;
 }
 
 /* Select one half and expose its bounds to the packet allocator. */
-void sdfSelectDoubleBuffer(s32 bufferIndex) {
+void sdfGrSetupPacketBuff(s32 bufferIndex) {
     sdfPacketCursor = sdfPacketBuffers[bufferIndex];
     sdfPacketBufferEnd = sdfPacketBuffers[bufferIndex] + sdfPacketBufferSize;
 }
@@ -982,7 +982,7 @@ void sdfBuildSceneDrawHeader(SdfGsContextPacket *packet, s32 frameAddress, s32 w
 extern u8 D_00438A22;
 
 /* Build both GS drawing contexts from the selected frame buffer and shared depth buffer. */
-void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s32 bufferIndex) {
+void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, SdfGraphObj *view, s32 bufferIndex) {
     s32 frameAddress;
     s32 depthAddress;
     s32 width;
@@ -1016,7 +1016,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", sdfRefreshSceneNodePackets);
 
 
 /* Retain the render-target view and initialize the scene callback and fixed drawing state. */
-void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
+void sdfGrSetStdDrawEnv(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
     node->link.patch = sdfRefreshSceneNodePackets;
@@ -1070,7 +1070,7 @@ void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex) {
+void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex) {
     SdfGraphObj *view = packet->source;
     u64 frameRegister;
     u64 depthRegister;
@@ -1093,16 +1093,16 @@ void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex) {
     packet->zbuf.registerId = depthRegister;
 }
 
-void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source, u32 frameMask, s32 region, s32 mode) {
+void sdfGrSetFramePacket(SdfPacketBuilder *packet, SdfGraphObj *source, u32 frameMask, s32 region, s32 mode) {
     sdfInitializeDmaReferenceTag(&packet->packetHeader, 2);
     packet->mode = mode;
     packet->source = source;
     packet->frameMask = frameMask;
     packet->region = region;
-    packet->prepare = sdfPrepareFrameDepthPacket;
+    packet->prepare = sdfGrFramePacketPredraw;
 }
 
-void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
+void sdfGrReqDraw(SdfListHead *list, SdfPacketChain *chain) {
     u32 start = sdfReadTimerCount();
     s32 interrupts;
     s32 index;
@@ -1138,19 +1138,19 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
     }
 }
 
-void sdfSetNonnegativePacketIndex(s32 value) {
+void sdfGrReqDrawDelay(s32 value) {
     sdfPacketSlotIndex = (value < 0) ? 0 : value;
 }
 
-void sdfResetPacketSlotState(void) {
+void sdfGrInitDraw(void) {
     sdfPacketSlotIndex = 0;
     D_0040B308[0].packetList = NULL;
     D_00438A28 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032DEC8);
+INCLUDE_ASM(const s32, "game/code_0032C278", sdfGrDrawFrame);
 
-void sdfWaitSlotReady(void) {
+void sdfDrawSync(void) {
     SdfPacketSlot *entry;
 
     while (1) {
@@ -1168,7 +1168,7 @@ void sdfWaitSlotReady(void) {
 }
 
 /* Allocate and initialize an empty packet list using the selected allocator. */
-SdfListHead *sdfAllocatePacketList(s32 (*allocatorArgument)(s32)) {
+SdfListHead *sdfPrimAllocDrawTag(s32 (*allocatorArgument)(s32)) {
     s32 (*allocator)(s32) = allocatorArgument;
     SdfListHead *list;
 
@@ -1792,7 +1792,7 @@ u8 *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
     u8 *workspace = root->workspace;
 
     if (workspace == NULL) {
-        workspace = (u8 *)sdfAllocSizeClassBlock(0x100);
+        workspace = (u8 *)sdfChipAllocDirect(0x100);
         root->workspace = workspace;
     }
     return workspace;
@@ -1808,9 +1808,9 @@ void sdfFreeNodeLists(SdfDrawNode *root) {
         while (node != NULL) {
             SdfCommandNode *next = node->next;
             if (node->allocation != NULL) {
-                sdfReleaseResourceAllocation(node->allocation);
+                sdfMemFreeDirect(node->allocation);
             } else {
-                sdfReleaseChipBlock(node);
+                sdfChipFreeDirect(node);
             }
             node = next;
         }
@@ -1822,9 +1822,9 @@ void sdfFreeNodeLists(SdfDrawNode *root) {
 
 void sdfReleaseFreeRoot(SdfDrawNode *root) {
     sdfFreeNodeLists(root);
-    sdfReleaseChipBlock(root->workspace);
+    sdfChipFreeDirect(root->workspace);
     root->workspace = NULL;
-    sdfReleaseChipBlock(root);
+    sdfChipFreeDirect(root);
 }
 
 
@@ -1850,7 +1850,7 @@ void sdfDestroyObjectList(SdfModel *owner) {
         sdfReleaseFreeRoot(((SdfDrawNode **)owner->list->buffer)[elementIndex]);
     }
     sdfDestroyDevRequest(owner->list);
-    sdfReleaseChipBlock(owner);
+    sdfChipFreeDirect(owner);
 }
 
 void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
@@ -1867,7 +1867,7 @@ void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
         sdfPendingQueuePush(&sdfObjectListReleaseQueue, slot);
     } else {
         sdfDestroyDevRequest(slot->list);
-        sdfReleaseChipBlock(slot);
+        sdfChipFreeDirect(slot);
     }
 }
 

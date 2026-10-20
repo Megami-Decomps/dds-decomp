@@ -4,7 +4,7 @@
 #include "eff_math.h"
 
 void effMathReleaseWorkResource(EffArrHdr *work) {
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 

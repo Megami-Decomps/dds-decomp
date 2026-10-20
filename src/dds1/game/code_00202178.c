@@ -1530,13 +1530,13 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         height = effect->height;
         position[2] = translatedZ;
         position[1] = height;
-        effObjSetInnerPosition(unit->effectObject, (u128 *)position);
+        dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
 
         VU0_LOAD_VF(vf10, source->rotation);
         VU0_LOAD_VF(vf11, D_003A5D50);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        effObjSetInnerRotation(effect->header.actor->effectObject, (u128 *)rotation);
+        dds3SetRotPoseSet(effect->header.actor->effectObject, (u128 *)rotation);
     }
 
     effect->header.actor->status.stateFlags |= 0x180;
@@ -2040,7 +2040,7 @@ void btlUpdateRahuEffectActorHeights(void) {
         if ((selected->status.flags & 2) == 0) {
             return;
         }
-        effObjFetchInnerPosition(selected->effectObject);
+        dds3GetPosPoseSet(selected->effectObject);
         VU0_STORE_VF(vf10, (u128 *)vector);
         if (!(vector[1] > -125.0f)) {
             return;
@@ -2055,7 +2055,7 @@ void btlUpdateRahuEffectActorHeights(void) {
             effect->height = limit;
         }
         vector[1] = effect->height;
-        effObjSetInnerPosition(actor->effectObject, (u128 *)vector);
+        dds3SetPosPoseSet(actor->effectObject, (u128 *)vector);
         return;
     }
 
@@ -2075,7 +2075,7 @@ void btlUpdateRahuEffectActorHeights(void) {
                 if (flags & 1) {
                     if (flags & 0x200) {
                         if (flags & 2) {
-                            effObjFetchInnerPosition(unit->effectObject);
+                            dds3GetPosPoseSet(unit->effectObject);
                             VU0_STORE_VF(vf10, (u128 *)vector);
                             if (vector[1] < ceiling) {
                                 height = effect->height + effect->speed;
@@ -2086,10 +2086,10 @@ void btlUpdateRahuEffectActorHeights(void) {
                                     effect->height = zero;
                                 }
                                 vector[1] = effect->height;
-                                effObjSetInnerPosition(unit->effectObject, (u128 *)vector);
+                                dds3SetPosPoseSet(unit->effectObject, (u128 *)vector);
                             } else {
                                 vector[1] = 0.0f;
-                                effObjSetInnerPosition(unit->effectObject, (u128 *)vector);
+                                dds3SetPosPoseSet(unit->effectObject, (u128 *)vector);
                             }
                         }
                     }
@@ -2766,7 +2766,7 @@ u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (effMiscRand(&effSharedRandomState) & 1) {
+            if (sdfGetRand(&effSharedRandomState) & 1) {
                 btlSetEffectCameraKeys(command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -3603,7 +3603,7 @@ void btlInitRandomBossSelection(void) {
     u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
-    ((BtlBossEffectPayload *)data)->selectedId = effMiscRand(&effSharedRandomState) % 6;
+    ((BtlBossEffectPayload *)data)->selectedId = sdfGetRand(&effSharedRandomState) % 6;
     btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
@@ -3818,7 +3818,7 @@ s32 btlSwapRandomBossSelection(void) {
         return -1;
     }
 
-    newId = effMiscRand(&effSharedRandomState) % 6;
+    newId = sdfGetRand(&effSharedRandomState) % 6;
     if (newId == effect->selectedId) {
         newId = (newId + 1) % 6;
     }
@@ -4145,7 +4145,7 @@ s32 btlPickRandomMarkedTask(void) {
     if (count == 0) {
         return -1;
     }
-    task = candidates[effMiscRandMod(0, count)];
+    task = candidates[sdfGetRandInt(0, count)];
     unit = task->unit;
     fldAppendSceneGroupHandle(task);
     task->indexWork.phase = 2;
@@ -4243,7 +4243,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
         if (count == 0) {
             return -1;
         }
-        task = candidates[effMiscRandMod(0, count)];
+        task = candidates[sdfGetRandInt(0, count)];
         unit = task->unit;
         fldAppendSceneGroupHandle(task);
         task->indexWork.phase = 2;
@@ -4496,7 +4496,7 @@ s32 btlSelectMissingHariSummon(void) {
     if (count == 0) {
         return -1;
     }
-    selected = effMiscRand(&effSharedRandomState) % count;
+    selected = sdfGetRand(&effSharedRandomState) % count;
     btlBossDebugPrintf("btl:HARI2 summon=%X\n", missing[selected]);
     return missing[selected];
 }
@@ -4582,7 +4582,7 @@ s32 func_0020A860(void) {
                     if (species < 0x143) {
                         if (species >= 0x13D) {
                             /* Agility from record 0x13D - 6 + [0, 6); the sum stays int before narrowing. */
-                            s32 value = datEnemyRecords[0x13D].baseStats[3] - 6 + effMiscRandMod(0, 6);
+                            s32 value = datEnemyRecords[0x13D].baseStats[3] - 6 + sdfGetRandInt(0, 6);
                             s8 agility = value;
 
                             unit->partyRecord.baseStats[3] = agility;
@@ -4610,7 +4610,7 @@ s32 func_0020A860(void) {
         if (count == 0) {
             return -1;
         }
-        task = candidates[effMiscRandMod(0, count)];
+        task = candidates[sdfGetRandInt(0, count)];
         unit = task->unit;
         fldAppendSceneGroupHandle(task);
         task->indexWork.phase = 2;
@@ -4856,7 +4856,7 @@ void btlChooseRandomPresetCameraKeys(unit)
     u32 kind;
 
     btlFlagAllUnitDefeatCandidatesTask();
-    kind = effMiscRandMod(0, 3);
+    kind = sdfGetRandInt(0, 3);
     switch (kind) {
     case 0:
         sdfDebugPrintf(D_003A5FF0);
@@ -5104,7 +5104,7 @@ u8 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
             return 1;
         case 0x1AD:
             btlFlagAllUnitsDefeatCandidate();
-            shot = effMiscRandMod(0, 4);
+            shot = sdfGetRandInt(0, 4);
             switch (shot) {
             case 0:
                 sdfDebugPrintf("DERUTA:0++++++++++++++++++++++++++\n");
@@ -5134,7 +5134,7 @@ u8 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
             return 1;
         default:
             btlFlagAllUnitDefeatCandidatesTask();
-            shot = effMiscRandMod(0, 5);
+            shot = sdfGetRandInt(0, 5);
             switch (shot) {
             case 0:
                 sdfDebugPrintf("I-E:0++++++++++++++++++++++++++\n");
@@ -5214,7 +5214,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
         if (count >= 2 && selector == 0 && mode == 1) {
             if (btlCanUseActorCategoryFlag4(command)) {
                 btlFlagAllUnitDefeatCandidatesTask();
-                shot = effMiscRandMod(0, 3);
+                shot = sdfGetRandInt(0, 3);
                 switch (shot) {
                 case 0:
                     sdfDebugPrintf(D_003A6338);
@@ -5237,14 +5237,14 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
             if (btlCanUseLinkedActor(command)) {
                 variant = 0;
                 if (!btlCanUseActorCategoryFlag2(command)) {
-                    variant = effMiscRandMod(0, 2);
+                    variant = sdfGetRandInt(0, 2);
                 }
             } else {
                 variant = 1;
             }
             if (variant == 0) {
                 btlFlagAllUnitDefeatCandidatesTask();
-                shot = effMiscRandMod(0, 4);
+                shot = sdfGetRandInt(0, 4);
                 switch (shot) {
                 case 0:
                     sdfDebugPrintf("TP1:0++++++++++++++++++++++++++\n");
@@ -5281,7 +5281,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
     if (btlCanUseLinkedActor(command)) {
         variant = 0;
         if (!btlCanUseActorCategoryFlag2(command)) {
-            variant = effMiscRandMod(0, 2);
+            variant = sdfGetRandInt(0, 2);
         }
     } else {
         variant = 1;

@@ -203,11 +203,11 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetResourceHandle(args->request);
-        data = sdfResourceRetainAddress(resource);
+        data = sdfMemLock(resource);
         size = (s32)fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].volume);
-        sdfReleaseResourceAllocation(resource);
+        sdfMemFreeDirect(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
     }
@@ -267,7 +267,7 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
         if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
             args->resourceAllocation =
                 fileGetResourceHandle(args->request);
-            data = sdfResourceRetainAddress(args->resourceAllocation);
+            data = sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetResourceSize(args->request);
             filePollEntryCleanup(args->request);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
@@ -286,7 +286,7 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
 void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *taskArgs) {
     u8 *work = (u8 *)btlGetRuntime();
     if (taskArgs->resourceAllocation != 0) {
-        sdfReleaseResourceAllocation(taskArgs->resourceAllocation);
+        sdfMemFreeDirect(taskArgs->resourceAllocation);
     }
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }
@@ -399,12 +399,12 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         if (unit->status.flags & 1) {
             position[0] = center[0] - sdfSinPoly(angle) * radius;
             position[1] = center[1];
-            position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            position[2] = center[2] - sdfCos(angle) * radius;
         } else {
             adjustedAngle = angle - step * 0.25f;
             position[0] = center[0] - sdfSinPoly(adjustedAngle) * radius;
             position[1] = center[1];
-            position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(adjustedAngle) * radius;
+            position[2] = center[2] - sdfCos(adjustedAngle) * radius;
         }
         PCP_COPY_VECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
@@ -516,7 +516,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
         angle += halfAngle;
         position[0] = sdfSinPoly(angle) * radius;
         position[1] = 0.0f;
-        position[2] = (distance - sdfEvaluateCosineViaSinePhaseShift(angle) * radius) * direction;
+        position[2] = (distance - sdfCos(angle) * radius) * direction;
         PCP_COPY_VECTOR(unit->position, position);
         btlSetUnitPosition(unit, position);
         PCP_COPY_VECTOR(unit->rotation, rotation);
@@ -551,7 +551,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
                 btlCopyUnitCurrentPosition(other, pos);
                 pos[1] += 1000000.0f;
                 pos[0] = 0;
-                effObjSetInnerPosition(other->effectObject, (u128 *)pos);
+                dds3SetPosPoseSet(other->effectObject, (u128 *)pos);
                 btlSetUnitPosition(other, pos);
             }
         }
@@ -589,7 +589,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
         btlSetUnitRotation(slot[1], (s128 *)rotation);
     }
     angle = 30.0f * 0.017453293f;
-    pos[0] = center[0] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    pos[0] = center[0] - sdfCos(angle) * radius;
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
@@ -597,7 +597,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[0], (s128 *)rotation);
     }
-    pos[0] = center[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+    pos[0] = center[0] + sdfCos(angle) * radius;
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[2], pos);
@@ -912,7 +912,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(pos, &D_003BE0A0);
                         pos[1] += 1000000.0f;
-                        effObjSetInnerPosition(unit->effectObject, (u128 *)pos);
+                        dds3SetPosPoseSet(unit->effectObject, (u128 *)pos);
                     }
                 }
             }
@@ -1037,7 +1037,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(position, center);
                         position[1] += 1000000.0f;
-                        effObjSetInnerPosition(unit->effectObject, (u128 *)position);
+                        dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
                     }
                 }
             }

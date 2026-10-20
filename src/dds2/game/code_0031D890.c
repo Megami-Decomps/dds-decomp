@@ -57,7 +57,7 @@ extern void *memset(void *, int, unsigned int);
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
 WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    SdfMemBlock *allocation = sdfMemAllocDirect(size);
     WideSlotPool *pool = (WideSlotPool *)sdfMemoryGetBlockAddress(allocation);
     memset(pool, 0, size);
     pool->allocation = allocation;
@@ -69,7 +69,7 @@ WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
 
 /* Release the allocation containing the sprite-number pool header and slots. */
 void itfReleaseSpriteWorkPool(WideSlotPool *pool) {
-    sdfReleaseResourceAllocation(pool->allocation);
+    sdfMemFreeDirect(pool->allocation);
 }
 
 /* Reserve the first unclaimed 0x14-byte slot in the wide pool. */
@@ -203,7 +203,7 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
 CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
     u32 size = count * 0x10 + 0xC;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    SdfMemBlock *allocation = sdfMemAllocDirect(size);
     CompactSlotPool *pool = (CompactSlotPool *)sdfMemoryGetBlockAddress(allocation);
 
     memset(pool, 0, size);
@@ -216,7 +216,7 @@ CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
 
 /* Release the allocation containing the hit-effect pool header and records. */
 void itfReleaseSpriteHitEffectWorkPool(CompactSlotPool *pool) {
-    sdfReleaseResourceAllocation(pool->allocation);
+    sdfMemFreeDirect(pool->allocation);
 }
 
 /* Reserve the first unclaimed 0x10-byte slot in the compact pool. */

@@ -70,8 +70,8 @@ extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
                                         const char *text);
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerPosition(fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
-    effObjSetInnerRotation(fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
+    dds3SetPosPoseSet(fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    dds3SetRotPoseSet(fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
     fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
 }
 
@@ -93,13 +93,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
             if ((mask >> i) & 1) {
                 sprintf(name, D_003B3D48, i + 1);
                 node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
-                effObjFetchInnerPosition(node);
+                dds3GetPosPoseSet(node);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
                 D_003900E0[count].v[0] = position[0];
                 D_003900E0[count].v[1] = position[1];
                 D_003900E0[count].v[2] = position[2];
                 D_003900E0[count].v[3] = position[3];
-                effObjFetchInnerRotationNormalized(node);
+                dds3GetRotPoseSet(node);
                 VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
                 D_00390180[count].v[0] = rotation[0];
                 D_00390180[count].v[1] = rotation[1];
@@ -110,13 +110,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
         } else {
             sprintf(name, D_003B3D48, i + 1);
             node = dds3FindIndexedObjectChainNodeByName(world, 4, (u8 *)name);
-            effObjFetchInnerPosition(node);
+            dds3GetPosPoseSet(node);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             D_00390010[i - 10][0] = position[0];
             D_00390010[i - 10][1] = position[1];
             D_00390010[i - 10][2] = position[2];
             D_00390010[i - 10][3] = position[3];
-            effObjFetchInnerRotationNormalized(node);
+            dds3GetRotPoseSet(node);
             VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
             D_00390050[i - 10][0] = rotation[0];
             D_00390050[i - 10][1] = rotation[1];
@@ -315,7 +315,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 
     count = 0;
     sdfActiveCounterRuntime = (SdfCounterRuntime *)mnuCreateListState(0, 6, 0x16);
-    sdfActiveCounterRuntime->state.timer = sdfAllocSizeClassBlock(0x24);
+    sdfActiveCounterRuntime->state.timer = sdfChipAllocDirect(0x24);
     memset(sdfActiveCounterRuntime->state.timer, 0, 0x24);
     sdfActiveCounterRuntime->state.draw = sdfDrawCounterMapSelectionRow;
     completedMask = mdlCollectFlagBitsIntoMask();
@@ -323,7 +323,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
         if ((mask >> i) & 1) {
             channel = (SdfCounterChannel *)mnuListAppendNode(
                 (struct MenuList *)sdfActiveCounterRuntime, NULL);
-            display = sdfAllocSizeClassBlock(sizeof(SdfCounterDisplay));
+            display = sdfChipAllocDirect(sizeof(SdfCounterDisplay));
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->word = (u32 *)(D_00390220 + i * 0x18);
@@ -398,10 +398,10 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
 
     if (rt != NULL) {
         for (channel = rt->state.first; channel != NULL; channel = channel->next) {
-            sdfReleaseChipBlock(channel->display);
+            sdfChipFreeDirect(channel->display);
             channel->display = NULL;
         }
-        sdfReleaseChipBlock(rt->state.timer);
+        sdfChipFreeDirect(rt->state.timer);
         rt->state.timer = NULL;
         mnuDestroyListState((struct MenuList *)rt);
     }

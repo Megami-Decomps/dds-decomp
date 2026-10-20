@@ -26,7 +26,7 @@ extern void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src);
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
     parReleaseCellSystem(work->system);
     effReleaseAttachedResources(work->resource);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 EffPCPNeedleWork *effPCPNeedleCreate(void *parameters) {
@@ -115,7 +115,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
             if (age == 0) {
                 VU0_LOAD_MATRIX(work->resource->matrix);
                 radius = (u32)slot->radius;
-                position[0] = sdfEvaluateCosineViaSinePhaseShift(slot->angle) * radius;
+                position[0] = sdfCos(slot->angle) * radius;
                 position[1] = sdfSinPoly(slot->angle) * radius;
                 position[2] = 0.0f;
                 VU0_LOAD_VF(vf10, position);

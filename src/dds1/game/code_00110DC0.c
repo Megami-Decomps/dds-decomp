@@ -113,7 +113,7 @@ s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
     WorldIndexNode **indexNodes;
     u32 i;
 
-    indexNodes = sdfAllocSizeClassBlock(8);
+    indexNodes = sdfChipAllocDirect(8);
     object->data = indexNodes;
     for (i = 0; i < 2; i++) {
         indexNodes[i] = dds3AppendWorldIndexNode(0);
@@ -131,7 +131,7 @@ void dds3DestroyObjectPointerChains(EffWorldNode *object) {
     for (i = 0; i < 2; i++) {
         dds3DestroyWorldIndexNode(indexNodes[i]);
     }
-    sdfReleaseChipBlock(indexNodes);
+    sdfChipFreeDirect(indexNodes);
 }
 
 

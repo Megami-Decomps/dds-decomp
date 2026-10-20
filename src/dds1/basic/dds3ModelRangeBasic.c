@@ -15,7 +15,7 @@ void dds3ReleaseModelRangeData(Dds3ModelRangeObjectView *modelRangeObject) {
     rangeData = modelRangeObject->rangeData;
     resourceData = rangeData->resourceData;
     if (resourceData != NULL) {
-        sdfQueueGeneralAllocationRelease(sdfFindGeneralBlockByAddress(resourceData));
+        sdfMemFreeDelayedDirect(sdfFindGeneralBlockByAddress(resourceData));
     }
-    sdfReleaseChipBlock(rangeData);
+    sdfChipFreeDirect(rangeData);
 }

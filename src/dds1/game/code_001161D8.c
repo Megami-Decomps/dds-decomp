@@ -14,8 +14,8 @@ EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *s
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_RESOURCE_OWNER);
 
     obj->key = initialValue;
-    effObjSetInnerPosition(obj, firstVector);
-    effObjSetInnerRotation(obj, secondVector);
+    dds3SetPosPoseSet(obj, firstVector);
+    dds3SetRotPoseSet(obj, secondVector);
     effObjInnerVecBackup(obj->inner);
     return obj;
 }
@@ -26,17 +26,17 @@ ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object) {
 }
 
 
-extern void dds3SetObjectFlags(void *object, s32 mask);
+extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
 /* Allocate the kind-9 light payload and its auxiliary buffer. */
 u32 dds3InitializeInnerVectorEffectObject(EffWorldNode *object) {
     EffLightData *obj;
 
     effObjInnerCreate(object);
-    obj = (EffLightData *)sdfAllocSizeClassBlock(sizeof(EffLightData));
+    obj = (EffLightData *)sdfChipAllocDirect(sizeof(EffLightData));
     object->data = obj;
     obj->resourceState = dds3CreateSlotResourceState(object);
-    dds3SetObjectFlags(object, 0x62);
+    dds3ObjectBaseOnFlag(object, 0x62);
     obj->flags = 0;
     obj->ambientColor[0] = 0.7f;
     obj->ambientColor[1] = 0.7f;
@@ -54,6 +54,6 @@ u32 dds3InitializeInnerVectorEffectObject(EffWorldNode *object) {
     obj->word10 = 0;
     obj->word1C = 0;
     obj->word5C = 0;
-    obj->buffer = sdfAllocSizeClassBlock(0xE0);
+    obj->buffer = sdfChipAllocDirect(0xE0);
     return 1;
 }

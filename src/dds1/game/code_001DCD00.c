@@ -448,7 +448,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
         }
     }
     if (enemyCount == 1 && allyHeight + 100.0f < enemyHeight) {
-        switch (effMiscRandMod(0, 4)) {
+        switch (sdfGetRandInt(0, 4)) {
         case 0:
         case 1:
             if (enemyHeight <= 500.0f) {
@@ -465,7 +465,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
             break;
         }
     } else {
-        switch (effMiscRandMod(0, 2)) {
+        switch (sdfGetRandInt(0, 2)) {
         case 0:
             btlPrepareActionCameraPoseWithActorClearance(action, &action->frontCamera, &action->backCamera);
             break;
@@ -609,7 +609,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         if (task->unit->status.flags & 0x200) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                     } else {
                         btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
@@ -650,7 +650,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
                     action->stepKind = 1;
                 } else {
-                    action->stepKind = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 1 : 2;
+                    action->stepKind = (sdfGetRand((EffRandState *)effSharedRandomState) & 1) ? 1 : 2;
                 }
                 switch (action->stepKind) {
                 case 1:
@@ -682,13 +682,13 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
-                        ((effMiscRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
+                        ((sdfGetRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
                 btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
                     btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
-                    action->stepKind = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 4 : 5;
+                    action->stepKind = (sdfGetRand((EffRandState *)effSharedRandomState) & 1) ? 4 : 5;
                 } else {
                     action->stepKind = 4;
                 }
@@ -776,7 +776,7 @@ static inline s32 btlChooseLinkedCameraVariant(BtlLinkedCommand *action, s32 *sh
             }
             return 0;
         }
-        choice = effMiscRandMod(NULL, 2);
+        choice = sdfGetRandInt(NULL, 2);
         if (shrinkDistance != NULL) {
             *shrinkDistance = 1;
         }
@@ -909,7 +909,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             if (btlCanUseActorCategoryFlag4(action)) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
-                       ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
+                       ((sdfGetRand((EffRandState *)effSharedRandomState) & 1) ||
                         btlCanUseActorCategoryFlag2(action))) {
                 btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
                 action->motionParameter = 30.0f;
@@ -928,7 +928,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (btlCanUseActorCategoryFlag4(action)) {
             btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
-                   ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
+                   ((sdfGetRand((EffRandState *)effSharedRandomState) & 1) ||
                     btlCanUseActorCategoryFlag2(action))) {
             btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
         } else {
@@ -1205,7 +1205,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
     policy = datActionAnimationRecords[action->actionCode].flags & 0xC00;
     if (policy != 0) {
         if (policy == 0xC00) {
-            index = effMiscRandMod(NULL, 2);
+            index = sdfGetRandInt(NULL, 2);
         } else {
             index = ((policy >> 10) ^ 1) & 1;
         }

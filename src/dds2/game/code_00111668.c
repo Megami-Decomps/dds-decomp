@@ -11,5 +11,5 @@ void dds3ReleaseWorldSlotResource(EffWorldNode *slotObject) {
     resource = slotObject->data;
     dds3ReleaseObjectResource(slotObject);
     dds3ExchangeSlot(resource->target, 0, 1);
-    sdfReleaseChipBlock(resource);
+    sdfChipFreeDirect(resource);
 }

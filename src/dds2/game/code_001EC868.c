@@ -668,7 +668,7 @@ void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamStat
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quaternion);
-        pose = effMiscRandMod(0, 4);
+        pose = sdfGetRandInt(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -743,7 +743,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quat);
-        pose = effMiscRandMod(0, 4);
+        pose = sdfGetRandInt(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -1040,9 +1040,9 @@ void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *fro
                 candidates[count++] = i;
             }
         }
-        selected = candidates[effMiscRandMod(0, count) & 0xFFFF];
+        selected = candidates[sdfGetRandInt(0, count) & 0xFFFF];
     } else {
-        selected = effMiscRandMod(0, 8);
+        selected = sdfGetRandInt(0, 8);
     }
     btlCopyUnitRotationQuaternion(unit, quaternion);
     fov = action->camera.fov;
@@ -1129,9 +1129,9 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
                 candidates[count++] = i;
             }
         }
-        selected = candidates[effMiscRandMod(0, count) & 0xFFFF];
+        selected = candidates[sdfGetRandInt(0, count) & 0xFFFF];
     } else {
-        selected = effMiscRandMod(0, 8);
+        selected = sdfGetRandInt(0, 8);
     }
     if (btlGetIndexListCount(action->targetList) == 1 && allowSingle != 0) {
         btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
@@ -1352,7 +1352,7 @@ f32 angle, f32 blend) {
         btlSetDefaultActionCameraPose(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (effMiscRand((EffRandState *)effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (sdfGetRand((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;
@@ -2053,9 +2053,9 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     }
     scale = (animationFlags & 0x200) ? 320.0f : 300.0f;
     if (animationFlags & 0x200) {
-        pose = effMiscRandMod(0, 2) + 2;
+        pose = sdfGetRandInt(0, 2) + 2;
     } else {
-        pose = effMiscRandMod(0, 2);
+        pose = sdfGetRandInt(0, 2);
     }
     groups = 0;
     count = btlGetIndexListCount(action->targetList);
@@ -3484,7 +3484,7 @@ void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from
     }
     width = unit->reach * unit->scale;
     height = unit->height * unit->scale;
-    pose = effMiscRandMod(NULL, 2);
+    pose = sdfGetRandInt(NULL, 2);
     btlCopyUnitRotationQuaternion(unit, quaternion);
     fov = action->camera.fov;
     from->fov = fov;
@@ -3671,7 +3671,7 @@ void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *action, BtlCamState *fr
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         btlCopyUnitRotationQuaternion(unit, quat);
-        pose = effMiscRandMod(0, 2);
+        pose = sdfGetRandInt(0, 2);
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
@@ -7190,17 +7190,17 @@ void btlFreeFieldBlocks(void) {
     BtlState *blocks = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (blocks->fieldTBResourceId != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)blocks->fieldTBResourceId);
         blocks->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_00418C58);
     }
     if (blocks->fieldF2ResourceId != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2ResourceId);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)blocks->fieldF2ResourceId);
         blocks->fieldF2ResourceId = 0;
         btlBossDebugPrintf("btl:free field F2\n");
     }
     if (blocks->fieldF1ResourceId != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1ResourceId);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)blocks->fieldF1ResourceId);
         blocks->fieldF1ResourceId = 0;
         btlBossDebugPrintf("btl:free field F1\n");
     }
@@ -7537,7 +7537,7 @@ u32 btlPollFieldArchiveLoad(args)
                                              args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+                sdfMemFreeDelayedDirect((struct SdfMemBlock *)blocks->fieldTBResourceId);
                 blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_00418C58);
             }
@@ -7585,7 +7585,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     } else {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
-                work->primaryBuffer = (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->frontHandle));
+                work->primaryBuffer = (void *)sdfMemLock(fileGetResourceHandle(args->frontHandle));
                 filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
@@ -7595,7 +7595,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         }
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
-                work->secondaryBuffer = (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->sideHandle));
+                work->secondaryBuffer = (void *)sdfMemLock(fileGetResourceHandle(args->sideHandle));
                 filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
@@ -8334,8 +8334,8 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     }
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
     resource = fileGetResourceHandle(args->request);
-    effect->resourceHandle = sndMixerClone((void *)sdfResourceRetainAddress(resource));
-    sdfReleaseResourceAllocation(resource);
+    effect->resourceHandle = sndMixerClone((void *)sdfMemLock(resource));
+    sdfMemFreeDirect(resource);
     filePollEntryCleanup(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
@@ -8671,7 +8671,7 @@ void sndFreeResourceNode(SoundResourceNode *node) {
     } else {
         ((BtlState *)btlGetRuntime())->soundResourceHead = node->next;
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Advance resource countdowns and battle tint, then tick slot-volume fades. */
@@ -8800,7 +8800,7 @@ void sndFreeResourceLink(SoundResourceLink *link) {
         link->effect->referenceCount--;
         sndDeleteSystemEffect(link->effect);
     }
-    sdfReleaseChipBlock(link);
+    sdfChipFreeDirect(link);
 }
 
 INCLUDE_ASM(const s32, "game/code_001EC868", func_002034A8);
@@ -8824,7 +8824,7 @@ void sndFreeLink(SoundLink *link) {
         link->effect->referenceCount = link->effect->referenceCount - 1;
         sndDeleteSystemEffect(link->effect);
     }
-    sdfReleaseChipBlock(link);
+    sdfChipFreeDirect(link);
 }
 
 /* Blend the linked command effect through the SDK's packed-color vectors. */
@@ -9083,7 +9083,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 void sndDestroyFileQueueWrapper(u32 handle) {
     SoundHandleNode *node = (SoundHandleNode *)handle;
     fileQueueDestroy(node->queue);
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 void func_00203EC0(void) {
@@ -9265,7 +9265,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             btlBossDebugPrintf("btl:sound file load end[%s]\n", request->filename);
             request->resourceAllocation = fileGetResourceHandle(request->request);
             size = (s32)fileGetResourceSize(request->request);
-            data = sdfResourceRetainAddress(request->resourceAllocation);
+            data = sdfMemLock(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == 0) {
                 func_003422F8(data, size);
                 node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
@@ -9276,7 +9276,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->packedTrackPosition >> 16));
-        sdfReleaseResourceAllocation(request->resourceAllocation);
+        sdfMemFreeDirect(request->resourceAllocation);
         filePollEntryCleanup(request->request);
         node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
                       SOUND_FILE_STATE_COMPLETE;
@@ -9396,7 +9396,7 @@ void sndFreeListNode(ActiveSoundNode *node) {
     } else {
         ((BtlState *)btlGetRuntime())->soundList = node->next;
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 /* Clear active-sound nodes, saving next before each allocation is released. */
@@ -9527,7 +9527,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
                 filePollEntryCleanup(owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
-                sdfReleaseResourceAllocation(owner->work.resourceHandles[i]);
+                sdfMemFreeDirect(owner->work.resourceHandles[i]);
             }
         }
         if (owner->next != 0) {
@@ -9538,7 +9538,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
         } else {
             ((BtlState *)btlGetRuntime())->soundSlotOwners = owner->next;
         }
-        sdfReleaseChipBlock(owner);
+        sdfChipFreeDirect(owner);
     }
 }
 

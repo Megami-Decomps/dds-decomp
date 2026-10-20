@@ -483,7 +483,7 @@ void btlRequestSceneEventResources(void) {
     btlBossDebugPrintf(D_0041B6C8, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_0041B6D8, battleState->eventTaskId);
-    kwlnTaskAddChild(battleState->scriptOwner, eventTask);
+    dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != 0) {
         sndReleaseMidiTrack(battleState->sequenceHandle);
@@ -588,7 +588,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)eventAssets);
+        sdfMemFreeDirect((struct SdfMemBlock *)eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);
@@ -764,7 +764,7 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
             }
         }
         if (count > 0) {
-            pick = effMiscRandMod(0, count);
+            pick = sdfGetRandInt(0, count);
             for (i = 0; i < 100; i++) {
                 if (group == btlScriptGroupSlotRows[i].group) {
                     if (mdlFlagTest(0x8FF - i) == 0) {
@@ -1301,7 +1301,7 @@ void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
     } else {
         ((BtlStateModelCacheView *)btlGetRuntime())->modelEntries = cacheEntry->next;
     }
-    sdfReleaseChipBlock(cacheEntry);
+    sdfChipFreeDirect(cacheEntry);
     btlBossDebugPrintf("btl:pack free[%X,%X]\n", cacheEntry->kind, cacheEntry->id);
 }
 
@@ -1432,7 +1432,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                 }
             } else {
                 for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
-                    sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
+                    sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
                 }
             }
             btlStageTaskCleanupCallback(entry->packRequest);
@@ -1568,22 +1568,22 @@ void func_0022D040(void) {
 
     for (row = 0; row < btlRuntimeState.particleRowCount; row++) {
         for (column = 0; column < btlRuntimeState.particlesPerRow; column++) {
-            direction[0] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
-            direction[1] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
-            direction[2] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[1] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[2] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
             VU0_NORMALIZE_PACKED_VECTOR(direction);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0] = direction[0];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1] = direction[1];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2] = direction[2];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle = 0;
-            value = effMiscRandUnitFloat(effSharedRandomState);
+            value = sdfGetRandFloat(effSharedRandomState);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed = (value * 0.5f + 0.5f) * 0.31415925f;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement = 0;
-            value = effMiscRandUnitFloat(effSharedRandomState);
+            value = sdfGetRandFloat(effSharedRandomState);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed = (value * 0.5f + 0.5f) * 9.999998093f;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha = 0x80;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = 0;
-            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay = effMiscRandMod(0, 8);
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay = sdfGetRandInt(0, 8);
         }
     }
 }
@@ -1921,8 +1921,8 @@ void btlInitializeGraphicsRuntime(void) {
     SdfListHead *packetList;
     SdfLinkedPacketList *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
-    runtime->resource = (void *)sdfResourceRetainAddress(runtime->handle);
-    packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    runtime->resource = (void *)sdfMemLock(runtime->handle);
+    packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->resource, 0, 0, 0);
@@ -1932,18 +1932,18 @@ void btlInitializeGraphicsRuntime(void) {
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     sdfCreateDescriptorPacket(packetList, kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
     D_00380608.append(&D_00380608, packetList);
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
+    sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
     runtime->options |= 1;
 }
 
 void btlInitializeOverlayGraphics(void) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     sdfCreateGraphBufferCopyPacket(packetList, context, kwlnHeldTextureReference->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
@@ -2053,7 +2053,7 @@ void btlClearRuntimeState(void) {
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
     if (handle != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
         btlRuntimeState.handle = 0;
         btlRuntimeState.resource = 0;
     }
@@ -2321,7 +2321,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     frFontDrawGlyphChain(textGlyph, 0, 0x60);
-    return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
+    return frDestroyFontRequestAfter(textGlyph);
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index.
@@ -2345,7 +2345,7 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
         frFontDrawGlyphChain(textGlyph, 0, 0x60);
-        frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
+        frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
 }
@@ -3120,7 +3120,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                     (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                     (const u8 *)D_00435E48 + unitId * 17, NULL);
                 frFontDrawGlyphChain(glyph, 1, 0x53);
-                frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                frDestroyFontRequestAfter(glyph);
             }
         }
         if (D_00436F68 < 0x400) {
@@ -3131,7 +3131,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                         (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         (const u8 *)D_00435E4C + unitId * 17, NULL);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
-                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    frDestroyFontRequestAfter(glyph);
                 }
             }
         }

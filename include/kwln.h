@@ -42,15 +42,15 @@ struct KwlnTask {
     KwlnTask *next;          /* 0x4C */
 };
 
-u32 kwlnTaskGetTimer(KwlnTask *task);
+u32 dds3GetProcessRunTime(KwlnTask *task);
 /* Return the task's low scheduler state when registered, otherwise DETACHED. */
-s32 kwlnTaskGetRegisteredState(KwlnTask *task);
-void kwlnTaskSetUserValue(KwlnTask *task, u32 userValue);
-u32 kwlnTaskGetUserValue(KwlnTask *task);
-KwlnTask *kwlnTaskGetTaskByName(const char *name);
+s32 dds3GetProcessStat(KwlnTask *task);
+void dds3SetProcessData(KwlnTask *task, u32 userValue);
+u32 dds3GetProcessData(KwlnTask *task);
+KwlnTask *dds3SearchProcessName(const char *name);
 /* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
 void kwlnUnlinkListNode(KwlnTask *task);
-s32 kwlnTaskIsRegistered(KwlnTask *task);
+s32 dds3ExistProcess(KwlnTask *task);
 s32 kwlnTaskExists(const char *name);
 
 /* Append the common rectangle used to frame a grid of sprite cells. */

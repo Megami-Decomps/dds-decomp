@@ -294,10 +294,10 @@ void mnuInitializeTitleAudioStreams(void) {
     mnuInitTitleSoundRemoteRequest(0x400);
 
     mnuTitleStreamDecoderState[1] = (u32)mnuTitleStreamDecodedSamples;
-    mnuTitleStreamDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    mnuTitleStreamDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfMemAllocDirect(0x68CA));
     mnuTitleStreamDecoderState[4] = 0;
     mnuTitleSoundBufferDecoderState[1] = (u32)mnuTitleSoundBufferDecodedSamples;
-    mnuTitleSoundBufferDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    mnuTitleSoundBufferDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfMemAllocDirect(0x68CA));
     mnuTitleSoundBufferDecoderState[4] = 2;
 
     mnuCreateTitleStreamThread();
@@ -338,7 +338,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamSt
     frameCount = fileBytes / streamState->frameBytes;
     streamState->frameIndex = 0;
     streamState->frameCount = frameCount;
-    sdfQueueGeneralAllocationRelease(resourceHandle);
+    sdfMemFreeDelayedDirect(resourceHandle);
 }
 
 void mnuStoreTaskResult(char *audioPath) {
@@ -375,7 +375,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         memcpy(destinationState->compressedData, fileData, fileBytes);
         destinationState->frameCount = fileBytes / destinationState->frameBytes;
         destinationState->frameIndex = 0;
-        sdfQueueGeneralAllocationRelease(resourceHandle);
+        sdfMemFreeDelayedDirect(resourceHandle);
         func_002F7628(mnuTitleStreamDecoderState);
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_COPIED;
         ready = 1;
@@ -507,7 +507,7 @@ void mnuCommitTitleStreamReadyState(void) {
 /* Reset load/data slots only when an allocation is present; otherwise do nothing. */
 void mnuResetTitleStream(void) {
     if (mnuTitleStreamStatus.allocation != 0) {
-        sdfQueueGeneralAllocationRelease(mnuTitleStreamStatus.allocation);
+        sdfMemFreeDelayedDirect(mnuTitleStreamStatus.allocation);
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_IDLE;
         mnuTitleStreamStatus.allocation = 0;
         mnuTitleStreamStatus.compressedData = 0;
@@ -532,7 +532,7 @@ void mnuInitializeTitleSoundBuffer(void) {
 
     WaitSema(mnuTitleStreamSemaphore);
     streamState->decoder = decoder;
-    allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
+    allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_MEDIUM);
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
     streamState->allocation = allocation;
     streamState->control = 2;
@@ -562,22 +562,22 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     case 1:
         mnuTitleSoundBufferDecoderState[2] = 1;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_LARGE;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_LARGE);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_LARGE);
         break;
     case 2:
         mnuTitleSoundBufferDecoderState[2] = 2;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 3:
         mnuTitleSoundBufferDecoderState[2] = 3;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 4:
         mnuTitleSoundBufferDecoderState[2] = 4;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_SMALL);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
     }
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
@@ -606,22 +606,22 @@ void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32
     case 1:
         mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_LARGE;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_LARGE);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_LARGE);
         break;
     case 2:
         mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 3:
         mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 4:
         mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
-        allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_SMALL);
+        allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
     }
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
@@ -674,7 +674,7 @@ void mnuReleaseSoundBuffer(void) {
     if (allocationHandle == 0) {
         return;
     }
-    sdfReleaseResourceAllocation(allocationHandle);
+    sdfMemFreeDirect(allocationHandle);
     streamState->allocation = 0;
 }
 

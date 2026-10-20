@@ -130,7 +130,7 @@ s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32)) 
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */
 u32 dds3CreateWorldObjectData(EffWorldNode *object) {
-    EvtWorldTable *data = sdfAllocSizeClassBlock(sizeof(EvtWorldTable));
+    EvtWorldTable *data = sdfChipAllocDirect(sizeof(EvtWorldTable));
     EvtWorldSlot *lists;
     s32 listIndex;
 
@@ -144,12 +144,12 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
         data->indexedHandle = 0;
         data->sceneResourceHandle = 0;
         data->sceneScript = NULL;
-        data->resource = sdfAllocGeneralBlock(0xD8);
+        data->resource = sdfMemAllocDirect(0xD8);
         if (data->resource == 0) {
-            sdfReleaseChipBlock(data);
+            sdfChipFreeDirect(data);
             return 0;
         }
-        lists = (EvtWorldSlot *)sdfResourceRetainAddress(data->resource);
+        lists = (EvtWorldSlot *)sdfMemLock(data->resource);
         data->slots = lists;
         for (listIndex = 0x11; listIndex >= 0; listIndex--) {
             lists->count = 0;
@@ -177,11 +177,11 @@ void dds3DestroyWorldObjectData(EffWorldNode *object) {
             }
         }
         if (data->resource != 0) {
-            sdfReleaseResourceAllocation(data->resource);
+            sdfMemFreeDirect(data->resource);
         }
         dds3ClearSceneObjectState(object);
         evtReleaseSceneResource(object);
-        sdfReleaseChipBlock(data);
+        sdfChipFreeDirect(data);
     }
 }
 

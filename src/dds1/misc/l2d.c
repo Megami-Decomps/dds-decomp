@@ -13,7 +13,7 @@ void l2dDrawColoredRect(void *rectangleData)
     Dds3L2dRectangle *rect = rectangleData;
     SdfListHead *list;
 
-    list = (SdfListHead *)sdfAllocatePacketList(0);
+    list = (SdfListHead *)sdfPrimAllocDrawTag(0);
     sdfAppendClosedRectanglePacket(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);

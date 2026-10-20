@@ -80,7 +80,7 @@ extern void *memcpy(void *, const void *, unsigned int);
 
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
-    EffResourceRectWork *dst = sdfAllocSizeClassBlock(sizeof(EffResourceRectWork));
+    EffResourceRectWork *dst = sdfChipAllocDirect(sizeof(EffResourceRectWork));
 
     dst->texture = effGetBillResourceTexture(0);
     memcpy(&dst->params, src, sizeof(*src));
@@ -88,7 +88,7 @@ EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
 }
 
 void effReleaseResourceTemplate(EffResourceRectWork *work) {
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 
@@ -134,7 +134,7 @@ extern void effTrackPolySetDrawKind(EffTrackPolyData *data, u32 kind);
 
 /* Clone a model track with independent history and gradient storage. */
 EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
-    EffTrackPolyWork *dst = sdfAllocSizeClassBlock(sizeof(EffTrackPolyWork));
+    EffTrackPolyWork *dst = sdfChipAllocDirect(sizeof(EffTrackPolyWork));
 
     dst->params = *src;
     dst->params.unk1C = 0xC;

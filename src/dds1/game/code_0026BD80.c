@@ -351,7 +351,7 @@ void mnuAdvanceMovieMenuIdleAnimation(void) {
     state->pulseTimer++;
     if (state->pulseTimer >= 61) {
         state->pulseTimer = 0;
-        if (state->slideOffset == 0 && effMiscRandUnitFloat(0) < 0.1f) {
+        if (state->slideOffset == 0 && sdfGetRandFloat(0) < 0.1f) {
             ((MenuState *)mnuMovieMenuState)->slideOffset = 0x400;
         }
     }

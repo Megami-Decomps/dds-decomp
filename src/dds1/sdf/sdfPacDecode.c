@@ -106,7 +106,7 @@ PacWork *sdfPacRemovePacket(PacWork *work) {
     if (state->queueTail == work) {
         state->queueTail = previousWork;
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
     return nextWork;
 }
 
@@ -178,7 +178,7 @@ void sdfPacDecodePendingBytes(PacState *state) {
     if (finished == 0) {
         return;
     }
-    sdfReleaseChipBlock(state->decoder);
+    sdfChipFreeDirect(state->decoder);
     state->onComplete(state);
 }
 
@@ -218,15 +218,15 @@ void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet)
         if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
             node->resourceHandle = sdfAllocGeneralBlockHigh(allocationSize);
         } else {
-            node->resourceHandle = sdfAllocGeneralBlock(allocationSize);
+            node->resourceHandle = sdfMemAllocDirect(allocationSize);
         }
-        state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->resourceHandle));
+        state->outputCursor = node->dataCursor = (u8 *)sdfMemLock((struct SdfMemBlock *)(node->resourceHandle));
         switch (packet->flags & PAC_ENCODING_MASK) {
         case PAC_ENCODING_RAW:
             state->onInput = sdfPacCopyPendingBytes;
             break;
         case PAC_ENCODING_COMPRESSED: {
-            SdfPacDecoder *decoder = sdfAllocSizeClassBlock(0x20);
+            SdfPacDecoder *decoder = sdfChipAllocDirect(0x20);
             state->decoder = (u8 *)decoder;
             sdfStoreWordAndSetState(decoder, state->outputCursor);
             state->onInput = sdfPacDecodePendingBytes;
@@ -302,7 +302,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfMemLock(resourceBuffer->resourceSlot));
         sdfReleaseMemorySlot((s32 *)&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
@@ -319,10 +319,10 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfMemLock(resourceBuffer->resourceSlot));
         sdfReleaseMemorySlot((s32 *)&resourceBuffer->resourceSlot);
     }
-    sdfReleaseChipBlock(state->decoder);
+    sdfChipFreeDirect(state->decoder);
     state->onComplete(state);
 }
 
@@ -360,9 +360,9 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
     if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
         buffer->resourceSlot = sdfAllocGeneralBlockHigh(packet->payloadSize);
     } else {
-        buffer->resourceSlot = sdfAllocGeneralBlock(packet->payloadSize);
+        buffer->resourceSlot = sdfMemAllocDirect(packet->payloadSize);
     }
-    buffer->cursor = (u8 *)sdfResourceRetainAddress(buffer->resourceSlot);
+    buffer->cursor = (u8 *)sdfMemLock(buffer->resourceSlot);
     memcpy(buffer->cursor, packet, PAC_HEADER_BYTES);
     buffer->cursor += PAC_HEADER_BYTES;
     switch (packet->flags) {
@@ -370,7 +370,7 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
         state->onInput = sdfPacCopyResourceChunk;
         break;
     case PAC_ENCODING_COMPRESSED: {
-        SdfPacDecoder *decoder = sdfAllocSizeClassBlock(0x20);
+        SdfPacDecoder *decoder = sdfChipAllocDirect(0x20);
         state->decoder = (u8 *)decoder;
         sdfStoreWordAndSetState(decoder, buffer->cursor);
         state->onInput = sdfPacDecodeResourceChunk;
@@ -381,7 +381,7 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
 
 void sdfPacCompleteResourcePacket(PacState *state) {
     state->queueTail->resourceHandle = state->slot.resource->texture;
-    sdfReleaseChipBlock(state->slot.resource);
+    sdfChipFreeDirect(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
 }
 
@@ -389,7 +389,7 @@ void sdfPacCompleteResourcePacket(PacState *state) {
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacEnqueuePacket(state, packet);
     {
-        void *allocation = sdfAllocSizeClassBlock(0x10);
+        void *allocation = sdfChipAllocDirect(0x10);
         state->slot.resource = allocation;
         sdfPacStartResourceChunk(state, packet, allocation);
     }
@@ -421,7 +421,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;
         if (nextIndex == allocation->entryCount) {
-            sdfReleaseChipBlock(allocation);
+            sdfChipFreeDirect(allocation);
             sdfDecodePacNodeAndAdvanceTail(state);
         } else {
             sdfPacResetOutputToAllocationEntry(state);

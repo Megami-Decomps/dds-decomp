@@ -117,7 +117,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         work->offsets[index][6] = x - halfWidth;
         work->offsets[index][7] = y + halfHeight;
     } else {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->rotationAngle);
+        cosine = sdfCos(obj->rotationAngle);
         sine = sdfSinPoly(obj->rotationAngle);
         cornerX = x - halfWidth;
         cornerY = y - halfHeight;
@@ -323,7 +323,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         work->offsets[index][6] = x - halfWidth;
         work->offsets[index][7] = y + halfHeight;
     } else {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->rotationAngle);
+        cosine = sdfCos(obj->rotationAngle);
         sine = sdfSinPoly(obj->rotationAngle);
         cornerX = x - halfWidth;
         cornerY = y - halfHeight;
@@ -447,7 +447,7 @@ void billInitializeCommonDrawState(BillObj *billboard) {
 BillObj *billAllocChild(SdfTextureFileHeader *resourceData) {
     BillObj *obj;
 
-    obj = sdfAllocSizeClassBlock(0x34);
+    obj = sdfChipAllocDirect(0x34);
     obj->child = NULL;
     if (resourceData != NULL) {
         obj->child = billCreateChildPayloadFromTextureResource(resourceData);
@@ -462,7 +462,7 @@ void billReleaseChild(BillObj *obj) {
     if (child != 0) {
         effReleaseSharedTextureRecord(child);
     }
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 void billProcessChild(BillObj *obj) {
@@ -479,7 +479,7 @@ BillObj *billAllocList(void *resourceData) {
         data = billCreateAnimationDataFromResource(resourceData);
     }
     n = data->entryCount;
-    newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
+    newobj = sdfChipAllocDirect(n * 20 + 0x6C);
     newobj->animationData = data;
     newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
     newobj->animationActive = 1;
@@ -498,7 +498,7 @@ BillObj *billCloneList(const BillObj *obj) {
     data = obj->animationData;
     n = data->entryCount;
     data->listRefCount = data->listRefCount + 1;
-    newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
+    newobj = sdfChipAllocDirect(n * 20 + 0x6C);
     newobj->animationData = data;
     newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
     newobj->animationActive = 1;
@@ -510,7 +510,7 @@ BillObj *billCloneList(const BillObj *obj) {
 
 void billReleaseList(BillObj *obj) {
     billReleaseSharedEntryBlock(obj->animationData);
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 /* Advance an entry's frame timer and apply its current record to the shared
@@ -761,8 +761,8 @@ BillData *billCreateAnimationDataFromResource(void *resourceData) {
     s32 entryCount;
     s32 resourceIndex;
 
-    allocation = sdfAllocGeneralBlock(resourceHeader[0] + childCount * 0x50 + sizeof(*data));
-    data = (BillData *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(resourceHeader[0] + childCount * 0x50 + sizeof(*data));
+    data = (BillData *)sdfMemLock(allocation);
     copiedBase = (u8 *)(data + 1);
     data->allocation = allocation;
     memcpy(copiedBase, sourceBytes, resourceHeader[0]);
@@ -806,7 +806,7 @@ void billReleaseSharedEntryBlock(BillData *block) {
             effReleaseSharedTextureRecord(block->children[childIndex]);
             childIndex++;
         }
-        sdfReleaseResourceAllocation(block->allocation);
+        sdfMemFreeDirect(block->allocation);
     }
 }
 
@@ -851,7 +851,7 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
 
     allocation = sdfReadNamedResource(path, header, 0);
     billboard = billCreateIndexed(kind, header[0]);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
     return billboard;
 }
 

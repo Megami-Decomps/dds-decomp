@@ -507,7 +507,7 @@ void mnuDrawScaledMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCel
 
 void mnuReleaseOptionalDrawAllocation(void *unused, void *allocation) {
     if (allocation != 0) {
-        sdfReleaseChipBlock(allocation);
+        sdfChipFreeDirect(allocation);
     }
 }
 
@@ -515,14 +515,14 @@ void mnuReleaseOptionalDrawAllocation(void *unused, void *allocation) {
 MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 cueDuration,
                                                 u8 initialGenerations,
                                                 u8 variant) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x48);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x48);
     MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->cueDuration = cueDuration;
     resource->initialGenerations = initialGenerations;
     resource->variant = variant;
-    resource->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
+    resource->spawnCountdown = (s32)(sdfGetRandFloat(0) * 30.0f + 10.0f);
     return resource;
 }
 
@@ -532,7 +532,7 @@ extern char D_003AF9F0[];
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
 SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
     HexStepTable steps = *(HexStepTable *)D_003AF9F0;
-    SpriteSpawnNode *node = sdfAllocSizeClassBlock(sizeof(SpriteSpawnNode));
+    SpriteSpawnNode *node = sdfChipAllocDirect(sizeof(SpriteSpawnNode));
 
     memset(node, 0, sizeof(SpriteSpawnNode));
     if (parent != NULL) {
@@ -550,8 +550,8 @@ SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *group, SpriteS
         node->direction = direction;
         node->framesLeft = node->duration = group->cueDuration - 5;
     } else {
-        node->x = (s32)(effMiscRandUnitFloat(0) * 30.0f) * 26 + 16;
-        node->y = (s32)(effMiscRandUnitFloat(0) * 20.0f) * 18 + 50;
+        node->x = (s32)(sdfGetRandFloat(0) * 30.0f) * 26 + 16;
+        node->y = (s32)(sdfGetRandFloat(0) * 20.0f) * 18 + 50;
         node->generations = group->initialGenerations;
         node->direction = 0;
         node->framesLeft = node->duration = group->cueDuration;
