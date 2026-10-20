@@ -709,42 +709,24 @@ s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
 
 extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
 
-/* Initialize and link count pool nodes, terminating the last; count must be at least one.
- * The link loop is a goto loop: retail's loop (bnez $5 back to 0x0032D128) recomputes
- * both %lo values on every pass, i.e. loop.c never scanned it. Guarded do-while, while
- * and for(;;) forms keep loop notes and cc1probe's 09.loop dump shows the %lo sums
- * "moved" to the preheader (16 of 27 words differ); a tail-recursive form folds the
- * first block into the loop (18 words). */
+/* Initialize and link count pool nodes, terminating the last; count must be at least one. */
 void sdfInitPacketPoolNodeChain(SdfPoolNode *nodes, s32 count) {
     SdfPoolNode *node = nodes;
-    SdfPoolNode *next;
-    s32 remaining = count - 1;
 
-    node->append = sdfAppendPacketList;
-    node->prepend = sdfPrependIfMode1;
-    node->first = 0;
-    node->last = 0;
-    node->unkC = 0;
-    node->unk18 = 0;
-    if (remaining == 0) {
-        node->next = NULL;
-        return;
+    for (;;) {
+        node->append = sdfAppendPacketList;
+        node->prepend = sdfPrependIfMode1;
+        node->first = 0;
+        node->last = 0;
+        node->unkC = 0;
+        node->unk18 = 0;
+        if (--count == 0) {
+            node->next = NULL;
+            break;
+        }
+        node->next = node + 1;
+        node++;
     }
-link:
-    next = node + 1;
-    remaining--;
-    node->next = next;
-    node = next;
-    next->append = sdfAppendPacketList;
-    next->prepend = sdfPrependIfMode1;
-    next->first = 0;
-    next->last = 0;
-    next->unkC = 0;
-    next->unk18 = 0;
-    if (remaining != 0) {
-        goto link;
-    }
-    node->next = NULL;
 }
 
 /* Make a REF DMA node for the payload following the source tag. */
