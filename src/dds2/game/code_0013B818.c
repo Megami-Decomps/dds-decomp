@@ -716,7 +716,7 @@ extern FldActionRow D_0038BE50[];
 
 extern u8 D_0038BC00[];
 
-extern u8 D_0038BC10[];
+extern char D_0038BC10[];
 
 extern u8 D_0038BC20[];
 
@@ -764,7 +764,7 @@ void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     D_0038BE50[index].childResource.data = &D_0038BE50[index].prefix.task.info;
     D_0038BE50[index].childResource.id = dds3AdvanceWorldCounter();
     D_0038BE50[index].childResource.name = (const char *)D_0038BC00;
-    child = evtSpawnActionObj11((s32)D_0038BE50[index].childResource.id, (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform, (s32)D_0038BC10);
+    child = evtSpawnActionObj11(D_0038BE50[index].childResource.id, (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform, D_0038BC10);
     roomIndex = func_0013BAB8(&D_0038BE50[index].childResource, child);
     state = (FldRoomStateHeader *)&fldRoomRecords[roomIndex].unk130;
     state->roomId = roomId;
@@ -820,7 +820,7 @@ void func_0013EEA0(s32 kind, s32 roomValue,
     D_0038BE50[index].childResource.name = (const char *)D_0038BC00;
     object = evtSpawnActionObj11(D_0038BE50[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform,
-                                 (s32)D_0038BC10);
+                                 D_0038BC10);
     taskIndex = func_0013BAB8(&D_0038BE50[index].childResource, object);
     if (kind == 0) {
         fldRoomRecords[taskIndex].mode = 3;

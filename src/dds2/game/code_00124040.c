@@ -1549,7 +1549,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             fldClearCameraObjectActiveFlag(fldAreaState.commandEnabled);
         }
         fldSynchronizePlayerPositionAndAreaState();
-        evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0038A610, (s32)(u32)D_00435F50);
+        evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0038A610, D_00435F50);
     }
 }
 

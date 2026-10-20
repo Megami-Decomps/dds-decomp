@@ -22,6 +22,6 @@ typedef struct EvtWorldSourceTransformPrefix {
 typedef char EvtWorldSourcePosition_size_must_be_0x10[(sizeof(EvtWorldSourcePosition) == 0x10) ? 1 : -1];
 typedef char EvtWorldSourceTransformPrefix_size_must_be_0x20[(sizeof(EvtWorldSourceTransformPrefix) == 0x20) ? 1 : -1];
 
-EffWorldNode *evtSpawnActionObj11(s32 key, EvtWorldSourceTransformPrefix *source, s32 value);
+EffWorldNode *evtSpawnActionObj11(u32 key, EvtWorldSourceTransformPrefix *source, const char *name);
 
 #endif
