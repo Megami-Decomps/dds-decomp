@@ -7822,7 +7822,8 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
         count = btlGetIndexListCount(link->indexWork.indices);
         if (count == 1 && modeA == 1 && modeB == 0) {
             if (command->actionCode == 0x106) {
-                goto satan_attack;
+                btlChooseSatanAttackCamera((s32)command);
+                return 1;
             }
             if (cameraMode == 0) {
                 btlBossDebugPrintf("SATAN:T-Def ++++\n");
@@ -7847,7 +7848,6 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
             return 1;
         } else if (count >= 2 && modeA == 1 && modeB == 0) {
             if (command->actionCode == 0x106) {
-satan_attack:
                 btlChooseSatanAttackCamera((s32)command);
                 return 1;
             }
