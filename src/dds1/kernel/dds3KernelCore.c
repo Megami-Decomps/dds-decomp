@@ -147,7 +147,68 @@ s32 kwlnTaskStep(KwlnTask *task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskRunScheduledUpdates);
+void kwlnTaskRunScheduledUpdates(void)
+{
+    KwlnTask* active = kwlnActiveTaskHead;
+    KwlnTask* delayed = kwlnDelayedDestroyTaskHead;
+    KwlnTask* current;
+    /* The two single-queue drains share a predecessor snapshot; the merge
+     * keeps its own. A step may unlink the selected node. SMT3 RunningProcess
+     * retains the selected-node role (dds3KernelCore.c:591-717). */
+    KwlnTask* drainPrevious;
+
+    for (;;) {
+        if (active != 0) {
+            if (delayed != 0) {
+                KwlnTask* previous;
+
+                if (active->priority <= delayed->priority) {
+                    current = active;
+                    previous = current->listPrev;
+                    if (kwlnTaskStep(current) != 0) {
+                        active = current->listNext;
+                    } else {
+                        active = previous != 0 ? previous->listNext : kwlnActiveTaskHead;
+                    }
+                } else {
+                    current = delayed;
+                    previous = current->listPrev;
+                    if (kwlnTaskStep(current) != 0) {
+                        delayed = current->listNext;
+                    } else {
+                        delayed = previous != 0 ? previous->listNext : kwlnDelayedDestroyTaskHead;
+                    }
+                }
+            } else {
+
+                do {
+                    current = active;
+                    drainPrevious = current->listPrev;
+                    if (kwlnTaskStep(current) != 0) {
+                        active = current->listNext;
+                    } else {
+                        active = drainPrevious != 0 ? drainPrevious->listNext : kwlnActiveTaskHead;
+                    }
+                } while (active != 0);
+                return;
+            }
+        } else {
+            if (delayed != 0) {
+
+                do {
+                    current = delayed;
+                    drainPrevious = current->listPrev;
+                    if (kwlnTaskStep(current) != 0) {
+                        delayed = current->listNext;
+                    } else {
+                        delayed = drainPrevious != 0 ? drainPrevious->listNext : kwlnDelayedDestroyTaskHead;
+                    }
+                } while (delayed != 0);
+            }
+            return;
+        }
+    }
+}
 
 void kwlnTaskFinalizeDestroy(KwlnTask* task)
 {
