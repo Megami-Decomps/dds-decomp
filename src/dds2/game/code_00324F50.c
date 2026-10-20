@@ -25,15 +25,8 @@ typedef struct SdfResourceVectorRecord1C {
     u8 opaque00[0x1C];
 } SdfResourceVectorRecord1C;
 
-/* Keep the extended header opaque for the existing whole-record copy. */
-typedef struct SdfResourceVectorRecord30 {
-    u8 opaque00[0x2C];
-    SdfVec4 *vector;
-} SdfResourceVectorRecord30;
 
 typedef char SdfResourceVectorRecord1CSizeCheck[(sizeof(SdfResourceVectorRecord1C) == 0x1C) ? 1 : -1];
-typedef char SdfResourceVectorRecord30SizeCheck[(sizeof(SdfResourceVectorRecord30) == 0x30) ? 1 : -1];
-typedef char SdfResourceVectorRecord30VectorOffsetCheck[((u32)&((SdfResourceVectorRecord30 *)0)->vector == 0x2C) ? 1 : -1];
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -400,19 +393,19 @@ MnuCallbackListPair *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *sour
 
 /* Deep-copy count extended sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner with each copied vector stored after its header. */
-MnuCallbackListPair *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord30 *source, s32 count) {
+MnuCallbackListPair *sdfCloneExtendedSpriteRecords(const SdfSpriteExtendedRecord *source, s32 count) {
     MnuCallbackListPair *owner = mnuCreateCallbackPair();
 
     while (count != 0) {
-        SdfResourceVectorRecord30 *copy =
-            (SdfResourceVectorRecord30 *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy) + sizeof(SdfVec4));
+        SdfSpriteExtendedRecord *copy =
+            (SdfSpriteExtendedRecord *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy) + sizeof(SdfVec4));
         SdfVec4 *vector;
 
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
         *copy = *source;
         vector = (SdfVec4 *)(copy + 1);
         copy->vector = vector;
-        *vector = *((SdfSpriteExtendedRecord *)source)->vector;
+        *vector = *source->vector;
         dds3AppendFirstResourceListValue(owner, (u32)copy);
         source++;
         count--;

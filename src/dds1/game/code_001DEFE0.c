@@ -525,7 +525,7 @@ void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *
     }
     VU0_LOAD_VF(vf10, centers[2]);
     VU0_LOAD_VF(vf11, centers[1]);
-    __asm__ volatile("vsub.xyzw vf10, vf10, vf11");
+    VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -2778,12 +2778,6 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
 extern f32 func_001F6E28(BtlIndexList *, f32 *, f32 *);
 
-/* Native pointer-form transfer with a complete 16-byte memory operand. */
-static inline void btlDefeatCameraStoreVector(f32 *dst) {
-    __asm__ volatile (
-        ".set noreorder\n\tsqc2 vf10, 0(%1)\n\t.set reorder"
-        : "=m" (*(PcpVectorCopyF32 *)dst) : "r" (dst));
-}
 
 /* Use the defeat-camera hook or frame the selected actor set with the native extent rules. */
 void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
@@ -2819,17 +2813,17 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
                 BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(indices, (s32)i);
                 if ((entry->status.flags & 0x20) != 0) {
                     btlInterpolateVectorStep(pose->position);
-                    btlDefeatCameraStoreVector(vectors.interpolated);
+                    VU0_STORE_VF_PTR(vf10, vectors.interpolated);
                     btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
-                    btlDefeatCameraStoreVector(pose->position);
+                    VU0_STORE_VF_PTR(vf10, pose->position);
                     pose->position[1] = 0.0f;
                     pose->position[2] *= 0.5f;
-                    __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (pose->position), "m" (*(const PcpVectorCopyF32 *)(pose->position)));
-                    __asm__ volatile (".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (vectors.interpolated), "m" (*(const PcpVectorCopyF32 *)(vectors.interpolated)));
+                    VU0_LOAD_VF_PTR(vf10, pose->position);
+                    VU0_LOAD_VF_PTR(vf11, vectors.interpolated);
                     VU0_SUB(vf10, vf10, vf11);
                     VU0_LENGTH_VF10(pose->distance);
                     VU0_NORMALIZE_VF10();
-                    btlDefeatCameraStoreVector(pose->direction);
+                    VU0_STORE_VF_PTR(vf10, pose->direction);
                     btlAdjustCameraDirectionForDefaultPlane(pose);
                     return;
                 }
@@ -2851,7 +2845,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     } else {
         span = func_001F6E28(indices, &height, &depth);
     }
-    btlDefeatCameraStoreVector(vectors.center);
+    VU0_STORE_VF_PTR(vf10, vectors.center);
     if (mode == 0 || runtime->cameraPresetMode == 3) {
         span += ffabsf(vectors.center[0]);
         vectors.center[0] = 0.0f;
@@ -2862,7 +2856,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     }
 
     btlMeasureMaskedUnitBounds(0x400, NULL, &depth);
-    btlDefeatCameraStoreVector(vectors.edge);
+    VU0_STORE_VF_PTR(vf10, vectors.edge);
     vectors.edge[0] = 0.0f;
     if (depth > 150.0f) {
         vectors.edge[1] = -depth * 0.45f;
@@ -2877,17 +2871,17 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
         }
     }
 
-    __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (vectors.edge), "m" (*(const PcpVectorCopyF32 *)(vectors.edge)));
-    __asm__ volatile (".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (vectors.center), "m" (*(const PcpVectorCopyF32 *)(vectors.center)));
+    VU0_LOAD_VF_PTR(vf10, vectors.edge);
+    VU0_LOAD_VF_PTR(vf11, vectors.center);
     VU0_LERP_VF10(0.5f);
-    btlDefeatCameraStoreVector(pose->position);
+    VU0_STORE_VF_PTR(vf10, pose->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(length);
     VU0_NORMALIZE_VF10();
     if (mode == 0) {
         VU0_ROTATE_VEC(vf10, vf10);
     }
-    btlDefeatCameraStoreVector(pose->direction);
+    VU0_STORE_VF_PTR(vf10, pose->direction);
 
     tangent = cosf(27.5f * 0.017453293f);
     length /= tangent;
