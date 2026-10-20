@@ -4873,16 +4873,11 @@ s32 fldUpdateFieldPlayerMovement(void) {
             }
         } else {
             s32 reversed = fileTestSavedSlotFlags(3) == 0;
-            if (D_0037F510[1][0][8] != 0) {
-                if (D_0037F510[1][0][10] == 0) {
-                    fldAreaState.negatedAngle -= 4.5f;
-                    goto update_camera_angle;
-                }
-            } else if (D_0037F510[1][0][10] != 0) {
+            if (D_0037F510[1][0][8] != 0 && D_0037F510[1][0][10] == 0) {
+                fldAreaState.negatedAngle -= 4.5f;
+            } else if (D_0037F510[1][0][8] == 0 && D_0037F510[1][0][10] != 0) {
                 fldAreaState.negatedAngle += 4.5f;
-                goto update_camera_angle;
-            }
-            if (D_00435C40[0][0][0] < 0x20) {
+            } else if (D_00435C40[0][0][0] < 0x20) {
                 if (reversed) {
                     fldAreaState.negatedAngle += 3.0f;
                 } else {
@@ -4909,7 +4904,6 @@ s32 fldUpdateFieldPlayerMovement(void) {
             } else {
                 goto camera_input_done;
             }
-update_camera_angle:
             fldAreaState.cameraTargetAngle = fldSnapAngleToCompassOctant(fldAreaState.negatedAngle);
         }
     }

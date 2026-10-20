@@ -259,7 +259,8 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                 rankMet = 1;
             }
             if (prfReqCheckWithFallback(unit, node->id) == 0) {
-                goto unavailable;
+                *entry = (*entry & 0xFFF0) | 3;
+                continue;
             } else {
                 if (selected == node->id) {
                     *entry |= 0x400;
@@ -272,11 +273,13 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                 }
                 if ((node->packedHeader & 0xF) == 3) {
                     if (prfReqEvaluateRules(0, 4, unit, node->id, 0) == 0) {
-                        goto unavailable;
+                        *entry = (*entry & 0xFFF0) | 3;
+                        continue;
                     }
                     if (mode != 0) {
                         if (mnuIsMantraNodeModelFlagSetForMember(node->id, (s8)unit->unitId) == 0) {
-                            goto unavailable;
+                            *entry = (*entry & 0xFFF0) | 3;
+                            continue;
                         }
                         *entry = (*entry & 0xFFF0) | 1;
                     } else {
@@ -319,13 +322,12 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                         break;
                     }
                 } else {
-                    goto unavailable;
+                    *entry = (*entry & 0xFFF0) | 3;
+                    continue;
                 }
             }
         }
         continue;
-    unavailable:
-        *entry = (*entry & 0xFFF0) | 3;
     }
 }
 
