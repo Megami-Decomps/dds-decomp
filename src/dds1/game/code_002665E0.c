@@ -164,48 +164,46 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
     case 3:
     case 4:
         if (level < 99 && progressRow->unit->hp != 0 && (progressRow->unit->status & 0x4000) == 0) {
-            if (work->levelAnimation[rowIndex].state == 3) {
-                goto flash;
-            }
-            work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(work, progressRow, rowIndex, 0);
-            currentExp = work->levelAnimation[rowIndex].currentProgress + work->levelAnimation[rowIndex].applied;
-            work->levelAnimation[rowIndex].currentProgress = currentExp;
-            if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level) && work->levelAnimation[rowIndex].state == 2) {
-                work->levelAnimation[rowIndex].level++;
-                work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
-                if (work->skipProgressAnimation != 0) {
-                    finished = 0;
-                    while (work->levelAnimation[rowIndex].level < 99) {
-                        nextLevel = work->levelAnimation[rowIndex].level + 1;
-                        nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
-                        if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level)) {
-                            work->levelAnimation[rowIndex].level++;
-                            work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
-                        } else {
-                            finished = 1;
-                        }
-                        if (work->levelAnimation[rowIndex].level >= 99) {
-                            finished = 1;
-                        }
-                        if (finished != 0) {
-                            break;
+            if (work->levelAnimation[rowIndex].state != 3) {
+                work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(work, progressRow, rowIndex, 0);
+                currentExp = work->levelAnimation[rowIndex].currentProgress + work->levelAnimation[rowIndex].applied;
+                work->levelAnimation[rowIndex].currentProgress = currentExp;
+                if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level) && work->levelAnimation[rowIndex].state == 2) {
+                    work->levelAnimation[rowIndex].level++;
+                    work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
+                    if (work->skipProgressAnimation != 0) {
+                        finished = 0;
+                        while (work->levelAnimation[rowIndex].level < 99) {
+                            nextLevel = work->levelAnimation[rowIndex].level + 1;
+                            nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
+                            if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level)) {
+                                work->levelAnimation[rowIndex].level++;
+                                work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
+                            } else {
+                                finished = 1;
+                            }
+                            if (work->levelAnimation[rowIndex].level >= 99) {
+                                finished = 1;
+                            }
+                            if (finished != 0) {
+                                break;
+                            }
                         }
                     }
+                    work->levelAnimation[rowIndex].iconState = 1;
+                    work->levelAnimation[rowIndex].completionState = 1;
+                    work->levelAnimation[rowIndex].completionFlashActive = 1;
+                    work->levelAnimation[rowIndex].iconOpacity = 0x80;
+                    work->levelAnimation[rowIndex].iconFrame = 0;
+                    work->levelAnimation[rowIndex].alpha = 0;
+                    work->levelAnimation[rowIndex].state++;
+                    mnuSetTitleSequenceVolumePan(0x12);
                 }
-                work->levelAnimation[rowIndex].iconState = 1;
-                work->levelAnimation[rowIndex].completionState = 1;
-                work->levelAnimation[rowIndex].completionFlashActive = 1;
-                work->levelAnimation[rowIndex].iconOpacity = 0x80;
-                work->levelAnimation[rowIndex].iconFrame = 0;
-                work->levelAnimation[rowIndex].alpha = 0;
-                work->levelAnimation[rowIndex].state++;
-                mnuSetTitleSequenceVolumePan(0x12);
             }
         } else {
             work->levelAnimation[rowIndex].remaining = 0;
         }
         if (work->levelAnimation[rowIndex].state == 3) {
-flash:
             work->levelAnimation[rowIndex].iconFrame++;
             work->levelAnimation[rowIndex].iconFrame = work->levelAnimation[rowIndex].iconFrame <= 0 ? 0 : (work->levelAnimation[rowIndex].iconFrame > 15 ? 15 : work->levelAnimation[rowIndex].iconFrame);
             if (work->levelAnimation[rowIndex].iconFrame >= 15) {

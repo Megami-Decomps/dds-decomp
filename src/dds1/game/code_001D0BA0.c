@@ -819,14 +819,13 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             if (datCommandRecords[command].flags & 2) {
                 kind = 4;
             } else if (runtime->unk_1FC & 0x10) {
-                goto normalReflectedHit;
+                kind = 1;
             } else {
                 switch (kind) {
                 case 0x20000:
                     kind = 0x10000;
                     break;
                 case 2:
-                normalReflectedHit:
                     kind = 1;
                     break;
                 }

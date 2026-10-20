@@ -5308,7 +5308,10 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
                 btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
                 btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
             } else {
-                goto genericSingleTargetCamera;
+                btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                return 1;
             }
             return 1;
         }
@@ -5323,7 +5326,6 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
         count = btlGetIndexListCount(task->indexWork.indices);
         if (count == 1 && selector == 1 && mode == 0) {
             if (variant == 0) {
-            genericSingleTargetCamera:
                 btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                 command->motionParameter = 30.0f;
                 command->flags |= 0x41;

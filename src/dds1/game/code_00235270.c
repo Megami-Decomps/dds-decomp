@@ -3302,7 +3302,6 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
             break;
         case 2:
             channel = &key->p10.b[0];
-        editColor:
             next = *channel + step;
             if (next >= 255) {
                 *channel = 255;
@@ -3314,10 +3313,26 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
             break;
         case 3:
             channel = &key->p10.b[1];
-            goto editColor;
+            next = *channel + step;
+            if (next >= 255) {
+                *channel = 255;
+            } else if (next <= 0) {
+                *channel = 0;
+            } else {
+                *channel = next;
+            }
+            break;
         case 4:
             channel = &key->p10.b[2];
-            goto editColor;
+            next = *channel + step;
+            if (next >= 255) {
+                *channel = 255;
+            } else if (next <= 0) {
+                *channel = 0;
+            } else {
+                *channel = next;
+            }
+            break;
         case 5:
             channel = &key->p10.b[3];
             next = *channel + step;
