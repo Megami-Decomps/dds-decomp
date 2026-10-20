@@ -159,10 +159,8 @@ void effSetSubSlot(EffWork *work, s32 slotValue) {
     }
 }
 
-/* Read the type-specific subslot, or zero for other types.
-   Retain the unused argument and DDS1's native unused byte declaration. */
+/* Read the type-specific subslot, or zero for other types. */
 u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
-    u8 unusedValue = unusedSlotValue;
     u32 type = work->type;
 
     switch (type) {
