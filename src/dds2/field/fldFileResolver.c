@@ -4914,15 +4914,13 @@ camera_input_done:
         fldClearSceneModelColors();
         fldShowSceneModels();
         fldClearCameraObjectTransitionFlags();
-clear_highlight:
         fldClearCameraObjectHighlightFlag();
     } else {
         fldShowSceneModels();
         fldMarkPrimaryObjectByPeerPresence();
         if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
-            goto clear_highlight;
-        }
-        if (fldAreaState.dist < 100.0f) {
+            fldClearCameraObjectHighlightFlag();
+        } else if (fldAreaState.dist < 100.0f) {
             fldSetCameraObjectHighlightFlag();
         } else {
             fldClearCameraObjectHighlightFlag();
