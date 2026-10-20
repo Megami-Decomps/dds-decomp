@@ -6490,7 +6490,146 @@ s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     return color | (scaled << 24);
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldDrawCameraColorScrollingGradient);
+typedef struct FldRainLayer {
+    s32 enabled;
+    s32 alpha;
+    s32 scrollStep;
+    u32 flags;
+} FldRainLayer;
+extern s32 D_00330728[];
+extern s32 D_003BADE4;
+extern FldCameraSetting fldAppliedCameraSettings[];
+extern void evtSetDrawSurfaceIndex(u32);
+extern void kwlnDrawTexturedColorQuad(s32 x, s32 y, s32 width, s32 height,
+                   s32 u, s32 v, s32 textureWidth, s32 textureHeight,
+                   u32 color0, u32 color1, u32 color2, u32 color3,
+                   struct SdfTex *texture);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void fldDrawCameraColorScrollingGradient(void) {
+    FldRainLayer *layer;
+    s32 i;
+    s32 x;
+    s32 leftX;
+    s32 rightX;
+    s32 wrappedRightX;
+    s32 width;
+    s32 height;
+    s32 textureSize;
+    s32 upperColor;
+    s32 lowerColor;
+    s32 scroll;
+
+    if (fldCameraColorEnabled == 0) {
+        return;
+    }
+    if (fldAreaState.colorEffectSuppressed != 0) {
+        if (D_003BADE0 > 0) {
+            D_003BADE0--;
+        }
+    } else if (D_003BADE0 < 100) {
+        D_003BADE0++;
+    }
+    if (fldAreaState.colorEffectSuppressed == 0) {
+        if (fldCameraSettings->color.enabled != 0 && fldCameraColorEffect != 0) {
+            effUpdateAndDrawSelectionEntries(fldCameraColorEffect);
+        }
+    }
+    x = (s32)(fldAreaState.negatedAngle * 2.8444443f);
+    x = -(x % 0x200);
+    while (x < 0) {
+        x += 0x200;
+    }
+    i = 0;
+    evtSetDrawSurfaceIndex(0x4F);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    leftX = x - 0x200;
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    textureSize = fldCameraSettings->unk0;
+    for (layer = (FldRainLayer *)fldAppliedCameraSettings->values; i < 3; i++, layer++) {
+        if (layer->enabled != 0) {
+            if (layer->flags & 0xF00) {
+                width = 0x200;
+                height = 0x200;
+            } else {
+                width = 0x100;
+                height = 0x100;
+            }
+            scroll = layer->scrollStep;
+            scroll = D_00330728[i] + layer->scrollStep;
+            D_003BADE4 = scroll;
+            D_00330728[i] = D_003BADE4 % height;
+            D_003BADE4 = D_00330728[i];
+            upperColor = fldComposeFadeColor(D_003BADE4 - height, 0x808080, layer->alpha);
+            lowerColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+            kwlnDrawTexturedColorQuad(x, D_003BADE4 - height, width, height, 0, 0, textureSize, textureSize,
+                          upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            upperColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+            lowerColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+            kwlnDrawTexturedColorQuad(x, D_003BADE4, width, height, 0, 0, textureSize, textureSize,
+                          upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            upperColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+            lowerColor = fldComposeFadeColor(D_003BADE4 + height + height, 0x808080, layer->alpha);
+            kwlnDrawTexturedColorQuad(x, D_003BADE4 + height, width, height, 0, 0, textureSize, textureSize,
+                          upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            if (width >= 0x200) {
+                upperColor = fldComposeFadeColor(D_003BADE4 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(leftX, D_003BADE4 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(leftX, D_003BADE4, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(leftX, D_003BADE4 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            } else {
+                rightX = x + width;
+                upperColor = fldComposeFadeColor(D_003BADE4 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(rightX, D_003BADE4 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(rightX, D_003BADE4, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(rightX, D_003BADE4 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                wrappedRightX = rightX - 0x200;
+                upperColor = fldComposeFadeColor(D_003BADE4 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(leftX, D_003BADE4 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(leftX, D_003BADE4, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(leftX, D_003BADE4 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(wrappedRightX, D_003BADE4 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(wrappedRightX, D_003BADE4, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_003BADE4 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_003BADE4 + height + height, 0x808080, layer->alpha);
+                kwlnDrawTexturedColorQuad(wrappedRightX, D_003BADE4 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            }
+        }
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
 
 extern char D_003A0100[];
 

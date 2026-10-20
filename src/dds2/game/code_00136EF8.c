@@ -74,7 +74,144 @@ extern s32 D_0043617C;
 
 extern f32 fldDotVector(f32 *, f32 *);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
+typedef struct FldRainLayer {
+    s32 enabled;
+    s32 alpha;
+    s32 scrollStep;
+    u32 flags;
+} FldRainLayer;
+extern s32 D_0038BBC8[];
+extern s32 D_00436170;
+extern s32 D_00436174;
+extern FldCameraSetting fldAppliedCameraSettings[];
+extern s32 fldComposeFadeColor(s32, s32, s32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_00136EF8(void) {
+    FldRainLayer *layer;
+    s32 i;
+    s32 x;
+    s32 leftX;
+    s32 rightX;
+    s32 wrappedRightX;
+    s32 width;
+    s32 height;
+    s32 textureSize;
+    s32 upperColor;
+    s32 lowerColor;
+    s32 scroll;
+
+    if (fldCameraColorEnabled == 0) {
+        return;
+    }
+    if (fldAreaState.colorEffectSuppressed != 0) {
+        if (D_00436170 > 0) {
+            D_00436170--;
+        }
+    } else if (D_00436170 < 100) {
+        D_00436170++;
+    }
+    if (fldAreaState.colorEffectSuppressed == 0) {
+        if (fldCameraSettings->color.enabled != 0 && fldCameraColorEffect != 0) {
+            effUpdateAndDrawSelectionEntries(fldCameraColorEffect);
+        }
+    }
+    x = (s32)(fldAreaState.negatedAngle * 2.8444443f);
+    x = -(x % 0x200);
+    while (x < 0) {
+        x += 0x200;
+    }
+    i = 0;
+    evtSetDrawSurfaceIndex(0x4F);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    leftX = x - 0x200;
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    textureSize = fldCameraSettings->unk0;
+    for (layer = (FldRainLayer *)fldAppliedCameraSettings->values; i < 3; i++, layer++) {
+        if (layer->enabled != 0) {
+            if (layer->flags & 0xF00) {
+                width = 0x200;
+                height = 0x200;
+            } else {
+                width = 0x100;
+                height = 0x100;
+            }
+            scroll = layer->scrollStep;
+            scroll = D_0038BBC8[i] + layer->scrollStep;
+            D_00436174 = scroll;
+            D_0038BBC8[i] = D_00436174 % height;
+            D_00436174 = D_0038BBC8[i];
+            upperColor = fldComposeFadeColor(D_00436174 - height, 0x808080, layer->alpha);
+            lowerColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+            evtSubmitTexturedGradientQuad(x, D_00436174 - height, width, height, 0, 0, textureSize, textureSize,
+                          upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            upperColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+            lowerColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+            evtSubmitTexturedGradientQuad(x, D_00436174, width, height, 0, 0, textureSize, textureSize,
+                          upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            upperColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+            lowerColor = fldComposeFadeColor(D_00436174 + height + height, 0x808080, layer->alpha);
+            evtSubmitTexturedGradientQuad(x, D_00436174 + height, width, height, 0, 0, textureSize, textureSize,
+                          upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            if (width >= 0x200) {
+                upperColor = fldComposeFadeColor(D_00436174 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(leftX, D_00436174 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(leftX, D_00436174, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(leftX, D_00436174 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            } else {
+                rightX = x + width;
+                upperColor = fldComposeFadeColor(D_00436174 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(rightX, D_00436174 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(rightX, D_00436174, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(rightX, D_00436174 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                wrappedRightX = rightX - 0x200;
+                upperColor = fldComposeFadeColor(D_00436174 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(leftX, D_00436174 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(leftX, D_00436174, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(leftX, D_00436174 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174 - height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(wrappedRightX, D_00436174 - height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(wrappedRightX, D_00436174, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+                upperColor = fldComposeFadeColor(D_00436174 + height, 0x808080, layer->alpha);
+                lowerColor = fldComposeFadeColor(D_00436174 + height + height, 0x808080, layer->alpha);
+                evtSubmitTexturedGradientQuad(wrappedRightX, D_00436174 + height, width, height, 0, 0, textureSize, textureSize,
+                              upperColor, upperColor, lowerColor, lowerColor, fldRainTextureReference);
+            }
+        }
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
