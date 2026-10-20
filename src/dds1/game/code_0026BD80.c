@@ -17,23 +17,6 @@ extern char mnuMovieMenuSpriteResourceNames[];
 
 extern void mnuAdvanceMovieMenuIdleAnimation();
 
-typedef struct {
-    s32 pad00;
-    u32 firstResource;    /* 0x04: released by mnuReleaseMenuResourceSlots */
-    s32 spriteHandle;     /* 0x08: released through effDestroyResourceSlotSet */
-    u32 secondResource;   /* 0x0C: released by mnuReleaseMenuResourceSlots */
-    s32 pad10;
-    s32 timer;            /* 0x14 */
-    s32 pad18;
-    s32 word1C;
-    s32 pulseTimer;       /* 0x20 */
-    s32 transitionOffset; /* 0x24 */
-    s32 mode;             /* 0x28 */
-    u8 pad2C[4];
-    s32 pad30;
-    s32 word34;
-    s32 slideOffset;      /* 0x38 */
-} MenuState;
 
 extern s8 D_00324510[];
 
@@ -57,10 +40,6 @@ extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern void sdfQuatFromEuler(f32 *, f32, f32, f32);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 
-typedef struct {
-    s32 pad00;
-    s32 graphics[1];
-} MovieMenuSpriteWork;
 
 /* Sprite rows: graphic slot, draw parameter, x offset, y offset. */
 extern s16 mnuMovieMenuSpritePlacements[][4];
@@ -72,8 +51,8 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                   depth,
                   (u32)((f32)alpha * 256.0f * 0.0078125f),
                   drawMode,
-                  ((MovieMenuSpriteWork *)mnuMovieMenuState)
-                      ->graphics[mnuMovieMenuSpritePlacements[spriteIndex][0]],
+                  mnuMovieMenuState
+                      ->spriteHandles[mnuMovieMenuSpritePlacements[spriteIndex][0]],
                   mnuMovieMenuSpritePlacements[spriteIndex][1],
                   drawContext);
 }
@@ -123,14 +102,14 @@ s32 mnuIsAnyMenuInputPressed(void) {
 }
 
 void mnuLoadMovieMenuResourceSlots(void) {
-    if (((MenuState *)mnuMovieMenuState)->firstResource == 0) {
-        ((MenuState *)mnuMovieMenuState)->firstResource =
+    if (mnuMovieMenuState->spriteHandles[0] == 0) {
+        mnuMovieMenuState->spriteHandles[0] =
             (u32)effLoadIndexedResource(D_003BC5D8, mnuMovieMenuSpriteResourceNames, 0);
     }
-    if (((MenuState *)mnuMovieMenuState)->secondResource == 0) {
+    if (mnuMovieMenuState->spriteHandles[2] == 0) {
         const char *name = mnuMovieMenuSpriteResourceNames;
         name += 0x20;
-        ((MenuState *)mnuMovieMenuState)->secondResource =
+        mnuMovieMenuState->spriteHandles[2] =
             (u32)effLoadIndexedResource(D_003BC5D8, name, 0);
     }
 }
@@ -140,27 +119,27 @@ u32 func_0026C040(void) {
 }
 
 void mnuReleaseMenuResourceSlots(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
-    if (state->firstResource != 0) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)state->firstResource);
-        state = (MenuState *)mnuMovieMenuState;
-        state->firstResource = 0;
+    MovieMenuState *state = mnuMovieMenuState;
+    if (state->spriteHandles[0] != 0) {
+        effDestroyResourceSlotSet((struct EffectSlotSet *)state->spriteHandles[0]);
+        state = mnuMovieMenuState;
+        state->spriteHandles[0] = 0;
     }
-    if (state->secondResource != 0) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)state->secondResource);
-        state = (MenuState *)mnuMovieMenuState;
-        state->secondResource = 0;
+    if (state->spriteHandles[2] != 0) {
+        effDestroyResourceSlotSet((struct EffectSlotSet *)state->spriteHandles[2]);
+        state = mnuMovieMenuState;
+        state->spriteHandles[2] = 0;
     }
 }
 
 void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
-    u32 *handle = &((MenuState *)mnuMovieMenuState)->spriteHandle;
+    u32 *handle = &mnuMovieMenuState->spriteHandles[1];
 
     if (*handle == 0) {
         if (loadImmediately != 0) {
             const char *name = mnuMovieMenuSpriteResourceNames;
             name += 0x10;
-            ((MenuState *)mnuMovieMenuState)->spriteHandle =
+            mnuMovieMenuState->spriteHandles[1] =
                 (u32)effLoadIndexedResource(D_003BC5D8, name, 0);
         } else {
             const char *name = mnuMovieMenuSpriteResourceNames;
@@ -172,13 +151,13 @@ void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
 }
 
 u8 mnuHasSpriteHandle(void) {
-    return ((MenuState *)mnuMovieMenuState)->spriteHandle != 0;
+    return mnuMovieMenuState->spriteHandles[1] != 0;
 }
 
 void mnuReleaseSpriteHandle(void) {
-    if (((MenuState *)mnuMovieMenuState)->spriteHandle != 0) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)((MenuState *)mnuMovieMenuState)->spriteHandle);
-        ((MenuState *)mnuMovieMenuState)->spriteHandle = 0;
+    if (mnuMovieMenuState->spriteHandles[1] != 0) {
+        effDestroyResourceSlotSet((struct EffectSlotSet *)mnuMovieMenuState->spriteHandles[1]);
+        mnuMovieMenuState->spriteHandles[1] = 0;
     }
 }
 
@@ -252,19 +231,19 @@ void mnuDrawMovieMenuTransitionWipe(s32 base, s32 source, u32 alpha, s32 context
 }
 
 void mnuResetMovieMenuOpeningAnimation(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
+    MovieMenuState *state = mnuMovieMenuState;
 
-    state->timer = 0;
+    state->cursor = 0;
     state->slideOffset = 0;
 }
 
 s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
-    MenuState *state;
+    MovieMenuState *state;
     s32 value;
     s32 alpha;
     f32 progress;
 
-    value = ((MenuState *)mnuMovieMenuState)->timer;
+    value = mnuMovieMenuState->cursor;
     if (value < 0) {
         value = 0;
     }
@@ -276,7 +255,7 @@ s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
     mnuDrawSprite(0, 0, 0, alpha, 0, 8, 0x53);
     mnuDrawSprite(0, 0, 0, alpha, 0, 0xC, 0x53);
 
-    value = ((MenuState *)mnuMovieMenuState)->timer - 5;
+    value = mnuMovieMenuState->cursor - 5;
     if (value < 0) {
         value = 0;
     }
@@ -286,8 +265,8 @@ s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
     }
     mnuDrawSprite(0, 0, 0, (s32)(progress * 76.8f), 0, 0xA, 0x53);
 
-    state = (MenuState *)mnuMovieMenuState;
-    if (state->timer == 5) {
+    state = mnuMovieMenuState;
+    if (state->cursor == 5) {
         state->slideOffset = 0x400;
     }
     if (state->slideOffset > 0) {
@@ -296,13 +275,13 @@ s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
         state->slideOffset = 0;
     }
 
-    mnuDrawMovieMenuTransitionWipe(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
+    mnuDrawMovieMenuTransitionWipe(mnuMovieMenuState->slideOffset - 0x200, 0, 0x80, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 2, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 1, 0x53);
     mnuDrawSprite(1, -10, 0, 0x80, 0, 4, 0x53);
 
-    value = ((MenuState *)mnuMovieMenuState)->timer - 5;
+    value = mnuMovieMenuState->cursor - 5;
     if (value < 0) {
         value = 0;
     }
@@ -312,7 +291,7 @@ s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
     }
     mnuDrawSprite(0, 0, 0, (s32)(progress * 128.0f), 0, 7, 0x53);
 
-    value = ((MenuState *)mnuMovieMenuState)->timer - 20;
+    value = mnuMovieMenuState->cursor - 20;
     if (value < 0) {
         value = 0;
     }
@@ -322,7 +301,7 @@ s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
     }
     mnuDrawSprite(0, 0, 0, (s32)(progress * 128.0f), 0, 0xB, 0x53);
 
-    value = ((MenuState *)mnuMovieMenuState)->timer - 15;
+    value = mnuMovieMenuState->cursor - 15;
     if (value < 0) {
         value = 0;
     }
@@ -333,43 +312,43 @@ s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
     progress = 1.0f - progress;
     mnuDrawMovieMenuBackgroundQuad((s32)(progress * 128.0f));
 
-    state = (MenuState *)mnuMovieMenuState;
-    state->timer++;
-    if (state->timer < 31) {
+    state = mnuMovieMenuState;
+    state->cursor++;
+    if (state->cursor < 31) {
         return 0;
     }
     return 1;
 }
 
 void mnuAdvanceMovieMenuIdleAnimation(void) {
-    MenuState *state;
+    MovieMenuState *state;
     f32 pulse;
 
     fldDrawCameraColorLayerPass();
 
-    state = (MenuState *)mnuMovieMenuState;
+    state = mnuMovieMenuState;
     state->pulseTimer++;
     if (state->pulseTimer >= 61) {
         state->pulseTimer = 0;
         if (state->slideOffset == 0 && sdfGetRandFloat(0) < 0.1f) {
-            ((MenuState *)mnuMovieMenuState)->slideOffset = 0x400;
+            mnuMovieMenuState->slideOffset = 0x400;
         }
     }
 
-    pulse = (f32)((MenuState *)mnuMovieMenuState)->pulseTimer / 60.0f;
+    pulse = (f32)mnuMovieMenuState->pulseTimer / 60.0f;
     pulse = (sdfSinPoly(pulse * 6.2831853f - 1.5707963f) + 1.0f) * 0.5f;
     mnuDrawSprite(0, 0, 0, 0x80, 0, 8, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xC, 0x53);
     mnuDrawSprite(0, 0, 0, 0x4C, 0, 0xA, 0x53);
     mnuDrawSprite(0, 0, 0, (s32)(pulse * 64.0f), 0, 0xA, 0x53);
 
-    if (((MenuState *)mnuMovieMenuState)->slideOffset > 0) {
-        ((MenuState *)mnuMovieMenuState)->slideOffset -= 0x20;
+    if (mnuMovieMenuState->slideOffset > 0) {
+        mnuMovieMenuState->slideOffset -= 0x20;
     } else {
-        ((MenuState *)mnuMovieMenuState)->slideOffset = 0;
+        mnuMovieMenuState->slideOffset = 0;
     }
 
-    mnuDrawMovieMenuTransitionWipe(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
+    mnuDrawMovieMenuTransitionWipe(mnuMovieMenuState->slideOffset - 0x200, 0, 0x80, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 2, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 1, 0x53);
@@ -390,16 +369,16 @@ void mnuRunMovieMenuIdleFrame(void) {
 }
 
 void mnuSwapStateWords(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
+    MovieMenuState *state = mnuMovieMenuState;
 
-    switch (state->mode) {
+    switch (state->backdropMode) {
     case 0:
-        state->transitionOffset = 0;
-        state->mode = 1;
+        state->orbitFrame = 0;
+        state->backdropMode = 1;
         break;
     case 1:
-        state->mode = 0;
-        state->transitionOffset = 0x6a4;
+        state->backdropMode = 0;
+        state->orbitFrame = 0x6a4;
         break;
     }
 }
@@ -532,65 +511,65 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
 }
 
 void mnuResetMovieMenuStateAndStartTrack(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
+    MovieMenuState *state = mnuMovieMenuState;
 
-    state->word34 = 0;
-    state->timer = 0;
-    state->word1C = 0;
+    state->transitionMode = 0;
+    state->cursor = 0;
+    state->idleTicks = 0;
     sndStartTrackExtended(0x310000);
 }
 
 void mnuClearGlobalMenuStateFields(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
+    MovieMenuState *state = mnuMovieMenuState;
 
-    state->word34 = 0;
-    state->timer = 0;
-    state->word1C = 0;
+    state->transitionMode = 0;
+    state->cursor = 0;
+    state->idleTicks = 0;
 }
 
 void mnuResetTitlePageAndPhase(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
+    MovieMenuState *state = mnuMovieMenuState;
 
-    state->word34 = 0;
-    state->timer = 0;
+    state->transitionMode = 0;
+    state->cursor = 0;
 }
 
 s32 mnuPollMovieMenuInputAndTimeout(void) {
-    MenuState *state = (MenuState *)mnuMovieMenuState;
-    switch (state->word34) {
+    MovieMenuState *state = mnuMovieMenuState;
+    switch (state->transitionMode) {
     case 0:
         if (mnuIsAnyMenuInputPressed() == 0) {
-            MenuState *opening = (MenuState *)mnuMovieMenuState;
-            if (opening->timer < 30) {
-                opening->timer++;
+            MovieMenuState *opening = mnuMovieMenuState;
+            if (opening->cursor < 30) {
+                opening->cursor++;
             } else {
-                opening->word34 = 1;
-                opening->timer = 0;
+                opening->transitionMode = 1;
+                opening->cursor = 0;
             }
             return 0;
         }
         sndSetSequenceVolumePan(8, 127, 63);
         return 1;
     case 1:
-        if (state->timer < 90) {
-            state->timer++;
+        if (state->cursor < 90) {
+            state->cursor++;
         } else {
-            state->timer = 0;
+            state->cursor = 0;
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             sndSetSequenceVolumePan(8, 127, 63);
             return 1;
         }
-        state = (MenuState *)mnuMovieMenuState;
-        state->word1C++;
-        if (state->word1C >= 601) {
-            state->word1C = 0;
+        state = mnuMovieMenuState;
+        state->idleTicks++;
+        if (state->idleTicks >= 601) {
+            state->idleTicks = 0;
             return -1;
         }
         break;
     case 2:
-        if (state->timer < 0) {
-            state->timer++;
+        if (state->cursor < 0) {
+            state->cursor++;
         } else {
             return 1;
         }
