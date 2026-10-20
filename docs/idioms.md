@@ -1843,6 +1843,23 @@ and returns without forming a separate result. Both routines therefore use
 the same void ABI as their DDS1 counterparts rather than returning incidental
 callee register contents as integer handles.
 
+## Point-basic IDs and borrowed names
+
+`evtSpawnActionObj11` (DDS1 `0x001175F8`, DDS2 `0x00117860`) takes a
+`u32` serial ID and a borrowed `const char *` name. Its constructor stores
+that name directly in the existing `EffWorldNode.value` pointer. Callers
+must pass their resource names or static text directly, not cast them to
+`s32` and have the callee cast the word back to a pointer.
+
+The reconstructed original
+[`dds3AddPointBasic` signature](https://github.com/smt-ret/smt3-reconstructed-sources/blob/39de063f7a49cfdf1913c0c1bc7f16da85881d05/src/dds3PointBasic.c#L8-L16)
+corroborates the unsigned ID, transform pointer and string-name contract.
+The HD body is not a PS2 byte donor. This repair preserves the existing
+borrowed transform-prefix layout; it introduces no alternate vector view
+or adapter. Both definitions and all ten call sites use the same prototype.
+All seventeen header includers and the three canaries retain exact native
+code under their existing flags.
+
 ## Battle records and saved-party ownership
 
 The DDS1 battle getters return the canonical `DatPartyRecord` entries in

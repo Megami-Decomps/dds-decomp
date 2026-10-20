@@ -1357,7 +1357,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         fldSetCameraObjectActiveFlag(fldAreaState.commandEnabled);
     }
     fldUpdateCameraObjectPose();
-    evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0032F170, (s32)D_003BABB8);
+    evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0032F170, D_003BABB8);
 }
 
 extern FieldVec4 D_0039FC80;

@@ -1059,7 +1059,7 @@ void func_0013BF48(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     D_003309B0[index].childResource.name = (const char *)D_00330760;
     object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
-                                 (s32)D_00330770);
+                                 D_00330770);
     taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
     fldRoomRecords[taskIndex].roomId = roomId;
     fldRoomRecords[taskIndex].mode = 2;
@@ -1114,7 +1114,7 @@ void func_0013C2B8(s32 kind, s32 roomValue,
     D_003309B0[index].childResource.name = (const char *)D_00330760;
     object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
-                                 (s32)D_00330770);
+                                 D_00330770);
     taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
     if (kind == 0) {
         fldRoomRecords[taskIndex].mode = 3;

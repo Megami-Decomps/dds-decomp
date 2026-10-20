@@ -983,10 +983,10 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     }
                     break;
                 case 0:
-                    evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)spawnResource->name);
+                    evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, spawnResource->name);
                     break;
                 case 1:
-                    spawnedObject = evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)spawnResource->name);
+                    spawnedObject = evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, spawnResource->name);
                     func_00138ED0(spawnResource, spawnedObject);
                     break;
                 case 2:
