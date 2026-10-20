@@ -28,6 +28,7 @@ extern void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 record
 extern EffRandState effDefaultRandomState[];
 extern void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex);
 extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
+extern void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count);
 extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents);
 extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
 
@@ -439,7 +440,30 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
     sdfMemFreeDirect(allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", effBuildPrimitiveCurveTangents);
+/* Per coordinate, estimate the slope at every key (one-sided at the ends, the
+ * sum of both neighbour differences inside) and solve those into cubic
+ * tangents, writing one coordinate-major run of recordCount values each. */
+void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount)
+{
+    s32 count = recordCount;
+    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(f32));
+    f32 *slopes = (f32 *)sdfMemLock(allocation);
+    f32 (*key)[EFF_CURVE_COMPONENT_COUNT] = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])keys;
+    s32 component;
+    s32 i;
+
+    for (component = 0; component < EFF_CURVE_COMPONENT_COUNT; component++) {
+        slopes[0] = (key[1][component] - key[0][component]) * 3.0f;
+        slopes[count - 1] = (key[count - 1][component] - key[count - 2][component]) * 3.0f;
+        for (i = 1; i <= count - 2; i++) {
+            slopes[i] = ((key[i][component] - key[i - 1][component]) +
+                         (key[i + 1][component] - key[i][component])) * 3.0f;
+        }
+        effSolveCubicTangents(tangents, slopes, count);
+        tangents += count;
+    }
+    sdfMemFreeDirect(allocation);
+}
 
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
 void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
