@@ -3,7 +3,7 @@
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
 recompiles and replaces selected code, read-only data, and initialized
-small-data sections from eleven paired source objects, and moves three
+small-data sections from thirteen paired source objects, and moves three
 source-owned zero-initialized state objects. The replacements retain ten
 declared assembly fallback functions in DDS1 and nine in DDS2. The targets also link
 development-only C code and data into an appended loadable segment:
@@ -130,7 +130,7 @@ placing any of them in the retail link.
 ## Current scope
 
 These are relocatable development builds, not general mod loaders. Each
-version replaces eleven paired source objects, then links one development
+version replaces thirteen paired source objects, then links one development
 entry object.
 The first smaller replacement is compiled separately with `-G0`: its `.text`
 is `0x3D0` bytes rather than the retail `0x3C8`, so two later function
@@ -157,11 +157,19 @@ unchanged while increasing the appended segment's memory size by exactly
 
 The complete FileManager subsystem is the first stateful replacement. Its
 manager and callback-driver text, read-only strings, and `fileManagerWork`
-state move together. The driver retains a source-built `0x10` small-data
+state move together. The callback driver is three retail objects per title: the
+head unit (`game/code_00288E70` in DDS1, `game/code_002C83F0` in DDS2), the
+thirteen-function `fileReq*` middle unit (`game/code_00289A08`,
+`game/code_002C8F88`), and the one-function tail (`game/code_00289D50`,
+`game/code_002C92D0`). Each is a separate paired replacement, and the middle
+unit is compiled with the same `-fno-optimize-sibling-calls` as its retail
+object because `dev_cc` receives the per-unit flags from `cflags.txt`. The head
+unit retains a source-built `0x10` small-data
 section at its retail address: an eight-byte reentrancy guard record followed
 by the eight-byte task name. Both source-recovered leading callbacks rebuild
-their four guard accesses as audited `HI16`/`LO16` relocations under `-G0`, and
-both drivers grow from `0xEF8` to `0xF10`. The remaining assembly callbacks
+their four guard accesses as audited `HI16`/`LO16` relocations under `-G0`.
+Under `-G0` the three driver texts grow from `0xB98`/`0x348`/`0x18` to
+`0xBB4`/`0x368`/`0x18` bytes. The remaining assembly callbacks
 contain six GP-relative accesses in each title. The retained-section audit
 proves those physical references at the same fallback-function offsets, exact
 retained objects, and an unchanged `_gp` instead of silently splitting the
@@ -187,9 +195,9 @@ references become ordinary relocated address pairs in development, leaving
 zero physical GP references to the moved heap state. The three units retain
 three declared assembly fallbacks per title.
 
-Together the replacements cover 168 DDS1 and 169 DDS2 exported symbols; 90
+Together the replacements cover 167 DDS1 and 168 DDS2 exported symbols; 88
 definitions per title change their relative offsets. The verifier follows
-1,414/1,453 external relocation sites targeting shifted definitions, 126/128
+1,394/1,433 external relocation sites targeting shifted definitions, 126/128
 relocations between replacement objects, and 2,776/2,972 total relocation
 targets into moved content. The moved sections retain 764/780 relocation
 entries. All counts are asserted by the version descriptors.

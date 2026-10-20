@@ -5,8 +5,8 @@
   "alignment": "0x1000",
   "heap_alignment": "0x80",
   "expected_replacement_symbols": 168,
-  "expected_shifted_replacement_symbols": 91,
-  "expected_shifted_symbol_relocations": 1455,
+  "expected_shifted_replacement_symbols": 88,
+  "expected_shifted_symbol_relocations": 1433,
   "expected_cross_replacement_relocations": 128,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x00488B30",
@@ -94,8 +94,8 @@
     {
       "retail_object": "build/dds2/src/dds2/game/code_002C83F0.o",
       "object": "build/dds2/dev/code_002C83F0.o",
-      "expected_symbols": 24,
-      "expected_shifted_symbols": 23,
+      "expected_symbols": 10,
+      "expected_shifted_symbols": 9,
       "fallback_symbols": [],
       "retained_sections": [
         {
@@ -111,6 +111,48 @@
           "expected_symbols": 2,
           "expected_retail_gp_references": 10,
           "expected_gp_references": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/game/code_002C8F88.o",
+      "object": "build/dds2/dev/code_002C8F88.o",
+      "expected_symbols": 13,
+      "expected_shifted_symbols": 11,
+      "fallback_symbols": [],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
+        },
+        {
+          "section": ".bss",
+          "size": 0
+        }
+      ]
+    },
+    {
+      "retail_object": "build/dds2/src/dds2/game/code_002C92D0.o",
+      "object": "build/dds2/dev/code_002C92D0.o",
+      "expected_symbols": 1,
+      "expected_shifted_symbols": 0,
+      "fallback_symbols": [],
+      "retained_sections": [
+        {
+          "section": ".rodata",
+          "size": 0
+        },
+        {
+          "section": ".data",
+          "size": 0
         },
         {
           "section": ".bss",
@@ -338,17 +380,37 @@
     {
       "object": "build/dds2/src/dds2/game/code_002C83F0.o",
       "section": ".text",
-      "old_size": "0xEF8",
-      "new_size": "0xF38",
+      "old_size": "0xB98",
+      "new_size": "0xBB4",
       "alignment": 8,
       "old_vaddr": "0x002C83F0",
-      "expected_relocations": 154,
-      "expected_target_relocations": 114
+      "expected_relocations": 119,
+      "expected_target_relocations": 26
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_002C8F88.o",
+      "section": ".text",
+      "old_size": "0x348",
+      "new_size": "0x368",
+      "alignment": 8,
+      "old_vaddr": "0x002C8F88",
+      "expected_relocations": 34,
+      "expected_target_relocations": 87
+    },
+    {
+      "object": "build/dds2/src/dds2/game/code_002C92D0.o",
+      "section": ".text",
+      "old_size": "0x18",
+      "new_size": "0x18",
+      "alignment": 8,
+      "old_vaddr": "0x002C92D0",
+      "expected_relocations": 1,
+      "expected_target_relocations": 1
     },
     {
       "object": "build/dds2/src/dds2/game/code_002C83F0.o",
       "section": ".rodata",
-      "old_size": "0x18",
+      "old_size": "0x14",
       "new_size": "0x14",
       "alignment": 8,
       "old_vaddr": "0x0042B648",
