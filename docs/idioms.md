@@ -7904,6 +7904,39 @@ Both games' nearest-key helpers read and write only word zero of the incoming
 distance pointer, so `bestDistance` is a scalar, not a second parameter view.
 
 
+## Viewer fade intervals distinguish instantaneous, completed and active keys
+
+`evtViewerUpdateTimelineGroupState` (DDS1 `0x0022D528`, 2924 bytes;
+DDS2 `0x00248000`, 2940 bytes) computes a full fade for a zero-duration key,
+then separately checks whether a nonzero interval has completed. Only the
+remaining active interval divides `(time - frame)` by `duration`. These are
+real divide-by-zero and completion guards, not invented duplicate branches:
+both completed states legitimately assign `1.0f`.
+
+Keep the mode read at the subsequent switch join. DDS1 can move that load
+into an unannulled delay slot; DDS2 uses the taken-path mode load in its
+branch-likely slots. Prematurely caching the mode changes its live range.
+
+The explicit completion flow retains a zero-use basic-block label before the
+frame and second duration loads through reload. Qualified `--rcse` traces
+keep that second `LHU`; the compressed `fade = 1; if (duration && active)`
+form has no label there and substitutes a register copy. Later jump cleanup
+removes the otherwise invisible boundary. No inline helper or artificial
+barrier is needed, and the frame is in `$3`, not a clobber of duration's `$2`.
+
+Read packed `u32` alpha as `color >> 24`, using the primary renderer fields;
+all six such expressions per target still become the native byte loads.
+The genuine `draw.color[3]` byte-array field stays a byte-array access. The
+missing named-unit path really halts: DDS1 `0x0022DAE0`/`0x0022DAF4` and
+DDS2 `0x002485C8`/`0x002485DC` are the native loop entries/backedges.
+
+This closes the retained S1/PurFAD candidates without new assembly, alias
+views, helpers, flags or header changes. Complete owner gates are 97/0 and
+101/0; required canaries remain 192/0, 158/0 and 15/0. Both stock-observed
+probes exit GDB 0 with hooked/unhooked equality. Raw cached-object objdiff
+still reports relocation-name/literal-owner metadata differences (not a
+claim of raw objdiff 100%); native-address word comparisons are exact.
+
 ## Movie parameter blends use the renderer's primary records
 
 Both polygon-movie units now use `EffBlurQuad`, `EffBlurTemplateBody`,

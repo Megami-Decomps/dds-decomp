@@ -1133,7 +1133,476 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
         break;
     }
 }
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateTimelineGroupState);
+#include "evt_blend_vec_color.h"
+extern EvtRuntimeGroup *D_004372B8;
+extern f32 D_00453960[3][4];
+extern EvtBlendVecColor D_00453990;
+extern EffBlurQuad D_004539B0;
+extern EffBlurTemplateBody D_004539E0;
+extern EffSolidRectParams D_00453A10;
+extern EffResourceRectParams D_00453A30;
+extern EffBlurScatterParams D_00453A60;
+extern EffBlurScaleParams D_00453A90;
+extern EffBlurQuad D_00453AC0;
+extern u8 kwlnDrawOverlayEnabled;
+extern s16 kwlnDrawOverlayAlpha;
+extern s16 kwlnDrawOverlayScale;
+extern void evtSetSkyOverlayEnabled(u32 enabled);
+extern void evtBeginSkyParameterTransition(s32 duration, s32 state);
+extern u16 evtIsSkyTransitionActive(void);
+extern void fldSetFadeTarget(s32 id, s32 mode, s32 duration);
+extern u32 fldGetSkyDrawState(void);
+extern void kwlnFadeClear(void);
+extern void kwlnSetLightColorTarget(s32, s32, f32 *);
+extern void kwlnSetLightDirectionTarget(s32, s32, f32 *);
+extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
+extern void evtSetSlotVector(s32, f32, f32);
+extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern f32 evtMovieInterpolateFloatIfEnabled(s32, f32, f32, f32);
+extern void evtBlendVectorRows(s32, f32, f32 *, f32 *, f32 *);
+extern void evtBlendParamsC(s32, f32, EvtBlendVecColor *, EvtBlendVecColor *, EvtBlendVecColor *);
+extern void evtBlendParamsA(s32, f32, EffBlurQuad *, EffBlurQuad *, EffBlurQuad *);
+extern void evtBlendParamsB(s32, f32, EffBlurTemplateBody *, EffBlurTemplateBody *, EffBlurTemplateBody *);
+extern void evtBlendParamsD(s32, f32, EffResourceRectParams *, EffResourceRectParams *, EffResourceRectParams *);
+extern void evtBlendParamsE(s32, f32, EffBlurScatterParams *, EffBlurScatterParams *, EffBlurScatterParams *);
+extern void evtBlendParamsF(s32, f32, EffBlurScaleParams *, EffBlurScaleParams *, EffBlurScaleParams *);
+extern void evtBlendParamsG(s32, f32, EffBlurQuad *, EffBlurQuad *, EffBlurQuad *);
+extern void evtPolygonMovieBlendMatrixParam(s32, f32, EffSolidRectParams *, EffSolidRectParams *, EffSolidRectParams *);
+extern void effSetLoadDescA(void *);
+extern void effCopyTexturedBlurParameters(EffBlurTemplateBody *);
+extern void effCopyFilterBlurParameters(EffBlurScatterParams *);
+extern void effCopyStaggeredBlurParameters(EffBlurScaleParams *);
+extern void effCopyFramebufferQuadParameters(void *);
+extern void effCopyTexturedSquareParameters(EffResourceRectParams *);
+extern s32 mnuSolveCubicBezierYForX(s32,const s32 *,const s32 *);
+void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *future,
+        EvtRuntimeChild *previous, s32 time, s32 *bestDistance, EvtRuntime *viewer,
+        s32 offset) {
+    s32 curveX[4], curveY[4];
+    s32 alpha = 0;
+    s32 enable = 1;
+    s32 color = 0;
+    s32 start, end;
+    f32 ratio;
+
+    start = previous != NULL ? previous->frame : viewer->headerFirst;
+    end = future != NULL ? future->frame : viewer->frameRange.word;
+    if (end != start) {
+        ratio = (f32)(time - start) / (f32)(end - start);
+    } else {
+        ratio = 0.0f;
+    }
+    switch (group->type) {
+    case 1:
+        break;
+    case 2:
+        if (previous != NULL) {
+            s32 distance = time - (previous->frame + offset);
+            if (distance < *bestDistance) {
+                *bestDistance = distance;
+                D_004372B8 = group;
+            }
+        }
+        break;
+    case 22:
+        if (previous != NULL) {
+            if (previous->p08.sh[0] != 0) {
+                return evtSetSkyOverlayEnabled(1);
+            }
+            return evtSetSkyOverlayEnabled(0);
+        }
+        return evtSetSkyOverlayEnabled(0);
+    case 12:
+        if (previous != NULL) {
+            if (viewer->unk2288 != previous->p0C.i) {
+                fldSetFadeTarget(previous->p0C.i, previous->p08.sh[0], previous->duration);
+                evtBeginSkyParameterTransition(previous->duration, previous->p08.sh[1]);
+                viewer->unk2288 = previous->p0C.i;
+            } else if (evtIsSkyTransitionActive() == 0) {
+                if (fldGetSkyDrawState() != previous->p08.sh[1]) {
+                    return evtBeginSkyParameterTransition(previous->duration, previous->p08.sh[1]);
+                }
+            }
+        } else if (viewer->unk2288 != 0) {
+            fldSetFadeTarget(0, 1, 0);
+            viewer->unk2288 = 0;
+        }
+        break;
+    case 6:
+        if (evtViewerHasUpdateFlag(viewer) == 1) {
+            break;
+        }
+        if (previous != NULL) {
+            s32 mode;
+            f32 fade;
+            /* Instantaneous and completed intervals both mean a full fade. */
+            if (previous->duration == 0) {
+                fade = 1.0f;
+            } else if (time >= previous->frame + previous->duration) {
+                fade = 1.0f;
+            } else {
+                fade = (f32)(time - previous->frame) / (f32)previous->duration;
+            }
+            mode = previous->p08.sh[0];
+            switch (mode) {
+            case 0:
+                color = 255;
+                alpha = 0;
+                if (fade != 1.0f) {
+                    alpha = (s32)(128.0f * (1.0f - fade));
+                }
+                break;
+            case 1:
+                color = 255;
+                alpha = 128;
+                if (fade != 1.0f) {
+                    alpha = (s32)(fade * 128.0f);
+                }
+                break;
+            case 2:
+                color = 0;
+                alpha = 0;
+                if (fade != 1.0f) {
+                    alpha = (s32)(128.0f * (1.0f - fade));
+                }
+                break;
+            case 3:
+                color = 0;
+                alpha = 128;
+                if (!(fade >= 0.95f)) {
+                    if (fade != 1.0f) {
+                        alpha = (s32)(fade * 128.0f);
+                    }
+                }
+                break;
+            case 4:
+                color = 255;
+                alpha = 0;
+                if (fade != 1.0f) {
+                    curveX[0] = 0;
+                    curveX[1] = previous->p0C.sb[0];
+                    curveY[1] = previous->p0C.sb[1];
+                    curveX[2] = previous->p0C.sb[2];
+                    curveX[3] = 128;
+                    curveY[0] = 0;
+                    curveY[2] = previous->p0C.sb[3];
+                    curveY[3] = 128;
+                    alpha = 128 - mnuSolveCubicBezierYForX((s32)(fade * 128.0f), curveX, curveY);
+                }
+                break;
+            case 5:
+                color = 255;
+                alpha = 128;
+                if (fade != 1.0f) {
+                    curveX[0] = 0;
+                    curveX[1] = previous->p0C.sb[0];
+                    curveY[1] = previous->p0C.sb[1];
+                    curveX[2] = previous->p0C.sb[2];
+                    curveX[3] = 128;
+                    curveY[0] = 0;
+                    curveY[2] = previous->p0C.sb[3];
+                    curveY[3] = 128;
+                    alpha = mnuSolveCubicBezierYForX((s32)(fade * 128.0f), curveX, curveY);
+                }
+                break;
+            case 6:
+                color = 0;
+                alpha = 0;
+                if (fade != 1.0f) {
+                    curveX[0] = 0;
+                    curveX[1] = previous->p0C.sb[0];
+                    curveY[1] = previous->p0C.sb[1];
+                    curveX[2] = previous->p0C.sb[2];
+                    curveX[3] = 128;
+                    curveY[0] = 0;
+                    curveY[2] = previous->p0C.sb[3];
+                    curveY[3] = 128;
+                    alpha = 128 - mnuSolveCubicBezierYForX((s32)(fade * 128.0f), curveX, curveY);
+                }
+                break;
+            case 7:
+                color = 0;
+                alpha = 128;
+                if (!(fade >= 0.95f)) {
+                    if (fade != 1.0f) {
+                        curveX[0] = 0;
+                        curveX[1] = previous->p14.sb[0];
+                        curveY[1] = previous->p14.sb[1];
+                        curveX[2] = previous->p14.sb[2];
+                        curveX[3] = 128;
+                        curveY[0] = 0;
+                        curveY[2] = previous->p14.sb[3];
+                        curveY[3] = 128;
+                        alpha = mnuSolveCubicBezierYForX((s32)(fade * 128.0f), curveX, curveY);
+                    }
+                }
+                break;
+            }
+            viewer->backgroundFadeStartAlpha = alpha;
+            return kwlnFadeSetColor(color, color, color, alpha);
+        }
+        viewer->backgroundFadeStartAlpha = 0;
+        return kwlnFadeClear();
+    case 10: {
+        f32 *from, *to;
+        f32 firstFrom, secondFrom, firstTo, secondTo;
+        EvtUnit *unit;
+        s32 kind;
+        if (previous != NULL) {
+            from = previous->payload;
+            firstFrom = previous->p08.f;
+            secondFrom = previous->p0C.f;
+            enable = previous->serializedValue;
+        } else {
+            from = NULL;
+            firstFrom = 7.0f;
+            secondFrom = 0.0f;
+        }
+        if (future != NULL) {
+            to = future->payload;
+            firstTo = future->p08.f;
+            secondTo = future->p0C.f;
+        } else {
+            to = NULL;
+            firstTo = 7.0f;
+            secondTo = 0.0f;
+        }
+        if (from == NULL && to == NULL) {
+            break;
+        }
+        evtBlendVectorRows(enable, ratio, from, to, D_00453960[0]);
+        kind = group->metadata.option;
+        if (kind == 0) {
+            break;
+        }
+        if (kind == 1) {
+            kwlnSetLightColorTarget(0, 0, D_00453960[0]);
+            kwlnSetLightDirectionTarget(0, 0, D_00453960[1]);
+            kwlnSetBackgroundColorTarget(0, D_00453960[2]);
+            D_00438A48 = evtMovieInterpolateFloatIfEnabled(enable, ratio, firstFrom, firstTo);
+            D_00438A4C = evtMovieInterpolateFloatIfEnabled(enable, ratio, secondFrom, secondTo);
+            break;
+        }
+        unit = NULL;
+        if (kind == 3) {
+            void *world = dds3GetWorldObject();
+            EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(world, 5,
+                    viewer->entryName[group->metadata.extra2]);
+            if (node != NULL) {
+                unit = evtUnitGetNestedValue(node);
+            } else {
+                /* Retail halts on a missing named unit: 0x002485C8-0x002485E0. */
+                while (1) {
+                }
+            }
+            if (previous == NULL) {
+                break;
+            }
+            if (previous->duration != 0 && previous->frame + previous->duration < time) {
+                break;
+            }
+            if (previous->frame == time && previous->p14.sh[0] == 1 && !(viewer->flags & 1)) {
+                kwlnDrawControlFlags |= 0x02000000;
+                break;
+            }
+        } else if (kind == 2) {
+            if (previous != NULL && previous->frame == time && previous->p14.sh[0] == 1 && !(viewer->flags & 1)) {
+                kwlnDrawControlFlags |= 0x02000000;
+                break;
+            }
+        }
+        evtSetSlotVectors(group->setterId, group->metadata.option, (s32)unit,
+                D_00453960[0], D_00453960[1], D_00453960[2]);
+        {
+            f32 first = evtMovieInterpolateFloatIfEnabled(enable, ratio, firstFrom, firstTo);
+            f32 second = evtMovieInterpolateFloatIfEnabled(enable, ratio, secondFrom, secondTo);
+            return evtSetSlotVector(group->setterId, first, second);
+        }
+    }
+    case 11: {
+        EvtBlendVecColor *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsC(enable, ratio, from, to, &D_00453990);
+            evtSetDrawVectorTarget(0, D_00453990.vec[1], D_00453990.vec[0], D_00453990.vec[2], D_00453990.vec[3]);
+            kwlnDrawVector.fogColor = D_00453990.color;
+        }
+        break;
+    }
+    case 13: {
+        EffBlurQuad *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsA(enable, ratio, from, to, &D_004539B0);
+            effSetLoadDescA(&D_004539B0);
+            if ((D_004539B0.color >> 24) == 0) {
+                viewer->blurRectangleEnabled = 0;
+            } else {
+                viewer->blurRectangleEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 14: {
+        EffBlurTemplateBody *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsB(enable, ratio, from, to, &D_004539E0);
+            effCopyTexturedBlurParameters(&D_004539E0);
+            if ((D_004539E0.source.color >> 24) == 0) {
+                viewer->texturedBlurEnabled = 0;
+            } else {
+                viewer->texturedBlurEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 15: {
+        EffBlurScatterParams *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsE(enable, ratio, from, to, &D_00453A60);
+            effCopyFilterBlurParameters(&D_00453A60);
+            if ((D_00453A60.color >> 24) == 0) {
+                viewer->filterBlurEnabled = 0;
+            } else {
+                viewer->filterBlurEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 23: {
+        EffBlurScaleParams *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsF(enable, ratio, from, to, &D_00453A90);
+            effCopyStaggeredBlurParameters(&D_00453A90);
+            if ((D_00453A90.color >> 24) == 0) {
+                viewer->staggeredBlurEnabled = 0;
+            } else {
+                viewer->staggeredBlurEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 27: {
+        EffBlurQuad *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsG(enable, ratio, from, to, &D_00453AC0);
+            effCopyFramebufferQuadParameters(&D_00453AC0);
+            if ((D_00453AC0.color >> 24) == 0) {
+                viewer->framebufferQuadEnabled = 0;
+            } else {
+                viewer->framebufferQuadEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 16: {
+        EffSolidRectParams *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtPolygonMovieBlendMatrixParam(enable, ratio, from, to, &D_00453A10);
+            effCopyColorRectangleParameters(&D_00453A10);
+            if ((D_00453A10.color >> 24) == 0) {
+                viewer->colorRectangleEnabled = 0;
+            } else {
+                viewer->colorRectangleEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 17: {
+        EffResourceRectParams *from, *to;
+        if (previous != NULL) {
+            from = previous->payload;
+            enable = previous->p08.sh[0];
+        } else {
+            from = NULL;
+        }
+        to = future != NULL ? future->payload : NULL;
+        if (from != NULL || to != NULL) {
+            evtBlendParamsD(enable, ratio, from, to, &D_00453A30);
+            effCopyTexturedSquareParameters(&D_00453A30);
+            if (D_00453A30.draw.color[3] == 0) {
+                viewer->texturedSquareEnabled = 0;
+            } else {
+                viewer->texturedSquareEnabled = 1;
+            }
+        }
+        break;
+    }
+    case 8:
+        if (previous != NULL) {
+            s16 scale, opacity;
+            EvtRuntimeChild *next;
+            if (previous->p0C.sh[0] == 0 || (next = previous->next) == NULL) {
+                opacity = previous->p08.sh[0];
+                scale = previous->p08.sh[1];
+            } else {
+                s32 elapsed = time - previous->frame;
+                s32 interval = next->frame - previous->frame;
+                s32 remaining = interval - elapsed;
+                opacity = (previous->p08.sh[0] * remaining + next->p08.sh[0] * elapsed) / interval;
+                scale = (previous->p08.sh[1] * remaining + next->p08.sh[1] * elapsed) / interval;
+            }
+            if (opacity != 0 || scale != 0) {
+                viewer->flags |= 4;
+                kwlnDrawOverlayEnabled = 1;
+                kwlnDrawOverlayAlpha = opacity;
+                kwlnDrawOverlayScale = scale;
+                break;
+            }
+        }
+        viewer->flags &= ~4;
+        kwlnDrawOverlayEnabled = 0;
+        break;
+    }
+}
 
 
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
