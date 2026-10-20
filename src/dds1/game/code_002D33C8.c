@@ -1,3 +1,4 @@
+#include "ee_mmi.h"
 #include "sdf_scene_packet.h"
 #include "sdf_gs_gouraud_textured.h"
 #include "sdf_gs_scene_state.h"
@@ -140,17 +141,7 @@ void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount
     }
 
     /* Move the FPU scalars into VU0, then broadcast tint and its scale. */
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "qmtc2.ni %0, vf2\n\t"
-        "pextlb $2, $0, %1\n\t"
-        "pextlh $2, $0, $2\n\t"
-        "qmtc2.ni $2, vf3\n\t"
-        "vitof0.xyzw vf3, vf3\n\t"
-        "qmtc2.ni %2, vf4\n\t"
-        "vmulx.xyz vf3, vf3, vf4x\n\t"
-        ".set reorder"
-        : : "r"(amount), "r"(tint), "r"(1.0f / 255.0f) : "$2");
+    EE_MMI_PALETTE_TINT_SETUP(amount, tint, 1.0f / 255.0f);
 
     if (texture->clutFormat == 0) {
         u32 *sourcePalette = (u32 *)source->paletteData;
@@ -160,26 +151,7 @@ void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount
             u32 value = *intensity;
             u32 color = *sourcePalette;
 
-            __asm__ volatile (
-                ".set noreorder\n\t"
-                "pextlb $2, $0, %1\n\t"
-                "pextlh $2, $0, $2\n\t"
-                "qmtc2.ni $2, vf5\n\t"
-                "vitof0.xyzw vf5, vf5\n\t"
-                "qmtc2.ni %0, vf4\n\t"
-                "vitof0.xyzw vf4, vf4\n\t"
-                "vmove.w vf6, vf5\n\t"
-                "vmulx.xyz vf4, vf3, vf4x\n\t"
-                "vmulaw.xyz ACC, vf5, vf0w\n\t"
-                "vmaddax.xyz ACC, vf4, vf2x\n\t"
-                "vmsubx.xyz vf6, vf5, vf2x\n\t"
-                "vftoi0.xyzw vf6, vf6\n\t"
-                "qmfc2.ni $2, vf6\n\t"
-                "ppach $2, $0, $2\n\t"
-                "ppacb %0, $0, $2\n\t"
-                ".set reorder"
-                : "+r"(value) : "r"(color)
-                : "$2");
+            EE_MMI_PALETTE_TINT_RGBA(value, color);
             count--;
             *destinationPalette = value;
             sourcePalette++;
@@ -197,31 +169,7 @@ void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount
             u32 value = *intensity;
             u16 color = *sourcePalette;
 
-            __asm__ volatile (
-                ".set noreorder\n\t"
-                "pext5 $2, %0\n\t"
-                "srl $3, $2, 5\n\t"
-                "and $3, $3, %2\n\t"
-                "or $2, $2, $3\n\t"
-                "pextlb $2, $0, $2\n\t"
-                "pextlh $2, $0, $2\n\t"
-                "qmtc2.ni $2, vf5\n\t"
-                "vitof0.xyzw vf5, vf5\n\t"
-                "qmtc2.ni %1, vf4\n\t"
-                "vitof0.xyzw vf4, vf4\n\t"
-                "vmove.w vf6, vf5\n\t"
-                "vmulx.xyz vf4, vf3, vf4x\n\t"
-                "vmulaw.xyz ACC, vf5, vf0w\n\t"
-                "vmaddax.xyz ACC, vf4, vf2x\n\t"
-                "vmsubx.xyz vf6, vf5, vf2x\n\t"
-                "vftoi0.xyzw vf6, vf6\n\t"
-                "qmfc2.ni $2, vf6\n\t"
-                "ppach $2, $0, $2\n\t"
-                "ppacb $2, $0, $2\n\t"
-                "ppac5 %0, $2\n\t"
-                ".set reorder"
-                : "+r"(color) : "r"(value), "r"(fiveBitExpandMask)
-                : "$2", "$3");
+            EE_MMI_PALETTE_TINT_RGB5(color, value, fiveBitExpandMask);
             count--;
             *destinationPalette = color;
             sourcePalette++;
