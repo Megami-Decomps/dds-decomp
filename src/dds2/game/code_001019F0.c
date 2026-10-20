@@ -69,7 +69,7 @@ extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
 extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
 extern void sdfDevSetCurrentDirectory(const char *path);
 extern void sdfDevSetDefaultDeviceWorker(s8 worker);
-extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
+extern void sdfFileCmdStartThread(s32 index);
 extern void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath);
 extern void sdfStartAndSuspendWorkerThread(void);
 extern void kwlnRunMainLoop(void);
@@ -116,8 +116,8 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     sdfPadRequestMode(1, 3);
     sdfDevSetCurrentDirectory(D_00411140);
     sdfDevSetDefaultDeviceWorker(3);
-    sdfEnsureDeviceWorkerThreadStarted(3);
-    sdfEnsureDeviceWorkerThreadStarted(0);
+    sdfFileCmdStartThread(3);
+    sdfFileCmdStartThread(0);
     sdfLoadModulesAndBindNamedResourceRpc(D_00411158, D_00411178);
     sdfStartAndSuspendWorkerThread();
     sdfStartTrackedThread(&kwlnMainLoopThreadNode, kwlnRunMainLoop, D_00439410, 0x4000, 0x60, 0);
@@ -380,7 +380,7 @@ extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
 extern u32 fldIsUpdateInhibited(void);
 extern void sdfDumpDmaVifCommandStream(s32);
-extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
+extern void sdfGrReqDraw(SdfListHead *, SdfPacketChain *);
 extern SdfPoolNode *D_00380788[13][4];
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00380708;
@@ -483,7 +483,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
         D_00435BC8 = 0;
     }
     if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
-        sdfQueueFramePackets(poolHead, (SdfPacketChain *)D_00380860);
+        sdfGrReqDraw(poolHead, (SdfPacketChain *)D_00380860);
     } else {
         kwlnDrawControlFlags &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }

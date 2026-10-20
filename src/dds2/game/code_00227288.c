@@ -362,7 +362,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
         if ((selected->status.flags & 2) == 0) {
             return;
         }
-        effObjFetchInnerPosition(selected->effectObject);
+        dds3GetPosPoseSet(selected->effectObject);
         VU0_STORE_VF(vf10, (u128 *)vector);
         if (!(vector[1] > -125.0f)) {
             return;
@@ -377,7 +377,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
             effect->linked.height = limit;
         }
         vector[1] = effect->linked.height;
-        effObjSetInnerPosition(actor->effectObject, (u128 *)vector);
+        dds3SetPosPoseSet(actor->effectObject, (u128 *)vector);
         return;
     }
 
@@ -398,7 +398,7 @@ void btlUpdateLinkedActorGroundHeight(void) {
                 if (flags & 1) {
                     if (flags & 0x200) {
                         if (flags & 2) {
-                            effObjFetchInnerPosition(unit->effectObject);
+                            dds3GetPosPoseSet(unit->effectObject);
                             VU0_STORE_VF(vf10, (u128 *)vector);
                             if (!(vector[1] > ceiling)) {
                                 if (vector[1] < lowerLimit) {
@@ -410,10 +410,10 @@ void btlUpdateLinkedActorGroundHeight(void) {
                                         effect->linked.height = zero;
                                     }
                                     vector[1] = effect->linked.height;
-                                    effObjSetInnerPosition(unit->effectObject, (u128 *)vector);
+                                    dds3SetPosPoseSet(unit->effectObject, (u128 *)vector);
                                 } else {
                                     vector[1] = zero;
-                                    effObjSetInnerPosition(unit->effectObject, (u128 *)vector);
+                                    dds3SetPosPoseSet(unit->effectObject, (u128 *)vector);
                                 }
                             }
                         }
@@ -1049,7 +1049,7 @@ s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (effMiscRand(&effSharedRandomState) & 1) {
+            if (sdfGetRand(&effSharedRandomState) & 1) {
                 btlSetEffectCameraKeys((s32)command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -1143,7 +1143,7 @@ s32 btlAdvanceMarkedLinkedActionCamera(BtlLinkedCommand *command) {
         if (command->motionProgress >= 0x19) {
             btlClearRuntimeFlag2000();
             if (command->motionProgress == 0x19) {
-                choice = effMiscRandMod(0, 2);
+                choice = sdfGetRandInt(0, 2);
                 switch (choice) {
                 case 0:
                     btlSetEffectCameraKeys((s32)command,

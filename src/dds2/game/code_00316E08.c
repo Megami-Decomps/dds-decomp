@@ -158,24 +158,24 @@ void mdlCreateViewerPackageTask(void) {
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
     mnuInitializeShootingScene(handle);
-    kwlnTaskCreate(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
+    dds3StartProcess(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
 }
 
 u8 mdlViewerPackageTaskExists(void) {
-    return kwlnTaskGetTaskByName(D_0042D4D0) != 0;
+    return dds3SearchProcessName(D_0042D4D0) != 0;
 }
 
 u32 mdlStopViewerPackageTask(void) {
     mnuMovieTaskState = 2;
     D_00435BB0 = 1;
     mdlDestroyOptionalViewerPackageWork(D_0043891C);
-    kwlnTaskDestroyWithHierarchyByName(D_0042D4D0, 1);
+    dds3KillProcessName(D_0042D4D0, 1);
     return mnuResumeEffectQueueFrameAdvance();
 }
 
 /* Return cleared 0x1E0-byte task work with its allocation handle and defaults. */
 MnuShootingWork *mdlAllocateViewerPackageWork(void) {
-    SdfMemBlock *block = sdfAllocGeneralBlock(0x1E0);
+    SdfMemBlock *block = sdfMemAllocDirect(0x1E0);
     MnuShootingWork *work = (MnuShootingWork *)sdfMemoryGetBlockAddress(block);
 
     memset(work, 0, 0x1E0);
@@ -447,7 +447,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                             fileCloneQueueEntries((struct FileQueue *)entry->dataCursor);
                         *queueSlot++ = clone;
                         fileQueueNotifyAllJobsComplete(clone);
-                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                     }
                     entry = entry->next;
                 } while (entry != NULL);
@@ -469,25 +469,25 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                     case 0:
                         evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
                         work->drawObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 1:
                         evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
                         work->playerObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 2:
                         evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
                         work->objects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 3:
                         evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
                         work->mapObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
-                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     default:
@@ -510,7 +510,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             while (entry != NULL) {
                 if (entry->packet[0] == 1) {
                     mdlLoadViewerPackageFromWork((MnuPackageEntry *)entry);
-                    sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                    sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                 }
                 entry = entry->next;
             }
@@ -526,7 +526,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         evtPrintDeveloperConsoleMessage(D_0042D6B8, D_0040A970[work->packageEntryIndex].name);
 
         if (D_0040A970[work->packageEntryIndex].kind == 0) {
-            sdfReleaseResourceAllocation(
+            sdfMemFreeDirect(
                 fileGetResourceHandle(work->packageRequest));
             filePollEntryCleanup(work->packageRequest);
             evtPrintDeveloperConsoleMessage(D_0042D6C8);
@@ -571,7 +571,7 @@ MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data) {
     memcpy(info, (u8 *)data + offset, sizeof(info));
     offset += sizeof(info);
     payload = (u8 *)data + offset;
-    block = sdfAllocGeneralBlock(info[0] + 0x10);
+    block = sdfMemAllocDirect(info[0] + 0x10);
     list = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
     objects = (u8 *)(list + 1);
     list->allocation = block;
@@ -581,12 +581,12 @@ MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data) {
     offset = sizeof(*list);
     memcpy((u8 *)list + offset, payload, info[0]);
     payload += info[0];
-    relocBlock = sdfAllocGeneralBlock(info[3]);
+    relocBlock = sdfMemAllocDirect(info[3]);
     offsets = (u32 *)sdfMemoryGetBlockAddress(relocBlock);
     memset(offsets, 0, info[3]);
     memcpy(offsets, payload, info[3]);
     dds3ApplyRelocationOffsets(objects, (u32)objects, offsets, info[3]);
-    sdfReleaseResourceAllocation(relocBlock);
+    sdfMemFreeDirect(relocBlock);
     return list;
 }
 
@@ -672,17 +672,17 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     handle->spriteWork = itfCreateSpriteWorkPool(100);
     handle->tintWork = itfCreateSpriteHitEffectWorkPool(100);
     dds3InitSoundSlotPool();
-    D_00438948 = sdfAllocGeneralBlock(0x1C20);
+    D_00438948 = sdfMemAllocDirect(0x1C20);
     D_0043894C = sdfMemoryGetBlockAddress(D_00438948);
     memset((void *)D_0043894C, 0, 0x1C20);
     mnuRegisterWorkEntryPool(D_0043894C, 100);
-    block = sdfAllocGeneralBlock(0x1C30);
+    block = sdfMemAllocDirect(0x1C30);
     lists[0] = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
     memset(lists[0], 0, 0x1C30);
     lists[0]->allocation = block;
     lists[0]->objects = (u8 *)(lists[0] + 1);
     lists[0]->count = 200;
-    block = sdfAllocGeneralBlock(0xE20);
+    block = sdfMemAllocDirect(0xE20);
     lists[1] = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
     memset(lists[1], 0, 0xE20);
     lists[1]->count = 100;
@@ -722,26 +722,26 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     itfReleaseSpriteHitEffectWorkPool(work->tintWork);
     dds3ReleaseSoundSlotPool();
     if (D_00438948 != NULL) {
-        sdfReleaseResourceAllocation(D_00438948);
+        sdfMemFreeDirect(D_00438948);
         D_00438948 = NULL;
     }
     if (work->progressWork != NULL) {
-        sdfReleaseResourceAllocation(work->progressWork->allocation);
+        sdfMemFreeDirect(work->progressWork->allocation);
         work->progressWork = NULL;
     }
     if (work->alternateProgressWork != NULL) {
-        sdfReleaseResourceAllocation(work->alternateProgressWork->allocation);
+        sdfMemFreeDirect(work->alternateProgressWork->allocation);
         work->alternateProgressWork = NULL;
     }
     if (work->effectWork != NULL) {
         for (i = 0; i < work->effectWork->count; i++) {
             mnuDestroyNodeJobQueues((s32 *)&work->effectWork->lists[i]);
         }
-        sdfReleaseResourceAllocation(work->effectWork->allocation);
+        sdfMemFreeDirect(work->effectWork->allocation);
         work->effectWork = NULL;
     }
     if (work->work24 != NULL) {
-        sdfReleaseResourceAllocation(work->work24->allocation);
+        sdfMemFreeDirect(work->work24->allocation);
         work->work24 = NULL;
     }
     slot = work->resourceSlots;
@@ -762,7 +762,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     } else {
         mdlFlagClear(0x849);
     }
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
 }
@@ -854,7 +854,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     mnuBindMovementRecordTable((MenuMovementRecord18 *)work->playerObjects->objects, work->playerObjects->count);
     mnuBindResourceRecordTable((MenuResourceRecord *)work->mapObjects->objects, work->mapObjects->count);
     mnuBindMenuRegistryParameters((MenuRegistryParameters *)work->drawObjects->objects, work->drawObjects->count);
-    counts = sdfAllocSizeClassBlock(work->drawObjects->count * 4);
+    counts = sdfChipAllocDirect(work->drawObjects->count * 4);
     records = (MenuRegistryParameters *)work->drawObjects->objects;
     for (i = 0; i < work->drawObjects->count; i++) {
         if (records[i].kind == 3) {
@@ -864,7 +864,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
         }
     }
     work->modelWork = mnuCreateSectionModelWork(work->drawObjects->count, counts);
-    sdfReleaseChipBlock(counts);
+    sdfChipFreeDirect(counts);
     D_00438928 = NULL;
     groups = work->modelWork->groups;
     records = (MenuRegistryParameters *)work->drawObjects->objects;
@@ -879,12 +879,12 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
         evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].major, records[i].minor, records[i].instanceCount);
     }
     if (work->effectWork == NULL) {
-        counts = sdfAllocSizeClassBlock(12);
+        counts = sdfChipAllocDirect(12);
         counts[1] = 2;
         counts[2] = 2;
         counts[0] = 30;
         work->effectWork = mnuCreateEffectWork(3, counts);
-        sdfReleaseChipBlock(counts);
+        sdfChipFreeDirect(counts);
         effects = work->effectWork->lists;
         for (i = 0; i < work->effectWork->count; i++) {
             MnuEffectList *list = &effects[i];
@@ -897,7 +897,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     }
     if (work->work24 == NULL) {
         itfInstallIndexedImageResourceBanks(work->resourceSlots, 7);
-        counts = sdfAllocSizeClassBlock(work->drawObjects->count * 4);
+        counts = sdfChipAllocDirect(work->drawObjects->count * 4);
         records = (MenuRegistryParameters *)work->drawObjects->objects;
         for (i = 0; i < work->drawObjects->count; i++) {
             if (records[i].kind == 1) {
@@ -907,7 +907,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
             }
         }
         work->work24 = itfCreateModelInstanceWork(work->drawObjects->count, counts);
-        sdfReleaseChipBlock(counts);
+        sdfChipFreeDirect(counts);
         instances = work->work24->lists;
         for (i = 0; i < work->work24->count; i++) {
             itfClearModelInstances(&instances[i]);
@@ -945,26 +945,26 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
 
     mnuDeactivateWorkEntry(&D_0040ABF8);
     if (work->mapObjects != NULL) {
-        sdfReleaseResourceAllocation(work->mapObjects->allocation);
+        sdfMemFreeDirect(work->mapObjects->allocation);
         work->mapObjects = NULL;
     }
     if (work->drawObjects != NULL) {
-        sdfReleaseResourceAllocation(work->drawObjects->allocation);
+        sdfMemFreeDirect(work->drawObjects->allocation);
         work->drawObjects = NULL;
     }
     if (work->objects != NULL) {
-        sdfReleaseResourceAllocation(work->objects->allocation);
+        sdfMemFreeDirect(work->objects->allocation);
         work->objects = NULL;
     }
     if (work->playerObjects != NULL) {
-        sdfReleaseResourceAllocation(work->playerObjects->allocation);
+        sdfMemFreeDirect(work->playerObjects->allocation);
         work->playerObjects = NULL;
     }
     if (work->modelWork != NULL) {
         for (i = 0; i < work->modelWork->count; i++) {
             mnuDestroyAllModelNodeContexts(&work->modelWork->groups[i]);
         }
-        sdfReleaseResourceAllocation(work->modelWork->allocation);
+        sdfMemFreeDirect(work->modelWork->allocation);
         work->modelWork = NULL;
     }
     evtPrintDeveloperConsoleMessage("stgRelease_Section !!\n");
@@ -1402,7 +1402,7 @@ void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
         }
         if (entry->flagsBits.mode >= 2) {
             runtime = mnuGetRuntimeHitTargetList();
-            angle = ((effMiscRandUnitFloat(NULL) * 90.0f + 135.0f) *
+            angle = ((sdfGetRandFloat(NULL) * 90.0f + 135.0f) *
                      3.141592503f) / 180.0f;
             mnuCreateRuntimeRecord(runtime, (s32)entry->currentX,
                                    (s32)entry->currentY, 0x33, 0, 0, 0, 1, 0,
@@ -1423,10 +1423,10 @@ void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
                                          (s32)entry->currentX + originX, timedY + originY);
         effects = work->effectWork->lists;
         if (entry->movementEffectScale != 0) {
-            step.x = sdfEvaluateCosineViaSinePhaseShift(
+            step.x = sdfCos(
                          entry->currentAngleRadians + 1.5707963f) * 0.0f +
                      sdfSinPoly(entry->currentAngleRadians + 1.5707963f);
-            step.y = sdfEvaluateCosineViaSinePhaseShift(
+            step.y = sdfCos(
                          entry->currentAngleRadians + 1.5707963f) -
                      sdfSinPoly(entry->currentAngleRadians + 1.5707963f) * 0.0f;
             VU0_LOAD_VF(vf10, &step);
@@ -1449,7 +1449,7 @@ void func_00319388(MenuWorkEntry *entry, MnuShootingWork *work) {
         if (entry->tag == 0x0201000F || entry->tag == 0x02010010) {
             evtPrintDeveloperConsoleMessage("======================================= ADD ITEM !!!!!!!!!!\n");
             runtime = mnuGetRuntimeHitTargetList();
-            angle = ((effMiscRandUnitFloat(NULL) * 90.0f + 135.0f) *
+            angle = ((sdfGetRandFloat(NULL) * 90.0f + 135.0f) *
                      3.141592503f) / 180.0f;
             mnuCreateRuntimeRecord(runtime, (s32)entry->currentX,
                                    (s32)entry->currentY, 0x33, 0, 0, 0, 1, 0,

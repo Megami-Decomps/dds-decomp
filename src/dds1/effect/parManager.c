@@ -52,10 +52,10 @@ void effDestroyResources(void *arg);
 /* Release the radial emitter's extra allocation, shared resources, and block. */
 void parReleaseObject(ParBurstEmitter *obj) {
     if (obj->childHandle != 0) {
-        sdfReleaseResourceAllocation(obj->childHandle);
+        sdfMemFreeDirect(obj->childHandle);
     }
     effDestroyResources(obj);
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 
@@ -89,19 +89,19 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
 
     packet += particleIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spawnDelayFrames + 1));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spawnDelayFrames + 1));
     initialRadius = effect->initialRadius;
     jitterFactor = effect->initialRadiusJitter;
-    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
     /* Each component gets a separate jitter sample, not one shared radius draw. */
-    packet->radialOffset[0] = initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
-    packet->radialOffset[1] = initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
-    packet->radialOffset[2] = initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
+    packet->radialOffset[0] = initialRadius * (sdfGetRandFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
+    packet->radialOffset[1] = initialRadius * (sdfGetRandFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
+    packet->radialOffset[2] = initialRadius * (sdfGetRandFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
     VU0_LOAD_VF(vf10, packet->radialOffset);
     VU0_LENGTH_VF10(initialRadiusLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -112,9 +112,9 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     packet->position[1] = packet->radialOffset[1] + effect->head.origin[1];
     packet->position[2] = packet->radialOffset[2] + effect->head.origin[2];
     if (effect->axisMode == PAR_BURST_RANDOM_AXIS) {
-        direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, direction);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, direction);
@@ -127,15 +127,15 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
         packet->rotationAxis[2] = 0;
     }
     jitterFactor = effect->targetRadiusJitter;
-    packet->radiusStep = (effect->targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor +
+    packet->radiusStep = (effect->targetRadius * (sdfGetRandFloat(effDefaultRandomState) * jitterFactor +
                                     (1.0f - jitterFactor)) - initialRadiusLength) /
                    effect->head.lifetimeFrames;
     jitterFactor = effect->head.billboardScaleJitter;
-    packet->billboardScale = effect->head.billboardScale * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor +
+    packet->billboardScale = effect->head.billboardScale * (sdfGetRandFloat(effDefaultRandomState) * jitterFactor +
                                          (1.0f - jitterFactor));
     jitterFactor = effect->head.initialPhaseJitter;
     if (jitterFactor != 0) {
-        packet->initialPhaseRadians = (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) *
+        packet->initialPhaseRadians = (sdfGetRandFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) *
                        (3.14159265f * 2.0f);
     } else {
         packet->initialPhaseRadians = 0;
@@ -195,7 +195,7 @@ void parUpdateBurstEmitter(ParBurstEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge(&effect->head.colorRamp, packet->color, age);
+            packet->color = dds3ParticleColorAnim(&effect->head.colorRamp, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.parameterWord);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet->radialOffset);
@@ -283,7 +283,7 @@ void parUpdateBurstEmitter(ParBurstEmitter *effect) {
 }
 
 
-void parInitColorRamp(ParColorRamp *p, s32 frames) {
+void dds3ParticleSetColorTable(ParColorRamp *p, s32 frames) {
     u32 alpha;
     f32 span;
     u32 a, b;
@@ -328,7 +328,7 @@ void parInitColorRamp(ParColorRamp *p, s32 frames) {
     p->bStep[1] = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
 }
 
-u32 parEvaluateColorRampAtAge(ParColorRamp *p, u32 color, s32 age) {
+u32 dds3ParticleColorAnim(ParColorRamp *p, u32 color, s32 age) {
     s32 channel[3];
     u32 alpha;
     u32 sum;
@@ -384,8 +384,8 @@ ParTable *parCreateHistorySlotTable(u32 slotCount, u16 pointCapacity, BillObj **
     u32 pointBytes = pointCapacity * sizeof(u128);
     u32 slabBytes = pointBytes + sizeof(ParSlot);
     u32 totalBytes = slabBytes * slotCount;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(totalBytes + sizeof(ParTable));
-    u8 *base = (u8 *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(totalBytes + sizeof(ParTable));
+    u8 *base = (u8 *)sdfMemLock(allocation);
     ParTable *table = (ParTable *)(base + totalBytes);
     u128 *points = (u128 *)base;
     ParSlot *slotBase = (ParSlot *)(points + pointCapacity * slotCount);
@@ -412,7 +412,7 @@ ParTable *parCreateHistorySlotTable(u32 slotCount, u16 pointCapacity, BillObj **
 
 /* Release the slot table's allocation handle, not a separate node object. */
 void parReleaseHistorySlotTable(ParTable *table) {
-    sdfReleaseResourceAllocation(table->allocation);
+    sdfMemFreeDirect(table->allocation);
 }
 
 void parPrependHistorySample(ParTable *table, s32 slotIndex, u32 color, f32 billboardScale) {

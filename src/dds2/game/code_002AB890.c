@@ -532,9 +532,9 @@ void mnuNoOpStaffDisplayTeardown(s32 object) {
 extern void *memset(void *, int, unsigned int);
 
 u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x54);
-    MenuStaffChoices *resource = (void *)sdfResourceRetainAddress(allocation);
+    MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x54);
+    MenuStaffChoices *resource = (void *)sdfMemLock(allocation);
 
     context->menu = resource;
     memset(resource, 0, 0x54);
@@ -550,13 +550,13 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
 /* Close the staff selection state: drop the owner's window containers, run
  * the owner's teardown hook, then close the party's resource menu. */
 s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     MenuStaffContext *owner = (MenuStaffContext *)context;
     MenuStaffChoices *party = (MenuStaffChoices *)owner->menu;
 
     mnuDestroyResourceOwnerWindowContainers(owner);
     mnuNoOpStaffDisplayTeardown(context);
-    sdfReleaseResourceAllocation(party->allocation);
+    sdfMemFreeDirect(party->allocation);
     return 1;
 }
 
@@ -583,7 +583,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
     u32 input;
     s32 result;
 
-    context = (MenuStaffContext *)kwlnTaskGetUserValue(callback);
+    context = (MenuStaffContext *)dds3GetProcessData(callback);
     popup = &context->popupState;
     resources = (MenuStaffChoices *)context->menu;
     input = mnuMapPadMaskToFlags(0x33);
@@ -643,7 +643,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTab
 extern u8 mnuCampItemCommandHelpTextBank[];
 
 s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
     mnuDrawCampGridAndLabelDefault(0,
@@ -655,7 +655,7 @@ s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
 }
 
 s32 mnuFinishStaffReturnPopup(KwlnTask *callback) {
-    return menuSetHandler((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
+    return menuSetHandler((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
 extern s32 evtGetIndexedEventRecordId(s32);
@@ -700,7 +700,7 @@ void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
 u32 mnuFadeInStaffItemList(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue(task);
+    context = dds3GetProcessData(task);
     mnuBeginWindowFadeTransition(((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->windows[0], &((MenuStaffContext *)context)->fade);
     return 1;
 }
@@ -708,7 +708,7 @@ u32 mnuFadeInStaffItemList(KwlnTask *task) {
 u32 mnuFadeInActiveStaffWindow(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue(task);
+    context = dds3GetProcessData(task);
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     return 1;
 }
@@ -724,7 +724,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
     u32 input;
     s32 result;
 
-    context = (MenuStaffContext *)kwlnTaskGetUserValue(callback);
+    context = (MenuStaffContext *)dds3GetProcessData(callback);
     resources = (MenuStaffChoices *)context->menu;
     popup = &context->popupState;
     input = mnuMapPadMaskToFlags(0xC33);

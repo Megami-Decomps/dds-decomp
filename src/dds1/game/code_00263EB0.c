@@ -57,7 +57,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     s32 changed = 0;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
@@ -131,7 +131,7 @@ extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 
 s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 1);
@@ -139,7 +139,7 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *task) {
 }
 
 s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *input) {
-    s32 context = kwlnTaskGetUserValue(input);
+    s32 context = dds3GetProcessData(input);
 
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)input);
@@ -148,7 +148,7 @@ s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *input) {
 u32 mnuBeginPanelEntryAndCaptureSoundMode(KwlnTask *task) {
     BrsSkillPackageWork *context;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     mnuSetPanelGroupSelection(context->panelHandle, -1);
     dspStartEntry(0x16);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -170,7 +170,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
     DatPartyRecord *entry;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
     result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, task);
@@ -199,7 +199,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *task) {
 }
 
 s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 1);
@@ -207,7 +207,7 @@ s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
 }
 
 s32 mnuAdvanceStatAssignmentPanel(KwlnTask *input) {
-    s32 context = kwlnTaskGetUserValue(input);
+    s32 context = dds3GetProcessData(input);
 
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)input);
@@ -215,7 +215,7 @@ s32 mnuAdvanceStatAssignmentPanel(KwlnTask *input) {
 
 u32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     char text[0x20];
-    BrsSkillPackageWork *work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     BrsRewardRow *state = work->selectedRewardRow;
     DatPartyRecord *entry = state->unit;
     u32 step = brsGetLevelStepCrossedBy(entry->level - state->values.amount, state->values.amount);
@@ -243,7 +243,7 @@ extern char brsRewardMessagePopupEntry[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 *panelState = &context->transition.state;
     s32 result;
 
@@ -259,7 +259,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
 }
 
 s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuDrawItemPanelBackdrop(context);
     mnuDrawStatAssignmentPanel(context, 0);
@@ -267,7 +267,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
 }
 
 s32 mnuAdvanceInactiveItemPanel(KwlnTask *input) {
-    s32 context = kwlnTaskGetUserValue(input);
+    s32 context = dds3GetProcessData(input);
 
     dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)input);
@@ -277,7 +277,7 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *input) {
 extern void *memset(void *, int, unsigned int);
 
 u32 brsPrepareRewardMessage(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     DatPartyRecord *item = context->selectedRewardRow->unit;
 
     if (context->rewardMode != 0) {
@@ -370,7 +370,7 @@ extern char brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
 s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
-    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 result;
 
     evtStageTestUpdateCamera();
@@ -399,7 +399,7 @@ extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 /* The dispatcher consumes the inline work area and its adjacent status word. */
 
 s32 itfRunPanelMode1(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     mnuDrawItemPanelBackdrop(panel);
@@ -411,7 +411,7 @@ s32 itfRunPanelMode1(KwlnTask *request) {
 extern void dspAdvanceMessageWindowControl(s32);
 
 s32 itfRunPanelMode2(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     dspAdvanceMessageWindowControl(0);
@@ -624,7 +624,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
             valueGlyph = itfCreateFont3TextGlyph(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
             frFontDrawGlyphChain(valueGlyph, 1, textStyle);
-            frFontQueueGlyphForCurrentDrawBuffer(valueGlyph);
+            frDestroyFontRequestAfter(valueGlyph);
             y += 0xB0;
         }
     }
@@ -638,7 +638,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, flags);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
@@ -649,7 +649,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary 
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, flags);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263EB0", D_003BC558);

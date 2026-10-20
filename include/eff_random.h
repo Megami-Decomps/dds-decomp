@@ -15,12 +15,12 @@ typedef char EffRandState_last_word_offset_must_be_0x0C[
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 effMiscRand(EffRandState *state);
+u32 sdfGetRand(EffRandState *state);
 
 /* Seed caller-owned state from the clock; NULL selects the shared state. */
-void effMiscSeedRandomFromClock(EffRandState *state);
+void sdfRandomizeByTime(EffRandState *state);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 effMiscRandUnitFloat(EffRandState *state);
+f32 sdfGetRandFloat(EffRandState *state);
 
 #endif /* EFF_RANDOM_H */

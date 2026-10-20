@@ -1789,10 +1789,10 @@ void fldInitializeSceneSlots(void) {
                     bonus++;
                 }
                 if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xEA) != 0) {
-                    if (effMiscRand(&effSharedRandomState) & 1) {
-                        actionTotal += effMiscRandMod(NULL, 2);
+                    if (sdfGetRand(&effSharedRandomState) & 1) {
+                        actionTotal += sdfGetRandInt(NULL, 2);
                     } else {
-                        actionTotal -= effMiscRandMod(NULL, 2);
+                        actionTotal -= sdfGetRandInt(NULL, 2);
                     }
                 }
             }

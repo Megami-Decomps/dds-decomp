@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Per-emitter color ramp initialized by parInitColorRamp. */
+/* Per-emitter color ramp initialized by dds3ParticleSetColorTable. */
 typedef struct ParColorRamp {
     s32 mode;          /* 0x00: 1 = no ramp, 2 = color0-to-color1 only */
     u32 color[3];      /* 0x04: ramp stops 0, 1, 2 */
@@ -20,7 +20,7 @@ typedef struct ParColorRamp {
 } ParColorRamp;
 
 /* Evaluate a color through the emitter ramp at the particle's current age. */
-u32 parEvaluateColorRampAtAge(ParColorRamp *colorRamp, u32 color, s32 age);
+u32 dds3ParticleColorAnim(ParColorRamp *colorRamp, u32 color, s32 age);
 
 typedef char ParColorRamp_size_must_be_0x44[
     (sizeof(ParColorRamp) == 0x44) ? 1 : -1];

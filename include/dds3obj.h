@@ -35,7 +35,7 @@ typedef char ObjBase_resourceSlotFamily_offset_must_be_0xAC[
 ObjBase *dds3CreateSlotResourceState(void *owner);
 void dds3EnsureSlotData(void *object);
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object);
-void *dds3GetObjectBaseResourceHandle(EffWorldNode *object);
+void *dds3ObjectBaseGetModelHandle(EffWorldNode *object);
 void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Forward a callback to the object's slot-1 handler when one is present; returns 1 if it did. */
 u8 dds3SetObjectSlot1MoverCallback(EffWorldNode *object,
@@ -61,11 +61,11 @@ EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *player);
 
 /* Inner transform vector helpers; fetch results are returned in VU vf10. */
-void effObjSetInnerPosition(EffWorldNode *object, u128 *vector);
-void effObjSetInnerRotation(EffWorldNode *object, u128 *vector);
-void effObjSetInnerScale(EffWorldNode *object, u128 *vector);
-void effObjFetchInnerPosition(EffWorldNode *object);
-void effObjFetchInnerRotationNormalized(EffWorldNode *object);
+void dds3SetPosPoseSet(EffWorldNode *object, u128 *vector);
+void dds3SetRotPoseSet(EffWorldNode *object, u128 *vector);
+void dds3SetSclPoseSet(EffWorldNode *object, u128 *vector);
+void dds3GetPosPoseSet(EffWorldNode *object);
+void dds3GetRotPoseSet(EffWorldNode *object);
 void effObjFetchInnerScale(EffWorldNode *object);
 void effObjAddInnerPosition(EffWorldNode *object, u128 *vector);
 void effObjMultiplyInnerRotation(EffWorldNode *object, u128 *vector);

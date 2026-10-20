@@ -40,7 +40,7 @@ void effReleaseBattleVoiceOwner(BattleEffect *owner) {
     owner->state->active--;
     sdfDebugPrintf(D_003A0DB8, owner->kind, owner->state,
                   owner->state->active);
-    sdfReleaseChipBlock(owner);
+    sdfChipFreeDirect(owner);
 }
 
 /* Return the policy controlling trigger-frame copying and minimum ramp selection. */

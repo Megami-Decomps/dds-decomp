@@ -31,7 +31,7 @@ typedef char SdfSceneDrawPacket_centeredBounds_at_0xE0[
 typedef char SdfSceneDrawPacket_blendState_at_0x130[
     ((u32)&((SdfSceneDrawPacket *)0)->blendState == 0x130) ? 1 : -1];
 
-void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet,
+void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet,
     struct SdfGraphObj *view, s32 bufferIndex);
 
 /* Linked metadata precedes the DMA drawing payload by one quadword. */
@@ -67,7 +67,7 @@ typedef char SdfSceneNode_frameContextTwo_registerId_at_0x198[
 typedef char SdfSceneNode_textures_at_0x1A0[
     ((u32)&((SdfSceneNode *)0)->texturePackets == 0x1A0) ? 1 : -1];
 
-void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view);
+void sdfGrSetStdDrawEnv(SdfSceneNode *node, SdfGraphObj *view);
 void sdfRefreshSceneNodePackets(SdfSceneNode *node, s32 bufferIndex);
 
 #endif

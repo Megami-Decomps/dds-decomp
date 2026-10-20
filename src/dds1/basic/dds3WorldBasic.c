@@ -127,7 +127,7 @@ WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount) {
     if (worldInfo->freeEntryCount < initialCount) {
         return NULL;
     }
-    indexNode = sdfAllocSizeClassBlock(sizeof(WorldIndexNode));
+    indexNode = sdfChipAllocDirect(sizeof(WorldIndexNode));
     if (indexNode == NULL) {
         return NULL;
     }
@@ -172,7 +172,7 @@ void dds3DestroyWorldIndexNode(WorldIndexNode *indexNode) {
     } else {
         indexNode->next->previous = indexNode->previous;
     }
-    sdfReleaseChipBlock(indexNode);
+    sdfChipFreeDirect(indexNode);
 }
 
 /* Preserve native-width tail copies; see docs/idioms.md,

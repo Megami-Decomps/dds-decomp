@@ -1215,8 +1215,8 @@ void btlInitBattleIndexWork(BattleIndexWork *object) {
     struct SdfMemBlock *allocation;
     u32 value;
     object->indices = btlAllocateIndexList(13);
-    allocation = sdfAllocGeneralBlock(0x836C);
-    value = sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(0x836C);
+    value = sdfMemLock(allocation);
     object->allocationHandle = allocation;
     object->groups = (BtlOperandGroup *)value;
     object->ownerId = 0;
@@ -1227,7 +1227,7 @@ void btlInitBattleIndexWork(BattleIndexWork *object) {
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
     struct SdfMemBlock *handle = object->allocationHandle;
     if (handle != 0) {
-        sdfReleaseResourceAllocation(handle);
+        sdfMemFreeDirect(handle);
         object->allocationHandle = 0;
     }
     if (object->indices != 0) {
@@ -2120,7 +2120,7 @@ void btlFreeTask(s32 taskAddress) {
     } else {
         context->taskTail = task->prev;
     }
-    sdfReleaseChipBlock((void *)taskAddress);
+    sdfChipFreeDirect((void *)taskAddress);
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
@@ -2356,9 +2356,9 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 
 #include "dds3_world_primary.h"
 
-extern void dds3ClearObjectFlags(void *, s32);
+extern void dds3ObjectBaseOffFlag(void *, s32);
 
-extern void dds3SetObjectFlags(void *, s32);
+extern void dds3ObjectBaseOnFlag(void *, s32);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
@@ -2412,7 +2412,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         if (unit->actorScale != 1.0f) {
             mdlSetAmountOnAllContextResources(model, unit->actorScale);
         }
-        dds3ClearObjectFlags(unit->effectObject, 0x400);
+        dds3ObjectBaseOffFlag(unit->effectObject, 0x400);
         unit->status.flags |= 8;
         unit->soundSlotOwner = sndAcquireSlotOwner(kind, id);
         unit->status.flags |= 2;
@@ -2955,7 +2955,7 @@ void btlSeekRandomModelFrame(BtlUnit *object) {
     }
     duration = btlGetUnitModelFrameCount(object);
     if (duration > 0) {
-        randomFrame = effMiscRandMod(0, duration);
+        randomFrame = sdfGetRandInt(0, duration);
         frame = (f32)randomFrame;
         sdfMotionSampleAtFrame(object->ext->owner->first, frame);
     }
@@ -2985,7 +2985,7 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
     VU0_STORE_VF(vf10, world);
     if (((u32)object->status.flags & 2) != 0) {
         world[2] += *(f32 *)((u8 *)object + 0x88);
-        effObjSetInnerPosition(object->effectObject, (u128 *)world);
+        dds3SetPosPoseSet(object->effectObject, (u128 *)world);
     }
 }
 
@@ -3124,7 +3124,7 @@ void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     effMiscQuatMultiplyVU();
     VU0_STORE_VF_UNCLOBBERED(vf10, vector);
     if (((u32)object->status.flags & 2) != 0) {
-        effObjSetInnerRotation(object->effectObject, (u128 *)vector);
+        dds3SetRotPoseSet(object->effectObject, (u128 *)vector);
     }
 }
 
@@ -3162,9 +3162,9 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return;
     }
-    effObjFetchInnerPosition(unit->effectObject);
+    dds3GetPosPoseSet(unit->effectObject);
     mdlStorePrimaryVectorVU(unit->ext->owner);
-    effObjFetchInnerRotationNormalized(unit->effectObject);
+    dds3GetRotPoseSet(unit->effectObject);
     mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
     sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
 }
@@ -3307,7 +3307,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     }
     shape = unit->ext->owner->sub;
     unit->transparencyModel = sdfModelCreateWithItems(shape->resourceList, shape->itemList);
-    dds3SetObjectFlags(unit->effectObject, 1);
+    dds3ObjectBaseOnFlag(unit->effectObject, 1);
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
 
@@ -3337,11 +3337,11 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                     }
                     mdlBroadcastMasked(info, color);
                     mdlProcessContextNodesAndTransforms(info, D_00325788[0]);
-                    dds3ClearObjectFlags(unit->effectObject, 1);
+                    dds3ObjectBaseOffFlag(unit->effectObject, 1);
                     btlBossDebugPrintf(D_003A3AD0, unit);
                 }
             } else if (alpha == 0) {
-                dds3SetObjectFlags(unit->effectObject, 1);
+                dds3ObjectBaseOnFlag(unit->effectObject, 1);
             } else if (unit->transparencyModel == 0) {
                 btlCreateUnitTransparency(unit);
             } else {
@@ -3372,24 +3372,24 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
         return;
     }
     unit->mirror->transparencyBuffer = sdfAllocPacketAligned(0x70000);
-    list = sdfAllocatePacketList(0);
+    list = sdfPrimAllocDrawTag(0);
     sdfCreateResourcePacket(list, D_003980E0.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
     btlMirrorSourceTransparencySurfaces[0]->append(btlMirrorSourceTransparencySurfaces[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
-        dds3SetObjectFlags(unit->effectObject, 1);
+        dds3ObjectBaseOnFlag(unit->effectObject, 1);
         return;
     }
     btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, btlMirrorSourceTransparencySurfaces, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->transparencyModel == 0) {
         unit->mirror->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
-        dds3SetObjectFlags(unit->mirror->effectObject, 1);
+        dds3ObjectBaseOnFlag(unit->mirror->effectObject, 1);
         return;
     }
-    list = sdfAllocatePacketList(0);
+    list = sdfPrimAllocDrawTag(0);
     sdfCreateDescriptorPacket(list, D_003980E0.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
     btlMirrorTargetTransparencySurfaces[0]->append(btlMirrorTargetTransparencySurfaces[0], list);
@@ -3485,14 +3485,14 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     if ((unit->status.flags & 2) != 0) {
         world[1] = 0;
         if (sdfLoadMapRecordPositionVector(unit->ext->owner->inner, 0) == 0) {
-            effObjFetchInnerPosition(unit->effectObject);
+            dds3GetPosPoseSet(unit->effectObject);
         }
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
         VU0_LOAD_VF(vf11, world);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(distance);
         if (distance < 2.0f * (unit->bodyRadius * unit->scale)) {
-            effObjSetInnerPosition(unit->effectObject, (u128 *)world);
+            dds3SetPosPoseSet(unit->effectObject, (u128 *)world);
             unit->status.stateFlags |= 0x8000;
             btlBossDebugPrintf(btlUnitWarpFormat, unit);
         }
@@ -4008,7 +4008,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             btlDestroyUnit((u8 *)unit->mirror);
             unit->mirror = NULL;
             if (unit->transparencyBufferAllocation != 0) {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->transparencyBufferAllocation);
+                sdfMemFreeDelayedDirect((struct SdfMemBlock *)unit->transparencyBufferAllocation);
                 unit->transparencyBufferAllocation = 0;
                 unit->transparencyBuffer = 0;
             }
@@ -4575,13 +4575,13 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
     }
     if (0.5f < task->amplitude) {
         BtlUnit *actor;
-        scale = task->amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.5f + 0.5f);
+        scale = task->amplitude * (sdfGetRandFloat(effSharedRandomState) * 0.5f + 0.5f);
         if (task->tick & 1) {
             scale = -scale;
         }
         actor = task->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
-            effObjFetchInnerPosition(actor->effectObject);
+            dds3GetPosPoseSet(actor->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
             pos[0] += scale;
         } else {
@@ -4589,18 +4589,18 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             pos[0] += scale;
             pos[2] += task->unit->positionZOffset;
         }
-        effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
+        dds3SetPosPoseSet(task->unit->effectObject, (u128 *)pos);
         task->amplitude *= 0.85f;
     } else {
         BtlUnit *actor = task->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
-            effObjFetchInnerPosition(actor->effectObject);
+            dds3GetPosPoseSet(actor->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
             btlCopyUnitCurrentPosition((u8 *)actor, pos);
             pos[2] += task->unit->positionZOffset;
         }
-        effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
+        dds3SetPosPoseSet(task->unit->effectObject, (u128 *)pos);
         return 1;
     }
     task->tick += 1;
@@ -4684,14 +4684,14 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         if (task->amount <= 0.01f) {
             btlCopyUnitCurrentPosition((u8 *)task->unit, position);
             position[2] += task->unit->positionZOffset;
-            effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
+            dds3SetPosPoseSet(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
     btlCopyUnitCurrentPosition((u8 *)task->unit, position);
     position[0] += offset;
     position[2] += task->unit->positionZOffset;
-    effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
+    dds3SetPosPoseSet(task->unit->effectObject, (u128 *)position);
     task->tick++;
     return 0;
 }
@@ -4792,7 +4792,7 @@ u32 btlPollGunLoad(u32 *taskArgs) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->handle);
-    unit->gunResource = (void *)sdfResourceRetainAddress(fileGetResourceHandle((struct FileRequest *)loadArgs->handle));
+    unit->gunResource = (void *)sdfMemLock(fileGetResourceHandle((struct FileRequest *)loadArgs->handle));
     filePollEntryCleanup((struct FileRequest *)(u32)loadArgs->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
@@ -5034,8 +5034,8 @@ void btlResetUnitLinks(BtlUnit *actor) {
 extern void *memset(void *, int, unsigned int);
 
 BtlUnit *btlCreateUnit(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x348);
-    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x348);
+    BtlUnit *unit = (BtlUnit *)sdfMemLock(allocation);
     BtlActorWork *work;
     memset(unit, 0, 0x348);
     unit->handle = (u32)allocation;
@@ -5092,7 +5092,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources(unit);
     if (unit->transparencyBufferAllocation != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->transparencyBufferAllocation);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)unit->transparencyBufferAllocation);
         unit->transparencyBufferAllocation = 0;
         unit->transparencyBuffer = 0;
     }
@@ -5116,7 +5116,7 @@ void btlDestroyUnit(u8 *actor) {
     } else {
         *(u8 **)((u8 *)btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)(actor + 0x33C)));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*(s32 *)(actor + 0x33C)));
 }
 
 void btlDestroyAllUnits(void) {
@@ -5198,7 +5198,7 @@ BtlIndexList *btlAllocateIndexList(s32 capacity) {
 }
 
 void btlFreeIndexList(BtlIndexList *list) {
-    sdfReleaseChipBlock(list);
+    sdfChipFreeDirect(list);
 }
 
 /* The caller keeps the live count within the allocated capacity. */
@@ -5788,10 +5788,10 @@ void btlUpdateBattleCameraFrame(void) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf11, &data->worldEye);
     VU0_STORE_VF(vf10, position);
-    effObjSetInnerPosition(camera, (u128 *)position);
+    dds3SetPosPoseSet(camera, (u128 *)position);
     dds3SetCameraFieldOfView(camera, scene->cameraCommand.camera.fov);
     data->fovUpdatePending |= 1;
-    effObjSetInnerRotation(camera, (u128 *)btlCameraOutputRotation);
+    dds3SetRotPoseSet(camera, (u128 *)btlCameraOutputRotation);
     PCP_COPY_VECTOR(&data->localUp, btlCameraLocalUpVector);
     scene->cameraCommand.state++;
 }
@@ -5823,8 +5823,8 @@ void btlInitializeWorldCamera(void) {
     VU0_STORE_VF(vf10, position);
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera != NULL) {
-        effObjSetInnerPosition(camera, (u128 *)position);
-        effObjSetInnerRotation(camera, (u128 *)btlWorldCameraStartRotation);
+        dds3SetPosPoseSet(camera, (u128 *)position);
+        dds3SetRotPoseSet(camera, (u128 *)btlWorldCameraStartRotation);
         data = camera->data;
         dds3SetCameraFieldOfView(camera, 0.6981317f);
         data->fovUpdatePending |= 1;

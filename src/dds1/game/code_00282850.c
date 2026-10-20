@@ -352,7 +352,7 @@ typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
 MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
-    MenuPanelState *panel = sdfAllocSizeClassBlock(sizeof(MenuPanelState));
+    MenuPanelState *panel = sdfChipAllocDirect(sizeof(MenuPanelState));
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
     panel->width = width;
     panel->height = height;
@@ -366,7 +366,7 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     if (resourceHandle != 0) {
         mnuReleaseResourceList(resourceHandle);
     }
-    sdfReleaseChipBlock(panel);
+    sdfChipFreeDirect(panel);
 }
 
 void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
@@ -461,7 +461,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
 
 /* Create the five panel items owned by this group and clear its selection. */
 MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *parent) {
-    MenuPanelGroup *group = sdfAllocSizeClassBlock(sizeof(MenuPanelGroup));
+    MenuPanelGroup *group = sdfChipAllocDirect(sizeof(MenuPanelGroup));
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         MenuPanelItem *panelItem = mnuCreatePanelItem();
@@ -479,7 +479,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         mnuFreePanelItemWork(group->children[panelIndex]);
     }
-    sdfReleaseChipBlock(group);
+    sdfChipFreeDirect(group);
 }
 
 /* Configure all five panel items against the same grid object. */
@@ -560,7 +560,7 @@ void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 o
 MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
                                       struct EffectSlotSet *resourceSet1,
                                       struct EffectSlotSet *resourceSet2) {
-    MenuSpriteState *spriteState = sdfAllocSizeClassBlock(sizeof(MenuSpriteState));
+    MenuSpriteState *spriteState = sdfChipAllocDirect(sizeof(MenuSpriteState));
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
     spriteState->resourceSets[0] = resourceSet0;
     spriteState->resourceSets[1] = resourceSet1;
@@ -570,7 +570,7 @@ MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
 }
 
 void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
-    sdfReleaseChipBlock(spriteState);
+    sdfChipFreeDirect(spriteState);
 }
 
 /* Select the range entry's sprite variant before submitting its draw request. */
@@ -655,7 +655,7 @@ void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
                         y + rows[0][horizontal][1] + vertical * 0xA8,
                         depth, 0xA09DC380, D_003BAA8C + skillId * 17, 0);
                     frFontDrawGlyphChain(glyph, 1, surface);
-                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    frDestroyFontRequestAfter(glyph);
                 } else {
                     effDrawSpriteWithCornerFade(
                         x + rows[1][horizontal][0],
@@ -672,7 +672,7 @@ MenuSimpleSpriteState *mnuAllocateSimpleSprite(
     struct EffectSlotSet *resourceSet0, struct EffectSlotSet *resourceSet1,
     struct EffectSlotSet *resourceSet2, struct EffectSlotSet *resourceSet3,
     struct EffectSlotSet *resourceSet4) {
-    MenuSimpleSpriteState *sprite = sdfAllocSizeClassBlock(sizeof(MenuSimpleSpriteState));
+    MenuSimpleSpriteState *sprite = sdfChipAllocDirect(sizeof(MenuSimpleSpriteState));
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
     sprite->resourceSets[0] = resourceSet0;
     sprite->resourceSets[1] = resourceSet1;
@@ -684,7 +684,7 @@ MenuSimpleSpriteState *mnuAllocateSimpleSprite(
 }
 
 void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *sprite) {
-    sdfReleaseChipBlock(sprite);
+    sdfChipFreeDirect(sprite);
 }
 
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
@@ -737,7 +737,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, DatPartyRecord *a
             mnuDrawRangeSpriteVariant(drawX - 0x160, drawY, depth, fade, skillId, 0, panel->resourceSets[4], surface);
             glyph = itfCreateConvertedTextGlyph(drawX, drawY, depth, 0xA09DC380, D_003BAA8C + skillId * 17, 0);
             frFontDrawGlyphChain(glyph, 1, surface);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
             mnuDrawRangeCostAndIcon(drawX + 0x7B0, drawY + 0x20, depth, 0x100, fade, actor, skillId, 0, 0, panel->resourceSets[1], panel->resourceSets[2], surface);
         } else {
             effDrawSpriteWithCornerFade(x + rows[1].x, y + rows[1].y + rowOffset, depth, fade, 1, panel->resourceSets[1], 9, surface);
@@ -1039,7 +1039,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
             glyph = itfCreateFont2TextGlyph(x + 0x490, drawY, depth, color, text, 0);
         }
         frFontDrawGlyphChain(glyph, 1, drawFlags);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
     }
 }
 
@@ -1051,7 +1051,7 @@ void func_00284880(void) {
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {
-    MenuPanelItem *panelItem = sdfAllocSizeClassBlock(sizeof(MenuPanelItem));
+    MenuPanelItem *panelItem = sdfChipAllocDirect(sizeof(MenuPanelItem));
     memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
     panelItem->value14 = 0x63;
     panelItem->value10 = 0x8c;
@@ -1116,7 +1116,7 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
 }
 
 void mnuFreePanelItemWork(MenuPanelItem *item) {
-    sdfReleaseChipBlock(item);
+    sdfChipFreeDirect(item);
 }
 
 extern void mnuDrawPanelItemDetail(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
@@ -1180,7 +1180,7 @@ void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
             glyph = itfCreateFont2TextGlyph(x + ((offset + 0x6C) << 4), y + 0x50,
                                             depth, color, text, 0);
             frFontDrawGlyphChain(glyph, 1, layer);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
         }
     }
 }
@@ -1217,7 +1217,7 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     sprintf(buffer, D_003BC7A0, value);
     glyph = itfCreateFont2TextGlyph(x + 0x340, y + 0x28, depth, color, buffer, 0);
     frFontDrawGlyphChain(glyph, 1, layer);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 
@@ -1231,7 +1231,7 @@ extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 
 /* Create a profile panel from the selection state's current profile ID and record. */
 MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
-    MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(sizeof(MenuProfilePanel));
+    MenuProfilePanel *panel = (MenuProfilePanel *)sdfChipAllocDirect(sizeof(MenuProfilePanel));
     s32 profileId;
     DatProfileRecord *profileRecord;
     memset(panel, 0, sizeof(MenuProfilePanel));
@@ -1243,7 +1243,7 @@ MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
 }
 
 void mnuFreeProfilePanelWork(MenuProfilePanel *panel) {
-    sdfReleaseChipBlock(panel);
+    sdfChipFreeDirect(panel);
 }
 
 void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fillIndex,
@@ -3055,14 +3055,14 @@ void evtDestroyBattleStageTestWorldNode(KwlnTask *task) {
 
 /* Destroy the named battle-stage-test task hierarchy and disable the debug graph. */
 void evtBattleStageTestStopTask(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_003B2608, 1);
+    dds3KillProcessName(D_003B2608, 1);
     kwlnDebugGraphSetEnabled(0);
 }
 
 /* Enable the debug graph and create the battle-stage selector task with its cleanup callback. */
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
-    kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
+    dds3StartProcess(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
 /* A PAC file request's cleanup (filePollEntryCleanup delegates it): once the
@@ -3075,11 +3075,11 @@ s32 btlDestroyStageTask(request)
     if (request->state == FILE_REQUEST_COMPLETE_STATE) {
         void *deviceRequest = request->deviceRequest;
         if (deviceRequest != NULL) {
-            sdfDevQueueReleaseState((DevState *)deviceRequest);
+            sdfFileCmdFree((DevState *)deviceRequest);
         }
         sdfPacReleasePacketQueueNodes(&request->packet);
-        sdfReleaseChipBlock(request->name);
-        sdfReleaseChipBlock((void *)request);
+        sdfChipFreeDirect(request->name);
+        sdfChipFreeDirect((void *)request);
         return 0;
     }
     return 1;

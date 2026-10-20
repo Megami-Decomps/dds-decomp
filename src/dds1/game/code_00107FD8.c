@@ -997,7 +997,7 @@ void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *
 
     glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 /* Zero frames leaves the prior state untouched; zero countLimit selects the -1 sentinel. */
@@ -1049,7 +1049,7 @@ void evtDestroySelectionState(void) {
 
 void evtSelStateDestroy(void) {
     if (evtSelectionStateActive != 0) {
-        sdfReleaseChipBlock(evtSelectionState);
+        sdfChipFreeDirect(evtSelectionState);
         evtSelectionStateActive = 0;
         VU0_MOVE_VF(vf10, vf0);
         VU0_CLEAR_W(vf10);
@@ -1058,11 +1058,11 @@ void evtSelStateDestroy(void) {
 }
 
 s32 evtStartSelCreate(void) {
-    return kwlnTaskCreate(D_0039E1F0, 0x2AF9, 0, 0, (s32)kwlnTaskNoopCallback, 0, 0);
+    return dds3StartProcess(D_0039E1F0, 0x2AF9, 0, 0, (s32)kwlnTaskNoopCallback, 0, 0);
 }
 
 u32 evtStartSelDestroy(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_0039E1F0, 1);
+    dds3KillProcessName(D_0039E1F0, 1);
     return 1;
 }
 
@@ -1344,10 +1344,10 @@ s32 evtCheckBattleShutdown(void) {
 }
 
 u32 evtEnsureSelectionTask(void) {
-    if (kwlnTaskGetTaskByName(D_003BA950) != NULL) {
+    if (dds3SearchProcessName(D_003BA950) != NULL) {
         return 0;
     }
-    if (kwlnTaskFindByPriority(0x3FA) == NULL) {
+    if (dds3SearchProcessPriority(0x3FA) == NULL) {
         fldDispatchDeferredFieldCommand();
         return 1;
     }
@@ -1532,7 +1532,7 @@ u32 evtDestroyFontTestModeNoOp(void) {
 }
 
 u32 evtTestFontCheck(void) {
-    return kwlnTaskGetTaskByName(D_0039E200) == NULL;
+    return dds3SearchProcessName(D_0039E200) == NULL;
 }
 
 void evtCreateMovieViewerTask(void) {
@@ -1670,9 +1670,9 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E200);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, 0);
+        D_003BD764 = dds3StartProcess("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, 0);
     } else if (mode == 0) {
-        kwlnTaskDestroyWithHierarchy(D_003BD764, 0);
+        dds3KillProcess(D_003BD764, 0);
     }
 }
 
@@ -1885,9 +1885,9 @@ void evtResourceCountDebugTaskDestroy(KwlnTask *task) {
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, 0);
+        D_003BD768 = dds3StartProcess(D_0039E238, 0x2710, 1, 1, evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, 0);
     } else if (mode == 0) {
-        kwlnTaskDestroyWithHierarchy(D_003BD768, 0);
+        dds3KillProcess(D_003BD768, 0);
     }
 }
 
@@ -1950,7 +1950,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
         procedureIndex >= sections->count) {
         return NULL;
     }
-    process = sdfAllocSizeClassBlock(sizeof(ScrData));
+    process = sdfChipAllocDirect(sizeof(ScrData));
     if (process == NULL) {
         return NULL;
     }
@@ -1984,7 +1984,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
     process->previous = NULL;
     process->next = NULL;
     if (header->intCount > 0) {
-        process->localInt = sdfAllocSizeClassBlock(header->intCount * sizeof(s32));
+        process->localInt = sdfChipAllocDirect(header->intCount * sizeof(s32));
         for (i = 0; i < header->intCount; i++) {
             process->localInt[i] = 0;
         }
@@ -1992,7 +1992,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
         process->localInt = NULL;
     }
     if (header->floatCount > 0) {
-        process->localFloat = sdfAllocSizeClassBlock(header->floatCount * sizeof(f32));
+        process->localFloat = sdfChipAllocDirect(header->floatCount * sizeof(f32));
         for (i = 0; i < header->floatCount; i++) {
             process->localFloat[i] = 0;
         }

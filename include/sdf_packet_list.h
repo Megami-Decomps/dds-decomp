@@ -7,7 +7,7 @@ struct SdfListHead;
 struct SdfDmaNode;
 struct SdfPoolNode;
 
-struct SdfListHead *sdfAllocatePacketList(s32 (*allocator)(s32));
+struct SdfListHead *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
 struct SdfListHead *sdfCreateResetPacketList(void);
 void sdfInitPacketList(struct SdfListHead *list);
 

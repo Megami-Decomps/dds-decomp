@@ -149,7 +149,7 @@ extern s32 DIntr(void);
 extern void EIntr(void);
 
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
-void *sdfAllocSizeClassBlock(s32 size) {
+void *sdfChipAllocDirect(s32 size) {
     s32 index = 0;
     SdfChipClass *sizeClass;
     SdfChipCell *result;

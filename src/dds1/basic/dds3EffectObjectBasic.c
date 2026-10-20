@@ -88,7 +88,7 @@ void effObjReleaseObjectData(EffectObj *obj) {
     effObjReleaseStateDependencies(data);
     effObjFreeInner(obj);
     dds3DestroyObjectBase(data->objectHandle);
-    sdfReleaseChipBlock(obj->data);
+    sdfChipFreeDirect(obj->data);
     obj->data = NULL;
 }
 
@@ -238,7 +238,7 @@ s32 effObjUpdateDependencies(EffectObj *obj) {
     if ((data->flags & 1) == 0) {
         return 1;
     }
-    if (dds3TestObjectFlags(obj, 1)) {
+    if (dds3ObjectBaseCheckFlag(obj, 1)) {
         return 1;
     }
 
@@ -280,8 +280,8 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     }
     obj->key = worldCounter;
     dds3EnsureSlotData(obj);
-    effObjSetInnerPosition(obj, firstVec);
-    effObjSetInnerRotation(obj, secondVec);
+    dds3SetPosPoseSet(obj, firstVec);
+    dds3SetRotPoseSet(obj, secondVec);
     effObjInnerVecBackup(obj->inner);
     data = obj->data;
     data->flags = 0;
@@ -537,7 +537,7 @@ EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    data->vector = sdfAllocSizeClassBlock(sizeof(parameters));
+    data->vector = sdfChipAllocDirect(sizeof(parameters));
     memcpy(data->vector, &parameters, sizeof(parameters));
     objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
     objectHandle->resourceState = 2;
@@ -563,7 +563,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = effObjCreateEventNodeFromMixer((SoundMixer *)resolvedId, firstVector, secondVector);
-    sdfReleaseResourceAllocation(resourceHandle);
+    sdfMemFreeDirect(resourceHandle);
     return created;
 }
 
@@ -660,16 +660,16 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    data->node = sdfAllocSizeClassBlock(0x10);
+    data->node = sdfChipAllocDirect(0x10);
     memset(data->node, 0, 0x10);
     switch (kind) {
     case 1:
-        data->vector = sdfAllocSizeClassBlock(sizeof(twoRows));
+        data->vector = sdfChipAllocDirect(sizeof(twoRows));
         memcpy(data->vector, twoRows, sizeof(twoRows));
         effMagatuhiCopyFloatBlock(bill, data->vector);
         break;
     case 2:
-        data->vector = sdfAllocSizeClassBlock(sizeof(fourRows));
+        data->vector = sdfChipAllocDirect(sizeof(fourRows));
         memcpy(data->vector, fourRows, sizeof(fourRows));
         effMagatuhiSetControlPointParams(bill, data->vector);
         break;
@@ -697,7 +697,7 @@ void *effObjCreateKindFromResource(s32 kind, void *resource) {
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     created = effObjCreateMagatuhiForKind(kind, resolvedId);
-    sdfReleaseResourceAllocation(resourceHandle);
+    sdfMemFreeDirect(resourceHandle);
     return created;
 }
 

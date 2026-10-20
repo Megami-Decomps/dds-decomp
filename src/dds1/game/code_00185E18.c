@@ -27,7 +27,7 @@ void effFreePairedResources(PairedEffectResources *pair) {
 
     effThunderGroupRelease(pair->resource[1]);
     effThunderGroupRelease(pair->resource[0]);
-    sdfReleaseChipBlock(pair);
+    sdfChipFreeDirect(pair);
 }
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
@@ -174,7 +174,7 @@ void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad,
         centerY = v * (1.0f / 3584.0f);
     }
     scale = source->displacement;
-    cosine = sdfEvaluateCosineViaSinePhaseShift(source->angle);
+    cosine = sdfCos(source->angle);
     sine = sdfSinPoly(source->angle);
     scaledU = (quad->vertices[0].s - centerX) * scale;
     scaledV = (quad->vertices[0].t - centerY) * scale;
@@ -436,7 +436,7 @@ extern void *memcpy(void *, const void *, unsigned int);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {
-    EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
+    EffBlurTemplate *dst = sdfChipAllocDirect(sizeof(EffBlurTemplate));
 
     dst->texture = effGetBillResourceTexture(2);
     memcpy(&dst->body, src, sizeof(*src));
@@ -444,7 +444,7 @@ EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {
 }
 
 void effReleaseBlurTemplate(EffBlurTemplate *owner) {
-    sdfReleaseChipBlock(owner);
+    sdfChipFreeDirect(owner);
 }
 
 /* Pixel-coordinate variant of the fixed-point rectangle below: the extent is not halved for Y. */

@@ -5,9 +5,9 @@
 #include "kwln.h"
 
 /* Queue size is a scalar count; unknown or detached states have no entries. */
-s32 kwlnTaskGetStateList(u32 state);
+s32 dds3GetProcessCount(u32 state);
 
 /* Returns a borrowed queue node, or NULL for detached/unsupported states or exhaustion. */
-KwlnTask *kwlnTaskGetByStateAndIndex(u32 taskState, s32 taskIndex);
+KwlnTask *dds3SearchProcessNumber(u32 taskState, s32 taskIndex);
 
 #endif /* KWLN_TASK_QUEUE_QUERY_H */

@@ -153,7 +153,7 @@ struct FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex,
 struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
 /* Update the first-option byte of every child on this glyph chain. */
-void frFontSetChildChainFirstOption(struct FrFontGlyph *glyph, u8 firstOption);
+void frSetFontColorNo(struct FrFontGlyph *glyph, u8 firstOption);
 /* Replace each child render word along the borrowed glyph chain. */
 void frFontSetChildColors(struct FrFontGlyph *parentNode, u32 colorWord);
 
@@ -164,7 +164,7 @@ struct FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth,
     u32 colors, char *text, struct FrFontGlyph *parent);
 
 /* Link a glyph chain into the current draw-buffer slot. */
-s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *glyph);
+s32 frDestroyFontRequestAfter(struct FrFontGlyph *glyph);
 
 #ifdef VERSION_DDS1
 struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,

@@ -16,7 +16,7 @@ void dds3ReleaseEventData(EffWorldNode *eventObject) {
     effObjFreeInner(eventObject);
     eventData = eventObject->data;
     dds3DestroyObjectBase(eventData->resourceState);
-    sdfReleaseChipBlock(eventData);
+    sdfChipFreeDirect(eventData);
 }
 
 /* Snapshot the node's vectors once its pending flag is observed. */

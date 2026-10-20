@@ -60,7 +60,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
     s32 buttons;
     s32 result;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
+    context = (BrsSkillPackageWork *)dds3GetProcessData(input);
     transitionState = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
@@ -82,7 +82,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
 }
 
 s32 mnuStaffRunPanel1(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
@@ -91,7 +91,7 @@ s32 mnuStaffRunPanel1(KwlnTask *task) {
 }
 
 s32 mnuStaffRunPanel2(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         brsDecaySharedAnimCounter(context);
@@ -110,19 +110,19 @@ u32 mnuResultMessageLeaveNoOp(void) {
 }
 
 s32 mnuStaffRunPanel0(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     mnuMapPadMaskToFlags(0x33);
     return menuSetHandler((void *)context, 0, (void *)task);
 }
 
 s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *task) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, (void *)task);
 }
 
 s32 mnuAdvanceResultPanel(KwlnTask *input) {
-    s32 context = kwlnTaskGetUserValue(input);
+    s32 context = dds3GetProcessData(input);
     return menuSetHandler((void *)context, 2, (void *)input);
 }
 
@@ -271,7 +271,7 @@ s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
 
 s32 mnuDispatchProfileSelectionScene(void *task) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     s32 *dispatchStatus = &scene->transition.state;
 
     result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, task);
@@ -321,14 +321,14 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
 
 
 s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, (void *)request);
 }
 
 s32 mnuRequestMessageWindowAndAdvanceResultPanel(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
@@ -336,7 +336,7 @@ s32 mnuRequestMessageWindowAndAdvanceResultPanel(KwlnTask *request) {
 
 /* Clear the scene's two selection-processing markers; return 1. */
 s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     scene->selectedRow = 0;
     scene->resetStateB = 0;
     return 1;
@@ -437,7 +437,7 @@ extern char brsLevelChangePopupEntry[];
 /* Advance the selected party member, apply its gains, and choose the next popup. */
 s32 brsProcessNextPrimaryReward(KwlnTask *task) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)dds3GetProcessData(task);
     s32 *dispatchStatus;
     s32 *slots;
     DatPartyRecord *item;

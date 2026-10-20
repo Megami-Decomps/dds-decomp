@@ -126,8 +126,8 @@ void dds3UpdateLinkedNodes(void) {
 void frFontSubmitAndFreeGlyphOwner(void *owner) {
     Dds3FontNode *node = owner;
 
-    frFontQueueGlyphForCurrentDrawBuffer(node->glyph);
-    sdfReleaseChipBlock(node);
+    frDestroyFontRequestAfter(node->glyph);
+    sdfChipFreeDirect(node);
 }
 
 s32 frFontDrawOwnedGlyph(void *owner) {
@@ -154,11 +154,11 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
 }
 
 void itfConfigureOwnedGlyphChainFlag(Dds3FontNode *node, u8 value) {
-    frFontSetChildChainFirstOption(node->glyph, value);
+    frSetFontColorNo(node->glyph, value);
 }
 
 void frFontReleaseOwnerStorage(void *memory) {
-    sdfReleaseChipBlock(memory);
+    sdfChipFreeDirect(memory);
 }
 
 Dds3IntrusiveNodeCallbacks dds3FontNodeVTable __attribute__((section(".sdata"))) = {

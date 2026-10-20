@@ -143,7 +143,7 @@ extern void *memset(void *, int, unsigned int);
 
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(MnuResourceTaskWork));
     MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
@@ -176,9 +176,9 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuResourceTaskWork *resourceWork)
         mnuFinalizeProgressHostVia(resourceWork->staffMenuContext, mnuReleaseStaffMenuContextAndResources);
     }
     dspCloseChannel();
-    sdfQueueGeneralAllocationRelease(resourceWork->messageResource1);
-    sdfQueueGeneralAllocationRelease(resourceWork->messageResource2);
-    sdfReleaseResourceAllocation(resourceWork->allocation);
+    sdfMemFreeDelayedDirect(resourceWork->messageResource1);
+    sdfMemFreeDelayedDirect(resourceWork->messageResource2);
+    sdfMemFreeDirect(resourceWork->allocation);
     resourceWork = NULL;
 }
 
@@ -260,7 +260,7 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     struct MenuList *list = mnuCreateListState(0, 6, 0x1A);
 
     list->drawCallback = mnuDrawMantraPartyListEntry;
-    list->context = sdfAllocSizeClassBlock(MNU_LIST_DRAW_VALUE_BYTES);
+    list->context = sdfChipAllocDirect(MNU_LIST_DRAW_VALUE_BYTES);
     memset(list->context, 0, MNU_LIST_DRAW_VALUE_BYTES);
     memset(partyOrder, 0, sizeof(partyOrder));
     do {
@@ -277,7 +277,7 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     do {
         if (*orderCursor != 0) {
             struct MenuListNode *selectionNode = mnuListAppendNode(list, NULL);
-            MnuProfileProgress *progress = sdfAllocSizeClassBlock(sizeof(MnuProfileProgress));
+            MnuProfileProgress *progress = sdfChipAllocDirect(sizeof(MnuProfileProgress));
             u16 partySlot = *orderCursor;
 
             selectionNode->userValue = (u32)progress;
@@ -319,7 +319,7 @@ void mnuResetResourceAnimation(void) {
 
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
 MnuResourceTask *mnuAllocateEmptyResourceListState(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_RESOURCE_LIST_WORK_BYTES);
     MnuResourceTask *task = (MnuResourceTask *)sdfMemoryGetBlockAddress(allocation);
 
     memset(task, 0, MNU_RESOURCE_LIST_WORK_BYTES);
@@ -337,13 +337,13 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
     MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     while (nodeCursor != NULL) {
-        sdfReleaseChipBlock((void *)(u32)nodeCursor->userValue);
+        sdfChipFreeDirect((void *)(u32)nodeCursor->userValue);
         nodeCursor = nodeCursor->next;
     }
-    sdfReleaseChipBlock(list->context);
+    sdfChipFreeDirect(list->context);
     mnuDestroyListState(list);
     mnuFinalizeProgressHostVia(sceneMetadata->attachedEffect, mnuReleaseMenuVisualWorkResources);
-    sdfReleaseResourceAllocation(task->allocation);
+    sdfMemFreeDirect(task->allocation);
     task = NULL;
 }
 
@@ -1020,7 +1020,7 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
 /* Release a nonnull grid-cell payload; the cell index is unused. */
 s32 mnuFreeTaskData(u32 unused, u32 taskData) {
     if (taskData != 0) {
-        sdfReleaseChipBlock((void *)taskData);
+        sdfChipFreeDirect((void *)taskData);
     }
 }
 
@@ -1124,7 +1124,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 MenuSceneWork *mnuCreateSceneWork(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_SCENE_WORK_SIZE);
     u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocation);
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
@@ -1142,7 +1142,7 @@ void mnuReleaseSceneContext(s32 unused, MenuSceneWork *scene) {
     sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     sdfDestroyGridWork(scene->gridHandle);
     mnuReleaseDisplayListNodes(&scene->sceneTransitionList);
-    sdfReleaseResourceAllocation(scene->allocation);
+    sdfMemFreeDirect(scene->allocation);
     mnuResetWorkFloats();
     /* Post-final-call exception: retail keeps jal + epilogue; this clear survives 01.sibling..11.cfg and is deleted in 13.life (cc1probe trace). */
     scene = NULL; /* the scene work was released above */
@@ -1469,7 +1469,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
         }
     }
 
-    entry = sdfAllocSizeClassBlock(sizeof(MnuMantraGridEntry));
+    entry = sdfChipAllocDirect(sizeof(MnuMantraGridEntry));
     memset(entry, 0, sizeof(MnuMantraGridEntry));
     entry->sceneId = profileId;
     entry->requiredLevel = prfGetRequiredProfileLevel(entry->sceneId);

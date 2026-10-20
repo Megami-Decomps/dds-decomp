@@ -70,7 +70,7 @@ typedef struct SkillMenuContext {
 extern void mnuDrawPanelState(s32, s32, s32, s32, s32);
 
 s32 ptySkillMenuUpdate(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state != 0) {
@@ -125,7 +125,7 @@ void ptySkillMenuCopyPageState(s32 context) {
 }
 
 s32 ptySkillMenuEnterPage(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
     s32 label;
@@ -160,7 +160,7 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
 }
 
 s32 ptySkillMenuDispatchPageRequest(KwlnTask *selection) {
-    s32 context = kwlnTaskGetUserValue(selection);
+    s32 context = dds3GetProcessData(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
@@ -206,7 +206,7 @@ void mnuFlagMatchingEntries(s32 context) {
 }
 
 s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -241,7 +241,7 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
 }
 
 s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(3);
@@ -253,7 +253,7 @@ s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
 }
 
 s32 ptySkillMenuDispatchConfirmRequest(KwlnTask *selection) {
-    s32 context = kwlnTaskGetUserValue(selection);
+    s32 context = dds3GetProcessData(selection);
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
@@ -261,7 +261,7 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void ptySkillMenuInitPages(void *);
 
 s32 ptySkillMenuOpenPartyPage(KwlnTask *menu) {
-    u8 *ctx = (u8 *)kwlnTaskGetUserValue(menu);
+    u8 *ctx = (u8 *)dds3GetProcessData(menu);
     MenuPageWindow *panel = (MenuPageWindow *)(ctx + 0x15C);
 
     mnuSelectPage(panel, ((SkillMenuContext *)ctx)->selection->cursor->index);
@@ -275,7 +275,7 @@ extern u32 mnuDestroySelectedPartyWindow(KwlnTask *task);
 extern void mnuDestroySkillMenuWindows(s32 context);
 
 s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
-    s32 context = kwlnTaskGetUserValue(selection);
+    s32 context = dds3GetProcessData(selection);
     mnuDestroySelectedPartyWindow(selection);
     mnuDestroySkillMenuWindows(context);
     mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15c));
@@ -284,7 +284,7 @@ s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
 
 extern void mnuClearListFlagsOneAndTwo();
 s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     s32 changed = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
 

@@ -324,16 +324,16 @@ void mnuUpdateSparkle(DspParticle *spark) {
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;
-            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 30.0f + 1.0f;
-        } else if (effMiscRandUnitFloat(0) > 0.7f) {
-            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 30.0f + 0.0f;
+            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 30.0f + 1.0f;
+        } else if (sdfGetRandFloat(0) > 0.7f) {
+            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 30.0f + 0.0f;
         } else {
             spark->phase = 1;
-            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 60.0f + 45.0f;
-            spark->z = (effMiscRandUnitFloat(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
-            spark->size = effMiscRandUnitFloat(0) * 10.0f;
-            spark->x = effMiscRandUnitFloat(0) * 512.0f + -256.0f;
-            spark->y = effMiscRandUnitFloat(0) * 448.0f + -128.0f;
+            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 60.0f + 45.0f;
+            spark->z = (sdfGetRandFloat(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = sdfGetRandFloat(0) * 10.0f;
+            spark->x = sdfGetRandFloat(0) * 512.0f + -256.0f;
+            spark->y = sdfGetRandFloat(0) * 448.0f + -128.0f;
         }
     }
 }
@@ -348,10 +348,10 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
 
     state->countdown = state->countdown - 1;
     if (state->countdown < 0) {
-        duration = effMiscRandUnitFloat(0) * 60.0f + 60.0f;
+        duration = sdfGetRandFloat(0) * 60.0f + 60.0f;
         state->period = duration;
         state->countdown = duration;
-        state->strength = effMiscRandUnitFloat(0) * 0.20000005f + 0.4f;
+        state->strength = sdfGetRandFloat(0) * 0.20000005f + 0.4f;
     }
     /* Advance every particle, including those waiting for their next phase. */
     particle = state->particles;
@@ -564,7 +564,7 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
 INCLUDE_ASM(const s32, "game/code_00254B30", itfUpdateDisplayListNode);
 
 MnuSceneListNode *mnuAllocateDisplayListNode(void) {
-    MnuSceneListNode *node = sdfAllocSizeClassBlock(sizeof(MnuSceneListNode));
+    MnuSceneListNode *node = sdfChipAllocDirect(sizeof(MnuSceneListNode));
 
     memset(node, 0, 0x14);
     return node;
@@ -589,7 +589,7 @@ MnuSceneListNode *mnuReleaseDisplayListNodeAndGetNext(MnuSceneListNode *node) {
     MnuSceneListNode *next;
 
     next = node->next;
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
     return next;
 }
 

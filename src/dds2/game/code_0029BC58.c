@@ -42,7 +42,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     case 5: {
         s32 roll;
         rewardIndex = unit->unitId * 4 - 4;
-        roll = effMiscRand(NULL) & 3;
+        roll = sdfGetRand(NULL) & 3;
 
         evtCopyEntryStringToActiveWindow(0, D_00435E48[unit->unitId]);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C[work->earnedItem]);
@@ -130,7 +130,7 @@ extern char brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
 s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
-    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)dds3GetProcessData(request);
     s32 result;
 
     evtStageTestUpdateCamera();
@@ -153,7 +153,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
 }
 
 s32 itfRunPanelMode1(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     mnuDrawItemPanelBackdrop(panel);
@@ -162,7 +162,7 @@ s32 itfRunPanelMode1(KwlnTask *request) {
 }
 
 s32 itfRunPanelMode2(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     dspAdvanceMessageWindowControlWithRefresh(0);
@@ -342,14 +342,14 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             packed = (alpha & 0xFF) | 0x96FF9B00;
             glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
             frFontDrawGlyphChain(glyph, 1, surface);
-            frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+            frDestroyFontRequestAfter((struct FrFontGlyph *)(u32)glyph);
             effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             sprintf(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
             glyph = itfCreateFont3TextGlyph(x + 0x900, y, z, packed, name, 0);
-            frFontSetChildChainFirstOption(glyph, 3);
+            frSetFontColorNo(glyph, 3);
             frFontDrawGlyphChain(glyph, 1, surface);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
             effDrawSpriteWithCornerColors(x + 0x6E0, y + 0x88, 0, valueColor, 0, work->teardownResource, 0x1B, 0x53);
             y += 0xB8;
         }
@@ -370,9 +370,9 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     packed = (alpha & 0xFF) | 0xA09DC300;
     sprintf(name, D_004379C8, res->totalExp);
     sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
-    frFontSetChildChainFirstOption(sprite, 3);
+    frSetFontColorNo(sprite, 3);
     frFontDrawGlyphChain(sprite, 1, flags);
-    frFontQueueGlyphForCurrentDrawBuffer(sprite);
+    frDestroyFontRequestAfter(sprite);
     color[0] = alpha;
     color[1] = alpha;
     color[2] = alpha;
@@ -391,9 +391,9 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSumm
         packed = (alpha & 0xFF) | 0xA09DC300;
         sprintf(name, D_004379C8, res->macca);
         sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
-        frFontSetChildChainFirstOption(sprite, 3);
+        frSetFontColorNo(sprite, 3);
         frFontDrawGlyphChain(sprite, 1, flags);
-        frFontQueueGlyphForCurrentDrawBuffer(sprite);
+        frDestroyFontRequestAfter(sprite);
         color[0] = alpha;
         color[1] = alpha;
         color[2] = alpha;

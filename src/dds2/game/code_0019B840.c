@@ -167,8 +167,8 @@ void frFontUploadClearedTexture(void) {
 
     imageSize = frFontWork.atlas.height * frFontWork.atlas.width;
     imageSize = (u32)imageSize >> 1;
-    allocation = sdfAllocGeneralBlock(imageSize);
-    pixels = (void *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(imageSize);
+    pixels = (void *)sdfMemLock(allocation);
     memset(pixels, 0, imageSize);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.atlas.bufferBase, (s16)frFontWork.atlas.bufferWidth, FR_FONT_GS_PSMT4, 0, 0,
                          (s16)frFontWork.atlas.width, (s16)frFontWork.atlas.height);
@@ -177,7 +177,7 @@ void frFontUploadClearedTexture(void) {
     sceGsExecLoadImage(loadImage, (s32)pixels);
     sceGsSyncPath(0, 0);
     SignalSema(sdfGsImageUploadSemaphore);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 /* Load only when the slot word is not exactly one; slot one borrows entry zero's allocation. */
@@ -281,7 +281,7 @@ void frFontBindResourceSections(
 
     if (resourceBytes == NULL) {
         if (allocation != NULL) {
-            resourceBytes = (u8 *)sdfResourceRetainAddress(allocation);
+            resourceBytes = (u8 *)sdfMemLock(allocation);
         }
     }
     entry = &frFontWork.entries[slotIndex];
@@ -334,7 +334,7 @@ void frFontFreeEntry(s32 slotId) {
     frFontSlotLoadedFlags[slotIndex] = 0;
     entry = &frFontWork.entries[slotIndex];
     if (entry->allocation != NULL) {
-        sdfReleaseResourceAllocation(entry->allocation);
+        sdfMemFreeDirect(entry->allocation);
         entry->resource = NULL;
     }
     entry->slots = NULL;

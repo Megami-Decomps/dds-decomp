@@ -246,7 +246,7 @@ void fldDrawSelectedMapMarker(void) {
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
     MapRequestRing *block = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
     MapRequestState *ring = &block->header;
     MapRequestNode *node;
@@ -277,7 +277,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
 
 void fldReleaseMapRequestQueue(MapRequestState *state) {
     if (state != NULL) {
-        sdfQueueGeneralAllocationRelease(state->allocation);
+        sdfMemFreeDelayedDirect(state->allocation);
     }
 }
 
@@ -405,7 +405,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     record->allocation = allocation;
     record->texture = sdfTexAcquireResourceTexture(record->resourceData);
     if (record->allocation != NULL) {
-        sdfQueueGeneralAllocationRelease(record->allocation);
+        sdfMemFreeDelayedDirect(record->allocation);
         record->allocation = NULL;
         record->resourceData = NULL;
     }

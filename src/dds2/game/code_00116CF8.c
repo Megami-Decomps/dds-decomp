@@ -88,7 +88,7 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
         return NULL;
     }
     entry = table->entries;
-    work = sdfAllocSizeClassBlock(sizeof(*work));
+    work = sdfChipAllocDirect(sizeof(*work));
     i = 0;
     memset(work, 0, sizeof(*work));
     work->direction = 0;

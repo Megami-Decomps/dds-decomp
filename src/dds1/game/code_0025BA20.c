@@ -20,7 +20,7 @@ void mnuAppendSpriteNodesForCueMode(MnuSpriteResourceGroup *resource, SdfList *l
         sdfListAppend(list, list->count, node);
         break;
     case 1:
-        chance = effMiscRandUnitFloat(NULL);
+        chance = sdfGetRandFloat(NULL);
         if (chance < 0.8f) {
             node = mnuCreateSpriteSpawnNode(resource, parent, 0);
             node->mode = mode;
@@ -34,7 +34,7 @@ void mnuAppendSpriteNodesForCueMode(MnuSpriteResourceGroup *resource, SdfList *l
         }
         break;
     case 2:
-        if (effMiscRandUnitFloat(NULL) < 0.8f) {
+        if (sdfGetRandFloat(NULL) < 0.8f) {
             node = mnuCreateSpriteSpawnNode(resource, parent, 0);
             node->mode = mode;
             sdfListAppend(list, list->count, node);

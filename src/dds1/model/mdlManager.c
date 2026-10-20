@@ -99,7 +99,7 @@ s32 btlGroupContainsId(s32 groupIndex, s32 wantedId) {
 
 /* Prepend id to this group's ID list; duplicate IDs are allowed. */
 void btlAddGroupId(s32 groupIndex, s32 newId) {
-    BattleGroupIdEntry *idEntry = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
+    BattleGroupIdEntry *idEntry = sdfChipAllocDirect(sizeof(BattleGroupIdEntry));
     BattleGroupIdEntry **groupHead = &btlGroupIdHeads[groupIndex];
     idEntry->id = newId;
     idEntry->next = *groupHead;
@@ -119,7 +119,7 @@ void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
     do {
         if (idCursor->id == wantedId) {
             *idLink = idCursor->next;
-            sdfReleaseChipBlock(idCursor);
+            sdfChipFreeDirect(idCursor);
             break;
         } else {
             idLink = &idCursor->next;
@@ -134,7 +134,7 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
     BattleGroupNode *previousHead;
     s32 slotIndex;
     btlRemoveCurrentGroupedEntity(groupIndex, entityType);
-    groupNode = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
+    groupNode = sdfChipAllocDirect(sizeof(BattleGroupNode));
     previousHead = btlGroupNodeHeads[groupIndex];
     if (previousHead != NULL) {
         previousHead->prev = groupNode;
@@ -194,16 +194,16 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
     }
     if (ownsResources != 0) {
         sdfResourceListRelease(groupNode->resourceList, 1);
-        sdfQueueGeneralAllocationRelease(groupNode->requestAllocation);
+        sdfMemFreeDelayedDirect(groupNode->requestAllocation);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
+                sdfMemFreeDirect(groupNode->slots[slotIndex].resourceHandle);
             }
         }
     }
     mdlDestroyPartList(groupNode->partList);
-    sdfReleaseResourceAllocation(groupNode->resourceHandle);
-    sdfReleaseChipBlock(groupNode);
+    sdfMemFreeDirect(groupNode->resourceHandle);
+    sdfChipFreeDirect(groupNode);
 }
 
 /* Forward the group/type pair explicitly, then destroy its node if present. */
@@ -316,7 +316,7 @@ void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 searchId) {
         }
         if (owner->ownsResources != 0) {
             if (owner->slots[searchId].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(owner->slots[searchId].resourceHandle);
+                sdfMemFreeDirect(owner->slots[searchId].resourceHandle);
             }
         }
         owner->slots[searchId].motionTable = NULL;
@@ -381,7 +381,7 @@ void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(request->group, request->id);
     SignalSema(mdlGroupJobSemaphore);
-    sdfReleaseChipBlock(request);
+    sdfChipFreeDirect(request);
 }
 
 void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRequest *destination) {
@@ -391,7 +391,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
     loadedData = fileGetLoadedDataAddress(resource);
     resourceList = sndBuildResourceHandleListFromOffsets(loadedData);
     destination->payload.resourceList = resourceList;
-    sdfReleaseResourceAllocation(fileGetResourceHandle(resource));
+    sdfMemFreeDirect(fileGetResourceHandle(resource));
     filePollEntryCleanup(resource);
 }
 
@@ -575,9 +575,9 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
             currentSlot = nextSlot;
             nextSlot = nextSlot->next;
             sdfReleaseDevSlot(currentSlot->model, 1, 1);
-            sdfReleaseChipBlock(currentSlot);
+            sdfChipFreeDirect(currentSlot);
         }
-        sdfReleaseChipBlock(deviceList);
+        sdfChipFreeDirect(deviceList);
         ctx->devList = NULL;
     }
 }
@@ -596,7 +596,7 @@ void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
     if (list->usedCount != 0 && --list->growStep == 0) {
         list->usedCount--;
         list->growStep = list->stride;
-        slot = sdfAllocSizeClassBlock(sizeof(MdlDevSlot));
+        slot = sdfChipAllocDirect(sizeof(MdlDevSlot));
         model = sdfModelCreateWithItems(ctx->sub->resourceList, ctx->sub->itemList);
         /* Finish initialization before publishing the new list head. */
         slot->next = list->first;
@@ -698,7 +698,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
     mdlUnlinkGroupEntry(ctx);
-    sdfReleaseChipBlock(ctx);
+    sdfChipFreeDirect(ctx);
 }
 
 struct SdfPoolNode;
@@ -1260,11 +1260,11 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
                 break;
             case 0x413250:
                 mdlAddBillboardPart(parts, work->dataCursor);
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)work->resourceHandle);
+                sdfMemFreeDirect((struct SdfMemBlock *)work->resourceHandle);
                 break;
             case 0x503344:
                 mdlAddEffectPart(parts, (struct EffNodeDescriptor *)work->dataCursor);
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)work->resourceHandle);
+                sdfMemFreeDirect((struct SdfMemBlock *)work->resourceHandle);
                 break;
             }
             break;
@@ -1332,11 +1332,11 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
             switch (((SdfPacModelPacketHeader *)packetWork->packet)->tag) {
             case 0x413250:
                 mdlAddBillboardPart(partList, packetWork->dataCursor);
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)packetWork->resourceHandle);
+                sdfMemFreeDirect((struct SdfMemBlock *)packetWork->resourceHandle);
                 break;
             case 0x503344:
                 mdlAddEffectPart(partList, (struct EffNodeDescriptor *)packetWork->dataCursor);
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)packetWork->resourceHandle);
+                sdfMemFreeDirect((struct SdfMemBlock *)packetWork->resourceHandle);
                 break;
             case 0x555049:
                 objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->decodedSize;
@@ -1387,7 +1387,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
 /* Clean up the retained dispatch request, then release its completion job. */
 void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
     btlStageTaskCleanupCallback(ownerBlock->owner);
-    sdfReleaseChipBlock(ownerBlock);
+    sdfChipFreeDirect(ownerBlock);
 }
 
 

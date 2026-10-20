@@ -117,8 +117,8 @@ void evtFillQuadRecordFields(u32 firstWord, u32 secondWord, u32 thirdWord, s16 f
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
-        if (kwlnTaskGetRegisteredState((KwlnTask *)task) != 0) {
-            kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 0);
+        if (dds3GetProcessStat((KwlnTask *)task) != 0) {
+            dds3KillProcess((KwlnTask *)task, 0);
         }
     }
 }
@@ -194,8 +194,8 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
         s32 remaining = swapCount;
         do {
             remaining--;
-            first = buffer + effMiscRand(0) % length;
-            second = buffer + effMiscRand(0) % length;
+            first = buffer + sdfGetRand(0) % length;
+            second = buffer + sdfGetRand(0) % length;
             value = *first;
             *first = *second;
             *second = value;
@@ -213,7 +213,7 @@ void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->handle));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(record->handle));
 }
 
 struct ItfMesSub;
@@ -462,13 +462,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];
@@ -528,7 +528,7 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
 
     allocation = sdfReadNamedResource((const char *)(u32)path, &info[0], (u32 *)&info[1]);
     texture = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(allocation));
     return texture;
 }
 

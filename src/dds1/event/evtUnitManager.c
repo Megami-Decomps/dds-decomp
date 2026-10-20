@@ -767,7 +767,7 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     f32 defaultVector[4];
 
     memcpy(defaultVector, (const f32 *)D_003AC060, sizeof(defaultVector));
-    work = sdfAllocSizeClassBlock(sizeof(EvtUnit));
+    work = sdfChipAllocDirect(sizeof(EvtUnit));
     memset(work, 0, sizeof(EvtUnit));
     work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
@@ -786,7 +786,7 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     work->color = 0x00B2B2B2;
     work->color5C = 0x80303030;
     work->color50 = 0x80303030;
-    endpoint = sdfAllocSizeClassBlock(sizeof(*endpoint));
+    endpoint = sdfChipAllocDirect(sizeof(*endpoint));
     work->endpointWork = endpoint;
     memset(endpoint, 0, sizeof(*endpoint));
     work->value = 0;
@@ -804,14 +804,14 @@ s32 evtReleaseUnitTransitionWork(EvtUnit *transitionWork) {
     endpointWork = transitionWork->endpointWork;
     transitionWork->owner->inner->lighting = 0;
     if (endpointWork != NULL) {
-        sdfReleaseChipBlock(endpointWork);
+        sdfChipFreeDirect(endpointWork);
         transitionWork->endpointWork = NULL;
     }
     if (transitionWork->pathHandle != 0) {
         dds3FreePathObject((Dds3PathCurveWork *)transitionWork->pathHandle);
         transitionWork->pathHandle = 0;
     }
-    sdfReleaseChipBlock(transitionWork);
+    sdfChipFreeDirect(transitionWork);
     return 1;
 }
 
@@ -1052,14 +1052,14 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     sdfStepWrappingFloatCounter((Dds3PathCurveWork *)unit->pathHandle);
     dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
     VU0_STORE_VF($vf10, v);
-    effObjSetInnerPosition(unit->effObj, (u128 *)v);
+    dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3InterpolatePathQuaternionVU((Dds3PathCurveWork *)unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
-        effObjSetInnerRotation(unit->effObj, (u128 *)v);
+        dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
     return 1;
 }
@@ -1132,8 +1132,8 @@ extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 extern void sdfSetFloatCounterDirection(s32 destination, s32 direction);
 
-extern void dds3SetObjectFlags(void *object, s32 flags);
-extern void dds3ClearObjectFlags(void *object, s32 flags);
+extern void dds3ObjectBaseOnFlag(void *object, s32 flags);
+extern void dds3ObjectBaseOffFlag(void *object, s32 flags);
 extern void evtResetObjectPendingValue(EffWorldNode *object);
 extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
@@ -1665,7 +1665,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     resourceId = scrReadIntParameter(1);
     motionSeTask = evtCreateMotionSeTask(modelKey, eventId, resourceId);
     if (motionSeTask != 0) {
-        kwlnTaskAddChild(evtFindTaskById(scrReadIntParameter(0)), motionSeTask);
+        dds3LinkProcess(evtFindTaskById(scrReadIntParameter(0)), motionSeTask);
     }
     /* The original success path ends in this void call, without a return. */
     scrSetIntegerReturnValue(modelKey);
@@ -1693,8 +1693,8 @@ u32 evtScriptSetWorldUnitFlagMask(void) {
     if (unit == NULL) {
         return ret;
     }
-    dds3SetObjectFlags(unit, 0x400);
-    dds3ClearObjectFlags(unit, 0x200);
+    dds3ObjectBaseOnFlag(unit, 0x400);
+    dds3ObjectBaseOffFlag(unit, 0x200);
     return 1;
 }
 
@@ -1710,8 +1710,8 @@ u32 evtScriptClearWorldUnitFlagMask(void) {
     if (unit == NULL) {
         return ret;
     }
-    dds3ClearObjectFlags(unit, 0x400);
-    dds3SetObjectFlags(unit, 0x200);
+    dds3ObjectBaseOffFlag(unit, 0x400);
+    dds3ObjectBaseOnFlag(unit, 0x200);
     return 1;
 }
 
@@ -1727,8 +1727,8 @@ u32 evtOpClearWorldObjectStateFlags(void) {
     if (unit == NULL) {
         return ret;
     }
-    dds3ClearObjectFlags(unit, 0x400);
-    dds3ClearObjectFlags(unit, 0x200);
+    dds3ObjectBaseOffFlag(unit, 0x400);
+    dds3ObjectBaseOffFlag(unit, 0x200);
     return 1;
 }
 
@@ -1824,7 +1824,7 @@ u32 evtSetWorldUnitPosition(void) {
     v[0] = bfWaitReadArgFloat(1);
     v[1] = bfWaitReadArgFloat(2);
     v[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerPosition(unit, (u128 *)v);
+    dds3SetPosPoseSet(unit, (u128 *)v);
     return 1;
 }
 
@@ -1853,7 +1853,7 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF($vf10, v);
-    effObjSetInnerRotation(unit, (u128 *)v);
+    dds3SetRotPoseSet(unit, (u128 *)v);
     return 1;
 }
 
@@ -1874,7 +1874,7 @@ u32 evtSetWorldUnitScale(void) {
     v[0] = bfWaitReadArgFloat(1);
     v[1] = bfWaitReadArgFloat(2);
     v[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerScale(unit, (u128 *)v);
+    dds3SetSclPoseSet(unit, (u128 *)v);
     return 1;
 }
 
@@ -2252,12 +2252,12 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
     }
 
     sourceTransform = source->data;
-    effObjFetchInnerPosition(actor);
+    dds3GetPosPoseSet(actor);
     VU0_STORE_VF(vf10, actorPosition);
     PCP_COPY_VECTOR(sourcePosition, &sourceTransform->position);
 
     if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
-        effObjFetchInnerRotationNormalized(actor);
+        dds3GetRotPoseSet(actor);
         referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
         unit->referenceAngleCacheFlags |= EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID;
         unit->cachedReferenceAngleDegrees = -(referenceAngle * 57.29577637f);
@@ -2326,7 +2326,7 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
         return 1;
     }
 
-    effObjFetchInnerRotationNormalized(actor);
+    dds3GetRotPoseSet(actor);
     referenceAngle = -(effMiscComputeQuaternionRotatedReferenceAngle() * 57.29577637f);
     sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->cachedReferenceAngleDegrees * 0.017453293f, 0.0f);
     /* This is the first write to the vector supplied to the transition. */
@@ -2859,7 +2859,7 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
-        effObjSetInnerRotation(obj, (u128 *)v);
+        dds3SetRotPoseSet(obj, (u128 *)v);
     }
     return 1;
 }

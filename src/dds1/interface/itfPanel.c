@@ -13,9 +13,9 @@
 void itfPanelReleasePrimitiveResources(UiSprite *sprite) {
     if (sprite != NULL) {
         if (sprite->payload != NULL) {
-            sdfReleaseResourceAllocation(sprite->payloadAllocation);
+            sdfMemFreeDirect(sprite->payloadAllocation);
         }
-        sdfReleaseResourceAllocation(sprite->allocation);
+        sdfMemFreeDirect(sprite->allocation);
     }
 }
 

@@ -1223,7 +1223,7 @@ void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     frFontDrawGlyphChain(handle, 1, option);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
 }
 
 FrFontTextBank *frFontGetColoredGlyphResource(void) {
@@ -1260,8 +1260,8 @@ SdfFlagListWork *sdfCreateFlagListWork(const SdfFlagListParams *source) {
 
     count = source->count;
     arrayBytes = count * (sizeof(f32[2][4]) + sizeof(u32[2]) + sizeof(SdfFlagListMark));
-    allocation = sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
-    buffer = (u8 *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(arrayBytes + sizeof(SdfFlagListWork));
+    buffer = (u8 *)sdfMemLock(allocation);
     work = (SdfFlagListWork *)(buffer + arrayBytes);
     work->vertices = (f32 (*)[4])buffer;
     buffer += count * sizeof(f32[2][4]);
@@ -1281,7 +1281,7 @@ SdfFlagListWork *sdfInitializeFlagListFromResource(void *file) {
 }
 
 void sdfReleaseFlagListResource(SdfFlagListWork *work) {
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 extern f32 sdfViewTargetVector[4];
@@ -1335,18 +1335,18 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     sdfAtan2Poly(sdfSceneProjectionParameters.camera.fov);
     sdfAtan2Poly(3.14159265f / 4.0f);
     if (spawnRange != 0) {
-        spawn = effMiscRand((EffRandState *)effSharedRandomState) % spawnRange + 1;
+        spawn = sdfGetRand((EffRandState *)effSharedRandomState) % spawnRange + 1;
     }
     for (i = 0; i < count; i++, mark++, vertices += 2, colors += 2) {
         timer = mark->timer;
         if (timer == -1) {
             if (spawn != 0) {
                 spawn--;
-                near = effMiscRandUnitFloat(effSharedRandomState);
-                lateral = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
-                if (effMiscRandUnitFloat(effSharedRandomState) > 0.5f) {
+                near = sdfGetRandFloat(effSharedRandomState);
+                lateral = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f;
+                if (sdfGetRandFloat(effSharedRandomState) > 0.5f) {
                     depth = near * 2000.0f + 1000.0f;
-                    pos[0] = depth * spreadX * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
+                    pos[0] = depth * spreadX * ((sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f);
                     pos[1] = depth * spreadY * lateral;
                     pos[2] = depth;
                     VU0_LOAD_VF(vf10, pos);
@@ -1364,8 +1364,8 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
                     }
                 } else {
                     depth = 0.0f;
-                    pos[0] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
-                    pos[2] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
+                    pos[0] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
+                    pos[2] = (sdfGetRandFloat(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
                     pos[1] = lateral * 100.0f + -200.0f;
                     VU0_LOAD_VF(vf10, pos);
                     VU0_LOAD_VF(vf11, sdfViewTargetVector);
@@ -1447,7 +1447,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     }
     count = work->params.count;
     sourceVertices = work->vertices;
-    vertexAllocation = sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
+    vertexAllocation = sdfMemAllocDirect(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
     count *= SDF_FLAG_LIST_VERTICES_PER_ENTRY;
     copiedVertices = (f32 (*)[4])sdfMemoryGetBlockAddress(vertexAllocation);
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
@@ -1463,7 +1463,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     sdfAppendPacket(packetList, (u32)sdfDrawCachedMatrixLinePairsVU(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->params.alpha.surfaceIndex];
     surface->append(surface, packetList);
-    sdfReleaseResourceAllocation(vertexAllocation);
+    sdfMemFreeDirect(vertexAllocation);
 }
 
 /* Return the drop list's movement speed; this is not a script operand. */

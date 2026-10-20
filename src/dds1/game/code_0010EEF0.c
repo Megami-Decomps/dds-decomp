@@ -125,7 +125,7 @@ extern s8 D_00324543[];
 extern s32 dds3UpdateWorldNodeDiagnosticListTask(void *task);
 
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
-s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
+s32 dds3DebugBasic(void *task) {
     s32 width;
     u8 *node;
     SdfListHead *list;
@@ -134,7 +134,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
-    node = (u8 *)kwlnTaskGetUserValue(task);
+    node = (u8 *)dds3GetProcessData(task);
     if (dds3ContainsNodeInAnyObjectChain(dds3GetWorldObject(), (EffWorldNode *)node) == 0) {
         return (s32)dds3UpdateWorldNodeDiagnosticListTask;
     }
@@ -168,7 +168,7 @@ EffWorldNode *dds3CreateWorldNodeForKind(u32 kind) {
     if (kind >= EFF_WORLD_KIND_COUNT) {
         return NULL;
     }
-    node = sdfAllocSizeClassBlock(sizeof(EffWorldNode));
+    node = sdfChipAllocDirect(sizeof(EffWorldNode));
     if (node == NULL) {
         return NULL;
     }
@@ -217,7 +217,7 @@ void effObjNodeDestroy(EffWorldNode *node) {
         if (prev != NULL) {
             prev->previous = node->previous;
         }
-        sdfReleaseChipBlock(node);
+        sdfChipFreeDirect(node);
     }
 }
 
@@ -230,7 +230,7 @@ s32 effObjInnerCreate(EffWorldNode *node) {
     if (node->inner != NULL) {
         return 0;
     }
-    inner = sdfAllocSizeClassBlock(sizeof(ObjectTransform));
+    inner = sdfChipAllocDirect(sizeof(ObjectTransform));
     if (inner == NULL) {
         return 0;
     }
@@ -249,7 +249,7 @@ void effObjFreeInner(EffWorldNode *node) {
     if (node != NULL) {
         inner = node->inner;
         if (inner != NULL) {
-            sdfReleaseChipBlock(inner);
+            sdfChipFreeDirect(inner);
             node->inner = NULL;
         }
     }
@@ -294,7 +294,7 @@ f32 effObjGetInnerFloat(EffWorldNode *node) {
     return node->inner->radius;
 }
 
-void effObjSetInnerPosition(EffWorldNode *node, u128 *vector) {
+void dds3SetPosPoseSet(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->position;
 
@@ -303,7 +303,7 @@ void effObjSetInnerPosition(EffWorldNode *node, u128 *vector) {
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjSetInnerRotation(EffWorldNode *node, u128 *vector) {
+void dds3SetRotPoseSet(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->rotation;
 
@@ -312,7 +312,7 @@ void effObjSetInnerRotation(EffWorldNode *node, u128 *vector) {
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjSetInnerScale(EffWorldNode *node, u128 *vector) {
+void dds3SetSclPoseSet(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->scale;
 
@@ -321,14 +321,14 @@ void effObjSetInnerScale(EffWorldNode *node, u128 *vector) {
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjFetchInnerPosition(EffWorldNode *node) {
+void dds3GetPosPoseSet(EffWorldNode *node) {
     u8 *p = (u8 *)&node->inner->position;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     VU0_SET_W_ONE(vf10);
 }
 
-void effObjFetchInnerRotationNormalized(EffWorldNode *node) {
+void dds3GetRotPoseSet(EffWorldNode *node) {
     u8 *p = (u8 *)&node->inner->rotation;
 
     VU0_LOAD_VF_MEMORY(vf10, p);

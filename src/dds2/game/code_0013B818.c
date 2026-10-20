@@ -605,8 +605,8 @@ s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
 u32 fldDestroyTaskSlot(u32 index) {
     u32 *taskSlot = &D_0038BD50[index];
 
-    if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) != 0) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)*taskSlot, 0);
+    if (dds3ExistProcess((KwlnTask *)*taskSlot) != 0) {
+        dds3KillProcess((KwlnTask *)*taskSlot, 0);
     }
     *taskSlot = 0;
     return 0;
@@ -658,7 +658,7 @@ void fldClearInactiveTaskSlots(void) {
     if (count > 0) {
         u32 *taskSlot = D_0038BD50;
         do {
-            if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) == 0) {
+            if (dds3ExistProcess((KwlnTask *)*taskSlot) == 0) {
                 *taskSlot = 0;
             }
             slotIndex++;
@@ -3107,7 +3107,7 @@ s32 fldUpdateTitleBannerTask(void *task) {
     if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
-    menu = (FldMenuState *)kwlnTaskGetUserValue(task);
+    menu = (FldMenuState *)dds3GetProcessData(task);
     if (menu->pending != 0) {
         fldDrawTitleBannerFrame(menu->position);
         fldDrawTitleBannerCursor(D_00399F60[menu->choice] - 9, 0x130);
@@ -3123,12 +3123,12 @@ s32 fldUpdateTitleBannerTask(void *task) {
 }
 
 s32 fldInitializeTitleBannerTask(KwlnTask *task) {
-    s16 *node = sdfAllocSizeClassBlock(8);
+    s16 *node = sdfChipAllocDirect(8);
     node[1] = 1;
     node[0] = 0;
     node[2] = 0;
     node[3] = 0;
-    kwlnTaskSetUserValue(task, (u32)node);
+    dds3SetProcessData(task, (u32)node);
     return (s32)fldUpdateTitleBannerTask;
 }
 

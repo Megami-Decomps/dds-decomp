@@ -1935,7 +1935,7 @@ s32 btlSelectAction211CameraPair(BtlLinkedCommand *command) {
     switch (command->actionCode) {
     case 0x211:
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (effMiscRandMod(0, 3)) {
+        switch (sdfGetRandInt(0, 3)) {
         case 0:
             btlBossDebugPrintf("3SIK:LKG-0 ++++\n");
             btlSetEffectCameraKeys((s32)command,
@@ -2018,7 +2018,7 @@ void btlAttachActionEffectToUnit(BtlUnit *unit) {
     position[0] = 0.0f;
     position[1] = 10000.0f;
     position[2] = -10000.0f;
-    effObjSetInnerPosition(unit->effectObject, (u128 *)position);
+    dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
 }
 
 void btlCommitSelectedUnit(void) {
@@ -2264,7 +2264,7 @@ void btlResetActionEffectOnUnit(void) {
         vec[2] = -10000.0f;
         unit->status.flags &= ~8;
         unit->status.stateFlags |= 0x180;
-        effObjSetInnerPosition(unit->effectObject, (u128 *)vec);
+        dds3SetPosPoseSet(unit->effectObject, (u128 *)vec);
     }
 }
 
@@ -3849,7 +3849,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             return 1;
         case 0x197:
             btlFlagAllUnitDefeatCandidatesTask();
-            switch (effMiscRandMod(0, 2)) {
+            switch (sdfGetRandInt(0, 2)) {
             case 0:
                 btlBossDebugPrintf("VURI:I-Z_G-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -3865,7 +3865,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             }
             /* retail keeps the out-of-range roll falling into the generic picks (b to the mod-3 roll) */
         default:
-            switch (effMiscRandMod(0, 3)) {
+            switch (sdfGetRandInt(0, 3)) {
             case 0:
                 btlBossDebugPrintf("VURI:I-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -3899,7 +3899,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (effMiscRandMod(0, 3)) {
+        switch (sdfGetRandInt(0, 3)) {
         case 0:
             btlBossDebugPrintf("VURI_A:I-0 ++++\n");
             btlSetEffectCameraKeys((s32)command,
@@ -3931,7 +3931,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (effMiscRandMod(0, 3)) {
+        switch (sdfGetRandInt(0, 3)) {
         case 0:
             btlBossDebugPrintf("VURI_B:I-0 ++++\n");
             btlSetEffectCameraKeys((s32)command,
@@ -4003,7 +4003,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                 if (btlCanUseActorCategoryFlag4(command)) {
                     btlClearAllUnitDefeatCandidatesTask();
                     btlApplyCombinedActorFlags((u8 *)command);
-                    switch (effMiscRandMod(0, 2)) {
+                    switch (sdfGetRandInt(0, 2)) {
                     case 0:
                         btlBossDebugPrintf(D_0041A5E0);
                         btlSetEffectCameraKeys((s32)command,
@@ -4081,7 +4081,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (btlCanUseLinkedActor(command)) {
                 cameraMode = 0;
                 if (!btlCanUseActorCategoryFlag2(command)) {
-                    cameraMode = effMiscRandMod(0, 2);
+                    cameraMode = sdfGetRandInt(0, 2);
                 }
             } else {
                 cameraMode = 1;
@@ -4110,7 +4110,7 @@ flag_defeat_candidates:
     if (btlCanUseLinkedActor(command)) {
         cameraMode = 0;
         if (!btlCanUseActorCategoryFlag2(command)) {
-            cameraMode = effMiscRandMod(0, 2);
+            cameraMode = sdfGetRandInt(0, 2);
         }
     } else {
         cameraMode = 1;
@@ -4180,7 +4180,7 @@ flag_defeat_candidates:
                 return 1;
             }
             btlFlagAllUnitDefeatCandidatesTask();
-            switch (effMiscRandMod(0, 3)) {
+            switch (sdfGetRandInt(0, 3)) {
             case 0:
                 btlBossDebugPrintf("VURI:ITP-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -4235,7 +4235,7 @@ flag_defeat_candidates:
             if (link->unit->partyRecord.unitId == 0x111) {
                 switch (targetSlot) {
                 case 0:
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -523.6f, -141.7f, -1094.1f, -0.041f, -0.102f, -0.005f, 0.985f, -568.6f,
@@ -4248,7 +4248,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 1:
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -300.6f, -113.2f, -1052.8f, -0.053f, -0.154f, 0.0f, 0.978f, -329.1f,
@@ -4261,7 +4261,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 2:
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -13.6f, -225.4f, -1001.0f, 0.029f, -0.156f, -0.01f, 0.978f, -47.7f,
@@ -4277,7 +4277,7 @@ flag_defeat_candidates:
             } else {
                 switch (targetSlot) {
                 case 0:
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             129.6f, -149.0f, -921.7f, -0.014f, 0.231f, -0.008f, 0.963f, 179.3f,
@@ -4290,7 +4290,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 1:
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             256.7f, -83.8f, -943.7f, -0.084f, 0.146f, -0.017f, 0.976f, 317.2f,
@@ -4303,7 +4303,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 2:
-                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             400.8f, -282.1f, -874.3f, 0.128f, 0.121f, 0.014f, 0.975f, 438.3f,
@@ -4327,7 +4327,7 @@ flag_defeat_candidates:
                 return 1;
             }
             if (link->unit->partyRecord.unitId == 0x111) {
-                switch (effMiscRandMod(0, 2)) {
+                switch (sdfGetRandInt(0, 2)) {
                 case 0:
                     btlBossDebugPrintf("VURI_A:NAGIBA-0 ++++\n");
                     btlSetEffectCameraKeys((s32)command,
@@ -4342,7 +4342,7 @@ flag_defeat_candidates:
                     return 1;
                 }
             } else {
-                switch (effMiscRandMod(0, 2)) {
+                switch (sdfGetRandInt(0, 2)) {
                 case 0:
                     btlBossDebugPrintf("VURI_B:NAGIBA-0 ++++\n");
                     btlSetEffectCameraKeys((s32)command,
@@ -4418,7 +4418,7 @@ flag_defeat_candidates:
                     return 1;
                 }
                 if (link->unit->partyRecord.unitId == 0x111) {
-                    switch (effMiscRandMod(0, 2)) {
+                    switch (sdfGetRandInt(0, 2)) {
                     case 0:
                         btlBossDebugPrintf("VURI_A:ITP-0 ++++\n");
                         btlSetEffectCameraKeys((s32)command,
@@ -4433,7 +4433,7 @@ flag_defeat_candidates:
                         return 1;
                     }
                 } else {
-                    switch (effMiscRandMod(0, 2)) {
+                    switch (sdfGetRandInt(0, 2)) {
                     case 0:
                         btlBossDebugPrintf("VURI_B:ITP-0 ++++\n");
                         btlSetEffectCameraKeys((s32)command,
@@ -4999,7 +4999,7 @@ void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
     }
     if (count != 0) {
         actor->indexWork.phase = 2;
-        actor->indexWork.skillId = choices[effMiscRandMod(NULL, count)];
+        actor->indexWork.skillId = choices[sdfGetRandInt(NULL, count)];
         btlBossDebugPrintf("btl:boss CHERUN shadow = %X\n", actor->indexWork.skillId);
     }
 }
@@ -5033,7 +5033,7 @@ s32 btlChoosePartyMemberShadowId(void) {
     if (count == 0) {
         return 0x12A;
     }
-    unit = choices[effMiscRandMod(NULL, count)];
+    unit = choices[sdfGetRandInt(NULL, count)];
     btlBossDebugPrintf(D_0041AAF8, unit->partyRecord.unitId);
     state = &battle->effect->summon;
     unitId = unit->partyRecord.unitId;
@@ -6559,7 +6559,7 @@ extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
 extern char D_0041ACC0[];
 
 void btlChooseBrahmaIndividualCamera(u32 unit) {
-    switch (effMiscRandMod(0, 2)) {
+    switch (sdfGetRandInt(0, 2)) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
         btlFlagAllUnitDefeatCandidatesTask();
@@ -6580,7 +6580,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041ACA8);
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041ACC0);
 
 void btlChooseBrahmaGroupCamera(u32 unit) {
-    switch (effMiscRandMod(0, 2)) {
+    switch (sdfGetRandInt(0, 2)) {
     case 0:
         btlBossDebugPrintf("BRAHMA:ALL-0 ++++\n");
         btlSetEffectCameraKeys((s32)unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
@@ -6763,7 +6763,7 @@ s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 mode
         break;
     }
     btlFlagAllUnitDefeatCandidatesTask();
-    switch (effMiscRandMod(NULL, 3)) {
+    switch (sdfGetRandInt(NULL, 3)) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
         btlSetEffectCameraKeys((s32)command,
@@ -7233,7 +7233,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
             if (btlCanUseLinkedActor(command) != 0) {
                 cameraMode = 0;
                 if (btlCanUseActorCategoryFlag2(command) == 0) {
-                    cameraMode = effMiscRandMod(0, 2);
+                    cameraMode = sdfGetRandInt(0, 2);
                 }
             } else {
                 cameraMode = 1;
@@ -7247,7 +7247,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
                 case 0x59: case 0x5E: case 0x7F: case 0xBE: case 0xDB:
                 case 0xDC: case 0xDF:
                     btlFlagAllUnitDefeatCandidatesTask();
-                    switch (effMiscRandMod(0, 2)) {
+                    switch (sdfGetRandInt(0, 2)) {
                     case 0:
                         btlBossDebugPrintf("SETO:T-0 ++++\n");
                         btlSetEffectCameraKeys((s32)command,
@@ -7279,7 +7279,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
         if (btlCanUseLinkedActor(command) != 0) {
             cameraMode = 0;
             if (btlCanUseActorCategoryFlag2(command) == 0) {
-                cameraMode = effMiscRandMod(0, 2);
+                cameraMode = sdfGetRandInt(0, 2);
             }
         } else {
             cameraMode = 1;
@@ -7455,7 +7455,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B3B8);
 
 void btlChooseSatanAttackCamera(s32 actor) {
     btlFlagAllUnitDefeatCandidatesTask();
-    switch (effMiscRandMod(NULL, 3)) {
+    switch (sdfGetRandInt(NULL, 3)) {
     case 0:
         btlBossDebugPrintf(D_0041B3B8);
         btlSetEffectCameraKeys(actor,
@@ -7480,7 +7480,7 @@ void btlChooseSatanAttackCamera(s32 actor) {
 
 /* Choose Satan keys; cases zero/one mark all candidates, case two marks only the linked group. */
 void btlChooseSatanGroupAwareCamera(s32 actor) {
-    switch (effMiscRandMod(NULL, 3)) {
+    switch (sdfGetRandInt(NULL, 3)) {
     case 0:
         btlBossDebugPrintf("SATAN:I-0 ++++\n");
         btlFlagAllUnitDefeatCandidatesTask();
@@ -7726,7 +7726,7 @@ s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 mod
         command->flags |= 0x800;
         return 1;
     }
-    shot = effMiscRandMod(NULL, 3);
+    shot = sdfGetRandInt(NULL, 3);
     switch (shot) {
     case 0:
     case 1:
@@ -7790,7 +7790,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
             if (btlCanUseLinkedActor(command) != 0) {
                 cameraMode = 0;
                 if (btlCanUseActorCategoryFlag2(command) == 0) {
-                    cameraMode = effMiscRandMod(0, 2);
+                    cameraMode = sdfGetRandInt(0, 2);
                 }
             } else {
                 cameraMode = 1;
@@ -7814,7 +7814,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
         if (btlCanUseLinkedActor(command) != 0) {
             cameraMode = 0;
             if (btlCanUseActorCategoryFlag2(command) == 0) {
-                cameraMode = effMiscRandMod(0, 2);
+                cameraMode = sdfGetRandInt(0, 2);
             }
         } else {
             cameraMode = 1;
@@ -7857,7 +7857,7 @@ satan_attack:
                 return 1;
             }
             btlFlagAllUnitDefeatCandidatesTask();
-            switch (effMiscRandMod(0, 3)) {
+            switch (sdfGetRandInt(0, 3)) {
             case 0:
                 btlBossDebugPrintf("SATAN:ITP-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -8307,13 +8307,13 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
         height = effect->linked.height;
         position[2] = translatedZ;
         position[1] = height;
-        effObjSetInnerPosition(unit->effectObject, (u128 *)position);
+        dds3SetPosPoseSet(unit->effectObject, (u128 *)position);
 
         VU0_LOAD_VF(vf10, source->rotation);
         VU0_LOAD_VF(vf11, D_0041B4D0);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        effObjSetInnerRotation(effect->linked.actor->effectObject, (u128 *)rotation);
+        dds3SetRotPoseSet(effect->linked.actor->effectObject, (u128 *)rotation);
     }
 
     effect->linked.actor->status.stateFlags |= 0x180;
@@ -8512,14 +8512,14 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             mainUnit->resourceIndex == 0x12E && (mainUnit->status.flags & 2)) {
             btlCopyUnitCurrentPosition(mainUnit, position);
             position[1] += 1000000.0f;
-            effObjSetInnerPosition(mainUnit->effectObject,
+            dds3SetPosPoseSet(mainUnit->effectObject,
                 (u128 *)position);
         }
         if ((twin->status.flags & 0xE0) && !(mainUnit->status.flags & 0xE0) &&
             twin->resourceIndex == 0x12F && (twin->status.flags & 2)) {
             btlCopyUnitCurrentPosition(twin, position);
             position[1] += 1000000.0f;
-            effObjSetInnerPosition(twin->effectObject,
+            dds3SetPosPoseSet(twin->effectObject,
                 (u128 *)position);
         }
     } else {

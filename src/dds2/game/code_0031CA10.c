@@ -85,7 +85,7 @@ ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts
 
     for (i = 0; i < listCount; i++) allocationSize += instanceCounts[i] * sizeof(ModelInstance);
     evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", allocationSize);
-    allocation = sdfAllocGeneralBlock(allocationSize);
+    allocation = sdfMemAllocDirect(allocationSize);
     work = (ModelInstanceWork *)sdfMemoryGetBlockAddress(allocation);
     memset(work, 0, allocationSize);
     work->allocation = allocation;

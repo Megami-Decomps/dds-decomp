@@ -212,7 +212,7 @@ u16 effParamWorkGetId(EffParamWork *work) {
 EffParamWork *effParamWorkCreate(u16 kind, void *source) {
     EffParamWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffParamWork));
+    work = sdfChipAllocDirect(sizeof(EffParamWork));
     work->kind = kind;
     work->payload = effParamWorkFactories[kind].create(source);
     return work;
@@ -221,7 +221,7 @@ EffParamWork *effParamWorkCreate(u16 kind, void *source) {
 /* Dispatch the payload before freeing its compact owner; this callback is required. */
 void effDispatchParameterDataAndFreeWork(EffParamWork *work) {
     effParamWorkFactories[work->kind].release(work->payload);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Invoke the kind-specific callback on this parameter block. */
@@ -235,7 +235,7 @@ void effParamWorkInvokeCallback(EffParamWork *work) {
 EffParamWork *effParamWorkDuplicate(EffParamWork *source) {
     EffParamWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffParamWork));
+    work = sdfChipAllocDirect(sizeof(EffParamWork));
     work->kind = source->kind;
     work->payload = effParamWorkFactories[source->kind].duplicate(source->payload);
     return work;
@@ -390,7 +390,7 @@ extern u32 effParamDescriptorGetTableIndex(const u32 *descriptor);
 EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffParamWorkEx));
+    work = sdfChipAllocDirect(sizeof(EffParamWorkEx));
     work->kind = effParamDescriptorGetKind(source);
     work->tableIndex = effParamDescriptorGetTableIndex(source);
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
@@ -404,7 +404,7 @@ EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
 /* Release the extended payload through its required kind callback, then its owner. */
 void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
     effParameterWorkOperations[work->kind].release(work->payload);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Invoke the extended work's required dispatch callback. */
@@ -416,7 +416,7 @@ void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
 EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
     EffParamWorkEx *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffParamWorkEx));
+    work = sdfChipAllocDirect(sizeof(EffParamWorkEx));
     work->kind = source->kind;
     work->tableIndex = source->tableIndex;
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
@@ -519,8 +519,8 @@ EffParamWork *effParamCreateFromTable(const EffParamTable *table, s32 recordInde
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 EffThunderVectorWork *effCreateThunderCellSystemWork(EffThunderAlphaParams *source) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
-    EffThunderVectorWork *work = (EffThunderVectorWork *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(source->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    EffThunderVectorWork *work = (EffThunderVectorWork *)sdfMemLock(allocation);
     u32 cellIndex;
 
     work->head.alpha = *source;

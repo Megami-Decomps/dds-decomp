@@ -235,7 +235,7 @@ extern SdfSoundRpcRequest *D_004391D4;
 extern s32 D_004391D8;
 extern DevState *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
-extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 callbackContext);
+extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
@@ -251,14 +251,14 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         }
         sdfSoundCommandBusy = 1;
         mnuBuildVoiceResourcePath(path, D_0040BAF8);
-        state = sdfDevCreateCallbackState(path, sdfSoundHandleRpcEvent, 0);
+        state = sdfFileCmdReadOpen(path, sdfSoundHandleRpcEvent, 0);
         D_004391DC = state;
         if (state != NULL) {
             WaitSema(sdfSoundRpcSemaphore);
             state = D_004391DC;
             if (state->result != 0) {
-                sdfDevReactivate(state);
-                sdfDevQueueReleaseState(D_004391DC);
+                sdfFileCmdClearError(state);
+                sdfFileCmdFree(D_004391DC);
                 D_004391DC = NULL;
                 state = NULL;
             }
@@ -270,13 +270,13 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         SdfMemBlock *allocation;
         void *buffer;
         D_004391D4 = request;
-        allocation = sdfAllocGeneralBlock(request->byteCount);
-        buffer = (void *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(request->byteCount);
+        buffer = (void *)sdfMemLock(allocation);
         if (buffer != NULL) {
-            sdfDevQueueRead(D_004391DC, buffer, D_004391D4->byteCount);
+            sdfFileCmdRead(D_004391DC, buffer, D_004391D4->byteCount);
             WaitSema(sdfSoundRpcSemaphore);
             sndCopyToIopAndWait(D_004391D4->destination, buffer, D_004391D4->byteCount);
-            sdfReleaseResourceAllocation(allocation);
+            sdfMemFreeDirect(allocation);
             D_0047B440[0] = D_004391D4->byteCount;
         } else {
             D_0047B440[0] = 0;
@@ -284,9 +284,9 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         break;
     }
     case 2:
-        sdfDevQueueActiveOperation(D_004391DC);
+        sdfFileCmdClose(D_004391DC);
         WaitSema(sdfSoundRpcSemaphore);
-        sdfDevQueueReleaseState(D_004391DC);
+        sdfFileCmdFree(D_004391DC);
         D_004391DC = NULL;
         sdfSoundCommandBusy = 0;
         D_0047B440[0] = 0;
@@ -1054,15 +1054,15 @@ void sdfPrintChipHeapInfo(void) {
 SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u32 *outSize, s32 extra) {
     DevState *state = sdfDevCreateCommandState(name);
     s32 size = sdfDevQueueControlAndWait(state);
-    SdfMemBlock *handle = sdfAllocGeneralBlock(size + extra);
-    u32 address = sdfResourceRetainAddress(handle);
+    SdfMemBlock *handle = sdfMemAllocDirect(size + extra);
+    u32 address = sdfMemLock(handle);
 
     sdfDevQueueReadAndWait(state, (void *)address, size);
     sdfDevWaitThenReleaseCommandState(state);
     if (outData != NULL) {
         *outData = address;
     } else {
-        sdfDecrementAllocationReferenceCount(handle);
+        sdfMemUnlock(handle);
     }
     if (outSize != NULL) {
         *outSize = size;
@@ -1081,7 +1081,7 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
 
     buffer = sdfReadNamedResource(name, info, 0);
     result = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
-    sdfReleaseResourceAllocation(buffer);
+    sdfMemFreeDirect(buffer);
     return result;
 }
 
@@ -1111,7 +1111,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 
     buffer = sdfReadNamedResource(name, info, 0);
     result = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)info[0]);
-    sdfReleaseResourceAllocation(buffer);
+    sdfMemFreeDirect(buffer);
     return result;
 }
 

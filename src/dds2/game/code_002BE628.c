@@ -271,19 +271,19 @@ void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
 
     index = 0;
     do {
-        s32 x = (s32)(effMiscRand(0) & 0x3F) * 4;
+        s32 x = (s32)(sdfGetRand(0) & 0x3F) * 4;
         s32 startY;
         s32 endY;
         s32 alpha;
 
         if (entry->option == 0) {
-            startY = (s32)(effMiscRand(0) & 7) + 8;
-            endY = startY + (s32)(effMiscRand(0) & 0x1F) + 0x20;
+            startY = (s32)(sdfGetRand(0) & 7) + 8;
+            endY = startY + (s32)(sdfGetRand(0) & 0x1F) + 0x20;
         } else {
-            startY = (s32)(effMiscRand(0) & 7) + 8;
-            endY = startY + (s32)(effMiscRand(0) & 0x1F) + 0x10;
+            startY = (s32)(sdfGetRand(0) & 7) + 8;
+            endY = startY + (s32)(sdfGetRand(0) & 0x1F) + 0x10;
         }
-        alpha = (s32)(effMiscRand(0) & 0x7F) + 0x80;
+        alpha = (s32)(sdfGetRand(0) & 0x7F) + 0x80;
 
         /* Walk the complete allocation: each motion row has a paired position row. */
         *(s32 *)(row + POSITION_X) = x * 16;
@@ -733,9 +733,9 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
         u32 bundleFade = panel->iconBundle->fade;
         struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           uiBlendColors(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
-        frFontSetChildChainFirstOption(glyph, 3);
+        frSetFontColorNo(glyph, 3);
         frFontDrawGlyphChain(glyph, 1, surface);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
         alpha = 0x100 - panel->iconBundle->fade;
     } else {
         alpha = transition;
@@ -746,7 +746,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
         struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           uiBlendColors(0xA09DC380, 0xA09DC300, alpha), text, NULL);
         frFontDrawGlyphChain(glyph, 1, surface);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
     }
 
     if (panel->frame[7] == NULL) {
@@ -864,7 +864,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 8,
                                        z, textColor, text, 0);
     frFontDrawGlyphChain(glyph, 1, surface);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     if (panel->frame[7] == NULL) {
         effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1], z,
                       alpha, 1, panel->frame[6], 0, surface);
@@ -1043,7 +1043,7 @@ typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
 MenuPanelState *mnuCreatePanelState(s32 width, s32 height) {
-    MenuPanelState *panel = (MenuPanelState *)sdfAllocSizeClassBlock(MNU_PANEL_STATE_BYTES);
+    MenuPanelState *panel = (MenuPanelState *)sdfChipAllocDirect(MNU_PANEL_STATE_BYTES);
 
     memset(panel, 0, MNU_PANEL_STATE_BYTES);
     panel->width = width;
@@ -1058,7 +1058,7 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     if (resourceHandle != 0) {
         mnuReleaseResourceList(resourceHandle);
     }
-    sdfReleaseChipBlock(panel);
+    sdfChipFreeDirect(panel);
 }
 
 void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
@@ -1169,7 +1169,7 @@ extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 /* Create the five panel items owned by this group and clear its selection. */
 MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *owner, EffectSlotSet *texture,
                                     EffectSlotSet *extraGrid) {
-    MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
+    MenuPanelGroup *group = (MenuPanelGroup *)sdfChipAllocDirect(MNU_PANEL_GROUP_BYTES);
     MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
@@ -1190,7 +1190,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         mnuFreePanelItemWork(group->entries[panelIndex]);
     }
-    sdfReleaseChipBlock(group);
+    sdfChipFreeDirect(group);
 }
 
 /* Configure all five panel items against the same grid object. */
@@ -1310,7 +1310,7 @@ void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId) {
 MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
                                       struct EffectSlotSet *resourceSet1,
                                       struct EffectSlotSet *resourceSet2) {
-    MenuSpriteState *spriteState = sdfAllocSizeClassBlock(MNU_SPRITE_STATE_BYTES);
+    MenuSpriteState *spriteState = sdfChipAllocDirect(MNU_SPRITE_STATE_BYTES);
     memset(spriteState, 0, MNU_SPRITE_STATE_BYTES);
     spriteState->resourceSets[0] = resourceSet0;
     spriteState->resourceSets[1] = resourceSet1;
@@ -1320,7 +1320,7 @@ MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *resourceSet0,
 }
 
 void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
-    sdfReleaseChipBlock(spriteState);
+    sdfChipFreeDirect(spriteState);
 }
 
 /* The sequel selects its draw variant from the range index plus eight. */
@@ -1338,7 +1338,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPanelItemValueMeter);
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
                                        struct EffectSlotSet *resourceSet1,
                                        struct EffectSlotSet *resourceSet2) {
-    MenuSpriteState *sprite = sdfAllocSizeClassBlock(MNU_SIMPLE_SPRITE_BYTES);
+    MenuSpriteState *sprite = sdfChipAllocDirect(MNU_SIMPLE_SPRITE_BYTES);
     memset(sprite, 0, MNU_SIMPLE_SPRITE_BYTES);
     sprite->resourceSets[0] = resourceSet0;
     sprite->resourceSets[1] = resourceSet1;
@@ -1348,7 +1348,7 @@ MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
 }
 
 void mnuFreeSimpleSpriteWork(MenuSpriteState *sprite) {
-    sdfReleaseChipBlock(sprite);
+    sdfChipFreeDirect(sprite);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyProfilePanelContents);
@@ -1626,7 +1626,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {
-    MenuPanelItem *panelItem = (MenuPanelItem *)sdfAllocSizeClassBlock(MNU_PANEL_ITEM_BYTES);
+    MenuPanelItem *panelItem = (MenuPanelItem *)sdfChipAllocDirect(MNU_PANEL_ITEM_BYTES);
 
     memset(panelItem, 0, MNU_PANEL_ITEM_BYTES);
     panelItem->value14 = 0x63;
@@ -1715,7 +1715,7 @@ void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
 }
 
 void mnuFreePanelItemWork(MenuPanelItem *item) {
-    sdfReleaseChipBlock(item);
+    sdfChipFreeDirect(item);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
@@ -1767,9 +1767,9 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     sprintf(text, D_00437C88, value);
     glyph = itfCreateFont2TextGlyph(x + 0x2D0, y, depth, color, text, 0);
-    frFontSetChildChainFirstOption(glyph, fontFlags);
+    frSetFontColorNo(glyph, fontFlags);
     frFontDrawGlyphChain(glyph, 1, flags);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     item->phase += 24;
     if (item->phase > 512) {
         item->phase -= 512;
@@ -1787,7 +1787,7 @@ extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 
 /* Create a profile panel and initialize its five native random words. */
 MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
-    MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
+    MenuProfilePanel *panel = (MenuProfilePanel *)sdfChipAllocDirect(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
     DatProfileRecord *profileRecord;
     u32 randomWordIndex;
@@ -1797,14 +1797,14 @@ MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     profileRecord = ptyGetCurrentProfileRecord(selectionState);
     mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), profileRecord->value);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
-        panel->randomOpacity[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
+        panel->randomOpacity[randomWordIndex] = sdfGetRand(0) % 0xC0 + 0x40;
     }
     panel->opacity = 0x100;
     return panel;
 }
 
 void mnuFreeProfilePanelWork(MenuProfilePanel *panel) {
-    sdfReleaseChipBlock(panel);
+    sdfChipFreeDirect(panel);
 }
 
 void mnuSetGroupProperties(MenuProfilePanel *panel, EffectSlotSet *panelSet,
@@ -3903,7 +3903,7 @@ void evtDestroyBattleStageTestWorldNode(KwlnTask *task) {
 
 /* Destroy the named battle-stage-test task hierarchy and disable the debug graph. */
 void evtBattleStageTestStopTask(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_0042B610, 1);
+    dds3KillProcessName(D_0042B610, 1);
     kwlnDebugGraphSetEnabled(0);
 }
 
@@ -3911,7 +3911,7 @@ void evtBattleStageTestStopTask(void) {
 /* Enable the debug graph and create the battle-stage selector task with its cleanup callback. */
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
-    kwlnTaskCreate(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
+    dds3StartProcess(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
 /* A PAC file request's cleanup (filePollEntryCleanup delegates it): once the
@@ -3924,11 +3924,11 @@ s32 btlDestroyStageTask(request)
     if (request->state == FILE_REQUEST_COMPLETE_STATE) {
         void *deviceRequest = request->deviceRequest;
         if (deviceRequest != NULL) {
-            sdfDevQueueReleaseState((DevState *)deviceRequest);
+            sdfFileCmdFree((DevState *)deviceRequest);
         }
         sdfPacReleasePacketQueueNodes(&request->packet);
-        sdfReleaseChipBlock(request->name);
-        sdfReleaseChipBlock((void *)request);
+        sdfChipFreeDirect(request->name);
+        sdfChipFreeDirect((void *)request);
         return 0;
     }
     return 1;

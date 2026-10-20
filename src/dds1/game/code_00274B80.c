@@ -256,7 +256,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
         sprintf(text, D_003BC6E0, level);
         glyph = itfCreateFont2TextGlyph(posX, y, 0, 0xA09DC380, text, NULL);
         frFontDrawGlyphChain(glyph, 1, 0x53);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
         break;
     case 1:
         if (list->cursor == node) {
@@ -459,9 +459,9 @@ extern void mnuLoadPanelSectionResources(MenuPageSlot *, EffectSlotSet *, u32,
                                          u32, s32);
 
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
-    PartyMenuData *menu = (PartyMenuData *)sdfResourceRetainAddress(allocation);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
+    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(PartyMenuData));
+    PartyMenuData *menu = (PartyMenuData *)sdfMemLock(allocation);
     s32 i;
 
     context->menu = menu;
@@ -492,12 +492,12 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
 }
 
 s32 mnuShopReleaseResources(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     mnuNoOpPartySelectionCleanup(context);
-    sdfReleaseResourceAllocation(menu->allocation);
+    sdfMemFreeDirect(menu->allocation);
     return 1;
 }
 
@@ -509,7 +509,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
         (struct EffectSlotSet *)(u32)((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
 s32 mnuHandlePartySelectionInput(s32 callback) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData((KwlnTask *)callback);
     PartyMenuData *menuWork = (PartyMenuData *)context->menu;
     s32 inputFlags = mnuMapPadMaskToFlags(0x33);
     s32 *popup = &context->popupState;
@@ -611,7 +611,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
                 0x640, 0xBE8, 0, color, name, 0);
             frFontCenterGlyphChainAt(0xD20, 0xBE8, glyph);
             frFontDrawGlyphChain(glyph, 1, 0x53);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
         }
     } else {
         glyph = itfCreateConvertedTextGlyph(
@@ -619,7 +619,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
         glyph = itfCreateConvertedTextGlyph(
             0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, glyph);
         frFontDrawGlyphChain(glyph, 1, 0x53);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
     }
     if (marker) {
         effDrawSpriteWithCornerFade(0x970, 0x8B0, 0, opacity, 1, sets[0], 0x1C, 0x53);
@@ -726,7 +726,7 @@ void mnuDrawPartySelectionPreview(s32 contextAddress) {
 }
 
 s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
 
     mnuDrawCampScreenDefault(callback);
@@ -738,7 +738,7 @@ s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
 }
 
 s32 mnuStepPartySelectionControl(KwlnTask *callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
+    return menuRunPanel((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
 u8 mnuIsStateNotOne(void) {
@@ -788,9 +788,9 @@ typedef struct StaffMenuRuntime {
 } StaffMenuRuntime;
 
 s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 staffView) {
-    s32 context = kwlnTaskGetUserValue(task);
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuRuntime));
-    StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress(allocation);
+    s32 context = dds3GetProcessData(task);
+    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(StaffMenuRuntime));
+    StaffMenuRuntime *state = (StaffMenuRuntime *)sdfMemLock(allocation);
 
     ((CampMenuContext *)context)->menu = state;
     memset(state, 0, sizeof(*state));
@@ -810,11 +810,11 @@ s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 staffView) {
 }
 
 s32 mnuStaffCloseSelectionState(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     void *menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)menu));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*(s32 *)menu));
     return 1;
 }
 
@@ -839,7 +839,7 @@ s32 mnuFinishPartySelectionEntry(KwlnTask *task) {
 /* Update the popup first; accept confirm/cancel only while its state is zero.
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
 s32 mnuStaffPopupUpdate(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     u8 *menuWork = (u8 *)((CampMenuContext *)context)->menu;
     s32 *popupState = (s32 *)(context + 0x54);
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
@@ -874,7 +874,7 @@ extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuDrawCampGridAndLabelDefault();
 
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuWork *menu = (StaffMenuWork *)work->menu;
 
@@ -899,7 +899,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
 }
 
 s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
+    return menuRunPanel((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
 extern void mnuResetPartyPanelFade(MenuPageWindow *, s32, s32, s32);
@@ -951,7 +951,7 @@ void mnuConfigurePartyPanelPage(s32 windowAddress, s32 mode, s32 staffImage, s32
 
 
 s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     MenuPageWindow *page = &context->partyWindow;
     StaffMenuWork *menu = (StaffMenuWork *)context->menu;
     s32 index = context->partyWindow.lists[0]->cursor->index;
@@ -997,7 +997,7 @@ extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 /* Tear down the staff panel and all four optional scene-side resources. */
 s32 mnuStaffReleasePanelScene(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     MenuPageWindow *entryList = &((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
@@ -1038,7 +1038,7 @@ void mnuResetSelectedPanelOpacity(s32 context) {
 /* Switch the party page, rebuilding its panels; previous takes priority.
  * The opaque request argument is forwarded unchanged. Return one if switched. */
 s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
-    s32 context = kwlnTaskGetUserValue(requestArgument);
+    s32 context = dds3GetProcessData(requestArgument);
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 pageChanged = 0;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_PAGE_INPUT_MASK);
@@ -1072,7 +1072,7 @@ extern u8 mnuStaffCampPagePopupEntry[];
 /* Update popup state before page navigation, view toggles, and exit requests.
  * stateWord holds the update result first, then the stored popup state. */
 s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 *popupState;
     u32 inputFlags;
@@ -1135,7 +1135,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
         handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, (const u8 *)(D_003BAA7C + slot->unitId * 45), i);
         if (handle != 0) {
             frFontDrawGlyphChain(handle, 1, 0x53);
-            frFontQueueGlyphForCurrentDrawBuffer(handle);
+            frDestroyFontRequestAfter(handle);
         }
     }
     itfSetTextDrawLimit(-1);
@@ -1180,21 +1180,21 @@ void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *slots) {
     }
 }
 
-extern void frFontAddSharedGlyphFlags(s32);
-extern u8 frFontClearFlagBits(u8);
+extern void frEnableMode(s32);
+extern u8 frDisableMode(u8);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
     FrFontGlyph *item;
     s32 top = y - 0x10;
 
-    frFontAddSharedGlyphFlags(1);
+    frEnableMode(1);
     item = frFontAppendTextToGlyphChain((const char *)(u32)textId, 0, 0, 0, 0);
     frFontSetGlyphPosition(item, x, top);
-    frFontStoreShiftedRenderValue(item, scale * 0x10);
+    frSetPriority(item, scale * 0x10);
     frFontSetChildColors(item, color);
-    frFontClearFlagBits(1);
+    frDisableMode(1);
     frFontDrawGlyphChain(item, 1, param);
-    frFontQueueGlyphForCurrentDrawBuffer(item);
+    frDestroyFontRequestAfter(item);
 }
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
@@ -1220,7 +1220,7 @@ extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325788[13][4];
 
 s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     DatGameState *gameState = datGameState;
     StaffMenuWork *menu = (StaffMenuWork *)context->menu;
     MenuPageWindow *page = &context->partyWindow;
@@ -1281,14 +1281,14 @@ void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer) {
         }
         if (voiceTimer->idleTicks >= MENU_IDLE_VOICE_TICKS) {
             voiceCount = evtStageTestCountFlags(0);
-            evtStageTestQueueMotion(0, effMiscRand(0) % voiceCount);
+            evtStageTestQueueMotion(0, sdfGetRand(0) % voiceCount);
             voiceTimer->idleTicks = 0;
         }
     }
 }
 
 s32 mnuStaffIdlePartyUpdate(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
     if (menu->staffMode == 0) {
@@ -1332,9 +1332,9 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     sprintf(text, D_003BC700, value);
     glyph = itfCreateFont2TextGlyph(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
-    frFontSetChildChainFirstOption(glyph, chainFlag);
+    frSetFontColorNo(glyph, chainFlag);
     frFontDrawGlyphChain(glyph, 1, texture);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:
     default:
@@ -1441,7 +1441,7 @@ extern void ptySkillMenuDrawEquippedSkillEntry();
 extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 
 s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *task) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     SkillMenuRuntime *child = (SkillMenuRuntime *)context->menu;
     MenuWindowContainer *window;
     DatPartyRecord *entry;
@@ -1499,7 +1499,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *task) {
 }
 
 u32 mnuDestroySelectedPartyWindow(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     mnuDestroyWindowContainer(menu->selectedList);
     menu->selectedList = 0;
@@ -1509,7 +1509,7 @@ u32 mnuDestroySelectedPartyWindow(KwlnTask *task) {
 /* Seek the first node with a nonzero sort key and no unavailable flag.
  * Leave the cursor unchanged if no such node exists. */
 void mnuSeekFirstAvailableStaffListNode(KwlnTask *task) {
-    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(task))->menu;
+    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)dds3GetProcessData(task))->menu;
     struct MenuListNode *listNode = ((MenuWindowContainer *)menuWork->selectedList)->list->first;
 
     while (listNode != NULL) {
@@ -1525,7 +1525,7 @@ void mnuSeekFirstAvailableStaffListNode(KwlnTask *task) {
 }
 
 MenuWindowContainer *ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *contextArg) {
-    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(contextArg))->menu;
+    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)dds3GetProcessData(contextArg))->menu;
     s32 selected = ((MenuWindowContainer *)menu->selectedList)->list->cursor->index;
     MenuWindowContainer *window;
 
@@ -1587,7 +1587,7 @@ void ptySkillMenuRefreshEntries(CampMenuContext *context) {
 
 s32 mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
-    u32 *bits = (u32 *)sdfAllocSizeClassBlock(0x50);
+    u32 *bits = (u32 *)sdfChipAllocDirect(0x50);
     PrfSkillListBuffer info;
 
     memset(bits, 0, 0x50);
@@ -1609,7 +1609,7 @@ s32 mnuBuildSkillCodeBitset(void) {
 
 /* Release the temporary skill-code bitmap allocated for page construction. */
 void mnuReleaseSkillCodeBitset(u32 *bits) {
-    sdfReleaseChipBlock(bits);
+    sdfChipFreeDirect(bits);
 }
 
 s32 mnuIsSkillCodeInBitset(s32 code, u32 *bits) {
@@ -1727,9 +1727,9 @@ void mnuDestroySkillMenuWindows(s32 context) {
 }
 
 s32 mnuCampMenuInit(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
-    s32 handle = (u32)sdfAllocGeneralBlock(0x38);
-    s32 *menu = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    s32 context = dds3GetProcessData(task);
+    s32 handle = (u32)sdfMemAllocDirect(0x38);
+    s32 *menu = (void *)sdfMemLock((struct SdfMemBlock *)(handle));
     CampMenuContext *work = (CampMenuContext *)context;
 
     work->menu = menu;
@@ -1760,14 +1760,14 @@ s32 mnuCampMenuInit(KwlnTask *task) {
 }
 
 s32 mnuCloseItemSelectionState(KwlnTask *contextArg) {
-    s32 context = kwlnTaskGetUserValue(contextArg);
+    s32 context = dds3GetProcessData(contextArg);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
     if (menu->selectedList != 0) {
         mnuDestroySelectedPartyWindow(contextArg);
     }
     mnuNoOpItemSelectionTeardown(context);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->handle));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(menu->handle));
     return 1;
 }
 
@@ -1776,7 +1776,7 @@ extern u8 mnuSkillMenuDetailPopupEntry[];
 extern u8 mnuCampFieldSkillPopupEntry[];
 
 s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(callback);
     SkillMenuRuntime *runtime = (SkillMenuRuntime *)context->menu;
     s32 inputFlags = mnuMapPadMaskToFlags(3);
     s32 *popup = &context->popupState;
@@ -1830,7 +1830,7 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
 }
 
 s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     s32 *slot;
 
     mnuDrawCampScreenDefault(callback);
@@ -1852,22 +1852,22 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
 }
 
 s32 mnuStepSkillSlotControl(KwlnTask *callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
+    return menuRunPanel((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
 void mnuClearSelectedListNodeId(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId = 0xffffffff;
 }
 
 u32 mnuHasSelectedListNodeId(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     return ~((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId >> 0x1f;
 }
 
 /* Set the selected flag only on nodes whose index matches the saved selection. */
 void mnuHighlightSelectedListNode(KwlnTask *task) {
-    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(task))->menu;
+    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)dds3GetProcessData(task))->menu;
     struct MenuListNode *listNode = ((MenuWindowContainer *)menuWork->selectedList)->list->first;
 
     for (; listNode != 0; listNode = listNode->next) {
@@ -1880,7 +1880,7 @@ void mnuHighlightSelectedListNode(KwlnTask *task) {
 }
 
 s32 mnuRestoreSkillMenuSelection(KwlnTask *task) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     SkillMenuRuntime *menu = (SkillMenuRuntime *)context->menu;
     s32 index = -1;
 
@@ -1911,7 +1911,7 @@ s32 mnuRestoreSkillMenuSelection(KwlnTask *task) {
 }
 
 u32 mnuResetStaffSelectionFlags(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionFlags = 0;
     return 1;
 }
@@ -1941,7 +1941,7 @@ void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
 /* Open the selected skill's popup or cancel, then process list navigation.
  * Native list reads precede the late window guard; preserve that ordering. */
 void mnuCampMenuHandleInput(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
     StaffMenuWork *menuWork = ((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
     s32 window = menuWork->selectedList;
@@ -1980,7 +1980,7 @@ extern void ptySkillMenuRefreshEntries(CampMenuContext *);
 extern u8 mnuSkillMenuDetailPopupEntry[];
 
 void ptySkillMenuHandleSelection(KwlnTask *callback) {
-    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(callback);
     SkillMenuRuntime *menuWork = (SkillMenuRuntime *)context->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
     MenuWindowContainer *window = menuWork->selectedWindow;
@@ -2053,7 +2053,7 @@ extern u8 mnuSkillMenuDetailPopupEntry[];
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
 void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
     MenuWindowContainer *window = (MenuWindowContainer *)menuWork->selectedList;

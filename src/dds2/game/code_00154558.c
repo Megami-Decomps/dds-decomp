@@ -575,10 +575,10 @@ s32 fldUpdateLookAtSegment(void) {
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.z = cam->z + sdfCos((cam->angle + 180.0f) * 3.14f / 180.0f);
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + sdfCos(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     fldLookAtNearPoint[0] = near.x;
     fldLookAtNearPoint[1] = near.y;
     fldLookAtNearPoint[2] = near.z;
@@ -609,10 +609,10 @@ s32 fldCmdSetLookAtHeading(void) {
     cam = &fldAreaState;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.z = cam->z + sdfCos((cam->angle + 180.0f) * 3.14f / 180.0f);
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + sdfCos(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     fldLookAtNearPoint[0] = near.x;
     fldLookAtNearPoint[1] = near.y;
     fldLookAtNearPoint[2] = near.z;
@@ -1796,7 +1796,7 @@ s32 fldCommandClearSelectedFlag(void) {
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
-    s32 roll = (s32)effMiscRandMod(0, 100);
+    s32 roll = (s32)sdfGetRandInt(0, 100);
     if (solarPhaseThreshold >= roll) {
         scrSetIntegerReturnValue(1);
     } else {
@@ -1902,13 +1902,13 @@ extern EffRandState effDefaultRandomState[];
 extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock((EffRandState *)effDefaultRandomState);
+    sdfRandomizeByTime((EffRandState *)effDefaultRandomState);
     effLoadCommonTexturesAndResetRenderFlags();
     effInitializeBillResourceOwners();
     parSysReset();
     effSeedEmitterDelayRandomState();
-    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
-    kwlnTaskCreate(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
+    dds3StartProcess("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
+    dds3StartProcess(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
     effFieldTaskStartupHook();
     effInitWorks();
     effBTLFieldColorResetFlags();

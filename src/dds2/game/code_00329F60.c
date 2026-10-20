@@ -120,8 +120,8 @@ void sdfCaptureDeferredGsImage(void) {
         rowBytes = pixelBytes * width;
         stride = rowBytes * 2;
         D_004389E1 = 5;
-        allocation = sdfAllocGeneralBlock(rowBytes * height);
-        pixels = (u8 *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(rowBytes * height);
+        pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
             (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
             D_0040B290.buffers[1]->word >> 6,
@@ -150,7 +150,7 @@ void sdfCaptureDeferredGsImage(void) {
             destination += stride;
             source += rowBytes;
         } while (--rows != 0);
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
         D_004389E0 = 0;
         if (D_004389E8) {
             D_004389E8(D_004389E4);
@@ -160,7 +160,7 @@ void sdfCaptureDeferredGsImage(void) {
 
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
-void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
+void sdfDeliverDrawStart(s32 oldBuffer, s32 nextBuffer) {
     if (sdfBufferSlotIndices[0] == oldBuffer) {
         sdfBufferSlotIndices[0] = oldBuffer ^ 1;
     }
@@ -171,7 +171,7 @@ void sdfSwapBufferSlots(s32 oldBuffer, s32 nextBuffer) {
 }
 
 /* Update one slot or both slots, then clear the busy-buffer status. */
-void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
+void sdfDeliverDrawEnd(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
     if (updateSingleSlot == 0) {
         sdfBufferSlotIndices[0] = bufferIndex;
         sdfBufferSlotIndices[1] = bufferIndex;
@@ -196,7 +196,7 @@ extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
 extern void sdfGraphResetDeviceForCurrentMode(void);
-extern void func_0032DEC8(void);
+extern void sdfGrDrawFrame(void);
 extern s32 sdfGraphWakeDisplayThread(s32);
 extern void sceGsResetPath(void);
 
@@ -221,7 +221,7 @@ void sdfRunGraphicsTransferWorker(void) {
             sdfGraphResetDeviceForCurrentMode();
         }
         D_00438A1D = 1;
-        func_0032DEC8();
+        sdfGrDrawFrame();
         D_00438A1D = 0;
         if (D_00438A1C != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
@@ -286,8 +286,8 @@ extern u8 D_004389D9;
 extern SdfThreadNode sdfGraphicsBufferThread;
 extern u8 sdfGraphicsTransferThreadStack[0x8000];
 extern u8 sdfGraphicsBufferThreadStack[0x1000];
-extern void sdfResizeDoubleBuffer(s32);
-extern void sdfResetPacketSlotState(void);
+extern void sdfGrMakePacketBuff(s32);
+extern void sdfGrInitDraw(void);
 extern void sdfRegisterTextureReleaseRequestHandler(void);
 
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
@@ -299,14 +299,14 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
 
     sceGsResetPath();
     D_004389D8 = 1;
-    sdfGraphApplyModeDefaults(graph, 1, 1);
+    sdfGrSetFrameSetMode(graph, 1, 1);
     sdfGraphRecreateBuffers(graph);
     D_004389D9 = 0;
     sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;
     sdfBusyBufferIndex = -1;
     sdfGsModeResetRequested = 1;
-    sdfResizeDoubleBuffer(packetBufferBytes);
-    sdfResetPacketSlotState();
+    sdfGrMakePacketBuff(packetBufferBytes);
+    sdfGrInitDraw();
     sdfRegisterTextureReleaseRequestHandler();
     sdfGsImageUploadSemaphore = sdfCreateSemaphore(1, 0x20, 0);
     D_004389EC = sdfCreateSemaphore(0, 0x20, 0);
@@ -317,7 +317,7 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
                           0x1000, 0x40, 0);
 }
 
-extern void sdfSelectDoubleBuffer(s32 bufferIndex);
+extern void sdfGrSetupPacketBuff(s32 bufferIndex);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {
@@ -327,7 +327,7 @@ void sdfWaitAndSelectBuffer(void) {
     while (sdfBusyBufferIndex == nextBuffer) {
     }
     sdfCurrentBufferIndex = nextBuffer;
-    sdfSelectDoubleBuffer((s8)sdfCurrentBufferIndex);
+    sdfGrSetupPacketBuff((s8)sdfCurrentBufferIndex);
     sdfVuClearTransformCache();
 }
 
@@ -424,7 +424,7 @@ SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
             }
             return block;
         }
-        allocated = sdfAllocSizeClassBlock(sizeof(*allocated));
+        allocated = sdfChipAllocDirect(sizeof(*allocated));
         allocated->next = block->next;
         if (allocated->next == NULL) {
             sdfTextureListHead = allocated;
@@ -470,7 +470,7 @@ SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
             }
             return block;
         }
-        allocated = sdfAllocSizeClassBlock(sizeof(*allocated));
+        allocated = sdfChipAllocDirect(sizeof(*allocated));
         allocated->prev = block->prev;
         if (allocated->prev == NULL) {
             sdfTextureBlockListHead = allocated;
@@ -522,7 +522,7 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block) {
             } else {
                 sdfTextureBlockListHead = block;
             }
-            sdfReleaseChipBlock(previousBlock);
+            sdfChipFreeDirect(previousBlock);
             return 1;
         }
     }
@@ -572,7 +572,7 @@ void sdfTexQueuePendingWork(SdfTexResource *texture) {
 void sdfTexInitializeLists(void) {
     SdfTexResource *head;
 
-    head = sdfAllocSizeClassBlock(0x1C);
+    head = sdfChipAllocDirect(0x1C);
     head->size = 0x100000;
     head->next = NULL;
     head->prev = NULL;
@@ -682,7 +682,7 @@ void sdfTexQueueImageUpload(SdfImageUploadRequest *request) {
 
     qwordCount = sdfFormatImageSize(format, width, height);
     allocationBlocks = (qwordCount + 0x7FEF) / 0x7FF0;
-    allocation = sdfAllocSizeClassBlock(allocationBlocks * 0x30 + 0x80);
+    allocation = sdfChipAllocDirect(allocationBlocks * 0x30 + 0x80);
     releaseEntry = (SdfTextureReleaseHead *)allocation;
     releaseEntry->next = NULL;
     releaseEntry->chipMemory = request->pixels;
@@ -852,13 +852,13 @@ void sdfFlushImageUploadQueue(void) {
 
         switch (entry->releaseMode) {
         case SDF_TEX_RELEASE_GENERAL_ALLOCATION:
-            sdfReleaseResourceAllocation(entry->allocation);
+            sdfMemFreeDirect(entry->allocation);
             break;
         case SDF_TEX_RELEASE_CHIP_ADDRESS:
-            sdfReleaseChipBlock(entry->chipMemory);
+            sdfChipFreeDirect(entry->chipMemory);
             break;
         }
-        sdfReleaseChipBlock(entry);
+        sdfChipFreeDirect(entry);
         entry = next;
     }
 }
@@ -1012,11 +1012,11 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
 
     if (borrowPixels == 0) {
         if (imageBytes > SDF_UPLOAD_CHIP_MAX_BYTES) {
-            request.allocation = sdfAllocGeneralBlock(imageBytes);
-            request.pixels = (void *)sdfResourceRetainAddress(request.allocation);
+            request.allocation = sdfMemAllocDirect(imageBytes);
+            request.pixels = (void *)sdfMemLock(request.allocation);
             request.allocationMode = SDF_UPLOAD_GENERAL_HEAP;
         } else {
-            request.pixels = sdfAllocSizeClassBlock(imageBytes);
+            request.pixels = sdfChipAllocDirect(imageBytes);
             request.allocationMode = SDF_UPLOAD_CHIP_HEAP;
         }
         memcpy(request.pixels, pixels, imageBytes);
@@ -1093,7 +1093,7 @@ SdfTex *sdfTexClone(SdfTex *source) {
     SdfTexRef *reference;
     SdfTex *original;
 
-    texture = sdfAllocSizeClassBlock(sizeof(*texture));
+    texture = sdfChipAllocDirect(sizeof(*texture));
     *texture = *source;
     reference = sdfAllocAndClearQuadwords(sizeof(*reference));
     original = reference->cloneSource;

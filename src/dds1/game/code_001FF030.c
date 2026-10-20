@@ -40,5 +40,5 @@ void btlRunWeightedAiAction(BtlTask *task, s32 rowIndex) {
     speciesId = task->unit->partyRecord.unitId;
     slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
     btlRunAiAction(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionArg);
-    sdfReleaseChipBlock(btlActionScratchWork);
+    sdfChipFreeDirect(btlActionScratchWork);
 }

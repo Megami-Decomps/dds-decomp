@@ -219,18 +219,18 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
         if (node->value != NULL) {
             glyph = itfCreateConvertedTextGlyph(textX, textY, depth, color,
                                                 (const u8 *)node->value, NULL);
-            frFontSetChildChainFirstOption(glyph, chainFlag);
+            frSetFontColorNo(glyph, chainFlag);
             if ((list->id & 1) != 0) {
                 sprintf(text, D_003BC718,
                               (s32)node->sortKeyPrimary);
                 glyph = itfCreateFont2TextGlyph(x + 0x1180, textY + 0x20, depth,
                                       color, text, glyph);
-                frFontSetChildChainFirstOption(glyph, chainFlag);
+                frSetFontColorNo(glyph, chainFlag);
             }
         }
         if (glyph != NULL) {
             frFontDrawGlyphChain(glyph, 1, (u32)drawArg);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {
             list->drawCallback(x, y, depth, list, node, drawArg);
@@ -295,7 +295,7 @@ void mnuDestroyWindowContainer(MenuWindowContainer *window) {
     if (textures != 0) {
         mnuReleaseWindowTextures(textures);
     }
-    sdfReleaseChipBlock(window);
+    sdfChipFreeDirect(window);
 }
 
 void mnuSetWindowOverlaySprite(MenuWindowContainer *window, EffectSlotSet *resources) {
@@ -662,8 +662,8 @@ extern void *memset(void *, int, unsigned int);
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
-    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(MenuWindowSpriteGroup));
+    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfMemLock(allocation);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
     group->allocation = allocation;
@@ -677,7 +677,7 @@ void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     for (spriteIndex = 0; spriteIndex < MNU_WINDOW_RESOURCE_SPRITES; spriteIndex++) {
         effDestroyResourceSlotSet(group->sprites[spriteIndex]);
     }
-    sdfReleaseResourceAllocation(group->allocation);
+    sdfMemFreeDirect(group->allocation);
 }
 
 void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, EffMappedResource *target) {
@@ -783,7 +783,7 @@ void mnuReleaseResourceList(MenuPanelHandles *panel) {
             count = panel->count;
         }
     }
-    sdfReleaseChipBlock(panel);
+    sdfChipFreeDirect(panel);
 }
 
 /* Draw and fade the six resources that make up the selected panel. */
@@ -1065,8 +1065,8 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
-    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(menu->count * MNU_LIST_POINTER_BYTES);
+    MenuListNode **items = (MenuListNode **)sdfMemLock(allocation);
     MenuListNode **writeCursor = items;
     MenuListNode *node;
 
@@ -1082,7 +1082,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks(menu, 0);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 /* Allocate four native fade records into pointer slots after the list header. */
@@ -1098,7 +1098,7 @@ void mnuFreeListEntries(s32 *list) {
     u32 slotIndex;
     s32 *entry = list + 1;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++, entry++) {
-        sdfReleaseChipBlock((void *)*entry);
+        sdfChipFreeDirect((void *)*entry);
     }
 }
 
@@ -1197,7 +1197,7 @@ MenuScrollPanel *mnuCreateScrollPanel(EffectSlotSet *firstResource, s32 firstInd
     u8 *position;
     s32 remaining;
 
-    panel = (MenuScrollPanel *)sdfAllocSizeClassBlock(sizeof(MenuScrollPanel));
+    panel = (MenuScrollPanel *)sdfChipAllocDirect(sizeof(MenuScrollPanel));
     memset(panel, 0, 0x4c);
     panel->firstSprite = 0;
     panel->secondSprite = 0;
@@ -1217,7 +1217,7 @@ MenuScrollPanel *mnuCreateScrollPanel(EffectSlotSet *firstResource, s32 firstInd
 
 void mnuDestroyScrollPanel(MenuScrollPanel *panel) {
     mnuReleaseScrollPanelAnimations(panel);
-    sdfReleaseChipBlock(panel);
+    sdfChipFreeDirect(panel);
 }
 
 void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel,
@@ -1345,7 +1345,7 @@ typedef struct MenuPageResources {
 /* Create a ten-sprite page bundle; the caller chooses its last two slots. */
 MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondaryResource, s32 extraResource, s32 extraIndex,
                      s32 finalResource, s32 finalIndex) {
-    MenuPageResources *item = (MenuPageResources *)sdfAllocSizeClassBlock(sizeof(MenuPageResources));
+    MenuPageResources *item = (MenuPageResources *)sdfChipAllocDirect(sizeof(MenuPageResources));
 
     memset(item, 0, 0x3C);
     item->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
@@ -1373,7 +1373,7 @@ void mnuDestroyResources(MenuPageResources *resources) {
     }
     effDestroyResourceSlotSet(object[12]);
     effDestroyResourceSlotSet(object[11]);
-    sdfReleaseChipBlock(resources);
+    sdfChipFreeDirect(resources);
 }
 
 extern char D_003BC720[];
@@ -1416,7 +1416,7 @@ void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources
     } while (0);
 draw:
     frFontDrawGlyphChain(glyph, 1, drawArg);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, s32 color) {
@@ -1526,7 +1526,7 @@ void mnuSetPageParams(MenuSprites *page, s32 pageTransitionMode) {
 
 MenuSprites *mnuCreatePageSpriteSet(s32 value, EffectSlotSet *mainResource,
                             EffectSlotSet *secondaryResource) {
-    MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(sizeof(MenuSprites));
+    MenuSprites *page = (MenuSprites *)sdfChipAllocDirect(sizeof(MenuSprites));
 
     memset(page, 0, 0x50);
     page->profileLabelOverride = value;
@@ -1579,7 +1579,7 @@ void mnuFreeIconSprites(MenuSprites *menu) {
     for (; i < 2; i++) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)*entry++);
     }
-    sdfReleaseChipBlock(menu);
+    sdfChipFreeDirect(menu);
 }
 
 void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuSprites *menu, s32 surface) {
@@ -1613,7 +1613,7 @@ void mnuClearEntries(MenuPageWindow *menu) {
 }
 
 MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
-    MenuIconBundle *item = (MenuIconBundle *)sdfAllocSizeClassBlock(sizeof(MenuIconBundle));
+    MenuIconBundle *item = (MenuIconBundle *)sdfChipAllocDirect(sizeof(MenuIconBundle));
     EffectSlotSet *sprite;
 
     memset(item, 0, 0x24);
@@ -1637,7 +1637,7 @@ void mnuReleaseFourResourceList(MenuIconBundle *list) {
     for (i = 0; i < 4; i++) {
         effDestroyResourceSlotSet(list->sprite[i]);
     }
-    sdfReleaseChipBlock(list);
+    sdfChipFreeDirect(list);
 }
 
 void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBundle *sprites, s32 surface) {
@@ -2314,7 +2314,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
         glyph = itfCreateFont2TextGlyph(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
     frFontDrawGlyphChain(glyph, 1, surface);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -2358,7 +2358,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 s
     width = frFontMeasureGlyphChain(glyph) + 8;
     frFontSetGlyphPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
     frFontDrawGlyphChain(glyph, 1, surface);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
@@ -2379,7 +2379,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         frFontCenterGlyphChainAt(0x1710, 0x5F0, glyph);
         frFontDrawGlyphChain(glyph, 1, surface);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
     }
 }
 
@@ -2405,7 +2405,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
             glyph = itfCreateFont2TextGlyph(x + 0xDF0,
                 0x160, depth, color, text, 0);
             frFontDrawGlyphChain(glyph, 1, surface);
-            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            frDestroyFontRequestAfter(glyph);
         }
     }
     if (slot->windowSprites != NULL) {

@@ -145,7 +145,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     s32 cueIndex;
     EvtMotionSeCue *cues;
 
-    motionSeParams = (EvtMotionSeTaskParams *)kwlnTaskGetUserValue(task);
+    motionSeParams = (EvtMotionSeTaskParams *)dds3GetProcessData(task);
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
@@ -185,7 +185,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
 /* Free the three-word parameter block owned by the motion-SE task. */
 void evtFreeMotionSeTaskParams(KwlnTask *task)
 {
-    sdfReleaseChipBlock((void *)(u32)kwlnTaskGetUserValue(task));
+    sdfChipFreeDirect((void *)(u32)dds3GetProcessData(task));
 }
 
 extern void sprintf(char *, const char *, ...);
@@ -200,12 +200,12 @@ KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     EvtMotionSeTaskParams *params;
 
     sprintf(taskName, evtMotionSeTaskNameFormat, eventTaskId, resourceId);
-    params = sdfAllocSizeClassBlock(0xC);
+    params = sdfChipAllocDirect(0xC);
     memset(params, 0, 0xC);
     params->modelKey = modelKey;
     params->eventTaskId = eventTaskId;
     params->resourceId = resourceId;
-    return kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeMotionSeTaskParams, (u32)params);
+    return dds3StartProcess(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeMotionSeTaskParams, (u32)params);
 }
 
 const char evtPackScriptPathFormat[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
@@ -246,7 +246,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             state->resourceAllocation = fileGetResourceHandle((struct FileRequest *)state->pendingRequest);
             filePollEntryCleanup(state->pendingRequest);
             state->pendingRequest = NULL;
-            header = (EvtPackHeader *)sdfResourceRetainAddress(state->resourceAllocation);
+            header = (EvtPackHeader *)sdfMemLock(state->resourceAllocation);
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
@@ -264,7 +264,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
 }
 
 s32 evtTickPackLoad(KwlnTask *task) {
-    EvtPackLoadState *packState = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
+    EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loaded) {
     default:
@@ -289,7 +289,7 @@ extern void effInitCh75Id(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
 void evtReleaseEventPackResources(KwlnTask *task) {
-    s32 stateHandle = kwlnTaskGetUserValue(task);
+    s32 stateHandle = dds3GetProcessData(task);
     EvtPackLoadState *packState = (EvtPackLoadState *)stateHandle;
 
     fileWaitIdle();
@@ -314,16 +314,16 @@ void evtReleaseEventPackResources(KwlnTask *task) {
             filePollEntryCleanup(packState->pendingRequest);
         }
         if (packState->resourceAllocation != NULL) {
-            sdfQueueGeneralAllocationRelease(packState->resourceAllocation);
+            sdfMemFreeDelayedDirect(packState->resourceAllocation);
         }
         if (packState->sceneAllocation1 != 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(packState->sceneAllocation1));
+            sdfMemFreeDirect((struct SdfMemBlock *)(u32)(packState->sceneAllocation1));
         }
         if (packState->sceneAllocation2 != 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(packState->sceneAllocation2));
+            sdfMemFreeDirect((struct SdfMemBlock *)(u32)(packState->sceneAllocation2));
         }
     }
-    sdfReleaseChipBlock(stateHandle);
+    sdfChipFreeDirect(stateHandle);
 }
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", evtNextCameraSlotViewerKey);

@@ -132,7 +132,7 @@ typedef struct {
 
 /* Release the allocation retained by the render/history owner. */
 void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 #include "sdf.h"
@@ -299,7 +299,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, co
     angleRow[2] += 0.21816613f;
     if (3.14159265f <= angleRow[2]) {
         angleRow[2] -= 3.14159265f;
-        angleRow[3] = effMiscRandUnitFloat(effDefaultRandomState) * 1.5f;
+        angleRow[3] = sdfGetRandFloat(effDefaultRandomState) * 1.5f;
     }
 
     phaseScalar = sdfSinPoly(angleRow[2]);
@@ -315,9 +315,9 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, co
         if (6.2831853f <= angleRow[0]) {
             angleRow[0] -= 6.2831853f;
             if (angleRow[1] < 1.0f) {
-                angleRow[1] += (effMiscRandUnitFloat(effDefaultRandomState) * 0.4f + 0.60000003f) * 0.25f;
+                angleRow[1] += (sdfGetRandFloat(effDefaultRandomState) * 0.4f + 0.60000003f) * 0.25f;
             } else if (0.5f < angleRow[1]) {
-                angleRow[1] -= (effMiscRandUnitFloat(effDefaultRandomState) * 0.4f + 0.60000003f) * 0.25f;
+                angleRow[1] -= (sdfGetRandFloat(effDefaultRandomState) * 0.4f + 0.60000003f) * 0.25f;
             }
         }
 
@@ -394,8 +394,8 @@ extern EffRandState effDefaultRandomState[];
 EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiWideFirst));
-    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(size + sizeof(EffMagatuhiWideFirst));
+    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfMemLock(allocation);
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
     u32 particleIndex;
@@ -410,7 +410,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.delaySpread;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -420,7 +420,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
 void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
@@ -432,12 +432,12 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     f32 random;
     EffCubicBezierSlot *slot;
 
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     radius = work->head.initialRadius * (random + random);
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[0] = random + random;
     direction[1] = 0.0f;
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
     VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
     VU0_NORMALIZE_VF10();
@@ -445,20 +445,20 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[0] = random + random;
     particle->driftState[1] = 0.0f;
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[2] = random + random;
     VU0_LOAD_VF(vf10, particle->driftState);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, particle->driftState);
     particle->scale = work->head.baseScale *
-        (effMiscRandUnitFloat(effDefaultRandomState) * work->head.scaleVariation +
+        (sdfGetRandFloat(effDefaultRandomState) * work->head.scaleVariation +
          (1.0f - work->head.scaleVariation));
-    particle->angle = effMiscRandUnitFloat(effDefaultRandomState) * EFF_MAGATUHI_FULL_TURN;
+    particle->angle = sdfGetRandFloat(effDefaultRandomState) * EFF_MAGATUHI_FULL_TURN;
     particle->liftStep = work->head.baseLiftStep *
-        (effMiscRandUnitFloat(effDefaultRandomState) * work->head.liftVariation +
+        (sdfGetRandFloat(effDefaultRandomState) * work->head.liftVariation +
          (1.0f - work->head.liftVariation));
     slot = effMathGetSlotAt(work->mathResource, index);
     slot->t = 0.0f;
@@ -549,12 +549,12 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
                     slot->controlPoints[0][1] = point[1];
                     slot->controlPoints[0][2] = point[2];
                     segmentDistance = captureDistance * 0.3999999762f;
-                    offset = pathJitter * (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f);
+                    offset = pathJitter * (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f);
                     slot->controlPoints[1][0] = point[0] + towardTarget[0] * segmentDistance + startTangent[0] * offset;
                     slot->controlPoints[1][1] = point[1] + towardTarget[1] * segmentDistance + startTangent[1] * offset;
                     slot->controlPoints[1][2] = point[2] + towardTarget[2] * segmentDistance + startTangent[2] * offset;
                     segmentDistance = captureDistance * 0.6499999762f;
-                    random = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
+                    random = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
                     offset = pathJitter * (random + random);
                     slot->controlPoints[2][0] = point[0] + towardTarget[0] * segmentDistance + sideAxis[0] * offset;
                     slot->controlPoints[2][1] = point[1] + towardTarget[1] * segmentDistance + sideAxis[1] * offset;
@@ -579,7 +579,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, point);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+            particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -604,8 +604,8 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
 /* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond *src) {
     u32 count = src->particleCount;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
-    EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
+    EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfMemLock(allocation);
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
     u32 i;
@@ -620,7 +620,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond 
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        *delays++ = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        *delays++ = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
     }
     return work;
 }
@@ -629,7 +629,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond 
 void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 
@@ -654,7 +654,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     slot->t = 0;
     slot->step = step;
 
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     scale[0] = work->head.jitterScales[0] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
@@ -673,7 +673,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     slot->controlPoints[0][1] = point[1];
     slot->controlPoints[0][2] = point[2];
 
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     scale[0] = work->head.jitterScales[1] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
@@ -692,7 +692,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     slot->controlPoints[1][1] = point[1];
     slot->controlPoints[1][2] = point[2];
 
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     scale[0] = work->head.jitterScales[2] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
@@ -713,7 +713,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     slot->controlPoints[2][2] = point[2];
 
     /* The fourth point reuses the third segment's normalized side direction. */
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     scale[0] = work->head.jitterScales[3] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
@@ -767,7 +767,7 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, particleIndex, out);
         }
         if (frame >= life && respawn) {
-            *delays = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+            *delays = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             (*delays)++;
         }
@@ -810,7 +810,7 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *callback) {
 
     for (particleIndex = 0; particleIndex < count; particleIndex += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
         effMagatuhiBuildBezierControlPointsVU(work, particleIndex);
-        *ages = effMiscRand((EffRandState *)effDefaultRandomState) % lifetimeFrames;
+        *ages = sdfGetRand((EffRandState *)effDefaultRandomState) % lifetimeFrames;
         slot = effMathGetSlotAt(work->mathResource, particleIndex);
         if (historyFrames < *ages) {
             slot->t = slot->step * (f32)(*ages - historyFrames);
@@ -892,8 +892,8 @@ typedef struct {
 /* Clone ring parameters; the returned work precedes its individual slots. */
 EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     u32 count = src->particleCount;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
-    EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
+    EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfMemLock(allocation);
     EffMagatuhiRingParticle *particle = (EffMagatuhiRingParticle *)(work + 1);
     s32 spread;
     u32 i;
@@ -909,7 +909,7 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -918,7 +918,7 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
 /* Release the ring history owner before the work/state allocation. */
 void effMagatuhiReleaseOwnerAndBuffer(EffMagatuhiRingWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 /* Initialize a ring slot and reset the history/value owned by that slot. */
@@ -928,14 +928,14 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
     f32 t;
 
     elem->age = 0;
-    elem->height = -work->head.heightSpread * effMiscRandUnitFloat(effDefaultRandomState);
-    elem->angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
+    elem->height = -work->head.heightSpread * sdfGetRandFloat(effDefaultRandomState);
+    elem->angle = sdfGetRandFloat(effDefaultRandomState) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = work->head.angleJitter;
-    elem->angleStep = work->head.angleStep * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend));
+    elem->angleStep = work->head.angleStep * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend));
     blend = work->head.startJitter;
-    elem->radius = work->head.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend));
+    elem->radius = work->head.startRadius * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend));
     blend = work->head.endJitter;
-    t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
+    t = sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend);
     elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.lifetimeFrames;
     effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
@@ -978,7 +978,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
         if (age > 0 && age <= life) {
             angle = particle->angle;
             radius = particle->radius;
-            out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            out[0] = sdfCos(angle) * radius;
             out[1] = particle->height;
             out[2] = sdfSinPoly(angle) * radius;
             VU0_LOAD_VF(vf11, origin);
@@ -1000,7 +1000,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+            particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -1058,7 +1058,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *callback) {
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitParticleA(work, i);
-                frameOffset = effMiscRand((EffRandState *)effDefaultRandomState) % frames;
+                frameOffset = sdfGetRand((EffRandState *)effDefaultRandomState) % frames;
                 particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
@@ -1076,7 +1076,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *callback) {
                 radius = particle->radius + radiusStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
-                    out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+                    out[0] = sdfCos(angle) * radius;
                     out[1] = height;
                     out[2] = sdfSinPoly(angle) * radius;
                     VU0_LOAD_VF(vf11, origin);
@@ -1098,8 +1098,8 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *callback) {
 /* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     u32 count = src->particleCount;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
-    EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
+    EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfMemLock(allocation);
     EffMagatuhiOrbitParticle *particle = (EffMagatuhiOrbitParticle *)(work + 1);
     s32 spread;
     u32 i;
@@ -1115,7 +1115,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -1124,7 +1124,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
 /* Release the orbit history owner before the work/state allocation. */
 void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiOrbitWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 /* Seed randomized height/angular/radial increments and clear the slot history. */
@@ -1136,14 +1136,14 @@ void effMagatuhiInitOrbitParticle(EffMagatuhiOrbitWork *work, s32 index) {
     elem->age = 0;
     elem->height = 0;
     blend = work->head.heightJitter;
-    elem->heightStep = work->head.heightStep * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend));
-    elem->angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
+    elem->heightStep = work->head.heightStep * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend));
+    elem->angle = sdfGetRandFloat(effDefaultRandomState) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = work->head.angleJitter;
-    elem->angleStep = work->head.angleStep * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend));
+    elem->angleStep = work->head.angleStep * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend));
     blend = work->head.startJitter;
-    elem->radius = work->head.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend));
+    elem->radius = work->head.startRadius * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend));
     blend = work->head.endJitter;
-    t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
+    t = sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend);
     elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.lifetimeFrames;
     effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
@@ -1186,7 +1186,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
         if (age > 0 && age <= life) {
             angle = particle->angle;
             radius = particle->radius;
-            out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            out[0] = sdfCos(angle) * radius;
             out[1] = particle->height;
             out[2] = sdfSinPoly(angle) * radius;
             VU0_LOAD_VF(vf11, origin);
@@ -1209,7 +1209,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+            particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -1268,7 +1268,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *callback) {
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitOrbitParticle(work, i);
-                frameOffset = effMiscRand((EffRandState *)effDefaultRandomState) % frames;
+                frameOffset = sdfGetRand((EffRandState *)effDefaultRandomState) % frames;
                 particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
@@ -1287,7 +1287,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *callback) {
                 height = particle->height + heightStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
-                    out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+                    out[0] = sdfCos(angle) * radius;
                     out[1] = height;
                     out[2] = sdfSinPoly(angle) * radius;
                     VU0_LOAD_VF(vf11, origin);
@@ -1322,8 +1322,8 @@ typedef struct {
 EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
-    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(size + sizeof(EffMagatuhiDriftWork));
+    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfMemLock(allocation);
     EffMagatuhiDriftWork *work = (EffMagatuhiDriftWork *)((u8 *)particle + size);
     s32 spread;
     u32 i;
@@ -1339,7 +1339,7 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -1348,7 +1348,7 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
 /* Release the drift history owner before its states-plus-work allocation. */
 void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiDriftWork *work) {
     effReleaseMagatuhiOwner(work->managedResource);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
@@ -1358,12 +1358,12 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     f32 radius;
     f32 random;
 
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     radius = work->head.initialRadius * (random + random);
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[0] = random + random;
     direction[1] = 0.0f;
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
     VU0_LOAD_VF_FROM(vf10, *(u128 *)direction);
     VU0_NORMALIZE_VF10();
@@ -1371,20 +1371,20 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[0] = random + random;
     particle->driftState[1] = 0.0f;
-    random = effMiscRandUnitFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
+    random = sdfGetRandFloat(effDefaultRandomState) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[2] = random + random;
     VU0_LOAD_VF(vf10, particle->driftState);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, particle->driftState);
     particle->scale = work->head.initialScale *
-        (effMiscRandUnitFloat(effDefaultRandomState) * work->head.initialScaleRandomness +
+        (sdfGetRandFloat(effDefaultRandomState) * work->head.initialScaleRandomness +
          (1.0f - work->head.initialScaleRandomness));
-    particle->angle = effMiscRandUnitFloat(effDefaultRandomState) * EFF_MAGATUHI_FULL_TURN;
+    particle->angle = sdfGetRandFloat(effDefaultRandomState) * EFF_MAGATUHI_FULL_TURN;
     particle->liftStep = work->head.initialLift *
-        (effMiscRandUnitFloat(effDefaultRandomState) * work->head.initialLiftRandomness +
+        (sdfGetRandFloat(effDefaultRandomState) * work->head.initialLiftRandomness +
          (1.0f - work->head.initialLiftRandomness));
     effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
@@ -1452,7 +1452,7 @@ void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+            particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -1509,7 +1509,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *callback) {
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitializeDriftParticle(work, i);
-                frameOffset = effMiscRand((EffRandState *)effDefaultRandomState) % frames;
+                frameOffset = sdfGetRand((EffRandState *)effDefaultRandomState) % frames;
                 particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */

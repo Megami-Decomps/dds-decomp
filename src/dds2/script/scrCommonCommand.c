@@ -54,7 +54,7 @@ extern u32 scrGetCommandTimer(void);
 
 s32 scrCommandStoreRandomCondition(void)
 {
-    scrSetIntegerReturnValue(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
+    scrSetIntegerReturnValue(sdfGetRandInt(0, scrReadIntParameter(0)) + 1);
     return 1;
 }
 
@@ -250,22 +250,22 @@ s32 scrCommandDestroyRegisteredTask(void)
 {
     s32 taskHandle;
     taskHandle = scrReadIntParameter(0);
-    if (kwlnTaskIsRegistered((KwlnTask *)taskHandle) == 0)
+    if (dds3ExistProcess((KwlnTask *)taskHandle) == 0)
     {
         return 1;
     }
-    kwlnTaskDestroyWithHierarchy((KwlnTask *)taskHandle, 1);
+    dds3KillProcess((KwlnTask *)taskHandle, 1);
     return 1;
 }
 
 s32 scrCommandWaitForTaskRemoval(void)
 {
-    return kwlnTaskIsRegistered((KwlnTask *)scrReadIntParameter(0)) == 0;
+    return dds3ExistProcess((KwlnTask *)scrReadIntParameter(0)) == 0;
 }
 
 s32 scrCommandStoreTaskPresence(void)
 {
-    if (kwlnTaskIsRegistered((KwlnTask *)scrReadIntParameter(0)) != 0)
+    if (dds3ExistProcess((KwlnTask *)scrReadIntParameter(0)) != 0)
     {
         scrSetIntegerReturnValue(1);
     }
@@ -281,13 +281,13 @@ u32 scrCommand_SCR_GET_TIMER()
 {
     KwlnTask* task;
     task = (KwlnTask*)scrReadIntParameter(0);
-    if (!kwlnTaskIsRegistered(task))
+    if (!dds3ExistProcess(task))
     {
         scrSetIntegerReturnValue(0);
     }
     else
     {
-        scrSetIntegerReturnValue(kwlnTaskGetTimer(task));
+        scrSetIntegerReturnValue(dds3GetProcessRunTime(task));
     }
     return 1;
 }

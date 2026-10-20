@@ -103,7 +103,7 @@ u32 effParamNodeConditionAlwaysTrue(void) {
 }
 
 EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
-    EffNode *node = (EffNode *)sdfAllocSizeClassBlock(0x10);
+    EffNode *node = (EffNode *)sdfChipAllocDirect(0x10);
 
     node->type = type;
     node->unkC = 1.03f;
@@ -114,7 +114,7 @@ EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
 
 void effDestroyNode(EffNode *node) {
     effNodeTypeOperations[node->type].destroy(node->instance);
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 void effUpdateNode(EffNode *node) {
@@ -202,6 +202,6 @@ struct EffNode *effLoadResourceNode(const char *resource) {
     sdfDebugPrintf("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
-    sdfReleaseResourceAllocation(resourceHandle);
+    sdfMemFreeDirect(resourceHandle);
     return node;
 }

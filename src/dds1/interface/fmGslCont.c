@@ -7,8 +7,8 @@ s32 fmGslReleaseActiveResourceBuffers(void) {
     if (frFontResourceList.head == 0) {
         return 0;
     }
-    sdfReleaseResourceAllocation(frFontResourceList.nodeAllocation);
-    sdfReleaseResourceAllocation(frFontResourceList.recordStorageAllocation);
+    sdfMemFreeDirect(frFontResourceList.nodeAllocation);
+    sdfMemFreeDirect(frFontResourceList.recordStorageAllocation);
     frFontResourceList.head = 0;
     return 1;
 }

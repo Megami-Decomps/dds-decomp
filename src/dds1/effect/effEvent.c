@@ -126,8 +126,8 @@ extern void effDrawSolidRectangle(EffSolidRectParams *arg);
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
-    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
+    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfMemLock(allocation);
     EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
     u32 index = 0;
     table->allocation = allocation;
@@ -147,7 +147,7 @@ EffArrHdr *effCreateSlotArray(u32 count) {
 
 /* Release the allocation handle stored after the contiguous slot array. */
 void effReleaseSlotArrayAllocation(EffArrHdr *header) {
-    sdfReleaseResourceAllocation(header->allocation);
+    sdfMemFreeDirect(header->allocation);
 }
 
 /* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
@@ -402,7 +402,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
             latitude += 0.20943949f;
             out = vertices;
             longitude = 0.0f;
-            ringY = radius * sdfEvaluateCosineViaSinePhaseShift(latitude);
+            ringY = radius * sdfCos(latitude);
             ringRadius = radius * sdfSinPoly(latitude);
             VU0_LOAD_MATRIX(matrix);
             VU0_LOAD_VF(vf11, center);
@@ -418,7 +418,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
                 VU0_STORE_VF(vf10, *out);
                 out++;
                 longitude += 0.31415924429893494f;
-                point[0] = sdfEvaluateCosineViaSinePhaseShift(longitude) * ringRadius;
+                point[0] = sdfCos(longitude) * ringRadius;
                 point[1] = ringY;
                 point[2] = sdfSinPoly(longitude) * ringRadius;
                 VU0_LOAD_VF(vf10, point);
@@ -535,7 +535,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
             VU0_STORE_VF(vf10, *out);
             out++;
             angle += angleStep;
-            point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            point[0] = sdfCos(angle) * radius;
             point[1] = y;
             point[2] = sdfSinPoly(angle) * radius;
             VU0_LOAD_VF(vf10, point);
@@ -551,14 +551,14 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     VU0_LOAD_VF(vf11, center);
     angle = 0.0f;
     for (segment = 0; segment < 20; segment++) {
-        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSinPoly(angle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
         out++;
-        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSinPoly(angle) * radius;
         VU0_LOAD_VF(vf10, point);
@@ -573,7 +573,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     VU0_LOAD_VF(vf11, center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
-        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSinPoly(angle) * radius;
         VU0_LOAD_VF(vf10, point);
@@ -581,7 +581,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         VU0_STORE_VF(vf10, *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
-        point[0] = sdfEvaluateCosineViaSinePhaseShift(oppositeAngle) * radius;
+        point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSinPoly(oppositeAngle) * radius;
         VU0_LOAD_VF(vf10, point);
@@ -596,7 +596,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     VU0_LOAD_VF(vf11, center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
-        point[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSinPoly(angle) * radius;
         VU0_LOAD_VF(vf10, point);
@@ -604,7 +604,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         VU0_STORE_VF(vf10, *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
-        point[0] = sdfEvaluateCosineViaSinePhaseShift(oppositeAngle) * radius;
+        point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSinPoly(oppositeAngle) * radius;
         VU0_LOAD_VF(vf10, point);
@@ -1173,7 +1173,7 @@ extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, voi
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
     const EffEventInit *init = (const EffEventInit *)params;
-    EffEventWork *work = sdfAllocSizeClassBlock(sizeof(EffEventWork));
+    EffEventWork *work = sdfChipAllocDirect(sizeof(EffEventWork));
 
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
@@ -1185,7 +1185,7 @@ EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
 /* Release the attached effect before freeing the event work. */
 void effEventReleaseNode(EffEventWork *work) {
     effReleaseBattleVoiceOwner(work->effect);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Copy the packed 0x30-byte record while retaining its native packed layout. */
@@ -1286,7 +1286,7 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
 EffEventLight *effEventLightCreate(SoundMixer *mixer, f32 param) {
-    EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
+    EffEventLight *work = sdfChipAllocDirect(sizeof(EffEventLight));
 
     work->init.orientation[3] = 1.0f;
     work->init.range = 50.0f;
@@ -1312,13 +1312,13 @@ void effEventLightDestroy(EffEventLight *work) {
     if (work->active != 0) {
         effEventReleaseSoundMixerVoices(work->handle);
     }
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Clone the init block/effect using the same handle; clear the shared-teardown flag. */
 EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
-    EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
+    EffEventLight *work = sdfChipAllocDirect(sizeof(EffEventLight));
 
     work->owner = effEventCreate(src->handle, 0, block);
     work->handle = src->handle;
@@ -1435,8 +1435,8 @@ INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
     u32 particleCount = src->particleCount;
     u32 particleBytes = particleCount * sizeof(EffEventBillParticle);
-    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(particleBytes + sizeof(EffEventBillSet));
-    EffEventBillParticle *particle = (EffEventBillParticle *)sdfResourceRetainAddress(allocationHandle);
+    SdfMemBlock *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(EffEventBillSet));
+    EffEventBillParticle *particle = (EffEventBillParticle *)sdfMemLock(allocationHandle);
     EffEventBillSet *work = (EffEventBillSet *)((u8 *)particle + particleBytes);
     u32 particleIndex;
 
@@ -1474,7 +1474,7 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
         billDispatchByKind((BillObj *)D_003BB144);
         billDispatchByKind((BillObj *)D_003BB148);
     }
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 extern EffRandState effDefaultRandomState[];
@@ -1489,43 +1489,43 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     s32 startDelaySpread = work->head.startDelaySpread;
     s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % startDelaySpread);
-    particle->motionDelay = -(effMiscRand((EffRandState *)effDefaultRandomState) % motionDelaySpread);
-    scaleFactor = effMiscRandUnitFloat(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
+    particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % startDelaySpread);
+    particle->motionDelay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % motionDelaySpread);
+    scaleFactor = sdfGetRandFloat(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
     particle->baseScale = work->head.baseScale * scaleFactor;
-    particle->scalePhaseX = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    particle->scalePhaseY = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    particle->scalePhaseStepX = work->head.scalePhaseStep * (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f);
-    particle->scalePhaseStepY = work->head.scalePhaseStep * (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f);
-    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
-    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
-    particle->rotation = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    if (effMiscRand((EffRandState *)effDefaultRandomState) & 1) {
-        particle->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
+    particle->scalePhaseX = sdfGetRandFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseY = sdfGetRandFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseStepX = work->head.scalePhaseStep * (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f);
+    particle->scalePhaseStepY = work->head.scalePhaseStep * (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f);
+    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->rotation = sdfGetRandFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    if (sdfGetRand((EffRandState *)effDefaultRandomState) & 1) {
+        particle->angularSpeed = work->head.angularSpeed * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
     } else {
-        particle->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
+        particle->angularSpeed = -(work->head.angularSpeed * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
     }
     spawnRadius = work->head.spawnRadius;
-    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[0] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[1] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[2] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
     /* Each coordinate consumes its own radial random factor, not one shared radius. */
-    particle->position[0] = spawnRadius * effMiscRandUnitFloat(effDefaultRandomState) * direction[0];
-    particle->position[1] = spawnRadius * effMiscRandUnitFloat(effDefaultRandomState) * direction[1];
-    particle->position[2] = spawnRadius * effMiscRandUnitFloat(effDefaultRandomState) * direction[2];
-    particle->motion[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->position[0] = spawnRadius * sdfGetRandFloat(effDefaultRandomState) * direction[0];
+    particle->position[1] = spawnRadius * sdfGetRandFloat(effDefaultRandomState) * direction[1];
+    particle->position[2] = spawnRadius * sdfGetRandFloat(effDefaultRandomState) * direction[2];
+    particle->motion[0] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     particle->motion[1] = 0;
-    particle->motion[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->motion[2] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, particle->motion);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, particle->motion);
-    particle->swayAmplitude = work->head.swayAmplitude * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
+    particle->swayAmplitude = work->head.swayAmplitude * (sdfGetRandFloat(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
     particle->swayPhase = 0;
-    particle->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
-    particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
+    particle->verticalSpeed = work->head.verticalSpeed * (sdfGetRandFloat(effDefaultRandomState) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
+    particle->lateralSpeed = work->head.lateralSpeed * (sdfGetRandFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
 extern f32 sdfViewEyeVector[4];
@@ -1601,9 +1601,9 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             }
             drawColor = effBlendColor(color & 0xFFFFFF, color, alpha);
             scaleY = particle->baseScale;
-            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseX);
+            phaseCosine = sdfCos(particle->scalePhaseX);
             modulationX = particle->scaleAmplitudeX * phaseCosine;
-            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseY);
+            phaseCosine = sdfCos(particle->scalePhaseY);
             scaleX = scaleY + modulationX;
             scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
             VU0_LOAD_VF(vf10, position);
@@ -1763,9 +1763,9 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             }
             secondaryColor = effBlendColor(color & 0xFFFFFF, color, alpha);
             scaleY = particle->baseScale;
-            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseX);
+            phaseCosine = sdfCos(particle->scalePhaseX);
             modulationX = particle->scaleAmplitudeX * phaseCosine;
-            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseY);
+            phaseCosine = sdfCos(particle->scalePhaseY);
             scaleX = scaleY + modulationX;
             scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
             VU0_LOAD_VF(vf10, position);
@@ -1790,7 +1790,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             primary.uv[slot][7] = v;
             halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
             halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(particle->rotation);
+            cosine = sdfCos(particle->rotation);
             sine = sdfSinPoly(particle->rotation);
             cornerX = center - halfWidth;
             cornerY = center - halfHeight;
@@ -1828,7 +1828,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             secondary.uv[slot][7] = v;
             halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
             halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(particle->rotation);
+            cosine = sdfCos(particle->rotation);
             sine = sdfSinPoly(particle->rotation);
             cornerX = center - halfWidth;
             cornerY = center - halfHeight;
@@ -1945,8 +1945,8 @@ void effEventInstallBillParticleSet(void) {
 EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind, void *params) {
     const EffChanHead *head = source;
     u32 recordCount = head->count;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
-    EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    EffChanWork *work = (EffChanWork *)sdfMemLock(allocation);
     EffChanRecord *record = (EffChanRecord *)(work + 1);
     EffParamWork *parameterTemplate;
     s32 delayModulus;
@@ -1963,11 +1963,11 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
         delayModulus = work->head.spread;
         parameterTemplate = effParamWorkCreate(kind, params);
         record->param = parameterTemplate;
-        record->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+        record->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
             record->param = effParamWorkDuplicate(parameterTemplate);
-            record->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+            record->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
             record++;
         }
     }

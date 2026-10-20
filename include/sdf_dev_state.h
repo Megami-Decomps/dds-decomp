@@ -7,7 +7,7 @@
 typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
 
-/* Complete 0x40-byte owner allocated by sdfDevAllocState. */
+/* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
 typedef struct DevState {
     struct DevState *next; /* 0x00 */
     struct DevState *previous; /* 0x04 */
@@ -52,11 +52,11 @@ typedef char DevState_callbackContext_offset_must_be_0x3C[
 
 /* Stable state APIs. Callback factories keep caller-specific callback types. */
 DevState *sdfDevCreateCommandState(const char *path);
-s32 sdfDevQueueRead(DevState *state, void *data, s32 byteCount);
-s32 sdfDevQueueWrite(DevState *state, const void *data, s32 byteCount);
-s32 sdfDevQueueReleaseState(DevState *state);
-s32 sdfDevReactivate(DevState *state);
-s32 sdfDevQueueActiveOperation(DevState *request);
+s32 sdfFileCmdRead(DevState *state, void *data, s32 byteCount);
+s32 sdfFileCmdWrite(DevState *state, const void *data, s32 byteCount);
+s32 sdfFileCmdFree(DevState *state);
+s32 sdfFileCmdClearError(DevState *state);
+s32 sdfFileCmdClose(DevState *request);
 void sdfDevQueueReadAndWait(DevState *state, void *buffer, s32 byteCount);
 u32 sdfDevQueueControlAndWait(DevState *state);
 void sdfDevWaitThenReleaseCommandState(DevState *state);

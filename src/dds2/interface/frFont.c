@@ -209,7 +209,7 @@ FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
 
 /* Link without repositioning into the draw-buffer-indexed queue; return 0.
  * The low-byte buffer index is used directly, without a two-slot bounds check. */
-s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *glyph) {
+s32 frDestroyFontRequestAfter(FrFontGlyph *glyph) {
     FrFontGlyph **queueSlot = &frFontWork.glyphSlots[kwlnGetDrawBufferIndex() & 0xFF];
 
     *queueSlot = frFontLinkGlyph(*queueSlot, glyph, 0);
@@ -423,7 +423,7 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
  * Neither allocation nor entry index is checked. */
 u8 *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
-    u8 *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
+    u8 *clonedResource = sdfChipAllocDirect(FR_FONT_RESOURCE_CLONE_BYTES);
     ItfPackedResourceSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);
@@ -641,12 +641,12 @@ void frFontSetGlyphPosition(FrFontGlyph *glyph, u32 x, u32 y) {
 }
 
 /* Store the glyph render value in sixteenths. */
-void frFontStoreShiftedRenderValue(FrFontGlyph *glyph, u32 unshiftedValue) {
+void frSetPriority(FrFontGlyph *glyph, u32 unshiftedValue) {
     glyph->renderValueOrSetupOrShade.renderValue = unshiftedValue >> FR_FONT_CONTEXT_VALUE_SHIFT;
 }
 
 /* Assign the first option byte across all visited children; NULL is a no-op. */
-void frFontSetChildChainFirstOption(FrFontGlyph *glyph, u8 firstOption) {
+void frSetFontColorNo(FrFontGlyph *glyph, u8 firstOption) {
     FrFontChildGlyph *childGlyph;
 
     for (; glyph != NULL; glyph = glyph->previous) {
@@ -667,13 +667,13 @@ void frFontSetChildColors(FrFontGlyph *parentNode, u32 colorWord) {
 }
 
 /* OR the requested mask into the shared byte, preserving implicit narrowing. */
-void frFontAddSharedGlyphFlags(s32 mask) {
+void frEnableMode(s32 mask) {
     mask |= frFontSharedGlyphFlags;
     frFontSharedGlyphFlags = mask;
 }
 
 /* Clear flag bits from the shared font flag byte; returns the previous value. */
-u8 frFontClearFlagBits(u8 mask) {
+u8 frDisableMode(u8 mask) {
     u8 previousFlags = frFontSharedGlyphFlags;
 
     frFontSharedGlyphFlags = previousFlags & ~mask;
@@ -681,7 +681,7 @@ u8 frFontClearFlagBits(u8 mask) {
 }
 
 /* Replace the complete shared render-flag word used by subsequent drawing. */
-void frFontSetSharedRenderFlags(u32 renderFlags) {
+void frSetFontDrawOT(u32 renderFlags) {
     frFontSharedRenderFlags = renderFlags;
 }
 
@@ -922,7 +922,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 renderFlags) {
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
-s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task) {
+s32 frFlipPacketBuf(KwlnTask *task) {
     s32 queueIndex = (kwlnGetDrawBufferIndex() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);

@@ -389,7 +389,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
         btlUnitGetMuzzlePosVU(unit);
         return;
     }
-    effObjFetchInnerPosition(unit->effectObject);
+    dds3GetPosPoseSet(unit->effectObject);
     VU0_STORE_VF(vf10, pos);
     VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
@@ -1198,7 +1198,7 @@ s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 ang
     delta[2] = targetPosition[2] - origin[2];
     if (delta[0] != 0.0f || delta[2] != 0.0f) {
         sine = sdfSinPoly(angle);
-        tangent = sine / sdfEvaluateCosineViaSinePhaseShift(angle);
+        tangent = sine / sdfCos(angle);
         x = tangent * delta[2];
         if (ffabsf(delta[0]) < ffabsf(x)) {
             x = delta[0];
@@ -2999,7 +2999,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
 
     task = scrCreateTaskForProcessId((s32)((BtlState *)battle)->scriptOwner->priority - 1, D_00435E7C, option);
     scrSetCurrentActor((KwlnTask *)task, (void *)actor);
-    window = ((ScrData *)kwlnTaskGetUserValue((KwlnTask *)task))->resourceIndex;
+    window = ((ScrData *)dds3GetProcessData((KwlnTask *)task))->resourceIndex;
     if (window >= 0) {
         s32 unit = (s32)((BtlActor *)actor)->unit;
         s32 width = 2;
@@ -3009,7 +3009,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
         }
         itfMesSetTextSlotFromValue(window, 0, ((BtlUnit *)unit)->partyRecord.unitId, width);
     }
-    kwlnTaskAddChild(((BtlState *)battle)->scriptOwner, (KwlnTask *)task);
+    dds3LinkProcess(((BtlState *)battle)->scriptOwner, (KwlnTask *)task);
     ((BtlState *)battle)->boundTask = task;
 }
 
@@ -3417,9 +3417,9 @@ BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
     s32 category;
 
     directoryHandle = btlOpenPfsDebugDirectory(path);
-    list = sdfAllocSizeClassBlock(sizeof(BtlResourceEntryList));
+    list = sdfChipAllocDirect(sizeof(BtlResourceEntryList));
     if (path != NULL) {
-        list->pathPrefix = sdfAllocSizeClassBlock(strlen(path) + 1);
+        list->pathPrefix = sdfChipAllocDirect(strlen(path) + 1);
         strcpy(list->pathPrefix, path);
     } else {
         list->pathPrefix = NULL;
@@ -3434,7 +3434,7 @@ BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
         index = 0;
         generalCount = effGetGeneralResourceCount();
         for (; index < generalCount; index++) {
-            entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
+            entry = sdfChipAllocDirect(BTL_RESOURCE_ENTRY_BYTES);
             entry->category = 8;
             entry->value = index;
             entry->id = 0;
@@ -3496,7 +3496,7 @@ BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
             continue;
         }
         if (category != 0) {
-            entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
+            entry = sdfChipAllocDirect(BTL_RESOURCE_ENTRY_BYTES);
             entry->category = category;
             entry->value = 0;
             entry->id = 0;
@@ -3524,17 +3524,17 @@ void btlDestroyEntryList(BtlResourceEntryList *list) {
         entry = list->head;
         do {
             BtlResourceEntry *next = entry->next;
-            sdfReleaseChipBlock(entry);
+            sdfChipFreeDirect(entry);
             entry = next;
         } while (entry != NULL);
     }
-    sdfReleaseChipBlock(list->pathPrefix);
-    sdfReleaseChipBlock(list);
+    sdfChipFreeDirect(list->pathPrefix);
+    sdfChipFreeDirect(list);
 }
 
 /* Append a named browser entry without changing the current scan order. */
 void btlAppendEntry(BtlResourceEntryList *list, const char *name, s32 category, s32 value, s32 id) {
-    BtlResourceEntry *entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
+    BtlResourceEntry *entry = sdfChipAllocDirect(BTL_RESOURCE_ENTRY_BYTES);
     BtlResourceEntry *tail;
     entry->category = category;
     entry->value = value;
@@ -3559,7 +3559,7 @@ void btlAppendEntry(BtlResourceEntryList *list, const char *name, s32 category, 
 /* Initialize a browser descriptor at the first entry of the borrowed list.
  * The native constructor leaves textureCategory untouched. */
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
-    BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(BTL_RESOURCE_DESCRIPTOR_BYTES);
+    BtlResourceDescriptor *descriptor = sdfChipAllocDirect(BTL_RESOURCE_DESCRIPTOR_BYTES);
 
     descriptor->originX = 8;
     descriptor->originY = 8;
@@ -3766,7 +3766,7 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
     }
-    sdfReleaseChipBlock(descriptor);
+    sdfChipFreeDirect(descriptor);
 }
 
 void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32 y) {
@@ -3827,7 +3827,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
     }
     allocation = sdfReadNamedResource(resourceName, &loadedResource, 0);
     btlReplaceResourceHandle(descriptor, (void *)loadedResource);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */
@@ -3883,7 +3883,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension) {
     struct BtlResourceNameRecord *record;
 
-    record = (struct BtlResourceNameRecord *)sdfAllocSizeClassBlock(BTL_RESOURCE_NAME_RECORD_BYTES);
+    record = (struct BtlResourceNameRecord *)sdfChipAllocDirect(BTL_RESOURCE_NAME_RECORD_BYTES);
     record->maximumNameLength = 9;
     record->x = 8;
     record->y = 8;
@@ -3897,7 +3897,7 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
 
 /* Release the chip allocation used for an editable resource-name record. */
 void btlDestroyResourceNameRecord(struct BtlResourceNameRecord *record) {
-    sdfReleaseChipBlock(record);
+    sdfChipFreeDirect(record);
 }
 
 extern u8 btlResourceNameCharacters[];

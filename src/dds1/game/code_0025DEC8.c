@@ -20,7 +20,7 @@ void itfEmitSelectedGlyph(ShopScene *context, s32 unused, s32 layoutFlags,
                               layoutFlags);
         frFontSetChildColors(glyph, color);
         frFontDrawGlyphChain(glyph, 1, glyphAttribute);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
         return;
     }
 }

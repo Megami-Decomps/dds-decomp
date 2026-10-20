@@ -33,7 +33,7 @@ void btlStartSkillEventTask(s32 skill) {
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, skill);
     scrSetCurrentActor((KwlnTask *)taskId, NULL);
-    kwlnTaskAddChild(battle->scriptOwner, (KwlnTask *)taskId);
+    dds3LinkProcess(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
 }
 
@@ -42,7 +42,7 @@ s32 btlReleaseScriptResource(void) {
     if (battle->eventTaskId == -1) {
         return 1;
     }
-    if (kwlnTaskIsRegistered((KwlnTask *)battle->scriptTask) == 0) {
+    if (dds3ExistProcess((KwlnTask *)battle->scriptTask) == 0) {
         battle->scriptTask = 0;
         return 1;
     }
@@ -81,7 +81,7 @@ void btlStartPrimaryScriptTask(void) {
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
     scrSetCurrentActor((KwlnTask *)taskId, NULL);
-    kwlnTaskAddChild(battle->scriptOwner, (KwlnTask *)taskId);
+    dds3LinkProcess(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 1;
 }
@@ -122,7 +122,7 @@ void btlStartSecondaryScriptTask(void) {
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
     scrSetCurrentActor((KwlnTask *)taskId, NULL);
-    kwlnTaskAddChild(battle->scriptOwner, (KwlnTask *)taskId);
+    dds3LinkProcess(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 2;
 }

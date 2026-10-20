@@ -388,7 +388,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *w
     sprintf(text, D_004379F0, endProgress - startProgress);
     glyph = itfCreateFont2TextGlyph(x + 0xC00, y + 0xE0, depth, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, context);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 
     if (startProgress > 0 && endProgress != 0) {
         progress = startProgress * 1000 / endProgress;
@@ -951,7 +951,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
         glyph = itfCreateConvertedTextGlyph(x + ((textOffset + 0x149) << 4), y + 0xB8, depth,
                                             color, (const u8 *)textAddress, NULL);
         frFontDrawGlyphChain(glyph, 1, context);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
     } else {
         cap = 0;
     }
@@ -1038,14 +1038,14 @@ fallback:
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */
 s32 brsPollResultCounterCompletion(void) {
-    KwlnTask *resultTask = kwlnTaskGetTaskByName(D_00428550);
+    KwlnTask *resultTask = dds3SearchProcessName(D_00428550);
     BrsResultWork *resultWork;
     s32 counterIndex;
 
     if (resultTask == NULL) {
         return 0;
     }
-    resultWork = (BrsResultWork *)kwlnTaskGetUserValue(resultTask);
+    resultWork = (BrsResultWork *)dds3GetProcessData(resultTask);
     for (counterIndex = 0; counterIndex < BRS_RESULT_COUNTER_PAIR_COUNT; counterIndex++) {
         if (resultWork->levelCounters[counterIndex].phase >= 2) {
             if (resultWork->levelCounters[counterIndex].remaining != 0 ||
@@ -1145,13 +1145,13 @@ u32 func_002A1118(void) {
 s32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     TitleEffectState *effectState;
 
-    effectState = (TitleEffectState *)kwlnTaskGetUserValue(task);
+    effectState = (TitleEffectState *)dds3GetProcessData(task);
     effectState->frameCounter = effectState->frameCounter + 1;
     return 0;
 }
 
 void mnuDestroyTitleEffectTask(KwlnTask *task) {
-    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
+    sdfChipFreeDirect((void *)dds3GetProcessData(task));
     mnuTitleSoundTask = 0;
 }
 
@@ -1159,17 +1159,17 @@ extern u8 D_00437A10[];
 
 /* Allocate the two-word effect state and attach it to the frame-counter task. */
 void mnuCreateTitleEffectTask(void) {
-    TitleEffectState *effectState = (TitleEffectState *)sdfAllocSizeClassBlock(MNU_TITLE_EFFECT_BYTES);
-    KwlnTask *effectTask = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
+    TitleEffectState *effectState = (TitleEffectState *)sdfChipAllocDirect(MNU_TITLE_EFFECT_BYTES);
+    KwlnTask *effectTask = dds3StartProcess(D_00437A10, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     mnuTitleSoundTask = effectTask;
-    kwlnTaskSetUserValue(effectTask, (u32)effectState);
+    dds3SetProcessData(effectTask, (u32)effectState);
     effectState->soundNameIndex = 0;
     effectState->frameCounter = 0;
 }
 
 void mnuResetTitleEffectState(s32 command) {
-    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+    TitleEffectState *effectState = (TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         sdfSoundStopNamedPlayback();
     }
@@ -1178,7 +1178,7 @@ void mnuResetTitleEffectState(s32 command) {
 }
 
 void mnuSetTitleVoicePrefixIndex(s32 prefixIndex) {
-    ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = prefixIndex;
+    ((TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask))->soundNameIndex = prefixIndex;
 }
 
 extern char D_00428610[];
@@ -1191,7 +1191,7 @@ extern char D_003E09F0[];
  * retain that signature rather than treating it as a filename string. */
 void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
-    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+    TitleEffectState *effectState = (TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         sdfDebugPrintf(D_00428610);
         sdfSoundStopNamedPlayback();
@@ -1213,7 +1213,7 @@ void mnuNoOpTitleAudio(void) {
 }
 
 s32 mnuGetTitleEffectFrameCounter(void) {
-    return ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->frameCounter;
+    return ((TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask))->frameCounter;
 }
 
 u32 sndOpStartTrackFromScript(void) {
@@ -1321,7 +1321,7 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     s32 bufferBytes = wordCount * SND_TRANSFER_WORD_BYTES;
     s32 halfwordIndex;
 
-    D_00437A28 = (u32)sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(bufferBytes));
+    D_00437A28 = (u32)sdfMemoryGetBlockAddress(sdfMemAllocDirect(bufferBytes));
     for (halfwordIndex = 0; halfwordIndex < wordCount * SND_TRANSFER_WORD_HALFWORDS; halfwordIndex++) {
         ((u16 *)D_00437A28)[halfwordIndex] = 0;
     }

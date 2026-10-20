@@ -75,9 +75,9 @@ extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *, FrFontGlyph *, s32);
 
 extern void frFontSetEntryFlag(s32 kind, u64 flag);
 
-extern void frFontAddSharedGlyphFlags(s32 value);
+extern void frEnableMode(s32 value);
 
-extern u8 frFontClearFlagBits(u8 value);
+extern u8 frDisableMode(u8 value);
 
 extern u8 D_00357980[];
 extern u8 D_00357988[];
@@ -253,8 +253,8 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     D_003BB15C &= ~2;
     D_003BB15C &= ~4;
     D_003BB15C &= ~8;
-    frFontAddSharedGlyphFlags(1);
-    frFontClearFlagBits(2);
+    frEnableMode(1);
+    frDisableMode(2);
     bytes = stream->encodedText;
     for (;;) {
         value = bytes[stream->encodedTextOffset++];
@@ -295,12 +295,12 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                 }
             }
             frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, frFontEncodedTextGlyphSpacing);
-            frFontStoreShiftedRenderValue(stream->glyphChain, stream->z);
+            frSetPriority(stream->glyphChain, stream->z);
         }
         bytes = stream->encodedText;
     }
-    frFontClearFlagBits(1);
-    frFontAddSharedGlyphFlags(2);
+    frDisableMode(1);
+    frEnableMode(2);
     return stream->glyphChain;
 }
 
@@ -510,18 +510,18 @@ FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32
         kind = 5;
     }
     frFontSetEntryFlag(kind, entryFlag);
-    frFontAddSharedGlyphFlags(1);
-    frFontClearFlagBits(2);
-    frFontClearFlagBits(0x10);
+    frEnableMode(1);
+    frDisableMode(2);
+    frDisableMode(0x10);
     glyph = frFontAppendTextToGlyphChain(source, kind, 0, 0, 0);
-    frFontAddSharedGlyphFlags(0x10);
-    frFontAddSharedGlyphFlags(2);
-    frFontClearFlagBits(1);
+    frEnableMode(0x10);
+    frEnableMode(2);
+    frDisableMode(1);
     frFontSetSpacingAndMeasureGlyphs(glyph, measureFlag);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
-    frFontSetChildChainFirstOption(glyph, 5);
+    frSetFontColorNo(glyph, 5);
     return glyph;
 }
 
@@ -577,7 +577,7 @@ void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
     glyph = frFontAppendTextToGlyphChain(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetSpacingAndMeasureGlyphs(glyph, -4);
     frFontLinkGlyph(parent, glyph, 0);
@@ -593,9 +593,9 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
 
     length = strlen(text);
     if (sharedFlag == 0) {
-        frFontAddSharedGlyphFlags(1);
+        frEnableMode(1);
     }
-    frFontClearFlagBits(2);
+    frDisableMode(2);
 
     if (length > 0) {
         do {
@@ -613,7 +613,7 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
                 glyphData[2] = 0;
             }
             glyph = frFontAppendTextToGlyphChain(glyphData, glyphMode, 0, 0, 0);
-            frFontStoreShiftedRenderValue(glyph, depth << 4);
+            frSetPriority(glyph, depth << 4);
             frFontSetChildColors(glyph, colors);
             frFontSetSpacingAndMeasureGlyphs(glyph, 3);
             chain = frFontLinkGlyphAfterPrevious(chain, glyph);
@@ -625,9 +625,9 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
         } while (position < length);
     }
 
-    frFontAddSharedGlyphFlags(2);
+    frEnableMode(2);
     if (sharedFlag == 0) {
-        frFontClearFlagBits(1);
+        frDisableMode(1);
     }
     return chain;
 }
@@ -680,12 +680,12 @@ FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, co
             i++;
         }
     }
-    frFontAddSharedGlyphFlags(1);
+    frEnableMode(1);
     glyph = frFontAppendTextToGlyphChain(buffer, 1, 0, 0, 0);
-    frFontAddSharedGlyphFlags(2);
-    frFontClearFlagBits(1);
+    frEnableMode(2);
+    frDisableMode(1);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return frFontLinkGlyph(parent, glyph, 0);
 }
@@ -694,12 +694,12 @@ FrFontGlyph *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
-    frFontClearFlagBits(2);
+    frDisableMode(2);
     glyph = frFontBuildGlyphChain(text, 2, 0, 0, glyph);
     frFontSetSpacingAndMeasureGlyphs(glyph, -1);
-    frFontAddSharedGlyphFlags(2);
+    frEnableMode(2);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return glyph;
 }
@@ -709,11 +709,11 @@ FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
-    frFontClearFlagBits(2);
+    frDisableMode(2);
     glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
-    frFontAddSharedGlyphFlags(2);
+    frEnableMode(2);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return glyph;
 }
@@ -723,12 +723,12 @@ FrFontGlyph *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, c
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
-    frFontClearFlagBits(2);
+    frDisableMode(2);
     glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
     frFontSetSpacingAndMeasureGlyphs(glyph, -2);
-    frFontAddSharedGlyphFlags(2);
+    frEnableMode(2);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return glyph;
 }
@@ -742,7 +742,7 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
     frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
     frFontSetSpacingAndMeasureGlyphs(glyph, 3);
     frFontSetGlyphPosition(glyph, x, y);
-    frFontStoreShiftedRenderValue(glyph, depth << 4);
+    frSetPriority(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
@@ -762,13 +762,13 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
     mode = (u16)flags;
     switch (mode) {
     case 1:
-        frFontClearFlagBits(4);
+        frDisableMode(4);
         break;
     case 2:
-        frFontAddSharedGlyphFlags(8);
+        frEnableMode(8);
         break;
     case 4:
-        frFontAddSharedGlyphFlags(0x20);
+        frEnableMode(0x20);
         break;
     }
     handle = itfDrawColor(x, y, depth, 1, 0, 0, 0x80, text, 0);
@@ -786,13 +786,13 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
     }
     switch (mode) {
     case 1:
-        frFontAddSharedGlyphFlags(4);
+        frEnableMode(4);
         break;
     case 2:
-        frFontClearFlagBits(8);
+        frDisableMode(8);
         break;
     case 4:
-        frFontClearFlagBits(0x20);
+        frDisableMode(0x20);
         break;
     }
     return handle;
@@ -952,8 +952,8 @@ MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     MemNode *next;
     s32 i;
 
-    buffer = sdfAllocGeneralBlock((payloadBytes + ITF_NODE_HEADER_BYTES) * (count + 1) + ITF_ALLOCATION_HANDLE_BYTES);
-    list = (u8 *)sdfResourceRetainAddress(buffer);
+    buffer = sdfMemAllocDirect((payloadBytes + ITF_NODE_HEADER_BYTES) * (count + 1) + ITF_ALLOCATION_HANDLE_BYTES);
+    list = (u8 *)sdfMemLock(buffer);
     i = 0;
     memcpy(list, &buffer, ITF_ALLOCATION_HANDLE_BYTES);
     list += ITF_ALLOCATION_HANDLE_BYTES;
@@ -998,7 +998,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 
 /* Release the handle preceding the original ring base, not an acquired payload. */
 u32 itfReleaseMemNodeBuffer(MemNode *ringBase) {
-    sdfReleaseResourceAllocation(((MemRingHeader *)((u8 *)ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
+    sdfMemFreeDirect(((MemRingHeader *)((u8 *)ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
     return 1;
 }
 
@@ -1008,7 +1008,7 @@ void itfLoadBackgroundSprite(void) {
     SdfMemBlock *fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
     itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resource));
-    sdfReleaseResourceAllocation(fileAllocation);
+    sdfMemFreeDirect(fileAllocation);
 }
 
 /* Drop the held texture reference without clearing the global. */
@@ -1051,7 +1051,7 @@ extern void itfReleaseFontTestTaskResources(KwlnTask *task);
 /* Start the background draw task and host-file font-test process. */
 void itfStartFontTestScene(void) {
     itfLoadBackgroundSprite();
-    kwlnTaskCreate("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, itfReleaseFontTestTaskResources, 0);
+    dds3StartProcess("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, itfReleaseFontTestTaskResources, 0);
     itfFontTestScriptTask = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
 }
 
@@ -1067,7 +1067,7 @@ s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task) {
     u32 readyMask;
 
     itfDrawBackgroundSprite();
-    taskState = kwlnTaskGetRegisteredState((KwlnTask *)itfFontTestScriptTask);
+    taskState = dds3GetProcessStat((KwlnTask *)itfFontTestScriptTask);
     readyMask = 0xffffffff;
     if (taskState != KWLN_TASK_DESTROY_PENDING) {
         readyMask = 0;
@@ -1222,7 +1222,7 @@ SdfTex *itfLoadTextureFromAsset(const char *path) {
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
     textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(assetInfo[0]));
-    sdfReleaseResourceAllocation(fileAllocation);
+    sdfMemFreeDirect(fileAllocation);
     return textureHandle;
 }
 
@@ -1585,14 +1585,14 @@ void mnuReportCampProcessHalted(void) {
 extern s32 D_00357AB8[];
 
 UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
-    UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(UiSprite));
+    UiSprite *work = (UiSprite *)sdfMemLock(allocation);
 
     work->kind = kind;
     work->allocation = allocation;
-    allocation = sdfAllocGeneralBlock(D_00357AB8[kind]);
+    allocation = sdfMemAllocDirect(D_00357AB8[kind]);
     work->payloadAllocation = allocation;
-    work->payload = (u32 *)sdfResourceRetainAddress(allocation);
+    work->payload = (u32 *)sdfMemLock(allocation);
     if (payload != 0) {
         switch (kind) {
         case 6:

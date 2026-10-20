@@ -64,11 +64,11 @@ void dds3DestroyObjectBase(ObjBase *base) {
         sdfReleaseDevSlot((SdfModel *)base->devSlot, 1, 1);
     }
     dds3DestroyWorldIndexNode(base->worldIndexNode);
-    sdfReleaseChipBlock(base);
+    sdfChipFreeDirect(base);
 }
 
 /* Set mask bits in the object's resolved base. */
-void dds3SetObjectFlags(void *object, s32 mask) {
+void dds3ObjectBaseOnFlag(void *object, s32 mask) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(object);
@@ -76,7 +76,7 @@ void dds3SetObjectFlags(void *object, s32 mask) {
 }
 
 /* Clear mask bits in the object's resolved base. */
-void dds3ClearObjectFlags(void *object, s32 mask) {
+void dds3ObjectBaseOffFlag(void *object, s32 mask) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(object);
@@ -84,7 +84,7 @@ void dds3ClearObjectFlags(void *object, s32 mask) {
 }
 
 /* Return whether any requested mask bit is set, not whether all bits are set. */
-u8 dds3TestObjectFlags(EffWorldNode *object, u32 mask) {
+u8 dds3ObjectBaseCheckFlag(EffWorldNode *object, u32 mask) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(object);
@@ -134,7 +134,7 @@ WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object) {
 }
 
 /* Return the stored resource pointer; its type depends on resourceState. */
-void *dds3GetObjectBaseResourceHandle(EffWorldNode *object) {
+void *dds3ObjectBaseGetModelHandle(EffWorldNode *object) {
     return dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 
@@ -267,7 +267,7 @@ void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 
     base->currentSlot = sdfNamedChunkFindId(model->inner, "Bip01 Head");
     mdlLoadTertiaryVectorVU(model);
     VU0_STORE_VF(vf10, scale);
-    effObjSetInnerScale(object, (u128 *)scale);
+    dds3SetSclPoseSet(object, (u128 *)scale);
     VU0_LOAD_VF(vf10, object->inner->rotation);
     effMiscNormalizeVU();
     mdlUpdateContextRotationBasisFromQuaternion(model);
@@ -395,7 +395,7 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     inner->flags |= 0x20;
     mdlProcessContextNodesAndTransforms(context, D_00325818);
     inner->flags &= ~0x20;
-    dds3SetObjectFlags(object, 0x10000);
+    dds3ObjectBaseOnFlag(object, 0x10000);
 
     evtSetDrawSurfaceIndex(0x4E);
     evtSubmitAlternateFramePacket();
@@ -417,7 +417,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
     s32 roomObjectIndex;
 
     base = dds3GetObjectOwnedHandle(object);
-    if (dds3TestObjectFlags(object, 1)) {
+    if (dds3ObjectBaseCheckFlag(object, 1)) {
         return;
     }
     if (base->resourceHandle == 0) {
@@ -428,7 +428,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
         if (base->resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
             return;
         }
-        if (dds3TestObjectFlags(object, 0x800)) {
+        if (dds3ObjectBaseCheckFlag(object, 0x800)) {
             dds3DrawObjectWithGradientOverlay(object);
             return;
         }
@@ -438,18 +438,18 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, EffWorldNode 
         } else {
             ((MdlCtx *)base->resourceHandle)->inner->lighting = NULL;
         }
-        if (dds3TestObjectFlags(object, 0x2000)) {
+        if (dds3ObjectBaseCheckFlag(object, 0x2000)) {
             mdlBlendEntryPitchYawAndUpdate((MdlCtx *)base->resourceHandle, surfaces, base->currentSlot,
                                            ((EffectObjectData *)object->data)->angle,
                                            ((EffectObjectData *)object->data)->word34);
             return;
         }
-        if (dds3TestObjectFlags(object, 0x10000)) {
+        if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
             model = ((MdlCtx *)base->resourceHandle)->inner;
             model->flags |= 0x40;
             mdlProcessContextNodesAndTransforms((MdlCtx *)base->resourceHandle, D_00325818);
             model->flags &= ~0x40;
-            dds3ClearObjectFlags(object, 0x10000);
+            dds3ObjectBaseOffFlag(object, 0x10000);
             return;
         }
         mdlProcessContextNodesAndTransforms((MdlCtx *)base->resourceHandle, surfaces);

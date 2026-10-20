@@ -32,10 +32,10 @@ s32 filePollEntryCleanup(struct FileRequest *request) {
     }
     if (request->state == FILE_REQUEST_COMPLETE) {
         if (request->deviceRequest != NULL) {
-            sdfDevQueueReleaseState((DevState *)request->deviceRequest);
+            sdfFileCmdFree((DevState *)request->deviceRequest);
         }
-        sdfReleaseChipBlock(request->name);
-        sdfReleaseChipBlock(request);
+        sdfChipFreeDirect(request->name);
+        sdfChipFreeDirect(request);
         return 0;
     }
     return 1;
@@ -218,13 +218,13 @@ s32 fileRequestIsReady(const FileRequest *request) {
     return result;
 }
 
-extern void sdfRestoreDeviceThreadPriority(void);
+extern void sdfFileCmdThreadSetLoPrio(void);
 
 /* Pump the device scheduler and file manager while the kind-specific readiness
  * predicate is zero. No timeout or NULL-request guard is introduced. */
 void fileWaitReady(FileRequest *request) {
     while (fileIsRequestReadyInCurrentMode(request) == 0) {
-        sdfRestoreDeviceThreadPriority();
+        sdfFileCmdThreadSetLoPrio();
         fileManUpdate();
     }
 }
@@ -297,6 +297,6 @@ void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
         chunkBytes = FILE_READ_SLOT_BYTES;
     }
     SignalSema(work->sema);
-    sdfDevQueueRead((DevState *)request->deviceRequest,
+    sdfFileCmdRead((DevState *)request->deviceRequest,
                     work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }

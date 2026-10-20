@@ -249,7 +249,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     if (mode == 2) {
         btlSyncEligibleActorPanelHpMp(task);
     }
-    sdfReleaseChipBlock(btlActionScratchWork);
+    sdfChipFreeDirect(btlActionScratchWork);
 }
 
 
@@ -284,7 +284,7 @@ u32 btlResolvePackedAiRoute(u32 route) {
     }
     count = last - first + 1;
     first--;
-    result = first + ((count * (effMiscRand(NULL) >> 8)) >> 24);
+    result = first + ((count * (sdfGetRand(NULL) >> 8)) >> 24);
     return result;
 }
 

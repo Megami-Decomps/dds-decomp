@@ -257,14 +257,14 @@ void evtAdvanceSolarPhaseParticles(SolarNoiseState *state) {
             state->activeCount++;
             for (i = 0; i < 10; i++) {
                 if (state->layers[i].active == 0) {
-                    angle = effMiscRandUnitFloat(0) * 6.2831852f;
+                    angle = sdfGetRandFloat(0) * 6.2831852f;
                     state->layers[i].x = (s32)((f32)state->centerX +
-                        (f32)state->radiusX * sdfEvaluateCosineViaSinePhaseShift(angle));
+                        (f32)state->radiusX * sdfCos(angle));
                     state->layers[i].y = (s32)((f32)state->centerY +
                         (f32)state->radiusY * sdfSinPoly(angle));
                     state->layers[i].age = 0;
                     state->layers[i].active = 1;
-                    state->layers[i].scale = (s32)(effMiscRandUnitFloat(0) * 100.0f + 100.0f);
+                    state->layers[i].scale = (s32)(sdfGetRandFloat(0) * 100.0f + 100.0f);
                     break;
                 }
             }
@@ -307,7 +307,7 @@ void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
                     for (i = 0; i < 10; i++) {
                         if (state->layers[i].active == 0) {
                             s32 spawnIndex =
-                                effMiscRand(0) % spawnCounts[phase - 2];
+                                sdfGetRand(0) % spawnCounts[phase - 2];
                             state->layers[i].x = spawns[spawnIndex][0];
                             state->layers[i].y = spawns[spawnIndex][1];
                             state->layers[i].age = 0;
@@ -446,7 +446,7 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
             point->age = age;
             if ((s16)age > point->duration) {
                 point->age = 0;
-                point->duration = (s16)(effMiscRandUnitFloat(0) * 30.0f + 120.0f);
+                point->duration = (s16)(sdfGetRandFloat(0) * 30.0f + 120.0f);
             }
         } else {
             point->age = 0;

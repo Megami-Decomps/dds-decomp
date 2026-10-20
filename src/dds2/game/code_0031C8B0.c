@@ -45,7 +45,7 @@ void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
 void mnuSampleModelMotionAtFrame(MnuModelNode *node, f32 frame) {
     Motion *motion = mdlFindNodeById(node->model, 0);
     if (frame < 0.0f) {
-        u32 random = effMiscRand(NULL);
+        u32 random = sdfGetRand(NULL);
         sdfMotionSampleAtFrame(motion, (f32)(random % node->model->first->frameCount));
         return;
     }

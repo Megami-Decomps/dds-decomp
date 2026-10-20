@@ -119,12 +119,12 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
 void effDestroyModelOwner(EffModelOwner *owner) {
     SdfLightingPacketStorage *buffer = owner->ownedBuffer;
     if (buffer != NULL) {
-        sdfReleaseChipBlock(buffer);
+        sdfChipFreeDirect(buffer);
     }
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
     }
-    sdfReleaseChipBlock(owner);
+    sdfChipFreeDirect(owner);
 }
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
@@ -375,7 +375,7 @@ void effFloorModelListRemove(EffectObjectNode *node) {
     } else {
         effFloorModelListHead = node->next;
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
 }
 
 void effSweepFloorModelList(void) {
@@ -468,7 +468,7 @@ typedef struct {
 
 /* Create an empty owner, or load its model and per-record queues from a file job. */
 u8 *effCreateResourceOwner(void *source) {
-    EffResourceOwner *owner = sdfAllocSizeClassBlock(sizeof(EffResourceOwner));
+    EffResourceOwner *owner = sdfChipAllocDirect(sizeof(EffResourceOwner));
     u8 *data;
     u32 i;
 
@@ -491,8 +491,8 @@ u8 *effCreateResourceOwner(void *source) {
         }
         data = (u8 *)fileResolveSecondaryBuffer(source);
         if (data != NULL) {
-            owner->queueAllocation = sdfAllocGeneralBlock(owner->count * 4);
-            owner->entries = sdfResourceRetainAddress(owner->queueAllocation);
+            owner->queueAllocation = sdfMemAllocDirect(owner->count * 4);
+            owner->entries = sdfMemLock(owner->queueAllocation);
             owner->entries[0] = fileCloneQueueEntries((struct FileQueue *)data);
             for (i = 1; i < owner->count; i++) {
                 owner->entries[i] = fileQueueClone(owner->entries[0]);
@@ -514,9 +514,9 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
         for (i = 0; i < owner->count; i++) {
             fileQueueDestroy(owner->entries[i]);
         }
-        sdfReleaseResourceAllocation(owner->queueAllocation);
+        sdfMemFreeDirect(owner->queueAllocation);
     }
-    sdfReleaseChipBlock(owner);
+    sdfChipFreeDirect(owner);
 }
 
 
@@ -553,10 +553,10 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
             for (i = 0; i < dst->count; i++) {
                 fileQueueDestroy(dst->entries[i]);
             }
-            sdfReleaseResourceAllocation(dst->queueAllocation);
+            sdfMemFreeDirect(dst->queueAllocation);
         }
-        dst->queueAllocation = sdfAllocGeneralBlock(dst->count * 4);
-        dst->entries = sdfResourceRetainAddress(dst->queueAllocation);
+        dst->queueAllocation = sdfMemAllocDirect(dst->count * 4);
+        dst->entries = sdfMemLock(dst->queueAllocation);
         for (i = 0; i < dst->count; i++) {
             dst->entries[i] = fileQueueClone(*src->entries);
         }
@@ -745,8 +745,8 @@ RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
     imageBytes = sdfFormatImageSize(source->pixelFormat, source->width, source->height) << 4;
     payloadBytes = imageBytes + paletteBytes;
     textureOffset = payloadBytes + 0x40;
-    allocationHandle = sdfAllocGeneralBlock(payloadBytes + 0x60);
-    cursor = (u8 *)sdfResourceRetainAddress(allocationHandle);
+    allocationHandle = sdfMemAllocDirect(payloadBytes + 0x60);
+    cursor = (u8 *)sdfMemLock(allocationHandle);
     texture = (RefObj *)(cursor + textureOffset);
     texture->base = cursor;
     cursor += 0x40;
@@ -792,7 +792,7 @@ void effReleaseSharedReference(RefObj *obj) {
     }
     obj->refCount--;
     if (obj->refCount == 0) {
-        sdfReleaseResourceAllocation(obj->allocationHandle);
+        sdfMemFreeDirect(obj->allocationHandle);
     }
 }
 
@@ -884,8 +884,8 @@ struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
     EffExpandedList *list;
     u8 *payload;
 
-    allocation = sdfAllocGeneralBlock(count * (sizeof(EffExpandedEntry) + sizeof(RefObj *)) + sizeof(EffExpandedList));
-    list = (EffExpandedList *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(count * (sizeof(EffExpandedEntry) + sizeof(RefObj *)) + sizeof(EffExpandedList));
+    list = (EffExpandedList *)sdfMemLock(allocation);
     list->entries = (EffExpandedEntry *)(list + 1);
     list->handles = (RefObj **)(list->entries + count);
     list->unk20 = -1;
@@ -915,7 +915,7 @@ void effReleaseReferenceHolder(EffExpandedList *holder) {
     for (i = 0; i < holder->count; i++) {
         effReleaseSharedReference(holder->handles[i]);
     }
-    sdfReleaseResourceAllocation(holder->allocation);
+    sdfMemFreeDirect(holder->allocation);
 }
 
 EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {

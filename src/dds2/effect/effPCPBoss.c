@@ -40,13 +40,13 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     f32 scale = work->head.scale;
     f32 t;
 
-    cell->offsetDistance = work->head.offsetDistance * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend)) * scale;
+    cell->offsetDistance = work->head.offsetDistance * (sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend)) * scale;
     blend = work->head.extentRandomness;
-    t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
+    t = sdfGetRandFloat(effDefaultRandomState) * blend + (1.0f - blend);
     cell->baseExtent = work->head.baseExtent * t * scale;
     cell->tipExtent = work->head.tipExtent * t * scale;
-    cell->flip = effMiscRand((EffRandState *)effDefaultRandomState) & 1;
-    cell->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % work->head.delaySpread);
+    cell->flip = sdfGetRand((EffRandState *)effDefaultRandomState) & 1;
+    cell->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % work->head.delaySpread);
 }
 
 /* Create a draw pool and delayed cells for each model map-position group. */
@@ -69,9 +69,9 @@ void effBossInitializeModelGroups(EffBossWork *work)
     parSetCellDrawBucket(work->system, work->head.drawBucket);
     work->groupsHandle = NULL;
     if (work->head.hasCells) {
-        work->groupsHandle = sdfAllocGeneralBlock(work->groupCount * sizeof(EffBossGroup)
+        work->groupsHandle = sdfMemAllocDirect(work->groupCount * sizeof(EffBossGroup)
             + work->cellCount * work->groupCount * sizeof(EffBossCell));
-        nextCells = (EffBossCell *)sdfResourceRetainAddress(work->groupsHandle);
+        nextCells = (EffBossCell *)sdfMemLock(work->groupsHandle);
         work->groups = (EffBossGroup *)nextCells;
         nextCells = (EffBossCell *)((u8 *)nextCells + work->groupCount * sizeof(EffBossGroup));
         for (groupIndex = 0, group = work->groups; groupIndex < work->groupCount; groupIndex++, group++) {
@@ -119,7 +119,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
 EffBossWork *effBossCreate(EffBossParams *bossParams, void *effectParams) {
     EffBossWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffBossWork));
+    work = sdfChipAllocDirect(sizeof(EffBossWork));
     work->head = bossParams->head;
     work->frame = 0;
     work->color = 0x80808080;
@@ -142,7 +142,7 @@ EffBossWork *effPCPBossApplyTwoBlocks(void *parameterTable) {
 EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src) {
     EffBossWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffBossWork));
+    work = sdfChipAllocDirect(sizeof(EffBossWork));
     memcpy(&work->head, &src->head, sizeof(EffBossHead));
     work->frame = 0;
     work->color = 0x80808080;
@@ -159,11 +159,11 @@ void effBossDestroy(EffBossWork *work) {
         for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
             effReleaseRecordGroupAssetAndHandle(work->groups[groupIndex].drawPool);
         }
-        sdfReleaseResourceAllocation(work->groupsHandle);
+        sdfMemFreeDirect(work->groupsHandle);
     }
     parReleaseCellSystem(work->system);
     effDispatchParameterDataAndFreeWork(work->paramWork);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 #include "eff_math.h"
@@ -477,7 +477,7 @@ void effBossTrailSetColor(EffBossWork *work, s32 value) {
 EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
     EffPCPBossWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffPCPBossWork));
+    work = sdfChipAllocDirect(sizeof(EffPCPBossWork));
     memcpy(work->parameterVector, vector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
@@ -502,7 +502,7 @@ EffPCPBossWork *effPCPBossApplyThreeBlocks(void *parameterTable) {
 EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
     EffPCPBossWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(EffPCPBossWork));
+    work = sdfChipAllocDirect(sizeof(EffPCPBossWork));
     memcpy(work->parameterVector, src->parameterVector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
@@ -515,7 +515,7 @@ EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
 void effPCPBossFree(EffPCPBossWork *work) {
     effDispatchParameterDataAndFreeWork(work->auxiliaryResource);
     effDispatchParameterDataAndFreeWork(work->modelResource);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 
 /* Per-frame update: basis from the muzzle position (or identity) fed to both parameter works. */
@@ -806,7 +806,7 @@ void effBossApplyGroupTint(EffBossWork *work, s32 value) {
 /* Create paired four-point chains; the update fills their point vectors. */
 PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src)
 {
-    PairedEffectResources *work = sdfAllocSizeClassBlock(sizeof(PairedEffectResources));
+    PairedEffectResources *work = sdfChipAllocDirect(sizeof(PairedEffectResources));
     EffThunderGroupParams chain;
 
     memcpy(work, src, sizeof(PairedEffectParams));

@@ -155,7 +155,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildClippedCommandPackets);
 
 /* Prepend a chip-allocated command node to one buffered draw list. */
 SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
-    SdfCommandNode *node = sdfAllocSizeClassBlock(sizeof(*node));
+    SdfCommandNode *node = sdfChipAllocDirect(sizeof(*node));
     SdfCommandNode **head = (SdfCommandNode **)((u32)listIndex * sizeof(*drawNode->lists) + (u32)drawNode +
                                                (u32)&((SdfDrawNode *)0)->lists);
     SdfCommandNode *next = *head;
@@ -169,8 +169,8 @@ SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetS
 }
 
 struct SdfMemBlock;
-extern struct SdfMemBlock * sdfAllocGeneralBlock(s32 requestedBytes);
-extern u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
+extern struct SdfMemBlock * sdfMemAllocDirect(s32 requestedBytes);
+extern u32 sdfMemLock(struct SdfMemBlock *allocation);
 
 /* The list head slot is declared `void **` (generic list storage), not `SdfCommandNode **`: its alias set must
  * conflict with the node's `void *payload` store. cc1probe --sched (hooked==unhooked): sched2 then ranks the
@@ -204,8 +204,8 @@ void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
     }
     count &= 0xFFFF;
     if (bytes != 0) {
-        allocation = sdfAllocGeneralBlock(bytes);
-        listNode = (SdfCommandNode *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(bytes);
+        listNode = (SdfCommandNode *)sdfMemLock(allocation);
         head = (void **)((u32)listIndex * sizeof(*node->lists) + (u32)node +
                          (u32)&((SdfDrawNode *)0)->lists);
         next = *head;
@@ -642,7 +642,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
             variant = variant == 0 ? negativeColor == 0 : variant;
             packets = variantLists[variant];
             if (packets == NULL) {
-                packets = sdfAllocatePacketList(NULL);
+                packets = sdfPrimAllocDrawTag(NULL);
                 variantLists[variant] = packets;
                 *(f32 *)&packets->unkC = depth;
                 packets->firstReferenceSource = (u32)lighting;

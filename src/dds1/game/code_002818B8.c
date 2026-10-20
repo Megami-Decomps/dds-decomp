@@ -134,7 +134,7 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 extern s32 sprintf(char *, const char *, ...);
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
-extern s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *);
+extern s32 frDestroyFontRequestAfter(struct FrFontGlyph *);
 /* Retail forwards the surface word; the selection helper uses five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void mnuDrawPartyPageContents(s32, s32, s32, s32, struct MenuPageResources *, s32);
@@ -201,7 +201,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     sprintf(text, D_003BC760, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x150, labelY, z, color, text, NULL);
     frFontDrawGlyphChain(glyph, 1, surface);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     uiDrawActiveSurfaceRegion(surface);
     mnuDrawPartyPanelSlotWithBlend(x + framePositions[4], y + framePositions[5], 0xFFFFFF,
                                   menu, panelIndex, panel->frame, 1, surface);
@@ -284,7 +284,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     sprintf(text, D_003BC760, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x170, labelY, z, textColor, text, NULL);
     frFontDrawGlyphChain(glyph, 1, surface);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
     uiDrawActiveSurfaceRegion(surface);
     effDrawSpriteWithCornerFade(x + framePositions[0], y + framePositions[1], 0xFFFFFF,
                                alpha, 1, panel->frame[4], 0, surface);

@@ -3,7 +3,7 @@
 #include "sdf_chip.h"
 #include "sdf_handler_node.h"
 
-extern void sdfReleaseCurrentResourceHandle(void *);
+extern void sdfMemFreeHandleDirect(void *);
 
 extern void (*sdfTickCallback)(void);
 
@@ -19,18 +19,18 @@ extern s32 RemoveSbusIntcHandler(s32);
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        return (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(size));
+        return (void *)sdfMemLock(sdfMemAllocDirect(size));
     }
-    return sdfAllocSizeClassBlock(size);
+    return sdfChipAllocDirect(size);
 }
 
 void sdfFreeMemoryFromEitherHeap(void *allocation) {
     if (allocation != NULL) {
         if (sdfChipIsInRange((s32)allocation)) {
-            sdfReleaseChipBlock(allocation);
+            sdfChipFreeDirect(allocation);
             return;
         }
-        sdfReleaseCurrentResourceHandle(allocation);
+        sdfMemFreeHandleDirect(allocation);
     }
 }
 
@@ -41,7 +41,7 @@ void sdfReleaseChipOrRetainedResource(void *allocation) {
             sdfQueuePendingChipRelease(allocation);
             return;
         }
-        sdfQueueGeneralAllocationRelease(sdfFindGeneralBlockByAddress(allocation));
+        sdfMemFreeDelayedDirect(sdfFindGeneralBlockByAddress(allocation));
     }
 }
 
@@ -51,10 +51,10 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     if (allocation != NULL) {
         *slot = NULL;
         if (sdfChipIsInRange((s32)allocation)) {
-            sdfReleaseChipBlock(allocation);
+            sdfChipFreeDirect(allocation);
             return;
         }
-        sdfReleaseCurrentResourceHandle(allocation);
+        sdfMemFreeHandleDirect(allocation);
     }
 }
 

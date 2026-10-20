@@ -401,7 +401,7 @@ f32 effCalcViewAxisWidthFactor(void *unused, f32 *direction) {
 
 /* Create the indexed billboard and render asset; only the second matrix is initialized. */
 u8 *billCreateUnitObject(s32 entryIndex) {
-    EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
+    EffInstance *instance = sdfChipAllocDirect(EFF_INSTANCE_BYTES);
 
     instance->billboard = billCreateIndexed(1, entryIndex);
     instance->renderState = sdfCreateAssetWithDrawEntries();
@@ -412,7 +412,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 
 /* Retain a cloned billboard's shared data, create a fresh render asset, and reset both matrices. */
 u8 *billCloneUnitObject(EffInstance *source) {
-    EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
+    EffInstance *instance = sdfChipAllocDirect(EFF_INSTANCE_BYTES);
 
     instance->billboard = billCloneObjectRetainingSharedData(source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
@@ -428,7 +428,7 @@ u8 *billCloneUnitObject(EffInstance *source) {
 void effDestroy(EffInstance *instance) {
     sdfQueueAssetRelease((SdfAsset *)instance->renderState);
     billDispatchByKind(instance->billboard);
-    sdfReleaseChipBlock(instance);
+    sdfChipFreeDirect(instance);
 }
 
 void effSetInstanceBillboardVector(EffInstance *instance, void *position) {
@@ -532,7 +532,7 @@ void func_0015A4B0(EffInstance *instance) {
     y = child->y * scaleY;
     width = child->halfWidth * scaleX;
     height = child->halfHeight * scaleY;
-    cosine = sdfEvaluateCosineViaSinePhaseShift(instance->billboard->rotationAngle);
+    cosine = sdfCos(instance->billboard->rotationAngle);
     sine = sdfSinPoly(instance->billboard->rotationAngle);
     cornerX = x - width;
     cornerY = y - height;
@@ -578,7 +578,7 @@ void func_0015A4B0(EffInstance *instance) {
         height = child->halfHeight * scaleY;
         params.primitive |= 0x1000;
         params.extraTexcoords = (u32 *)secondaryUv;
-        cosine = sdfEvaluateCosineViaSinePhaseShift(instance->billboard->rotationAngle);
+        cosine = sdfCos(instance->billboard->rotationAngle);
         sine = sdfSinPoly(instance->billboard->rotationAngle);
         cornerX = x - width;
         cornerY = y - height;
@@ -674,7 +674,7 @@ void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescripto
         corners[3][0] = -halfWidth;
         corners[3][1] = halfHeight;
     } else {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(source->angle);
+        cosine = sdfCos(source->angle);
         sine = sdfSinPoly(source->angle);
         cornerX = -halfWidth;
         cornerY = -halfHeight;
@@ -812,7 +812,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
         corners[3][0] = -halfWidth;
         corners[3][1] = halfHeight;
     } else {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(source->angle);
+        cosine = sdfCos(source->angle);
         sine = sdfSinPoly(source->angle);
         cornerX = -halfWidth;
         cornerY = -halfHeight;
@@ -865,7 +865,7 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
 
 /* Seed the generator used for per-particle launch delays. */
 void effSeedEmitterDelayRandomState(void) {
-    effMiscSeedRandomFromClock((EffRandState *)effEmitterDelayRandomState);
+    sdfRandomizeByTime((EffRandState *)effEmitterDelayRandomState);
 }
 
 /* Effect-manager startup hook for emitter work; retail currently does no work. */
@@ -875,8 +875,8 @@ void effInitializeEmitterSubsystem(void) {
 /* Allocate records followed by their owner tail; clear only two native state words per record. */
 EffectBufferTail *effAllocateBuffer(s32 recordCount) {
     s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
-    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
-    EffectBufferRecord *recordCursor = (void *)sdfResourceRetainAddress(allocationHandle);
+    SdfMemBlock *allocationHandle = sdfMemAllocDirect(recordBytes + sizeof(EffectBufferTail));
+    EffectBufferRecord *recordCursor = (void *)sdfMemLock(allocationHandle);
     EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
     bufferTail->allocation = allocationHandle;
@@ -894,11 +894,11 @@ EffectBufferTail *effAllocateBuffer(s32 recordCount) {
 }
 
 void effReleaseBufferAllocation(EffectBufferTail *buffer) {
-    sdfReleaseResourceAllocation(buffer->allocation);
+    sdfMemFreeDirect(buffer->allocation);
 }
 
 struct ParColorRamp;
-extern void parInitColorRamp(struct ParColorRamp *, s32);
+extern void dds3ParticleSetColorTable(struct ParColorRamp *, s32);
 extern ParTable *parCreateHistorySlotTable(u32, u16, BillObj **);
 extern u32 parGetEmitterCellGroupDivisor(u16);
 extern void parDispatchSub(void *, s32, void *, void *);
@@ -916,7 +916,7 @@ void effInitializeEmitterHead(EffEmitterHead *owner) {
         billSetChildScaleComponents(owner->billboard, owner->scale[0], owner->scale[1]);
         billSetBillboardMode(owner->billboard, owner->drawKind);
     }
-    parInitColorRamp((struct ParColorRamp *)owner->fade, owner->lifetimeFrames);
+    dds3ParticleSetColorTable((struct ParColorRamp *)owner->fade, owner->lifetimeFrames);
     switch (owner->sub.kind) {
     case PAR_KIND_STATE_HISTORY:
         owner->sub.payload.history.table = parCreateHistorySlotTable(owner->particleCount,
@@ -1015,7 +1015,7 @@ void effScaleTemplateTail13(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the template prefix and appended tail, then allocate its packet records. */
 s32 effCloneRingTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 clone = (s32)sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
@@ -1028,7 +1028,7 @@ s32 effCloneRingTemplate(EffTemplatePacketList *source) {
 
 void effFreeRingTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 
@@ -1079,11 +1079,11 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     }
     packet->f30 = phase;
     jitter = effect->radiusRange;
-    packet->f34 = effect->radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->f34 = effect->radius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->speedRange;
-    packet->vel[0] = effect->f168 * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->vel[0] = effect->f168 * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     packet->f38 = effect->f160;
-    packet->pos[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * effect->radius;
+    packet->pos[0] = sdfCos(phase) * effect->radius;
     packet->pos[1] = 0;
     packet->pos[2] = sdfSinPoly(phase) * effect->radius;
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -1095,10 +1095,10 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1143,7 +1143,7 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
             f32 radius;
 
             /* effInitializeEmitterHead initializes this opaque slot as a ParColorRamp. */
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1156,7 +1156,7 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
             packet->f3C += packet->f38;
             theta = packet->f30;
             radius = packet->f34;
-            offset[0] = sdfEvaluateCosineViaSinePhaseShift(theta) * radius;
+            offset[0] = sdfCos(theta) * radius;
             offset[1] = packet->f3C;
             offset[2] = sdfSinPoly(theta) * radius;
             VU0_LOAD_VF(vf10, offset);
@@ -1214,7 +1214,7 @@ void effScaleDiscTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the disc prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 clone = (s32)sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
@@ -1227,7 +1227,7 @@ s32 effCloneTemplate(EffTemplatePacketList *source) {
 
 void effFreeDiscTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffDiscEmitter {
@@ -1253,10 +1253,10 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     f32 jitter;
 
     packet += packetIndex;
-    radialDistance = effect->radius * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
-    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    radialDistance = effect->radius * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
@@ -1270,23 +1270,23 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (effMiscRandUnitFloat(effDefaultRandomState) * effect->jitterB + (1.0f - effect->jitterB));
+    packet->f30 = effect->f164 * (sdfGetRandFloat(effDefaultRandomState) * effect->jitterB + (1.0f - effect->jitterB));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->f3C = effect->f15C * (sdfGetRandFloat(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1328,7 +1328,7 @@ void effEmitterDiscUpdate(EffDiscEmitter *effect) {
             f32 previousWaveValue;
             f32 factor;
 
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1398,7 +1398,7 @@ void effScaleBallisticTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the ballistic prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 clone = (s32)sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
@@ -1411,7 +1411,7 @@ s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
 
 void effFreeBallisticTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffBallisticEmitter {
@@ -1452,9 +1452,9 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
     switch (effect->mode) {
     case 0:
         if (effect->randomDir) {
-            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = 0;
-            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
@@ -1468,20 +1468,20 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
             packet->pos[0] += effect->head.origin[0];
             packet->pos[1] += effect->head.origin[1];
             packet->pos[2] += effect->head.origin[2];
-            direction[0] = (effMiscRandUnitFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
+            direction[0] = (sdfGetRandFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
             direction[1] = -(1.0f - cone);
-            direction[2] = (effMiscRandUnitFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
+            direction[2] = (sdfGetRandFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            jitter = sdfGetRandFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
             packet->vel[1] = direction[1] * speed * jitter;
             packet->vel[2] = direction[2] * speed * jitter;
-            packet->f38 = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
+            packet->f38 = (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
         } else {
             angle = (3.14159265f * 2.0f) / (u32)effect->head.particleCount * index;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            cosine = sdfCos(angle);
             sine = sdfSinPoly(angle);
             packet->pos[0] = cosine * radius;
             packet->pos[1] = 0;
@@ -1504,13 +1504,13 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
             packet->pos[0] = effect->head.origin[0];
             packet->pos[1] = effect->head.origin[1];
             packet->pos[2] = effect->head.origin[2];
-            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-            direction[1] = -((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
-            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = -((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+            direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            jitter = sdfGetRandFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
             packet->vel[1] = direction[1] * speed * jitter;
             packet->vel[2] = direction[2] * speed * jitter;
@@ -1530,13 +1530,13 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
         if (effect->randomDir) {
             decay = effect->decayPct / 100.0f + 1.0f;
             EE_MMI_UNIT_MATRIX(effect->head.matrix);
-            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-            direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            jitter = sdfGetRandFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             direction[0] *= speed * jitter;
             direction[1] *= speed * jitter;
             direction[2] *= speed * jitter;
@@ -1565,13 +1565,13 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
         }
         break;
     }
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1618,7 +1618,7 @@ void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1690,7 +1690,7 @@ void effScaleLookAtRingTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the look-at ring prefix/tail and spawn its staggered packet schedule. */
 s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 clone = (s32)sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
@@ -1703,7 +1703,7 @@ s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
 
 void effFreeLookAtRingTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 extern u8 sdfViewEyeVector[];
@@ -1725,7 +1725,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
         period = effect->period;
         angle = (3.14159265f * 2.0f) / period * (packetIndex % period);
-        packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        packet->vel[0] = sdfCos(angle);
         packet->vel[1] = sdfSinPoly(angle);
         packet->vel[2] = 0;
         VU0_LOAD_VF(vf10, packet->vel);
@@ -1742,7 +1742,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
         angle = (3.14159265f * 2.0f) / period * (packetIndex % period);
         scale *= lifetimeFrames;
         angle += effect->f160 * (3.14159265f / 180.0f) * lifetimeFrames;
-        packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        packet->vel[0] = sdfCos(angle);
         packet->vel[1] = 0;
         packet->vel[2] = sdfSinPoly(angle);
         packet->f34 = angle;
@@ -1753,10 +1753,10 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
         packet->color = 0;
     }
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1788,7 +1788,7 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
         f32 angle;
 
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1797,7 +1797,7 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
             packet->pos[1] += packet->vel[1] * stepScale;
             packet->pos[2] += packet->vel[2] * stepScale;
             angle = packet->f34;
-            packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            packet->vel[0] = sdfCos(angle);
             packet->vel[1] = sdfSinPoly(angle);
             packet->vel[2] = 0;
             VU0_LOAD_VF(vf10, packet->vel);
@@ -1852,7 +1852,7 @@ void effScaleBurstTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the burst prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 clone = (s32)sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
@@ -1865,7 +1865,7 @@ s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
 
 void effFreeBurstTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffBurstEmitter {
@@ -1891,18 +1891,18 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
 
     packet += packetIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
-    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    directionVector[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
-    packet->vel[0] = speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
-    packet->vel[1] = speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
-    packet->vel[2] = speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
+    packet->vel[0] = speed * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
+    packet->vel[1] = speed * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
+    packet->vel[2] = speed * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_LENGTH_VF10(velocityLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -1913,9 +1913,9 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
     packet->pos[1] = packet->vel[1] + effect->head.origin[1];
     packet->pos[2] = packet->vel[2] + effect->head.origin[2];
     if (effect->mode == 1) {
-        directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        directionVector[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        directionVector[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, directionVector);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, directionVector);
@@ -1928,12 +1928,12 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
         packet->f38 = 0;
     }
     jitter = effect->jitterB;
-    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.lifetimeFrames;
+    packet->f3C = (effect->f160 * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.lifetimeFrames;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1972,7 +1972,7 @@ void effEmitterBurstUpdate(EffBurstEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2053,7 +2053,7 @@ void effScaleSphereTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the sphere prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 clone = (s32)sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
@@ -2066,7 +2066,7 @@ s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
 
 void effFreeSphereTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffSphereEmitter {
@@ -2096,15 +2096,15 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet += packetIndex;
     radius = effect->radius;
     jitter = effect->f178;
-    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    directionVector[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
-    packet->pos[0] = radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
-    packet->pos[1] = radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
-    packet->pos[2] = radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
+    packet->pos[0] = radius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
+    packet->pos[1] = radius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
+    packet->pos[2] = radius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->pos);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -2112,23 +2112,23 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    packet->vel[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    packet->vel[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     packet->vel[1] = 0;
-    packet->vel[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    packet->vel[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
+    packet->f30 = effect->f164 * (sdfGetRandFloat(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
-    packet->age = ~(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->f3C = effect->f15C * (sdfGetRandFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
+    packet->age = ~(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2170,7 +2170,7 @@ void effEmitterSphereUpdate(EffSphereEmitter *effect) {
             f32 previousWaveValue;
             f32 factor;
 
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2245,7 +2245,7 @@ void effScaleExpandRingTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the expanding-ring prefix/tail and initialize its period-grouped packet tags. */
 s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 clone = (s32)sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
@@ -2258,7 +2258,7 @@ s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
 
 void effFreeExpandRingTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffExpandingRingEmitter {
@@ -2284,10 +2284,10 @@ void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 packetIndex)
     packet->age = -1;
     packet->color = 0;
     jitter = effect->jitter;
-    radius = effect->radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    radius = effect->radius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     packet->f30 = radius;
     angle = (3.14159265f * 2.0f) / effect->period * (packetIndex % effect->period);
-    packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+    packet->vel[0] = sdfCos(angle);
     packet->vel[1] = 0;
     packet->vel[2] = sdfSinPoly(angle);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -2300,10 +2300,10 @@ void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 packetIndex)
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, packet);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2333,7 +2333,7 @@ void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
     packetCount = effect->head.particleCount;
     lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->loop;
-    rotationCos = sdfEvaluateCosineViaSinePhaseShift(rotationStep);
+    rotationCos = sdfCos(rotationStep);
     rotationSin = sdfSinPoly(rotationStep);
     PCP_COPY_VECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -2349,14 +2349,14 @@ void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
             f32 phaseCos;
             f32 phaseSin;
 
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
             angle = (f32)age / (f32)lifetimeFrames * 3.14159265f;
             radius = packet->f30;
-            phaseCos = sdfEvaluateCosineViaSinePhaseShift(angle);
+            phaseCos = sdfCos(angle);
             phaseSin = sdfSinPoly(angle);
             vector[0] = packet->vel[0] * (radius * phaseSin);
             vector[1] = radius * phaseCos;
@@ -2418,7 +2418,7 @@ void effScaleConeTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the cone prefix/tail, allocate packet records, and initialize their native age tags. */
 s32 effCloneConeTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x180);
+    s32 clone = (s32)sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
@@ -2431,7 +2431,7 @@ s32 effCloneConeTemplate(EffTemplatePacketList *source) {
 
 void effFreeConeTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffConeEmitter {
@@ -2471,7 +2471,7 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
     speed = effect->speed;
     if (effect->mode == 0) {
         angle = sweepRadians / (u32)effect->head.particleCount * packetIndex;
-        angleCos = sdfEvaluateCosineViaSinePhaseShift(angle);
+        angleCos = sdfCos(angle);
         angleSin = sdfSinPoly(angle);
         packet->pos[0] = angleCos * radius;
         packet->pos[1] = 0;
@@ -2488,13 +2488,13 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
         packet->vel[2] = angleSin * cone * speed;
         packet->f38 = gravity;
     }
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2528,7 +2528,7 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2588,7 +2588,7 @@ void effScalePacketRecordTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the prefix/tail and initialize each packet record with the template's uniform scale. */
 s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x170);
+    s32 clone = (s32)sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
@@ -2601,7 +2601,7 @@ s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
 
 void effFreePacketRecordScaleTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 /* vu0 routine: seed radial placement, normalized velocity and activation age. */
@@ -2614,15 +2614,15 @@ void func_0015EE70(EffTemplatePacketList *effect, s32 index) {
     packet += index;
     if (effect->randomSphere) {
         radius = effect->recordScale;
-        direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, direction);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, direction);
-        packet->position[0] = radius * effMiscRandUnitFloat(effDefaultRandomState) * direction[0];
-        packet->position[1] = radius * effMiscRandUnitFloat(effDefaultRandomState) * direction[1];
-        packet->position[2] = radius * effMiscRandUnitFloat(effDefaultRandomState) * direction[2];
+        packet->position[0] = radius * sdfGetRandFloat(effDefaultRandomState) * direction[0];
+        packet->position[1] = radius * sdfGetRandFloat(effDefaultRandomState) * direction[1];
+        packet->position[2] = radius * sdfGetRandFloat(effDefaultRandomState) * direction[2];
         VU0_LOAD_MATRIX(effect->head.matrix);
         VU0_LOAD_VF(vf10, packet->position);
         VU0_APPLY_MATRIX(vf10, vf10);
@@ -2630,31 +2630,31 @@ void func_0015EE70(EffTemplatePacketList *effect, s32 index) {
         packet->position[0] += effect->head.origin[0];
         packet->position[1] += effect->head.origin[1];
         packet->position[2] += effect->head.origin[2];
-        direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-        direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, direction);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, packet->velocity);
-        packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
+        packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
     } else {
         PCP_COPY_VECTOR(packet->position, effect->head.origin);
         value = (3.14159265f * 2.0f) / effect->head.particleCount * index;
-        direction[0] = sdfEvaluateCosineViaSinePhaseShift(value);
+        direction[0] = sdfCos(value);
         direction[1] = sdfSinPoly(value);
         direction[2] = 0;
         VU0_LOAD_VF(vf10, direction);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, packet->velocity);
-        packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
+        packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->delayRange + 1));
     }
     packet->f30 = effect->motionMagnitude;
     packet->color = 0;
     value = effect->head.speedJitter;
-    packet->scale = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * value + (1.0f - value));
+    packet->scale = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * value + (1.0f - value));
     value = effect->head.spinJitter;
     if (value != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * value + (1.0f - value)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * value + (1.0f - value)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2721,7 +2721,7 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 PCP_COPY_VECTOR(previousPosition, packet->pos);
@@ -2812,7 +2812,7 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
 
 /* Clone a single-particle template: the fixed prefix plus an empty appended tail. */
 void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
-    EffTemplatePacketList *clone = (EffTemplatePacketList *)sdfAllocSizeClassBlock(0x150);
+    EffTemplatePacketList *clone = (EffTemplatePacketList *)sdfChipAllocDirect(0x150);
     s32 tailBytes = 0;
 
     memset(clone, 0, 0x150);
@@ -2826,7 +2826,7 @@ void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
 
 void effFreeSingleParticleTemplate(void *effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 extern EffRandState effDefaultRandomState[];
@@ -2849,10 +2849,10 @@ void effInitParticleRecord(effect)
     record->angle = 0;
     effect->lastSpeed = effect->speed;
     jitter = effect->speedJitter;
-    record->speed = effect->speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    record->speed = effect->speed * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->angleJitter;
     if (jitter != 0) {
-        record->angle = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        record->angle = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         record->angle = 0;
     }
@@ -2903,7 +2903,7 @@ void effScaleOffsetGravityTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the offset-gravity prefix/tail, allocate records, and initialize their native age tags. */
 s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x190);
+    s32 clone = (s32)sdfChipAllocDirect(0x190);
     s32 tailBytes = 0x40;
 
     memset((void *)clone, 0, 0x190);
@@ -2916,7 +2916,7 @@ s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
 
 void effFreeOffsetGravityTemplate(u32 effect) {
     effDestroyResources((EffEmitterHead *)effect);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffOffsetGravityEmitter {
@@ -2957,9 +2957,9 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
     switch (effect->mode) {
     case 0:
         if (effect->randomDir) {
-            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = 0;
-            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
@@ -2971,21 +2971,21 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
             VU0_LOAD_VF(vf10, &packet->f30);
             VU0_APPLY_MATRIX(vf10, vf10);
             VU0_STORE_VF(vf10, &packet->f30);
-            direction[0] = (effMiscRandUnitFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
+            direction[0] = (sdfGetRandFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
             direction[1] = -(1.0f - cone);
-            direction[2] = (effMiscRandUnitFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
+            direction[2] = (sdfGetRandFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            jitter = sdfGetRandFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
             packet->vel[1] = direction[1] * speed * jitter;
             packet->vel[2] = direction[2] * speed * jitter;
-            packet->f3C = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
+            packet->f3C = (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
         } else {
             /* This native branch initializes position, leaving the stored offset intact. */
             angle = (3.14159265f * 2.0f) / (u32)effect->head.particleCount * index;
-            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            cosine = sdfCos(angle);
             sine = sdfSinPoly(angle);
             packet->pos[0] = cosine * radius;
             packet->pos[1] = 0;
@@ -3006,13 +3006,13 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
             packet->f34 = 0;
             packet->f38 = 0;
             PCP_COPY_VECTOR(packet->pos, effect->head.origin);
-            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-            direction[1] = -((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
-            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = -((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+            direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            jitter = sdfGetRandFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
             packet->vel[1] = direction[1] * speed * jitter;
             packet->vel[2] = direction[2] * speed * jitter;
@@ -3033,13 +3033,13 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
         if (effect->randomDir) {
             decay = effect->decayPct / 100.0f + 1.0f;
             EE_MMI_UNIT_MATRIX(effect->head.matrix);
-            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-            direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
-            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            jitter = sdfGetRandFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             direction[0] *= speed * jitter;
             direction[1] *= speed * jitter;
             direction[2] *= speed * jitter;
@@ -3068,13 +3068,13 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
         }
         break;
     }
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -3115,7 +3115,7 @@ void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -3183,25 +3183,25 @@ void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
 
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
 EffTemplatePacketList *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
-    EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x200);
+    EffTemplatePacketList *clone = sdfChipAllocDirect(0x200);
     struct SdfMemBlock *auxAllocationHandle;
     s32 tailBytes = 0xB0;
 
     memset(clone, 0, 0x200);
     memcpy(clone, source, source->head.templateSize);
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
-    auxAllocationHandle = sdfAllocGeneralBlock(clone->head.particleCount * 0x10);
+    auxAllocationHandle = sdfMemAllocDirect(clone->head.particleCount * 0x10);
     clone->auxiliaryAllocation = auxAllocationHandle;
-    clone->auxiliaryData = (void *)sdfResourceRetainAddress(auxAllocationHandle);
+    clone->auxiliaryData = (void *)sdfMemLock(auxAllocationHandle);
     effInitializeEmitterHead(&clone->head);
     effResetDiscAuxPacketAges(clone);
     return clone;
 }
 
 void effFreeDiscAuxTemplate(EffTemplatePacketList *effect) {
-    sdfReleaseResourceAllocation(effect->auxiliaryAllocation);
+    sdfMemFreeDirect(effect->auxiliaryAllocation);
     effDestroyResources(&effect->head);
-    sdfReleaseChipBlock(effect);
+    sdfChipFreeDirect(effect);
 }
 
 typedef struct EffDiscAuxEmitter {
@@ -3231,10 +3231,10 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
 
     packet += packetIndex;
     auxiliaryCursor += packetIndex;
-    radialDistance = effect->radius * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
-    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    radialDistance = effect->radius * ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
@@ -3245,24 +3245,24 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
     VU0_LOAD_VF(vf10, *auxiliaryCursor);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, *auxiliaryCursor);
-    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[0] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
+    packet->f30 = effect->f164 * (sdfGetRandFloat(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
-    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->f3C = effect->f15C * (sdfGetRandFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
+    packet->age = -(sdfGetRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -3308,7 +3308,7 @@ void effEmitterDiscAuxUpdate(EffDiscAuxEmitter *effect) {
             f32 previousWaveValue;
             f32 factor;
 
-            packet->color = parEvaluateColorRampAtAge((ParColorRamp *)effect->head.fade, packet->color, age);
+            packet->color = dds3ParticleColorAnim((ParColorRamp *)effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -3377,7 +3377,7 @@ void effScaleTemplatePacketPositions(float scale, EffTemplatePacketList *effect)
 
 /* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
 s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
-    s32 copy = (s32)sdfAllocSizeClassBlock(0x190);
+    s32 copy = (s32)sdfChipAllocDirect(0x190);
     s32 tailLen = 0x40;
     s32 count;
     s32 perRecord;
@@ -3412,8 +3412,8 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         }
         listBytes = count * 12;
         ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
-        ((EffTemplatePacketList *)copy)->listAllocation = sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
-        addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
+        ((EffTemplatePacketList *)copy)->listAllocation = sdfMemAllocDirect(listBytes + perRecord * count * 16);
+        addr = (s32 *)sdfMemLock(((EffTemplatePacketList *)copy)->listAllocation);
         i = 0;
         base = (s32)addr;
         ((EffTemplatePacketList *)copy)->recordList = base;

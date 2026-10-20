@@ -31,8 +31,8 @@ extern void *memcpy(void *, const void *, unsigned int);
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
 EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
     s32 count = src->count;
-    void *allocation = sdfAllocGeneralBlock(count * 0x30 + 0x38);
-    EffBlurScaleWork *work = (EffBlurScaleWork *)sdfResourceRetainAddress(allocation);
+    void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
+    EffBlurScaleWork *work = (EffBlurScaleWork *)sdfMemLock(allocation);
     EffBlurScaleSlot *slot;
     s32 i = 0;
 
@@ -54,7 +54,7 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
 
 /* Release the scale variant's allocation, including its inline slot array. */
 void effBlurReleaseSecondResource(EffBlurScaleWork *work) {
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 extern SdfPoolNode D_003803E8;
@@ -120,7 +120,7 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
     f32 phase = source->angle * 0.017453292519943295f;
     f32 amplitude = source->displacement;
     f32 dx = sdfSinPoly(phase) * amplitude;
-    f32 dy = sdfEvaluateCosineViaSinePhaseShift(phase) * amplitude;
+    f32 dy = sdfCos(phase) * amplitude;
 
     data->color[0] = ((u8 *)&source->color)[0];
     data->color[1] = ((u8 *)&source->color)[1];

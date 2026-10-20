@@ -240,14 +240,14 @@ void evtDestroyTestTaskScripts(KwlnTask *task) {
 
 void evtStartTestTask(void) {
     D_003BA8EC = 0x80000000;
-    kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, evtUpdateScriptTestSelection, evtDestroyTestTaskScripts, 0);
+    dds3StartProcess(D_003ACD18, 0x2AF9, 1, 1, evtUpdateScriptTestSelection, evtDestroyTestTaskScripts, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);
 
 void evtStopTestTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_003ACD18, 1);
-    kwlnTaskDestroyWithHierarchyByName("PolygonMovie", 0);
+    dds3KillProcessName(D_003ACD18, 1);
+    dds3KillProcessName("PolygonMovie", 0);
     evtDestroySecondaryWorldNode();
 }
 
@@ -380,7 +380,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
 
     switch (group->type) {
     case 10:
-        vectors = sdfAllocSizeClassBlock(0x30);
+        vectors = sdfChipAllocDirect(0x30);
         mnuSampleCampPanelVisualTrack(viewer, group, frame, vectors, &first, &second);
         break;
     case 24:
@@ -390,7 +390,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         mnuSampleCampListLayoutTrack(viewer, viewer->frameGroup, &layout);
         break;
     }
-    key = sdfAllocSizeClassBlock(sizeof(*key));
+    key = sdfChipAllocDirect(sizeof(*key));
     memset(key, 0, sizeof(*key));
     key->frame = frame;
     key->serializedValue = -1;
@@ -452,7 +452,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         key->serializedValue = 0;
         break;
     case 11: {
-        EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(sizeof(*draw));
+        EvtViewerDrawPayload *draw = sdfChipAllocDirect(sizeof(*draw));
         draw->parameters.vec[0] = kwlnDrawVector.fogFar;
         draw->parameters.color = kwlnDrawVector.fogColor;
         key->payload = draw;
@@ -463,14 +463,14 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         break;
     }
     case 13: {
-        void *payload = sdfAllocSizeClassBlock(0x28);
+        void *payload = sdfChipAllocDirect(0x28);
         key->payload = payload;
         memcpy(payload, effGetLoadDescA(), 0x28);
         key->p08.h[0] = 1;
         break;
     }
     case 14: {
-        void *payload = sdfAllocSizeClassBlock(0x2C);
+        void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
         memcpy(payload, &effGetCh71Work()->body, sizeof(EffBlurTemplateBody));
         key->p08.h[0] = 1;
@@ -478,35 +478,35 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         break;
     }
     case 15: {
-        void *payload = sdfAllocSizeClassBlock(0x2C);
+        void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
         memcpy(payload, &effGetCh72Work()->params, sizeof(EffBlurScatterParams));
         key->p08.h[0] = 1;
         break;
     }
     case 23: {
-        void *payload = sdfAllocSizeClassBlock(0x2C);
+        void *payload = sdfChipAllocDirect(0x2C);
         key->payload = payload;
         memcpy(payload, effGetCh76Work(), 0x2C);
         key->p08.h[0] = 1;
         break;
     }
     case 27: {
-        void *payload = sdfAllocSizeClassBlock(0x28);
+        void *payload = sdfChipAllocDirect(0x28);
         key->payload = payload;
         memcpy(payload, effGetCh73Params(), 0x28);
         key->p08.h[0] = 1;
         break;
     }
     case 16: {
-        void *payload = sdfAllocSizeClassBlock(0x18);
+        void *payload = sdfChipAllocDirect(0x18);
         key->payload = payload;
         memcpy(payload, effGetCh74Params(), 0x18);
         key->p08.h[0] = 1;
         break;
     }
     case 17: {
-        void *payload = sdfAllocSizeClassBlock(0x24);
+        void *payload = sdfChipAllocDirect(0x24);
         key->payload = payload;
         memcpy(payload, effGetCh75Work(), 0x24);
         key->p08.h[0] = 1;
@@ -526,7 +526,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         key->p18.f = display.scaleY;
         break;
     case 25: {
-        EvtCameraColorPayload *payload = sdfAllocSizeClassBlock(0x40);
+        EvtCameraColorPayload *payload = sdfChipAllocDirect(0x40);
         s32 i;
         key->payload = payload;
         payload->parameters.x = layout.x;

@@ -245,14 +245,14 @@ extern s32 btlResolveBattleTerminalOutcome(void);
 
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern f32 effMiscRandUnitFloat(EffRandState *state);
+extern f32 sdfGetRandFloat(EffRandState *state);
 extern EffRandState effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(void *, void *);
 struct MdlCtx;
 struct SdfPoolNode;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
-extern void dds3ClearObjectFlags(s32, s32);
+extern void dds3ObjectBaseOffFlag(s32, s32);
 extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 btlUnitTransparencySurfaces[];
 
@@ -1290,7 +1290,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (kwlnTaskIsRegistered((KwlnTask *)scene->boundTask) == 0) {
+                } else if (dds3ExistProcess((KwlnTask *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -3982,7 +3982,7 @@ void btlDestroyActionSeq(ActionStateLink *unit) {
     } else {
         ((BtlState *)btlGetRuntime())->tasks = unit->next;
     }
-    sdfReleaseChipBlock(unit);
+    sdfChipFreeDirect(unit);
 }
 
 void btlUpdateActionSeqs(void) {

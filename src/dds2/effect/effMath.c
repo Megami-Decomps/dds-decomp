@@ -6,7 +6,7 @@ extern f32 D_00433528;
 
 
 void effMathReleaseWorkResource(EffArrHdr *work) {
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 

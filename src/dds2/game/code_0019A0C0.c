@@ -27,7 +27,7 @@ extern EffRandState effDefaultRandomState[];
 
 extern void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex);
 
-extern void effSamplePrimitiveCurveVertex(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t);
+extern void effSplCalc(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t);
 
 extern void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t);
 
@@ -42,8 +42,8 @@ extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimi
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
 EffChanWork *effChanWorkCreate(EffChanSource *source) {
     u32 recordCount = source->head.count;
-    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
-    EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocationHandle);
+    SdfMemBlock *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    EffChanWork *work = (EffChanWork *)sdfMemLock(allocationHandle);
     EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
     EffParamWork *parameterTemplate;
     s32 delayModulus;
@@ -61,7 +61,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
         delayModulus = work->head.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
             recordCursor->param = effParamWorkDuplicate(parameterTemplate);
-            recordCursor->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
             recordCursor++;
         }
     }
@@ -84,7 +84,7 @@ void effDestroyChannelWork(EffChanWork *work) {
             recordIndex++;
         } while (recordIndex < recordCount);
     }
-    sdfReleaseResourceAllocation(work->buffer);
+    sdfMemFreeDirect(work->buffer);
 }
 
 extern f32 sdfViewTargetVector[4];
@@ -111,7 +111,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->t = 0;
     bezierSlot->step = cursorStep;
 
-    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -130,7 +130,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[0][1] = jitteredPoint[1];
     bezierSlot->controlPoints[0][2] = jitteredPoint[2];
 
-    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[1] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -149,7 +149,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[1][1] = jitteredPoint[1];
     bezierSlot->controlPoints[1][2] = jitteredPoint[2];
 
-    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[2] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -169,7 +169,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[2][1] = jitteredPoint[1];
     bezierSlot->controlPoints[2][2] = jitteredPoint[2];
 
-    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
+    centeredRandom = sdfGetRandFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[3] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -236,7 +236,7 @@ void effUpdateChannelWork(EffChanWork *work) {
         if (recordTime < activeSteps) {
             recordCursor->delay++;
         } else if (cycleEnabled != 0) {
-            recordCursor->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
         } else {
             recordCursor->delay++;
         }
@@ -286,7 +286,7 @@ void effFillRandRecords(EffEmit *emitter) {
     }
     do {
         effJitterChannelControlPoints(channelWork, recordIndex);
-        recordCursor->delay = effMiscRand((EffRandState *)effDefaultRandomState) % stepModulus;
+        recordCursor->delay = sdfGetRand((EffRandState *)effDefaultRandomState) % stepModulus;
         bezierSlot = effMathGetSlotAt(channelWork->slots, recordIndex);
         recordIndex++;
         randomStep = recordCursor->delay;
@@ -300,9 +300,9 @@ void effFillRandRecords(EffEmit *emitter) {
 extern void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents);
 
 EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
-    SdfMemBlock *primaryResource = sdfAllocGeneralBlock(0x2C);
+    SdfMemBlock *primaryResource = sdfMemAllocDirect(0x2C);
     f32 step = EFF_CHANNEL_DEFAULT_STEP;
-    EffPrimitiveCurve *primitive = (EffPrimitiveCurve *)sdfResourceRetainAddress(primaryResource);
+    EffPrimitiveCurve *primitive = (EffPrimitiveCurve *)sdfMemLock(primaryResource);
     SdfMemBlock *coefficientResource;
     f32 (*coefficients)[EFF_CURVE_COMPONENT_COUNT];
 
@@ -316,8 +316,8 @@ EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flatt
         primitive->cubicCoefficients = NULL;
         primitive->interpolationMode = 1;
     } else {
-        coefficientResource = sdfAllocGeneralBlock(recordCount * 36);
-        coefficients = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])sdfResourceRetainAddress(coefficientResource);
+        coefficientResource = sdfMemAllocDirect(recordCount * 36);
+        coefficients = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])sdfMemLock(coefficientResource);
         primitive->allocation = primaryResource;
         primitive->coefficientAllocation = coefficientResource;
         primitive->interpolationMode = EFF_PRIMITIVE_CUBIC_MODE;
@@ -335,22 +335,22 @@ EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flatt
 }
 
 /* Release the optional coefficient allocation, then the primary buffer; do not free or clear the object. */
-void effFreeBuffers(EffPrimitiveCurve *primitive) {
+void effSplRelease(EffPrimitiveCurve *primitive) {
     if (primitive != NULL) {
         if (primitive->cubicCoefficients != NULL) {
-            sdfReleaseResourceAllocation(primitive->coefficientAllocation);
+            sdfMemFreeDirect(primitive->coefficientAllocation);
         }
-        sdfReleaseResourceAllocation(primitive->allocation);
+        sdfMemFreeDirect(primitive->allocation);
     }
 }
 
 /* Sample before stepping. Wrap at >1 only, subtract once, and return zero when the record cursor resets. */
-s32 effAdvancePrimCursor(void *vertex, EffPrimitiveCurve *primitive) {
+s32 effSplRun(void *vertex, EffPrimitiveCurve *primitive) {
     s32 continuing = 1;
     f32 position = primitive->cursorPosition;
     u32 recordIndex = primitive->cursorIndex;
 
-    effSamplePrimitiveCurveVertex(vertex, primitive, recordIndex, position);
+    effSplCalc(vertex, primitive, recordIndex, position);
     position += primitive->cursorStep;
     if (position > 1.0f) {
         position -= 1.0f;
@@ -368,7 +368,7 @@ s32 effAdvancePrimCursor(void *vertex, EffPrimitiveCurve *primitive) {
 
 /* Evaluate packed XYZ cubic coefficients or adjacent linear keys at t.
  * a/b serve as coefficients or endpoints; only the cubic path writes output W. */
-void effSamplePrimitiveCurveVertex(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t) {
+void effSplCalc(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t) {
     f32 *a;
     f32 *b;
     f32 *c;
@@ -394,7 +394,7 @@ void effSamplePrimitiveCurveVertex(EffVert *vertex, EffPrimitiveCurve *primitive
 
 /* Evaluate packed XYZ cubic coefficients or adjacent linear keys into vf10.
  * The linear path leaves local W untouched before the native full-vector load. */
-void effSamplePrimitiveCurve(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
+void effSplCalcRegist(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
 {
     f32 vertex[4];
     f32 *a;
@@ -422,20 +422,20 @@ void effSamplePrimitiveCurve(EffPrimitiveCurve *primitive, s32 recordIndex, f32 
 }
 
 /* Reset the primitive's record index and within-record position without changing its step. */
-void effResetPrimitiveRecordCursor(EffPrimitiveCurve *primitive) {
+void effSplRewind(EffPrimitiveCurve *primitive) {
     primitive->cursorIndex = 0;
     primitive->cursorPosition = 0.0f;
 }
 
 /* Set the per-call cursor increment; sampling and wrapping are performed by the advance routine. */
-void effSetPrimitiveRecordCursorStep(EffPrimitiveCurve *primitive, f32 step) {
+void effSplSetStep(EffPrimitiveCurve *primitive, f32 step) {
     primitive->cursorStep = step;
 }
 
 /* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
 void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
-    f32 *tangentData = (f32 *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(primitive->recordCount * EFF_CURVE_POINT_BYTES);
+    f32 *tangentData = (f32 *)sdfMemLock(allocation);
 
     effBuildPrimitiveCurveTangents(tangentData, primitive->keys, primitive->recordCount);
     if (flattenEqualComponents == 0) {
@@ -443,7 +443,7 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
     } else {
         effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(primitive, tangentData);
     }
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", effBuildPrimitiveCurveTangents);
@@ -451,7 +451,7 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", effBuildPrimitiveCurveTangents);
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
 void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
     s32 byteCount = count * sizeof(f32);
-    void *allocation = sdfAllocGeneralBlock(byteCount);
+    void *allocation = sdfMemAllocDirect(byteCount);
     f32 *upper;
     s32 i;
     f32 denominator;
@@ -460,7 +460,7 @@ void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
     f32 *rhsEnd;
 
     count -= 2;
-    upper = (f32 *)sdfResourceRetainAddress(allocation);
+    upper = (f32 *)sdfMemLock(allocation);
     denominator = 2.0f;
 
     solution[0] = rhs[0] / denominator;
@@ -478,7 +478,7 @@ void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
     for (i = count; i >= 0; i--) {
         solution[i] -= upper[i + 1] * solution[i + 1];
     }
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 /* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
@@ -545,8 +545,8 @@ void *effCreateChannel(void *rows, u32 recordCount) {
     if (recordCount < EFF_BEZIER_MIN_RECORD_COUNT) {
         return channel;
     }
-    allocation = sdfAllocGeneralBlock(EFF_CHANNEL_BYTES);
-    channel = (void *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(EFF_CHANNEL_BYTES);
+    channel = (void *)sdfMemLock(allocation);
     channelObject = channel;
     channelObject->allocation = allocation;
     channelObject->cursorStep = EFF_CHANNEL_DEFAULT_STEP;
@@ -561,7 +561,7 @@ void *effCreateChannel(void *rows, u32 recordCount) {
  * The native s32 signature has no explicit return; retain that contract. */
 s32 effReleaseInterpolationChannel(void **handleAddress) {
     if (handleAddress != NULL) {
-        sdfReleaseResourceAllocation(*handleAddress);
+        sdfMemFreeDirect(*handleAddress);
     }
 }
 
@@ -650,11 +650,11 @@ s32 frFontInitializeGlyphAtlas(s32 unused, s32 columns, s32 rows, s32 cellWidth,
     frFontResourceList.count = count;
     frFontResourceList.capacity = count;
     frFontResourceList.pixelByteCount = cellWidth * cellHeight / 2;
-    frFontResourceList.nodeAllocation = sdfAllocGeneralBlock(count * sizeof(FntNode));
-    frFontResourceList.head = (FntNode *)sdfResourceRetainAddress(frFontResourceList.nodeAllocation);
+    frFontResourceList.nodeAllocation = sdfMemAllocDirect(count * sizeof(FntNode));
+    frFontResourceList.head = (FntNode *)sdfMemLock(frFontResourceList.nodeAllocation);
     if (recordBytes != 0) {
-        frFontResourceList.recordStorageAllocation = sdfAllocGeneralBlock(recordBytes * frFontResourceList.count);
-        records = (u8 *)sdfResourceRetainAddress(frFontResourceList.recordStorageAllocation);
+        frFontResourceList.recordStorageAllocation = sdfMemAllocDirect(recordBytes * frFontResourceList.count);
+        records = (u8 *)sdfMemLock(frFontResourceList.recordStorageAllocation);
     }
     for (i = 0; i < frFontResourceList.count - 1; i++) {
         frFontResourceList.head[i].next = &frFontResourceList.head[i + 1];

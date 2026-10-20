@@ -8,5 +8,5 @@ typedef struct {
 
 
 void dds3ReleaseModelAllocation(ModelObj *model) {
-    sdfReleaseChipBlock(model->allocation);
+    sdfChipFreeDirect(model->allocation);
 }

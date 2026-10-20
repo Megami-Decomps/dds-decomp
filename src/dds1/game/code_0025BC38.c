@@ -47,7 +47,7 @@ void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
             sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    sdfReleaseResourceAllocation(resources->allocation);
+    sdfMemFreeDirect(resources->allocation);
 }
 
 extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
@@ -111,7 +111,7 @@ void mnuUpdateMantraSpriteCueGroups(MnuSpriteResourceGroup *resources) {
                 }
             }
         }
-        resources->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 20.0f + 1.0f);
+        resources->spawnCountdown = (s32)(sdfGetRandFloat(0) * 20.0f + 1.0f);
     } else {
         resources->spawnCountdown--;
     }
@@ -162,7 +162,7 @@ typedef struct MenuResourceWork {
 } MenuResourceWork;
 
 MenuResourceWork *mnuRequestEffectResource(const char *ctx, const char *config) {
-    MenuResourceWork *work = (MenuResourceWork *)sdfAllocSizeClassBlock(0x70);
+    MenuResourceWork *work = (MenuResourceWork *)sdfChipAllocDirect(0x70);
     memset(work, 0, 0x70);
     effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
     return work;
@@ -174,7 +174,7 @@ u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
 
 void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
-    sdfReleaseChipBlock(work);
+    sdfChipFreeDirect(work);
 }
 extern void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite,
                                      s32 placementIndex, s32 flags, s32 context);
@@ -763,7 +763,7 @@ s32 mnuUpdateMantraCostNotification(MnuSceneListNode *node, s32 index, s32 drawA
 }
 
 MnuSceneListNode *mnuAllocateMenuListNode(void) {
-    MnuSceneListNode *node = sdfAllocSizeClassBlock(sizeof(MnuSceneListNode));
+    MnuSceneListNode *node = sdfChipAllocDirect(sizeof(MnuSceneListNode));
 
     memset(node, 0, 0x14);
     return node;
@@ -788,7 +788,7 @@ MnuSceneListNode *mnuFreeMenuListNodeAndGetNext(MnuSceneListNode *node) {
     MnuSceneListNode *next;
 
     next = node->next;
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
     return next;
 }
 

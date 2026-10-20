@@ -118,7 +118,7 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
 s32 dds3AllocateWorldObjectEntry(EffWorldNode *object) {
     WorldInfo *entry;
 
-    entry = (WorldInfo *)sdfAllocSizeClassBlock(0x28);
+    entry = (WorldInfo *)sdfChipAllocDirect(0x28);
     if (entry == NULL) {
         return 0;
     }
@@ -152,9 +152,9 @@ void dds3DestroyWorldObjectEntry(EffWorldNode *object)
         dds3DestroyWorldIndexNode(entry->firstIndex);
     }
     if (entry->entryAllocation != NULL) {
-        sdfReleaseResourceAllocation(entry->entryAllocation);
+        sdfMemFreeDirect(entry->entryAllocation);
     }
-    sdfReleaseChipBlock(entry);
+    sdfChipFreeDirect(entry);
 }
 
 u32 dds3DispatchWorldEntryUpdateCallback(EffWorldNode *obj) {
@@ -197,9 +197,9 @@ EffWorldNode *dds3CreateActiveWorldWithValueCapacity(s32 capacity) {
 
     world = dds3CreateWorldNodeForKind(0);
     info = world->data;
-    allocation = sdfAllocGeneralBlock(capacity * 8);
+    allocation = sdfMemAllocDirect(capacity * 8);
     info->entryAllocation = allocation;
-    info->entries = (WorldValueEntry *)sdfResourceRetainAddress(allocation);
+    info->entries = (WorldValueEntry *)sdfMemLock(allocation);
     info->entryCapacity = capacity;
 
     for (index = 0; index < capacity; index++) {

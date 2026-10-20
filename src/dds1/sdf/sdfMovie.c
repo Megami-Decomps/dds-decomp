@@ -7,7 +7,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-s32 sdfDevQueueControlRequest(DevState *state);
+s32 sdfFileCmdFileSize(DevState *state);
 s32 WaitSema(s32 semaphore);
 s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);
@@ -49,7 +49,7 @@ void sdfMovieScheduleLinearStreamRead(MovObj *movie) {
         streamPosition = ringStart;
     }
     stream->writeCursor = streamPosition;
-    sdfDevQueueRead(deviceState, bufferPosition, readSize);
+    sdfFileCmdRead(deviceState, bufferPosition, readSize);
 }
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
@@ -64,7 +64,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
          movie->state > SDF_MOVIE_STATE_STOP_REQUESTED)) {
         movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-        sdfDevQueueActiveOperation(deviceState);
+        sdfFileCmdClose(deviceState);
         return 0;
     }
 
@@ -72,7 +72,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
     case SDF_MOVIE_STATE_INITIAL:
         if (operation == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfDevQueueControlRequest(deviceState);
+            sdfFileCmdFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
@@ -92,7 +92,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
             }
             if (movie->remainingBytes == 0) {
                 movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-                sdfDevQueueActiveOperation(deviceState);
+                sdfFileCmdClose(deviceState);
             } else {
                 sdfMovieScheduleLinearStreamRead(movie);
             }
@@ -102,7 +102,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         if (operation == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
-            sdfDevQueueReleaseState(deviceState);
+            sdfFileCmdFree(deviceState);
         }
         break;
     }
@@ -125,7 +125,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
         return;
     }
     movie->state = SDF_MOVIE_STATE_DATA_READ;
-    sdfDevQueueRead(movie->deviceState, stream->pacInputBuffer, remaining <= 0x4000 ? remaining : 0x4000);
+    sdfFileCmdRead(movie->deviceState, stream->pacInputBuffer, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
@@ -139,7 +139,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
         (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
          movie->state > SDF_MOVIE_STATE_STOP_REQUESTED)) {
         movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-        sdfDevQueueActiveOperation(deviceState);
+        sdfFileCmdClose(deviceState);
         return 0;
     }
 
@@ -147,7 +147,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
     case SDF_MOVIE_STATE_INITIAL:
         if (operation == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfDevQueueControlRequest(deviceState);
+            sdfFileCmdFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
@@ -155,16 +155,16 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             movie->state = SDF_MOVIE_STATE_PAC_HEADER_READ;
-            sdfDevQueueRead(deviceState, stream, 0x40);
+            sdfFileCmdRead(deviceState, stream, 0x40);
         }
         break;
     case SDF_MOVIE_STATE_PAC_HEADER_READ:
         if (operation == SDF_DEV_EVENT_READ_REPLY) {
             s32 payloadBytes = stream->packetBytes - 0x40;
-            stream->payloadAllocation = sdfAllocGeneralBlock(payloadBytes);
-            stream->blockMask = (u8 *)sdfResourceRetainAddress(stream->payloadAllocation);
+            stream->payloadAllocation = sdfMemAllocDirect(payloadBytes);
+            stream->blockMask = (u8 *)sdfMemLock(stream->payloadAllocation);
             movie->state = SDF_MOVIE_STATE_PAC_MASK_READ;
-            sdfDevQueueRead(deviceState, stream->blockMask, payloadBytes);
+            sdfFileCmdRead(deviceState, stream->blockMask, payloadBytes);
             movie->remainingBytes -= stream->packetBytes;
         }
         break;
@@ -228,7 +228,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
             movie->remainingBytes -= bytesRead;
             if (movie->remainingBytes == 0) {
                 movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-                sdfDevQueueActiveOperation(deviceState);
+                sdfFileCmdClose(deviceState);
             } else {
                 sdfMovieProcessPendingData(movie);
             }
@@ -239,7 +239,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
         if (operation == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
-            sdfDevQueueReleaseState(deviceState);
+            sdfFileCmdFree(deviceState);
         }
         break;
     }

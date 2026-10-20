@@ -461,7 +461,7 @@ void parControlInit(void);
 void parSysReset(void) {
     parRecordListHead = 0;
     parControlInit();
-    effMiscSeedRandomFromClock((EffRandState *)D_00451F50);
+    sdfRandomizeByTime((EffRandState *)D_00451F50);
 }
 
 void parInitializeParticleSubsystem(void) {
@@ -481,8 +481,8 @@ ParReleaseRecord *func_00162E48(s32 count, s16 flags, s16 options) {
     if (flags & 1) bytes += vertexCount * sizeof(record->texcoords[0]);
     if (flags & 2) bytes += vertexCount * sizeof(u128);
     if (flags & 4) bytes += vertexCount * sizeof(u32);
-    allocation = sdfAllocGeneralBlock(bytes + sizeof(*record));
-    buffer = (u8 *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(bytes + sizeof(*record));
+    buffer = (u8 *)sdfMemLock(allocation);
     record = (ParReleaseRecord *)(buffer + bytes);
     memset(record, 0, sizeof(*record));
     record->positions = (u128 *)buffer;
@@ -514,7 +514,7 @@ ParReleaseRecord *func_00162E48(s32 count, s16 flags, s16 options) {
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->flags = 1;
     sdfQueueAssetRelease(record->asset);
-    sdfReleaseResourceAllocation(record->allocation);
+    sdfMemFreeDirect(record->allocation);
 }
 
 void parPrependRecordListNode(ParReleaseRecord *node) {
@@ -620,8 +620,8 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     }
     total = count * perCell;
     cellsSize = (total + count) * 0x14;
-    allocation = sdfAllocGeneralBlock(cellsSize + 0x2C);
-    base = sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(cellsSize + 0x2C);
+    base = sdfMemLock(allocation);
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
     system->vertices = (u128 *)base;
@@ -650,7 +650,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 
 void parReleaseCellSystem(ParSystem *system) {
     sdfQueueAssetRelease(system->asset);
-    sdfReleaseResourceAllocation(system->allocation);
+    sdfMemFreeDirect(system->allocation);
 }
 
 void parCellInit(ParSystem *system, s32 cellIndex) {
@@ -1726,8 +1726,8 @@ void parDrawPendingCellSystems(void) {
 ParBlock *parAllocateDrawBlock(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock((colorBytes + points) * 4 + 0x18);
-    s32 base = sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
+    s32 base = sdfMemLock(allocation);
     u8 *vertices = (u8 *)base + points * 16;
     ParBlock *block = (ParBlock *)(vertices + colorBytes);
     block->color = 0x80808080;
@@ -1742,7 +1742,7 @@ ParBlock *parAllocateDrawBlock(s32 count) {
 
 void parReleaseDrawBlock(ParBlock *block) {
     sdfQueueAssetRelease(block->asset);
-    sdfReleaseResourceAllocation(block->allocation);
+    sdfMemFreeDirect(block->allocation);
 }
 
 void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
@@ -1773,7 +1773,7 @@ void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
 }
 
 ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
-    ParEmitDesc *desc = sdfAllocSizeClassBlock(src->count * 4 + 0xF0);
+    ParEmitDesc *desc = sdfChipAllocDirect(src->count * 4 + 0xF0);
 
     memset(desc, 0, 0xF0);
     memcpy(desc, src, src->headerSize);

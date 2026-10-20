@@ -26,7 +26,7 @@ void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
 s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
     EvtPictureWork *picture;
 
-    picture = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    picture = (EvtPictureWork *)dds3GetProcessData(task);
     if (picture->flags & EVT_PICTURE_FLAG_DRAW_ENABLED) {
         if (picture->texture != 0) {
             evtSubmitPictureDrawPacket(picture->texture);
@@ -40,10 +40,10 @@ s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
 void evtPictureReleaseTaskTextureAndState(KwlnTask *task) {
     EvtPictureWork *picture;
 
-    picture = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    picture = (EvtPictureWork *)dds3GetProcessData(task);
     if (picture->texture != 0) {
         sdfTexReleaseReferenceViaHandler(picture->texture);
         picture->texture = 0;
     }
-    sdfReleaseChipBlock(picture);
+    sdfChipFreeDirect(picture);
 }

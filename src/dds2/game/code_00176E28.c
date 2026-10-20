@@ -88,8 +88,8 @@ EffRingWork *source;
     u32 spread;
     u32 i;
 
-    handle = sdfAllocGeneralBlock(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
-    block = (EffRingBlock *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(source->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
+    block = (EffRingBlock *)sdfMemLock(handle);
     ring = &block->header;
     memcpy(ring, source, EFF_RING_PARAM_BYTES);
     ring->vertices = block->vertices;
@@ -110,7 +110,7 @@ EffRingWork *source;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
+        ring->vertices[i].age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % spread);
         ring->vertices[i].angle = angle;
         angle += step;
     }
@@ -133,7 +133,7 @@ EffRingWork *effDuplicateRingFan(EffRingWork *ring) {
 /* Release the matrix pool's resources before the ring's backing allocation. */
 void effReleaseRingResources(EffRingWork *ring) {
     effReleaseRingRecordPool(ring->recordPool);
-    sdfReleaseResourceAllocation(ring->allocationHandle);
+    sdfMemFreeDirect(ring->allocationHandle);
 }
 
 /* Copy one quadword; the fourth component is copied along with XYZ. */
@@ -195,7 +195,7 @@ void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
     VEC3_SPLAT(axisOffset, work->currentAxisOffset);
     VEC3_SPLAT(sideOffsetA, work->currentSideOffsetA);
     VEC3_SPLAT(sideOffsetB, work->currentSideOffsetB);
-    radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
+    radialDirection[0] = sdfCos(part->angle);
     radialDirection[1] = 0;
     sine = sdfSinPoly(part->angle);
     radialDirection[2] = sine;
@@ -321,7 +321,7 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
+                part->age = ~(sdfGetRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashWriteRingColorSlots(work, index, color);
@@ -372,8 +372,8 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
     quads = recordBytes >> 4;
     recordBytes = ((recordBytes & 0xF) != 0 ? quads + 1 : quads) << 4;
     size = recordBytes + EFF_POOL_HEADER_BYTES;
-    handle = sdfAllocGeneralBlock(size);
-    block = (u8 *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(size);
+    block = (u8 *)sdfMemLock(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + recordBytes);
     pool->recordBase = (u8 *)block;
@@ -393,7 +393,7 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
-    sdfReleaseResourceAllocation(pool->buffer);
+    sdfMemFreeDirect(pool->buffer);
 }
 
 /* Build scale/origin transform and submit five-vertex groups in batches of 25.
@@ -506,8 +506,8 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     positionWordCount = vertexCount * 4;
     colorWordCount = vertexCount;
     size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
-    handle = sdfAllocGeneralBlock(size);
-    block = (u32 *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(size);
+    block = (u32 *)sdfMemLock(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
     pool->recordBase = (u8 *)block;
@@ -527,7 +527,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
 /* Release the asset and backing allocation; the header points into that block. */
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
-    sdfReleaseResourceAllocation(pool->buffer);
+    sdfMemFreeDirect(pool->buffer);
 }
 
 /* Submit the position/color pool in triangle batches of at most 48 vertices. */
@@ -594,8 +594,8 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     positionWordCount = quadCount * 16;
     colorWordCount = quadCount * EFF_QUAD_VERTEX_COUNT;
     size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
-    handle = sdfAllocGeneralBlock(size);
-    block = (u32 *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(size);
+    block = (u32 *)sdfMemLock(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
     pool->recordBase = (u8 *)block;
@@ -615,7 +615,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
 /* Queue the asset before releasing the allocation containing this header. */
 void effReleaseRecordGroupResources(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
-    sdfReleaseResourceAllocation(pool->buffer);
+    sdfMemFreeDirect(pool->buffer);
 }
 
 /* Submit the position/color pool in quad batches of at most 32 vertices. */
@@ -790,8 +790,8 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     s32 ageOffset;
     u32 segments;
 
-    handle = sdfAllocGeneralBlock(sizeof(PcpScatterRadialWork) + params->particleCount * sizeof(PcpScatterRadialParticle));
-    work = (PcpScatterRadialWork *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(sizeof(PcpScatterRadialWork) + params->particleCount * sizeof(PcpScatterRadialParticle));
+    work = (PcpScatterRadialWork *)sdfMemLock(handle);
     work->particles = (PcpScatterRadialParticle *)(work + 1);
     work->params = *params;
     work->color = 0x80808080;
@@ -813,8 +813,8 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
             work->duplicateGroupCount++;
         }
         count = work->duplicateGroupCount;
-        handle = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = (EffParamWork **)sdfResourceRetainAddress(handle);
+        handle = sdfMemAllocDirect(count * sizeof(u32));
+        handles = (EffParamWork **)sdfMemLock(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = handles;
         work->duplicatedHandles[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
@@ -831,7 +831,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     }
     segments = work->params.radialSegments;
     for (i = 0; i < count; i++, particle++) {
-        particle->age = ageOffset - effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread;
+        particle->age = ageOffset - sdfGetRand((EffRandState *)effDefaultRandomState) % delaySpread;
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }

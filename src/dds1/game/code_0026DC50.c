@@ -32,7 +32,7 @@ extern void *memset(void *, int, unsigned int);
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
 SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
     HexStepTable steps = *(HexStepTable *)D_003AFEC8;
-    SpriteSpawnNode *node = sdfAllocSizeClassBlock(sizeof(SpriteSpawnNode));
+    SpriteSpawnNode *node = sdfChipAllocDirect(sizeof(SpriteSpawnNode));
 
     memset(node, 0, sizeof(SpriteSpawnNode));
     if (parent != NULL) {
@@ -50,8 +50,8 @@ SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, Sprit
         node->direction = direction;
         node->framesLeft = node->duration = group->cueDuration - 5;
     } else {
-        node->x = effMiscRandMod(NULL, 15) * 22 + 56;
-        node->y = effMiscRandMod(NULL, 10) * 36 + 189;
+        node->x = sdfGetRandInt(NULL, 15) * 22 + 56;
+        node->y = sdfGetRandInt(NULL, 10) * 36 + 189;
         node->generations = group->initialGenerations;
         node->direction = 0;
         node->framesLeft = node->duration = group->cueDuration;
@@ -61,7 +61,7 @@ SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, Sprit
 
 void mnuReleaseMovieParticleWork(s32 unused, void *data) {
     if (data != NULL) {
-        sdfReleaseChipBlock(data);
+        sdfChipFreeDirect(data);
     }
 }
 

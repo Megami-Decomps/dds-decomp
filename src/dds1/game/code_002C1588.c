@@ -109,13 +109,13 @@ extern void *memset(void *, int, unsigned int);
 /* Own a NUL-terminated text copy; store X scaled by 16 and Y scaled by 8. */
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                u32 reference) {
-    GridTextWidget *widget = (GridTextWidget *)sdfAllocSizeClassBlock(sizeof(GridTextWidget));
+    GridTextWidget *widget = (GridTextWidget *)sdfChipAllocDirect(sizeof(GridTextWidget));
     u32 textBytes;
     char *textCopy;
 
     memset(widget, 0, 0x40);
     textBytes = strlen(text) + 1;
-    textCopy = (char *)sdfAllocSizeClassBlock(textBytes);
+    textCopy = (char *)sdfChipAllocDirect(textBytes);
     widget->textLength = textBytes;
     widget->text = textCopy;
     memcpy(textCopy, text, textBytes);
@@ -152,11 +152,11 @@ void itfSetGridDimensions(GridTextWidget *widget, s32 columns, s32 rows) {
 u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     GridTextListItem *next;
 
-    sdfReleaseChipBlock(widget->text);
+    sdfChipFreeDirect(widget->text);
     do {
         next = itfRemoveSelectedGridTextItem(widget);
     } while (next != NULL);
-    sdfReleaseChipBlock(widget);
+    sdfChipFreeDirect(widget);
     return 1;
 }
 
@@ -164,7 +164,7 @@ u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     GridTextListItem *childLink;
 
-    sdfReleaseChipBlock(widget->text);
+    sdfChipFreeDirect(widget->text);
     childLink = widget->selected;
     if (childLink != NULL) {
         do {
@@ -175,7 +175,7 @@ u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
             childLink = itfRemoveSelectedGridTextItem(widget);
         } while (childLink != NULL);
     }
-    sdfReleaseChipBlock(widget);
+    sdfChipFreeDirect(widget);
     return 1;
 }
 
@@ -217,7 +217,7 @@ u32 itfGetGridListLinkFlags(GridTextWidget *owner) {
 }
 
 GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text, u32 value) {
-    GridTextListItem *item = (GridTextListItem *)sdfAllocSizeClassBlock(sizeof(GridTextListItem));
+    GridTextListItem *item = (GridTextListItem *)sdfChipAllocDirect(sizeof(GridTextListItem));
     GridTextListItem *tail;
     s32 length;
     s32 allocation;
@@ -231,7 +231,7 @@ GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text,
     }
     length = strlen(text);
     allocation = length + 1;
-    copy = (char *)sdfAllocSizeClassBlock(allocation);
+    copy = (char *)sdfChipAllocDirect(allocation);
     item->textLength = allocation;
     item->text = copy;
     memcpy(copy, text, allocation);
@@ -323,11 +323,11 @@ GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *widget) {
     if (next == NULL) {
         widget->tail = previous;
     }
-    sdfReleaseChipBlock(node->text);
+    sdfChipFreeDirect(node->text);
     if (node->parameter != NULL) {
-        sdfReleaseChipBlock(node->parameter);
+        sdfChipFreeDirect(node->parameter);
     }
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
     widget->itemCount--;
     return widget->selected;
 }
@@ -338,10 +338,10 @@ void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, GridTextListItem 
     s32 textBytes;
     char *textCopy;
 
-    sdfReleaseChipBlock(item->text);
+    sdfChipFreeDirect(item->text);
     textLength = strlen(text);
     textBytes = textLength + 1;
-    textCopy = (char *)sdfAllocSizeClassBlock(textBytes);
+    textCopy = (char *)sdfChipAllocDirect(textBytes);
     item->textLength = textBytes;
     item->text = textCopy;
     memcpy(textCopy, text, textBytes);
@@ -357,7 +357,7 @@ s32 itfSetGridNumericItemDescriptor(GridTextWidget *widget, GridTextListItem *it
     s32 width = 1;
     s32 length;
 
-    copy = (GridNumericDescriptor *)sdfAllocSizeClassBlock(sizeof(GridNumericDescriptor));
+    copy = (GridNumericDescriptor *)sdfChipAllocDirect(sizeof(GridNumericDescriptor));
     item->parameter = copy;
     memcpy(copy, descriptor, sizeof(GridNumericDescriptor));
     item->number = descriptor->value;

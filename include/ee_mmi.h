@@ -405,7 +405,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Gather one column of four 16-byte matrix rows into a VU register.
- * Retail: four branches each in both games' mdlRotateLightEditorVectorFromPad
+ * Retail: four branches each in both games' dds3LightEditorAngleEdit
  * and evtRotateViewerPositionFromPad repeat the fixed $2-$5 SDK scratch sequence:
  * lw $2/$3/$4/$5 at 0/0x10/0x20/0x30(src); pextlw $2,$3,$2;
  * pextlw $4,$5,$4; pcpyld $2,$4,$2; qmtc2.ni $2,vf.
@@ -421,7 +421,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Count the leading sign bits (minus one) of a word: plzcw out,in. Retail:
- * DDS1 sdfAllocSizeClassBlock / DDS2 sdfAllocSizeClassBlock (power-of-two size class of an
+ * DDS1 sdfChipAllocDirect / DDS2 sdfChipAllocDirect (power-of-two size class of an
  * allocation: class = 27 - (plzcw(size - 1) & 0xFF) for sizes above 16).
  * C has no equivalent (cc1 has no clz builtin), so the instruction is
  * written directly; `out` may be the same variable as `in`.

@@ -541,8 +541,8 @@ extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *sr
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(SoundMixer));
-    SoundMixer *mixer = (void *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(SoundMixer));
+    SoundMixer *mixer = (void *)sdfMemLock(allocation);
 
     mixer->resource = allocation;
     memcpy(mixer, src, 0xC38);
@@ -562,7 +562,7 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
         voice = next;
     }
     effBattleReleaseParameterBanks(mixer);
-    sdfReleaseResourceAllocation(mixer->resource);
+    sdfMemFreeDirect(mixer->resource);
 }
 
 s32 sndGetMixerBankCallbackFrame(SoundMixer *mixer, u16 kind) {
@@ -601,7 +601,7 @@ extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
 /* Create a voice on the mixer bank selected by kind (0/1: first bank, 2+:
  * second): link it into the mixer, duplicate each parameter row's work (with
  * the optional unit-scale callback) and count it as active. */
-extern void * sdfAllocSizeClassBlock(s32 size);
+extern void * sdfChipAllocDirect(s32 size);
 extern void *memset(void *, int, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
@@ -616,7 +616,7 @@ BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner
     u16 entryCount;
     u32 callbackEnabled;
 
-    effect = sdfAllocSizeClassBlock(sizeof(BattleEffect));
+    effect = sdfChipAllocDirect(sizeof(BattleEffect));
     memset(effect, 0, sizeof(BattleEffect));
     effect->color = 0x80808080;
 

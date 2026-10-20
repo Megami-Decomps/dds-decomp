@@ -86,7 +86,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     task = evtCreateTaskWithValue(0x2AFE, entry);
-    kwlnTaskAddChild(work->task, task);
+    dds3LinkProcess(work->task, task);
     scrSetIntegerReturnValue((s32)task);
     return 1;
 }
@@ -104,7 +104,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    kwlnTaskAddChild(work->task, childTask);
+    dds3LinkProcess(work->task, childTask);
     scrSetIntegerReturnValue((s32)childTask);
     return 1;
 }
@@ -114,7 +114,7 @@ u32 evtOpcodeSetTaskContextFlag(void) {
     s32 registered;
 
     task = scrReadIntParameter(0);
-    registered = kwlnTaskIsRegistered((KwlnTask *)task);
+    registered = dds3ExistProcess((KwlnTask *)task);
     if (registered != 0) {
         evtSetContextFlag((KwlnTask *)task);
     }
@@ -126,7 +126,7 @@ u32 evtOpcodeClearTaskContextFlag(void) {
     s32 registered;
 
     task = scrReadIntParameter(0);
-    registered = kwlnTaskIsRegistered((KwlnTask *)task);
+    registered = dds3ExistProcess((KwlnTask *)task);
     if (registered != 0) {
         evtClearContextFlag((KwlnTask *)task);
     }
@@ -140,7 +140,7 @@ u32 evtOpcodeDestroyTask(void) {
     s32 registered;
 
     task = scrReadIntParameter(0);
-    registered = kwlnTaskIsRegistered((KwlnTask *)task);
+    registered = dds3ExistProcess((KwlnTask *)task);
     if (registered != 0) {
         evtDestroyTaskHierarchy(task);
     }
@@ -386,7 +386,7 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     if ((fileMenuTaskExists() != 0) || (fldIsUpdateInhibited() != 0)) {
         return 0;
     }
-    overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);
+    overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     state = &datGameState->world;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
@@ -464,19 +464,19 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
 s32 evtCreateSolarOverlayWork(KwlnTask *task) {
     SolarOverlayWork *overlay;
 
-    overlay = sdfAllocSizeClassBlock(0x104);
+    overlay = sdfChipAllocDirect(0x104);
     evtInitializeVisualData(overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
-    kwlnTaskSetUserValue(task, (u32)overlay);
+    dds3SetProcessData(task, (u32)overlay);
     return (s32)evtUpdateSolarOverlayFade;
 }
 
 void evtFreeSolarOverlayWork(KwlnTask *task) {
     SolarOverlayWork *overlay;
 
-    overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);
+    overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     evtReleaseSolarNoiseSprite(&overlay->noiseSprite);
-    sdfReleaseChipBlock(overlay);
+    sdfChipFreeDirect(overlay);
     evtSolarOverlayTask = 0;
 }
 
@@ -485,7 +485,7 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
     if (evtSolarOverlayTask != 0) {
         return;
     }
-    evtSolarOverlayTask = kwlnTaskCreate(D_00437208, 0x2B0B, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
+    evtSolarOverlayTask = dds3StartProcess(D_00437208, 0x2B0B, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
@@ -496,7 +496,7 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
 
 void evtStopSolarOverlay(void) {
     if (evtSolarOverlayTask != 0) {
-        kwlnTaskDestroyWithHierarchy(evtSolarOverlayTask, 1);
+        dds3KillProcess(evtSolarOverlayTask, 1);
     }
 }
 

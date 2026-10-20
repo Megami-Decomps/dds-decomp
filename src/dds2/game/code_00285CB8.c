@@ -3,7 +3,7 @@
 
 void mnuReleaseOptionalResourceSlot(u32 *resourceSlot) {
     if (resourceSlot != NULL) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*resourceSlot));
+        sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*resourceSlot));
         return;
     }
 }

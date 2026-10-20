@@ -62,9 +62,9 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
     f32 step;
     u32 color;
 
-    object = sdfAllocSizeClassBlock(sizeof(PcpScatterDraw));
-    allocation = sdfAllocGeneralBlock(bytes);
-    cursor = (u8 *)sdfResourceRetainAddress(allocation);
+    object = sdfChipAllocDirect(sizeof(PcpScatterDraw));
+    allocation = sdfMemAllocDirect(bytes);
+    cursor = (u8 *)sdfMemLock(allocation);
     memset(cursor, 0, bytes);
     object->points = (f32 *)cursor;
     cursor += totalVectors * 16;
@@ -114,8 +114,8 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
         effPcpScatterResRelease(current->sharedResource);
     }
     sdfQueueAssetRelease(current->asset);
-    sdfReleaseResourceAllocation(current->allocation);
-    sdfReleaseChipBlock(object);
+    sdfMemFreeDirect(current->allocation);
+    sdfChipFreeDirect(object);
 }
 
 extern u8 effScatterTriangleIndices[];
@@ -225,8 +225,8 @@ extern EffRandState effDefaultRandomState[];
 
 /* effNeedleCreateWork */
 EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
-    EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
+    EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfMemLock(allocation);
     u32 slotIndex;
     EffResourceWork *resource;
     u32 count, delayRange;
@@ -254,9 +254,9 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     radiusBase = work->params.radiusBase;
     radiusJitter = work->params.radiusJitter;
     for (slotIndex = 0; slotIndex < count; slotIndex++, slot++) {
-        slot->angle = effMiscRandUnitFloat(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
-        slot->radius = radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
-        slot->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayRange);
+        slot->angle = sdfGetRandFloat(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
+        slot->radius = radiusBase * (sdfGetRandFloat(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
+        slot->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayRange);
         effSetResourceEntryValue(work->resource, slotIndex, 0x808080);
     }
     return work;

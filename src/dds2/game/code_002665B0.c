@@ -343,7 +343,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     }
     handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, colors, text, 0);
     frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
 }
 
 
@@ -397,7 +397,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
-    frFontQueueGlyphForCurrentDrawBuffer(sprite);
+    frDestroyFontRequestAfter(sprite);
 }
 
 extern char D_00437868[];
@@ -425,9 +425,9 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
         sprintf(text, D_00437868, entry->requiredAmount);
         glyph = itfCreateFont3TextGlyph(0x1810, 0x268, depth,
             uiBlendColors(0xA09DC380, 0xA09DC300, scale), text, 0);
-        frFontSetChildChainFirstOption(glyph, 4);
+        frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, priority);
-        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        frDestroyFontRequestAfter(glyph);
         selected = 1;
     }
     effDrawTextureSlotWithBlendedCornerColors(0x510, rowY + 0x80, depth, scale, 0, host->resourceBank[0],
@@ -455,7 +455,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
 void *mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
-    s32 panel = (s32)sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
+    s32 panel = (s32)sdfChipAllocDirect(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow((MenuPageBar *)panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
         (EffectSlotSet *)host->imageHandles[1]);
@@ -471,7 +471,7 @@ void mnuReleaseDualPercentPanel(void *panelOwner) {
     if (panelOwner != NULL) {
         mnuReleaseSpriteTextures((u32 *)panel);
         mnuReleaseSpriteTextures((u32 *)(panel + MNU_PERCENT_PANEL_BYTES));
-        sdfReleaseChipBlock(panel);
+        sdfChipFreeDirect(panel);
         return;
     }
 }
@@ -562,9 +562,9 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     color = mnuBlendListNodeColorByFlags(color, node);
     color = uiBlendColors(color, color & ~0xFF, width);
     glyph = itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
-    frFontSetChildChainFirstOption(glyph, chainFlags);
+    frSetFontColorNo(glyph, chainFlags);
     frFontDrawGlyphChain(glyph, 1, priority);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    frDestroyFontRequestAfter(glyph);
 }
 
 
@@ -797,8 +797,8 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 
 /* Allocate/zero the progress host, retain its allocation, and begin resource setup. */
 MenuProgressHost *mnuCreateProgressHost(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
-    MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(allocation);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(MNU_MENU_HOST_BYTES);
+    MenuProgressHost *host = (MenuProgressHost *)sdfMemLock(allocation);
     memset((void *)host, 0, MNU_MENU_HOST_BYTES);
     host->allocation = allocation;
     host->titleEffectHandle = mnuAllocateValueRecord(1);
@@ -813,7 +813,7 @@ void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
     mnuReleaseStaffMenuTextureHandles(&host->staffSlots);
     mnuReleaseTitleEffectSprites(&host->staffSlots);
     effDestroyEffectList(host->titleEffectHandle);
-    sdfReleaseResourceAllocation(host->allocation);
+    sdfMemFreeDirect(host->allocation);
 }
 
 /* Return one while initialization is pending (including state zero), zero when ready.
@@ -916,7 +916,7 @@ extern void sndReleaseTrackHandle(s32);
  * counterpart sound action and texture release. Only enable == 1 sends sound calls.
  * Preserve the identical retail arms and the independent draw-gate update. */
 void mnuTerminalSetTrack(s8 mode, s8 enable) {
-    s32 address = kwlnTaskGetUserValue(D_0043785C);
+    s32 address = dds3GetProcessData(D_0043785C);
     MenuSlotState *work = (MenuSlotState *)address;
 
     if (mode == 1) {
@@ -1029,8 +1029,8 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     MenuSlotState *obj;
     u32 i;
 
-    allocation = sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
-    obj = (MenuSlotState *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(MNU_TERMINAL_SCENE_BYTES);
+    obj = (MenuSlotState *)sdfMemLock(allocation);
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     obj->heapHandle = allocation;
     mnuClearPanelTransitionState(&obj->transitionWork);
@@ -1061,7 +1061,7 @@ extern void fldProcessDeferredSceneCommand(void);
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
 void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
-    MenuSlotState *work = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *work = (MenuSlotState *)dds3GetProcessData(task);
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
@@ -1070,7 +1070,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
         mnuDrainPanelTransitions(&work->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
-        sdfReleaseResourceAllocation(work->heapHandle);
+        sdfMemFreeDirect(work->heapHandle);
         mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
@@ -1082,7 +1082,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
 
 /* Draw/step the task's gradient indicator, then select its message-control mode. */
 s32 mnuUpdateTerminalMessageWindowIndicator(KwlnTask *task) {
-    MenuGradientFade *context = &((MenuSlotState *)kwlnTaskGetUserValue(task))->gradientFade;
+    MenuGradientFade *context = &((MenuSlotState *)dds3GetProcessData(task))->gradientFade;
     mnuDrawAndStepGradientFade(context, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
         mnuSetStateValue(&context->active, 1);
@@ -1104,24 +1104,24 @@ void mnuCreateTerminalSceneTasks(s32 reduced, s32 slot) {
     KwlnTask *drawTask;
     KwlnTask *fadeTask;
 
-    D_0043785C = kwlnTaskCreate(D_00424F00, 0x404, 1, 1,
+    D_0043785C = dds3StartProcess(D_00424F00, 0x404, 1, 1,
         mnuPrepareTerminalPopupAndDispatch, NULL, (u32)scene);
-    drawTask = kwlnTaskCreate(D_00424F10, 0x2B14, 1, 1,
+    drawTask = dds3StartProcess(D_00424F10, 0x2B14, 1, 1,
         evtRunTerminalPanel, NULL, (u32)scene);
-    kwlnTaskCreate(D_00424F20, 0x5210, 1, 1,
+    dds3StartProcess(D_00424F20, 0x5210, 1, 1,
         evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, (u32)scene);
-    fadeTask = kwlnTaskCreate("term_fade", 0x2B15, 1, 0,
+    fadeTask = dds3StartProcess("term_fade", 0x2B15, 1, 0,
         mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
-    kwlnTaskAddChild(drawTask, fadeTask);
+    dds3LinkProcess(drawTask, fadeTask);
     mnuTerminalTaskState = 1;
 }
 
 
 /* Destroy the three named terminal tasks and clear the retained task handle. */
 void fldStopSceneTasks(void) {
-    kwlnTaskDestroyWithHierarchyByName(D_00424F00, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_00424F10, 0);
-    kwlnTaskDestroyWithHierarchyByName(D_00424F20, 0);
+    dds3KillProcessName(D_00424F00, 0);
+    dds3KillProcessName(D_00424F10, 0);
+    dds3KillProcessName(D_00424F20, 0);
     D_0043785C = 0;
 }
 
@@ -1142,7 +1142,7 @@ s32 fldPollSceneState(void) {
 
 /* Seed the task's popup slot before dispatching mode zero with the supplied request. */
 s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *request) {
-    s32 context = kwlnTaskGetUserValue(request);
+    s32 context = dds3GetProcessData(request);
 
     mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPreparationPopupEntry);
     return menuSetHandler((void *)context, 0, (void *)request);
@@ -1150,12 +1150,12 @@ s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *request) {
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
 s32 evtRunTerminalPanel(KwlnTask *request) {
-    return menuSetHandler((void *)kwlnTaskGetUserValue(request), 1, (void *)request);
+    return menuSetHandler((void *)dds3GetProcessData(request), 1, (void *)request);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
 s32 evtRunTerminalPanelSync(KwlnTask *request) {
-    return menuSetHandler((void *)kwlnTaskGetUserValue(request), 2, (void *)request);
+    return menuSetHandler((void *)dds3GetProcessData(request), 2, (void *)request);
 }
 
 /* Require the fade to be inactive before testing message-window control for idle. */
@@ -1857,7 +1857,7 @@ void mnuDispatchTransitionHostCallbacks(MenuSlotState *host) {
 s32 mnuBeginTerminalSlotSelection(KwlnTask *task) {
     MenuSlotState *work;
 
-    work = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    work = (MenuSlotState *)dds3GetProcessData(task);
     if ((work->initFlags & 1) == 0) {
         mnuConfigureTerminalSlotEffects(1, work);
         mnuTerminalSelectSlot(1, 0, work);
@@ -1891,7 +1891,7 @@ extern char mnuTerminalEntryMessagePopupEntry[];
 
 /* Event panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
 s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
-    MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(input);
+    MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(input);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->dispatchStatus;
     s32 kind = context->commandLists[0]->cursor->index;
@@ -1954,7 +1954,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
 }
 
 s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
     mnuDrawTerminalBackdrop(state);
@@ -1969,7 +1969,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
 }
 
 s32 evtBSetupDispatchSync(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
@@ -1978,7 +1978,7 @@ s32 evtBSetupDispatchSync(KwlnTask *request) {
 
 
 s32 evtClearDispatchVisualFlag(KwlnTask *task) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(task);
     evtRememberDispatchCallback(0, (s32)state);
     state->commandLists[0]->scale = 0;
     mnuTerminalSetTrack(0, 0);
@@ -1992,7 +1992,7 @@ s32 evtClearDispatchVisualFlag(KwlnTask *task) {
 extern void mnuReleaseResourceGroup(s32);
 
 s32 evtBeginSelectionExitFade(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    s32 state = dds3GetProcessData(task);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
     mnuTerminalSelectSlot(0, -2, state);
@@ -2009,7 +2009,7 @@ extern void fileSetPreviewLocation(s32 x, s32 y);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
@@ -2034,20 +2034,20 @@ s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
 }
 
 s32 evtBDispatchStart(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     return menuSetHandler(state, 1, (void *)request);
 }
 
 s32 evtBSetupDispatchSyncB(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
 u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
-    MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(task);
 
     if (context->menuActive == 0) {
         mnuSelectFirstListNode((s32)context->secondaryList);
@@ -2064,7 +2064,7 @@ u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
 }
 
 u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
-    MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(task);
 
     if (context->menuActive != 0) {
         mnuConfigureTerminalSlotEffects(3, (s32)context);
@@ -2080,7 +2080,7 @@ u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
 
 /* Handle owner-panel input only after dispatch completes and the panel is fully shown. */
 s32 mnuUpdateTerminalSelectionInput(KwlnTask *request) {
-    MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(request);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &context->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&context->transitionWork, dispatch, 0, request);
@@ -2111,7 +2111,7 @@ s32 mnuUpdateTerminalSelectionInput(KwlnTask *request) {
 }
 
 s32 mnuUpdateAndDrawTerminalScene(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
     mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
@@ -2122,14 +2122,14 @@ s32 mnuUpdateAndDrawTerminalScene(KwlnTask *request) {
 }
 
 s32 evtBSetupDispatchSyncC(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
 u32 evtEnterThresholdSelectionList(KwlnTask *task) {
-    MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(task);
 
     mnuRefreshThresholdNodeFlags((s32)context->progressList);
     mnuSelectFirstListNode((s32)context->progressList);
@@ -2141,7 +2141,7 @@ u32 evtEnterThresholdSelectionList(KwlnTask *task) {
 }
 
 u32 evtBEnterStateA(KwlnTask *task) {
-    s32 context = kwlnTaskGetUserValue(task);
+    s32 context = dds3GetProcessData(task);
 
     mnuTerminalSelectSlot(3, 0, context);
     mnuApplyGridPanelHostSetting(4, (MenuSlotState *)context);
@@ -2153,7 +2153,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
 
 /* Recover the selected affordable party member, then process list input. */
 s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
-    MenuSlotState *host = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *host = (MenuSlotState *)dds3GetProcessData(task);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &host->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&host->transitionWork, dispatch, 0, task);
@@ -2218,11 +2218,11 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
     }
     font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);
-    frFontQueueGlyphForCurrentDrawBuffer(font);
+    frDestroyFontRequestAfter(font);
 }
 
 s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
     mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
@@ -2236,7 +2236,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *request) {
 }
 
 s32 evtBSetupDispatchSyncD(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
@@ -2247,13 +2247,13 @@ extern void mnuSelectLastListNode(MenuList *list);
 u32 evtSelectFinalVisualNode(KwlnTask *task) {
     MenuSlotState *state;
 
-    state = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    state = (MenuSlotState *)dds3GetProcessData(task);
     mnuSelectLastListNode((u32)state->commandLists[0]);
     return 1;
 }
 
 s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     s32 *panel = (s32 *)(state + 0x54);
     s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
     if (result != 0) {
@@ -2270,7 +2270,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
 }
 
 s32 mnuBeginTerminalExitTransition(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
     if (evtGetMessageWindowControlState() == 0 && dispatchState->exitState == 0) {
@@ -2294,7 +2294,7 @@ s32 mnuBeginTerminalExitTransition(KwlnTask *request) {
 }
 
 s32 evtBSetupDispatchSyncE(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
@@ -2304,7 +2304,7 @@ s32 evtBSetupDispatchSyncE(KwlnTask *request) {
 
 
 s32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    s32 state = dds3GetProcessData(task);
     mnuReleaseCampTextureHandlesAndClearOutput(((MenuSlotState *)state)->imageHandles);
     mnuConfigureSelectedSceneModeEffect(2, (MenuSlotState *)state);
     mnuTerminalSelectSlot(3, 4, state);
@@ -2319,7 +2319,7 @@ s32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
 
 
 s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    s32 state = dds3GetProcessData(task);
     mnuSnapshotCampTextureHandles(((MenuSlotState *)state)->imageHandles);
     mnuConfigureSelectedSceneModeEffect(1, (MenuSlotState *)state);
     mnuTerminalSelectSlot(3, 0, state);
@@ -2341,7 +2341,7 @@ extern char mnuTerminalPopupEntries[];
 /* Dispatch completion waits for the fade and pending resource/graph work;
  * keep the request outstanding until that barrier has drained. */
 s32 evtPollDispatchAfterFade(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result == 0) {
@@ -2370,7 +2370,7 @@ extern void mnuDrawTerminalFrameAndSlotLabels(s32);
 extern void mnuDrawTerminalSelectedSlots(s32);
 
 s32 mnuPrepareTerminalPanelForInput(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
     mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
@@ -2381,14 +2381,14 @@ s32 mnuPrepareTerminalPanelForInput(KwlnTask *request) {
 }
 
 s32 evtBDispatchSync(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     return menuSetHandler(state, 2, (void *)request);
 }
 
 /* Bind the selected text row to message slot zero, then start the entry prompt. */
 u32 evtPrepareSelectedMenuEntry(KwlnTask *task) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(task);
     struct MenuList *owner = state->secondaryList;
     s32 *selectionIndex = &owner->cursor->camp.value;
 
@@ -2412,7 +2412,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern char mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, (void *)request);
 
@@ -2435,7 +2435,7 @@ s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
 }
 
 s32 mnuDrawTerminalSelectionPanel(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
     mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
@@ -2446,14 +2446,14 @@ s32 mnuDrawTerminalSelectionPanel(KwlnTask *request) {
 }
 
 s32 evtBSetupDispatchSyncF(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
 u32 evtBCheckPanelMode(KwlnTask *task) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(task);
 
     dspSetActive(1);
     switch (state->displayMode) {
@@ -2472,7 +2472,7 @@ s32 evtBContinueDispatchOrRestoreTable(KwlnTask *request) {
     s32 result;
     s32 *dispatch;
 
-    state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    state = (MenuSlotState *)dds3GetProcessData(request);
     dispatch = &state->dispatchStatus;
     result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result != 0) {
@@ -2485,7 +2485,7 @@ s32 evtBContinueDispatchOrRestoreTable(KwlnTask *request) {
 }
 
 s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
     mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
@@ -2496,14 +2496,14 @@ s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *request) {
 }
 
 s32 evtBSetupDispatchSyncG(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
 u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
-    MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(task);
 
     mnuConfigureTerminalSlotEffects(2, (s32)context);
     if (context->selectionStep >= 2) {
@@ -2522,7 +2522,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
 
 
 s32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    s32 state = dds3GetProcessData(task);
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);
     mnuConfigureTerminalSlotEffects(1, (MenuSlotState *)state);
@@ -2537,7 +2537,7 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
 
 /* Selection chain startup: fade in once the field frames are drained, then open the popup when the fade finishes. */
 s32 evtBStartSelectionChainAfterFade(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
@@ -2564,7 +2564,7 @@ s32 evtBStartSelectionChainAfterFade(KwlnTask *request) {
 }
 
 s32 evtBDispatchSyncD2(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
     mnuDrawTerminalBackdrop(state);
@@ -2582,7 +2582,7 @@ s32 evtBDispatchSyncD2(KwlnTask *request) {
 }
 
 s32 evtBDispatchSyncB(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     return menuSetHandler(state, 2, (void *)request);
 }
@@ -2594,7 +2594,7 @@ extern void mnuTerminalFadeOrClose(s32, MenuSlotState *);
 extern void mnuStartMantraSpriteLoad(void);
 
 s32 evtBCloseTerminalAndLoadMantraSprites(KwlnTask *task) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(task);
     s32 mode;
     mnuTerminalFadeOrClose(0, state);
     evtClearActiveFlag(0);
@@ -2619,7 +2619,7 @@ extern char mnuTerminalPanelPopupEntry[];
 
 /* Wait for the mode's load/fade barrier before binding the terminal exit popup. */
 s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 ready = 0;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
@@ -2637,7 +2637,7 @@ s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
     }
     if (state->dispatchStatus == 0) {
         if (state->reduced == 0) {
-            ready = kwlnTaskGetTaskByName(D_00425008) == NULL;
+            ready = dds3SearchProcessName(D_00425008) == NULL;
             if (evtIsActiveFlagSet(0) != 0) {
                 ready = 1;
             }
@@ -2666,14 +2666,14 @@ s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
 }
 
 s32 evtBLateDispatchStart(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     mnuDrawTerminalBackdrop((s32)state);
     return menuSetHandler(state, 1, (void *)request);
 }
 
 s32 evtBDispatchSyncC(KwlnTask *request) {
-    MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
+    MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
 
     return menuSetHandler(state, 2, (void *)request);
 }

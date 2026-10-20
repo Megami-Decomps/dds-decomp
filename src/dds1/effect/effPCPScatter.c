@@ -119,8 +119,8 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
             work->duplicateGroupCount = work->duplicateGroupCount + 1;
         }
         count = work->duplicateGroupCount;
-        allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
+        handles = (EffParamWork **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -145,10 +145,10 @@ void effPcpScatterReleaseParticleGroup(PcpScatterRadialWork *work)
                 duplicatedHandleIndex++;
             } while (duplicatedHandleIndex < count);
         }
-        sdfReleaseResourceAllocation(work->duplicateAllocation);
+        sdfMemFreeDirect(work->duplicateAllocation);
     }
     effPcpScatterReleasePoolResources(work->childWork);
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 /* Seed radial particle index, clamping only the local segment count.
@@ -163,14 +163,14 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
         segments = 1;
     }
     angleStep = EFF_SCATTER_RADIAL_TURN / segments;
-    particle->angle = angleStep * (index % segments) + angleStep * EFF_SCATTER_HALF_SEGMENT * effMiscRandUnitFloat(effDefaultRandomState);
+    particle->angle = angleStep * (index % segments) + angleStep * EFF_SCATTER_HALF_SEGMENT * sdfGetRandFloat(effDefaultRandomState);
     jitter = work->params.radiusJitter;
-    particle->radius = work->params.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    particle->radius = work->params.startRadius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     particle->height = 0.0f;
     jitter = work->params.targetRadiusJitter;
-    particle->radiusStep = (work->params.endRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - particle->radius) / work->params.duration;
+    particle->radiusStep = (work->params.endRadius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - particle->radius) / work->params.duration;
     jitter = work->params.speedJitter;
-    particle->heightStep = work->params.initialHeightStep * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    particle->heightStep = work->params.initialHeightStep * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     particle->age = 0;
     particle->angleStep = work->params.initialAngleStep;
 }
@@ -268,7 +268,7 @@ void effPcpScatterDrawRadialParticles(PcpScatterRadialWork *work) {
                     height -= heightStep * pulseAngle / angleStep;
                 }
             }
-            position[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+            position[0] = sdfCos(angle) * radius;
             position[1] = height;
             position[2] = sdfSinPoly(angle) * radius;
             VU0_LOAD_VF(vf12, position);
@@ -277,7 +277,7 @@ void effPcpScatterDrawRadialParticles(PcpScatterRadialWork *work) {
                 colors[0] = color;
                 colors[3] = color;
                 angle += sdfAtan2Poly(halfWidth[0] / radius);
-                next[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+                next[0] = sdfCos(angle) * radius;
                 next[1] = height;
                 next[2] = sdfSinPoly(angle) * radius;
                 VU0_LOAD_VF(vf10, next);
@@ -381,8 +381,8 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
     u32 i;
     s32 delaySpread;
 
-    allocation = sdfAllocGeneralBlock(sizeof(PcpScatterSpinWork) + params->particleCount * sizeof(PcpScatterSpinParticle));
-    work = (PcpScatterSpinWork *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(sizeof(PcpScatterSpinWork) + params->particleCount * sizeof(PcpScatterSpinParticle));
+    work = (PcpScatterSpinWork *)sdfMemLock(allocation);
     work->particles = (PcpScatterSpinParticle *)(work + 1);
     work->params = *params;
     work->color = EFF_SCATTER_NEUTRAL_COLOR;
@@ -404,8 +404,8 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
             work->duplicateGroupCount++;
         }
         count = work->duplicateGroupCount;
-        allocation = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(count * sizeof(u32));
+        handles = (EffParamWork **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -421,7 +421,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -451,8 +451,8 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
             work->duplicateGroupCount = work->duplicateGroupCount + 1;
         }
         count = work->duplicateGroupCount;
-        allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
+        handles = (EffParamWork **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -477,10 +477,10 @@ void effPcpScatterReleaseSharedParticles(PcpScatterSpinWork *work)
                 duplicatedHandleIndex++;
             } while (duplicatedHandleIndex < count);
         }
-        sdfReleaseResourceAllocation(work->duplicateAllocation);
+        sdfMemFreeDirect(work->duplicateAllocation);
     }
     effPcpScatterReleasePoolResources(work->childWork);
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 
@@ -492,15 +492,15 @@ void effScatterSpriteSpawn(PcpScatterSpinWork *work, s32 index)
     f32 direction[4];
     f32 jitter;
 
-    sprite->angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    sprite->angle = sdfGetRandFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.startRadiusJitter;
-    sprite->radius = work->params.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    sprite->radius = work->params.startRadius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.endRadiusJitter;
-    sprite->radiusStep = (work->params.endRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - sprite->radius) / (f32)work->params.duration;
+    sprite->radiusStep = (work->params.endRadius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - sprite->radius) / (f32)work->params.duration;
     sprite->angleStep = work->params.angleStep;
-    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[0] = (sdfGetRandFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[1] = (sdfGetRandFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[2] = (sdfGetRandFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
@@ -712,8 +712,8 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
     u32 i;
     s32 delaySpread;
 
-    allocation = sdfAllocGeneralBlock(sizeof(PcpScatterRibbonWork) + params->particleCount * sizeof(PcpScatterRibbonParticle));
-    work = (PcpScatterRibbonWork *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(sizeof(PcpScatterRibbonWork) + params->particleCount * sizeof(PcpScatterRibbonParticle));
+    work = (PcpScatterRibbonWork *)sdfMemLock(allocation);
     work->particles = (PcpScatterRibbonParticle *)(work + 1);
     work->params = *params;
     work->color = EFF_SCATTER_NEUTRAL_COLOR;
@@ -735,8 +735,8 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
             work->duplicateGroupCount++;
         }
         count = work->duplicateGroupCount;
-        allocation = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(count * sizeof(u32));
+        handles = (EffParamWork **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -752,7 +752,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -786,8 +786,8 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
             work->duplicateGroupCount = work->duplicateGroupCount + 1;
         }
         count = work->duplicateGroupCount;
-        allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
+        handles = (EffParamWork **)sdfMemLock(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -812,10 +812,10 @@ void effPcpScatterReleaseLinkedParticles(PcpScatterRibbonWork *work)
                 duplicatedHandleIndex++;
             } while (duplicatedHandleIndex < count);
         }
-        sdfReleaseResourceAllocation(work->duplicateAllocation);
+        sdfMemFreeDirect(work->duplicateAllocation);
     }
     effPcpScatterReleasePoolResources(work->childWork);
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 
@@ -834,12 +834,12 @@ void effScatterInitRibbonParticle(PcpScatterRibbonWork *work, s32 index)
     particle->tiltHalfAngle = rightAngle;
     particle->tiltAngle = diagonalAngle;
     particle->tiltStep = tiltStep;
-    particle->unk1C = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
+    particle->unk1C = sdfGetRandFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
     particle->radius = EFF_SCATTER_INITIAL_RIBBON_RADIUS;
 
-    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[0] = (sdfGetRandFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     direction[1] = 0.0f;
-    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[2] = (sdfGetRandFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     VU0_NORMALIZE_PACKED_VECTOR(direction);
 
     particle->unk20 = direction[0];
@@ -920,7 +920,7 @@ void effScatterUpdateRibbonParticles(PcpScatterRibbonWork *work) {
             normal[1] = 0.0f;
             normal[2] = 1.0f;
             position[0] = sdfSinPoly(angle) * radius;
-            position[1] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius + height;
+            position[1] = sdfCos(angle) * radius + height;
             position[2] = 0.0f;
             VU0_LOAD_VF(vf10, position);
             VU0_MOVE_VF(vf12, vf10);
@@ -930,7 +930,7 @@ void effScatterUpdateRibbonParticles(PcpScatterRibbonWork *work) {
                 colors[3] = color;
                 angle += sdfAtan2Poly(halfWidth[0] / radius);
                 next[0] = sdfSinPoly(angle) * radius;
-                next[1] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius + height;
+                next[1] = sdfCos(angle) * radius + height;
                 next[2] = 0.0f;
                 VU0_LOAD_VF(vf10, next);
                 VU0_LOAD_VF(vf11, position);
@@ -1037,8 +1037,8 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     recordWords = slotCount * EFF_SCATTER_POOL_RECORD_WORDS_PER_SLOT;
     auxWords = slotCount * EFF_SCATTER_POOL_AUX_WORDS_PER_SLOT;
     allocationBytes = (recordWords + auxWords) * EFF_SCATTER_WORD_BYTES + EFF_SCATTER_POOL_CONTROL_BYTES;
-    allocation = sdfAllocGeneralBlock(allocationBytes);
-    recordBlock = (u32 *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(allocationBytes);
+    recordBlock = (u32 *)sdfMemLock(allocation);
     memset(recordBlock, 0, allocationBytes);
     pool = (PcpScatterPool *)(recordBlock + (recordWords + auxWords));
     pool->recordBase = (u8 *)recordBlock;
@@ -1063,7 +1063,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *work)
         effPcpScatterResRelease(work->sharedResource);
     }
     sdfQueueAssetRelease(work->drawAsset);
-    sdfReleaseResourceAllocation(work->allocation);
+    sdfMemFreeDirect(work->allocation);
 }
 
 /* Submit six-vertex scatter groups using the optional shared texture owner. */
@@ -1144,7 +1144,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 {
     PcpScatterRes *res;
 
-    res = sdfAllocSizeClassBlock(sizeof(PcpScatterRes));
+    res = sdfChipAllocDirect(sizeof(PcpScatterRes));
     res->textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resId));
     res->refCount = 1;
     return res;
@@ -1155,7 +1155,7 @@ void effPcpScatterResRelease(PcpScatterRes *res)
 {
     if (--res->refCount == 0) {
         sdfTexReleaseReferenceViaHandler(res->textureHandle);
-        sdfReleaseChipBlock(res);
+        sdfChipFreeDirect(res);
     }
 }
 
@@ -1179,8 +1179,8 @@ PcpScatterInstanceA *effPcpScatterCreateParticleInstance(src, resource)
     PcpScatterParamsA *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceA));
-    PcpScatterInstanceA *inst = (PcpScatterInstanceA *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceA));
+    PcpScatterInstanceA *inst = (PcpScatterInstanceA *)sdfMemLock(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
     u32 count;
@@ -1209,7 +1209,7 @@ PcpScatterInstanceA *effPcpScatterCreateParticleInstance(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1234,7 +1234,7 @@ PcpScatterInstanceA *effScatterCloneWithSharedObject(PcpScatterInstanceA *work) 
 void effScatterReleaseObjectAndBuffer(PcpScatterInstanceA *work)
 {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 
@@ -1263,18 +1263,18 @@ void effScatterRingInit(PcpScatterInstanceA *work, s32 index)
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    angle = sdfGetRandFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     riseStep = work->params.riseStep;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightOffsetJitter;
-    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    height = work->params.heightOffsetBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.targetRadiusJitter;
     rise = 0.0f;
-    ring->radiusStep = (work->params.targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - radius) / (f32)work->params.duration;
-    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(effDefaultRandomState);
+    ring->radiusStep = (work->params.targetRadius * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - radius) / (f32)work->params.duration;
+    ring->orientationAngle = work->params.tiltScale * sdfGetRandFloat(effDefaultRandomState);
     ring->tiltAngle = rise;
     ring->angle = angle;
     ring->radius = radius;
@@ -1289,7 +1289,7 @@ void effScatterRingInit(PcpScatterInstanceA *work, s32 index)
     u = 0.0f;
     du = (f32)work->params.uSpan / (f32)count;
     for (i = 0; i < count; i++) {
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] = rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -1343,7 +1343,7 @@ void effScatterRingUpdate(PcpScatterInstanceA *work, s32 index)
     for (i = 0; i < count; i++) {
         f32 s;
 
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] += rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -1449,8 +1449,8 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceB));
-    PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceB));
+    PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfMemLock(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
     u32 count;
@@ -1483,7 +1483,7 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     delayModulus = delayLimit;
     count = inst->params.particleCount;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1509,7 +1509,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 void effScatterReleaseInstanceResources(PcpScatterInstanceB *work)
 {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 
@@ -1536,18 +1536,18 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    angle = sdfGetRandFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     riseStep = work->params.riseStep;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightOffsetJitter;
-    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    height = work->params.heightOffsetBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.radiusStepJitter;
     rise = 0.0f;
-    ring->radiusStep = work->params.radiusStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
-    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(effDefaultRandomState);
+    ring->radiusStep = work->params.radiusStepBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    ring->orientationAngle = work->params.tiltScale * sdfGetRandFloat(effDefaultRandomState);
     ring->tiltAngle = rise;
     ring->angle = angle;
     ring->radius = radius;
@@ -1562,7 +1562,7 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
     u = 0.0f;
     du = (f32)work->params.uSpan / (f32)count;
     for (i = 0; i < count; i++) {
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] = rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -1617,7 +1617,7 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
     for (i = 0; i < count; i++) {
         f32 s;
 
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] += rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -1689,7 +1689,7 @@ void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
                 effScatterRingUpdateScaled(work, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+                particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
             } else {
                 particle->age++;
             }
@@ -1739,8 +1739,8 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     PcpScatterParamsC *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceC));
-    PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceC));
+    PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfMemLock(allocation);
     PcpScatterParticle *particle;
     u32 delayModulus;
     u32 count;
@@ -1773,7 +1773,7 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     delayModulus = delayLimit;
     count = inst->params.particleCount;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1799,7 +1799,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work)
 {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 
@@ -1825,16 +1825,16 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    angle = sdfGetRandFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightOffsetJitter;
-    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    height = work->params.heightOffsetBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.radiusStepJitter;
-    ring->radiusStep = work->params.radiusStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
-    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(effDefaultRandomState);
+    ring->radiusStep = work->params.radiusStepBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    ring->orientationAngle = work->params.tiltScale * sdfGetRandFloat(effDefaultRandomState);
     ring->tiltAngle = 0;
     rise = work->params.riseRange / (f32)work->params.particleCount * (f32)index;
     radius = radius + work->params.radiusRamp * (f32)(work->params.particleCount - index);
@@ -1851,7 +1851,7 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
     u = 0.0f;
     du = (f32)work->params.uSpan / (f32)count;
     for (i = 0; i < count; i++) {
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] = rise;
         s = sdfSinPoly(angle) * radius;
         vertex[4] = vertex[0];
@@ -1906,7 +1906,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
     for (i = 0; i < count; i++) {
         f32 s;
 
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] += rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -1985,7 +1985,7 @@ void effScatterUpdateTwoColor(PcpScatterInstanceC *work) {
                 effScatterRingUpdateScaledLong(work, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+                particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
             } else {
                 particle->age++;
             }
@@ -2037,8 +2037,8 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpScatterPlainParticle) + sizeof(PcpScatterPlainInstance));
-    PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterPlainParticle) + sizeof(PcpScatterPlainInstance));
+    PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfMemLock(allocation);
     PcpScatterPlainParticle *particle;
     u32 delayModulus;
     u32 count;
@@ -2067,7 +2067,7 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
+        particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -2093,7 +2093,7 @@ PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstan
 void effReleaseScatterWorkResources(PcpScatterPlainInstance *work)
 {
     effReleaseScatterObject(work->scatterObject);
-    sdfReleaseResourceAllocation(work->allocationHandle);
+    sdfMemFreeDirect(work->allocationHandle);
 }
 
 /* Seed a flat-ring particle and its paired UVs with independent samples. */
@@ -2113,17 +2113,17 @@ void effScatterCreateFlatRing(PcpScatterPlainInstance *work, s32 index) {
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RADIAL_TURN;
+    angle = sdfGetRandFloat(effDefaultRandomState) * EFF_SCATTER_RADIAL_TURN;
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightJitter;
-    height = work->params.heightBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    height = work->params.heightBase * (sdfGetRandFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     /* Euler samples use the retail constant's lower-rounded full turn. */
-    ring->rot[0] = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
-    ring->rot[1] = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
-    ring->rot[2] = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[0] = sdfGetRandFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[1] = sdfGetRandFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[2] = sdfGetRandFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
     ring->angle = angle;
     ring->radius = radius;
     ring->height = height;
@@ -2174,7 +2174,7 @@ void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
     ring->angularSpeed *= work->params.angularDamping;
     height = ring->height;
     for (i = 0; i < count; i++) {
-        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[0] = sdfCos(angle) * radius;
         vertex[1] = 0;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];

@@ -63,9 +63,9 @@ extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
 extern void fileClearMemoryCardOperationActive(void);
-extern void frFontAddSharedGlyphFlags(s32 mask);
-extern u8 frFontClearFlagBits(u8 mask);
-extern void frFontSetSharedRenderFlags(u32 renderFlags);
+extern void frEnableMode(s32 mask);
+extern u8 frDisableMode(u8 mask);
+extern void frSetFontDrawOT(u32 renderFlags);
 extern s32 mcResetSlotMetadata(void);
 extern void sndReleaseTrackHandle(u32 trackHandle);
 extern char * strcpy(char *, const char *);
@@ -489,7 +489,7 @@ extern s8 fileConfigTaskState;
 
 void fileDestroyMenuTask(void) {
     if (D_003BC7F0 != 0) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)D_003BC7F0, 1);
+        dds3KillProcess((KwlnTask *)D_003BC7F0, 1);
         D_003BC7F0 = 0;
         fileMenuTaskAlive = 0;
     }
@@ -536,21 +536,21 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     fileMenuConvertedTextGlyph = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(fileMenuConvertedTextGlyph, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(fileMenuConvertedTextGlyph);
+    frDestroyFontRequestAfter(fileMenuConvertedTextGlyph);
 }
 
 extern FrFontGlyph * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
-    frFontAddSharedGlyphFlags(1);
+    frEnableMode(1);
     fileMenuStringGlyph = frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
-    frFontClearFlagBits(1);
+    frDisableMode(1);
     frFontSetSpacingAndMeasureGlyphs(fileMenuStringGlyph, 1);
     frFontSetGlyphPosition(fileMenuStringGlyph, x << 4, y << 3);
     frFontSetChildColors(fileMenuStringGlyph, color);
     frFontDrawGlyphChain(fileMenuStringGlyph, 0, 0x56);
-    frFontQueueGlyphForCurrentDrawBuffer(fileMenuStringGlyph);
-    frFontSetSharedRenderFlags(0x54);
+    frDestroyFontRequestAfter(fileMenuStringGlyph);
+    frSetFontDrawOT(0x54);
 }
 
 void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
@@ -558,7 +558,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     imageHandle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(imageHandle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)imageHandle);
+    frDestroyFontRequestAfter((struct FrFontGlyph *)(u32)imageHandle);
 }
 
 extern f32 fileSaveHighlightPhase;
@@ -877,8 +877,8 @@ s32 fileReadSlotPreviewBegin(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
-        fileSaveReadBuffer = (void *)(u32)sdfResourceRetainAddress(fileSaveReadBufferResource);
+        fileSaveReadBufferResource = sdfMemAllocDirect(0x30);
+        fileSaveReadBuffer = (void *)(u32)sdfMemLock(fileSaveReadBufferResource);
         mcReadOpenFile(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, 0x30);
         return (s32)fileReadSlotPreviewWait;
     }
@@ -894,7 +894,7 @@ s32 fileReadSlotPreviewWait(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)fileStoreSlotHeader;
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfMemFreeDirect(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -906,10 +906,10 @@ s32 fileStoreSlotHeader(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         memcpy(&fileSavePreviewRecords[fileSlotScanIndex], fileSaveReadBuffer, 0x30);
-        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+        sdfMemFreeDirect(fileSaveReadBufferResource);
         return fileAdvanceSlotScan();
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfMemFreeDirect(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -1066,7 +1066,7 @@ s32 fileScanSlotStates(void) {
 }
 
 s32 fileResolveAbortSlotFlow(void) {
-    if (D_003BC848 == 1 && kwlnTaskGetTaskByName(D_003B2658) == NULL) {
+    if (D_003BC848 == 1 && dds3SearchProcessName(D_003B2658) == NULL) {
         return mcdEnterSelectedFileFlow();
     }
     fileSetMenuFlowState(0);
@@ -2179,8 +2179,8 @@ s32 fileLoadMainBlobBegin(void) {
         return 0;
     }
     size = fileMainBlobSize();
-    fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
-    fileSaveReadBuffer = (void *)(u32)sdfResourceRetainAddress(fileSaveReadBufferResource);
+    fileSaveReadBufferResource = sdfMemAllocDirect(size);
+    fileSaveReadBuffer = (void *)(u32)sdfMemLock(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
         mcReadOpenFile(fileSaveFileDescriptor, (u32)fileSaveReadBuffer, size);
         return (s32)mcHandleSetupResult;
@@ -2199,7 +2199,7 @@ s32 mcHandleSetupResult(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)mcdHandleSaveSetupDone;
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfMemFreeDirect(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2217,7 +2217,7 @@ s32 mcdHandleSaveSetupDone(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         fileReloadSaveBuffer();
-        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+        sdfMemFreeDirect(fileSaveReadBufferResource);
         D_003BC7ED = 1;
         fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
@@ -2228,7 +2228,7 @@ s32 mcdHandleSaveSetupDone(void) {
         fileSetMenuFlowState(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfMemFreeDirect(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2712,7 +2712,7 @@ void fileEnterMcPackScene(s32 mode) {
             fileSavePreviewPortraitTextures[4] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
+        sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
         index++;
         node = node->next;
     }
@@ -2738,7 +2738,7 @@ void fileEnterMcPackScene(s32 mode) {
         D_003BC80C = 0;
         fileMenuStateHandler = (s32 (*)())fileResetSlotPollState;
     }
-    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, fileDestroyMemoryCardMenuTask, 0);
+    dds3StartProcess("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, fileDestroyMemoryCardMenuTask, 0);
     D_003BC7FC = 1;
     fileInitCursorPulse();
     kwlnFadeOutStart(0, 0, 0, 8);
@@ -2838,7 +2838,7 @@ void fileReleaseMenuResources(void) {
             fileSaveIconRequest = 0;
         }
         sdfReleaseMemorySlot((s32 *)&fileSaveIconResourceHandle);
-        kwlnTaskDestroyWithHierarchyByName("FileMentCalc", 1);
+        dds3KillProcessName("FileMentCalc", 1);
         fileClearMemoryCardOperationActive();
     }
 }
@@ -2848,7 +2848,7 @@ u32 fileMenuOperationSucceeded(void) {
 }
 
 s32 fileMenuTaskExists(void) {
-    return kwlnTaskGetTaskByName("FileMentCalc") != NULL;
+    return dds3SearchProcessName("FileMentCalc") != NULL;
 }
 
 u32 fileGetSelectionPendingFlag(void) {
@@ -3366,8 +3366,8 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
     FileConfigListNode *node;
     s32 i;
 
-    block = sdfAllocGeneralBlock(0x3C);
-    task = (FileConfigTask *)sdfResourceRetainAddress(block);
+    block = sdfMemAllocDirect(0x3C);
+    task = (FileConfigTask *)sdfMemLock(block);
     memset(task, 0, 0x3C);
     task->backingAllocation = block;
     task->state = mode;
@@ -3378,7 +3378,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
     list->drawCallback = fileDrawConfigurationMenuEntry;
     for (i = 0; i < 5; i++) {
         node = (FileConfigListNode *)mnuListAppendNode(task->frame, NULL);
-        node->resource = sdfAllocSizeClassBlock(4);
+        node->resource = sdfChipAllocDirect(4);
         memset(node->resource, 0, 4);
     }
     switch (mode) {
@@ -3420,7 +3420,7 @@ void fileConfigTaskDestroy(KwlnTask *task) {
         }
         node = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->first;
         for (i = 0; i < ((FileConfigTask *)fileConfigTaskWork)->frame->count; i++) {
-            sdfReleaseChipBlock(node->resource);
+            sdfChipFreeDirect(node->resource);
             node = node->next;
         }
         mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
@@ -3431,7 +3431,7 @@ void fileConfigTaskDestroy(KwlnTask *task) {
                 ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }
-        sdfReleaseResourceAllocation(((FileConfigTask *)fileConfigTaskWork)->backingAllocation);
+        sdfMemFreeDirect(((FileConfigTask *)fileConfigTaskWork)->backingAllocation);
         fileConfigTaskWork = 0;
         fileConfigTaskState = 0;
     }
@@ -3447,17 +3447,17 @@ extern void fileConfigTaskDestroy(KwlnTask *task);
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
+        dds3StartProcess(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
+        dds3StartProcess(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
+        dds3StartProcess(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
     }
 }
 
 void mnuConfigTasksDestroy(void) {
-    kwlnTaskDestroyWithHierarchyByName(fileConfigInputTaskName, 1);
-    kwlnTaskDestroyWithHierarchyByName(fileConfigLoadTaskName, 1);
-    kwlnTaskDestroyWithHierarchyByName(fileConfigOwnerTaskName, 1);
+    dds3KillProcessName(fileConfigInputTaskName, 1);
+    dds3KillProcessName(fileConfigLoadTaskName, 1);
+    dds3KillProcessName(fileConfigOwnerTaskName, 1);
 }
 
 s32 fileConsumeConfigTaskReady(void) {
@@ -4192,7 +4192,7 @@ void sdfVuMatrixToQuaternion(f32 matrix[4][4]) {
 
 FileJobPayload *fileCreateJob(FileJobType type) {
     FileJobType kind = type;
-    FileJobPayload *job = sdfAllocSizeClassBlock(sizeof(FileJobPayload));
+    FileJobPayload *job = sdfChipAllocDirect(sizeof(FileJobPayload));
     memset(job, 0, 0x2C);
     job->unk0 = 200;
     job->type = kind;
@@ -4235,13 +4235,13 @@ void fileJobDestroy(FileJobPayload *job) {
     }
     fileJobFreePrimaryBuffer(job);
     fileJobFreeSecondaryBuffer(job);
-    sdfReleaseChipBlock(job);
+    sdfChipFreeDirect(job);
 }
 
 void fileJobFreePrimaryBuffer(FileJobPayload *job) {
     struct SdfMemBlock *allocation = job->primary.allocation;
     if (allocation != NULL) {
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
         job->primary.offset = 0;
         job->primary.size = 0;
         job->primary.allocation = NULL;
@@ -4251,7 +4251,7 @@ void fileJobFreePrimaryBuffer(FileJobPayload *job) {
 void fileJobFreeSecondaryBuffer(FileJobPayload *job) {
     struct SdfMemBlock *allocation = job->secondary.allocation;
     if (allocation != NULL) {
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
         job->secondary.offset = 0;
         job->secondary.size = 0;
         job->secondary.allocation = NULL;
@@ -4322,8 +4322,8 @@ void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color) {
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option) {
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->primary.allocation = sdfAllocGeneralBlock(size);
-        job->primary.offset = sdfResourceRetainAddress(job->primary.allocation);
+        job->primary.allocation = sdfMemAllocDirect(size);
+        job->primary.offset = sdfMemLock(job->primary.allocation);
         job->primary.size = size;
         job->option = option;
         memcpy((void *)job->primary.offset, src, size);
@@ -4339,12 +4339,12 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandP
     command = sdfDevCreateCommandState(commandPath);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        allocation = sdfAllocGeneralBlock(size);
-        buffer = (void *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(size);
+        buffer = (void *)sdfMemLock(allocation);
         sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, buffer, size, option);
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
         return;
     }
 }
@@ -4352,8 +4352,8 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandP
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector) {
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->secondary.allocation = sdfAllocGeneralBlock(size);
-        job->secondary.offset = sdfResourceRetainAddress(job->secondary.allocation);
+        job->secondary.allocation = sdfMemAllocDirect(size);
+        job->secondary.offset = sdfMemLock(job->secondary.allocation);
         job->secondary.size = size;
         job->primary.selector = selector;
         memcpy((void *)job->secondary.offset, src, size);
@@ -4369,12 +4369,12 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
     command = sdfDevCreateCommandState(commandPath);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        allocation = sdfAllocGeneralBlock(size);
-        buffer = (void *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(size);
+        buffer = (void *)sdfMemLock(allocation);
         sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetSecondaryData(job, buffer, size, selector);
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
         return;
     }
 }
@@ -4429,12 +4429,12 @@ FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        allocation = sdfAllocGeneralBlock(size);
-        buffer = (void *)sdfResourceRetainAddress(allocation);
+        allocation = sdfMemAllocDirect(size);
+        buffer = (void *)sdfMemLock(allocation);
         sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
         job = fileDuplicateJob((FileJobPayload *)buffer);
-        sdfReleaseResourceAllocation(allocation);
+        sdfMemFreeDirect(allocation);
         return job;
     }
 }
@@ -4524,7 +4524,7 @@ void fileQueueRemove(FileQueue *queue, FileJob *job) {
 }
 
 FileQueue *fileQueueCreate(void) {
-    FileQueue *queue = sdfAllocSizeClassBlock(sizeof(FileQueue));
+    FileQueue *queue = sdfChipAllocDirect(sizeof(FileQueue));
     memset(queue, 0, 0x90);
     queue->count = 0;
     queue->updateFrame = 0;
@@ -4533,14 +4533,14 @@ FileQueue *fileQueueCreate(void) {
 }
 
 FileJob *fileJobCreate(void) {
-    FileJob *job = sdfAllocSizeClassBlock(sizeof(FileJob));
+    FileJob *job = sdfChipAllocDirect(sizeof(FileJob));
     memset(job, 0, 0xC0);
     fileJobResetAndInitTransform(job);
     return job;
 }
 
 void fileDestroyJob(FileJob *job) {
-    sdfReleaseChipBlock(job);
+    sdfChipFreeDirect(job);
 }
 
 FileQueue *fileCloneQueueEntries(FileQueue *source) {
@@ -4685,7 +4685,7 @@ void fileQueueDestroy(FileQueue *queue) {
         fileDestroyJob(job);
         job = next;
     }
-    sdfReleaseChipBlock(queue);
+    sdfChipFreeDirect(queue);
 }
 
 
@@ -5184,8 +5184,8 @@ FileQueue *fileQueueCreateFromCommandState(const char *entry) {
         return NULL;
     }
     size = sdfDevQueueControlAndWait(command);
-    allocation = sdfAllocGeneralBlock(size);
-    image = (FileQueue *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(size);
+    image = (FileQueue *)sdfMemLock(allocation);
     sdfDevQueueReadAndWait(command, image, size);
     sdfDevWaitThenReleaseCommandState(command);
     queue = fileQueueCreate();
@@ -5207,7 +5207,7 @@ FileQueue *fileQueueCreateFromCommandState(const char *entry) {
         strcpy(copy->name, src->name);
         copy->flags = src->flags;
     }
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
     return queue;
 }
 
@@ -5416,7 +5416,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(obj->jobs[i]);
         }
-        sdfReleaseResourceAllocation(obj->jobAllocation);
+        sdfMemFreeDirect(obj->jobAllocation);
     }
     if (obj->referenceHolder != NULL) {
         effReleaseReferenceHolder(obj->referenceHolder);
@@ -5424,7 +5424,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
     if (obj->recordWork != NULL) {
         fileReleaseGridRecordHandle(obj->recordWork);
     }
-    sdfReleaseChipBlock(obj);
+    sdfChipFreeDirect(obj);
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
@@ -5464,7 +5464,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(dst->jobs[i]);
             }
-            sdfReleaseResourceAllocation(dst->jobAllocation);
+            sdfMemFreeDirect(dst->jobAllocation);
             dst->jobs = 0;
             dst->jobAllocation = 0;
         }
@@ -5472,8 +5472,8 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (size == 0) {
             return;
         }
-        dst->jobAllocation = sdfAllocGeneralBlock(size);
-        dst->jobs = (FileJobPayload **)sdfResourceRetainAddress(dst->jobAllocation);
+        dst->jobAllocation = sdfMemAllocDirect(size);
+        dst->jobs = (FileJobPayload **)sdfMemLock(dst->jobAllocation);
         for (i = 0; i < count; i++) {
             dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
@@ -5543,14 +5543,14 @@ void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(obj->jobs[i]);
         }
-        sdfReleaseResourceAllocation(obj->jobAllocation);
+        sdfMemFreeDirect(obj->jobAllocation);
         obj->jobs = 0;
         obj->jobAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        obj->jobAllocation = sdfAllocGeneralBlock(size);
-        obj->jobs = (FileJobPayload **)sdfResourceRetainAddress(obj->jobAllocation);
+        obj->jobAllocation = sdfMemAllocDirect(size);
+        obj->jobs = (FileJobPayload **)sdfMemLock(obj->jobAllocation);
         obj->jobs[0] = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
             obj->jobs[i] = fileJobCreateChild(obj->jobs[0]);
@@ -6294,13 +6294,13 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -6336,9 +6336,9 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->axis[1] = direction[1];
                                 motion->axis[2] = direction[2];
                             }
-                            direction[0] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            direction[0] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
                             direction[1] = 0.0f;
-                            direction[2] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            direction[2] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
                             direction[3] = 0.0f;
                             VU0_LOAD_VF(vf10, direction);
                             VU0_NORMALIZE_VF10();
@@ -6350,23 +6350,23 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             motion->swayDirection[1] = direction[1];
                             motion->swayDirection[2] = direction[2];
                             motion->speed = keys->emitter.wave.axialSpeed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.wave.axialSpeedRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.axialSpeedRandomness +
                                  (1.0f - keys->emitter.wave.axialSpeedRandomness));
                             initialAmplitude = keys->emitter.wave.initialAmplitude *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.wave.initialAmplitudeRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.initialAmplitudeRandomness +
                                  (1.0f - keys->emitter.wave.initialAmplitudeRandomness));
                             finalAmplitude = keys->emitter.wave.finalAmplitude *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.wave.finalAmplitudeRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.finalAmplitudeRandomness +
                                  (1.0f - keys->emitter.wave.finalAmplitudeRandomness));
                             motion->amplitude = initialAmplitude;
                             motion->amplitudeStep = (finalAmplitude - initialAmplitude) / (f32)length;
                             motion->phaseStep = keys->emitter.wave.phaseStep *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.wave.phaseStepRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.wave.phaseStepRandomness +
                                  (1.0f - keys->emitter.wave.phaseStepRandomness));
-                            motion->phase = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
+                            motion->phase = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
                             motion->previousSine = sdfSinPoly(motion->phase);
                             radius = keys->emitter.wave.initialRadius *
-                                ((effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f);
+                                ((sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f);
                             VEC3_SPLAT(radiusVector, radius);
                             if (localSpace != 0) {
                                 VU0_LOAD_VF(vf10, direction);
@@ -6380,14 +6380,14 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (sdfGetRand(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -6400,7 +6400,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
                                 distance = motion->speed * age;
                                 distance -= speedDecrease * age * age * 0.5f;
                                 slot->pos[0] += motion->axis[0] * distance;
@@ -6531,13 +6531,13 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -6556,9 +6556,9 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
-                            delta[0] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
-                            delta[1] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
-                            delta[2] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[0] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[1] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[2] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f;
                             VU0_LOAD_VF(vf10, delta);
                             VU0_NORMALIZE_VF10();
                             VU0_STORE_VF(vf10, delta);
@@ -6566,10 +6566,10 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.radial.speed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.radial.radius *
-                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
+                                    (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -6587,14 +6587,14 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (sdfGetRand(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -6607,7 +6607,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
                                 VU0_LOAD_VF(vf11, slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
@@ -6751,13 +6751,13 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -6781,24 +6781,24 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             initialRadius = keys->emitter.circular.initialRadius *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.circular.initialRadiusRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.initialRadiusRandomness +
                                  (1.0f - keys->emitter.circular.initialRadiusRandomness));
                             finalRadius = keys->emitter.circular.finalRadius *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.circular.finalRadiusRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.finalRadiusRandomness +
                                  (1.0f - keys->emitter.circular.finalRadiusRandomness));
                             motion->radius = initialRadius;
                             motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
-                            motion->initialPhase = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
+                            motion->initialPhase = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
                             motion->angularSpeed = keys->emitter.circular.angularSpeed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.circular.angularSpeedRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.angularSpeedRandomness +
                                  (1.0f - keys->emitter.circular.angularSpeedRandomness));
                             motion->axialSpeed = keys->emitter.circular.axialSpeed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.circular.axialSpeedRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.circular.axialSpeedRandomness +
                                  (1.0f - keys->emitter.circular.axialSpeedRandomness));
-                            direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase);
+                            direction[0] = sdfCos(motion->initialPhase);
                             direction[1] = 0.0f;
                             direction[2] = sdfSinPoly(motion->initialPhase);
-                            motion->height = -keys->emitter.circular.initialAxialExtent * effMiscRandUnitFloat(&effSharedRandomState);
+                            motion->height = -keys->emitter.circular.initialAxialExtent * sdfGetRandFloat(&effSharedRandomState);
                             VEC3_SPLAT(radiusVector, initialRadius);
                             VU0_LOAD_VF(vf10, direction);
                             VU0_LOAD_VF(vf11, radiusVector);
@@ -6817,14 +6817,14 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (sdfGetRand(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -6837,10 +6837,10 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
                                 motion->height = motion->height - motion->axialSpeed * age + gravity * age * age * 0.5f;
                                 motion->radius += motion->radiusStep * age;
-                                position[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * motion->radius;
+                                position[0] = sdfCos(motion->initialPhase) * motion->radius;
                                 position[1] = motion->height;
                                 position[2] = sdfSinPoly(motion->initialPhase) * motion->radius;
                                 if (localSpace == 0) {
@@ -6872,7 +6872,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                         motion->height = motion->height - motion->axialSpeed + gravity * age;
                         motion->radius += motion->radiusStep;
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
-                        position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * motion->radius;
+                        position[0] = sdfCos(phase) * motion->radius;
                         position[1] = motion->height;
                         position[2] = sdfSinPoly(phase) * motion->radius;
                         if (!(flags & 1)) {
@@ -6993,13 +6993,13 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7023,24 +7023,24 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             initialRadius = keys->emitter.orientedRing.initialRadius *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.orientedRing.initialRadiusRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.orientedRing.initialRadiusRandomness +
                                  (1.0f - keys->emitter.orientedRing.initialRadiusRandomness));
                             finalRadius = keys->emitter.orientedRing.finalRadius *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.orientedRing.finalRadiusRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.orientedRing.finalRadiusRandomness +
                                  (1.0f - keys->emitter.orientedRing.finalRadiusRandomness));
                             motion->radius = initialRadius;
                             motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
                             motion->angularSpeed = keys->emitter.orientedRing.angularSpeed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.orientedRing.angularSpeedRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.orientedRing.angularSpeedRandomness +
                                  (1.0f - keys->emitter.orientedRing.angularSpeedRandomness));
-                            motion->initialPhase = effMiscRandUnitFloat(&effSharedRandomState) * 1.5707962512969971f;
+                            motion->initialPhase = sdfGetRandFloat(&effSharedRandomState) * 1.5707962512969971f;
                             motion->height = 0.0f;
-                            motion->orientationAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            motion->tiltAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->orientationAngle = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->tiltAngle = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             sdfVuLoadRotationMatrixX(motion->orientationAngle);
                             sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
                             sdfMultiplyVuMatrixInPlace();
-                            direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * initialRadius;
+                            direction[0] = sdfCos(motion->initialPhase) * initialRadius;
                             direction[1] = 0.0f;
                             direction[2] = sdfSinPoly(motion->initialPhase) * initialRadius;
                             VU0_LOAD_VF(vf10, direction);
@@ -7054,14 +7054,14 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (sdfGetRand(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7074,11 +7074,11 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
                                 motion->height += gravity * age * age * 0.5f;
                                 motion->radius += motion->radiusStep * age;
                                 radius = motion->radius;
-                                direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * radius;
+                                direction[0] = sdfCos(motion->initialPhase) * radius;
                                 direction[1] = 0.0f;
                                 direction[2] = sdfSinPoly(motion->initialPhase) * radius;
                                 VU0_LOAD_VF(vf10, direction);
@@ -7112,7 +7112,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
                         sdfMultiplyVuMatrixInPlace();
                         radius = motion->radius;
-                        direction[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
+                        direction[0] = sdfCos(phase) * radius;
                         direction[1] = 0.0f;
                         direction[2] = sdfSinPoly(phase) * radius;
                         VU0_LOAD_VF(vf10, direction);
@@ -7206,13 +7206,13 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (effMiscRandUnitFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (sdfGetRandFloat(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7235,11 +7235,11 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             spread = keys->emitter.directed.spread *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.directed.spreadRandomness +
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.directed.spreadRandomness +
                                  (1.0f - keys->emitter.directed.spreadRandomness));
-                            delta[0] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
+                            delta[0] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
                             delta[1] = -(1.0f - spread);
-                            delta[2] = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
+                            delta[2] = (sdfGetRandFloat(&effSharedRandomState) - 0.5f) * 2.0f * spread;
                             VU0_LOAD_VF(vf10, delta);
                             VU0_NORMALIZE_VF10();
                             localSpace = flags & 1;
@@ -7251,10 +7251,10 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.directed.speed *
-                                (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
+                                (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.directed.radius *
-                                    (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
+                                    (sdfGetRandFloat(&effSharedRandomState) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -7272,14 +7272,14 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 VU0_ADD(vf10, vf10, vf11);
                             }
                             VU0_STORE_VF(vf10, slot->pos);
-                            motion->scaleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = effMiscRandUnitFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = sdfGetRandFloat(&effSharedRandomState) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = effMiscRandUnitFloat(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (effMiscRand(&effSharedRandomState) & 1) {
+                                    motion->angle = sdfGetRandFloat(&effSharedRandomState) * 6.2831850051879883f;
+                                    if (sdfGetRand(&effSharedRandomState) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7292,7 +7292,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             slot->state = 0;
                             PCP_COPY_VECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(effMiscRand(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(sdfGetRand(&effSharedRandomState) % prewarmLength);
                                 VU0_LOAD_VF(vf11, slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
@@ -7384,8 +7384,8 @@ FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data
     size = slotBytes + headerSize;
     size += effEmitterTypeDescriptors[type].slotBytes * count;
     size += dataBytes * 2;
-    allocation = sdfAllocGeneralBlock(size);
-    rec = (void *)sdfResourceRetainAddress(allocation);
+    allocation = sdfMemAllocDirect(size);
+    rec = (void *)sdfMemLock(allocation);
     body = (u8 *)rec + headerSize;
     rec->type = type;
     rec->slots = (FileSlot *)body;
@@ -7413,7 +7413,7 @@ FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data
 }
 
 void fileReleaseGridRecordHandle(FileSlotTable *record) {
-    sdfReleaseResourceAllocation(record->allocation);
+    sdfMemFreeDirect(record->allocation);
 }
 
 void fileClearRecordReferences(FileSlotTable *record) {

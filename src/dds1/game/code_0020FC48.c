@@ -317,7 +317,7 @@ void btlRequestSceneEventResources(void) {
     btlBossDebugPrintf(D_003A6758, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_003A6768, battleState->eventTaskId);
-    kwlnTaskAddChild(battleState->scriptOwner, eventTask);
+    dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == 0) {
@@ -411,7 +411,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)eventAssets);
+        sdfMemFreeDirect((struct SdfMemBlock *)eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_003A6838);
@@ -1061,7 +1061,7 @@ void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
     } else {
         ((BtlState *)btlGetRuntime())->modelEntries = cacheEntry->next;
     }
-    sdfReleaseChipBlock(cacheEntry);
+    sdfChipFreeDirect(cacheEntry);
     btlBossDebugPrintf(D_003A68F8, cacheEntry->kind, cacheEntry->id);
 }
 
@@ -1193,7 +1193,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                 }
             } else {
                 for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
-                    sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
+                    sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
                 }
             }
             btlStageTaskCleanupCallback(entry->packRequest);
@@ -1433,7 +1433,7 @@ void btlInitVisibilityGrid(void) {
     btlRuntimeState.cellHeight = (sinf(angle) * 16.0f + 16.0f + 2.5f) * 0.5f;
     btlRuntimeState.gridWidth = 0x200 / (btlRuntimeState.cellWidth * 2) + 1;
     btlRuntimeState.gridHeight = 0x1C0 / (btlRuntimeState.cellHeight * 2) + 1;
-    btlRuntimeState.ownedData = sdfAllocSizeClassBlock(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
+    btlRuntimeState.ownedData = sdfChipAllocDirect(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
     btlRuntimeState.unk_3C[0] = 0;
     for (y = 0; y < btlRuntimeState.gridHeight; y++) {
         for (x = 0; x < btlRuntimeState.gridWidth; x++) {
@@ -1445,7 +1445,7 @@ void btlInitVisibilityGrid(void) {
 void btlReleaseOwnedData(void) {
     u8 *data = btlRuntimeState.ownedData;
     if (data != 0) {
-        sdfReleaseChipBlock(data);
+        sdfChipFreeDirect(data);
         btlRuntimeState.ownedData = 0;
     }
 }
@@ -1782,8 +1782,8 @@ void btlInitializeGraphicsRuntime(void) {
     SdfListHead *packetList;
     SdfLinkedPacketList *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
-    runtime->request = (void *)sdfResourceRetainAddress(runtime->handle);
-    packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    runtime->request = (void *)sdfMemLock(runtime->handle);
+    packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->request, 0, 0, 0);
@@ -1793,18 +1793,18 @@ void btlInitializeGraphicsRuntime(void) {
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
-    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     sdfCreateDescriptorPacket(packetList, kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->request, 0);
     D_00325708.append(&D_00325708, packetList);
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
+    sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->request = 0;
     runtime->options |= 1;
 }
 
 void btlInitializeOverlayGraphics(void) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
+    SdfListHead *packetList = (SdfListHead *)sdfPrimAllocDrawTag(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
     sdfCreateGraphBufferCopyPacket(packetList, context, kwlnHeldTextureReference->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
@@ -1916,7 +1916,7 @@ void btlClearRuntimeState(void) {
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
     if (handle != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
+        sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
         btlRuntimeState.handle = 0;
         btlRuntimeState.request = 0;
     }
@@ -2187,7 +2187,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     frFontDrawGlyphChain(textGlyph, 0, 0x60);
-    return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
+    return frDestroyFontRequestAfter(textGlyph);
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index.
@@ -2211,7 +2211,7 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, BtlDebugMenuCursor *
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
         frFontDrawGlyphChain(textGlyph, 0, 0x60);
-        frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
+        frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
 }
@@ -2948,7 +2948,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                         (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         D_003BAA74 + enemy * 17, NULL);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
-                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    frDestroyFontRequestAfter(glyph);
                 }
             }
         }

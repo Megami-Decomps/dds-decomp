@@ -36,8 +36,8 @@ u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
  * offsets are relative to the start of the block. */
 
 extern EvtUnit *effObjGetTransitionWork(EffWorldNode *object);
-extern void dds3SetObjectFlags(PolyMovieObject *obj, s32 flags);
-extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
+extern void dds3ObjectBaseOnFlag(PolyMovieObject *obj, s32 flags);
+extern void dds3ObjectBaseOffFlag(PolyMovieObject *obj, s32 flags);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
 
@@ -63,7 +63,7 @@ s32 evtPolygonMovieTestFlag(KwlnTask *task)
     EvtPolygonMovieTaskState *state;
     s32 set;
 
-    state = (EvtPolygonMovieTaskState *)kwlnTaskGetUserValue(task);
+    state = (EvtPolygonMovieTaskState *)dds3GetProcessData(task);
     set = 0;
     if (state->movieFlags & 8) {
         set = 1;
@@ -449,29 +449,29 @@ void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, 
         effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
         break;
     case 2:
-        dds3ClearObjectFlags(obj, 0x400);
-        dds3ClearObjectFlags(obj, 0x200);
-        dds3ClearObjectFlags(obj, 0x4000);
-        dds3ClearObjectFlags(obj, 0x8000);
+        dds3ObjectBaseOffFlag(obj, 0x400);
+        dds3ObjectBaseOffFlag(obj, 0x200);
+        dds3ObjectBaseOffFlag(obj, 0x4000);
+        dds3ObjectBaseOffFlag(obj, 0x8000);
         return;
     case 3:
-        dds3SetObjectFlags(obj, 0x400);
-        dds3ClearObjectFlags(obj, 0x200);
+        dds3ObjectBaseOnFlag(obj, 0x400);
+        dds3ObjectBaseOffFlag(obj, 0x200);
         if (setFlags != 0) {
-            dds3SetObjectFlags(obj, setFlags);
+            dds3ObjectBaseOnFlag(obj, setFlags);
         }
         if (clearFlags != 0) {
-            dds3ClearObjectFlags(obj, clearFlags);
+            dds3ObjectBaseOffFlag(obj, clearFlags);
         }
         return;
     case 4:
-        dds3ClearObjectFlags(obj, 0x400);
-        dds3SetObjectFlags(obj, 0x200);
+        dds3ObjectBaseOffFlag(obj, 0x400);
+        dds3ObjectBaseOnFlag(obj, 0x200);
         if (setFlags != 0) {
-            dds3SetObjectFlags(obj, setFlags);
+            dds3ObjectBaseOnFlag(obj, setFlags);
         }
         if (clearFlags != 0) {
-            dds3ClearObjectFlags(obj, clearFlags);
+            dds3ObjectBaseOffFlag(obj, clearFlags);
         }
         break;
     }
@@ -482,7 +482,7 @@ void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits)
 {
     EvtPolygonMovieTaskState *state;
 
-    state = (EvtPolygonMovieTaskState *)kwlnTaskGetUserValue(task);
+    state = (EvtPolygonMovieTaskState *)dds3GetProcessData(task);
     *state->flags = *state->flags | bits;
 }
 
@@ -490,7 +490,7 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 {
     EvtPolygonMovieTaskState *state;
 
-    state = (EvtPolygonMovieTaskState *)kwlnTaskGetUserValue(task);
+    state = (EvtPolygonMovieTaskState *)dds3GetProcessData(task);
     *state->flags = *state->flags & ~bits;
 }
 
@@ -544,7 +544,7 @@ PolyMovieWork *evtPolygonMovieAllocWork(void)
 {
     PolyMovieWork *work;
 
-    work = sdfAllocSizeClassBlock(sizeof(PolyMovieWork));
+    work = sdfChipAllocDirect(sizeof(PolyMovieWork));
     if (work == NULL) {
         return work;
     }
@@ -561,7 +561,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
     }
     work->unk_114 = 0;
     work->handle = -1;
-    work->buffer = sdfAllocSizeClassBlock(0x1FC);
+    work->buffer = sdfChipAllocDirect(0x1FC);
     for (arrayIndex = 0; arrayIndex < 0x7F; arrayIndex++) {
         work->buffer[arrayIndex] = 0;
     }
@@ -765,7 +765,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
 {
     if (work != NULL) {
         if (work->buffer != NULL) {
-            sdfReleaseChipBlock(work->buffer);
+            sdfChipFreeDirect(work->buffer);
         }
         if (work->handle >= 0) {
             itfMesDestroyWindowIfPresent(work->handle);
@@ -779,19 +779,19 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
             filePollEntryCleanup(work->secondaryResource.request);
         }
         if (work->mainResource.handle != 0) {
-            sdfReleaseResourceAllocation(work->mainResource.handle);
+            sdfMemFreeDirect(work->mainResource.handle);
         }
         if (work->secondaryResource.handle != 0) {
-            sdfReleaseResourceAllocation(work->secondaryResource.handle);
+            sdfMemFreeDirect(work->secondaryResource.handle);
         }
         if (work->tertiaryResource.handle != 0) {
-            sdfReleaseResourceAllocation(work->tertiaryResource.handle);
+            sdfMemFreeDirect(work->tertiaryResource.handle);
         }
         if (mnuQueryTitleSoundBusy() == 1) {
             mnuStopTitleVoicePlayback();
         }
         sdfDebugPrintf("sound stop all. \n");
-        sdfReleaseChipBlock(work);
+        sdfChipFreeDirect(work);
     }
 }
 
@@ -804,8 +804,8 @@ SdfMemBlock *evtPolygonMovieCreateHeader(PmdHeader **out)
     void *block;
 
     headerBytes = 0x40;
-    handle = sdfAllocGeneralBlock(headerBytes);
-    block = (void *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(headerBytes);
+    block = (void *)sdfMemLock(handle);
     memcpy(block, header, headerBytes);
     *out = block;
     return handle;
@@ -840,8 +840,8 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
     memset(buffer, 0, headerBytes);
     memcpy(buffer + 8, D_003BBF78, 4);
     *(s32 *)(buffer + 0x14) = 9;
-    handle = sdfAllocGeneralBlock(headerBytes);
-    address = (u8 *)sdfResourceRetainAddress(handle);
+    handle = sdfMemAllocDirect(headerBytes);
+    address = (u8 *)sdfMemLock(handle);
     memcpy(address, buffer, headerBytes);
     *out = (PmdHeader *)address;
     return handle;
@@ -930,8 +930,8 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     KwlnTask *task;
 
     D_003BA8EC = 0x80000000;
-    viewerHandle = sdfAllocGeneralBlock(0x2490);
-    viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
+    viewerHandle = sdfMemAllocDirect(0x2490);
+    viewer = (EvtRuntime *)sdfMemLock(viewerHandle);
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
     evtFormatPolygonMoviePaths(event, id, path0, path1, path2);
@@ -949,7 +949,7 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
         work->tertiaryResource.request = 0;
         work->tertiaryResource.address = 0;
     }
-    task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
+    task = dds3StartProcess(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
     viewer->windowContext = work;
     work->task = task;
     evtEventViewerInitCampFontResource(viewer);
@@ -961,24 +961,24 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
 void evtSetContextFlag(KwlnTask *task) {
     EvtPictureWork *context;
 
-    context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    context = (EvtPictureWork *)dds3GetProcessData(task);
     context->flags = context->flags | EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
 void evtClearContextFlag(KwlnTask *task) {
     EvtPictureWork *context;
 
-    context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    context = (EvtPictureWork *)dds3GetProcessData(task);
     context->flags = context->flags & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
 void evtDestroyTaskHierarchy(u32 taskHandle) {
-    kwlnTaskDestroyWithHierarchy((KwlnTask *)taskHandle, 1);
+    dds3KillProcess((KwlnTask *)taskHandle, 1);
 }
 
 /* Allocate the picture task's flag and texture state. */
 EvtPictureWork *evtAllocateContext(void) {
-    EvtPictureWork *context = sdfAllocSizeClassBlock(sizeof(EvtPictureWork));
+    EvtPictureWork *context = sdfChipAllocDirect(sizeof(EvtPictureWork));
     context->flags = 0;
     context->texture = NULL;
     return context;

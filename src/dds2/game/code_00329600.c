@@ -54,14 +54,14 @@ void sdfResizeResourceAllocation(SdfMemBlock *allocation, s32 size) {
             if (available == size) {
                 nextBlock->next->prev = allocation;
                 allocation->next = nextBlock->next;
-                sdfReleaseChipBlock(nextBlock);
+                sdfChipFreeDirect(nextBlock);
             } else {
                 nextBlock->address = temporaryAddress + size;
             }
         } else {
             s32 oldAddress;
 
-            replacement = sdfAllocGeneralBlock(size);
+            replacement = sdfMemAllocDirect(size);
             memcpy((void *)replacement->address, (void *)allocation->address, currentSize);
             temporaryAddress = (s32)allocation->prev;
             oldAddress = allocation->address;
@@ -75,12 +75,12 @@ void sdfResizeResourceAllocation(SdfMemBlock *allocation, s32 size) {
             allocation->next->prev = allocation;
             replacement->prev->next = replacement;
             replacement->next->prev = replacement;
-            sdfReleaseResourceAllocation(replacement);
+            sdfMemFreeDirect(replacement);
         }
     } else if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
         nextBlock->address = temporaryAddress + size;
     } else {
-        temporaryAddress = (s32)sdfAllocSizeClassBlock(0x10);
+        temporaryAddress = (s32)sdfChipAllocDirect(0x10);
         ((SdfMemBlock *)temporaryAddress)->prev = allocation;
         ((SdfMemBlock *)temporaryAddress)->next = nextBlock;
         nextBlock->prev = (SdfMemBlock *)temporaryAddress;
@@ -101,7 +101,7 @@ void sdfSkipNextListNode(SdfMemBlock *node) {
 }
 
 /* Coalesce adjacent free records, then recycle this record or mark it free. */
-void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation) {
+void sdfMemFreeDirect(struct SdfMemBlock *allocation) {
     SdfMemBlock *nextBlock;
     s32 interruptsDisabled;
 
@@ -112,11 +112,11 @@ void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation) {
     nextBlock = allocation->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
         sdfSkipNextListNode(allocation);
-        sdfReleaseChipBlock(nextBlock);
+        sdfChipFreeDirect(nextBlock);
     }
     if (allocation->prev->state == SDF_HEAP_BLOCK_FREE) {
         sdfSkipNextListNode(allocation->prev);
-        sdfReleaseChipBlock(allocation);
+        sdfChipFreeDirect(allocation);
     } else {
         allocation->state = SDF_HEAP_BLOCK_FREE;
         allocation->referenceCount = 0;
@@ -127,11 +127,11 @@ void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation) {
 }
 
 /* Resolve a data address to its allocation record before releasing it. */
-void sdfReleaseCurrentResourceHandle(void *address) {
+void sdfMemFreeHandleDirect(void *address) {
     SdfMemBlock *allocation;
 
     allocation = sdfFindGeneralBlockByAddress(address);
-    sdfReleaseResourceAllocation(allocation);
+    sdfMemFreeDirect(allocation);
 }
 
 /* Clear the owner's handle before releasing the allocation it contained. */
@@ -141,26 +141,26 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
     allocationHandle = *handleSlot;
     if (allocationHandle != 0) {
         *handleSlot = 0;
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)allocationHandle);
+        sdfMemFreeDirect((struct SdfMemBlock *)allocationHandle);
         return;
     }
 }
 
 /* Zero is a sentinel and is never submitted to the pending queue. */
-void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *allocation) {
+void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation) {
     if (allocation != NULL) {
         sdfPendingQueuePush(&sdfGeneralReleaseRequest, allocation);
     }
 }
 
 /* Increment the signed reference count and return the stored data address. */
-u32 sdfResourceRetainAddress(SdfMemBlock *allocation) {
+u32 sdfMemLock(SdfMemBlock *allocation) {
     allocation->referenceCount = allocation->referenceCount + 1;
     return allocation->address;
 }
 
 /* This path reads the same reference-count storage unsigned and never decrements zero. */
-void sdfDecrementAllocationReferenceCount(SdfMemBlock *allocation) {
+void sdfMemUnlock(SdfMemBlock *allocation) {
     u16 referenceCount = *(u16 *)&allocation->referenceCount;
     if (referenceCount != 0) {
         *(u16 *)&allocation->referenceCount = referenceCount - 1;
@@ -250,7 +250,7 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
     u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
     s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
-    u32 *requestWords = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)sdfAllocGeneralBlock(requestBytes));
+    u32 *requestWords = (u32 *)sdfMemLock((struct SdfMemBlock *)sdfMemAllocDirect(requestBytes));
     u32 *replyWords;
     s32 result;
 
@@ -297,4 +297,4 @@ void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *o
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329600", sdfGraphApplyModeDefaults);
+INCLUDE_ASM(const s32, "game/code_00329600", sdfGrSetFrameSetMode);

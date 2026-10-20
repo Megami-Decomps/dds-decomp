@@ -206,9 +206,9 @@ void sndCycleTestMessageResource(void);
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue((KwlnTask *)scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
-    kwlnTaskCreate("TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
-    kwlnTaskCreate("TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
+    itfMesSetWindowCallbackAddress(((ScrData *)dds3GetProcessData((KwlnTask *)scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
+    dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
+    dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
 
 void sndCycleTestMessageResource(void) {
@@ -857,18 +857,18 @@ extern s32 btlUpdateActiveBattleFrame(KwlnTask *task);
 void btlCreateDrawTasks(void) {
     BattleController *battle = (BattleController *)btlRuntime;
     KwlnTask *draw;
-    draw = kwlnTaskCreate(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
+    draw = dds3StartProcess(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
     battle->drawTask = draw;
-    kwlnTaskAddChild(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
+    dds3LinkProcess(draw, dds3StartProcess("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     KwlnTask *task;
 
-    task = kwlnTaskFindByPriority(0x3f9);
+    task = dds3SearchProcessPriority(0x3f9);
     if (task != 0) {
         BattleController *battle = (BattleController *)btlRuntime;
-        kwlnTaskDestroyWithHierarchy(battle->drawTask, 1);
+        dds3KillProcess(battle->drawTask, 1);
         return;
     }
 }
@@ -914,7 +914,7 @@ extern u32 kwlnGetFrameCounter(void);
 
 extern u32 btlIsCurrentDarkZone(void);
 
-extern void effMiscSeedRandom(void *, u32);
+extern void sdfRandomize(void *, u32);
 
 extern s32 itfMesCreateWindow(ItfMesSub *);
 
@@ -944,9 +944,9 @@ void btlInitializeBattleRuntime(void) {
     u8 *runtime;
 
     btlResetRuntimeSequenceCounter();
-    allocation = sdfAllocGeneralBlock(0xFD4);
+    allocation = sdfMemAllocDirect(0xFD4);
     D_004366E0 = allocation;
-    runtime = (u8 *)sdfResourceRetainAddress(allocation);
+    runtime = (u8 *)sdfMemLock(allocation);
     btlRuntime = (s32)runtime;
     memset(runtime, 0, 0xFD4);
 
@@ -972,7 +972,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->unk2B0 = 0;
     ((BattleInitState *)btlRuntime)->unk2B4 = btlIsCurrentDarkZone();
     seed = kwlnGetFrameCounter();
-    effMiscSeedRandom(effSharedRandomState, seed);
+    sdfRandomize(effSharedRandomState, seed);
     btlResetActorEntryState();
 
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
@@ -1091,7 +1091,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
         btlBossDebugPrintf(D_00414F98);
     }
 
-    sdfReleaseResourceAllocation(D_004366E0);
+    sdfMemFreeDirect(D_004366E0);
     D_004366E0 = 0;
     btlRuntime = 0;
     btlBossDebugPrintf(D_00414FB0);
@@ -2508,7 +2508,7 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
 s32 btlSelectActorAction(s32 state) {
     s32 selection = btlSelectEnemyDropItem(state, 1);
     if (selection == 0) {
-        selection = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
+        selection = (sdfGetRand((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }
     return selection;
 }
@@ -2593,7 +2593,7 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
             }
         }
         if (total != 0 && btlRollAiBucket() < total + bonus) {
-            roll = effMiscRandMod(0, total);
+            roll = sdfGetRandInt(0, total);
             total = 0;
             for (index = 0; index < 2; index++) {
                 if (enemy->additionalDropItemIds[index] != 0) {
@@ -2783,7 +2783,7 @@ s32 btlChooseAvailableUnit(void) {
     if (count == 0) {
         return 0;
     }
-    return candidates[effMiscRandMod(0, count)];
+    return candidates[sdfGetRandInt(0, count)];
 }
 
 s32 btlCountAvailableUnits(void) {

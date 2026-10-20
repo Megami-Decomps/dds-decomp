@@ -57,7 +57,7 @@ s32 mnuSetFrameDivisor(void) {
 
 void mnuCreateMovieManagerTask(void) {
     sdfSoundInitIpuStream();
-    kwlnTaskCreate("movieMan", 0x385, 1, 0, (TaskUpdate)mnuSetFrameDivisor, 0, 0);
+    dds3StartProcess("movieMan", 0x385, 1, 0, (TaskUpdate)mnuSetFrameDivisor, 0, 0);
 }
 
 u32 mnuScriptRequestMovieByIndex(void) {
@@ -120,7 +120,7 @@ void mnuClearMovieList(void) {
     if (node != NULL) {
         do {
             MnuMovieListNode *next = node->next;
-            sdfReleaseChipBlock(node);
+            sdfChipFreeDirect(node);
             node = next;
         } while (node != NULL);
         mnuMovieList.head = NULL;
@@ -246,7 +246,7 @@ s32 mnuMovieViewer(void) {
         }
     }
 
-    mnuMovieList.packets = (SdfListHead *)sdfAllocatePacketList(0);
+    mnuMovieList.packets = (SdfListHead *)sdfPrimAllocDrawTag(0);
     mnuDrawMovieList();
     mnuDrawMovieProgressCounter();
     D_003805A8.append(&D_003805A8, mnuMovieList.packets);
@@ -256,14 +256,14 @@ s32 mnuMovieViewer(void) {
 
 void mnuCreateMovieViewerTask(void) {
     mnuBuildMovieViewerList();
-    mnuMovieList.task = kwlnTaskCreate(mnuMovieViewerTaskName, 0x2b02, 1, 0,
+    mnuMovieList.task = dds3StartProcess(mnuMovieViewerTaskName, 0x2b02, 1, 0,
                                        (TaskUpdate)mnuMovieViewer, 0, 0);
 }
 
 void mnuDestroyMovieViewerTask(void) {
-    KwlnTask *movieTask = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
+    KwlnTask *movieTask = dds3SearchProcessName(mnuMovieViewerTaskName);
     if (movieTask != NULL) {
-        kwlnTaskDestroyWithHierarchy(movieTask, 0);
+        dds3KillProcess(movieTask, 0);
         mnuMovieList.task = 0;
         mnuStopMovieDrawTask();
     }

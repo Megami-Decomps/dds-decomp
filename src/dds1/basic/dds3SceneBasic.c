@@ -59,7 +59,7 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     if (worldData->sceneResourceHandle != 0) {
         evtReleaseSceneResource(worldNode);
     }
-    resourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)resourceHandle);
+    resourceAddress = sdfMemLock((struct SdfMemBlock *)resourceHandle);
     if (resourceAddress != 0) {
         worldData->sceneResourceHandle = (struct SdfMemBlock *)resourceHandle;
         worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
@@ -74,7 +74,7 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (worldData->sceneResourceHandle != 0) {
-        sdfReleaseResourceAllocation(worldData->sceneResourceHandle);
+        sdfMemFreeDirect(worldData->sceneResourceHandle);
     }
     worldData->sceneResourceHandle = 0;
     worldData->sceneScript = NULL;
@@ -97,7 +97,7 @@ s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
     if (scriptIndex < 0) {
         return 0;
     }
-    if (kwlnTaskGetTaskByName(taskName) != NULL) {
+    if (dds3SearchProcessName(taskName) != NULL) {
         return 0;
     }
     return scrCreateTaskForProcessId(0x3EA, (s32)sceneScript, scriptIndex);
@@ -110,10 +110,10 @@ void evtDestroyNamedTask(void *unusedContext, const char *taskName) {
     KwlnTask *task;
 
     if (taskName != NULL) {
-        task = kwlnTaskGetTaskByName(taskName);
+        task = dds3SearchProcessName(taskName);
         if (task == NULL) {
             return;
         }
-        kwlnTaskDestroyWithHierarchy(task, 0);
+        dds3KillProcess(task, 0);
     }
 }

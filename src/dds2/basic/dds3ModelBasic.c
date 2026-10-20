@@ -7,5 +7,5 @@ typedef struct {
 } ModelObj;
 
 void dds3ReleaseModelAllocation(ModelObj *model) {
-    sdfReleaseChipBlock(model->allocation);
+    sdfChipFreeDirect(model->allocation);
 }

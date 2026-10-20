@@ -99,7 +99,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
 }
 
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(0x14);
+    SdfMemBlock *allocation = sdfMemAllocDirect(0x14);
     TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
@@ -107,8 +107,8 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
     work->list = sdfCreateTaskHeader(userData);
     sdfSetTaskDestroyCallback(work->list, destroyCallback);
     sdfSetTaskSecondaryCallback(work->list, sdfCallbackWorkOnRemove);
-    work->primaryTaskName = sdfAllocSizeClassBlock(strlen(name));
-    work->secondaryTaskName = sdfAllocSizeClassBlock(strlen(name) + 5);
+    work->primaryTaskName = sdfChipAllocDirect(strlen(name));
+    work->secondaryTaskName = sdfChipAllocDirect(strlen(name) + 5);
     sprintf(work->primaryTaskName, D_004388D8, name);
     sprintf(work->secondaryTaskName, D_004388E0, name);
     return work;
@@ -117,14 +117,14 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
 void sdfDestroyTaskResourceWork(TaskWork *work) {
     if (work != NULL) {
         sdfDestroyTaskWork(work->list);
-        sdfReleaseChipBlock(work->primaryTaskName);
-        sdfReleaseChipBlock(work->secondaryTaskName);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfChipFreeDirect(work->primaryTaskName);
+        sdfChipFreeDirect(work->secondaryTaskName);
+        sdfMemFreeDirect(work->allocation);
     }
 }
 
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
-    SdfTaskEntry *work = sdfAllocSizeClassBlock(0x1C);
+    SdfTaskEntry *work = sdfChipAllocDirect(0x1C);
 
     memset(work, 0, 0x1C);
     work->flags = SDF_TASK_ENTRY_UPDATE_ENABLED | SDF_TASK_ENTRY_CALLBACK_ENABLED |
@@ -158,7 +158,7 @@ void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
     if (entry != NULL) {
         void (*destroy)(s32, s32) = entry->destroy;
         destroy(entry->key, entry->initResult);
-        sdfReleaseChipBlock(entry);
+        sdfChipFreeDirect(entry);
     }
 }
 
@@ -236,7 +236,7 @@ s32 sdfTaskWorkStep(TaskWork *work) {
 }
 
 s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
-    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
+    TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -247,7 +247,7 @@ s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
 }
 
 s32 sdfTaskWorkRunAll(KwlnTask *task) {
-    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
+    TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -258,7 +258,7 @@ s32 sdfTaskWorkRunAll(KwlnTask *task) {
 }
 
 void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
-    sdfDestroyTaskResourceWork((TaskWork *)kwlnTaskGetUserValue(task));
+    sdfDestroyTaskResourceWork((TaskWork *)dds3GetProcessData(task));
 }
 
 /* Default empty grid draw callback; retain its retail zero-argument definition. */
@@ -271,7 +271,7 @@ SdfGrid *sdfGridCreate(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16
                        u16 visibleRows, u32 userData, void (*onDestroy)(s32, u32)) {
     u32 cellCount = width * height;
     s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
     SdfGrid *grid = (SdfGrid *)sdfMemoryGetBlockAddress(allocation);
 
     memset(grid, 0, size);
@@ -312,7 +312,7 @@ void sdfDestroyGridWork(SdfGrid *owner) {
     if (owner != NULL) {
         sdfGridReleaseAllCells(owner);
         owner->onDestroy(0, owner->userData);
-        sdfReleaseResourceAllocation(owner->allocation);
+        sdfMemFreeDirect(owner->allocation);
     }
 }
 

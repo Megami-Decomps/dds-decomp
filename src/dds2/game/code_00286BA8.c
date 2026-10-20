@@ -183,7 +183,7 @@ extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 /* Allocate and clear status work, retain its allocation handle and create the progress host.
  * Print the native load banner and initialize panel sound entries before returning the work pointer. */
 MnuStatusResource *mnuAllocateMantraResourceWork(void) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MTR_STATUS_RESOURCE_BYTES);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(MTR_STATUS_RESOURCE_BYTES);
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocation);
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
@@ -200,12 +200,12 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuStatusResource *resourceWork) {
     if (resourceWork != NULL) {
 
         dspCloseChannel();
-        sdfQueueGeneralAllocationRelease(resourceWork->resourceAllocationA);
-        sdfQueueGeneralAllocationRelease(resourceWork->resourceAllocationB);
+        sdfMemFreeDelayedDirect(resourceWork->resourceAllocationA);
+        sdfMemFreeDelayedDirect(resourceWork->resourceAllocationB);
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
-        sdfReleaseResourceAllocation(resourceWork->allocation);
+        sdfMemFreeDirect(resourceWork->allocation);
         mnuReleasePanelEntryPool();
     }
     evtPrintDeveloperConsoleMessage("mtrRelease\n");

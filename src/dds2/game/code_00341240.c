@@ -11,25 +11,25 @@ extern u16 D_0040BAC0[];
 
 extern EffRandState D_0040BAE8;
 
-void effMiscSeedRandom(EffRandState *state, u32 seed);
+void sdfRandomize(EffRandState *state, u32 seed);
 s32 effMiscReadCachedClockTime(ClockTime *now);
 
 extern s8 sndSynchronousCommandMode;
 extern void *sceSifAllocIopHeap(s32);
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
-f32 effMiscRandUnitFloat(EffRandState *state) {
-    u32 value = effMiscRand(state) & 0xFFFFFF;
+f32 sdfGetRandFloat(EffRandState *state) {
+    u32 value = sdfGetRand(state) & 0xFFFFFF;
 
     return (f32)value * 5.9604644775390625e-8f;
 }
 
-u32 effMiscRandMod(EffRandState *state, u32 modulus) {
-    return effMiscRand(state) % modulus;
+u32 sdfGetRandInt(EffRandState *state, u32 modulus) {
+    return sdfGetRand(state) % modulus;
 }
 
 /* Seed the generator state (the shared effect state when `state` is NULL); each word is the previous one rotated right 8 bits and xored with a constant. */
-void effMiscSeedRandom(EffRandState *state, u32 seed) {
+void sdfRandomize(EffRandState *state, u32 seed) {
     if (state == NULL) {
         state = &D_0040BAE8;
     }
@@ -46,7 +46,7 @@ void effMiscSeedRandom(EffRandState *state, u32 seed) {
 }
 
 /* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
-void effMiscSeedRandomFromClock(EffRandState *state) {
+void sdfRandomizeByTime(EffRandState *state) {
     ClockTime now;
     s32 t;
 
@@ -54,7 +54,7 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     t = now.year * 0x16E + now.day + D_0040BAC0[now.month + 7] + 0xFFF4FF83;
     t = t * 0x18 + now.hour;
     t = t * 0x3C + now.min;
-    effMiscSeedRandom(state, t * 0x3C + now.sec);
+    sdfRandomize(state, t * 0x3C + now.sec);
 }
 
 extern s32 sceCdReadClock(SdfCdClock *);

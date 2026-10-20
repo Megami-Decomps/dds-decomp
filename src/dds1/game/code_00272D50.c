@@ -273,9 +273,9 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     StaffWindowResources *resources;
     s32 handle;
 
-    context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
-    handle = (u32)sdfAllocGeneralBlock(0x2C);
-    resources = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    context = (StaffDisplayContext *)dds3GetProcessData(task);
+    handle = (u32)sdfMemAllocDirect(0x2C);
+    resources = (void *)sdfMemLock((struct SdfMemBlock *)(handle));
     context->resources = resources;
     memset(resources, 0, 0x2C);
     resources->allocation = handle;
@@ -290,11 +290,11 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
 }
 
 s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
-    StaffDisplayContext *context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
+    StaffDisplayContext *context = (StaffDisplayContext *)dds3GetProcessData(task);
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     mnuNoOpStaffDisplayTeardown(context);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
+    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(resources->allocation));
     return 1;
 }
 
@@ -316,7 +316,7 @@ s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
     u32 input;
     s32 result;
 
-    context = (StaffDisplayContext *)kwlnTaskGetUserValue(callback);
+    context = (StaffDisplayContext *)dds3GetProcessData(callback);
     popup = &context->popupState;
     resources = context->resources;
     input = mnuMapPadMaskToFlags(0x33);
@@ -373,7 +373,7 @@ extern u8 mnuCampItemCommandHelpTextBank[];
 extern u8 *D_003BAA9C;
 
 s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
-    s32 context = kwlnTaskGetUserValue(callback);
+    s32 context = dds3GetProcessData(callback);
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
     mnuDrawCampGridAndLabelDefault(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
@@ -383,7 +383,7 @@ s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
 }
 
 s32 mnuStaffRunPanel2b(KwlnTask *request) {
-    s32 state = kwlnTaskGetUserValue(request);
+    s32 state = dds3GetProcessData(request);
 
     return menuRunPanel((void *)state, 2, request);
 }
@@ -450,7 +450,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
     s32 result;
     u32 input;
 
-    context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
+    context = (StaffDisplayContext *)dds3GetProcessData(task);
     popup = &context->popupState;
     resources = context->resources;
     input = mnuMapPadMaskToFlags(0x33);

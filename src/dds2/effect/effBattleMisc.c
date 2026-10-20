@@ -249,7 +249,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *requ
         dir[0] = dir[1] = dir[2] = 750.0f;
         dds3LoadCameraVectorVU(camera);
         VU0_MOVE_VF(vf11, vf10);
-        effObjFetchInnerPosition(camera);
+        dds3GetPosPoseSet(camera);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
         VU0_LOAD_VF(vf11, dir);

@@ -914,7 +914,7 @@ s32 btlChooseRandomAvailableOption(s32 object) {
     s32 choices[24];
     s32 count = btlCollectAvailableOptionSkills(object, choices);
     if (count != 0) {
-        return choices[effMiscRandMod(0, count)];
+        return choices[sdfGetRandInt(0, count)];
     }
     return -1;
 }
@@ -944,7 +944,7 @@ s32 btlChooseEligibleSkill(s32 object) {
     if (count == 0) {
         return -1;
     }
-    return choices[effMiscRandMod(0, count)];
+    return choices[sdfGetRandInt(0, count)];
 }
 
 f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 command) {

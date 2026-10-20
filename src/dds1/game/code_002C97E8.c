@@ -94,8 +94,8 @@ void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
     axis[1] = y;
     axis[2] = z;
     axis[3] = 1.0f;
-    a = fsqrtf((1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) * 0.5f);
-    b = fsqrtf((1.0f + sdfEvaluateCosineViaSinePhaseShift(angle)) * 0.5f);
+    a = fsqrtf((1.0f - sdfCos(angle)) * 0.5f);
+    b = fsqrtf((1.0f + sdfCos(angle)) * 0.5f);
     sdfVec3NormalizeInPlaceAndGetLength(axis);
     out[0] = axis[0] * a;
     out[1] = axis[1] * a;
@@ -129,13 +129,13 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
     f32 sz;
 
     half = -x * 0.5f;
-    cx = sdfEvaluateCosineViaSinePhaseShift(half);
+    cx = sdfCos(half);
     sx = sdfSinPoly(half);
     half = -y * 0.5f;
-    cy = sdfEvaluateCosineViaSinePhaseShift(half);
+    cy = sdfCos(half);
     sy = sdfSinPoly(half);
     half = -z * 0.5f;
-    cz = sdfEvaluateCosineViaSinePhaseShift(half);
+    cz = sdfCos(half);
     sz = sdfSinPoly(half);
     out[0] = sz * sy * cx + cz * cy * sx;
     out[1] = cz * sy * cx - sz * cy * sx;
@@ -243,7 +243,7 @@ void sdfQuatExp(f32 *out, f32 *in) {
     f32 x = in[0], y = in[1], z = in[2];
     f32 length = fsqrtf(x * x + y * y + z * z);
     f32 sine = sdfSinPoly(length);
-    out[3] = sdfEvaluateCosineViaSinePhaseShift(length);
+    out[3] = sdfCos(length);
     if (length > 0.0f) {
         out[0] = sine * in[0] / length;
         out[1] = sine * in[1] / length;
@@ -331,14 +331,14 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
 }
 
 s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     s32 result = frFontMeasureGlyphChain(handle);
     frFontDrawGlyphChain(handle, 1, option);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
     return result;
 }
 
@@ -349,12 +349,12 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 
     s32 result = 0;
     frFontSetChildColors(handle, second);
     frFontSetGlyphPosition(handle, x << 4, y << 3);
-    frFontStoreShiftedRenderValue(handle, first);
+    frSetPriority(handle, first);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
     frFontDrawGlyphChain(handle, 1, option);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
     return result;
 }
 
@@ -362,14 +362,14 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     s32 result;
 
-    frFontSetChildChainFirstOption(handle, flags);
+    frSetFontColorNo(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
         result = frFontMeasureGlyphChain(handle);
     }
     frFontDrawGlyphChain(handle, 1, color);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
     return result;
 }
 
@@ -379,14 +379,14 @@ s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *
     FrFontGlyph *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
-    frFontSetChildChainFirstOption(handle, flags);
+    frSetFontColorNo(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
         result = frFontMeasureGlyphChain(handle);
     }
     frFontDrawGlyphChain(handle, 1, color);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
     return result;
 }
 
@@ -396,27 +396,27 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char
     FrFontGlyph *handle = itfCreateFont2TextGlyph(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
-    frFontSetChildChainFirstOption(handle, flags);
+    frSetFontColorNo(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
         result = frFontMeasureGlyphChain(handle);
     }
     frFontDrawGlyphChain(handle, 1, color);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
     return result;
 }
 
 s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, FrFontTextBank *name, u32 extra, s32 flag, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
-    frFontSetChildChainFirstOption(handle, opacity);
+    frSetFontColorNo(handle, opacity);
     frFontSetChildColors(handle, second);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
     frFontDrawGlyphChain(handle, 1, option);
-    frFontQueueGlyphForCurrentDrawBuffer(handle);
+    frDestroyFontRequestAfter(handle);
     return result;
 }
 
@@ -471,7 +471,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
 
 /* Return a callback-list header with its allocation descriptor and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(SdfList));
+    SdfMemBlock *allocation = sdfMemAllocDirect(sizeof(SdfList));
     SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, sizeof(SdfList));
@@ -486,7 +486,7 @@ void sdfDestroyTaskWork(SdfList *work) {
     if (work != NULL) {
         sdfClearTaskList(work);
         work->onDestroy(-1, work->userData);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfMemFreeDirect(work->allocation);
     }
 }
 
@@ -497,7 +497,7 @@ void sdfSetTaskDestroyCallback(SdfList *work, SdfListCallback callback) {
 }
 
 SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
-    SdfListNode *node = sdfAllocSizeClassBlock(sizeof(SdfListNode));
+    SdfListNode *node = sdfChipAllocDirect(sizeof(SdfListNode));
 
     memset(node, 0, sizeof(SdfListNode));
     node->value = value;
@@ -515,7 +515,7 @@ SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
 
 /* Insert a new node after `after`, bumping the index of every later node. */
 SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void *value) {
-    SdfListNode *node = sdfAllocSizeClassBlock(sizeof(SdfListNode));
+    SdfListNode *node = sdfChipAllocDirect(sizeof(SdfListNode));
     SdfListNode *it;
 
     memset(node, 0, sizeof(SdfListNode));
@@ -585,7 +585,7 @@ SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     }
     neighbour = sdfRemoveAndReindexListNode(list, node);
     list->onRemove(node->index, node->value);
-    sdfReleaseChipBlock(node);
+    sdfChipFreeDirect(node);
     return neighbour;
 }
 
@@ -600,7 +600,7 @@ void sdfClearTaskList(SdfList *list) {
                 SdfListNode *current = node;
                 node = node->next;
                 list->onRemove(current->index, current->value);
-                sdfReleaseChipBlock(current);
+                sdfChipFreeDirect(current);
             } while (node != NULL);
         }
         list->tail = 0;
@@ -711,15 +711,15 @@ TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc
 
     work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
-    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, (u32)work);
-    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, (u32)work);
+    dds3StartProcess(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, (u32)work);
+    dds3StartProcess(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, (u32)work);
     return work;
 }
 
 void sdfDestroyTaskWorkerTasks(TaskWork *work) {
     if (work != NULL) {
-        kwlnTaskDestroyWithHierarchyByName(work->primaryTaskName, 1);
-        kwlnTaskDestroyWithHierarchyByName(work->secondaryTaskName, 0);
+        dds3KillProcessName(work->primaryTaskName, 1);
+        dds3KillProcessName(work->secondaryTaskName, 0);
     }
 }
 
@@ -729,14 +729,14 @@ u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
 
     registered = 0;
     if (work != NULL) {
-        task = kwlnTaskGetTaskByName(work->primaryTaskName);
+        task = dds3SearchProcessName(work->primaryTaskName);
         registered = task != 0;
     }
     return registered;
 }
 
 s32 kwlnTaskExists(const char *name) {
-    return kwlnTaskGetTaskByName(name) != NULL;
+    return dds3SearchProcessName(name) != NULL;
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
@@ -815,7 +815,7 @@ extern unsigned int strlen(const char *);
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x14);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x14);
     TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
@@ -823,8 +823,8 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
     work->list = sdfCreateTaskHeader(userData);
     sdfSetTaskDestroyCallback(work->list, destroyCallback);
     sdfSetTaskSecondaryCallback(work->list, sdfCallbackWorkOnRemove);
-    work->primaryTaskName = sdfAllocSizeClassBlock(strlen(name));
-    work->secondaryTaskName = sdfAllocSizeClassBlock(strlen(name) + 5);
+    work->primaryTaskName = sdfChipAllocDirect(strlen(name));
+    work->secondaryTaskName = sdfChipAllocDirect(strlen(name) + 5);
     sprintf(work->primaryTaskName, "%s", name);
     sprintf(work->secondaryTaskName, "draw_%s", name);
     return work;
@@ -834,14 +834,14 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
 void sdfDestroyTaskResourceWork(TaskWork *work) {
     if (work != NULL) {
         sdfDestroyTaskWork(work->list);
-        sdfReleaseChipBlock(work->primaryTaskName);
-        sdfReleaseChipBlock(work->secondaryTaskName);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfChipFreeDirect(work->primaryTaskName);
+        sdfChipFreeDirect(work->secondaryTaskName);
+        sdfMemFreeDirect(work->allocation);
     }
 }
 
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
-    SdfTaskEntry *work = sdfAllocSizeClassBlock(sizeof(SdfTaskEntry));
+    SdfTaskEntry *work = sdfChipAllocDirect(sizeof(SdfTaskEntry));
 
     memset(work, 0, 0x1C);
     work->flags = SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_UPDATE_ENABLED |
@@ -876,7 +876,7 @@ void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
     if (entry != NULL) {
         void (*destroy)(s32, s32) = entry->destroy;
         destroy(entry->key, entry->initResult);
-        sdfReleaseChipBlock(entry);
+        sdfChipFreeDirect(entry);
     }
 }
 
@@ -955,7 +955,7 @@ s32 sdfTaskWorkStep(TaskWork *work) {
 }
 
 s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
-    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
+    TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -966,7 +966,7 @@ s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
 }
 
 s32 sdfTaskWorkRunAll(KwlnTask *task) {
-    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
+    TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -977,7 +977,7 @@ s32 sdfTaskWorkRunAll(KwlnTask *task) {
 }
 
 void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
-    sdfDestroyTaskResourceWork((TaskWork *)kwlnTaskGetUserValue(task));
+    sdfDestroyTaskResourceWork((TaskWork *)dds3GetProcessData(task));
 }
 
 /* Default empty grid draw callback; retain its retail zero-argument definition. */
@@ -991,7 +991,7 @@ SdfGrid *sdfGridCreate(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16
                        u16 visibleRows, u32 userData, void (*onDestroy)(s32, u32)) {
     u32 cellCount = width * height;
     s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
     SdfGrid *grid = (SdfGrid *)sdfMemoryGetBlockAddress(allocation);
 
     memset(grid, 0, size);
@@ -1032,7 +1032,7 @@ void sdfDestroyGridWork(SdfGrid *work) {
     if (work != NULL) {
         sdfGridReleaseAllCells(work);
         work->onDestroy(0, work->userData);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfMemFreeDirect(work->allocation);
     }
 }
 

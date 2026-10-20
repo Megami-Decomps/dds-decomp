@@ -1185,7 +1185,7 @@ extern s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode);
 s32 btlSelectActorAction(s32 object) {
     s32 result = btlSelectEnemyDropItem(object, 1);
     if (result == 0) {
-        result = (effMiscRand((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
+        result = (sdfGetRand((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
     return result;
 }
@@ -1361,7 +1361,7 @@ s32 btlChooseAvailableUnit(void) {
         }
     }
     if (count != 0) {
-        return candidates[effMiscRandMod(0, count)];
+        return candidates[sdfGetRandInt(0, count)];
     }
     return 0;
 }
