@@ -242,6 +242,8 @@ segments:
       - [0x183850, c, game/code_00282850]
       - [0x1897A0, c, file/fileManager]  # Nocturne __FILE__
       - [0x189E70, c, game/code_00288E70]
+      - [0x18AA08, c, game/code_00289A08]
+      - [0x18AD50, c, game/code_00289D50]
       - [0x18AD68, c, mc/mcManager]  # Nocturne __FILE__
       - [0x18B150, c, game/code_0028A150]
       - [0x19B810, c, game/code_0029A810]  # P4 transfer

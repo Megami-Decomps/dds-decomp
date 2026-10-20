@@ -10,32 +10,37 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-extern s32 fileActiveCardDetectionRequestIndex;
-
-/* The open device state retains the resolved path at +0x10. */
-
 extern char fileManagerTaskName[];
+
 extern s32 D_003BC7D8;
+
 extern s32 (*fileIdleUpdateCallback)(void);
 
 s32 WaitSema(s32 sema);
+
 s32 SignalSema(s32 sema);
+
 void *memset(void *dst, s32 val, u32 len);
+
 s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-s32 func_002F6990(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
-s32 sceMcSync(s32 mode, void *command, s32 *result);
-void func_002F6E90(u32 arg0, s32 arg1);
+
 s32 fileMan(KwlnTask *task);
-void fileReqInit(s32 arg0);
+
 extern s32 sdfDevQueueControlRequest(DevState *);
+
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
+
 extern void filePrependNode(FileManWork *work, FileRequest *job);
+
 extern void fileUnlinkNode(FileManWork *work, FileRequest *job);
+
 extern DevState *sdfDevCreateCallbackState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
+
 extern DevState *sdfDevCreateModeState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
                         s32 options);
+
 extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
 
 s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
@@ -406,7 +411,6 @@ s32 fileManUpdate(void) {
     return work->head != NULL;
 }
 
-
 /* Task callback driving asynchronous file work. */
 s32 fileMan(KwlnTask *task) {
     fileManUpdate();
@@ -420,115 +424,6 @@ void fileManInit(void) {
     fileManagerWork.buffer = (u8 *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
     kwlnTaskCreate(fileManagerTaskName, 0x384, 1, 0, fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
-}
-
-void fileReqInit(s32 request) {
-    FileReqEntry *entry = &fileRequestEntries[request];
-    func_002F6990(request, 0, &entry->cardType, &entry->sizeKiB, &entry->formatted);
-    /* cc1probe: reset survives 01.sibling, disappears at 13.life, and
-     * retains the retail JAL/epilogue; see the post-call exception in
-     * docs/CONTRIBUTING.md. The other game has the same 76-byte wrapper. */
-    request = -1;
-}
-
-/* Select and reinitialize one file request, then clear its +0x10 byte. */
-void fileReqBegin(s32 request) {
-    fileActiveCardDetectionRequestIndex = request;
-    fileReqInit(request);
-    fileRequestEntries[request].requestRetryCount = 0;
-}
-
-/* Keep the zero-status tail distinct and the ready path after retry work;
- * see docs/idioms.md, "Trace-justified switch tails: fileReqPoll". */
-s32 fileReqPoll(void) {
-    FileReqEntry *entry = &fileRequestEntries[fileActiveCardDetectionRequestIndex];
-    s32 info[2];
-    s32 result = sceMcSync(1, info, &info[1]);
-    s32 retries;
-
-    if (result == 1) {
-        entry->unk0 = info[1];
-        if (info[1] == -1) {
-            entry->slotMetadataDirty = result;
-            entry->selectedSlot = 0;
-        }
-        switch (entry->cardType) {
-        case 0:
-            entry->slotMetadataDirty = result;
-            entry->status = 0;
-            entry->selectedSlot = 0;
-            break;
-        case 2:
-            if (entry->formatted == 0) {
-                retries = entry->requestRetryCount;
-                if (retries < 5) {
-                    entry->requestRetryCount = retries + 1;
-                    fileReqInit(fileActiveCardDetectionRequestIndex);
-                    return 0;
-                }
-                entry->status = 2;
-                entry->slotMetadataDirty = result;
-                entry->selectedSlot = 0;
-            } else {
-                entry->status = result;
-            }
-            break;
-        default:
-            entry->status = 3;
-            entry->slotMetadataDirty = 1;
-            entry->selectedSlot = 0;
-            break;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-u8 fileReqGetStatus(s32 request) {
-    return fileRequestEntries[request].status;
-}
-
-s32 fileReqGetSize(s32 request) {
-    return fileRequestEntries[request].sizeKiB << 10;
-}
-
-u8 fileReqIsSlotMetadataDirty(s32 request) {
-    return fileRequestEntries[request].slotMetadataDirty;
-}
-
-void fileReqClearSlotMetadataDirty(s32 request) {
-    fileRequestEntries[request].slotMetadataDirty = 0;
-}
-
-void fileReqMarkSlotMetadataDirty(s32 request) {
-    fileRequestEntries[request].slotMetadataDirty = 1;
-}
-
-void fileReqClearSlotFlags(s32 request, s32 slot) {
-    slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    fileRequestSlotFlags[slot] = 0;
-}
-
-void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
-    slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    fileRequestSlotFlags[slot] |= mask;
-}
-
-u32 fileReqGetSlotFlags(s32 request, s32 slot) {
-    slot += request * FILE_REQ_WORDS_PER_ENTRY;
-    return fileRequestSlotFlags[slot];
-}
-
-s8 fileReqGetSelectedSlot(s32 request) {
-    return fileRequestEntries[request].selectedSlot;
-}
-
-void fileReqSetSelectedSlot(s32 request, s32 selectedSlot) {
-    fileRequestEntries[request].selectedSlot = selectedSlot;
-}
-
-void fileReqStartCardDetection(u32 port) {
-    func_002F6E90(port, 0);
 }
 
 s32 D_003BC7D8 __attribute__((section(".sdata"))) = 0;
