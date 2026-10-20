@@ -10078,16 +10078,6 @@ s32 btlHaveActiveSceneActorEntriesCleared(void) {
     return 1;
 }
 
-typedef struct SceneGlobalState {
-    u8 pad00[0x38];
-    u32 stage; /* 0x38: state gate */
-    u32 flags; /* 0x3C: scene restrictions */
-    u8 pad40[8];
-    s8 fadeLatched;  /* 0x48: fade kind counts recorded */
-    u8 pad49[3];
-    s32 fadeKindA;
-    s32 fadeKindB;
-} SceneGlobalState;
 
 
 s32 fldSelectSceneMode(ActionStateLink *task) {
@@ -10095,7 +10085,7 @@ s32 fldSelectSceneMode(ActionStateLink *task) {
     if (mdlFlagTest(0x801) != 0) {
         return 1;
     }
-    if (mdlFlagTest(0x81D) == 0 && mdlFlagTest(0x801) == 0 && !(((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x200)) {
+    if (mdlFlagTest(0x81D) == 0 && mdlFlagTest(0x801) == 0 && !(btlTrackedTaskHandles->status.flags & 0x200)) {
         if (btlHasSpecialActiveSceneActor() != 0) {
             return 2;
         }
@@ -10110,7 +10100,7 @@ s32 fldSelectSceneMode(ActionStateLink *task) {
             return 5;
         }
     }
-    if (mdlFlagTest(0x805) == 0 && !(((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x200)) {
+    if (mdlFlagTest(0x805) == 0 && !(btlTrackedTaskHandles->status.flags & 0x200)) {
         if (btlFindHuntTutorialSkill() != 0 && btlHaveActiveSceneActorEntriesCleared() != 0) {
             return 3;
         }
@@ -10172,7 +10162,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
             case 1:
                 btlBossDebugPrintf("-----------------First Battle!!-------------------\n");
                 mdlFlagClear(0x801);
-                ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
+                btlTrackedTaskHandles->status.flags |= 0x100;
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
@@ -10186,7 +10176,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
             case 6:
                 btlBossDebugPrintf("-----------------Tutorial Majin!!-------------------\n");
                 mdlFlagSet(0x81A);
-                ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x300;
+                btlTrackedTaskHandles->status.flags |= 0x300;
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_004367F0, 0x2B0E, 1, 1, btlUpdateMajinTutorialTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
@@ -10200,7 +10190,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
             case 2:
                 btlBossDebugPrintf("-----------------Tutorial Weak!!-------------------\n");
                 mdlFlagSet(0x81D);
-                ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x300;
+                btlTrackedTaskHandles->status.flags |= 0x300;
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
@@ -10214,7 +10204,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
             case 3:
                 btlBossDebugPrintf("-----------------Tutorial Hunt!!-------------------\n");
                 mdlFlagSet(0x805);
-                ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
+                btlTrackedTaskHandles->status.flags |= 0x100;
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
@@ -10231,7 +10221,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
             case 4:
                 btlBossDebugPrintf("-----------------Tutorial Fear!!-------------------\n");
                 mdlFlagSet(0x806);
-                ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
+                btlTrackedTaskHandles->status.flags |= 0x100;
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
@@ -10244,7 +10234,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 break;
             case 5:
                 btlBossDebugPrintf("-----------------New Linkage!!-------------------\n");
-                ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x200;
+                btlTrackedTaskHandles->status.flags |= 0x200;
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_004367EC, 0x2B0E, 1, 1, btlUpdateLinkageNoticeTask,
                                         btlFinishTrackedBattleTaskAndCloseWindow,
@@ -11710,7 +11700,7 @@ s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
 }
 
 s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
-    SceneGlobalState *global;
+    BattleTrackedTaskWork *global;
     BtlSceneFadingRecord *rec = scene->fading;
     BtlSceneSlot *slot;
     u32 fadeCount = 0;
@@ -11726,12 +11716,12 @@ s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
         }
         fadeCount++;
     }
-    global = (SceneGlobalState *)btlTrackedTaskHandles;
-    if (global->fadeLatched == 0) {
+    global = btlTrackedTaskHandles;
+    if (global->fadeKindsCached == 0) {
         if (countA != 0 || countB != 0) {
-            global->fadeKindA = countA;
-            global->fadeKindB = countB;
-            global->fadeLatched = 1;
+            global->fadeKindACount = countA;
+            global->fadeKindBCount = countB;
+            global->fadeKindsCached = 1;
         }
     }
     fadeCount--;
@@ -11821,8 +11811,8 @@ s32 btlUpdateScenePanelTask(KwlnTask *task) {
     if ((scene->battleFlags & 0x200) == 0) {
         return 0;
     }
-    if (((SceneGlobalState *)btlTrackedTaskHandles)->stage == 1 &&
-        (((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x100) == 0) {
+    if (btlTrackedTaskHandles->presentationState == 1 &&
+        (btlTrackedTaskHandles->status.flags & 0x100) == 0) {
         return 0;
     }
     func_001CF800();
