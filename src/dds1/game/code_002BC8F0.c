@@ -1113,7 +1113,133 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", sdfDrawTexturedQuad);
+void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
+                   const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
+                   u32 flipFlags, f32 angle, u32 blendKind, s32 mode,
+                   SdfTex *texture, s32 surfaceId) {
+    u32 textureCoordinates[4];
+    /* The four corners stay separate locals: itfRotateScreenOffset writes each
+     * coordinate through its own pointer. */
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 x2;
+    s32 y2;
+    s32 x3;
+    s32 y3;
+    s32 packet;
+    SdfListHead *packetList;
+    u64 *packetWords;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 centerX;
+    s32 centerY;
+    s32 savedCoordinate;
+    SdfPoolNode *drawSurface;
+
+    if (mode == 0) {
+        sdfTexSetPrimaryBufferModeBits(texture, 0, 1);
+    } else {
+        sdfTexSetPrimaryBufferModeBits(texture, 1, 1);
+    }
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 4));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x15C, 3, 0x531, 4);
+    packetWords = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    left = x + 0x7000;
+    top = y + 0x7900;
+    right = left + width - 8;
+    bottom = top + height - 4;
+    halfWidth = (right - left) / 2;
+    halfHeight = (bottom - top) / 2;
+    centerX = left + halfWidth;
+    centerY = top + halfHeight;
+    x0 = left;
+    y0 = top;
+    x3 = right;
+    y3 = bottom;
+    if (angle == 0.0f) {
+        x1 = right;
+        y1 = top;
+        x2 = left;
+        y2 = bottom;
+    } else {
+        itfRotateScreenOffset(&x0, &y0, -halfWidth, -halfHeight, centerX, centerY, angle);
+        itfRotateScreenOffset(&x1, &y1, halfWidth, -halfHeight, centerX, centerY, angle);
+        itfRotateScreenOffset(&x2, &y2, -halfWidth, halfHeight, centerX, centerY, angle);
+        itfRotateScreenOffset(&x3, &y3, halfWidth, halfHeight, centerX, centerY, angle);
+    }
+    textureCoordinates[0] = uvRect->u0 * 16;
+    textureCoordinates[1] = uvRect->v0 * 16;
+    textureCoordinates[2] = uvRect->u1 * 16;
+    textureCoordinates[3] = uvRect->v1 * 16;
+    if (flipFlags & 1) {
+        savedCoordinate = x0;
+        x0 = x1;
+        x1 = savedCoordinate;
+        savedCoordinate = x2;
+        x2 = x3;
+        x3 = savedCoordinate;
+    }
+    if (flipFlags & 2) {
+        savedCoordinate = y0;
+        y0 = y2;
+        y2 = savedCoordinate;
+        savedCoordinate = y1;
+        y1 = y3;
+        y3 = savedCoordinate;
+    }
+    if (cornerColors == NULL) {
+        packetWords[0] = ((u64)0x80 << 32) | 0x80;
+        packetWords[1] = ((u64)0x80 << 32) | 0x80;
+        packetWords[6] = ((u64)0x80 << 32) | 0x80;
+        packetWords[7] = ((u64)0x80 << 32) | 0x80;
+        packetWords[12] = ((u64)0x80 << 32) | 0x80;
+        packetWords[13] = ((u64)0x80 << 32) | 0x80;
+        packetWords[18] = ((u64)0x80 << 32) | 0x80;
+        packetWords[19] = ((u64)0x80 << 32) | 0x80;
+    } else {
+        u32 rgba0 = cornerColors[0].rgba;
+        u32 rgba1 = cornerColors[1].rgba;
+        u32 rgba2 = cornerColors[2].rgba;
+        u32 rgba3 = cornerColors[3].rgba;
+
+        packetWords[0] = cornerColors[0].channels.red | ((u64)cornerColors[0].channels.green << 32);
+        packetWords[1] = ((rgba0 >> 8) & 0xFF) | ((u64)(rgba0 & 0xFF) << 32);
+        packetWords[6] = cornerColors[1].channels.red | ((u64)cornerColors[1].channels.green << 32);
+        packetWords[7] = ((rgba1 >> 8) & 0xFF) | ((u64)(rgba1 & 0xFF) << 32);
+        packetWords[12] = cornerColors[2].channels.red | ((u64)cornerColors[2].channels.green << 32);
+        packetWords[13] = ((rgba2 >> 8) & 0xFF) | ((u64)(rgba2 & 0xFF) << 32);
+        packetWords[18] = cornerColors[3].channels.red | ((u64)cornerColors[3].channels.green << 32);
+        packetWords[19] = ((rgba3 >> 8) & 0xFF) | ((u64)(rgba3 & 0xFF) << 32);
+    }
+    /* Six u64 per vertex: RGBAQ, UV, then XYZ2 (the 0x531 register list). */
+    packetWords[2] = textureCoordinates[0] | ((u64)textureCoordinates[1] << 32);
+    packetWords[4] = (u64)(u32)x0 | ((u64)(u32)y0 << 32);
+    packetWords[5] = depth >> 4;
+    packetWords[8] = textureCoordinates[2] | ((u64)textureCoordinates[1] << 32);
+    packetWords[10] = (u64)(u32)x1 | ((u64)(u32)y1 << 32);
+    packetWords[11] = depth >> 4;
+    packetWords[14] = textureCoordinates[0] | ((u64)textureCoordinates[3] << 32);
+    packetWords[16] = (u64)(u32)x2 | ((u64)(u32)y2 << 32);
+    packetWords[17] = depth >> 4;
+    packetWords[20] = textureCoordinates[2] | ((u64)textureCoordinates[3] << 32);
+    packetWords[22] = (u64)(u32)x3 | ((u64)(u32)y3 << 32);
+    packetWords[23] = depth >> 4;
+    effSelectPresetByKind(blendKind, surfaceId);
+    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packetList);
+    sdfConsCreateDrawPacket(packetList, texture, 0);
+    sdfAppendPacket(packetList, packet);
+    drawSurface = &kwlnDrawSurfaces[surfaceId];
+    drawSurface->append(drawSurface, packetList);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
+}
+
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
