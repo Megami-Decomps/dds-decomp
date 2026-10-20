@@ -15451,3 +15451,39 @@ the same type. Both direct includers and both constructors remain exact.
 Both complete owners gate at 63 match/0 differ; the three required canaries
 remain at 192/0, 158/0 and 15/0. Extra per-record predicates or stream wrappers
 are not needed and are not retained.
+
+## Task queues: snapshot the selected node before stepping it
+
+`kwlnTaskRunScheduledUpdates` (DDS1 `0x00100D40`, DDS2 `0x00100C28`,
+292 bytes each) merges the active and delayed-destroy queues by priority,
+then drains the remaining queue. Capture the selected node in `current`
+before saving its predecessor and calling `kwlnTaskStep(current)`.
+Read `current->listNext` only when the step reports that the node survived.
+Otherwise recover from the saved predecessor or the fresh queue head:
+the selected node may already have been unlinked and destroyed.
+
+The merge has its own predecessor local. The two mutually exclusive
+single-queue drains share `drainPrevious`, which has the same real role in
+both loops and is initialized before every step. This is ordinary
+same-kind snapshot reuse, not an extra lifetime-only value.
+
+The substantive `RunningProcess` reconstruction in
+[`smt3-reconstructed-sources`](https://github.com/smt-ret/smt3-reconstructed-sources),
+`src/dds3KernelCore.c:591-717`, corroborates the selected-node role and
+predecessor-based recovery. Do not import its `RunProcess(&pro)` interface
+into the PS2 ABI: retail passes the task pointer itself, not its address.
+The reconstruction supplies source-structure evidence, not a byte donor.
+
+The parity-qualified `probe_kernel_exact/decisions.log:346-385` under
+`sandbox_PurFAD/smt3_body_round` records the deciding global allocation:
+the selected-node quantity has priority 73333 and takes `$16`, ahead of
+the merge predecessor at 72000 (`$17`) and delayed cursor at 54761 (`$18`).
+The active cursor can share `$16`; the shared drain predecessor conflicts
+with both cursor homes across its two phases and takes `$17`.
+Positive predecessor recovery also preserves the native branch-likely
+head reloads. No cached-empty flag, callback wrapper, register pin or
+compiler override is needed.
+
+Both complete owners gate at 31 match/0 differ and ordinary objdiff is
+100% for both targets. The required canaries remain 192/0, 158/0 and 15/0.
+
