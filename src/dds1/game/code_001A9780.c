@@ -9270,21 +9270,19 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         if (btlStepTargetGridSelection(selection, work) != 0) {
             sndSetStationedSeVolume(1);
         }
-        goto update_list;
+    } else {
+        if (selection == 1) {
+            if (work->entry != 0) work->entry--;
+            else work->entry = count - 1;
+            if (count >= 2) sndSetStationedSeVolume(1);
+        }
+        if (selection == 2) {
+            if ((u32)work->entry < count - 1) work->entry++;
+            else work->entry = 0;
+            if (count >= 2) sndSetStationedSeVolume(1);
+        }
     }
 
-    if (selection == 1) {
-        if (work->entry != 0) work->entry--;
-        else work->entry = count - 1;
-        if (count >= 2) sndSetStationedSeVolume(1);
-    }
-    if (selection == 2) {
-        if ((u32)work->entry < count - 1) work->entry++;
-        else work->entry = 0;
-        if (count >= 2) sndSetStationedSeVolume(1);
-    }
-
-update_list:
     if (work->entry == oldEntry) {
         return;
     }
