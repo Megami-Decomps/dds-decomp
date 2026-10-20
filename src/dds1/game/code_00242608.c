@@ -962,7 +962,53 @@ void mnuShopSubmitDescriptor(EvtRuntime *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", mnuShopQueueAuxiliaryTexturePacket);
+extern s32 D_00368C10[4];
+extern s32 D_00368C20[4];
+extern s32 D_00368C30[4];
+
+void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
+    SdfListHead *list;
+    SdfPacket *packet;
+    u32 color;
+
+    if (kwlnHeldTextureReference == NULL) {
+        return;
+    }
+    if (alpha == 0) {
+        return;
+    }
+    D_00368C30[0] = 0x80;
+    D_00368C30[1] = 0x80;
+    D_00368C30[2] = 0x80;
+    D_00368C30[3] = 0x80;
+    if (alpha > 0x80) {
+        alpha = 0x80;
+    }
+    color = alpha << 24;
+    D_00368C10[0] = 0;
+    D_00368C10[1] = 0x180;
+    D_00368C10[2] = 0x2000;
+    D_00368C10[3] = 0xB88;
+    D_00368C20[0] = 0x10;
+    D_00368C20[1] = 0x180;
+    D_00368C20[2] = 0x2000;
+    D_00368C20[3] = 0xB90;
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+    packet[0].unk0 = 3;
+    packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
+    packet[0].unk18 = 0xE;
+    packet[1].unk0 = 0x50002;
+    packet[1].unk8 = 0x47;
+    packet[1].unk10 = ((u64)(color >> 24) << 32) | 0x64;
+    packet[1].unk18 = 0x42;
+    sdfAppendPacket(list, (u32)packet);
+    itfQueueTextureBoundQuadPacket(D_00368C10, D_00368C20, D_00368C30,
+                                  0xFEFF9B, kwlnHeldTextureReference, 0, list);
+    D_003255A8.append(&D_003255A8, list);
+}
 
 void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene) {
     mnuShopQueueAuxiliaryTexturePacket(scene->auxResource);
