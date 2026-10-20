@@ -288,9 +288,9 @@ void parInitColorRamp(ParColorRamp *p, s32 frames) {
     f32 span;
     u32 a, b;
 
-    p->color0 &= 0xFFFFFF;
-    p->color1 &= 0xFFFFFF;
-    p->color2 &= 0xFFFFFF;
+    p->color[0] &= 0xFFFFFF;
+    p->color[1] &= 0xFFFFFF;
+    p->color[2] &= 0xFFFFFF;
     alpha = p->alpha << 24;
     p->fadeIn = alpha;
     if (p->fadeInFrames > 0) {
@@ -313,22 +313,71 @@ void parInitColorRamp(ParColorRamp *p, s32 frames) {
     if (span == 0) {
         span = 1.0f;
     }
-    a = p->color1;
-    b = p->color0;
-    p->r01 = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
-    p->g01 = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
-    p->b01 = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
+    a = p->color[1];
+    b = p->color[0];
+    p->rStep[0] = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
+    p->gStep[0] = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
+    p->bStep[0] = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
     if (p->mode == 2) {
         return;
     }
-    a = p->color2;
-    b = p->color1;
-    p->r12 = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
-    p->g12 = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
-    p->b12 = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
+    a = p->color[2];
+    b = p->color[1];
+    p->rStep[1] = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
+    p->gStep[1] = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
+    p->bStep[1] = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", parEvaluateColorRampAtAge);
+u32 parEvaluateColorRampAtAge(ParColorRamp *p, u32 color, s32 age) {
+    s32 channel[3];
+    u32 alpha;
+    u32 sum;
+    f32 t;
+
+    if (age >= p->frames - p->fadeOutFrames) {
+        if (p->frames < age) {
+            return 0;
+        }
+        alpha = p->fadeOut * (p->frames - age);
+        alpha &= 0xFF000000;
+    } else if (age <= p->fadeInFrames) {
+        alpha = p->fadeIn * age;
+        alpha &= 0xFF000000;
+    } else {
+        alpha = p->alpha << 24;
+    }
+    if (p->mode == 1) {
+        return p->color[0] | alpha;
+    }
+    t = age;
+    if (age < p->rampFrames) {
+        s32 red = p->rStep[0] * t;
+        s32 green = p->gStep[0] * t;
+        s32 blue = p->bStep[0] * t;
+        sum = p->color[0];
+        channel[0] = red;
+        channel[1] = green;
+        channel[2] = blue;
+        sum += channel[0];
+        sum += (u32)channel[1] << 8;
+        sum += (u32)channel[2] << 16;
+        return (sum & 0xFFFFFF) | alpha;
+    } else {
+        s32 red, green, blue;
+        t -= (f32)p->rampFrames;
+        red = p->rStep[1] * t;
+        green = p->gStep[1] * t;
+        blue = p->bStep[1] * t;
+        sum = p->color[1];
+        channel[0] = red;
+        channel[1] = green;
+        channel[2] = blue;
+        sum += channel[0];
+        sum += (u32)channel[1] << 8;
+        sum += (u32)channel[2] << 16;
+        return (sum & 0xFFFFFF) | alpha;
+    }
+}
 
 /* Allocate contiguous point slabs, slot records and the trailing table header. */
 ParTable *parCreateHistorySlotTable(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
