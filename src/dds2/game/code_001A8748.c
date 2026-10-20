@@ -602,7 +602,7 @@ s32 itfEditOverlayColor(void) {
         }
         y += 0x60;
     }
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     itfTestOverlayPhase += itfTestOverlayPhaseStep;
     itfDrawPulsingTestOverlay(0x52);
     if ((s8)D_0037F510.secondaryTriangle < 0) {

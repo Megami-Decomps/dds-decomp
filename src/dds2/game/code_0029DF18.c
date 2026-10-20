@@ -318,6 +318,10 @@ extern s32 sprintf(char *dst, const char *fmt, ...);
 extern const char D_004379F0[];
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
+typedef struct { u32 values[4]; } BrsProgressBarPalette;
+extern const BrsProgressBarPalette D_004285B0;
+extern const BrsProgressBarCoordinates D_004285C0;
+
 /* Draw the EXP remaining and temporarily crop the progress sprites for this
  * row. Source lineage: Harbor/Luna's 30-word predecessor and the matched
  * profile renderer's draw-fresh resource/tail-origin ordering.
@@ -327,10 +331,7 @@ extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s
 void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *work,
                                BrsProgressRow *row, s32 context, s32 index) {
     char text[32];
-    typedef struct { u32 values[4]; } BrsProgressBarPalette;
-    extern const BrsProgressBarPalette D_004285B0;
     BrsProgressBarPalette palette = D_004285B0;
-    extern const BrsProgressBarCoordinates D_004285C0;
     BrsProgressBarCoordinates coordinates = D_004285C0;
     s32 fade = 0x100 - work->fadeProgress;
     s32 fillX = coordinates.fillX;

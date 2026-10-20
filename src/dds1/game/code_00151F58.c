@@ -508,7 +508,7 @@ void func_001528C0(EffUnitObject *instance) {
     params.parameters = D_0034E090;
     params.positions = (u128 *)positions;
     params.colors = D_0034E0A0;
-    params.texcoords = (u32 *)uv;
+    params.texcoords = &uv[0][0];
     params.color = instance->billboard->childParam;
     params.parameterCount = 2;
     params.vertexCount = 4;

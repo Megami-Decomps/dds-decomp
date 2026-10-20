@@ -15487,3 +15487,164 @@ compiler override is needed.
 Both complete owners gate at 31 match/0 differ and ordinary objdiff is
 100% for both targets. The required canaries remain 192/0, 158/0 and 15/0.
 
+## Scene-model position caches use the scene-record point type
+
+DDS1 `D_003D40B0` and DDS2 `D_0044F818` cache the XYZ coordinates from
+each loaded `FldSceneRecord.pos`. Their producers at `00146080` and
+`00149FE8` copy floats at offsets `0`, `4`, and `8`, then advance the
+destination by `0xC`. These are arrays of the existing `FldPoint`, not
+integer-slot records that need a second cast-based position view.
+
+The reset and release loops clear the same three components. Native
+`sw zero` instructions in those loops do not establish an integer field
+type: floating zero has the same stored representation. Keep the array
+declarations and all component accesses consistently typed as `FldPoint`.
+
+## Prefer the recovered owner's fields to nominal field views
+
+Several native accesses already have fields in the primary owner:
+
+- DDS1 `btlQueueSceneActorModelEntry` reads the scene kind at `+0x24A`
+  (`lbu` at `001C55CC`), already `BtlState.unk24A`.
+- DDS1 `func_002DF710` reads the signed count at `+0x52`
+  (`lh` at `002DF77C`), already `VuWork.selectedTriangleCount`.
+- DDS2 movie selection lists use `MenuList.drawCallback` at `+0x2C`
+  and `MenuList.cursor` at `+0x1C`; the selected node's index is its
+  first word. A separate padded `SpriteMenuList` is unnecessary.
+- The page-bundle constructor supplies two sprites from the secondary
+  resource, six from the main resource, then two individual resources.
+  `MenuPageResources` records those groups as `secondarySprites[2]` at
+  `+0x0C`, `mainSprites[6]` at `+0x14`, `finalSprite` at `+0x2C`, and
+  `extraSprite` at `+0x30`. Release the two arrays, then extra and final.
+  A single ten-element array variant saved an extra array-base register
+  (`$19`) and needed a `0x30` frame instead of retail's `0x20`; the
+  constructor-supported grouping retains the native code without a
+  whole-owner pointer-array view.
+- DDS2 panel-animation traversal advances by `0x30` (native `0027A058`).
+  Advance a `MantraPanelAnimation *` rather than a word cursor by twelve
+  words and repeatedly casting it back to its original record type.
+
+These observations justify primary-field/type corrections, not a blanket
+claim that renaming a field or deleting a view preserves code generation.
+Gate the complete affected translation unit and the linked retail image.
+
+## The work-script context is one shared typed record
+
+`EvtScriptContext` is the existing `0x18`-byte script-exchange record used
+directly by DDS2. DDS1 uses the same layout: `evtRunContext` at `0011B878`
+retains one context base, accesses the flags with `lhu`/`sh` at `+0`,
+stores arguments/index with `sw` at `+4/+8/+0xC`, stores options with
+`sh` at `+0x14`, and retrieves the result with `lw` at `+0x10`.
+
+DDS1's symbol map also identifies its former field-address labels as
+exact offsets from `evtWorkScriptContext` at `003C2E70`: command index
+`003C2E74`, first argument `003C2E78`, second argument `003C2E7C`, result
+`003C2E80`. Those addresses corroborate the primary record; they are not
+independently owned C arrays. Declare the context as `EvtScriptContext`,
+use its fields consistently, and do not retain a word-array or separate
+field-address declaration beside the primary type.
+
+## Used externs belong at file scope with the provider's actual contract
+
+A local `extern` is not evidence that its prototype is false or unused.
+Check the real definition and table layout before moving it. The purity
+cleanup moved 27 used declarations in ten units to adjacent file scope,
+deduplicated repeated prototypes, and retained only the table types they
+actually require. For the DDS1 level-result palettes, reuse the already
+existing `BrsLevelCornerColors` definition rather than making a second
+nominal palette type. Both games' complete units stayed exact; no dummy
+declaration or altered return/argument contract was needed.
+
+## Kernel draw state shares the effect owner's parameter types
+
+Both `dds3KernelDraw.c` implementations and `evtPolygonMovie.c` exchange
+the same `EffSolidRectParams`, `EffResourceRectParams`, `EffBlurQuad`,
+`EffBlurTemplateBody`, and `EffBlurScaleParams` bodies. The effect work
+records already name these bodies as their leading members. A separate
+set of layout-identical `Kwln*Params` types is not an independent payload
+format. Use the owner's actual type in every staged, saved, and frame
+object, blend prototype, and copy API; access the real member returned by
+a work getter instead of reinterpreting the whole owner.
+
+The packed colors remain `u32` values. Alpha is their high byte, as also
+shown by the native fade update's mask and `alpha << 24`. Reading it as
+`color >> 24` compiles to the native `lbu`, including the original order
+relative to counter stores. This removes the nominal color-view cast
+without adding a union or rearranging statements. Adding channel unions
+to the primary effect headers was not byte-neutral: it changed private
+blur, trail, and movie-blender functions in both games.
+
+Keep storage alignment separate from payload format. The staggered
+parameter body is `0x2C` bytes, while its three actual snapshot objects
+are eight-byte aligned: DDS1 `003C2D30`, `003C2D00`, `003C2570`; DDS2
+`0043E4B0`, `0043E480`, `0043DCF0`. Declare that alignment on the objects.
+Their per-frame `memcpy` uses `sizeof` the real body and preserves the
+retail aligned doubleword copy without an over-aligned nominal alias.
+The dynamic-work snapshots still use their real leading `params` member.
+
+The complete cutover removes the obsolete `kwln_draw_params.h`, its
+tautological cross-view layout checks, and the unused scalar/bounds field
+aliases from C. Both kernel units gate at 42/0, both effect-event
+units at 103/0, and both complete linked games pass their retail SHA-1.
+
+## Serialized event prefixes do not need a nominal byte-array owner
+
+`EffEventWork` contains the real `EffEventInit` prefix followed by the actor
+and effect pointers. Copy the prefix with
+`memcpy(&destination->init, source, sizeof(destination->init))`. The paired
+serialized-record copier takes byte-buffer arguments and copies the existing
+`EFF_EVENT_EVENT_RECORD_BYTES` length. Both forms preserve the native
+unaligned `0x30`-byte transfer; a packed `FileRecordHeader` wrapper around a
+byte array adds no separate record format. Removing it leaves both complete
+effect-event units at 103/0, including all four 100-byte copy functions.
+
+Keep pointer arguments faithful to existing declarations as well. The
+billboard packet's `texcoords` is `f32 *`, so its local `f32 uv[4][2]` supplies
+`&uv[0][0]`, not an intermediate `u32 *`. A draw surface's `append` callback
+takes the `SdfPoolNode *` owner itself, not that same address temporarily cast
+to `SdfListHead *`. These four one-line corrections keep the DDS1/DDS2
+billboard units at 121/0 each and browser units at 60/0 each.
+
+## A nested channel loader returns its captured aligned span
+
+The channel-file helper really has a four-word capture frame: size at `+0`,
+cursor at `+4`, segment bytes at `+8`, and aligned span at `+0xC`. Both
+retail helpers store the final return register to that fourth word:
+`001181F4` in DDS1 and `0011877C` in DDS2. Their function bodies are
+`0x9C` bytes, excluding the following padding word.
+
+After assigning the rounded span to `alignedBytes`, return that captured
+value. It is the actual reported segment length, not a write-only outer
+local retained beside a separately returned temporary. This live form
+keeps the native capture store and return without manufacturing a dummy
+use or invoking the dead-code exception. The complete channel units gate
+at 44/0 and 45/0.
+
+## Fixed two-entry snapshots need no nominal wrapper
+
+The same byte-copy distinction applies to DDS2 `fldLoadResourceByIndex`.
+Its eight-byte snapshot is just two `s32` entries. Use a real `s32 ids[2]`
+and `memcpy(ids, D_00436330, sizeof(ids))`, then index that array. A
+`FieldResourceIds` wrapper adds no independent owner or record format.
+The direct array form keeps the native 84-byte function and the complete
+field unit at 184/0.
+
+## A draw-surface append receives its actual pool owner
+
+`SdfPoolNode.append` takes `SdfPoolNode *` as its first argument and
+`SdfListHead *` as its second. The pool and the packet list are different
+objects, despite their similarly positioned link fields. Pass the actual
+surface pointer directly:
+
+```c
+surface->append(surface, packets);
+kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
+```
+
+Do not cast the receiver to `SdfListHead *` before passing it back to the
+already correctly typed callback. The preview, overlay editor, light
+editor, group-property dialog, and DDS2 `func_002F3F70` sites keep their
+native bytes with the direct receiver. This removes an incompatible
+intermediate argument type; it changes no callback signature, payload
+layout, compiler flag, or instruction macro.
+

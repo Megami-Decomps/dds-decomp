@@ -1338,7 +1338,10 @@ void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth,
 /* Ten resource handles occupy offsets 0x0c through 0x30 in each page bundle. */
 typedef struct MenuPageResources {
     u8 pad0[0xC];
-    struct EffectSlotSet *sprites[10]; /* 0x0c */
+    struct EffectSlotSet *secondarySprites[2]; /* 0x0c */
+    struct EffectSlotSet *mainSprites[6];      /* 0x14 */
+    struct EffectSlotSet *finalSprite;         /* 0x2c */
+    struct EffectSlotSet *extraSprite;         /* 0x30 */
     s32 values[2];                     /* 0x34: page label values */
 } MenuPageResources;
 
@@ -1348,31 +1351,30 @@ MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondar
     MenuPageResources *item = (MenuPageResources *)sdfChipAllocDirect(sizeof(MenuPageResources));
 
     memset(item, 0, 0x3C);
-    item->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
-    item->sprites[1] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 1, 1);
-    item->sprites[2] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 2, 1);
-    item->sprites[3] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 5, 1);
-    item->sprites[4] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 6, 1);
-    item->sprites[5] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 7, 1);
-    item->sprites[6] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 8, 1);
-    item->sprites[7] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0xA, 1);
-    item->sprites[9] = effCreateResourceSlotSet((EffectSlotSet *)extraResource, extraIndex, 1);
-    item->sprites[8] = effCreateResourceSlotSet((EffectSlotSet *)finalResource, finalIndex, 1);
+    item->secondarySprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
+    item->secondarySprites[1] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 1, 1);
+    item->mainSprites[0] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 2, 1);
+    item->mainSprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 5, 1);
+    item->mainSprites[2] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 6, 1);
+    item->mainSprites[3] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 7, 1);
+    item->mainSprites[4] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 8, 1);
+    item->mainSprites[5] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0xA, 1);
+    item->extraSprite = effCreateResourceSlotSet((EffectSlotSet *)extraResource, extraIndex, 1);
+    item->finalSprite = effCreateResourceSlotSet((EffectSlotSet *)finalResource, finalIndex, 1);
     return item;
 }
 
 /* Preserve the native resource-slot release order. */
 void mnuDestroyResources(MenuPageResources *resources) {
-    struct EffectSlotSet **object = (struct EffectSlotSet **)resources;
     u32 i;
     for (i = 0; i < 2; i++) {
-        effDestroyResourceSlotSet(object[i + 3]);
+        effDestroyResourceSlotSet(resources->secondarySprites[i]);
     }
     for (i = 0; i < 6; i++) {
-        effDestroyResourceSlotSet(object[i + 5]);
+        effDestroyResourceSlotSet(resources->mainSprites[i]);
     }
-    effDestroyResourceSlotSet(object[12]);
-    effDestroyResourceSlotSet(object[11]);
+    effDestroyResourceSlotSet(resources->extraSprite);
+    effDestroyResourceSlotSet(resources->finalSprite);
     sdfChipFreeDirect(resources);
 }
 
@@ -1394,10 +1396,10 @@ void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources
     if (layout != 1) {
         goto compact;
     }
-    itfDrawGridWithResolvedSlot(x + 0xB0, y + 0x30, z, 1, page->sprites[0], 0, drawArg);
-    itfDrawGridWithResolvedSlot(x + 0x5F0, y + 0xF8, z, 1, page->sprites[2], 0, drawArg);
-    itfDrawGridWithResolvedSlot(x + 0x260, y + 0x30, z, 1, page->sprites[8], 0, drawArg);
-    itfDrawGridWithResolvedSlot(x + 0x100, y + 0xF8, z, 1, page->sprites[9], 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0xB0, y + 0x30, z, 1, page->secondarySprites[0], 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0x5F0, y + 0xF8, z, 1, page->mainSprites[0], 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0x260, y + 0x30, z, 1, page->finalSprite, 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0x100, y + 0xF8, z, 1, page->extraSprite, 0, drawArg);
     sprintf(text, D_003BC720, page->values[0]);
     glyph = itfCreateFont2TextGlyph(x + 0x440, y + 0x100, z, 0xA09DC380, text, NULL);
     sprintf(text, D_003BC720, page->values[1]);
@@ -1406,9 +1408,9 @@ void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources
 
     do {
     compact:
-        itfDrawGridWithResolvedSlot(x + 0xB0, y + 0x30, z, 1, page->sprites[1], 0, drawArg);
-        itfDrawGridWithResolvedSlot(x + 0x5F0, y + 0x88, z, 1, page->sprites[2], 0, drawArg);
-        itfDrawGridWithResolvedSlot(x + 0x100, y + 0x78, z, 1, page->sprites[9], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x + 0xB0, y + 0x30, z, 1, page->secondarySprites[1], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x + 0x5F0, y + 0x88, z, 1, page->mainSprites[0], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x + 0x100, y + 0x78, z, 1, page->extraSprite, 0, drawArg);
         sprintf(text, D_003BC720, page->values[0]);
         glyph = itfCreateFont2TextGlyph(x + 0x440, y + 0x90, z, 0xA09DC380, text, NULL);
         sprintf(text, D_003BC720, page->values[1]);

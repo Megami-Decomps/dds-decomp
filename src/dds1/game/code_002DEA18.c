@@ -400,11 +400,6 @@ void sdfVuBuildVisibleTriangleList(VuWork *work) {
     *work->dmaEnd = NULL;
 }
 
-/* Indexed triangle count occupies the two bytes following nodeCount. */
-typedef struct {
-    u8 pad00[0x52];
-    s16 indexedTriangleCount;
-} VuIndexedTriangleCount;
 void func_002DF710(VuWork *work) {
     /* DDS1 node region uses the tail byte at +0x50. */
     f32 scale = D_003BDA30;
@@ -419,7 +414,7 @@ void func_002DF710(VuWork *work) {
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = D_003BD344;
-    remaining = ((VuIndexedTriangleCount *)work)->indexedTriangleCount;
+    remaining = work->selectedTriangleCount;
     indices = D_003F7860;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->dmaBase;
@@ -441,7 +436,7 @@ void func_002DF710(VuWork *work) {
         out[0][1] = (u128 *)b;
         out[0][2] = (u128 *)c;
         out += 1;
-            goto advanceTriangle;
+            continue;
         appendInsidePair:
         out[0][0] = (u128 *)b;
         out[0][1] = (u128 *)e;
@@ -450,7 +445,7 @@ void func_002DF710(VuWork *work) {
         out[1][1] = (u128 *)c;
         out[1][2] = (u128 *)e;
         out += 2;
-            goto advanceTriangle;
+            continue;
         interpolateOutsideA:
         sdfVuInterpolateClipVertex(d, a, b);
         sdfVuInterpolateClipVertex(e, a, c);
@@ -478,7 +473,7 @@ void func_002DF710(VuWork *work) {
             out += 4;
 
             } else goto appendInsidePair;
-            goto advanceTriangle;
+            continue;
         threeDifferentRegions: {
             if (aRegion != 0 || (bRegion ^ cRegion) != 3) goto rotateTriangle;
         d = vuAllocNode(work);
@@ -505,7 +500,7 @@ void func_002DF710(VuWork *work) {
         out[4][1] = (u128 *)g;
         out[4][2] = (u128 *)c;
         out += 5;
-            goto advanceTriangle;
+            continue;
         }
         rotateTriangle: {
             VuBlendNode *oldA = a;
@@ -530,8 +525,6 @@ void func_002DF710(VuWork *work) {
         out[2][1] = (u128 *)b;
         out[2][2] = (u128 *)c;
         out += 3;
-        advanceTriangle:
-            ;
         } while (--remaining != 0);
     }
     work->nodeCount = out - (u128 *(*)[3])D_003EB860;

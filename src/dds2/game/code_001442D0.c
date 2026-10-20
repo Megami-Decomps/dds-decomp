@@ -115,15 +115,11 @@ extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 
 
 
-typedef struct FldSlot0C {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} FldSlot0C; /* 0xC bytes */
 
 extern SdfModel *D_003A5470[];
 
-extern FldSlot0C D_0044F818[];
+/* Native scene rows copy XYZ floats into this twelve-byte position cache. */
+extern FldPoint D_0044F818[];
 
 extern s32 D_004362D4;
 
@@ -1241,9 +1237,9 @@ void fldResetSceneResourceTables(void) {
     D_0044F7F0[8] = 0;
     for (i = 0; i < 96; i++) {
         D_003A5470[i] = 0;
-        D_0044F818[i].unk0 = 0;
-        D_0044F818[i].unk4 = 0;
-        D_0044F818[i].unk8 = 0;
+        D_0044F818[i].x = 0.0f;
+        D_0044F818[i].y = 0.0f;
+        D_0044F818[i].z = 0.0f;
     }
 }
 
@@ -2356,9 +2352,9 @@ void fldReleaseSceneDevSlotsAndTextures(void) {
     }
     for (i = 0; i < 96; i++) {
         D_003A5470[i] = 0;
-        D_0044F818[i].unk0 = 0;
-        D_0044F818[i].unk4 = 0;
-        D_0044F818[i].unk8 = 0;
+        D_0044F818[i].x = 0.0f;
+        D_0044F818[i].y = 0.0f;
+        D_0044F818[i].z = 0.0f;
     }
     if (D_0044F7F0[5] != 0) {
         sdfTexReleaseReferenceViaHandler(D_0044F7F0[5]);
@@ -2485,9 +2481,9 @@ void fldLoadSceneModelsAndCamera(void) {
     rec = fldSceneRecords;
     for (i = 0; i < fldSceneRecordCount; i++, rec++) {
         D_003A5470[i] = sdfModelCreateWithAlternateItems(0, rec->model);
-        ((FldPoint *)D_0044F818)[i].x = rec->pos->x;
-        ((FldPoint *)D_0044F818)[i].y = rec->pos->y;
-        ((FldPoint *)D_0044F818)[i].z = rec->pos->z;
+        D_0044F818[i].x = rec->pos->x;
+        D_0044F818[i].y = rec->pos->y;
+        D_0044F818[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
     D_0044F7F0[5] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
@@ -3126,13 +3122,12 @@ void fldUpdatePositionedTextureNodes(void) {
     }
 }
 
-typedef struct FieldResourceIds {
-    s32 entries[2];
-} FieldResourceIds;
 
 void fldLoadResourceByIndex(s32 index) {
-    FieldResourceIds ids = *(FieldResourceIds *)D_00436330;
-    fldIndexedResourceHandle = (u32)sdfReadNamedResource((const char *)(u32)ids.entries[index], &fldIndexedResourceData, 0);
+    s32 ids[2];
+
+    memcpy(ids, D_00436330, sizeof(ids));
+    fldIndexedResourceHandle = (u32)sdfReadNamedResource((const char *)(u32)ids[index], &fldIndexedResourceData, 0);
     fldIndexedResourceEffect = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)fldIndexedResourceData);
 }
 

@@ -9343,7 +9343,7 @@ void func_002F3F70(u8 *owner, void *matrix) {
     packet->secondValue = restoreValue;
     packet->secondAddress = 0x42;
     sdfAppendPacket(list, packet);
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 void effLoadScalyTexture(void) {
@@ -13655,6 +13655,9 @@ u32 effFinalizeQueuedFile(void) {
     return 0;
 }
 
+extern FileJob *fileDuplicateAndAppendJob(FileQueue *, FileJobPayload *);
+extern FileJob *fileQueueFindById(FileQueue *, u32);
+
 /* Clone the selected file job, rebind its asset payload and refresh queue views. */
 u32 effCloneSelectedFileJob(void) {
     FileJob *selected;
@@ -13665,8 +13668,6 @@ u32 effCloneSelectedFileJob(void) {
     void *source;
     u32 count;
 
-    extern FileJob *fileDuplicateAndAppendJob(FileQueue *, FileJobPayload *);
-    extern FileJob *fileQueueFindById(FileQueue *, u32);
 
     selected = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     job = fileDuplicateAndAppendJob(effFileQueue, (FileJobPayload *)selected->id);

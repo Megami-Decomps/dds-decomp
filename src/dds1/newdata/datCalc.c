@@ -413,11 +413,7 @@ extern PtyItemQuantityUpdateView ptyItemQuantityUpdates[];
 
 extern ScrData *evtWorkScriptTask;
 
-extern s32 evtWorkScriptContext[];
-extern s32 evtWorkScriptContextCommandIndex[];
-extern s32 evtWorkScriptContextFirstArgument[];
-extern s32 evtWorkScriptContextSecondArgument[];
-extern s32 evtWorkScriptContextReturnValue[];
+extern EvtScriptContext evtWorkScriptContext;
 
 extern s32 scrReadIntParameter(s32 idx);
 extern void scrSetIntegerReturnValue();
@@ -1283,19 +1279,19 @@ extern s32 scrStartProcessProcedure(ScrData *context, s32 procedureIndex);
 /* Step the script with these context values; clear the written flag, not the stored result. */
 s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
     scrStartProcessProcedure(evtWorkScriptTask, script);
-    ((EvtScriptContext *)evtWorkScriptContext)->commandIndex = commandIndex;
-    ((EvtScriptContext *)evtWorkScriptContext)->firstArgument = firstArgument;
-    ((EvtScriptContext *)evtWorkScriptContext)->secondArgument = secondArgument;
-    ((EvtScriptContext *)evtWorkScriptContext)->options = options;
-    ((EvtScriptContext *)evtWorkScriptContext)->stateFlags &= EVT_RESULT_RESET_MASK;
+    evtWorkScriptContext.commandIndex = commandIndex;
+    evtWorkScriptContext.firstArgument = firstArgument;
+    evtWorkScriptContext.secondArgument = secondArgument;
+    evtWorkScriptContext.options = options;
+    evtWorkScriptContext.stateFlags &= EVT_RESULT_RESET_MASK;
     bfStepContext(evtWorkScriptTask);
-    return ((EvtScriptContext *)evtWorkScriptContext)->returnValue;
+    return evtWorkScriptContext.returnValue;
 }
 
 /* Create the script task and clear its separate 24-byte context. */
 void dds3WorkInit(void *header) {
     evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
-    memset(evtWorkScriptContext, 0, EVT_CONTEXT_BYTES);
+    memset(&evtWorkScriptContext, 0, EVT_CONTEXT_BYTES);
 }
 
 ScrData *scrGetWorkTaskHandle(void) {
@@ -1308,39 +1304,39 @@ void scrDestroyWorkTask(void) {
 }
 
 s32 evtPushFirstRosterLevel(void) {
-    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level);
+    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level);
     return 1;
 }
 
 s32 evtPushSecondRosterLevel(void) {
-    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContextSecondArgument[0])->level);
+    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContext.secondArgument)->level);
     return 1;
 }
 
 s32 evtPushFirstRosterCurrentHp(void) {
-    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->hp);
+    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContext.firstArgument)->hp);
     return 1;
 }
 
 s32 evtPushSecondRosterCurrentHp(void) {
-    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContextSecondArgument[0])->hp);
+    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp);
     return 1;
 }
 
 s32 evtPushFirstRosterMaximumHp(void) {
-    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->maxHp);
+    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContext.firstArgument)->maxHp);
     return 1;
 }
 
 s32 evtPushSecondRosterMaximumHp(void) {
-    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContextSecondArgument[0])->maxHp);
+    scrSetIntegerReturnValue(((DatPartyRecord *)evtWorkScriptContext.secondArgument)->maxHp);
     return 1;
 }
 
 extern u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
-    s8 statIndex = datCommandSelectors[((EvtScriptContext *)evtWorkScriptContext)->commandIndex].stat;
+    s8 statIndex = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -1352,10 +1348,10 @@ s32 evtPushFirstRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->firstArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->firstArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
         }
         break;
     }
@@ -1365,7 +1361,7 @@ s32 evtPushFirstRosterSelectedStat(void) {
 
 /* Push the second entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushSecondRosterSelectedStat(void) {
-    s8 statIndex = datCommandSelectors[((EvtScriptContext *)evtWorkScriptContext)->commandIndex].stat;
+    s8 statIndex = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -1377,10 +1373,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
         }
         break;
     }
@@ -1390,7 +1386,7 @@ s32 evtPushSecondRosterSelectedStat(void) {
 
 /* Push the first entry's option-selected stat, retaining the same default selectors. */
 s32 evtPushFirstRosterOptionStat(void) {
-    s8 statIndex = datFlagToElementIndex(((EvtScriptContext *)evtWorkScriptContext)->options);
+    s8 statIndex = datFlagToElementIndex(evtWorkScriptContext.options);
     s32 statValue = EVT_DEFAULT_STAT_VALUE;
 
     switch (statIndex) {
@@ -1401,10 +1397,10 @@ s32 evtPushFirstRosterOptionStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->firstArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->firstArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex);
         }
         break;
     }
@@ -1414,7 +1410,7 @@ s32 evtPushFirstRosterOptionStat(void) {
 
 /* Push the second entry's option-selected stat, retaining the same default selectors. */
 s32 evtPushSecondRosterOptionStat(void) {
-    s8 statIndex = datFlagToElementIndex(((EvtScriptContext *)evtWorkScriptContext)->options);
+    s8 statIndex = datFlagToElementIndex(evtWorkScriptContext.options);
     s32 statValue = EVT_DEFAULT_STAT_VALUE;
 
     switch (statIndex) {
@@ -1425,10 +1421,10 @@ s32 evtPushSecondRosterOptionStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument, statIndex);
+                (DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex);
         }
         break;
     }
@@ -1440,7 +1436,7 @@ s32 evtPushSecondRosterOptionStat(void) {
 s32 evtPushFirstRosterStatEligibility(void) {
     s32 statIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)evtWorkScriptContextFirstArgument[0], statIndex));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)evtWorkScriptContext.firstArgument, statIndex));
     return 1;
 }
 
@@ -1448,13 +1444,13 @@ s32 evtPushFirstRosterStatEligibility(void) {
 s32 evtPushSecondRosterStatEligibility(void) {
     s32 statIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)evtWorkScriptContextSecondArgument[0], statIndex));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)evtWorkScriptContext.secondArgument, statIndex));
     return 1;
 }
 
 /* Kind 5 selects the first entry's roster detail instead of the command-table stat. */
 s32 evtPushSelectedStatOrRosterLowValue(void) {
-    EvtScriptContext *scriptContext = (EvtScriptContext *)evtWorkScriptContext;
+    EvtScriptContext *scriptContext = &evtWorkScriptContext;
     s32 commandIndex = scriptContext->commandIndex;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
@@ -1468,7 +1464,7 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
 
 /* Kind 5 scales the command stat by the first entry's roster multiplier, then truncates. */
 s32 evtPushSelectedScaledStat(void) {
-    EvtScriptContext *scriptContext = (EvtScriptContext *)evtWorkScriptContext;
+    EvtScriptContext *scriptContext = &evtWorkScriptContext;
     s32 commandIndex = scriptContext->commandIndex;
     s32 statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
@@ -1480,7 +1476,7 @@ s32 evtPushSelectedScaledStat(void) {
 }
 
 s32 evtPushSelectedStatGrade(void) {
-    scrSetIntegerReturnValue(datCommandRecords[evtWorkScriptContextCommandIndex[0]].stat2D);
+    scrSetIntegerReturnValue(datCommandRecords[evtWorkScriptContext.commandIndex].stat2D);
     return 1;
 }
 
@@ -1488,12 +1484,12 @@ s32 evtPushSelectedStatGrade(void) {
 s32 evtSelectScriptStatValue(void) {
     s32 statValue;
 
-    switch (((EvtScriptContext *)evtWorkScriptContext)->options) {
+    switch (evtWorkScriptContext.options) {
     case 1:
-        statValue = datCommandRecords[((EvtScriptContext *)evtWorkScriptContext)->commandIndex].hpPower;
+        statValue = datCommandRecords[evtWorkScriptContext.commandIndex].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[((EvtScriptContext *)evtWorkScriptContext)->commandIndex].mpPower;
+        statValue = datCommandRecords[evtWorkScriptContext.commandIndex].mpPower;
         break;
     default:
         statValue = 0;
@@ -1505,10 +1501,10 @@ s32 evtSelectScriptStatValue(void) {
 
 /* Select the alternate stat through the first entry's table value, not the context selector. */
 s32 evtPushEntryIndexedStatOption(void) {
-    s32 *contextWords = evtWorkScriptContext;
+    EvtScriptContext *scriptContext = &evtWorkScriptContext;
     s32 statValue;
-    u16 statOption = ((EvtScriptContext *)contextWords)->options;
-    u16 commandIndex = datItemSkillRecords[((DatPartyRecord *)contextWords[2])->menuValue].commandIndex;
+    u16 statOption = scriptContext->options;
+    u16 commandIndex = datItemSkillRecords[((DatPartyRecord *)scriptContext->firstArgument)->menuValue].commandIndex;
 
     switch (statOption) {
     case 1:
@@ -1527,7 +1523,7 @@ s32 evtPushEntryIndexedStatOption(void) {
 
 /* Kind 5 selects the first entry's high roster detail instead of the command total. */
 s32 evtPushSelectedTotalOrRosterHighValue(void) {
-    EvtScriptContext *scriptContext = (EvtScriptContext *)evtWorkScriptContext;
+    EvtScriptContext *scriptContext = &evtWorkScriptContext;
     s32 commandIndex = scriptContext->commandIndex;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
@@ -1540,26 +1536,26 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
 }
 
 s32 evtPushSelectedStatMaximum(void) {
-    scrSetIntegerReturnValue(datCommandRecords[evtWorkScriptContextCommandIndex[0]].stat36);
+    scrSetIntegerReturnValue(datCommandRecords[evtWorkScriptContext.commandIndex].stat36);
     return 1;
 }
 
 /* Store the script argument as the context result and mark it written. */
 s32 evtStoreScriptParameterResult(void) {
-    u16 stateFlags = ((EvtScriptContext *)evtWorkScriptContext)->stateFlags | EVT_RESULT_WRITTEN_FLAG;
+    u16 stateFlags = evtWorkScriptContext.stateFlags | EVT_RESULT_WRITTEN_FLAG;
 
-    ((EvtScriptContext *)evtWorkScriptContext)->stateFlags = stateFlags;
-    ((EvtScriptContext *)evtWorkScriptContext)->returnValue = scrReadIntParameter(0);
+    evtWorkScriptContext.stateFlags = stateFlags;
+    evtWorkScriptContext.returnValue = scrReadIntParameter(0);
     return 1;
 }
 
 s32 evtPushScriptContextResult(void) {
-    scrSetIntegerReturnValue(evtWorkScriptContextReturnValue[0]);
+    scrSetIntegerReturnValue(evtWorkScriptContext.returnValue);
     return 1;
 }
 
 s32 evtPushEntryFlagBitInverted(void) {
-    scrSetIntegerReturnValue((((((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->flags) >> 5) ^ 1) & 1);
+    scrSetIntegerReturnValue((((((DatPartyRecord *)evtWorkScriptContext.firstArgument)->flags) >> 5) ^ 1) & 1);
     return 1;
 }
 
@@ -1661,19 +1657,19 @@ s32 evtPushAvailableIntegerValue(void) {
 }
 
 void evtPushLevelMaxHpGrowth(void) {
-    scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level - 1]);
+    scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 void evtPushLevelMaxMpGrowth(void) {
-    scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level - 1]);
+    scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 void evtSelectStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument);
-    s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument)->hp;
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)evtWorkScriptContext.secondArgument);
+    s32 currentHp = ((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
@@ -1699,26 +1695,26 @@ void evtSelectStatGrade(void) {
 }
 
 void evtPushLevelValueA(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesA[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level - 1]);
+    scrSetFloatReturnValue(datBattleParameters->levelValuesA[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 void evtPushLevelValueB(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level - 1]);
+    scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 void evtPushLevelValueCCommand18D(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level - 1]);
+    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 void evtPushLevelValueCCommand18E(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->level - 1]);
+    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 void evtScriptSelectRandomValue(void) {
     s32 resultCode;
     s32 roll;
 
-    if ((((DatPartyRecord *)evtWorkScriptContextSecondArgument[0])->flags & 0x20) == 0) {
+    if ((((DatPartyRecord *)evtWorkScriptContext.secondArgument)->flags & 0x20) == 0) {
         roll = sdfGetRandInt(0, 0x20);
         resultCode = roll != 0 ? 10 : 0x80;
     } else {
@@ -1729,13 +1725,13 @@ void evtScriptSelectRandomValue(void) {
 }
 
 void evtPushRosterBaseValue(void) {
-    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)evtWorkScriptContextFirstArgument[0])->unitId].base);
+    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId].base);
 }
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 void evtSelectFineStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument);
-    s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)evtWorkScriptContext)->secondArgument)->hp;
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)evtWorkScriptContext.secondArgument);
+    s32 currentHp = ((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 

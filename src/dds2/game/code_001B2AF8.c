@@ -887,10 +887,11 @@ s32 btlSelectPreemptiveOutcome(void) {
 }
 
 /* Select a follow-up encounter from the override, forced scene or adjustment rows. */
+extern void btlSerialBattleChanceHook(s32);
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004156F8);
 
 s32 btlSelectSerialEncounter(void) {
-    extern void btlSerialBattleChanceHook(s32);
 
     BtlState *state = (BtlState *)btlGetRuntime();
     u16 selectionIndex = (u16)state->adjustmentEntryIndex;

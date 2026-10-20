@@ -4088,18 +4088,18 @@ u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *panel, u32 bits, s16 
 
 void mnuTransitionActivePanelAnimations(MantraPanelPool *pool, s32 mode) {
     s32 i;
-    u32 *item = (u32 *)pool->items;
+    MantraPanelAnimation *item = pool->items;
 
-    for (i = 0; i < pool->count; i++, item += 12) {
-        if ((((MantraPanelAnimation *)item)->flags >> 8) & 1) {
-            if (((((MantraPanelAnimation *)item)->flags >> 19) & 0xF) == 2) {
-                mnuQueuePanelAnimationTransition((MantraPanelAnimation *)item, 5, 0);
+    for (i = 0; i < pool->count; i++, item++) {
+        if ((item->flags >> 8) & 1) {
+            if (((item->flags >> 19) & 0xF) == 2) {
+                mnuQueuePanelAnimationTransition(item, 5, 0);
             } else if (mode == 1) {
-                mnuQueuePanelAnimationTransition((MantraPanelAnimation *)item, 7, 0);
+                mnuQueuePanelAnimationTransition(item, 7, 0);
             } else if (mode == 0) {
-                mnuQueuePanelAnimationTransition((MantraPanelAnimation *)item, 9, 0);
+                mnuQueuePanelAnimationTransition(item, 9, 0);
             } else {
-                mnuResetPanelAnimationFlags((MantraPanelAnimation *)item);
+                mnuResetPanelAnimationFlags(item);
             }
         }
     }

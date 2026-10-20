@@ -1182,6 +1182,8 @@ s32 btlSelectActorAction(s32 object) {
     return result;
 }
 
+extern s32 btlRollAiBucket(void);
+
 /* Select an enemy item drop; mode 1 bypasses the story-flag override item. */
 s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
     BtlUnit *actor = (BtlUnit *)actorAddress;
@@ -1189,7 +1191,6 @@ s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
     s32 item = 0;
     u16 i;
 
-    extern s32 btlRollAiBucket(void);
 
     if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
         mdlFlagTest(enemy->overrideFlag) != 0) {
@@ -1946,7 +1947,6 @@ extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 command) {
-    extern s32 btlRollAiBucket(void);
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 attribute;
     u32 mask;

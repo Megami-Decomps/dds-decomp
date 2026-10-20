@@ -1301,10 +1301,11 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
                    (u32)mnuCreateNamedRecord(&initialTag));
 }
 
+extern s32 D_004389B4;
+extern s32 D_004389B8;
+
 /* Update the active-effect entrance animation once per frame. */
 s32 mnuAdvanceWorkEntryEntrance(MenuWorkEntry *entry) {
-    extern s32 D_004389B4;
-    extern s32 D_004389B8;
     s32 phase = D_004389B4;
     s32 mode;
     s32 result = 0;

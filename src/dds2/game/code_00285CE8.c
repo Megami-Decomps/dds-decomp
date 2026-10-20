@@ -92,9 +92,10 @@ void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, 
     }
 }
 
+typedef struct MtrDirections { u8 offsets[6][2]; } MtrDirections;
+extern const MtrDirections D_00425DD8;
+
 MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
-    typedef struct MtrDirections { u8 offsets[6][2]; } MtrDirections;
-    extern const MtrDirections D_00425DD8;
     MtrDirections directionTable = D_00425DD8;
     MtrCell *cell = NULL;
     s32 count;

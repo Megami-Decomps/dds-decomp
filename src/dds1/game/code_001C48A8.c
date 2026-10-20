@@ -590,7 +590,7 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
         task->ownerId = 0x8000000000000003ULL;
         btlStartTask(task);
     }
-    switch (((BattleSceneWork *)scene)->encounterKind) {
+    switch (scene->unk24A) {
         case 1:
             task = btlCreateEffObjB(NULL, 0xD);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;

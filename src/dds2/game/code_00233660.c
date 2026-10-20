@@ -3344,7 +3344,7 @@ s32 dds3LightEditorProcess(KwlnTask *task) {
     }
     fldDrawRgbEditor(state->packetList, 0x8740, 0x8320,
                       state->editing == 1 ? state->selection - 12 : -1, state->ambient);
-    D_00380708.append((SdfListHead *)&D_00380708, state->packetList);
+    D_00380708.append(&D_00380708, state->packetList);
     return 0;
 }
 
