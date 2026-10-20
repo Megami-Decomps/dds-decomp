@@ -958,76 +958,77 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
     /* Native signed rejection edges at 002A0BC4/002A0BCC share the fallback.
      * EE GCC 2.96 pass 00 retains their order; a switch reverses it, while
      * an enclosing one-pass loop also aligns the progress join. */
-    if (phase < 0) goto fallback;
-    if (phase >= 3) goto fallback;
-    fillX = coordinates.fillX;
-    fillY = coordinates.fillY;
-    fillSlot = coordinates.fillSlot;
-    tailX = coordinates.tailX;
-    tailY = coordinates.tailY;
-    tailSlot = coordinates.tailSlot;
-    if (cap != 0) {
-        if (remaining < cap) {
-            /* The denominator is captured on the positive-progress guard edge:
-             * DDS2 002A0C00/04 and DDS1 00269054/58. CSE forwards the quotient
-             * divisor but retains this snapshot for its divide-zero check. */
-            s32 normalizationBase = cap;
-            if (remaining > 0) {
-                progress = remaining * 1000 / normalizationBase;
-                originalProgress = progress;
-                if (work->profileAnimation[index].progressInitialized == 0) {
-                    work->profileAnimation[index].previousProgress = progress;
-                    work->profileAnimation[index].progressInitialized = 1;
-                }
-                if (progress <= 40) {
-                    progress = 40;
-                }
-                if (work->profileAnimation[index].applied == 0 &&
-                    originalProgress >= work->profileAnimation[index].previousProgress &&
-                    originalProgress - work->profileAnimation[index].previousProgress < 41) {
-                    difference = originalProgress - work->profileAnimation[index].previousProgress;
-                    if (difference < 10) {
-                        progress += 9;
-                    } else {
-                        progress += difference;
+    if (phase >= 0) {
+        if (phase < 3) {
+            fillX = coordinates.fillX;
+            fillY = coordinates.fillY;
+            fillSlot = coordinates.fillSlot;
+            tailX = coordinates.tailX;
+            tailY = coordinates.tailY;
+            tailSlot = coordinates.tailSlot;
+            if (cap != 0) {
+                if (remaining < cap) {
+                    /* The denominator is captured on the positive-progress guard edge:
+                     * DDS2 002A0C00/04 and DDS1 00269054/58. CSE forwards the quotient
+                     * divisor but retains this snapshot for its divide-zero check. */
+                    s32 normalizationBase = cap;
+                    if (remaining > 0) {
+                        progress = remaining * 1000 / normalizationBase;
+                        originalProgress = progress;
+                        if (work->profileAnimation[index].progressInitialized == 0) {
+                            work->profileAnimation[index].previousProgress = progress;
+                            work->profileAnimation[index].progressInitialized = 1;
+                        }
+                        if (progress <= 40) {
+                            progress = 40;
+                        }
+                        if (work->profileAnimation[index].applied == 0 &&
+                            originalProgress >= work->profileAnimation[index].previousProgress &&
+                            originalProgress - work->profileAnimation[index].previousProgress < 41) {
+                            difference = originalProgress - work->profileAnimation[index].previousProgress;
+                            if (difference < 10) {
+                                progress += 9;
+                            } else {
+                                progress += difference;
+                            }
+                        }
+                        progress = progress <= 0 ? 0 : (progress > 1000 ? 1000 : progress);
+                        resources = work->teardownResource;
+                        resources->workEntries[fillSlot].geometry.bounds[2] =
+                            (resources->workEntries[fillSlot].sourceWidth << 4) * progress / 1000;
+                        range = resources->descriptions[fillSlot].colors[2] -
+                            resources->descriptions[fillSlot].colors[0];
+                        range = range * progress / 1000 - range;
+                        resources->workEntries[fillSlot].parameters[2] = range;
+                        effDrawSpriteWithCornerColors(x + (fillX << 4), y + (fillY << 3),
+                                                     depth, palette.values, 0, resources, fillSlot, context);
+                        /* Capture the tail origin, then reacquire the draw-owned entry. */
+                        tailPosition = x + (tailX << 4);
+                        resources = work->teardownResource;
+                        effDrawSpriteWithCornerColors(tailPosition +
+                                                     resources->workEntries[fillSlot].geometry.bounds[2], y + (tailY << 3), depth,
+                                                     palette.values, 0, resources, tailSlot, context);
+                        /* Draw may replace the resource; restore the current fill entry. */
+                        restoreResources = work->teardownResource;
+                        restoreResources->workEntries[fillSlot].parameters[2] = 0;
+                        restoreResources->workEntries[fillSlot].geometry.bounds[2] =
+                            restoreResources->workEntries[fillSlot].sourceWidth << 4;
                     }
+                } else {
+                    if (row->unit->hp == 0 || mnuIsTitleEntryAvailable(row->unit) || (row->unit->status & 0x4040)) {
+                        barColor = work->profileAnimation[index].alpha | 0x60606000;
+                        palette.values[0] = barColor;
+                        palette.values[1] = barColor;
+                        palette.values[2] = barColor;
+                        palette.values[3] = barColor;
+                    }
+                    effDrawSpriteWithCornerColors(x + 0x13A0, y + 0x168, depth, palette.values,
+                                                 0, work->teardownResource, 26, context);
                 }
-                progress = progress <= 0 ? 0 : (progress > 1000 ? 1000 : progress);
-                resources = work->teardownResource;
-                resources->workEntries[fillSlot].geometry.bounds[2] =
-                    (resources->workEntries[fillSlot].sourceWidth << 4) * progress / 1000;
-                range = resources->descriptions[fillSlot].colors[2] -
-                    resources->descriptions[fillSlot].colors[0];
-                range = range * progress / 1000 - range;
-                resources->workEntries[fillSlot].parameters[2] = range;
-                effDrawSpriteWithCornerColors(x + (fillX << 4), y + (fillY << 3),
-                                             depth, palette.values, 0, resources, fillSlot, context);
-                /* Capture the tail origin, then reacquire the draw-owned entry. */
-                tailPosition = x + (tailX << 4);
-                resources = work->teardownResource;
-                effDrawSpriteWithCornerColors(tailPosition +
-                                             resources->workEntries[fillSlot].geometry.bounds[2], y + (tailY << 3), depth,
-                                             palette.values, 0, resources, tailSlot, context);
-                /* Draw may replace the resource; restore the current fill entry. */
-                restoreResources = work->teardownResource;
-                restoreResources->workEntries[fillSlot].parameters[2] = 0;
-                restoreResources->workEntries[fillSlot].geometry.bounds[2] =
-                    restoreResources->workEntries[fillSlot].sourceWidth << 4;
             }
-        } else {
-            if (row->unit->hp == 0 || mnuIsTitleEntryAvailable(row->unit) || (row->unit->status & 0x4040)) {
-                barColor = work->profileAnimation[index].alpha | 0x60606000;
-                palette.values[0] = barColor;
-                palette.values[1] = barColor;
-                palette.values[2] = barColor;
-                palette.values[3] = barColor;
-            }
-            effDrawSpriteWithCornerColors(x + 0x13A0, y + 0x168, depth, palette.values,
-                                         0, work->teardownResource, 26, context);
+            return;
         }
     }
-    return;
-fallback:
     effDrawSpriteWithCornerColors(x + 0x1290, y + 0x160, depth, palette.values,
                                  0, work->teardownResource, 19, context);
 }

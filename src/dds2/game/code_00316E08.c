@@ -1303,31 +1303,29 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
     MenuRegistryParameters *parameters = NULL;
     s32 kind;
 
-    if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) goto movement;
-    parameterIndex = 0;
-    if (tagClass == MNU_WORK_TAG_REGISTRY_TABLE) goto registry;
-    kind = 0;
-    goto create;
-
-movement:
-    kind = 3;
-    mnuLoadTitleSoundBufferEntry(0x12);
-    mnuClearInactiveSoundBufferState();
-    parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
-    D_00438928 = (MnuModelNode *)mnuAcquireUnusedModelNode(
-        (u32 *)&groups[8]);
-    evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
-    goto create;
-
-registry: {
-    MenuRegistry *record = mnuGetMenuRecordRegistryEntry(entry->tag);
-    parameterIndex = record->parameterIndex;
-    parameters = mnuGetMenuRegistryParametersByIndex(parameterIndex);
-    kind = parameters->kind;
-    work->targets++;
-}
-
-create:
+    switch (tagClass) {
+    default:
+        parameterIndex = 0;
+        kind = 0;
+        break;
+    case MNU_WORK_TAG_MOVEMENT_TABLE:
+        kind = 3;
+        mnuLoadTitleSoundBufferEntry(0x12);
+        mnuClearInactiveSoundBufferState();
+        parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
+        D_00438928 = (MnuModelNode *)mnuAcquireUnusedModelNode(
+            (u32 *)&groups[8]);
+        evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
+        break;
+    case MNU_WORK_TAG_REGISTRY_TABLE: {
+        MenuRegistry *record = mnuGetMenuRecordRegistryEntry(entry->tag);
+        parameterIndex = record->parameterIndex;
+        parameters = mnuGetMenuRegistryParametersByIndex(parameterIndex);
+        kind = parameters->kind;
+        work->targets++;
+        break;
+    }
+    }
 
     if (kind != 1) {
         if (kind == 3) {
