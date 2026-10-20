@@ -26,7 +26,7 @@ bodies in P4, so there is no C to try. **41 recompile byte-identical.**
 
 | Kind | Count | Notes |
 |---|---:|---|
-| Non-trivial C (more than 4 instructions) | 16 | sdkTask, scr common commands, itfMesManager, effMiscRand, and more |
+| Non-trivial C (more than 4 instructions) | 16 | sdkTask, scr common commands, itfMesManager, sdfGetRand, and more |
 | Inline-VU0-asm C (effMisc) | 5 | Bytes come from the asm text, not the compiler |
 | `call + sync` wrappers (kernel) | 4 | In the SDK/libkernl range |
 | 4 instructions or fewer | 16 | Getters and returns; weak evidence |
@@ -46,7 +46,7 @@ The retail SHA-1 still matches.
 | DDS1 | Size | Persona 4 origin | Unit here |
 |---|---:|---|---|
 | `func_001019C8` | 0x8C | `func_00452490`, Kernel/sdkTask.c | `kernel/dds3KernelCore.c` |
-| `kwlnTaskGetTimer` 0x101A60 | 0x8 | `kwlnTaskGetTimer`, Kernel/sdkTask.c | `kernel/dds3KernelCore.c` |
+| `dds3GetProcessRunTime` 0x101A60 | 0x8 | `dds3GetProcessRunTime`, Kernel/sdkTask.c | `kernel/dds3KernelCore.c` |
 | `scrCommand_SCR_GET_TIMER` 0x10DD38 | 0x5C | Script/scrCommonCommand.c | `script/scrCommonCommand.c` |
 | `scrCommand_SCR_EXISTS` 0x10EEA8 | 0x48 | Script/scrCommonCommand.c | `script/scrCommonCommand.c` |
 | `func_0011CE88` | 0x30 | `func_00298d70` | `game/code_0011CE88.c` |
@@ -60,7 +60,7 @@ The retail SHA-1 still matches.
 | `func_0029A810` | 0x30 | `func_00492e30` | `game/code_0029A810.c` |
 | `func_002DD8B8`, `func_002DDC50` | 0x2C, 0x48 | effMisc.c (VU0 asm) | `game/code_002DD8B8.c` |
 | `effMiscQuatMultiplyVU`, `effMiscNormalizeVU`, `func_002E7D98` | | effMisc.c (VU0 asm) | `game/code_002E7C20.c` |
-| `effMiscRand` 0x2E8340 | 0x54 | effMisc.c | `game/code_002E7C20.c` |
+| `sdfGetRand` 0x2E8340 | 0x54 | effMisc.c | `game/code_002E7C20.c` |
 
 P4's global names were replaced by the DDS symbols at the same relocation
 sites. For example, P4's `iGpffffb9ec` becomes DDS `D_003BA800`. The link
