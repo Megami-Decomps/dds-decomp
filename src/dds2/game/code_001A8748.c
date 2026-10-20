@@ -1887,38 +1887,38 @@ s32 btlBuildUnitIndexList(void *actionArg, BtlIndexList *targets,
     unit = battle->units;
     count = 0;
     selected = -1;
-    while (unit != NULL) {
+    for (; unit != NULL; unit = unit->nextActor) {
         s32 flags = unit->status.flags;
 
         if ((flags & 0x100) == 0) {
-            goto nextUnit;
+            continue;
         }
         if ((flags & 0xE0) != 0) {
             if (excludedStatus == 0) {
-                goto nextUnit;
+                continue;
             }
             if ((excludedStatus & 0x4000) != 0 && excludedStatus != -1) {
-                goto nextUnit;
+                continue;
             }
         }
         if ((flags & areaMask) == 0) {
-            goto nextUnit;
+            continue;
         }
         if ((rule & 2) != 0 && (unit->status.flags & 1) != 0) {
             if (action->unit == unit) {
-                goto nextUnit;
+                continue;
             }
             collected[count++] = unit;
         } else if ((rule & 8) != 0) {
             if ((unit->status.flags & 1) != 0) {
-                goto nextUnit;
+                continue;
             }
             collected[count] = unit;
             selected = count++;
         } else {
             if ((rule & 4) == 0) {
                 if ((unit->status.flags & 1) == 0) {
-                    goto nextUnit;
+                    continue;
                 }
             } else {
                 if ((unit->status.flags & 1) == 0) {
@@ -1926,24 +1926,19 @@ s32 btlBuildUnitIndexList(void *actionArg, BtlIndexList *targets,
                 }
             }
             if ((unit->status.flags & 1) != 0) {
-                if (excludedStatus == 0) {
-                    goto appendUnit;
-                }
-                if (excludedStatus == -1) {
-                    goto appendUnit;
-                }
-                if (unit->partyRecord.status == 0) {
-                    goto nextUnit;
-                }
-                if ((excludedStatus & unit->partyRecord.status) != 0) {
-                    goto nextUnit;
+                if (excludedStatus != 0) {
+                    if (excludedStatus != -1) {
+                        if (unit->partyRecord.status == 0) {
+                            continue;
+                        }
+                        if ((excludedStatus & unit->partyRecord.status) != 0) {
+                            continue;
+                        }
+                    }
                 }
             }
-appendUnit:
             collected[count++] = unit;
         }
-nextUnit:
-        unit = unit->nextActor;
     }
     if (count > 0) {
         if (selected < 0) {
@@ -2099,16 +2094,13 @@ s32 btlMarkInactiveActorCandidates(void) {
     if (unit != NULL) {
         do {
             s32 flags = unit->status.flags;
-            if ((flags & 0x200) == 0) {
-                goto next_actor;
+            if ((flags & 0x200) != 0) {
+                if ((flags & 1) == 0) {
+                    eligible[count] = unit;
+                    unit->status.flags = flags & ~0x100;
+                    count++;
+                }
             }
-            if ((flags & 1) != 0) {
-                goto next_actor;
-            }
-            eligible[count] = unit;
-            unit->status.flags = flags & ~0x100;
-            count++;
-next_actor:
             unit = unit->nextActor;
         } while (unit != NULL);
     }
