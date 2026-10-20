@@ -874,18 +874,18 @@ typedef char MnuStaffMovieWork_size_must_be_0x20[(sizeof(MnuStaffMovieWork) == 0
 /* DDS1 title-movie menu allocation (0x40 bytes). */
 typedef struct MovieMenuState {
     struct SdfMemBlock *allocation; /* 0x00: retained general-heap owner */
-    u8 pad04[0x0C];
+    u32 spriteHandles[3]; /* 0x04: indexed resource slots used by the sprite table */
     s32 state;           /* 0x10 */
     s32 cursor;          /* 0x14 */
     s32 mode;            /* 0x18 */
     s32 idleTicks; /* 0x1C: no-input timeout ticks, capped at450. */
-    u8 pad20[4];
+    s32 pulseTimer;      /* 0x20 */
     s32 orbitFrame;      /* 0x24: camera orbit frame, wraps after 3600 */
-    u8 pad28[4];
+    s32 backdropMode;    /* 0x28 */
     struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
     struct MnuSpriteResourceGroup *resources; /* 0x30 */
     s32 transitionMode; /* 0x34: backdrop/choice transition. */
-    u8 pad38[4];
+    s32 slideOffset;     /* 0x38 */
     s8 movieSkipped;     /* 0x3C: set when the opening movie is skipped */
     u8 pad3D[3];
 } MovieMenuState;
