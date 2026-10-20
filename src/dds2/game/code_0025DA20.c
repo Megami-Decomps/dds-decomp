@@ -655,19 +655,18 @@ void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
         display->scaleY = from->p18.f;
         display->enabled = from->p08.sb[0];
         display->variant = from->p08.sb[1];
-        goto copyExtraMetadata;
+    } else {
+        display->x = from->p0C.sh[0] + (to->p0C.sh[0] - from->p0C.sh[0]) * ratio;
+        display->y = from->p0C.sh[1] + (to->p0C.sh[1] - from->p0C.sh[1]) * ratio;
+        display->color[0] = (u32)(from->p10.b[0] + (to->p10.b[0] - from->p10.b[0]) * ratio);
+        display->color[1] = (u32)(from->p10.b[1] + (to->p10.b[1] - from->p10.b[1]) * ratio);
+        display->color[2] = (u32)(from->p10.b[2] + (to->p10.b[2] - from->p10.b[2]) * ratio);
+        display->color[3] = (u32)(from->p10.b[3] + (to->p10.b[3] - from->p10.b[3]) * ratio);
+        display->scaleX = from->p14.f + (to->p14.f - from->p14.f) * ratio;
+        display->scaleY = from->p18.f + (to->p18.f - from->p18.f) * ratio;
+        display->enabled = from->p08.sb[0];
+        display->variant = from->p08.sb[1];
     }
-    display->x = from->p0C.sh[0] + (to->p0C.sh[0] - from->p0C.sh[0]) * ratio;
-    display->y = from->p0C.sh[1] + (to->p0C.sh[1] - from->p0C.sh[1]) * ratio;
-    display->color[0] = (u32)(from->p10.b[0] + (to->p10.b[0] - from->p10.b[0]) * ratio);
-    display->color[1] = (u32)(from->p10.b[1] + (to->p10.b[1] - from->p10.b[1]) * ratio);
-    display->color[2] = (u32)(from->p10.b[2] + (to->p10.b[2] - from->p10.b[2]) * ratio);
-    display->color[3] = (u32)(from->p10.b[3] + (to->p10.b[3] - from->p10.b[3]) * ratio);
-    display->scaleX = from->p14.f + (to->p14.f - from->p14.f) * ratio;
-    display->scaleY = from->p18.f + (to->p18.f - from->p18.f) * ratio;
-    display->enabled = from->p08.sb[0];
-    display->variant = from->p08.sb[1];
-copyExtraMetadata:
     display->preserveAlpha = from->p1C.sb[0];
 }
 
