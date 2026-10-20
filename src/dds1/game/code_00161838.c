@@ -1,6 +1,8 @@
 #include "common.h"
 #include "btl.h"
 #include "eff_field_color.h"
+#include "pcp_vu0.h"
+#include "sdf_debug_api.h"
 
 extern u32 effFieldColorFlags;
 
@@ -49,14 +51,39 @@ void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
     color[2] = 0.24f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00161838", effBTLFieldColorGetBaseColor);
+extern f32 D_00350F60[][4];
 
-/* Variant and kind are narrowed to their stored widths before the lookup. */
-EffFieldColorRecord *effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, f32 *output) {
-    return effBTLFieldColorGetBaseColor(colorId, variant, kind, output);
-}
+extern f32 D_00352880[4];
 
 extern EffFieldColorRecord D_0034E730[];
+
+/* Scale the color record's RGB triple by the field color entry for this variant
+ * and kind. The staging quadword's x element is multiplied but never read. */
+void effBTLFieldColorGetBaseColor(s32 colorId, s16 variant, s16 kind, f32 *output) {
+    f32 scaled[4];
+    s16 index = variant - 200;
+
+    if ((u16)index >= 40 || kind <= 0 || kind >= 11) {
+        sdfDebugPrintf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
+        VU0_LOAD_VF(vf10, D_00352880);
+    } else {
+        VU0_LOAD_VF(vf10, D_00350F60[(index * 10) + kind - 1]);
+    }
+    scaled[1] = D_0034E730[colorId].channelScales[1];
+    scaled[2] = D_0034E730[colorId].channelScales[2];
+    scaled[3] = D_0034E730[colorId].channelScales[3];
+    VU0_LOAD_VF(vf11, scaled);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaled);
+    output[0] = scaled[1];
+    output[1] = scaled[2];
+    output[2] = scaled[3];
+}
+
+/* Variant and kind are narrowed to their stored widths before the lookup. */
+void effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, f32 *output) {
+    effBTLFieldColorGetBaseColor(colorId, variant, kind, output);
+}
 
 u32 effBTLFieldColorGetEntryWord(s32 index) {
     return D_0034E730[index].packedColor;
