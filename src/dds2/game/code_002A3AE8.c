@@ -28,12 +28,6 @@ typedef struct SpriteMenuState {
     struct MenuList *list; /* 0x24: generic selection-list owner. */
 } SpriteMenuState;
 
-typedef struct SpriteMenuList {
-    u8 pad00[0x1C];
-    u32 *selected;    /* 0x1C */
-    u8 pad20[0xC];
-    void (*callback)(void); /* 0x2C */
-} SpriteMenuList;
 
 /* Sprite rows: graphic slot, draw parameter, x offset, y offset. */
 extern s16 mnuMovieMenuSpritePlacements[][4];
@@ -77,7 +71,7 @@ void mnuRecreateMenuSelectionList(void) {
     }
     node = mnuCreateListState(0, 3, 0);
     ((SpriteMenuState *)mnuMovieMenuState)->list = node;
-    ((SpriteMenuList *)node)->callback = mnuDrawMovieMenuListItem;
+    node->drawCallback = mnuDrawMovieMenuListItem;
     for (i = 0; i < 3; i++) {
         mnuListAppendNode(((SpriteMenuState *)mnuMovieMenuState)->list, 0);
     }
@@ -88,7 +82,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
 }
 
 u32 mnuGetMovieMenuSelectionIndex(void) {
-    return *((SpriteMenuList *)((SpriteMenuState *)mnuMovieMenuState)->list)->selected;
+    return ((SpriteMenuState *)mnuMovieMenuState)->list->cursor->index;
 }
 
 struct MenuList;

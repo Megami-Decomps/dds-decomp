@@ -1856,7 +1856,7 @@ s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
         return 0;
     }
     evtDrawMenuFrame(packets, x, y, 28, 3, 0, 1, runtime, NULL, evtDrawGroupPropertyTable);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (runtime->actionMode != 15) {
         return 0;
     }

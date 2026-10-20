@@ -596,7 +596,7 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
         visibleEntry = visibleEntry->next;
     }
     surface = &kwlnDrawSurfaces[descriptor->drawSurface];
-    surface->append((SdfListHead *)surface, packetList);
+    surface->append(surface, packetList);
     return descriptor->result;
 }
 
@@ -703,7 +703,7 @@ void effDrawResourceTexturePreview(EffResourceDescriptor *overlay) {
         vertex->corner[1].mask = 0xFF0000;
         sdfConsCreateDrawPacket(list, texture, 0);
         sdfAppendPacket(list, (u32)sprite);
-        D_003805A8.append((SdfListHead *)&D_003805A8, list);
+        D_003805A8.append(&D_003805A8, list);
     }
 }
 

@@ -1036,15 +1036,11 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-typedef struct FldSlot {
-    u32 unk_0;
-    u32 unk_4;
-    u32 unk_8;
-} FldSlot;
 
 extern SdfTex *D_003D40A0[4];
 extern SdfModel *D_00348F30[];
-extern FldSlot D_003D40B0[];
+/* Native scene rows copy XYZ floats into this twelve-byte position cache. */
+extern FldPoint D_003D40B0[];
 
 void fldResetSceneResourceTables(void) {
     s32 i;
@@ -1060,9 +1056,9 @@ void fldResetSceneResourceTables(void) {
     D_003D40A0[3] = 0;
     for (i = 0; i < 64; i++) {
         D_00348F30[i] = 0;
-        D_003D40B0[i].unk_0 = 0;
-        D_003D40B0[i].unk_4 = 0;
-        D_003D40B0[i].unk_8 = 0;
+        D_003D40B0[i].x = 0.0f;
+        D_003D40B0[i].y = 0.0f;
+        D_003D40B0[i].z = 0.0f;
     }
 }
 
@@ -1996,7 +1992,7 @@ void fldReleaseTitleSlots(void) {
 
 extern SdfModel *D_00348F30[];
 
-extern FldSlot D_003D40B0[];
+extern FldPoint D_003D40B0[];
 
 extern void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release);
 
@@ -2010,9 +2006,9 @@ void fldReleaseMenuSlots(void) {
     }
     for (i = 0; i < 64; i++) {
         D_00348F30[i] = 0;
-        D_003D40B0[i].unk_0 = 0;
-        D_003D40B0[i].unk_4 = 0;
-        D_003D40B0[i].unk_8 = 0;
+        D_003D40B0[i].x = 0.0f;
+        D_003D40B0[i].y = 0.0f;
+        D_003D40B0[i].z = 0.0f;
     }
     if (D_003D40A0[0] != 0) {
         sdfTexReleaseReferenceViaHandler(D_003D40A0[0]);
@@ -2111,9 +2107,9 @@ void fldLoadSceneModelsAndCamera(void) {
     rec = fldSceneRecords;
     for (i = 0; i < fldSceneRecordCount; i++, rec++) {
         D_00348F30[i] = sdfModelCreateWithAlternateItems(0, rec->model);
-        ((FldPoint *)D_003D40B0)[i].x = rec->pos->x;
-        ((FldPoint *)D_003D40B0)[i].y = rec->pos->y;
-        ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
+        D_003D40B0[i].x = rec->pos->x;
+        D_003D40B0[i].y = rec->pos->y;
+        D_003D40B0[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
     D_003D40A0[0] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));

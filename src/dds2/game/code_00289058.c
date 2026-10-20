@@ -163,6 +163,9 @@ void mnuSelectMantraUnitByIndex(MnuStatusResource *resource, s8 targetIndex) {
 
 /* The selection allocator reserves 0x16C bytes for 176 inline flag entries. */
 
+extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
+extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
+
 /* Skip unavailable neighbors after retreating the node selection. */
 void mnuSelectAvailableMantraNeighbor(MnuStatusResource *resource) {
     MantraMenuWork *work = &resource->menu;
@@ -175,8 +178,6 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *resource) {
     u32 selectedIndex;
     s32 i;
 
-    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
-    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 
     mnuAdvanceMantraUnitPanelListState(resource->menu.selectionController);
     mnuRetreatNodeCursorAndClearListFlags(resource);
@@ -232,8 +233,6 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *resource) {
     u32 selectedIndex;
     s32 i;
 
-    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
-    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 
     mnuQueueNextUnitPanelSelection(resource->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(resource);

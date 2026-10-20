@@ -238,10 +238,13 @@ extern void *memcpy(void *, const void *, u32);
 extern s32 sprintf(char *, const char *, ...);
 extern const char D_003BC578[];
 
+typedef struct BrsLevelCornerColors {
+    u32 values[4];
+} BrsLevelCornerColors;
+extern const BrsLevelCornerColors D_003AFC50;
+
 void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                                 BrsProgressRow *row, s32 context, s32 index) {
-    typedef struct BrsLevelCornerColors { u32 values[4]; } BrsLevelCornerColors;
-    extern const BrsLevelCornerColors D_003AFC50;
     char text[32];
     BrsLevelCornerColors colors;
     u32 color = work->levelAnimation[index].alpha | 0x80808000;
@@ -418,9 +421,6 @@ void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSki
 }
 
 
-typedef struct BrsLevelCornerColors {
-    u32 values[4];
-} BrsLevelCornerColors;
 
 extern const BrsLevelCornerColors D_003AFC60;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);

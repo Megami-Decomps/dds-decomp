@@ -641,7 +641,7 @@ void effDisableRectangleBlur(void) {
 }
 
 /* Copy only the 0x28-byte source prefix; retain the screen record's trailing bytes. */
-void effCopyRectangleBlurParameters(const KwlnBlurRectParams *parameters) {
+void effCopyRectangleBlurParameters(const EffBlurQuad *parameters) {
     memcpy(&effBlurRectangleParameters, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
@@ -1161,9 +1161,6 @@ struct EffEventWork {
     BattleEffect *effect;
 };
 
-typedef struct {
-    u8 bytes[EFF_EVENT_EVENT_RECORD_BYTES];
-} __attribute__((packed)) FileRecordHeader;
 
 
 extern void effBattleSetScale(BattleEffect *effect, f32 scale);
@@ -1188,14 +1185,14 @@ void effEventReleaseNode(EffEventWork *work) {
     sdfChipFreeDirect(work);
 }
 
-/* Copy the packed 0x30-byte record while retaining its native packed layout. */
+/* Copy the serialized init prefix, retaining the event's actor and effect links. */
 void effEventCopyFileRecordHeader(EffEventWork *destination, const void *source) {
-    *(FileRecordHeader *)destination = *(const FileRecordHeader *)source;
+    memcpy(&destination->init, source, sizeof(destination->init));
 }
 
-/* This copies a packed 0x30-byte record, not a complete 0x60-byte billboard state. */
-void effEventCopySerializedRecord(const FileRecordHeader *source, FileRecordHeader *destination) {
-    *destination = *source;
+/* Copy one serialized event record; either byte buffer may be unaligned. */
+void effEventCopySerializedRecord(const void *source, void *destination) {
+    memcpy(destination, source, EFF_EVENT_EVENT_RECORD_BYTES);
 }
 
 /* Forward the effect's scale value without modifying the record's init prefix. */

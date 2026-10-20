@@ -540,12 +540,13 @@ s32 mnuStaffListInput(KwlnTask *task) {
     return 1;
 }
 
+extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
+extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue);
+extern char mnuCampItemCategoryPopupEntry[];
+extern char mnuCampAmmoPartySelectionPopupEntry[];
+
 /* Handle staff-item selection, confirmation and popup input. */
 s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
-    extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
-    extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 menuValue);
-    extern char mnuCampItemCategoryPopupEntry[];
-    extern char mnuCampAmmoPartySelectionPopupEntry[];
 
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
@@ -961,9 +962,10 @@ void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) 
     }
 }
 
+extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
+extern char D_0042AD08[];
+
 s32 mnuDrawStaffValuePage(KwlnTask *task) {
-    extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
-    extern char D_0042AD08[];
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
     const u8 *slotsCaption = (const u8 *)D_0042AD08;
     MenuStaffChoices *menu = context->menu;

@@ -431,7 +431,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     s32 size;
     u8 *address;
     u32 segmentBytes;
-    u32 alignedBytes;
+    u32 alignedBytes; /* 0011877C stores the returned stride at static-chain +0xC. */
     s32 i;
 
     /* Nested helper retains the outer file cursor and reports one 16-byte-aligned segment span. */
@@ -453,7 +453,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
             advance = blocks << 4;
         }
         alignedBytes = advance;
-        return advance;
+        return alignedBytes;
     }
 
     command = sdfDevCreateCommandState(table->path);

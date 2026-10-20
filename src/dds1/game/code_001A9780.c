@@ -185,10 +185,11 @@ s8 btlGetLinkageSlotCost(s32 command);
 
 s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
+extern void btlSerialBattleChanceHook(s32);
+extern s32 btlRollAiBucket(void);
+
 /* Select a follow-up encounter from the override, forced scene or adjustment rows. */
 s32 btlSelectSerialEncounter(void) {
-    extern void btlSerialBattleChanceHook(s32);
-    extern s32 btlRollAiBucket(void);
 
     BtlState *state = (BtlState *)btlGetRuntime();
     u16 selectionIndex = (u16)state->adjustmentEntryIndex;
@@ -282,7 +283,6 @@ extern void btlSurpriseChanceHook(s32 chance);
 
 /* Roll the level/ability-scaled surprise chance, including scene overrides. */
 s32 btlRollSurpriseAttack(void) {
-    extern s32 btlRollAiBucket(void);
     f32 levelScale[9];
     BtlState *state;
     u32 partyLevel;
@@ -8351,10 +8351,11 @@ void func_001BDF60(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
     itfSetTextDrawLimit(-1);
 }
 
+extern u16 btlReadUnitStatusMask(DatPartyRecord *);
+extern const u32 D_003A2E70[3];
+extern const u32 D_003A2E80[3];
+
 void func_001BE590(BattleSceneObject *object) {
-    extern u16 btlReadUnitStatusMask(DatPartyRecord *);
-    extern const u32 D_003A2E70[3];
-    extern const u32 D_003A2E80[3];
     typedef struct CommandLabelBank { const u8 *text[3]; } CommandLabelBank;
     CommandLabelBank revertLabels;
     CommandLabelBank transformLabels;
