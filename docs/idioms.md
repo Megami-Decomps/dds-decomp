@@ -15375,3 +15375,29 @@ stock-observed compilation agree across all 17 listed object-section entries and
 normalized assembly. This builds on Son3, SdfModelVis and BigB's investigations
 and the documented profile-panel idiom. It reconstructs equivalent ordinary
 source; the original lexical source and unavailable historical parks are not claimed.
+
+## Particle queues: cache the stable pool before traversing records
+
+`parDrawPendingParticleRecords` (DDS1 `0x0015B420`, DDS2 `0x00163010`,
+548 bytes each) obtains its primary draw-surface owner once for a nonempty
+queue, then walks records with a guarded `do/while`. Initialize that owner
+before the traversal, not once per record. This is a real lifetime distinction:
+retail initializes the cached owner at target `+0x34/+0x38`, before the record
+loop, and keeps it in the frame-pointer register through packet construction.
+The remainder's divisor 3 is materialized locally rather than owning that register.
+
+The draw surfaces are the existing 0x62-entry `kwlnDrawSurfaces` array, not
+independent objects at interior addresses. The particle routes use entries
+51, 55 and 39; existing cell work also uses entry 56. A unit-local pool-dispatch
+inline performs the ordinary object method `pool->append(pool, packet)`.
+All seven same-game dispatch sites use it, including the cell-list loop,
+special-list routes and caller-supplied cell emitter. There is no invented
+callback parameter or narrowed owner domain. A direct-call rewrite changes
+address commoning and is not equivalent compiler visibility for this toolchain.
+
+`ParReleaseRecord.texcoords` is a float UV-pair array, matching the request's
+float texture-coordinate stream; the constructor's allocated-buffer cast has
+the same type. Both direct includers and both constructors remain exact.
+Both complete owners gate at 63 match/0 differ; the three required canaries
+remain at 192/0, 158/0 and 15/0. Extra per-record predicates or stream wrappers
+are not needed and are not retained.

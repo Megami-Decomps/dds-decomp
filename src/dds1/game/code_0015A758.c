@@ -479,7 +479,7 @@ ParReleaseRecord *func_0015B258(s32 count, s16 flags, s16 options) {
     bytes = vertexCount * sizeof(u128);
     buffer += bytes;
     if (flags & 1) {
-        record->texcoords = (u32 (*)[2])buffer;
+        record->texcoords = (f32 (*)[2])buffer;
         buffer += vertexCount * sizeof(record->texcoords[0]);
     }
     if (flags & 2) record->normals = (u128 *)buffer;
@@ -508,7 +508,58 @@ void parPrependRecordListNode(ParReleaseRecord *node) {
     parRecordListHead = node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", parDrawPendingParticleRecords);
+extern SdfPoolNode kwlnDrawSurfaces[0x62];
+
+static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, SdfListHead *packet) {
+    pool->append(pool, packet);
+}
+
+void parDrawPendingParticleRecords(void) {
+    ParReleaseRecord *record;
+    SdfListHead *packet;
+    s32 remaining;
+    s16 flags;
+    SdfPoolNode *priorityPool;
+    record = parRecordListHead;
+    if (record != NULL) {
+        priorityPool = &kwlnDrawSurfaces[51];
+        do {
+            if (record->drawCount != 0 && record->flags != 1) {
+                packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+                sdfInitPacketList(packet);
+                sdfConsAppendClearPacket(packet, 0);
+                sdfConsAppendAssetPacket(packet, record->asset, 0);
+                flags = record->flags;
+                remaining = record->drawCount;
+                record->request.positions = record->positions;
+                record->request.texcoords = record->texcoords[0];
+                record->request.colors = record->colors;
+                record->request.normals = record->normals;
+                record->request.parameterCount = 16;
+                record->request.vertexCount = 48;
+                while (remaining >= 48) {
+                    sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&record->request));
+                    record->request.positions += 48;
+                    if (flags & 1) record->request.texcoords += 96;
+                    if (flags & 2) record->request.normals += 48;
+                    remaining -= 48;
+                    if (flags & 4) record->request.colors += 48;
+                }
+                if (remaining > 0) {
+                    record->request.parameterCount = remaining / 3;
+                    record->request.vertexCount = remaining;
+                    sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&record->request));
+                }
+                record->drawCount = 0;
+                if (flags & 0x10) parAppendDrawSurfacePool(priorityPool, packet);
+                else if (flags & 0x20) parAppendDrawSurfacePool(&kwlnDrawSurfaces[55], packet);
+                else parAppendDrawSurfacePool(&kwlnDrawSurfaces[39], packet);
+            }
+            record = record->next;
+        } while (record != NULL);
+    }
+    parRecordListHead = NULL;
+}
 
 /* Replace the record asset's primary texture and dirty its draw state. */
 void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
@@ -1497,7 +1548,7 @@ extern const u32 D_0034E520[];
 extern const u32 D_0034E450[];
 extern const u32 D_0034E4D0[];
 extern SdfPoolNode *D_0034E620[];
-extern SdfPoolNode D_00325248;
+
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
 void parDrawPendingCellSystems(void) {
@@ -1626,7 +1677,7 @@ void parDrawPendingCellSystems(void) {
     }
     for (i = 0; i < 4; i++) {
         if (lists[i] != 0) {
-            D_0034E620[i]->append(D_0034E620[i], lists[i]);
+            parAppendDrawSurfacePool(D_0034E620[i], lists[i]);
         }
     }
     if (lists[4] != 0) {
@@ -1640,7 +1691,7 @@ void parDrawPendingCellSystems(void) {
         packet[4] = 0x8000000026ULL;
         packet[5] = 0x42;
         sdfAppendPacket(specialList, (u32)packet);
-        D_00325248.append(&D_00325248, specialList);
+        parAppendDrawSurfacePool(&kwlnDrawSurfaces[56], specialList);
         packet = (u64 *)sdfAllocPacketAligned(0x30);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -1649,7 +1700,7 @@ void parDrawPendingCellSystems(void) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfAppendPacket(lists[4], (u32)packet);
-        D_00325248.append(&D_00325248, lists[4]);
+        parAppendDrawSurfacePool(&kwlnDrawSurfaces[56], lists[4]);
     }
     D_003BB014 = NULL;
 }
@@ -1704,7 +1755,7 @@ void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
         counts[1] = remaining;
         sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
     }
-    emitter->append(emitter, list);
+    parAppendDrawSurfacePool(emitter, list);
 }
 
 ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
