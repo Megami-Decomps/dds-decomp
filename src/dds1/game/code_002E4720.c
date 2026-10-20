@@ -1537,7 +1537,52 @@ char *sdfFileCmdMakeRealFileName(char *path, s32 worker) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", sdfFileCmdAnalyzeFileName);
+extern s32 memcmp(const void *, const void *, u32);
+
+extern char D_003BD450[]; /* /movie/ */
+
+extern char D_003BD458[]; /* cdimg: */
+
+/* Split the device prefix off a path and report the worker that serves it. */
+s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
+    s32 worker;
+    s32 prefixLength;
+    const char *suffix;
+    const char *name;
+
+    if (strchr(path, ':') != NULL) {
+        if (memcmp(path, D_003BD438, 7) == 0) {
+            suffix = path + 7;
+            if (memcmp(suffix, D_003BD450, 7) == 0) {
+                worker = 3;
+                prefixLength = 0;
+            } else if (memcmp(suffix, "/movie2/", 7) == 0) {
+                worker = 3;
+                prefixLength = 0;
+            } else {
+                worker = 0;
+                prefixLength = 7;
+            }
+        } else if (memcmp(path, D_003BD440, 6) == 0) {
+            worker = 1;
+            prefixLength = 6;
+        } else if (memcmp(path, D_003BD448, 5) == 0) {
+            worker = 2;
+            prefixLength = 5;
+        } else if (memcmp(path, D_003BD458, 6) == 0) {
+            worker = 3;
+            prefixLength = 6;
+        } else {
+            return -1;
+        }
+        name = path + prefixLength;
+    } else {
+        worker = D_003BD42E;
+        name = path;
+    }
+    *resolvedPath = sdfFileCmdMakeRealFileName((char *)name, worker);
+    return worker;
+}
 
 /* Allocate a request state and retain the callback's opaque context word. */
 DevState *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
