@@ -236,6 +236,8 @@ segments:
       - [0x1BF628, c, game/code_002BE628]
       - [0x1C8D00, c, file/fileManager]  # Nocturne __FILE__
       - [0x1C93F0, c, game/code_002C83F0]
+      - [0x1C9F88, c, game/code_002C8F88]
+      - [0x1CA2D0, c, game/code_002C92D0]
       - [0x1CA2E8, c, mc/mcManager]  # Nocturne __FILE__
       - [0x1CA6D0, c, game/code_002C96D0]
       - [0x1DD108, c, game/code_002DC108]  # mirrors dds1 game/code_0029A810 (tools/shared_funcs.py)
