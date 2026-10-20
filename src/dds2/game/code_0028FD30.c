@@ -244,18 +244,19 @@ s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *
         } else {
             messageEntry = messageEntries.entries[3][activeVariant];
         }
+        dspStartEntry(messageEntry);
+        /* The dialog callback can update the caller-owned acquisition record. */
+        currentFlags = *sourceBits;
     } else if (mode == 0x0300) {
         messageEntry = messageEntries.entries[4][activeVariant];
+        dspStartEntry(messageEntry);
+        currentFlags = *sourceBits;
     } else if (mode == 0x0400) {
         messageEntry = messageEntries.entries[5][activeVariant];
-    } else {
-        goto complete;
+        dspStartEntry(messageEntry);
+        currentFlags = *sourceBits;
     }
-    dspStartEntry(messageEntry);
-    /* The dialog callback can update the caller-owned acquisition record. */
-    currentFlags = *sourceBits;
 
-complete:
     /* Without a dialog callback, the earlier flags snapshot is still current. */
     publishedFlags = (currentFlags & ~0x2000) | 0x4000;
     *sourceBits = publishedFlags;
