@@ -834,7 +834,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             if (datCommandRecords[command].flags & 2) {
                 kind = 4;
             } else if (runtime->unk220 & 0x10) {
-                goto normalReflectedHit;
+                kind = 1;
             } else {
                 switch (kind) {
                 case 0x20000:
@@ -842,7 +842,6 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                     break;
                 case 2:
                 case 4:
-                normalReflectedHit:
                     kind = 1;
                     break;
                 }

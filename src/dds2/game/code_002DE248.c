@@ -4087,19 +4087,19 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
             switch (track->kind) {
             case 3:
                 reference = D_00437E60[0];
+                texture = sdfGetOrCreateTextureForReference(surface, reference);
                 break;
             case 4:
                 reference = D_00437E60[1];
+                texture = sdfGetOrCreateTextureForReference(surface, reference);
                 break;
             default:
                 texture = NULL;
-                goto setTexture;
+                break;
             }
-            texture = sdfGetOrCreateTextureForReference(surface, reference);
         } else {
             texture = sdfGetOrCreateTextureForReference(surface, reference);
         }
-setTexture:
         sdfSetAssetPrimaryTextureAddress(track->handle, texture);
     }
     sdfConsAppendAssetPacket(list, track->handle, 0);

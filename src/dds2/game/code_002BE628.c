@@ -1926,12 +1926,7 @@ s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callb
         if (entry->canEnter != NULL) {
             accepted = entry->canEnter(callback) != 0;
         }
-        if (!accepted) {
-            if ((*slot)->flags & 1) {
-                goto enter;
-            }
-        } else {
-        enter:
+        if (accepted || ((*slot)->flags & 1)) {
             if (!((*slot)->flags & 0x10000)) {
                 mnuApplyPanelTransitionAction(0, *slot, state, (u32)callback);
                 (*slot)->flags |= 0x10000;
