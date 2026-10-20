@@ -1178,7 +1178,7 @@ than manufacture effects. Whole-unit and complete-build acceptance still apply.
 
 DDS1 `func_001BDF60` (`0x001BDF60`, 1584 bytes) shares the sequence
 `frFontDrawGlyphWithSharedFlags(glyph, 1)` followed by
-`frFontQueueGlyphForCurrentDrawBuffer(glyph)` with nine other native sites.
+`frDestroyFontRequestAfter(glyph)` with nine other native sites.
 A plain `btlSubmitSharedTextGlyph` static inline is used at all ten sites,
 across seven functions in `game/code_001A9780.c`; this is a recurring text
 submission operation, not a one-off register-allocation wrapper. Eight sites
@@ -2009,7 +2009,7 @@ still has legacy caller/provider declarations. Recover its renderer
 return and argument-forwarding ABI independently; canonical draw owners
 do not establish that wrapper ABI.
 
-`sdfAllocatePacketList` and its optional allocation callback return native
+`sdfPrimAllocDrawTag` and its optional allocation callback return native
 `s32` allocation words. Decode each newly allocated list once into
 `SdfListHead *`; keep the full `SdfPoolNode` owner and typed list thereafter.
 The diagnostic draw leaves similarly decode each 20-byte
@@ -2077,7 +2077,7 @@ splitting copy, not a pointer or user-variable flag), then by descending
 `floor_log2(refs) * refs / live_length * 10000 * width`, and only then by
 ascending pseudo number. Pseudos local to one basic block with a single death
 are allocated earlier by local-alloc, with copy suggestions tried first.
-Controls on DDS1 `func_00104168`, `sdfDevResolvePathForWorker` and others: plain versus
+Controls on DDS1 `func_00104168`, `sdfFileCmdAnalyzeFileName` and others: plain versus
 `register` storage class, prototyped versus unprototyped integer calls, and
 visible/static/opaque out-of-line callees all left the priorities and homes
 unchanged. The ordering follows from what is referenced and for how long:
@@ -4071,7 +4071,7 @@ record and these pointer contracts live in `mnu_work.h`.
 ## DDS1 staff pages retain one embedded window owner
 
 DDS1 `func_00276898` receives a `KwlnTask *` and explicitly forwards it to
-`kwlnTaskGetUserValue`; the native accessor loads the task's `+0x38` word.
+`dds3GetProcessData`; the native accessor loads the task's `+0x38` word.
 `CampMenuContext.partyWindow` starts at `+0x15C`, with native slots at window
 `+0x78` and a `0x134` stride. Its `lists[0]` is at window `+0x67C`, hence
 context `+0x7D8`. `mnuDrawSlotIcons` receives the window itself: the native
@@ -4866,14 +4866,14 @@ distinct from the complete primary actor-status record above.
 DDS2 `0032A230` uses the separate control bytes `D_00438A1C` and
 `D_00438A1D`, not `sdfBusyBufferIndex` or the `sdfTextureUpdateQueue`
 object. The transfer drain rechecks `D_00438A1C` after `SleepThread`;
-`sdfWaitSlotReady` polls volatile `D_00438A1D`. Keep both control bytes
+`sdfDrawSync` polls volatile `D_00438A1D`. Keep both control bytes
 volatile, clear the active byte before testing the reset byte, and retain
 the existing volatile GS image-upload semaphore contract.
 
 DDS1 `002D1380` has the same protocol with `D_003BD32C` and
 `D_003BD32D`. Retail `002D51B0`/`002D5218`/`002D5258` repeatedly
 checks the reset byte while polling hardware; `002D52DC`/`002D5338`
-reloads it after sleeping, and `sdfWaitSlotReady` polls the active byte
+reloads it after sleeping, and `sdfDrawSync` polls the active byte
 at `002D54B0`. These real shared controls justify the volatile byte
 contracts; they are not scheduling-only qualifiers. Its GS `BUSDIR`
 write at `002D148C` is a genuine 64-bit MMIO access.
@@ -4904,7 +4904,7 @@ The battle callers' float-vector scratch arrays remain float arrays; the
 ## General-heap descriptor and represented-address boundary
 
 The matched `sdfMemory.c` providers in both games distinguish the descriptor
-from its represented data address: `sdfAllocGeneralBlock(s32)` returns a
+from its represented data address: `sdfMemAllocDirect(s32)` returns a
 `SdfMemBlock *`, while `sdfMemoryGetBlockAddress(SdfMemBlock *)` returns a
 `u32` address word. Task-resource and grid `allocation` fields retain the
 descriptor pointer for destruction; they are not integer allocation indices.
@@ -5929,7 +5929,7 @@ file request at +00, PAC request at +04, signed phase/index at +08/+0A,
 and an unknown word at +0C. Keep this as the primary `LmapLoadState`, with
 the shared `FilePacRequest` owning the PAC queue rather than another view.
 
-`func_0030A8A8` forwards `kwlnTaskGetUserValue` in `$4` through the matched
+`func_0030A8A8` forwards `dds3GetProcessData` in `$4` through the matched
 `func_0030ABF0` wrapper to the loader. Both receive `LmapTaskState *`;
 the wrapper compares the loader's actual `s32` result directly. The former
 void/no-argument declarations and `s64` comparison local were unnecessary.
@@ -6784,7 +6784,7 @@ DDS2's command-list text helpers receive a 32-bit handle from
 `frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8)`. The provider in
 `interface/frFont.c` forwards that pointer and mode to the chain renderer.
 Use the same explicit word-to-pointer boundary as the adjacent
-`frFontQueueGlyphForCurrentDrawBuffer` call, rather than relying on an
+`frDestroyFontRequestAfter` call, rather than relying on an
 implicit integer argument. All three callers (now in `game/code_001B2AF8`)
 retain their retail instructions. This contract correction does not
 claim that the still-ASM command-list renderer has matched.
@@ -6824,7 +6824,7 @@ it against six. Field-area pickup count/score at `+106/+108` are cleared
 by the initializer and incremented by the collector. Existing field
 getters and controller clients use their primary members, not interior
 global aliases. The precise PRNG contract is
-`u32 effMiscRand(struct EffRandState *)`; null selects the default state
+`u32 sdfGetRand(struct EffRandState *)`; null selects the default state
 in the real `00340AC8` provider.
 
 ## DDS2 HP/MP command factors use the primary battle owners
@@ -6875,7 +6875,7 @@ and path tables use the existing generic pointer/count descriptor.
 DDS2's slot setter takes three filename pointers: its battle callers pass
 the `.data` strings `human/pc001_00.PB` and `human/pc001_01.PB`.
 `mdlReleaseViewerAllocation` in both games receives the allocated
-chip-cell pointer directly and forwards it to `sdfReleaseChipBlock`.
+chip-cell pointer directly and forwards it to `sdfChipFreeDirect`.
 
 ## Scene AI sprite angles and scale-call boundaries
 
@@ -6982,7 +6982,7 @@ return, a new object view, or a wrong-prototype target landing.
 
 The paired PMD2 `evtPolygonMovieCreateHeader` and PMD3
 `func_00234C18`/`func_0024F9B8` constructors return the `SdfMemBlock *`
-obtained from `sdfAllocGeneralBlock`; their output arguments separately
+obtained from `sdfMemAllocDirect`; their output arguments separately
 receive the retained data address. Returning the handle directly retires
 the pointer-to-integer adapters without changing any constructor text.
 No existing C caller or shared declaration uses these four providers.
@@ -7279,7 +7279,7 @@ unchanged.
 `evtBuildFrameStatePacketList` returns the `SdfListHead *` created by
 `sdfCreateResetPacketList`; its frame callers append that same owner to
 their `SdfPoolNode`. The background resource/descriptor builders retain
-the list returned by `sdfAllocatePacketList` as `SdfListHead *` too.
+the list returned by `sdfPrimAllocDrawTag` as `SdfListHead *` too.
 `sdfConsAppendProgramReferencePacket` receives that CPU list owner as
 its first argument and a `DmaPacketHeader *` as its second argument.
 Only the second argument is converted to the genuine packet-address
@@ -7336,7 +7336,7 @@ origin instead changes the compiler's addressing in all three viewer
 submission functions. Both games' list locals and callbacks remain
 byte-exact with the canonical owner and native symbols.
 
-The shop builders also retain their `sdfAllocatePacketList` result as
+The shop builders also retain their `sdfPrimAllocDrawTag` result as
 `SdfListHead *`. Frame initialization passes `&scene.link` to the
 linked-payload helper, rather than casting the complete `SdfSceneNode`.
 
@@ -8461,7 +8461,7 @@ this native-evidenced unit; its index-list providers remain in the preceding
 unit. There is no visibility stub, mismatching provider or flag change.
 
 The local inline chooser distinguishes unavailable actors (variant one),
-category-flag-two actors (variant zero), and an actual `effMiscRandMod(NULL, 2)`
+category-flag-two actors (variant zero), and an actual `sdfGetRandInt(NULL, 2)`
 draw. Only that draw requests the first site's distance shrink. The same
 native policy occurs at DDS1 `001DE048..001DE08C` / `001DE218..001DE248`,
 their DDS2 twins `001EB728..001EB76C` / `001EB8F8..001EB928`, and independent
@@ -9444,7 +9444,7 @@ chooses the disc/host/PFS path builder in `sdfDevAllocateNormalizedPath`; the
 fallback worker is read by the native file-path classifier only when the
 input lacks a colon. `sdfDevSetDefaultDeviceWorker` sets both, while
 `sdfDevSetFallbackDeviceWorker` changes the latter independently.
-`sdfDevAllocateWorkerPath` builds cdrom0/host0/pfs0 paths or copies worker-three
+`sdfFileCmdMakeRealFileName` builds cdrom0/host0/pfs0 paths or copies worker-three
 input; unsupported workers return NULL. The normalized-path allocation stays
 0x80 bytes. Existing fixed-size buffers, length assumptions and copy forms
 remain untouched.
@@ -9811,7 +9811,7 @@ count to one before the existing release logic. Native suppression flags,
 return widths, and neighboring misnamed sound APIs are left unchanged.
 
 `mdlReleaseViewerAllocation` forwards the allocation pointer directly to
-`sdfReleaseChipBlock`; it does not dereference an allocation wrapper.
+`sdfChipFreeDirect`; it does not dereference an allocation wrapper.
 
 ## Flash payload duplication callbacks
 
@@ -10764,7 +10764,7 @@ between DDS1 and DDS2. `sdfInitializeRuntimeServices` initializes heaps,
 textures, pad, graphics/resource services, the DMA program and tick worker.
 `sdfInitializeGraphicsWorkers` sizes each packet-buffer half and starts the
 transfer/buffer workers. Their `packetBufferBytes` parameter is a byte count:
-`sdfResizeDoubleBuffer` rounds it to 128 bytes, allocates twice that size,
+`sdfGrMakePacketBuff` rounds it to 128 bytes, allocates twice that size,
 and places the second half that many bytes after the first.
 
 `sdfTexQueueImageUpload` builds GS transfer setup and chunked IMAGE/REF DMA,
@@ -13016,7 +13016,7 @@ normal cross-jumping merges their shared tails into the two native callsites.
 DDS2 `mnuApplyRandomStatItemEffect` (`002B06A8`, 492 bytes) reads five
 eligible flags from the selected menu row, then a 20-byte signed weight row.
 `cumulativeWeight` and `weightCount` are real scan totals. Initializing them
-before the two `effMiscRand` calls keeps their values live across those calls
+before the two `sdfGetRand` calls keeps their values live across those calls
 and supplies the weighted scan in the retail lifetime.
 
 The qualified `cc1probe --all` trace places the count and cumulative total in
@@ -14330,7 +14330,7 @@ individual NUL strings, add C literals, or manufacture DDS1 counterparts.
 
 ## Graphics workers, general release requests and motion slot dispatch
 
-`sdfGeneralReleaseRequest` is initialized with `sdfReleaseResourceAllocation`
+`sdfGeneralReleaseRequest` is initialized with `sdfMemFreeDirect`
 and receives allocations through the general-release queue. It is distinct
 from the already named chip-release request. `sdfNamedResourceRpcClient`
 is bound to the named-resource service and reused for the packed name/data
