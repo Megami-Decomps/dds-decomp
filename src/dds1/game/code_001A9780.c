@@ -2858,22 +2858,11 @@ void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
     work->battleFlags |= 0x100000;
 }
 
-typedef struct BattlePanelEdgeWork {
-    u8 pad00[0x30];
-    s8 phase;
-    s8 edgePhase;
-    u8 pad32[2];
-    s32 timer;
-    u8 pad38[8];
-    f32 anchor[4];
-    f32 corners[4][4];
-    s16 alpha;
-} BattlePanelEdgeWork;
 
 extern f32 D_003A2450[4];
 
 /* Advance one corner toward the panel boundary before moving to the next edge. */
-s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BattlePanelEdgeWork *work) {
+s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
     f32 center[4];
 
     memcpy(center, D_003A2450, sizeof(center));
@@ -2931,8 +2920,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2450);
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2460);
 
 void func_001AF058(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
-    /* Animation fields use the existing panel-edge payload view. */
-    BattlePanelEdgeWork *panel = (BattlePanelEdgeWork *)work;
+    BtlAnalysisPanelWork *panel = work;
     f32 center[4] __attribute__((aligned(16)));
     s32 horizontalExtent;
     s32 verticalExtent;
@@ -2993,10 +2981,10 @@ void func_001AF058(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
         break;
     case 2:
         btlAdvancePanelCornerPhase(command, panel);
-        panel->alpha += 32;
-        panel->alpha = panel->alpha <= 0 ? 0 :
-            panel->alpha >= 128 ? 128 : panel->alpha;
-        if (panel->alpha >= 128) {
+        panel->edgeAlpha += 32;
+        panel->edgeAlpha = panel->edgeAlpha <= 0 ? 0 :
+            panel->edgeAlpha >= 128 ? 128 : panel->edgeAlpha;
+        if (panel->edgeAlpha >= 128) {
             work->page = 3;
         }
         break;
@@ -3084,10 +3072,10 @@ void func_001AF058(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
                 work->page = 7;
             }
         } else {
-            panel->alpha -= 32;
-            panel->alpha = panel->alpha <= 0 ? 0 :
-                panel->alpha >= 128 ? 128 : panel->alpha;
-            if (panel->alpha <= 0) {
+            panel->edgeAlpha -= 32;
+            panel->edgeAlpha = panel->edgeAlpha <= 0 ? 0 :
+                panel->edgeAlpha >= 128 ? 128 : panel->edgeAlpha;
+            if (panel->edgeAlpha <= 0) {
                 work->page = 8;
             }
         }

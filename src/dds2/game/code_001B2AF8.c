@@ -63,17 +63,6 @@ extern u32 strlen(const char *);
  * An early void declaration recolors btlDrawItemCommandRows' loop carriers:
  * retail row $21, y $22, total $30 become $20, $21, $23 respectively. */
 
-typedef struct BattlePanelEdgeWork {
-    u8 pad00[0x30];
-    s8 phase;
-    s8 edgePhase;
-    u8 pad32[2];
-    s32 timer;
-    u8 pad38[8];
-    f32 anchor[4];
-    f32 corners[4][4];
-    s16 alpha;
-} BattlePanelEdgeWork;
 
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
@@ -3746,7 +3735,7 @@ void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
 }
 
 /* Advance one corner toward the panel boundary before moving to the next edge. */
-s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BattlePanelEdgeWork *work) {
+s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
     f32 center[4];
 
     memcpy(center, D_00415F80, sizeof(center));
@@ -3804,8 +3793,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F80);
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F90);
 
 void func_001B9C70(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
-    /* Animation fields use the existing panel-edge payload view. */
-    BattlePanelEdgeWork *panel = (BattlePanelEdgeWork *)work;
+    BtlAnalysisPanelWork *panel = work;
     f32 center[4] __attribute__((aligned(16)));
     s32 horizontalExtent;
     s32 verticalExtent;
@@ -3866,10 +3854,10 @@ void func_001B9C70(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
         break;
     case 2:
         btlAdvancePanelCornerPhase(command, panel);
-        panel->alpha += 32;
-        panel->alpha = panel->alpha <= 0 ? 0 :
-            panel->alpha >= 128 ? 128 : panel->alpha;
-        if (panel->alpha >= 128) {
+        panel->edgeAlpha += 32;
+        panel->edgeAlpha = panel->edgeAlpha <= 0 ? 0 :
+            panel->edgeAlpha >= 128 ? 128 : panel->edgeAlpha;
+        if (panel->edgeAlpha >= 128) {
             work->page = 3;
         }
         break;
@@ -3957,10 +3945,10 @@ void func_001B9C70(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
                 work->page = 7;
             }
         } else {
-            panel->alpha -= 32;
-            panel->alpha = panel->alpha <= 0 ? 0 :
-                panel->alpha >= 128 ? 128 : panel->alpha;
-            if (panel->alpha <= 0) {
+            panel->edgeAlpha -= 32;
+            panel->edgeAlpha = panel->edgeAlpha <= 0 ? 0 :
+                panel->edgeAlpha >= 128 ? 128 : panel->edgeAlpha;
+            if (panel->edgeAlpha <= 0) {
                 work->page = 8;
             }
         }

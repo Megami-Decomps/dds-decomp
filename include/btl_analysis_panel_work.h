@@ -18,7 +18,10 @@ typedef struct BtlAnalysisPanelWork {
     s32 x;
     s32 y;
     s8 page;
-    u8 pad31[0xF];
+    s8 edgePhase;
+    u8 pad32[2];
+    s32 timer;
+    u8 pad38[8];
     f32 anchor[4];
     f32 corners[4][4];
     s16 edgeAlpha;
@@ -37,7 +40,10 @@ typedef struct BtlAnalysisPanelWork {
     s32 x;
     s32 y;
     s8 page;
-    u8 pad31[0xF];
+    s8 edgePhase;
+    u8 pad32[2];
+    s32 timer;
+    u8 pad38[8];
     f32 anchor[4];
     f32 corners[4][4];
     s16 edgeAlpha;
