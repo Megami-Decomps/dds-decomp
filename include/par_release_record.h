@@ -18,7 +18,7 @@ typedef struct ParReleaseRecord {
     EffPacketParams request;
     struct SdfAsset *asset;
     u128 *positions;
-    u32 (*texcoords)[2];
+    f32 (*texcoords)[2];
     u128 *normals;
     u32 *colors;
     struct ParReleaseRecord *next;
