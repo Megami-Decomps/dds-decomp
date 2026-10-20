@@ -184,7 +184,6 @@ segments:
       - [0x13B9A8, c, event/evtStage]  # Nocturne __FILE__
       - [0x13BF20, c, game/code_0023AF20]
       - [0x13C3A0, c, event/evtUnitManager]  # Nocturne __FILE__
-      - [0x13E658, c, game/code_0023D658]
       - [0x141D20, c, event/evtCommand]  # Nocturne __FILE__
       - [0x143CB8, c, game/code_00242CB8]
       - [0x1447F0, c, game/code_002437F0]
@@ -391,7 +390,6 @@ segments:
       - [0x321FF0, .rodata, game/code_00233660]
       - [0x322578, .rodata, event/evtStage]
       - [0x3225D0, .rodata, event/evtUnitManager]
-      - [0x322650, .rodata, game/code_0023D658]
       - [0x322BC0, .rodata, event/evtCommand]
       - [0x322FE8, .rodata, game/code_00242CB8]
       - [0x3230E8, .rodata, game/code_002437F0]
@@ -517,7 +515,6 @@ segments:
       - [0x33636C, .lit4, game/code_00233660]
       - [0x3363C4, .lit4, event/evtStage]
       - [0x3363D0, .lit4, event/evtUnitManager]
-      - [0x3363EC, .lit4, game/code_0023D658]
       - [0x33641C, .lit4, event/evtCommand]
       - [0x336420, .lit4, game/code_00242CB8]
       - [0x33642C, .lit4, game/code_002437F0]
@@ -606,7 +603,7 @@ segments:
       - [0x337CF8, .sdata, game/code_00227288]
       - [0x337FA0, .sdata, model/mdlManager]  # `/model/` (func_00231B50)
       - [0x337FAC, .sdata, game/code_00233660]
-      - [0x3381EC, .sdata, game/code_0023D658]
+      - [0x3381EC, .sdata, event/evtUnitManager]
       - [0x3381F8, .sdata, game/code_00242CB8]
       - [0x338210, .sdata, game/code_002437F0]
       - [0x33822C, .sdata, game/code_00244F00]
