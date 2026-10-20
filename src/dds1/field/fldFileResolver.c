@@ -4986,16 +4986,11 @@ s32 fldUpdateFieldPlayerMovement(void) {
             }
         } else {
             s32 reversed = fileTestSavedSlotFlags(3) == 0;
-            if (D_00324510[1][0][8] != 0) {
-                if (D_00324510[1][0][10] == 0) {
-                    fldAreaState.negatedAngle -= 4.5f;
-                    goto update_camera_angle;
-                }
-            } else if (D_00324510[1][0][10] != 0) {
+            if (D_00324510[1][0][8] != 0 && D_00324510[1][0][10] == 0) {
+                fldAreaState.negatedAngle -= 4.5f;
+            } else if (D_00324510[1][0][8] == 0 && D_00324510[1][0][10] != 0) {
                 fldAreaState.negatedAngle += 4.5f;
-                goto update_camera_angle;
-            }
-            if (D_003BA870[0][0][0] < 0x20) {
+            } else if (D_003BA870[0][0][0] < 0x20) {
                 if (reversed) {
                     fldAreaState.negatedAngle += 3.0f;
                 } else {
@@ -5022,7 +5017,6 @@ s32 fldUpdateFieldPlayerMovement(void) {
             } else {
                 goto camera_input_done;
             }
-update_camera_angle:
             fldAreaState.cameraTargetAngle = fldSnapAngleToCompassOctant(fldAreaState.negatedAngle);
         }
     }
@@ -5033,15 +5027,13 @@ camera_input_done:
         fldClearCameraModelColor();
         fldDisableCameraObjectFlag();
         fldClearCameraObjectTransitionFlags();
-clear_highlight:
         fldClearCameraObjectHighlightFlag();
     } else {
         fldDisableCameraObjectFlag();
         fldSetCameraObjectTransitionFlag();
         if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
-            goto clear_highlight;
-        }
-        if (fldAreaState.dist < 100.0f) {
+            fldClearCameraObjectHighlightFlag();
+        } else if (fldAreaState.dist < 100.0f) {
             fldSetCameraObjectHighlightFlag();
         } else {
             fldClearCameraObjectHighlightFlag();
