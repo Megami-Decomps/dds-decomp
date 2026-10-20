@@ -14963,6 +14963,70 @@ state all have hooked/unhooked equality. Whole-unit gates are `15/0` and
 and all three canaries, are exact. Complete object data compares to retail
 with zero differing bytes, including 58 relocated readonly entries.
 
+## Unit-motion manager: restore local body knowledge and contiguous data
+
+The Nocturne Dec 26 2002 motion driver at `0x001E6710` references
+`../event/src/evtUnitManager.c` at `0x0053A930`. Its unique
+`set exmot %d_%d\n` string and matching control-flow shape identify DDS1
+`func_00222ED8` (1640 bytes) and DDS2 `func_0023DA70` (1800 bytes); this is
+source-membership evidence, not a claim that the three functions are identical.
+
+The idle restart distinguishes the requested motion ID from the current ID.
+The unequal arm restarts with `unit->unkBC`; the equal arm restarts with the
+captured `model->current.h.motionIndex`. These are genuinely different source
+arguments that become equal under the guard. Their later common-tail merge
+retains the otherwise dead current-index load at DDS1 `0x00222FEC`, DDS2
+`0x0023DB84`, and Nocturne `0x001E6864`. Identical copied arms or a bare unused
+load are not substitutes. Set the model's frame step before resetting the unit
+motion ticks. In the timed transition, capture the current motion between the
+state change and the flag clear: these are real, alias-sensitive state updates.
+The wobble constants are ordinary float literals, including DDS1's owned
+`.lit4` entries, not mutable external float objects.
+
+The final residual was a `beql` instead of the native plain `beq` at driver
+`+0x258`. In the extern-only DDS2 probe, reorg classifies the direction call as
+potentially throwing and keeps `$v0` live on the opposite path. Defining
+`evtApplyUnitDirectionOffset` in the same unit removes that spurious liveness;
+the qualified final probe's `mark_target_live_regs` omits `$v0` at that branch,
+and the native delay-slot fill becomes legal without annulment. Use the actual
+provider definitions, not a `nothrow` declaration, copied helper body, or
+compiler-option override.
+
+Join the complete adjacent script/unit-method suffix into `event/evtUnitManager`
+in each game, retaining retail function order through the existing
+`event/evtCommand` boundary. Remove the former `game/code_00222AC0` and
+`game/code_0023D658` C/data owners and migrate their raw-data include paths.
+A split immediately after the driver puts the following readonly start at
+DDS1 `0x003AC118` / DDS2 `0x00421688` (eight modulo sixteen), misphasing later
+jump tables. The complete adjacent owners instead retain these native spans:
+
+| Section | DDS1 [start, end) | DDS2 [start, end) |
+| --- | --- | --- |
+| `.text` | `0x00220830`–`0x002260C0` | `0x0023B3A0`–`0x00240D20` |
+| `.rodata` | `0x003AC060`–`0x003AC650` | `0x004215D0`–`0x00421BC0` |
+| `.lit4` | `0x003BA134`–`0x003BA180` | `0x004353D0`–`0x0043541C` |
+| `.sdata` | `0x003BBDAC`–`0x003BBDB8` | `0x004371EC`–`0x004371F8` |
+
+Both owners retain default `-O2 -G8`; neither `cflags.txt` needs an override.
+The window's retained unit is an `EvtUnit *`, matching
+`evtActivateStoredUnitMotionSlot(EvtUnit *)`; pass that pointer directly at
+both activation sites and preserve the same four-byte native storage. No
+shared-header change or compatibility owner is needed.
+
+Both complete-owner gates report `113 match, 0 differ`; the standard canaries
+report `192/0`, `158/0`, and `15/0`. Independently linking the ordinary full-ASM
+compiler objects at the unchanged native section addresses reproduces every
+emitted byte of all four runtime sections in both retail ELFs. The remaining
+four text bytes and two readonly bytes are zero alignment tails at the next
+owners. All 76 literal bytes and 12 small-data bytes match in their native order.
+Qualified probes have GDB exit zero and hooked/unhooked equality. Canonical
+expected objects, assembly, linker scripts, and reports are not changed.
+
+Nocturne also attributes the earlier endpoint/scaled-value providers to this
+source family, but that does not prove their DDS data ownership or exact left
+boundary. Leave that preceding DDS owner unchanged in this right-boundary
+repair; do not present a Nocturne minimum span as proven DDS file edges.
+
 ## Section-model and indexed-image translation units
 
 DDS2's section-model unit starts at `0x0031C8B0` and ends at
