@@ -274,7 +274,7 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes) {
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
@@ -308,7 +308,7 @@ void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 
 }
 
 extern DevConsState *D_00438AB0;
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes);
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
 void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers);
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
