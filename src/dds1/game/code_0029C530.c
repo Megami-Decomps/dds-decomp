@@ -7564,7 +7564,7 @@ typedef struct EffSpiralParticle {
 } EffSpiralParticle;
 
 /* vu0 routine: native matrix, cross/normalize and ribbon extrusion. */
-void func_002AD6B8(EffClassWork *work) {
+void effUpdateBillSpiral(EffClassWork *work) {
     EffBillSpiralConfig *config = (EffBillSpiralConfig *)work->payload;
     EffectNodeHeader *state;
     EffRibbonWork *asset;
