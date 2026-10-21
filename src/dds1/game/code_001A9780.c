@@ -48,6 +48,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_phase_panel_work.h"
 #include "btl_roster_pair.h"
 #include "sdf.h"
+#include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
@@ -175,7 +176,6 @@ s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUni
 
 s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command);
 
-/* The label resource index is the copied party record's unit ID. */ void *btlGetIndexedUiResource(BtlUnit *unit);
 
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);

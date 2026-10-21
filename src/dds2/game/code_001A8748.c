@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_indexed_ui_resource_api.h"
 #include "btl_actor_status_table_api.h"
 #include "itf_debug_panel_work.h"
 #include "itf_color_panel_row.h"
@@ -96,7 +97,7 @@ extern u8 btlSharedActorTransformParameters[];
 
 extern u8 *D_00435E00;
 
-extern void *btlPartyUnitGunTypeNames[];
+extern const u8 *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
 
@@ -3382,7 +3383,7 @@ s32 btlGetCommandAttributeName(s32 commandIndex) {
 }
 
 /* The label resource index is the copied party record's unit ID. */
-void *btlGetIndexedUiResource(BtlUnit *unit) {
+const u8 *btlGetIndexedUiResource(BtlUnit *unit) {
     return btlPartyUnitGunTypeNames[unit->partyRecord.unitId];
 }
 
