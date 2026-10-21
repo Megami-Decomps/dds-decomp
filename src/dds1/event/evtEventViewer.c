@@ -59,8 +59,6 @@ extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
 extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 struct EvtRuntime;
-struct EvtRuntime;
-struct EvtRuntime;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
@@ -117,6 +115,8 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 /* Linked timeline track. Saved vectors and the attachment latch are used by
  * kind-1 world-object tracks; the vectors keep their original embedded layout. */
 
+/* Timeline payloads store fogFar before fogNear. */
+
 
 extern void evtReorderListNodes(EvtRuntimeGroup *track);
 
@@ -158,7 +158,6 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void evtEventViewerReleasePendingNode(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
-EffWorldNode *dds3GetWorldObject(void);
 
 EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer)
 {
@@ -814,7 +813,6 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);
 extern EffWorldNode *evtEventViewerGetNameObject(s32, EvtRuntime *);
 extern s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *, EffWorldNode *, EffWorldNode *, EffWorldNode *, EffWorldNode *);
-extern void evtEventViewerFreeBuffer(EvtRuntimeChild *);
 extern void *evtEventViewerCreateOriginEffect(void *, u32, s32, s32, u32, EvtRuntime *);
 extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
 extern void mnuShopRegisterSceneObject(EvtRuntime *, s32);
@@ -1005,91 +1003,6 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         break;
     }
 }
-
-
-
-
-
-struct EvtRuntime;
-struct EvtRuntime;
-struct EvtRuntime;
-
-extern char evtViewerTaskName[]; /* "EventViewer" */
-s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
-s32 evtViewerUpdateFrame(KwlnTask *task);
-void fldInitializeCameraColorResource(void);
-s32 evtCreateFrameVariableTask(void);
-s32 evtViewerScheduleFrameVariableTask(KwlnTask *task);
-extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
-
-/* Effect-channel assignments driven by the viewer's timeline tracks. */
-
-extern void effInitCh71Id(void);
-extern void effInitCh72Id(void);
-extern void effInitCh75Id(void);
-extern void effInitCh76Id(void);
-extern void effSetCh71Id(SdfTex *texture);
-extern void effSetCh72Id(SdfTex *sourceHandle);
-extern void effSetCh75Id(SdfTex *texture);
-extern void effSetCh76Id(SdfTex *sourceHandle);
-
-
-extern u32 mnuCampGetPrimaryOption(void *scene);
-extern const char *D_00368410[];
-extern const char *D_00368418[];
-extern const char *D_00368420[];
-extern const char *D_00368430[];
-extern s32 D_003BBE94;
-
-extern u32 kwlnDrawControlFlags;
-extern s8 D_0036876A[];
-extern u8 D_003BBE88[3];
-extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
-void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
-void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
-EffWorldNode *dds3GetWorldObject(void);
-f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-void sdfSetViewFieldOfView(f32 fieldOfView);
-void mnuStopMovieDrawTask(void);
-void mnuCheckMovieDecoderStatus(void);
-
-/* Handles retained by the viewer and by its owning task context. */
-
-
-
-/* Script-command parameter slots have byte, halfword, word and float views. */
-
-
-u16 evtViewerPopHistory(EvtRuntime *viewer);
-
-/* Timeline key shared by several track kinds, not a rendered font glyph.
- * The selector/channel widths depend on the enclosing track and key kind. */
-
-
-/* Linked timeline track. Saved vectors and the attachment latch are used by
- * kind-1 world-object tracks; the vectors keep their original embedded layout. */
-
-
-extern void evtReorderListNodes(EvtRuntimeGroup *track);
-
-typedef struct CampDisplayDefaults CampDisplayDefaults;
-extern void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
-extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
-
-
-/* Timeline payloads store fogFar before fogNear. */
-extern KwlnDrawVectorParams kwlnDrawVector;
-extern u128 *D_00324770[];
-extern u128 kwlnDefaultColorVector[];
-extern f32 D_003BD358;
-extern f32 D_003BD35C;
-extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
-extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
-extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
-extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
-
-extern void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
-extern void evtEventViewerFreeBuffer(EvtRuntimeChild *key);
 
 void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                    s32 interval, EvtRuntime *viewer) {
@@ -1724,14 +1637,11 @@ extern void evtViewerCountFlaggedUpdates(EvtRuntime *viewer);
 extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
-extern s32 evtViewerTestIndexedCondition(u32 condition);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame,
                                            s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                                         s32 interval, EvtRuntime *viewer);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
-extern u8 kwlnDrawOverlayEnabled;
-extern EvtRuntimeGroup *D_003BBE80;
 
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     EvtRuntimeGroup *group;
@@ -2162,7 +2072,6 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
     }
 }
 
-extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 void evtViewerMarkWindowActive(EvtRuntime *viewer);
 
 /* Activates the message window thirty frames before a kind-4 key when its
@@ -2210,10 +2119,7 @@ extern s32 campAnyPackedFlagSet(void *scene);
 extern s32 scrCommandIsProcessControlFlagClear(void);
 extern u32 mnuCampGetSecondaryOption(void *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
-extern s32 mnuQueryTitleSoundBusy(void);
-extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);
-extern s32 fldTitleIsActive(void);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
 void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
@@ -3898,7 +3804,6 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
 }
 
 extern char D_003ADA98[]; /* "E%3d_%03d" */
-extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 
@@ -4006,8 +3911,6 @@ s32 evtViewerPickNextHandler(KwlnTask *task) {
 
 extern s16 D_003BBE7C;
 extern s8 D_00324510[];
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
 extern s32 mnuGetMoviePlaybackMode(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *task);
@@ -4163,14 +4066,12 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
 }
 
 extern f32 D_00324590[];
-extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void fldSetTitleDrawMode();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();
 extern void fldReleaseCameraColorEffect();
-void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
 void evtViewerReleaseResources(EvtRuntime *viewer) {
     mnuReleaseCampSceneRegisteredIds(viewer);
