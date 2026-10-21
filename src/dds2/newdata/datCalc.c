@@ -489,7 +489,7 @@ extern f32 btlGetEncounterAdjustmentScale(void);
 
 extern u32 btlGetEscapeAttemptCount(void);
 
-extern s32 D_00435E8C;
+extern s32 btlConditionalEncounterCachedInterval;
 
 
 extern s8 (*D_00435E3C)[6];
@@ -2434,19 +2434,19 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
     if (total == 0) {
         return 0;
     }
-    if (D_00435E8C > 0) {
-        return D_00435E8C;
+    if (btlConditionalEncounterCachedInterval > 0) {
+        return btlConditionalEncounterCachedInterval;
     }
     interval = D_00435E0C[encounterIndex].groups[variant].interval;
     if (interval <= 0) {
         return 0;
     }
-    D_00435E8C = sdfGetRandInt(0, interval * 2 - 60) + 30;
-    return D_00435E8C;
+    btlConditionalEncounterCachedInterval = sdfGetRandInt(0, interval * 2 - 60) + 30;
+    return btlConditionalEncounterCachedInterval;
 }
 
-extern s32 D_00435E90;
-extern s32 D_00435E94;
+extern s32 btlSelectedConditionalEncounterIndex;
+extern s32 btlSelectedConditionalEncounterResult;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
@@ -2503,9 +2503,9 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
                 scene = D_00435E0C[encounterIndex].groups[group].entries[i].sceneIndex;
                 if ((datGameState->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
-                    D_00435E90 = encounterIndex;
-                    D_00435E8C = 0;
-                    D_00435E94 = packed;
+                    btlSelectedConditionalEncounterIndex = encounterIndex;
+                    btlConditionalEncounterCachedInterval = 0;
+                    btlSelectedConditionalEncounterResult = packed;
                     return packed;
                 }
                 dds3WorkClear();
@@ -2522,7 +2522,7 @@ void dds3WorkClear(void) {
 
     state->conditionalEncounterStepRemainder = 0;
     state->conditionalEncounterGauge = 0;
-    D_00435E8C = 0;
+    btlConditionalEncounterCachedInterval = 0;
 }
 
 void func_0011EBE0(void) {
@@ -2642,9 +2642,11 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E80);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", evtWorkScriptTask);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E8C);
+INCLUDE_SDATA(const s32, "newdata/datCalc", btlConditionalEncounterCachedInterval);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E90);
+INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterIndex);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E94);
+INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterResult);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E98);
 
