@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x001BDF60	btlDrawActorCommandRows	inferred	Draws actor commands selected by kind as rows with highlight state, command labels, and cost indicators; btlDrawCommandClassRows calls it for class 0. Paired DDS2 implementation at 0x001C92A0.
 0x0023A968	evtUpdateLightAndBackgroundEditor	inferred	Draws the light/background editor, handles mode and value input, then applies or restores the selected light color, direction, background and slot vectors; paired DDS2 implementation at 0x00255818. The provider body supplies the behavior evidence; no direct C caller is named.
 0x00202F90	btlSelectLowestNonzeroHpTarget	inferred	Builds candidates, selects the lowest nonzero current HP and appends the winner; comparison prefers the later candidate on equal HP. DDS2 twin at 0x00215C70.
 0x002AFE68	effBuildQuantizedTexturedStrip	inferred	Writes quantized textured-strip positions, UVs and per-vertex color/alpha from EffBillQuantizedConfig; paired DDS2 implementation at 0x002F3258.

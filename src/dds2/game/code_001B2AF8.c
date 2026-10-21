@@ -9269,7 +9269,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
     return 0;
 }
 
-extern void func_001C92A0(BattleSceneObject *, u16, u16, u16);
+extern void btlDrawActorCommandRows(BattleSceneObject *, u16, u16, u16);
 
 extern void btlDrawLinkageSkillOptions(s32);
 
@@ -9282,7 +9282,7 @@ extern void btlDrawRetreatCommandLabel(s32);
 void btlDrawCommandClassRows(s32 sceneContext) {
     switch (btlGetActorCommandClass(sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
-        func_001C92A0((BattleSceneObject *)sceneContext, 0, 2, 3);
+        btlDrawActorCommandRows((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
         btlDrawLinkageSkillOptions(sceneContext);
@@ -9309,7 +9309,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
  * The existing matched caller corroborates this inherited context. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004169C0);
 
-void func_001C92A0(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
+void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
     char text[16];
     BattlePanelColors colors = D_004169C0;
     char *labels[3] = { D_00436848, D_00436850, D_00436848 };
