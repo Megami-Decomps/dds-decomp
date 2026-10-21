@@ -433,7 +433,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
  * 31 - (plzcw(value) & 0xFF). This pure SDK value calculation uses $2
  * as its scratch register and has no memory side effects.
  * Retail: DDS2 sdfGetOrCreateTextureForReference at 002DDE84/002DDE94,
- * DDS1 func_0029C048 at 0029C16C/0029C17C, and the texture-state packet
+ * DDS1 sdfGetOrCreateTextureForReference at 0029C16C/0029C17C, and the texture-state packet
  * builders at DDS1 002D2D50/002D2D6C and DDS2 0032BC00/0032BC1C.
  * Plain C counting emits a loop; ordinary C subtraction emits ADDIU,
  * not the native trapping ADDI used to materialize 31.

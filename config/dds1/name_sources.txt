@@ -5702,6 +5702,7 @@
 0x0029BD90	effCreateSharedTextureReference	inferred	allocates and returns a retained shared texture reference from a serialized texture header
 0x0029BF88	effCloneSharedReferenceWithValue	inferred	Clones a reference object then assigns the supplied value to its metadata word. [names_reviewed5.tsv]
 0x0029BFB0	effReleaseSharedReference	inferred	eff effect resources and animation in game/code_0029A840.c
+0x0029C048	sdfGetOrCreateTextureForReference	inferred	confidence=high; src/dds1/game/code_0029A840.c:811; twin of DDS2 0x002DDD60; Caches one SdfTex by target surface and RefObj index, reuses it when both match, and otherwise creates/configures the texture from the referenced image and binds it through the surface callback. [Binary Ninja body, RefObj layout, and cross-title caller analysis]
 0x0029C378	effReleaseReferenceHolder	inferred	eff effect resources and animation in game/code_0029A840.c
 0x0029C408	effReferenceObjectRetain	inferred	paired effect body: reads cnt1C [names_R_FuncNames7.tsv]
 0x0029C420	effSampleAnimSet	inferred	effect/code_0029A840: picks the segment index of an animation set for a frame (loop flag 1 wraps by set length, otherwise clamps to the last segment), writes weight 1.0, speed 2.0 when flag 4 else 1.0; byte-identical shape to DDS2 func_002DE138 (names_R_FuncNames7 calls it effReferenceStartSet, but the body only reads count/flags/length/segments) [names_M78_D1Large.tsv]
