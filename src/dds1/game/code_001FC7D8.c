@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"
@@ -179,7 +180,6 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     return (u32)btlRollAiBucket() < 0x46;
 }
 
-extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -198,7 +198,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     s32 x;
     s32 y;
 
-    if (btlSetActorEffectParameter((u8 *)unit, 2) != 0) {
+    if (btlSetActorEffectParameter(unit, 2) != 0) {
         if (unit->status.stateFlags & 0x80) {
             return;
         }
@@ -217,7 +217,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
-        if (btlSetActorEffectParameter((u8 *)unit, 1) != 0) {
+        if (btlSetActorEffectParameter(unit, 1) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
             visible = btlProjectForwardPositionToPackedScreen(screen);
             x = screen[0] >> 4;
