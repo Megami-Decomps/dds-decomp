@@ -9863,3 +9863,6 @@
 0x00120528	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldDrawConvertedTextGlyph
 0x001A7C08	itfMesDrawWindowBackground	inferred	confidence=high; builds the mode-dependent message-window background from window texture rectangle tables, queues panel and border quads, and appends the packets to the interface display list.
 0x0024B078	evtViewerReturnZero	inferred	Unconditionally returns zero; paired with the same event-viewer helper in DDS1 at 0x00230470.
+0x001BAB90	btlDrawAnalysisPanelVitalBars	inferred	Draws the analysis panel HP/MP bar frames and cropped fill from the selected unit's current and maximum values; paired DDS1 0x001AFF78 and analysis-panel caller.
+0x001C3EC0	btlUpdateActorPanelCursorState	inferred	Advances pending cursor selection, settle offsets, pulse phase and cursor echoes; paired DDS1 0x001B8CB8 and actor-panel update caller.
+0x001C6648	btlUpdateActorVitalEffectState	inferred	Advances and clears the actor panel HP/MP change-effect states, offsets, timers and highlight levels; paired DDS1 0x001BB440 and actor-panel update caller.
