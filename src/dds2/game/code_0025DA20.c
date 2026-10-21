@@ -3751,10 +3751,10 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
 
 extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void mnuDrawTerminalPanelListRows(s32, s32, s32, void *, s32, s32);
-extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, void *, s32, s32);
-extern void mnuDrawTerminalPanelValues(s32, s32, s32, void *, s32, s32, s32);
-extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
-extern void mnuDrawShopPricePlaceholder(s32, s32, s32, void *, s32);
+extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawTerminalPanelValues(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
+extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
+extern void mnuDrawShopPricePlaceholder(s32, s32, s32, MenuTerminalContext *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
