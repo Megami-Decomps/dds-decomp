@@ -14,7 +14,7 @@ extern s32 sdfGraphicsTransferThreadId;
 
 extern u8 sdfCurrentDisplayModeIndex;
 
-extern u8 D_0043913C;
+extern u8 sdfGraphBufferRecreationPending;
 
 extern SdfGraphObj D_0040B290;
 
@@ -23,7 +23,7 @@ extern SdfGraphObj D_0040B290;
 void sdfGraphSetDisplayMode(s32 displayModeIndex) {
     sdfCurrentDisplayModeIndex = (u8)displayModeIndex;
     sdfGrSetFrameSetMode(&D_0040B290, displayModeIndex, 0);
-    D_0043913C = 1;
+    sdfGraphBufferRecreationPending = 1;
 }
 
 /* Release buffers in slot order, clearing each slot immediately afterward. */

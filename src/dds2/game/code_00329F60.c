@@ -175,7 +175,7 @@ void sdfDeliverDrawEnd(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
     sdfBusyBufferIndex = SDF_NO_BUSY_BUFFER;
 }
 
-extern s8 D_0043913C;
+extern s8 sdfGraphBufferRecreationPending;
 extern s8 sdfGsModeResetRequested;
 extern volatile s32 sdfGsImageUploadSemaphore;
 extern volatile u8 D_00438A1D;
@@ -199,8 +199,8 @@ void sdfRunGraphicsTransferWorker(void) {
         SleepThread();
         startTicks = sdfReadTimerCount();
         WaitSema(sdfGsImageUploadSemaphore);
-        if (D_0043913C != 0) {
-            D_0043913C = 0;
+        if (sdfGraphBufferRecreationPending != 0) {
+            sdfGraphBufferRecreationPending = 0;
             sdfGraphRecreateBuffers(&D_0040B290);
         }
         if (sdfGsModeResetRequested != 0) {
