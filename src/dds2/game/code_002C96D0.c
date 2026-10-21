@@ -3382,7 +3382,7 @@ s32 fileApplySelectedLoadResult(void) {
         if (startBranchFlag) {
             mtrMantraEventBitReset();
             ptyResetPartyRecordsAndProfiles();
-            sdfDebugPrintf("scd:hard init\n");
+            printf("scd:hard init\n");
         }
     } else {
         mdlFlagClear(0x80E);
@@ -3555,7 +3555,7 @@ void fileReleaseMenuFlowResource(void) {
 extern char D_0042B920[];
 
 void filePrintAccessoryLoadNotice(void) {
-    sdfDebugPrintf(D_0042B920);
+    printf(D_0042B920);
 }
 
 extern char D_0042B938[];
@@ -3564,7 +3564,7 @@ void fileSaveAndDisplayCurrentMoney(void) {
     DatGameState *state = datGameState;
     u32 money = state->header.savedMoney;
     state->savedCurrency = money;
-    sdfDebugPrintf(D_0042B938, money);
+    printf(D_0042B938, money);
 }
 
 typedef struct FileMultiFlagBonus {
@@ -3596,7 +3596,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     if (party->flags & 0x8000) {
         return 0;
     }
-    sdfDebugPrintf(D_0042B950, unitId);
+    printf(D_0042B950, unitId);
     changed = 0;
     party->flags |= 0x8000;
     if (unitId != 7) {
@@ -5335,7 +5335,7 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
 extern u8 D_00437E28[];
 
 FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
-    sdfDebugPrintf(D_00437E28);
+    printf(D_00437E28);
     return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 

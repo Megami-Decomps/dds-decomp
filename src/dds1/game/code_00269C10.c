@@ -463,7 +463,7 @@ void mnuTitleStreamUpdateAndLogBgm(void) {
         mnuTitleStreamStatus.loadState = MNU_STREAM_COMMIT_READY;
         *(u32 *)D_003D9178 = 0;
     }
-    sdfDebugPrintf("----------- AT3 BGM Play ------------\n");
+    printf("----------- AT3 BGM Play ------------\n");
     SignalSema(mnuTitleStreamSemaphore);
 }
 
@@ -649,7 +649,7 @@ void mnuPrintTitleDebugBanner(void) {
     if (mnuTitleSoundBufferState.control != 1) {
         mnuTitleSoundBufferState.control = 0;
     }
-    sdfDebugPrintf(D_003AFD48);
+    printf(D_003AFD48);
     SignalSema(mnuTitleStreamSemaphore);
 }
 

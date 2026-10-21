@@ -4,6 +4,6 @@
 #include "common.h"
 
 /* SDK printf: the native provider returns vfprintf's result unchanged. */
-s32 sdfDebugPrintf(const char *format, ...);
+s32 printf(const char *format, ...);
 
 #endif

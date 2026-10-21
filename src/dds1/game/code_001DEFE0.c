@@ -10414,7 +10414,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
             data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
             size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
-            sdfDebugPrintf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
+            printf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
             work->motionSeLoadFrame = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
@@ -10579,7 +10579,7 @@ u32 sndFinishEarringPlayback(void) {
         return 1;
     }
     if (status == 2) {
-        sdfDebugPrintf("%%%%%%%%%%%%%%%% EARRING(2)\n");
+        printf("%%%%%%%%%%%%%%%% EARRING(2)\n");
         mnuPrintTitleDebugBanner();
     }
     return 0;
@@ -10695,7 +10695,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
             filePollEntryCleanup(args->request);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuPrintTitleDebugBanner();
-            sdfDebugPrintf(D_003A5390);
+            printf(D_003A5390);
             btlBossDebugPrintf(D_003A53B0);
         }
         return 0;

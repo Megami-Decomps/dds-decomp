@@ -160,10 +160,10 @@ s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, 
         if (btlHasMappedSpecialAbilityForSlot(defender, guard) || btlHasSpecialAbilityWhenArgumentUnset(defender, guard) ||
             btlHasEnabledSpecialAbilityForSlot(defender, guard)) {
             value = 0;
-            sdfDebugPrintf("btl:bad auto guard[%X]\n", guard);
+            printf("btl:bad auto guard[%X]\n", guard);
         } else if (btlTestSelectedItemCategoryMask(defender, guard)) {
             value = 0;
-            sdfDebugPrintf("btl:bad counter guard[%X]\n", guard);
+            printf("btl:bad counter guard[%X]\n", guard);
         }
     }
     return value;

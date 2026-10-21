@@ -33,16 +33,16 @@ void *malloc(u32 size);
 void fclose(SdkFileStream *stream);
 #endif
 #ifndef SDK_SKIP_sdfFreeHeapMemory
-void sdfFreeHeapMemory(void *memory);
+void free(void *memory);
 #endif
 #ifndef SDK_SKIP_fopen
 SdkFileStream *fopen(const char *name, const char *mode);
 #endif
 #ifndef SDK_SKIP_sdfReadFileStream
-u32 sdfReadFileStream(void *data, u32 size, u32 count, SdkFileStream *stream);
+u32 fread(void *data, u32 size, u32 count, SdkFileStream *stream);
 #endif
 #ifndef SDK_SKIP_sdfWriteFileStream
-u32 sdfWriteFileStream(const void *data, u32 size, u32 count, SdkFileStream *stream);
+u32 fwrite(const void *data, u32 size, u32 count, SdkFileStream *stream);
 #endif
 #endif
 

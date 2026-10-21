@@ -1178,11 +1178,11 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
     TitleEffectState *effectState = (TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask);
 
     if (sdfSoundIsCommandBusy() != 0) {
-        sdfDebugPrintf("now playeng start...\n");
+        printf("now playeng start...\n");
         sdfSoundStopNamedPlayback();
     }
     sprintf(voicePath, "%s%04d.ADB", D_003771D8 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
-    sdfDebugPrintf("--------------- VOICE -> %s\n", voicePath);
+    printf("--------------- VOICE -> %s\n", voicePath);
     sdfSoundSendNamedCommand(voicePath, 0x64);
     effectState->frameCounter = 0;
 }

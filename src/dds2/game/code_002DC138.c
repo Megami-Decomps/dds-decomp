@@ -374,7 +374,7 @@ void effFloorModelListPush(EffModelOwner *obj) {
 
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {
-        sdfDebugPrintf("eff:floor model delete[%p]\n", node->object);
+        printf("eff:floor model delete[%p]\n", node->object);
         effDestroyModelOwner(node->object);
         node->object = NULL;
     }

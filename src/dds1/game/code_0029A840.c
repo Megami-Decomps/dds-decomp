@@ -365,7 +365,7 @@ extern char D_003B2AA0[];
 
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {
-        sdfDebugPrintf(D_003B2AA0, node->object);
+        printf(D_003B2AA0, node->object);
         effDestroyModelOwner(node->object);
         node->object = NULL;
     }

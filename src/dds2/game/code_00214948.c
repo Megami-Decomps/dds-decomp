@@ -401,15 +401,15 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
         if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
             if (datCommandSelectors[command].kind != 1) {
-                sdfDebugPrintf(D_00419C80);
+                printf(D_00419C80);
                 return 0;
             }
             if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
-                sdfDebugPrintf(D_00419CB0);
+                printf(D_00419CB0);
                 return 0;
             }
             if (fldCountSceneSlots() < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
-                sdfDebugPrintf(D_00419CD8);
+                printf(D_00419CD8);
                 return 0;
             }
             if (btlFindCommandPartnersByAffinity(unit, command, &members[1], &members[2]) != 0) {
@@ -443,7 +443,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
             return 1;
         }
     }
-    sdfDebugPrintf(D_00419D00);
+    printf(D_00419D00);
     return 0;
 }
 

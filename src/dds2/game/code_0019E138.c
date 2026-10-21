@@ -1695,7 +1695,7 @@ void mnuReportCampProcessHalted(void) {
     if (dds3AdminGetActiveMode() != 5) {
         dds3AdminSetControlFlag();
     }
-    sdfDebugPrintf(D_00414C50);
+    printf(D_00414C50);
 }
 
 

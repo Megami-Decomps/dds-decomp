@@ -167,7 +167,7 @@ MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
 
 void mnuFreeOptionalBlock(u32 ptr) {
     if (ptr != 0) {
-        sdfFreeHeapMemory(ptr);
+        free(ptr);
     }
 }
 

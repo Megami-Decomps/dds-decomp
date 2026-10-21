@@ -3244,7 +3244,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             if (row->transitionFrame == 0) {
                 node = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), key, 6);
                 if (node != NULL) {
-                    sdfDebugPrintf("DOOR SISETU FADE 6\n");
+                    printf("DOOR SISETU FADE 6\n");
                     dds3SetObjectPayloadWord8(node, 9);
                 }
             }

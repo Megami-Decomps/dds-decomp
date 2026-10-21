@@ -6162,9 +6162,9 @@ void func_00153068(void) {
     /* The scaled volume is never used; retail keeps only the divide-by-zero check. */
     if (percent > 0) {
         volume = (volume * percent) / 100;
-        sdfDebugPrintf(D_00413F78);
+        printf(D_00413F78);
     } else {
-        sdfDebugPrintf(D_00413F78);
+        printf(D_00413F78);
     }
 }
 
@@ -6175,7 +6175,7 @@ extern s32 D_00451D3C[];
 s32 fldReportCampVolumeError(void) {
     if (D_00451D3C[0] != 1) {
         if (fldGetCampSceneControlMode() != 0) {
-            sdfDebugPrintf(D_00413F78);
+            printf(D_00413F78);
         }
     }
 }
@@ -6188,7 +6188,7 @@ void fldUpdateTargetGuideController(void) {
                 return;
             }
             if (fldGetSceneReadyOrPendingState() != 0) {
-                sdfDebugPrintf(D_00413F78);
+                printf(D_00413F78);
                 return;
             }
         } else {

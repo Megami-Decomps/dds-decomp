@@ -58,7 +58,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 case 5:
                     entrySize = entry->dataSize;
                     modelPayload = packState->data + entry->dataOffset;
-                    sdfDebugPrintf("unit decode rid:%d, size:%d\n", resourceId, entrySize);
+                    printf("unit decode rid:%d, size:%d\n", resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
                     case 0x2AC:
@@ -75,7 +75,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                     if (evtNextCameraSlotViewerKey >= 0x7D0) {
                         evtNextCameraSlotViewerKey = 0x3E8;
                     }
-                    sdfDebugPrintf("BE regist unit %d < %d >\n", evtNextCameraSlotViewerKey, entrySize);
+                    printf("BE regist unit %d < %d >\n", evtNextCameraSlotViewerKey, entrySize);
                     return viewerObjectKey;
                 }
             }
@@ -175,7 +175,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
                     evtSetBgmVolumePan(motionSeParams->eventTaskId, cues[cueIndex].fade);
-                    sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
+                    printf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
         }
@@ -217,7 +217,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventDirectoryId;
     struct FileRequest *request;
 
-    sdfDebugPrintf(D_003BC370);
+    printf(D_003BC370);
     eventId = state->eventId;
     eventDirectoryId = eventId - eventId % 10;
     sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, eventDirectoryId, eventId, eventId);
@@ -257,7 +257,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             }
         }
     } else {
-        sdfDebugPrintf(D_003BC378);
+        printf(D_003BC378);
         state->loaded = EVT_PACK_LOAD_COMPLETE;
     }
 }

@@ -378,12 +378,12 @@ void dds3PrintProcessList(void)
 
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedStartTaskHead, D_00411008);
     queueCountFormat = D_00411038;
-    sdfDebugPrintf(queueCountFormat, kwlnDelayedStartTaskCount);
+    printf(queueCountFormat, kwlnDelayedStartTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnActiveTaskHead, D_00411048);
-    sdfDebugPrintf(queueCountFormat, kwlnActiveTaskCount);
+    printf(queueCountFormat, kwlnActiveTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedDestroyTaskHead, D_00411078);
-    sdfDebugPrintf(queueCountFormat, kwlnDelayedDestroyTaskCount);
-    sdfDebugPrintf(D_00435BF8);
+    printf(queueCountFormat, kwlnDelayedDestroyTaskCount);
+    printf(D_00435BF8);
 }
 
 extern u8 kwlnTaskTreePrefix[];
@@ -391,7 +391,7 @@ extern u8 D_00435C00[];
 
 void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 {
-    sdfDebugPrintf(D_00435C00, kwlnTaskTreePrefix, task);
+    printf(D_00435C00, kwlnTaskTreePrefix, task);
     if (task->childList != NULL) {
         if (task->parent == NULL) {
             kwlnTaskTreePrefix[0] = ' ';

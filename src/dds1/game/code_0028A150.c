@@ -3969,15 +3969,15 @@ void fileDrawConfigurationMenuBackground(void *unused) {
 void fileResetRenderFlags(void);
 
 void fileManagerResetSubsystems(void) {
-    sdfDebugPrintf(D_003BC900);
+    printf(D_003BC900);
     effLoadFlashTextures();
-    sdfDebugPrintf(D_003BC908);
+    printf(D_003BC908);
     effLoadWindTexture();
-    sdfDebugPrintf(D_003BC910);
+    printf(D_003BC910);
     effLoadScalyTexture();
-    sdfDebugPrintf(D_003BC918);
+    printf(D_003BC918);
     fileResetRenderFlags();
-    sdfDebugPrintf(D_003BC920);
+    printf(D_003BC920);
 }
 
 void fileSetRenderFlag(u32 bits) {
@@ -4876,7 +4876,7 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
 }
 
 FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
-    sdfDebugPrintf(D_003BC940);
+    printf(D_003BC940);
     return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 

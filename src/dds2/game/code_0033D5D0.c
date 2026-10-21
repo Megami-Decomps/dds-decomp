@@ -209,7 +209,7 @@ void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void
     s32 quadwordCount;
 
     sdfDevConsInit();
-    formattedCount = sdfVFormatString(text, format, arguments);
+    formattedCount = vsprintf(text, format, arguments);
     start = (u8 *)sdfGetPacketCursor();
     if (formattedCount == 0) {
         *(u128 *)start = 0;
@@ -361,7 +361,7 @@ s32 sdfPrintFormattedDevMessage(const char *fmt, ...) {
     s32 length;
 
     __builtin_stdarg_start(args, fmt);
-    length = sdfVFormatString(buffer, fmt, args);
+    length = vsprintf(buffer, fmt, args);
     sdfDevPrintText(buffer);
     return length;
 }
@@ -1936,11 +1936,11 @@ void sdfLoadDevModule(void) {
     if (sdfDevModuleLoaded == 0) {
         D_00438B68 = 0;
         if (sceSifLoadStartModule("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
-            sdfDebugPrintf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
+            printf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
             return;
         }
         if (resident != 0) {
-            sdfDebugPrintf(D_0042E3A0);
+            printf(D_0042E3A0);
             return;
         }
         D_00438B68 = 1;

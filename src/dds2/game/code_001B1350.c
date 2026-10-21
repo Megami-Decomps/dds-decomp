@@ -151,10 +151,10 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
             btlHasSpecialAbility274(defender, element) != 0 ||
             btlHasEnabledSpecialAbilityForSlot(defender, element) != 0) {
             result = 0;
-            sdfDebugPrintf("btl:bad auto guard[%X]\n", element);
+            printf("btl:bad auto guard[%X]\n", element);
         } else if (btlTestSelectedItemCategoryMask(defender, element) != 0) {
             result = 0;
-            sdfDebugPrintf("btl:bad counter guard[%X]\n", element);
+            printf("btl:bad counter guard[%X]\n", element);
         }
     }
     if (guardAbility != -1 && (guardMask & result)) {

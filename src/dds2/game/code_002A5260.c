@@ -1796,13 +1796,13 @@ extern u32 D_00437ADC, D_00437AE0, D_00437AE4;
 
 s32 mnuMovieDrawNextProc(s32 procedure) {
     if (mnuMovieDrawTask == 0) {
-        sdfDebugPrintf(D_0042A348);
+        printf(D_0042A348);
         return -1;
     }
     mnuSubmitMovieDrawPacket(&mnuMovieDrawContext, &D_003803C8);
     D_00437AD0++;
     if (D_00437AD0 == 0x1E) {
-        sdfDebugPrintf(D_0042A380, procedure);
+        printf(D_0042A380, procedure);
         return -1;
     }
     return 0;

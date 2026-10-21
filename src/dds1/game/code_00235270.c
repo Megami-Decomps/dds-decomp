@@ -2639,7 +2639,7 @@ s32 func_0023A968(s32 x, s32 y, EvtRuntime *runtime) {
             if (node != NULL) {
                 nestedValue = evtUnitGetNestedValue(node);
             } else {
-                sdfDebugPrintf((char *)D_003AEB60);
+                printf((char *)D_003AEB60);
                 break;
             }
             evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
@@ -4471,16 +4471,16 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
 
     if (sdfPfsDebugMode) {
-        sdfDebugPrintf("hdd -> %s\n", pm2Path);
+        printf("hdd -> %s\n", pm2Path);
         pm2 = sceOpen(pm2Path, 0x602, 0666);
         pm3 = sceOpen(pm3Path, 0x602, 0666);
     } else {
-        sdfDebugPrintf("pc -> %s\n", pm2Path);
+        printf("pc -> %s\n", pm2Path);
         pm2 = sceOpen(pm2Path, 0x602);
         pm3 = sceOpen(pm3Path, 0x602);
     }
     if (pm2 < 0 || pm3 < 0) {
-        sdfDebugPrintf(D_003BC350);
+        printf(D_003BC350);
         return 0;
     }
 
@@ -4502,11 +4502,11 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         case 24: evtEmitGroupTypeTwentySevenPayloads(pm2, runtime); break;
         case 21:
             evtWriteGroupMetadata(pm2, runtime);
-            sdfDebugPrintf("save object table\n");
+            printf("save object table\n");
             break;
         case 25:
             evtEmitGroupTypeTwentyFivePayloads(pm2, runtime);
-            sdfDebugPrintf("save rain data\n");
+            printf("save rain data\n");
             break;
         }
     }
@@ -4519,7 +4519,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         }
     }
     sceClose(pm3);
-    sdfDebugPrintf("save pm3 file\n");
+    printf("save pm3 file\n");
     sceSync(D_003BC358, 0);
     return 1;
 }
@@ -4575,7 +4575,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
                 }
             }
         }
-        sdfDebugPrintf("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
+        printf("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
         link->option = 0;
         link->extra2 = 0;
     }
@@ -4666,7 +4666,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     s32 oldIndex;
     s32 headerLast, headerFirst;
 
-    sdfDebugPrintf("start SetGameData\n");
+    printf("start SetGameData\n");
     soundRowsPresent = 0;
     if (work->mainEntry2Data != NULL) {
         packageId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId;
@@ -4801,7 +4801,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
         }
     }
-    sdfDebugPrintf("end pm1 load\n");
+    printf("end pm1 load\n");
 
     /* Access each serialized row through its version-specific accessor. */
     if (work->subEntry0Data != NULL) {
@@ -4843,7 +4843,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                         oldIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                         nameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                         oldName = (char *)work->subEntry1Data + nameIndex * 32;
-                        sdfDebugPrintf("oldtable index=%d string=%s\n", oldIndex, oldName);
+                        printf("oldtable index=%d string=%s\n", oldIndex, oldName);
                         if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4) != -1) {
                             s32 objectNameIndex;
                             world = dds3GetWorldObject();
@@ -4855,7 +4855,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                                     (char *)work->subEntry1Data + linkedNameIndex * 32, runtime);
                             } else {
                                 key->p0C.h[0] = -1;
-                                sdfDebugPrintf("name not found \n");
+                                printf("name not found \n");
                             }
                         }
                     }
@@ -5349,7 +5349,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 for (component = 2; component >= 0; component--) {
                     rain->parameters.z[component] = 0;
                 }
-                sdfDebugPrintf("modify rain param\n");
+                printf("modify rain param\n");
             }
         }
     }
@@ -5446,14 +5446,14 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         evtPreloadBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
         while (evtIsBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) == 0) {
         }
-        sdfDebugPrintf("smg file load :eventViewer\n");
+        printf("smg file load :eventViewer\n");
     }
     if (timeiId != -1) {
         if (!fldTitleIsActive()) {
             fldStartTitle(timeiId, -1, 30);
-            sdfDebugPrintf("timei file load=%d\n", timeiId);
+            printf("timei file load=%d\n", timeiId);
         } else {
-            sdfDebugPrintf("warning!! timei process doing!!\n");
+            printf("warning!! timei process doing!!\n");
         }
     }
     if (mnuCampGetPrimaryOption(runtime) == 0) {
@@ -5464,7 +5464,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     evtViewerDispatchFlagMode(runtime);
     evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
     evtViewerDispatchFlagMode(runtime);
-    sdfDebugPrintf("SetGameData PM2 Version = %d Stageno = %d\n",
+    printf("SetGameData PM2 Version = %d Stageno = %d\n",
         work->sub->kind, ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
     return 1;
 }
@@ -5565,7 +5565,7 @@ s32 evtPlayBgm(s32 eventId, s32 fade) {
         return 0;
     }
     packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
-    sdfDebugPrintf("Event BGM play :%08X\n", packedTrackId);
+    printf("Event BGM play :%08X\n", packedTrackId);
     sndStartTrackDefault(packedTrackId);
     return packedTrackId;
 }
@@ -5579,7 +5579,7 @@ void evtTransitionBgm(s32 eventId, s32 fade) {
     if (fade >= 0) {
         packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
     }
-    sdfDebugPrintf("Event BGM trans :%08X\n", packedTrackId);
+    printf("Event BGM trans :%08X\n", packedTrackId);
     sndTransitionBgm(packedTrackId);
 }
 
@@ -5589,7 +5589,7 @@ s32 evtFadeInBgm(s32 eventId, s32 fade) {
         return 0;
     }
     packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
-    sdfDebugPrintf("Event BGM fade in play :%08X\n", packedTrackId);
+    printf("Event BGM fade in play :%08X\n", packedTrackId);
     sndStartTrackExtended(packedTrackId);
     return packedTrackId;
 }
