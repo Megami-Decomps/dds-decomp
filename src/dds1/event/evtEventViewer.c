@@ -4066,7 +4066,6 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
 }
 
 extern f32 D_00324590[];
-extern void fldSetTitleDrawMode();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
