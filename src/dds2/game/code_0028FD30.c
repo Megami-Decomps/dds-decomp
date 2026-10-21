@@ -13,7 +13,6 @@ extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
 extern void mnuTransitionActivePanelAnimations(MantraPanelPool *pool, s32 mode);
 /* Original-style implicit int, kept: matched code depends on it: mnuHideMantraLimitLine, mnuHideMantraScrollCursor, mnuQueueUnitPanelSelection, mnuShowMantraLimitLine, mnuShowMantraScrollCursor. */
 
-extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspStartEntry(s32);
 extern s32 dspCloseChannel(void);

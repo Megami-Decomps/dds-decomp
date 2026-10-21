@@ -66,7 +66,6 @@ extern void mnuLoadEffectResources(u8 *);
 
 extern void mnuEnableCampBadgeFade(u8 *);
 
-extern void evtCreateMessageWindowIfMissing(s32);
 
 extern u8 mnuCampMessagePack[];
 
@@ -830,17 +829,18 @@ u8 *mnuCreateStaffMenuWork(void) {
     ((MenuStaffContext *)menuBytes)->allocation = allocation;
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
-    if (dds3AdminReadPreviousSignedSample() != 0) {
-        ((MenuStaffContext *)menuBytes)->menuResource =
-            mnuAllocateValueRecord(1);
-    } else {
+    /* Keep the zero case first to preserve the matched branch layout. */
+    if (dds3AdminReadPreviousSignedSample() == 0) {
         ((MenuStaffContext *)menuBytes)->menuResource =
             mnuAllocateValueRecord(0);
+    } else {
+        ((MenuStaffContext *)menuBytes)->menuResource =
+            mnuAllocateValueRecord(1);
     }
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);
     mnuEnableCampBadgeFade(effectBytes);
-    evtCreateMessageWindowIfMissing((s32)mnuCampMessagePack);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)(s32)mnuCampMessagePack);
     movLoadTitleEffects(menuBytes);
     mnuBuildCampTitleEffectResourceList(menuBytes);
     mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);

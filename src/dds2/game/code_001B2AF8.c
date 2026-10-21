@@ -10107,7 +10107,6 @@ extern void mdlFlagClear(s32);
 extern void mdlFlagSet(s32);
 extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 dspCloseChannel(void);
-extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 btlUpdateCommandNoticeTask(KwlnTask *);
 extern s32 btlUpdateMajinTutorialTask(KwlnTask *);

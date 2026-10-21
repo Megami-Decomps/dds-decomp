@@ -98,7 +98,6 @@ void itfMesReplaceTextSlotData();
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
-extern s32 frFontMeasureLineWidth();
 
 void itfMesInitializePanelPlacementSprite(ItfMesState *panel);
 
@@ -425,7 +424,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
                 captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
                     itfMesGetNextEntrySelectedItem(mes), NULL);
             }
-            if (frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
+            if ((s32)frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
                 frFontSetGlyphPosition(captionBlock->glyphChain, captionBlock->x, captionBlock->y);
             } else {
                 frFontCenterGlyphChainAt(0x5C0, captionBlock->y, captionBlock->glyphChain);
@@ -1565,7 +1564,6 @@ extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
-extern s32 frFontMeasureLineWidth(s32 row, FrFontGlyph *glyph);
 
 extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 

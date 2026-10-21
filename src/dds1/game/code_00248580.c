@@ -884,7 +884,6 @@ extern void mnuTerminalBuildMenus(MenuTerminalWork *host);
 
 extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 
-extern s32 evtCreateMessageWindowIfMissing(s32);
 
 /* Allocate the terminal scene and its lists/effects/message resource.
  * Keep the K&R definition and native calls; both cursor slots start at -1. */
@@ -913,7 +912,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     obj->selectedSlot = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    evtCreateMessageWindowIfMissing(obj->messageResources.dataAddress);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->cursor[i] = -1;
     }
@@ -2144,7 +2143,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuAnimateTerminalSelection(1, (MenuTerminalWork *)context);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuTerminalWork *)context);
     ((MenuTerminalWork *)context)->exitPending = 0;
-    evtCreateMessageWindowIfMissing(((MenuTerminalWork *)context)->messageResources.dataAddress);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)((MenuTerminalWork *)context)->messageResources.dataAddress);
     if (((MenuTerminalWork *)context)->mode != 0) {
         sndStartTrackExtended(((MenuTerminalWork *)context)->bgmHandle);
     }

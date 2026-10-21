@@ -131,7 +131,6 @@ extern const char *mnuTerminalCharacterBackgroundSpriteNames[4];
 
 
 extern void evtLoadResourcePair(u32, EvtResourcePair *);
-extern void evtCreateMessageWindowIfMissing(s32);
 extern void mnuSnapshotCampTextureHandles(u32 *);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
@@ -1039,7 +1038,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj->slotCopy = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair((u32)"/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    evtCreateMessageWindowIfMissing(obj->messageResources.dataAddress);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->selectedSlots[i] = -1;
     }
@@ -2323,7 +2322,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuTerminalSelectSlot(3, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
-    evtCreateMessageWindowIfMissing(((MenuSlotState *)state)->messageResources.dataAddress);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)((MenuSlotState *)state)->messageResources.dataAddress);
     return 1;
 }
 

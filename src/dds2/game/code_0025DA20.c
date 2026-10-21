@@ -1389,7 +1389,6 @@ void mnuShopLoadSpriteAssets(MenuTerminalContext *scene) {
 
 
 extern void evtLoadResourcePair(const char *, EvtResourcePair *);
-extern void evtCreateMessageWindowIfMissing();
 
 void mnuShopLoadMessageResource(MenuTerminalContext *scene) {
     scene->type = mnuCampFlagRows[scene->shopRow].messageSet;
@@ -1407,7 +1406,7 @@ void mnuShopLoadMessageResource(MenuTerminalContext *scene) {
         evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", &scene->messageResources);
         break;
     }
-    evtCreateMessageWindowIfMissing(scene->messageResources.dataAddress);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)scene->messageResources.dataAddress);
 }
 
 
