@@ -201,14 +201,14 @@ extern s32 itfUpdateTestMessageResourceInput(KwlnTask *task);
 
 extern u8 D_003B4A28[];
 
-extern s32 scrCreateTaskForProcessId();
+extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
 
 void sndCycleTestMessageResource(void);
 
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((ScrData *)dds3GetProcessData((KwlnTask *)scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
+    itfMesSetWindowCallbackAddress(((ScrData *)dds3GetProcessData((KwlnTask *)scrCreateTaskForProcessId(0x3E8, (s32)D_003B4A28, 0)))->resourceIndex, itfPrintTestMessageCallback);
     dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
     dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
@@ -1449,11 +1449,11 @@ DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
     return &actor->partyRecord;
 }
 
-s32 btlGetCurrentPartyEntryRecord(void) {
-    s32 temp_v0;
+DatPartyRecord *btlGetCurrentPartyEntryRecord(s32 rosterIndex) {
+    s32 index;
 
-    temp_v0 = dds3FindEntryIndex();
-    return (s32)&datGameState->party[temp_v0];
+    index = dds3FindEntryIndex(rosterIndex);
+    return &datGameState->party[index];
 }
 
 DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {

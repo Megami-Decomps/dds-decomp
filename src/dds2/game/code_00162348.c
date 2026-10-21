@@ -86,7 +86,7 @@ struct SdfListHead;
 extern void *memcpy(void *dst, void *src, u32 n);
 extern void polyInitializeBasicRingCells(void *);
 
-extern void parClearHistorySlotPoints(s32);
+extern void parClearHistorySlotPoints(s32, s32);
 
 
 
@@ -354,7 +354,7 @@ void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) 
 void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearHistorySlotPoints((s32)work->payload.history.table);
+        parClearHistorySlotPoints((s32)work->payload.history.table, index);
         return;
     case 2:
         parCellInit(work->payload.crossStrip.drawSystem, index);

@@ -172,7 +172,7 @@ extern s32 mnuIsSolarPricedItemId(s32);
 
 extern u8 mnuCampWideRewardEntries[];
 
-extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
+extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, struct FrFontTextBank *bank, s32 flags);
 
 
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
@@ -2499,7 +2499,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
     struct FrFontGlyph *handle;
 
     if (enabled != 0) {
-        handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
+        handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, (struct FrFontTextBank *)enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
         frFontDrawGlyphChain(handle, 0, flags);
         frDestroyFontRequestAfter(handle);

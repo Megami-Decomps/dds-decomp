@@ -1960,7 +1960,7 @@ extern void btlAttachActionEffectToUnit(BtlUnit *unit);
 void btlAttachActionEffectToUnit(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlSelectCtrl *ctrl = &battle->effect->selection;
-    f32 position[3];
+    f32 position[4];
 
     ctrl->unit = unit;
     unit->status.flags &= ~0x100;
@@ -2210,7 +2210,7 @@ void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHand
 void btlResetActionEffectOnUnit(void) {
     BtlUnit *unit = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
     if (unit != NULL) {
-        f32 vec[3];
+        f32 vec[4];
         vec[0] = 0.0f;
         vec[1] = 10000.0f;
         vec[2] = -10000.0f;

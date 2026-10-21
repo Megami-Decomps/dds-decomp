@@ -1850,7 +1850,7 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *f
 extern s32 D_004391FC;
 extern s32 D_00439200;
 extern u8 sdfIpuStreamThreadStack[];
-extern s32 sdfAddHandler();
+extern s32 sdfAddHandler(s32 kind, s32 index, s32 handler, s32 argument, s32 option);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void sdfIpuDmaCompletionWorker();
 
@@ -1859,9 +1859,9 @@ void sdfSoundInitIpuStream(void) {
     HW_WRITE(IPU_CMD, 0x90000000);
     sdfSoundNodeHead = 0;
     D_00439204 = NULL;
-    D_004391FC = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
+    D_004391FC = sdfAddHandler(1, 3, (s32)sdfWakeIpuCompletionWorker, -1, 0);
     EnableDmac(3);
-    D_00439200 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
+    D_00439200 = sdfAddHandler(1, 4, (s32)sdfCompleteIpuInputFeedDma, -1, 0);
     EnableDmac(4);
     D_00439214 = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     _StartThread(D_00439214, 0);

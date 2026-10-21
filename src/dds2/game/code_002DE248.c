@@ -12834,7 +12834,7 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
     }
 }
 
-extern void camAimRotation();
+extern void camAimRotation(void *, void *);
 
 void effMultiplyQuatWithFlag(u8 *work) {
     s128 rotation;

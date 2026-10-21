@@ -779,7 +779,7 @@ void itfDrawVertexColoredTriangle();
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
-    itfDrawVertexColoredTriangle((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
+    itfDrawVertexColoredTriangle((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, (const u32 *)vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
 /* Queue three GS vertices with individual colors on the selected draw surface. */

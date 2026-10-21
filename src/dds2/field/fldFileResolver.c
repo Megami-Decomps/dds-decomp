@@ -703,7 +703,7 @@ extern f32 D_0038BB00[];
 
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 
-extern void fldToggleWorldNodeState(s32);
+extern void fldToggleWorldNodeState(s64);
 
 extern void fldProbeCameraSupportSurface(void);
 

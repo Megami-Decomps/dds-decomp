@@ -131,9 +131,9 @@ typedef char Dds1ProfileParamRecordLayoutCheck[
 extern Dds1ProfileParamRecord D_003907B0[PRF_PROFILE_COUNT];
 typedef char Dds1ProfileParamTableExtentCheck[
     (sizeof(D_003907B0) == 0xA80) ? 1 : -1];
-extern s32 fopen(const char *, const char *);
-extern void fprintf(s32, const char *, s32, s32);
-extern void fclose(s32);
+extern SdkFileStream *fopen(const char *, const char *);
+extern void fprintf(SdkFileStream *, const char *, s32, s32);
+extern void fclose(SdkFileStream *);
 extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
@@ -146,8 +146,8 @@ s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
-    s32 file = fopen("debug.log", sdfDebugLogAppendMode);
-    if (file != 0) {
+    SdkFileStream *file = fopen("debug.log", sdfDebugLogAppendMode);
+    if (file != NULL) {
         fprintf(file, sdfDebugLogPairFormat, left, right);
         fclose(file);
     }

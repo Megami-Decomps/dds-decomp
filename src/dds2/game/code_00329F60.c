@@ -790,7 +790,7 @@ s32 sdfWakeImageUploadThreadOnDmac(s32 channel, s32 threadId) {
 }
 
 extern s32 sdfWakeImageUploadThreadOnDmac(s32 channel, s32 threadId);
-extern s32 AddDmacHandler2(s32 channel, s32 (*handler)(s32, s32), s32 arg, s32 threadId);
+extern s32 AddDmacHandler2(s32 channel, s32 handler, s32 arg, s32 threadId);
 extern u8 D_0040B2B0[];
 
 /* Detach one queued batch, wait for its DMA, then release its owned source and packet allocations. */
@@ -809,7 +809,7 @@ void sdfFlushImageUploadQueue(void) {
 
     if (dmaPacketAddress != 0) {
         s32 threadId = GetThreadId();
-        s32 handlerId = AddDmacHandler2(1, sdfWakeImageUploadThreadOnDmac, 0, threadId);
+        s32 handlerId = AddDmacHandler2(1, (s32)sdfWakeImageUploadThreadOnDmac, 0, threadId);
         u64 tag = ((u64)((u32)D_0040B2B0 & 0x0FFFFFFF) << 32) | 0x20000000;
         u32 *channel;
 
