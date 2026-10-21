@@ -5153,6 +5153,7 @@
 0x002C80E8	fileQueueAlternateCallbackRequest	inferred	confidence=high; matched-C; src/dds2/file/fileManager.c:215:func_002C80E8; Queues a callback request with alternate mode one and no explicit dispatch/callback addresses.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002C8108	fileGetResourceHandle	inferred	Byte-identical DDS1 counterpart: Returns the file work's resource handle, released by callers through the file resource release routine.
 0x002C8118	fileGetResourceSize	inferred	Byte-identical DDS1 counterpart: Returns the file work's loaded resource size used by sound buffer transfer.
+0x002C8120	fileGetRemainingTransferBytes	inferred	Returns FileRequest.transferBytes, initialized from sourceByteCount and decremented as chunks are consumed by fileManager's transfer handlers; paired with DDS1 0x00288BA0.
 0x002C8128	fileIsRequestReadyInCurrentMode	inferred	Returns whether request reached ready state; one mode additionally requires a nonzero field. [names_reviewed6.tsv]
 0x002C8168	fileRequestIsReady	inferred	Returns true only when the file request has a nonzero marker at offset 0x68 and its status byte is 6; field area-loading callers use it as their readiness test.
 0x002C81D0	fileWaitForRequestReady	inferred	src/dds2/file/fileManager.c; forwards FileRequest unchanged to fileWaitReady, which pumps updates until request readiness; paired 00288C50.
