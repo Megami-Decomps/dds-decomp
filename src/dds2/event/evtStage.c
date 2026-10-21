@@ -17,8 +17,6 @@
 
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
 
-extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
-
 const char evtStageResourcePathFormat[0x10] = "%sf%03d_%03d";
 
 const char evtScriptResourcePathFormat[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";

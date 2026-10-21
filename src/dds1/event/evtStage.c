@@ -17,7 +17,6 @@
 
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
 
-Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 extern const char evtFieldScriptTerminationFormat[0x28];
 #include "sdf_debug_api.h"
 
