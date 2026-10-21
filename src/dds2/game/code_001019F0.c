@@ -55,7 +55,7 @@ void dds3ClearScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
 
 typedef struct SdfThreadNode SdfThreadNode;
 
-extern void func_00356F58(void);
+extern void __main(void);
 extern void sdfInitDeviceSemaphores(void);
 extern s32 func_0036DD28(void);
 extern void sceCdInit(s32);
@@ -84,7 +84,7 @@ extern u8 D_00438A8C;
 extern SdfThreadNode kwlnMainLoopThreadNode;
 extern u8 D_00439410[];
 s32 sdfInitializeRuntimeAndStartMainLoop(void) {
-    func_00356F58();
+    __main();
     sceSifInitRpc(0);
     sceSifInitIopHeap();
     sdfDiscType = D_00435C0C;

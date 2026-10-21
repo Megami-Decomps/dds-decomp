@@ -768,7 +768,7 @@ s32 sdfDevGetFileSize(void) {
 
 
 
-extern s32 func_002FF538(s32);
+extern s32 malloc(s32);
 
 extern s32 func_0030EF30(s32 fileHandle, s32 buffer, s32 byteCount);
 
@@ -787,7 +787,7 @@ void sdfDevLoadWholeFile(const char *fileName) {
     }
     fileBytes = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
     sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
-    bufferAddress = func_002FF538(fileBytes);
+    bufferAddress = malloc(fileBytes);
     D_003BDA44 = bufferAddress;
     func_0030EF30(fileHandle, bufferAddress, fileBytes);
     sceClose(fileHandle);

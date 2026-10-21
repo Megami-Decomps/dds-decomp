@@ -13,7 +13,7 @@
 
 extern u32 D_003E274C[];
 
-extern void *func_002FF538(u32 size);
+extern void *malloc(u32 size);
 
 /* Allocate the chip heap and page records, initialize free pages and size classes. */
 void sdfInitChipHeap(u32 heapSize) {
@@ -31,7 +31,7 @@ void sdfInitChipHeap(u32 heapSize) {
     s32 unitSize;
     s32 cellCount;
 
-    allocation = func_002FF538(heapSize);
+    allocation = malloc(heapSize);
     sdfChipPages = allocation;
     recordBytes = (heapSize / 0x1018U) * sizeof(SdfChipPage);
     recordEnd = (u8 *)allocation + recordBytes;
@@ -113,7 +113,7 @@ void sdfGetChipHeapStats(SdfChipHeapStats *stats) {
     stats->partialBlockCount = partialBlocks;
 }
 
-extern void *func_002FF538(u32 size);
+extern void *malloc(u32 size);
 extern s32 D_003BD2DC;
 extern SdfPendingRequest sdfGeneralReleaseRequest;
 
@@ -124,7 +124,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     u32 alignedStart;
     u32 alignedEnd;
 
-    heap->base = (u32)func_002FF538(heapSize);
+    heap->base = (u32)malloc(heapSize);
     heap->size = heapSize;
     freeBlock = sdfChipAllocDirect(sizeof(SdfMemBlock));
     alignedStart = (heap->base + SDF_MEM_ALIGNMENT_MASK) & ~SDF_MEM_ALIGNMENT_MASK;
