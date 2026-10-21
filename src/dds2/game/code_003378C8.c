@@ -775,6 +775,8 @@ void sdfVuEmitSelectedNodePacket(VuWork *work) {
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */
+void sdfVuVertexAlphaClamp(VuWork *work, const u128 *parameters);
+
 void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
     SdfAssetEntry *asset;
     u32 mode;
