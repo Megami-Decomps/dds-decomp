@@ -187,7 +187,7 @@ extern u32 btlGetSubtaskTargetMode(void);
 
 extern void btlPickCommandTargetWithStatusMask(s32, s32);
 
-extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
+extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, s32 mask);
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
