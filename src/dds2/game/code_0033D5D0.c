@@ -531,7 +531,7 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
                 SignalSema(sdfDiscSemaphore);
                 continue;
             }
-            D_00476940.size = sdfDevSeekFile(fd, 0, 2);
+            D_00476940.size = sceLseek(fd, 0, 2);
             sceClose(fd);
             SignalSema(sdfDiscSemaphore);
             break;
@@ -773,11 +773,11 @@ void sdfDevLoadWholeFile(const char *fileName) {
     if (fileHandle < 0) {
         sdfPanicHaltPrintf(D_0042E288, fileName);
     }
-    fileBytes = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
-    sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
+    fileBytes = sceLseek(fileHandle, 0, SDF_DEV_SEEK_END);
+    sceLseek(fileHandle, 0, SDF_DEV_SEEK_START);
     bufferAddress = malloc(fileBytes);
     D_004391A4 = bufferAddress;
-    sdfDevReadFileBytes(fileHandle, bufferAddress, fileBytes);
+    sceRead(fileHandle, bufferAddress, fileBytes);
     sceClose(fileHandle);
 }
 
@@ -1226,7 +1226,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_SEEK - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            endOffset = sdfDevSeekFile(state->resourceId, state->operationArg, state->options);
+            endOffset = sceLseek(state->resourceId, state->operationArg, state->options);
             if (endOffset < 0) {
                 sdfFileCmdError(state, endOffset);
                 continue;
@@ -1241,17 +1241,17 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_GET_SIZE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            position = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
+            position = sceLseek(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
             if (position < 0) {
                 sdfFileCmdError(state, position);
                 continue;
             }
-            endOffset = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_END);
+            endOffset = sceLseek(state->resourceId, 0, SDF_DEV_SEEK_END);
             if (endOffset < 0) {
                 sdfFileCmdError(state, endOffset);
                 continue;
             }
-            result = sdfDevSeekFile(state->resourceId, position, SDF_DEV_SEEK_START);
+            result = sceLseek(state->resourceId, position, SDF_DEV_SEEK_START);
             if (result < 0) {
                 sdfFileCmdError(state, result);
                 continue;
@@ -1266,7 +1266,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
-            result = sdfDevReadFileBytes(state->resourceId, (s32)state->requestData,
+            result = sceRead(state->resourceId, (s32)state->requestData,
                            state->requestExtra);
             if (result < 0) {
                 sdfFileCmdError(state, result);
@@ -1326,12 +1326,12 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
             /* A negative count means the whole file; NULL storage is allocated below. */
             if (transferResult < 0) {
                 state->state = SDF_DEV_STATE_SEEKING;
-                transferResult = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
+                transferResult = sceLseek(fileHandle, 0, SDF_DEV_SEEK_END);
                 if (transferResult < 0) {
                     sdfFileCmdError(state, transferResult);
                     continue;
                 }
-                result = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_START);
+                result = sceLseek(state->resourceId, 0, SDF_DEV_SEEK_START);
                 if (result < 0) {
                     sdfFileCmdError(state, result);
                     continue;
@@ -1344,7 +1344,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
                 }
                 state->requestData = buffer;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = sdfDevReadFileBytes(state->resourceId, (s32)buffer, transferResult);
+                transferResult = sceRead(state->resourceId, (s32)buffer, transferResult);
                 if (transferResult < 0) {
                     sdfFileCmdError(state, transferResult);
                     continue;
@@ -1891,7 +1891,7 @@ typedef void (*SdfPowerOffCallback)(void *);
 
 extern SdfPowerOffCallback sceCdPOffCallback(SdfPowerOffCallback, void *);
 
-extern s32 func_003698D8(void);
+extern s32 sceFsInit(void);
 
 
 extern s32 sceMount(const char *, const char *, s32, const void *, s32);
@@ -1925,7 +1925,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     thread = sdfCreateThread((void *)sdfPowerOffLoop, D_00477180, 0x800, 1);
     _StartThread(thread, semaphore);
     sceCdPOffCallback(sdfPowerOffInterruptCallback, (void *)semaphore);
-    func_003698D8();
+    sceFsInit();
     sprintf(buffer, "hdd0:%s,", path);
     sceMount(D_00438B60, buffer, 0, 0, 0);
     sdfPfsDebugMode = 1;
