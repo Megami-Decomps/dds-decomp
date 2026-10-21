@@ -87,7 +87,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void fldSetGsAlphaBlendEquation(s32);
 
-extern void func_00136EF8(void);
+extern void fldDrawCameraColorScrollingGradient(void);
 
 extern void fldDrawSkyGradient(void);
 
@@ -612,7 +612,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     fldSelectDisplayBuffer(0x53);
     fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
     fldSetGsAlphaBlendEquation(0);
-    func_00136EF8();
+    fldDrawCameraColorScrollingGradient();
     fldDrawSkyGradient();
     if (D_00389988[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
