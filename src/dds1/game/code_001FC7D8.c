@@ -13,6 +13,7 @@
 #include "btl_task_condition.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
+#include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
 #include "btl_analysis_panel_wait_args.h"
 #include "btl_model_record.h"
@@ -768,12 +769,11 @@ BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
 }
 
 
-extern void btlCreateSkillNamePanel(s32);
+extern s32 btlCreateSkillNamePanel(const u8 *text);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
-extern void *btlGetIndexedUiResource();
 extern u8 *D_003BAA8C;
-extern s32 D_00360458[];
-extern s32 D_00360460[];
+extern const u8 *D_00360458[];
+extern const u8 *D_00360460[];
 
 s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
@@ -794,7 +794,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
                     btlCreateSkillNamePanel(D_00360458[0]);
                 }
             } else {
-                btlCreateSkillNamePanel((s32)btlGetIndexedUiResource(owner));
+                btlCreateSkillNamePanel(btlGetIndexedUiResource(owner));
             }
         } else {
             btlCreateSkillNamePanel(D_003BAA8C + resourceIndex * 17);
@@ -827,7 +827,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
 }
 
 extern u8 *D_003BAA84;
-extern void btlCreateSkillNamePanel(s32);
+extern s32 btlCreateSkillNamePanel(const u8 *text);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 
 s32 btlPollTimedTaskLink(BtlObjLink *link) {
@@ -863,10 +863,10 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 skillNameIndex
 
 extern u8 btlActionPassLabel[];
 extern u8 btlActionRetreatLabel[];
-extern s32 D_00360438[];
-extern s32 D_00360448[];
-extern s32 D_0036044C[];
-extern s32 D_00360450[];
+extern const u8 *D_00360438[];
+extern const u8 *D_00360448[];
+extern const u8 *D_0036044C[];
+extern const u8 *D_00360450[];
 
 s32 btlPollCategoryLabelTask(BtlObjLink *link) {
     BtlUnit *owner;
@@ -876,7 +876,7 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
         case 10:
-            btlCreateSkillNamePanel((s32)btlActionPassLabel);
+            btlCreateSkillNamePanel(btlActionPassLabel);
             break;
         case 5:
             if (owner->status.flags & 0x1000) {
@@ -886,7 +886,7 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
             }
             break;
         case 6:
-            btlCreateSkillNamePanel((s32)btlActionRetreatLabel);
+            btlCreateSkillNamePanel(btlActionRetreatLabel);
             break;
         case 9:
             btlCreateSkillNamePanel(D_0036044C[0]);

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
@@ -113,7 +114,7 @@ typedef struct BtlPackedCtx {
 } BtlPackedCtx;
 extern u8 *D_00435E5C;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
-extern void btlCreateSkillNamePanel(s32);
+extern s32 btlCreateSkillNamePanel(const u8 *text);
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
@@ -122,13 +123,12 @@ extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern u8 *D_00435E64;
 extern u8 btlActionPassLabel[];
 extern u8 btlActionRetreatLabel[];
-extern s32 D_003BEB38[];
-extern s32 D_003BEB48[];
-extern s32 D_003BEB4C[];
-extern s32 D_003BEB50[];
-extern s32 D_003BEB58[];
-extern s32 D_003BEB60[];
-extern void *btlGetIndexedUiResource();
+extern const u8 *D_003BEB38[];
+extern const u8 *D_003BEB48[];
+extern const u8 *D_003BEB4C[];
+extern const u8 *D_003BEB50[];
+extern const u8 *D_003BEB58[];
+extern const u8 *D_003BEB60[];
 extern s32 btlRollAiBucket(void);
 extern s32 btlPollCategoryLabelTask(void *args);
 extern s32 btlPollActorOrEntryLabelTask(void *args);
@@ -849,7 +849,7 @@ s32 btlPollActorOrEntryLabelTask(void *arguments) {
 
         if (resourceIndex == 0) {
             if ((btlUnitStatusPair(owner) & 0x1400) == 0 && (owner->partyRecord.flags & 0x10) == 0) {
-                btlCreateSkillNamePanel((s32)btlGetIndexedUiResource(owner));
+                btlCreateSkillNamePanel(btlGetIndexedUiResource(owner));
             } else if (battleState->commandRestrictFlags & 0x400) {
                 if (owner->status.flags & 0x400) {
                     btlCreateSkillNamePanel(D_003BEB60[0]);
@@ -926,7 +926,7 @@ s32 btlPollCategoryLabelTask(void *arguments) {
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
         case 10:
-            btlCreateSkillNamePanel((s32)btlActionPassLabel);
+            btlCreateSkillNamePanel(btlActionPassLabel);
             break;
         case 5: {
             u32 flags = owner->status.flags;
@@ -940,7 +940,7 @@ s32 btlPollCategoryLabelTask(void *arguments) {
             break;
         }
         case 6:
-            btlCreateSkillNamePanel((s32)btlActionRetreatLabel);
+            btlCreateSkillNamePanel(btlActionRetreatLabel);
             break;
         case 9:
             btlCreateSkillNamePanel(D_003BEB4C[0]);

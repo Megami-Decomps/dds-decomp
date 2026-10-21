@@ -21,6 +21,7 @@
 #include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "sdf.h"
+#include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
 #include "btl_command_partner_output.h"
 #include "btl_state.h"
@@ -59,7 +60,7 @@ extern u8 btlSharedActorTransformParameters[];
 
 extern void *btlCommandAttributeNames[];
 
-extern void *btlPartyUnitGunTypeNames[];
+extern const u8 *btlPartyUnitGunTypeNames[];
 
 
 extern DatEnemyRecord *datEnemyRecords;
@@ -1808,7 +1809,7 @@ s32 btlGetCommandAttributeName(s32 index) {
 }
 
 /* The label resource index is the copied party record's unit ID. */
-void *btlGetIndexedUiResource(BtlUnit *unit) {
+const u8 *btlGetIndexedUiResource(BtlUnit *unit) {
     return btlPartyUnitGunTypeNames[unit->partyRecord.unitId];
 }
 

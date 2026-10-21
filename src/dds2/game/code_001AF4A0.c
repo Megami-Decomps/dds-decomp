@@ -104,7 +104,7 @@ extern u8 btlSharedActorTransformParameters[];
 
 extern u8 *D_00435E00;
 
-extern void *btlPartyUnitGunTypeNames[];
+extern const u8 *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
 

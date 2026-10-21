@@ -7,6 +7,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_stat_effect_offsets.h"
@@ -54,7 +55,6 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
 extern s32 btlCountEligibleLinkedActors(BtlState *battle);
-extern void * btlGetIndexedUiResource(BtlUnit *unit);
 extern u32 btlNextScaledRandom(u32 limit);
 extern void btlResetBattleHistoryCounters(void);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);

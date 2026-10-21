@@ -74,7 +74,7 @@ extern u8 btlSharedActorTransformParameters[];
 
 extern void *btlCommandAttributeNames[];
 
-extern void *btlPartyUnitGunTypeNames[];
+extern const u8 *btlPartyUnitGunTypeNames[];
 
 
 extern DatEnemyRecord *datEnemyRecords;
