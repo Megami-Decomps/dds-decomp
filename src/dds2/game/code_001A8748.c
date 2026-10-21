@@ -2083,7 +2083,6 @@ s32 btlMarkInactiveActorCandidates(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *eligible[16];
     BtlUnit *unit;
-    BtlUnit *selected;
     BtlUnit **read;
     s32 count;
     s32 remaining;

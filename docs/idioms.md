@@ -15684,6 +15684,16 @@ intermediate argument type; it changes no callback signature, payload
 layout, compiler flag, or instruction macro.
 
 
+## Uninitialized unused declarations need no replacement
+
+An automatic declaration with no initializer, reference, address escape,
+or implicit macro operand has no source role. Remove it rather than
+inventing a use or preserving it as an allocation hint. The rotate
+constructor's `p`, trail renderer's `edgeColor`/`centerColor`, inactive
+candidate selector's `selected`, and guard handler's `entry` all disappear
+without changing their real dataflow. Gate the complete unit: an unused
+declaration is not permission to assume old-compiler output is unchanged.
+
 ## A completed triangle case can guard its own emission
 
 In DDS1 `func_002DF710`, the three-region case emits five triangles and
