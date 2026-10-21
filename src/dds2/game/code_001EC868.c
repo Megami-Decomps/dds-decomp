@@ -9553,15 +9553,15 @@ void btlQueueUnitSoundSlotFileLoad(BtlRuntimeTaskArgs *args) {
     if (!(owner->flags & SOUND_SLOT_FILES_READY)) {
         return;
     }
-    if (owner->work.resourceHandles[args->unk_08] == 0) {
+    if (owner->work.resourceHandles[args->resourceIndex] == 0) {
         return;
     }
     table = btlSelectSideIndexedActorParameterTable(owner->category, owner->work.id);
-    entry = &table[args->unk_08];
+    entry = &table[args->resourceIndex];
     args->option = entry->fileId;
-    if (args->unk_08 != 0xB) {
-        owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->unk_08);
-        owner->work.pendingSlot = args->unk_08;
+    if (args->resourceIndex != 0xB) {
+        owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->resourceIndex);
+        owner->work.pendingSlot = args->resourceIndex;
         owner->flags |= SOUND_SLOT_TRACK_LOAD_REQUESTED;
         owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
         owner->flags &= ~SOUND_SLOT_TRACK_READY;
@@ -9590,11 +9590,11 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
         return 1;
     }
     soundWork = &owner->work;
-    if (soundWork->resourceHandles[args->unk_08] == 0) {
+    if (soundWork->resourceHandles[args->resourceIndex] == 0) {
         return 1;
     }
-    if (args->unk_08 != 0xB) {
-        key = sndBuildMotSeResourceKey(owner, args->unk_08);
+    if (args->resourceIndex != 0xB) {
+        key = sndBuildMotSeResourceKey(owner, args->resourceIndex);
         if (owner->flags & SOUND_SLOT_TRACK_READY) {
             sndSetStationedSeHighVolume(key);
             btlBossDebugPrintf("btl:motSE play[%X-%X]\n", key >> 16, key & 0xFFFF);
@@ -9608,8 +9608,8 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->unk_08]);
-            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
+            data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->resourceIndex]);
+            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->resourceIndex]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
             work->motionSeLoadFrame = 0;
@@ -9619,13 +9619,13 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
         }
         return 1;
     }
-    if ((s32)args->unk_0C > 90) {
+    if (args->elapsedFrames > 90) {
         owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
         owner->flags |= SOUND_SLOT_TRACK_READY;
         btlBossDebugPrintf("btl:motSE load time out[%X]\n", key);
         return 1;
     }
-    args->unk_0C++;
+    args->elapsedFrames++;
     return 0;
 }
 
@@ -9648,9 +9648,9 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     }
     args = btlGetTaskArguments(task);
     args->actor = unit;
-    args->unk_08 = option;
+    args->resourceIndex = option;
     args->option = 0;
-    args->unk_0C = 0;
+    args->elapsedFrames = 0;
     return task;
 }
 

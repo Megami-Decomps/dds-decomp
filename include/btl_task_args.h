@@ -152,12 +152,14 @@ typedef struct BtlRuntimeTaskArgs {
     union {
         u32 unk_08; /* Kind 9: indexed-unit-effect value; kind 0x2A: second linked camera unit. */
         struct BtlUnit *unitB;
+        s32 resourceIndex; /* Motion-SE task: selected entry in its resource handle array. */
     };
     union {
         u32 unk_0C;
         struct BtlUnit *unitC; /* Status callback receives a unit pointer in this slot. */
         f32 scale2;
         s8 mode;
+        s32 elapsedFrames; /* Motion-SE task: retries before the load timeout. */
     };
     u32 unk_10;
     union {
