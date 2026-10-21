@@ -9828,3 +9828,7 @@
 0x001AFF78	btlDrawAnalysisPanelVitalBars	inferred	Draws the analysis panel HP/MP bar frames and cropped fill from the selected unit's current and maximum values; paired DDS2 0x001BAB90 and analysis-panel caller.
 0x001B8CB8	btlUpdateActorPanelCursorState	inferred	Advances pending cursor selection, settle offsets, pulse phase and cursor echoes; paired DDS2 0x001C3EC0 and actor-panel update caller.
 0x001BB440	btlUpdateActorVitalEffectState	inferred	Advances and clears the actor panel HP/MP change-effect states, offsets, timers and highlight levels; paired DDS2 0x001C6648 and actor-panel update caller.
+0x002A7568	effAppendSurfaceGridVectors	inferred	Appends three vectors to the surface-grid ring, mirrors the ring head at capacity, and advances retained-vector count.
+0x002A7610	effInterpolateSurfaceGridVectors	inferred	Interpolates three surface-grid vectors across each column using Catmull-Rom when history is full or linear interpolation otherwise, then appends each result.
+0x002AB290	effDrawEffectStrip	inferred	Builds camera-facing strip quads from the effect strip point and color data and submits them for rendering.
+0x002AE498	effDrawRibbon	inferred	Builds and submits the ribbon work strip geometry and texture packets, returning when it has no segments or its color is transparent.
