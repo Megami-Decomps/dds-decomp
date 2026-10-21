@@ -253,7 +253,7 @@ typedef struct DatGameState {
     u64 areaFlags[13][64];                 /* 0x13F70 */
     u8 activationFlags[32];                /* 0x15970 */
     DatVrHeader vr;                        /* 0x15990 */
-    u8 pad159D0[0x19000];
+    u8 stageCellBits[0x19000];             /* 0x159D0: cell bitmap, ten bytes per stage row, 800 bytes per stage; the stage reset clears all of it. */
     u32 scriptFlags[3];                    /* 0x2E9D0 */
     u32 battleFlags[3];                    /* 0x2E9DC */
     u8 pad2E9E8[8];

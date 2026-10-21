@@ -1551,7 +1551,7 @@ void fldResetFieldMapState(void) {
     }
 
     fldClearAllAreaFloorFlags();
-    memset(datGameState->pad159D0, 0, sizeof(datGameState->pad159D0));
+    memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
 }
 
 /* The reset includes the first word of the following render region. */
@@ -2107,7 +2107,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
         bit = neighborX % 8;
         column = neighborX / 8;
         if (column >= 0 && neighborZ >= 0 && column < record->cols && neighborZ < record->rows) {
-            datGameState->pad159D0[neighborZ * 10 + stageIndex * 800 + column] |= 1 << bit;
+            datGameState->stageCellBits[neighborZ * 10 + stageIndex * 800 + column] |= 1 << bit;
         }
     }
 }
@@ -2131,7 +2131,7 @@ s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z) {
     byte = cellX / 8;
     stage = fldFindStageCoordinateIndex(fldAreaState.area, floor);
     if (byte >= 0 && row >= 0 && byte < record->cols && row < record->rows) {
-        if ((datGameState->pad159D0[row * 10 + stage * 800 + byte] >> bit) & 1) {
+        if ((datGameState->stageCellBits[row * 10 + stage * 800 + byte] >> bit) & 1) {
             return 1;
         }
     }
