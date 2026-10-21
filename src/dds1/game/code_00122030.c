@@ -147,7 +147,7 @@ extern s32 D_003BABEC;
 
 void fldDispatchDeferredFieldCommand(void);
 
-extern FieldPlayerSceneWork D_0032F1A0;
+extern FieldPlayerSceneWork fldPlayerSceneWork;
 
 
 extern void dds3WorkClear(void);
@@ -651,7 +651,7 @@ void fldInitializeDisplayAndTables(void) {
 }
 
 void fldResetPlayerSceneTransformState(void) {
-    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
 
     VU0_STORE_VF(vf0, &sceneWork->position);
     VU0_STORE_VF(vf0, &sceneWork->rotation);
@@ -788,7 +788,7 @@ void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kin
 /* Converts the field work's primary and secondary state words into a
  * compact scene status, giving the primary state precedence. */
 u32 fldGetSceneStatusCode(void) {
-    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
 
     if (sceneWork->primaryState == 1) {
         return 1;
@@ -851,7 +851,7 @@ void fldRebuildFieldScene(void) {
     {
         f32 axis[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 
-        sceneWork = &D_0032F1A0;
+        sceneWork = &fldPlayerSceneWork;
         if (sceneWork->sequenceOption == 1) {
             /* This provider initializes the real sequence-packet layout in scene storage. */
             fldInitializeActorLinkedSequence(datGameState->vr.previewX,
@@ -1068,7 +1068,7 @@ void fldTogglePlayerModel(void) {
 
         player = (EffWorldNode *)fldPlayerObject;
         {
-            sceneWork = &D_0032F1A0;
+            sceneWork = &fldPlayerSceneWork;
             dds3GetPosPoseSet(player);
             VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->position);
             dds3GetRotPoseSet(player);
@@ -1079,7 +1079,7 @@ void fldTogglePlayerModel(void) {
         /* Rebind the same local for the rebuild phase. Both definitions feed
          * real phase uses; the resulting two-definition pseudo stays global,
          * rather than merging snapshot HIGH/base/+16 in local-alloc. */
-        sceneWork = &D_0032F1A0;
+        sceneWork = &fldPlayerSceneWork;
         fldAreaState.playerModelAlternate ^= 1;
         VU0_LOAD_VF(vf10, &axis);
         effMiscAxisAngleToQuaternionVU(3.1415926f);
@@ -1105,7 +1105,7 @@ void fldTogglePlayerModel(void) {
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_003BAB60);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_003BAB58);
     D_003BAB58 = 0;
-    dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, D_0032F1A0.sequenceWord3C);
+    dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, fldPlayerSceneWork.sequenceWord3C);
     fldPlayerModelContext = (MdlCtx *)dds3ObjectBaseGetModelHandle((EffWorldNode *)fldPlayerObject);
     if (D_0032E4C8[0] != 0) {
         mdlAddEntryFlagged((MdlCtx *)fldPlayerModelContext, 0, 2);
@@ -1152,7 +1152,7 @@ void fldReleasePlayerSceneResources(void) {
 
     if (fldPlayerObject != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
-            sceneWork = &D_0032F1A0;
+            sceneWork = &fldPlayerSceneWork;
             dds3GetPosPoseSet((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->position);
             dds3GetRotPoseSet((EffWorldNode *)fldPlayerObject);
@@ -1942,7 +1942,7 @@ extern void func_0014C468(void);
 /* Dispatch one pending field command, preferring the temporary override
  * over the scene-work buffer and its saved fallback. */
 s32 fldDispatchPendingSceneResource(void) {
-    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
     u32 overrideFlags;
 
     if (fldAreaState.unk100 == 1) {
@@ -2067,7 +2067,7 @@ INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCC8);
 
 s32 fldProcSequence(KwlnTask *task) {
     EffBlurScatterParams blur;
-    FieldPlayerSceneWork *scene = &D_0032F1A0;
+    FieldPlayerSceneWork *scene = &fldPlayerSceneWork;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
     s32 mode;
     s32 coordinateFlags;
@@ -2365,7 +2365,7 @@ extern s32 fldProcDraw(KwlnTask *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
 void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
-    FieldPlayerSceneWork *scene = &D_0032F1A0;
+    FieldPlayerSceneWork *scene = &fldPlayerSceneWork;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
 
     controller->stage = 0;

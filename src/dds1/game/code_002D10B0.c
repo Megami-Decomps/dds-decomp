@@ -172,7 +172,7 @@ void sdfRunGraphicsTransferWorker(void) {
 
     D_003BD2F1 = 0;
     sdfAddHandler(1, 1, sdfGraphWakeDisplayThread, -1, 0);
-    sdfEnableDmacChannel(1);
+    EnableDmac(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
         D_003BD2F1 = 1;
@@ -768,7 +768,7 @@ s32 sdfWakeImageUploadThreadOnDmac(s32 channel, s32 threadId) {
     return -1;
 }
 
-extern s32 func_0030A740(s32 channel, s32 (*handler)(s32, s32), s32 arg, s32 threadId);
+extern s32 AddDmacHandler2(s32 channel, s32 (*handler)(s32, s32), s32 arg, s32 threadId);
 extern u8 D_00398100[];
 
 /* Detach one queued batch, wait for its DMA, then release its owned source and packet allocations. */
@@ -787,7 +787,7 @@ void sdfFlushImageUploadQueue(void) {
 
     if (dmaPacketAddress != 0) {
         s32 threadId = GetThreadId();
-        s32 handlerId = func_0030A740(1, sdfWakeImageUploadThreadOnDmac, 0, threadId);
+        s32 handlerId = AddDmacHandler2(1, sdfWakeImageUploadThreadOnDmac, 0, threadId);
         u64 tag = ((u64)((u32)D_00398100 & 0x0FFFFFFF) << 32) | 0x20000000;
         u32 *channel;
 

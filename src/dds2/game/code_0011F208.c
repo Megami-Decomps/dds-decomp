@@ -60,7 +60,7 @@ extern void fldInitializeAreaWork(void);
 
 extern void fldResetSparkRewardProfileIndex(void);
 
-extern FieldStageCoordinate D_00389170[];
+extern FieldStageCoordinate fldStageCoordinateRecords[];
 
 
 
@@ -1525,7 +1525,7 @@ void fldLoadFieldTablesAndIndexStages(void) {
     sdfDevQueueReadAndWait(command, fldCameraFollowRows, 0xC00);
     sdfDevQueueReadAndWait(command, fldCameraSettings, 0x2A0);
     sdfDevQueueReadAndWait(command, D_00387D70, 0x1400);
-    sdfDevQueueReadAndWait(command, D_00389170, 0x600);
+    sdfDevQueueReadAndWait(command, fldStageCoordinateRecords, 0x600);
     sdfDevQueueReadAndWait(command, D_00389A70, 0x880);
     sdfDevQueueReadAndWait(command, D_00391FA0, 0x1200); /* 64 FldNpcMotion rows */
     sdfDevWaitThenReleaseCommandState(command);
@@ -1535,7 +1535,7 @@ void fldLoadFieldTablesAndIndexStages(void) {
         D_003899F0[i] = 0;
     }
     for (i = 0; i < 0x60; i++) {
-        s16 id = (D_00389170)[i].x;
+        s16 id = (fldStageCoordinateRecords)[i].x;
 
         if (id > 0) {
             if (id < 0x1F) {
@@ -1543,7 +1543,7 @@ void fldLoadFieldTablesAndIndexStages(void) {
                     D_003899F0[id] = sum;
                 }
                 previous = id;
-                sum += (D_00389170)[i].rows;
+                sum += (fldStageCoordinateRecords)[i].rows;
             }
         }
     }
@@ -2042,7 +2042,7 @@ s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex) {
 
 /* Search all 640 stage entries; the miss result is 640 rather than zero. */
 u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
-    FieldStageCoordinate *record = D_00389170;
+    FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
     s32 visited = 0;
 
@@ -2060,7 +2060,7 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
 /* Return the area's base row plus rows preceding the matching stage record.
  * A missing coordinate pair returns zero, unlike the index lookup's sentinel. */
 u32 fldFindStageCoordinateRowOffset(s32 x, s32 y) {
-    FieldStageCoordinate *records = D_00389170;
+    FieldStageCoordinate *records = fldStageCoordinateRecords;
     s32 rowOffset = 0;
     s32 index = 0;
     do {
@@ -2077,7 +2077,7 @@ u32 fldFindStageCoordinateRowOffset(s32 x, s32 y) {
 
 /* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
 FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
-    FieldStageCoordinate *record = D_00389170;
+    FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
 
     do {

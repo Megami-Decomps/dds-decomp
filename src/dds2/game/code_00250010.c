@@ -4749,7 +4749,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         }
     }
     sceClose(pm2);
-    sdfPfsSendPathRequest(D_004377C8, 0);
+    sceSync(D_004377C8, 0);
     evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
@@ -4758,7 +4758,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
     sceClose(pm3);
     sdfDebugPrintf("save pm3 file\n");
-    sdfPfsSendPathRequest(D_004377C8, 0);
+    sceSync(D_004377C8, 0);
     return 1;
 }
 

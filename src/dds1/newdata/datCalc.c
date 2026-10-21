@@ -1791,51 +1791,51 @@ u8 btlSelectConditionalEncounterGroup(s32 encounterIndex) {
     u8 code;
 
     for (conditionIndex = 0; conditionIndex < 3; conditionIndex++) {
-        enabled[conditionIndex] = evtTestSolarPhaseOrModelFlag(D_003BAA3C[encounterIndex].conditions[conditionIndex]);
+        enabled[conditionIndex] = evtTestSolarPhaseOrModelFlag(datBattleAdjustmentRecords[encounterIndex].conditions[conditionIndex]);
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[0];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[0];
     if (enabled[0] && enabled[1] && enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[1];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[1];
     if (enabled[0] && enabled[1]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[2];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[2];
     if (enabled[0] && enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[3];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[3];
     if (enabled[1] && enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[4];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[4];
     if (enabled[0]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[5];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[5];
     if (enabled[1]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[6];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[6];
     if (enabled[2]) {
         if (code != 8) {
             return code;
         }
     }
-    code = D_003BAA3C[encounterIndex].variantCodes[7];
+    code = datBattleAdjustmentRecords[encounterIndex].variantCodes[7];
     return code == 8 ? 0 : code;
 }
 
@@ -1919,7 +1919,7 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
     variant = btlSelectConditionalEncounterGroup(encounterIndex);
     total = 0;
     for (i = 0; i < 20; i++) {
-        total += D_003BAA3C[encounterIndex].groups[variant].entries[i].weight;
+        total += datBattleAdjustmentRecords[encounterIndex].groups[variant].entries[i].weight;
     }
     if (total == 0) {
         return 0;
@@ -1927,7 +1927,7 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
     if (D_003BAAB8 > 0) {
         return D_003BAAB8;
     }
-    interval = D_003BAA3C[encounterIndex].groups[variant].interval;
+    interval = datBattleAdjustmentRecords[encounterIndex].groups[variant].interval;
     if (interval <= 0) {
         return 0;
     }
@@ -1981,16 +1981,16 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     }
     total = 0;
     for (i = 0; i < 20; i++) {
-        if (D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
-            total += D_003BAA3C[encounterIndex].groups[group].entries[i].weight;
+        if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
+            total += datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight;
         }
     }
     count = 0;
     roll = sdfGetRandInt(0, total);
     for (i = 0; i < 20; i++) {
-        if (D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
-            if (roll < count + D_003BAA3C[encounterIndex].groups[group].entries[i].weight) {
-                scene = D_003BAA3C[encounterIndex].groups[group].entries[i].sceneIndex;
+        if (datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex != 0) {
+            if (roll < count + datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight) {
+                scene = datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex;
                 if ((datGameState->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
                     D_003BAABC = encounterIndex;
@@ -2001,7 +2001,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
                 dds3WorkClear();
                 return 0;
             }
-            count += D_003BAA3C[encounterIndex].groups[group].entries[i].weight;
+            count += datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].weight;
         }
     }
     return 0;
@@ -2060,7 +2060,7 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", datBattleSceneRecords);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA38);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA3C);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datBattleAdjustmentRecords);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", fldEncounterRollTable);
 

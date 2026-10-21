@@ -55,11 +55,11 @@ void dds3ClearScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
 
 typedef struct SdfThreadNode SdfThreadNode;
 
-extern void func_00356F58(void);
+extern void __main(void);
 extern void sdfInitDeviceSemaphores(void);
-extern s32 func_0036DD28(void);
-extern void func_0034CB60(s32);
-extern void func_0034D038(u32 discType);
+extern s32 sceSifSyncIop(void);
+extern void sceCdInit(s32);
+extern void sceCdMmode(u32 discType);
 extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
 extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
 extern void sdfDevSetCurrentDirectory(const char *path);
@@ -84,21 +84,21 @@ extern u8 D_00438A8C;
 extern SdfThreadNode kwlnMainLoopThreadNode;
 extern u8 D_00439410[];
 s32 sdfInitializeRuntimeAndStartMainLoop(void) {
-    func_00356F58();
+    __main();
     sceSifInitRpc(0);
     sceSifInitIopHeap();
     sdfDiscType = D_00435C0C;
     sdfInitDeviceSemaphores();
     while (sceSifRebootIop(D_004110A8) == 0) {
     }
-    while (func_0036DD28() == 0) {
+    while (sceSifSyncIop() == 0) {
     }
     sceSifInitRpc(0);
     sceSifInitIopHeap();
     sceSifLoadFileReset();
     sceFsReset();
-    func_0034CB60(0);
-    func_0034D038(D_00435C0C);
+    sceCdInit(0);
+    sceCdMmode(D_00435C0C);
     while (sceSifLoadModule(D_004110C8, 0, 0) < 0) {
     }
     while (sceSifLoadModule(D_004110E8, 0, 0) < 0) {

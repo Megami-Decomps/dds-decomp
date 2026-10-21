@@ -279,7 +279,7 @@ void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *o
     while (sceSifLoadModule(modulePath, 0, NULL) < 0) {
     }
     if (optionalModulePath != NULL) {
-        func_0034D8E0(0);
+        sceSifMInitRpc(0);
     }
     while (1) {
         sceSifMBindRpc(&sdfNamedResourceRpcClient, SDF_NAMED_RESOURCE_RPC_ID, 0);

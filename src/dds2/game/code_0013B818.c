@@ -90,7 +90,7 @@ extern void evtSubmitPrimaryAlphaBlendMode();
 
 extern u32 fldAuxRecordBuffer;
 
-extern u32 fldValueRecords;
+extern FldValueRecord *fldValueRecords;
 
 extern u32 fldAuxRecordResource;
 

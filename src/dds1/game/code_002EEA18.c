@@ -560,7 +560,7 @@ void sdfStartAndSuspendWorkerThread(void) {
 }
 
 extern char *D_00398C80[];
-extern void func_002F5E30(void);
+extern void sceMcInit(void);
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
 void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
@@ -573,7 +573,7 @@ void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
         strcat(path, moduleNames[moduleIndex]);
         sceSifLoadModule(path, 0, 0);
     }
-    func_002F5E30();
+    sceMcInit();
 }
 
 

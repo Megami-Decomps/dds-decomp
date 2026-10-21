@@ -168,7 +168,7 @@ void mnuUpdateTitleAudioStreams(void) {
         (D_00437A30 != 0 && mnuTitleStreamStatus.control == 1)) {
         mnuTitleStreamDecoderState[0] = (u32)(mnuTitleStreamStatus.compressedData
                               + mnuTitleStreamStatus.frameBytes * mnuTitleStreamStatus.frameIndex);
-        func_00350570(mnuTitleStreamDecoderState);
+        at3decDecodeFrame(mnuTitleStreamDecoderState);
     }
     if (mnuTitleStreamStatus.control == 1) {
         mnuTitleStreamStatus.samples = (s16 *)mnuTitleStreamDecoderState[1];
@@ -180,7 +180,7 @@ void mnuUpdateTitleAudioStreams(void) {
         (D_00437A30 != 0 && mnuTitleSoundBufferState.control == 1)) {
         mnuTitleSoundBufferDecoderState[0] = (u32)(mnuTitleSoundBufferState.compressedData
                               + mnuTitleSoundBufferState.frameBytes * mnuTitleSoundBufferState.frameIndex);
-        func_00350570(mnuTitleSoundBufferDecoderState);
+        at3decDecodeFrame(mnuTitleSoundBufferDecoderState);
     }
     if (mnuTitleSoundBufferState.control == 1) {
         mnuTitleSoundBufferState.samples = (s16 *)mnuTitleSoundBufferDecoderState[1];
@@ -348,7 +348,7 @@ void mnuStoreTaskResult(char *audioPath) {
 }
 
 
-extern void func_003504A8(u32 *);
+extern void at3decReset(u32 *);
 
 /* Allocate in global status, but use the supplied state's copy destination
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
@@ -370,7 +370,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         destinationState->frameCount = fileBytes / destinationState->frameBytes;
         destinationState->frameIndex = 0;
         sdfMemFreeDelayedDirect(resourceHandle);
-        func_003504A8(mnuTitleStreamDecoderState);
+        at3decReset(mnuTitleStreamDecoderState);
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_COPIED;
         ready = 1;
     }
@@ -556,7 +556,7 @@ void mnuInitializeTitleSoundBuffer(void) {
     streamState->samples = (s16 *)mnuTitleAudioSilenceBuffer;
     streamState->frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
     mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", streamState);
-    func_003504A8(decoder);
+    at3decReset(decoder);
     SignalSema(mnuTitleStreamSemaphore);
 }
 
@@ -601,7 +601,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     mnuTitleSoundBufferState.compressedData = bufferAddress;
     sprintf(soundPath, D_00428650, D_003E0F60[soundEntryIndex].filename);
     mnuLoadTitleStreamFrameData(soundPath, &mnuTitleSoundBufferState);
-    func_003504A8(mnuTitleSoundBufferDecoderState);
+    at3decReset(mnuTitleSoundBufferDecoderState);
     SignalSema(mnuTitleStreamSemaphore);
 }
 
@@ -647,7 +647,7 @@ void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32
     frameCount = dataBytes / mnuTitleSoundBufferState.frameBytes;
     mnuTitleSoundBufferState.frameIndex = 0;
     mnuTitleSoundBufferState.frameCount = frameCount;
-    func_003504A8(mnuTitleSoundBufferDecoderState);
+    at3decReset(mnuTitleSoundBufferDecoderState);
     SignalSema(mnuTitleStreamSemaphore);
 }
 

@@ -52,7 +52,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
 extern void btlUpdateBattleCameraFrame(void);
-extern s32 btlRuntime;
+extern BtlState *btlRuntime;
 
 
 extern u64 D_003BB2E8;
@@ -296,7 +296,7 @@ extern void btlUpdateTintAndWorldLight(void);
 extern void fldAdvanceSceneGroupScheduler(void);
 
 s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
-    BtlState *battle = (BtlState *)btlRuntime;
+    BtlState *battle = btlRuntime;
     if (battle == NULL) {
         return 0;
     }
@@ -313,7 +313,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlSweepFinishedTasks();
         btlUpdateBattleCameraFrame();
         /* The callbacks above may replace the runtime; advance its current frame. */
-        ++((BtlState *)btlRuntime)->frame;
+        ++btlRuntime->frame;
     } else {
         btlExitWhenAudioAndTasksIdle();
     }
@@ -330,7 +330,7 @@ extern void btlUpdateFieldPresentationNoOp(void);
 extern void btlUpdateSceneFlow(void);
 
 s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
-    BtlState *battle = (BtlState *)btlRuntime;
+    BtlState *battle = btlRuntime;
     if (battle == NULL) {
         return 0;
     }
@@ -357,7 +357,7 @@ extern char D_003A1598[]; /* "battle_draw" */
 
 
 void btlCreateDrawTasks(void) {
-    BtlState *battle = (BtlState *)btlRuntime;
+    BtlState *battle = btlRuntime;
     KwlnTask *mainTask;
     KwlnTask *drawTask;
     mainTask = dds3StartProcess(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
@@ -371,7 +371,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
     task = dds3SearchProcessPriority(0x3f9);
     if (task != NULL) {
-        dds3KillProcess(((BtlState *)btlRuntime)->scriptOwner, 1);
+        dds3KillProcess(btlRuntime->scriptOwner, 1);
         return;
     }
 }
@@ -447,8 +447,8 @@ extern void btlInitializeRuntimeNoOp(void);
 void btlInitializeBattleRuntime(void) {
     btlResetRuntimeSequenceCounter();
     D_003BB2E0 = (u32)sdfMemAllocDirect(0xE10);
-    btlRuntime = (s32)sdfMemLock((struct SdfMemBlock *)(D_003BB2E0));
-    memset((void *)btlRuntime, 0, 0xE10);
+    btlRuntime = (BtlState *)sdfMemLock((struct SdfMemBlock *)(D_003BB2E0));
+    memset(btlRuntime, 0, 0xE10);
 
     ((BattleInitState *)btlRuntime)->tick = 0;
     ((BattleInitState *)btlRuntime)->unk200 = 0;
@@ -459,7 +459,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
     mnuMovieTaskState = 2;
-    ((BtlState *)btlRuntime)->timingRate = 0x1E;
+    btlRuntime->timingRate = 0x1E;
     {
         BattleInitState *state = (BattleInitState *)btlRuntime;
         state->endCode = 0;
@@ -527,7 +527,7 @@ INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15A8);
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15C8);
 
 s32 btlExitWhenAudioAndTasksIdle(void) {
-    if (btlRuntime == 0) {
+    if (btlRuntime == NULL) {
         btlBossDebugPrintf(D_003A15A8);
         return 0;
     }
@@ -557,9 +557,9 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     brsTaskTryDestroy();
     btlClearSoundAndModelResources();
     btlDestroyDrawTaskAtPriorityWhenPresent();
-    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x4A0));
-    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x49C));
-    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x498));
+    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[2]);
+    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[1]);
+    itfMesDestroyWindowIfPresent(((BattleInitState *)btlRuntime)->messageWindows[0]);
     btlAdvanceTitleStateWithAudioCleanup();
     kwlnCancelConfiguredFadeFrames();
     evtDestroySelectionState();
@@ -568,7 +568,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     itfMesClearFlags(1);
     sdfMemFreeDirect((struct SdfMemBlock *)(u32)(D_003BB2E0));
     D_003BB2E0 = 0;
-    btlRuntime = 0;
+    btlRuntime = NULL;
     btlBossDebugPrintf("** btlExit ***************\n");
     return 0;
 }
@@ -589,36 +589,36 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
     btlCreateDrawTasks();
     switch (mode) {
     case 0:
-        ((BtlState *)btlRuntime)->encounterPack = pack;
-        ((BtlState *)btlRuntime)->adjustmentGroupIndex = (u8)(encounter >> 24);
-        ((BtlState *)btlRuntime)->adjustmentEntryIndex = (u8)(encounter >> 16);
-        ((BtlState *)btlRuntime)->battleMode = (u16)encounter;
+        btlRuntime->encounterPack = pack;
+        btlRuntime->adjustmentGroupIndex = (u8)(encounter >> 24);
+        btlRuntime->adjustmentEntryIndex = (u8)(encounter >> 16);
+        btlRuntime->battleMode = (u16)encounter;
         btlBossDebugPrintf("enc[pack:%X,no:%X,index:%X,encNo:%X]\n", pack, (u8)(encounter >> 24), (u8)(encounter >> 16), (u16)encounter);
         if (pack > 0) {
-            paramA = D_003BAA3C[pack].encounterParamA;
-            ((BtlState *)btlRuntime)->encounterParamA = paramA;
-            paramB = D_003BAA3C[pack].encounterParamB;
-            ((BtlState *)btlRuntime)->encounterParamB = paramB;
+            paramA = datBattleAdjustmentRecords[pack].encounterParamA;
+            btlRuntime->encounterParamA = paramA;
+            paramB = datBattleAdjustmentRecords[pack].encounterParamB;
+            btlRuntime->encounterParamB = paramB;
             evtPrintDeveloperConsoleMessage("Pack:0x%X Maj:%d Min:%d\n", pack, (s16)paramA, (s16)paramB);
-            if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
+            if (btlRuntime->encounterParamA == 0 && btlRuntime->encounterParamB == 0) {
                 if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
                     evtPrintDeveloperConsoleMessage("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
                     paramA = req.code;
                     paramB = req.parameter;
-                    ((BtlState *)btlRuntime)->encounterParamA = paramA;
-                    ((BtlState *)btlRuntime)->encounterParamB = paramB;
+                    btlRuntime->encounterParamA = paramA;
+                    btlRuntime->encounterParamB = paramB;
                 }
             }
         } else {
-            ((BtlState *)btlRuntime)->encounterParamA = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMajorId;
-            ((BtlState *)btlRuntime)->encounterParamB = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMinorId;
-            if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
+            btlRuntime->encounterParamA = datBattleSceneRecords[btlRuntime->battleMode].backgroundMajorId;
+            btlRuntime->encounterParamB = datBattleSceneRecords[btlRuntime->battleMode].backgroundMinorId;
+            if (btlRuntime->encounterParamA == 0 && btlRuntime->encounterParamB == 0) {
                 if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
-                    ((BtlState *)btlRuntime)->encounterParamA = req.code;
-                    ((BtlState *)btlRuntime)->encounterParamB = req.parameter;
+                    btlRuntime->encounterParamA = req.code;
+                    btlRuntime->encounterParamB = req.parameter;
                 } else {
-                    ((BtlState *)btlRuntime)->encounterParamA = 0xC9;
-                    ((BtlState *)btlRuntime)->encounterParamB = 1;
+                    btlRuntime->encounterParamA = 0xC9;
+                    btlRuntime->encounterParamB = 1;
                 }
             }
         }
@@ -628,14 +628,14 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
         btlSetScene(0xC);
         break;
     }
-    if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
-        ((BtlState *)btlRuntime)->encounterParamA = 0xC9;
-        ((BtlState *)btlRuntime)->encounterParamB = 1;
+    if (btlRuntime->encounterParamA == 0 && btlRuntime->encounterParamB == 0) {
+        btlRuntime->encounterParamA = 0xC9;
+        btlRuntime->encounterParamB = 1;
     }
     itfMesSetFlags(1);
     mdlFlagSet(0xC0F);
-    ((BtlState *)btlRuntime)->battleFlags |= 0x701C1;
-    ((BtlState *)btlRuntime)->commandRestrictFlags |= 2;
+    btlRuntime->battleFlags |= 0x701C1;
+    btlRuntime->commandRestrictFlags |= 2;
     btlBossDebugPrintf("** btlStart **************\n");
 }
 
@@ -650,14 +650,14 @@ void btlLoadInputIconsAndSystemSounds(void) {
 }
 
 u8 btlIsRuntimeAllocated(void) {
-    return btlRuntime != 0;
+    return btlRuntime != NULL;
 }
 
 s32 btlIsCurrentActorFullyMarked(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    return (((BtlState *)btlRuntime)->battleFlags & 0x6000000) == 0x6000000;
+    return (btlRuntime->battleFlags & 0x6000000) == 0x6000000;
 }
 
 s32 btlHasPendingRuntimeActivity(void) {
@@ -665,7 +665,7 @@ s32 btlHasPendingRuntimeActivity(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    battle = (BtlState *)btlRuntime;
+    battle = btlRuntime;
     if (battle->tasks != NULL) {
         return 1;
     }
@@ -676,19 +676,19 @@ s32 btlHasPendingRuntimeActivity(void) {
 }
 
 void btlResetActorEntryState(void) {
-    s32 context = btlRuntime;
+    BtlState *context = btlRuntime;
     DatPartyRecord *entries = datGameState->party;
     u32 i;
-    ((BtlState *)context)->moneyEarned = 0;
-    ((BtlState *)context)->moneyTotal = 0;
-    ((BtlState *)context)->experienceEarned = 0;
-    ((BtlState *)context)->epEarned = 0;
-    ((BtlState *)context)->totalAp = 0;
+    context->moneyEarned = 0;
+    context->moneyTotal = 0;
+    context->experienceEarned = 0;
+    context->epEarned = 0;
+    context->totalAp = 0;
     for (i = 0; i < 5; i++) {
         entries[i].huntExp = 0;
 
     }
-    memset(((BtlState *)btlRuntime)->itemDrops, 0, sizeof(((BtlState *)btlRuntime)->itemDrops));
+    memset(btlRuntime->itemDrops, 0, sizeof(btlRuntime->itemDrops));
 }
 
 extern const char D_003A1698[];
@@ -705,7 +705,7 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    runtime = (BtlState *)btlRuntime;
+    runtime = btlRuntime;
     rewards->macca = (u32)runtime->moneyTotal;
     rewards->totalExp = runtime->experienceEarned;
     rewards->totalAp = runtime->totalAp;
@@ -719,8 +719,8 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
     }
     btlBossDebugPrintf(D_003A1698);
     for (i = 0; i < 3; i++) {
-        rewards->icons[i].id = ((BtlState *)btlRuntime)->itemDrops[i].id;
-        rewards->icons[i].param = ((BtlState *)btlRuntime)->itemDrops[i].count;
+        rewards->icons[i].id = btlRuntime->itemDrops[i].id;
+        rewards->icons[i].param = btlRuntime->itemDrops[i].count;
     }
     return 1;
 }
@@ -759,7 +759,7 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
 }
 
 void *btlGetRuntime(void) {
-    return (void *)(u32)btlRuntime;
+    return btlRuntime;
 }
 
 

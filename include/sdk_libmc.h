@@ -26,17 +26,17 @@ s32 sceMcSync(s32 mode, s32 *command, s32 *result);
 #endif
 
 #ifdef VERSION_DDS2
-#ifndef SDK_SKIP_sdfAllocHeapMemory
-void *sdfAllocHeapMemory(u32 size);
+#ifndef SDK_SKIP_malloc
+void *malloc(u32 size);
 #endif
-#ifndef SDK_SKIP_sdfCloseFileStream
-void sdfCloseFileStream(SdkFileStream *stream);
+#ifndef SDK_SKIP_fclose
+void fclose(SdkFileStream *stream);
 #endif
 #ifndef SDK_SKIP_sdfFreeHeapMemory
 void sdfFreeHeapMemory(void *memory);
 #endif
-#ifndef SDK_SKIP_sdfOpenFileStream
-SdkFileStream *sdfOpenFileStream(const char *name, const char *mode);
+#ifndef SDK_SKIP_fopen
+SdkFileStream *fopen(const char *name, const char *mode);
 #endif
 #ifndef SDK_SKIP_sdfReadFileStream
 u32 sdfReadFileStream(void *data, u32 size, u32 count, SdkFileStream *stream);

@@ -190,7 +190,7 @@ extern s32 D_003BAE68;
 
 extern u32 fldAuxRecordBuffer;
 
-extern u32 fldValueRecords;
+extern FldValueRecord *fldValueRecords;
 
 extern u32 fldAuxRecordResource;
 

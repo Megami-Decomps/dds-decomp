@@ -90,7 +90,7 @@ extern void fldActivateObjectById(s32);
 
 extern void ptyReturnOne(s32);
 
-extern FieldStageCoordinate D_0032DDB0[];
+extern FieldStageCoordinate fldStageCoordinateRecords[];
 
 extern u8 D_0033F068[];
 
@@ -1518,7 +1518,7 @@ void fldLoadFieldTables(void) {
     sdfDevQueueReadAndWait(command, fldCameraFollowRows, 0xC00);
     sdfDevQueueReadAndWait(command, fldCameraSettings, 0x2A0);
     sdfDevQueueReadAndWait(command, D_0032C9B0, 0x1400);
-    sdfDevQueueReadAndWait(command, D_0032DDB0, 0x600);
+    sdfDevQueueReadAndWait(command, fldStageCoordinateRecords, 0x600);
     sdfDevQueueReadAndWait(command, D_0032E5C8, 0x880);
     sdfDevQueueReadAndWait(command, D_00336A60, 0x1200); /* 64 FldNpcMotion rows */
     sdfDevWaitThenReleaseCommandState(command);
@@ -1551,7 +1551,7 @@ void fldResetFieldMapState(void) {
     }
 
     fldClearAllAreaFloorFlags();
-    memset(datGameState->pad159D0, 0, sizeof(datGameState->pad159D0));
+    memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
 }
 
 /* The reset includes the first word of the following render region. */
@@ -2012,7 +2012,7 @@ s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex) {
 
 /* Search all 640 stage entries; the miss result is 640 rather than zero. */
 u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
-    FieldStageCoordinate *record = D_0032DDB0;
+    FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
     s32 visited = 0;
 
@@ -2029,7 +2029,7 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
 
 /* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
 FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
-    FieldStageCoordinate *record = D_0032DDB0;
+    FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
 
     do {
@@ -2107,7 +2107,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
         bit = neighborX % 8;
         column = neighborX / 8;
         if (column >= 0 && neighborZ >= 0 && column < record->cols && neighborZ < record->rows) {
-            datGameState->pad159D0[neighborZ * 10 + stageIndex * 800 + column] |= 1 << bit;
+            datGameState->stageCellBits[neighborZ * 10 + stageIndex * 800 + column] |= 1 << bit;
         }
     }
 }
@@ -2131,7 +2131,7 @@ s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z) {
     byte = cellX / 8;
     stage = fldFindStageCoordinateIndex(fldAreaState.area, floor);
     if (byte >= 0 && row >= 0 && byte < record->cols && row < record->rows) {
-        if ((datGameState->pad159D0[row * 10 + stage * 800 + byte] >> bit) & 1) {
+        if ((datGameState->stageCellBits[row * 10 + stage * 800 + byte] >> bit) & 1) {
             return 1;
         }
     }
