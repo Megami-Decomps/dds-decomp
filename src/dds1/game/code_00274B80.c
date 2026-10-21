@@ -751,7 +751,7 @@ void mnuSelectStaffSelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(3, context);
 }
 
-void mnuReleaseMenuWindowHandles() {
+void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
 /* Release both staff resource slots; their menu indices differ between games. */
