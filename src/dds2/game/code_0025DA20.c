@@ -3758,7 +3758,7 @@ extern void mnuDrawShopPricePlaceholder(s32, s32, s32, void *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawShopCurrencyBalance(void *, s32);
+extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
 
 /* Draw the active dispatch mode before advancing its callback state. */
