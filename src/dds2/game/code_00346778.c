@@ -89,7 +89,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         sdfMoviePacRingSemaphore = sdfCreateSemaphore(1, 1, 0);
     }
     D_0043921C = -1;
-    pacWork = sdfAllocAndClearQuadwords(0x78);
+    pacWork = sdfAllocAndClearQuadwords(sizeof(*pacWork));
     owner->stream.pac = pacWork;
     allocation = sdfMemAllocDirect(0x24000);
     pacWork->allocation = allocation;
