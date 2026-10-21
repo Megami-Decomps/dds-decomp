@@ -7595,6 +7595,7 @@ fileSlotDisplayStates = 0x003DC7C0;
 fileSavePreviewRecords = 0x003DC800;
 sdfChipClassTable = 0x003E26F0;
 sdfGeneralHeap = 0x003E2748;
+sdfDisplayEnvironment = 0x003EB820; // size:0x28
 sdfTextureQueueWork = 0x003EB848;
 sdfPadPortBuffers = 0x003F9900;
 sdfPadPorts = 0x003F9B00;
