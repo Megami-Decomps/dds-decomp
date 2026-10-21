@@ -1709,14 +1709,7 @@ void effSetBillboardMatrixComponent(EffBillboardWork *work, float value) {
     work->scale = value;
 }
 
-/* Per-instance frame entries and the descriptor that owns their storage. */
-typedef struct EffFrameState {
-    u8 *entries;       // 0x00
-    u8 *asset;         // 0x04
-    struct SdfMemBlock *allocation; // 0x08: allocation descriptor
-} EffFrameState;
-
-
+#include "eff_frame_state.h"
 
 void effClearBillFrames(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;

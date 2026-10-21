@@ -1491,12 +1491,7 @@ void effSetBillboardMatrixComponent(EffBillboardWork *work, float value) {
     work->scale = value;
 }
 
-/* Frame builder owns an entry array, a resource, and its allocation handle. */
-typedef struct EffFrameState {
-    u8 *entries;        // 0x00
-    u8 *asset;          // 0x04
-    struct SdfMemBlock *allocation; // 0x08: allocation descriptor
-} EffFrameState;
+#include "eff_frame_state.h"
 
 void effClearBillFrames(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
