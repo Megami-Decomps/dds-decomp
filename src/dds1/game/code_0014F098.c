@@ -13,7 +13,7 @@ extern void fldSelectCameraByActorName(const char *entry);
 
 extern s32 fldResolveEventSelectorTarget(s32 index);
 
-extern s32 func_0013CEB0(s32 param0, s32 param1);
+extern s32 fldDispatchInteractionAction(s32 param0, s32 param1);
 
 extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
 
@@ -81,7 +81,7 @@ s32 fldCmdDispatchInteractionAction(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(func_0013CEB0(param0, param1));
+    scrSetIntegerReturnValue(fldDispatchInteractionAction(param0, param1));
     return 1;
 }
 

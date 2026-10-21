@@ -155,7 +155,7 @@ extern s32 fldEvaluateCameraMoveTracking(void);
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 
-extern s32 func_0013FA98(s32 param0, s32 param1);
+extern s32 fldDispatchInteractionAction(s32 param0, s32 param1);
 
 extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
 
@@ -1629,7 +1629,7 @@ s32 fldCmdDispatchInteractionAction(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(func_0013FA98(param0, param1));
+    scrSetIntegerReturnValue(fldDispatchInteractionAction(param0, param1));
     return 1;
 }
 
