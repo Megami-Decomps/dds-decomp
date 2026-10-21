@@ -69,7 +69,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "mdl_flag_api.h"
 
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
-extern void func_001BBE18(BtlUnit *, BattleActorPanelWork *, s32, s8, s16, s32, s32);
+extern void btlDrawActorPanelEntry(BtlUnit *, BattleActorPanelWork *, s32, s8, s16, s32, s32);
 
 
 
@@ -5478,7 +5478,7 @@ s32 func_001B6CF8(KwlnTask *task) {
             btlDrawActorPanelHighlights(unit, work, slot, 0);
             btlWriteTriangleHighlightPulse(unit, work, slot);
             btlDrawActorPanelTransitionTriangles(unit, work, slot);
-            func_001BBE18(unit, work, slot, 0, work->activeEntries[slot].presentation.fade,
+            btlDrawActorPanelEntry(unit, work, slot, 0, work->activeEntries[slot].presentation.fade,
                           work->activeEntries[slot].position[0], work->activeEntries[slot].position[1]);
             btlUpdateActorVitalChangeEffects(unit, work, slot);
             btlTrackActorVitalChanges(unit, work, slot, 0);
@@ -5914,7 +5914,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
             btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
             btlUpdateActorPanelHighlights(unit, work, i, 1);
             btlDrawActorPanelHighlights(unit, work, i, 1);
-            func_001BBE18(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
+            btlDrawActorPanelEntry(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
                           work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
 
             if (work->reserveEntries[i].presentation.fade >= 0x80) {
@@ -7255,7 +7255,7 @@ extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIconFixed64(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIcon(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
-void func_001BBE18(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
+void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
                    s8 bank, s16 alpha, s32 x, s32 y) {
     BattleHudOffsets offsets = {{{10, 43}, {51, 47}, {23, 62}, {54, 49}, {26, 64}}};
     BattleHudSprites sprites = D_003A2DB0;
