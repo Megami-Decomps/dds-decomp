@@ -98,11 +98,6 @@ extern s32 fldCountSceneSlots(void);
 
 extern char D_003A1A40[];
 
-typedef struct BattleFearState {
-    u8 pad_000[0x1FC];
-    u32 flags;
-} BattleFearState;
-
 extern s32 dds3FindEntryIndex(s32);
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
@@ -406,7 +401,7 @@ s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
     s32 threshold;
     u32 category;
 
-    if (((BattleFearState *)btlGetRuntime())->flags & 0x80) {
+    if (((BtlState *)btlGetRuntime())->unk_1FC & 0x80) {
         return 0;
     }
     actionThreshold = 0;
