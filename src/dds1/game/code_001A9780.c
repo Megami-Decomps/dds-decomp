@@ -4083,7 +4083,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2988);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2998);
 
-void func_001B2AC8(BattleSceneObject *object) {
+void btlInitializeCommandOptionState(BattleSceneObject *object) {
     enum {
         LAYOUT_ROW = (s32)&((BattleCommandLayoutWork *)0)->fixedDimensions[0][3],
         LAYOUT_POSITION = (s32)&((BattleCommandLayoutWork *)0)->positions[0] - LAYOUT_ROW,
@@ -8696,7 +8696,7 @@ extern s32 btlUpdateCommandNoticeTask(KwlnTask *task);
 
 extern s32 btlUpdateLinkageNoticeTask(KwlnTask *task);
 
-extern void func_001B2AC8(BattleSceneObject *object);
+extern void btlInitializeCommandOptionState(BattleSceneObject *object);
 
 extern u8 btlLinkageTutorialMessages[];
 
@@ -8742,7 +8742,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
         btlInitializeSelectionWork();
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
-        func_001B2AC8(object);
+        btlInitializeCommandOptionState(object);
         if ((task->unit->status.flags & 0x200) && !(scene->battleFlags & 0x1000000)) {
             if (mdlFlagTest(0x81B) == 0) {
                 mdlFlagSet(0x81B);

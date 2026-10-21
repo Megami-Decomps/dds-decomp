@@ -4977,7 +4977,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004164B8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004164C8);
 
-void func_001BD6E8(BattleSceneObject *object) {
+void btlInitializeCommandOptionState(BattleSceneObject *object) {
     enum {
         LAYOUT_ROW = (s32)&((BattleCommandLayoutWork *)0)->fixedDimensions[0][3],
         LAYOUT_POSITION = (s32)&((BattleCommandLayoutWork *)0)->positions[0] - LAYOUT_ROW,
@@ -10111,7 +10111,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
         btlInitializeSelectionWork();
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
-        func_001BD6E8(object);
+        btlInitializeCommandOptionState(object);
         if ((task->unit->status.flags & 0x200) && !(scene->battleFlags & 0x1000000)) {
             switch (fldSelectSceneMode(task)) {
             case 1:
