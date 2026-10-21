@@ -9,3 +9,4 @@ dds2 0x002CAED0  # fileResetSlotSelection deferred in DDS2: with mcdCreateMenuDr
 dds2 0x002C9818  # mcdCreateMenuDrawHandle deferred (same flip)
 dds2 0x002119E0  # DDS1 btlSelectConditionalAiRoute: the name tips btlSelectLowestRankTarget (code_002112C8) to CONTEXT
 dds2 0x0034EC40  # DDS1 sceMcInit: the name tips func_001F5320 (code_001EC868) to a different instruction selection
+dds2 0x00435E0C  # DDS1 datBattleAdjustmentRecords: the name tips btlFindSpecialActionIndex (code_00214948) to CONTEXT

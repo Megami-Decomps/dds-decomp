@@ -1312,7 +1312,7 @@ s32 btlAllActiveUnitsReady(void) {
 /* Return the battle-parameter scale for the selected encounter's clamped adjustment. */
 f32 btlGetEncounterAdjustmentScale(void) {
     BattleController *runtime = (BattleController *)btlGetRuntime();
-    s32 adjustment = D_003BAA3C[runtime->adjustmentRecordIndex]
+    s32 adjustment = datBattleAdjustmentRecords[runtime->adjustmentRecordIndex]
                          .groups[runtime->adjustmentGroupIndex]
                          .entries[runtime->adjustmentEntryIndex]
                          .value;

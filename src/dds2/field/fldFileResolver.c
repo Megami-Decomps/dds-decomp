@@ -1508,7 +1508,7 @@ extern s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle)
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];
-extern FieldPlayerSceneWork D_0038A640;
+extern FieldPlayerSceneWork fldPlayerSceneWork;
 extern void fldAllocateBackgroundBuffer(void);
 #include "fld_object_slot_api.h"
 extern void fldReleaseResourceSlots();
@@ -1531,7 +1531,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     void *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;
-    FieldPlayerSceneWork *sceneWork = &D_0038A640;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
     s32 area;
     s32 room;
     s32 isField;

@@ -90,7 +90,7 @@ extern void fldActivateObjectById(s32);
 
 extern void ptyReturnOne(s32);
 
-extern FieldStageCoordinate D_0032DDB0[];
+extern FieldStageCoordinate fldStageCoordinateRecords[];
 
 extern u8 D_0033F068[];
 
@@ -1518,7 +1518,7 @@ void fldLoadFieldTables(void) {
     sdfDevQueueReadAndWait(command, fldCameraFollowRows, 0xC00);
     sdfDevQueueReadAndWait(command, fldCameraSettings, 0x2A0);
     sdfDevQueueReadAndWait(command, D_0032C9B0, 0x1400);
-    sdfDevQueueReadAndWait(command, D_0032DDB0, 0x600);
+    sdfDevQueueReadAndWait(command, fldStageCoordinateRecords, 0x600);
     sdfDevQueueReadAndWait(command, D_0032E5C8, 0x880);
     sdfDevQueueReadAndWait(command, D_00336A60, 0x1200); /* 64 FldNpcMotion rows */
     sdfDevWaitThenReleaseCommandState(command);
@@ -2012,7 +2012,7 @@ s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex) {
 
 /* Search all 640 stage entries; the miss result is 640 rather than zero. */
 u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
-    FieldStageCoordinate *record = D_0032DDB0;
+    FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
     s32 visited = 0;
 
@@ -2029,7 +2029,7 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
 
 /* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
 FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
-    FieldStageCoordinate *record = D_0032DDB0;
+    FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
 
     do {

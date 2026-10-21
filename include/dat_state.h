@@ -411,7 +411,7 @@ typedef char BattleAdjustmentRecordSizeCheck[sizeof(BattleAdjustmentRecord) == 0
 typedef char BattleAdjustmentStreamOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->streamSelection == 4 ? 1 : -1];
 typedef char BattleAdjustmentGroupsOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->groups == 0x1C ? 1 : -1];
 
-extern BattleAdjustmentRecord *D_003BAA3C;
+extern BattleAdjustmentRecord *datBattleAdjustmentRecords;
 #else
 /* DDS2 encounter records carry two background IDs, four opaque bytes, and
  * three conditional weighted encounter groups (0x190 bytes total). */
