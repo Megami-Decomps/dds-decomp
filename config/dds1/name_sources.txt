@@ -9879,3 +9879,25 @@
 0x00307308	fread	inferred	newlib fread: copies buffered bytes with memcpy and refills through __srefill. DDS2 twin 0x00359B18.
 0x002F5990	sceSdRemote	inferred	libsdr sceSdRemote: the variadic EE-side remote call of libsd commands over the sdr RPC, after sceSdRemoteInit and sceSdTransToIOP. DDS2 twin 0x0034E820.
 0x0030ECF8	sceLseek	inferred	FILEIO sceLseek: between sceClose and sceRead, sends the descriptor, offset and whence to the IOP's FILEIO server. DDS2 twin 0x00369F78.
+0x0039B4D0	at3decImdctTwiddles	inferred	libat3dec: 128 x 4 words, the butterfly twiddles of the 256-point inverse transform; read by its routines. DDS2 twin 0x0040E650.
+0x003B5C80	at3decOutputFirTaps	inferred	libat3dec: 48 taps of the final FIR that at3decFilterOutput applies; read by its routines. DDS2 twin 0x0042F9D0.
+0x003B5CE0	at3decQmfTaps	inferred	libat3dec: 24 half-band QMF synthesis taps, forward order; read by its routines. DDS2 twin 0x0042FA30.
+0x003B5D10	at3decQmfTapsReversed	inferred	libat3dec: the same 24 QMF taps in reverse order; read by its routines. DDS2 twin 0x0042FA60.
+0x003B5D40	at3decLowHalfMask	inferred	libat3dec: four words of 0x00007FFF, a low-half mask vector; read by its routines. DDS2 twin 0x0042FA90.
+0x003B5D50	at3decScaleFactorShifts	inferred	libat3dec: 64 right shifts by scale factor index (21 - index/3); read by its routines. DDS2 twin 0x0042FAA0.
+0x003B5EA8	at3decGainSteps	inferred	libat3dec: 8 gain interpolation steps, 0x8000 * 2^(-k/8); read by its routines. DDS2 twin 0x0042FBF8.
+0x003B5EB8	at3decBandMixWeights	inferred	libat3dec: per-band mix weight pairs, the default pair after them; read by its routines. DDS2 twin 0x0042FC08.
+0x003B5EC4	at3decDefaultMixWeight	inferred	libat3dec: the default mix weight pair (8, 8); read by its routines. DDS2 twin 0x0042FC14.
+0x003B5EC8	at3decJointStereoWeights	inferred	libat3dec: joint stereo weight pairs selected by a 4-bit code, the unity pair after them; read by its routines. DDS2 twin 0x0042FC18.
+0x003B5F04	at3decUnityMixWeight	inferred	libat3dec: the unity mix weight pair (0x8000, 0x8000); read by its routines. DDS2 twin 0x0042FC54.
+0x003B5F08	at3decSubbandStartLines	inferred	libat3dec: the first spectral line of each of the 32 subbands, and the end; read by its routines. DDS2 twin 0x0042FC58.
+0x003B635E	at3decLookaheadBits	inferred	libat3dec: lookahead width by quantisation step and coding mode; read by its routines. DDS2 twin 0x004300AE.
+0x003B6AA8	at3decCodeLengthTables	inferred	libat3dec: 13 pointers to code length tables by quantisation step and coding mode; read by its routines. DDS2 twin 0x004307F8.
+0x003B6ADC	at3decDequantTables	inferred	libat3dec: 22 pointers to dequantised value tables; read by its routines. DDS2 twin 0x0043082C.
+0x003B6B38	at3decSymbolLookupTables	inferred	libat3dec: 14 pointers to symbol lookup tables (peeked bits to symbol); read by its routines. DDS2 twin 0x00430888.
+0x003B6C70	at3decOverlapWindow	inferred	libat3dec: 128-entry window of the inverse transform's overlap stage; read by its routines. DDS2 twin 0x004309C0.
+0x003B6D70	at3decOverlapOrder	inferred	libat3dec: the overlap stage's output order, a permutation of 0..127; read by its routines. DDS2 twin 0x00430AC0.
+0x003B6F70	at3decOverlapWindows	inferred	libat3dec: the overlap stage's two 128-entry windows; read by its routines. DDS2 twin 0x00430CC0.
+0x003B7170	at3decFallingWindow	inferred	libat3dec: 128-entry falling window, the overlap stage's and at3decCarrySilentBand's; read by its routines. DDS2 twin 0x00430EC0.
+0x0039A820	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9A0.
+0x0039A870	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9F0.
