@@ -13,7 +13,7 @@
 #include "eff_manager_task.h"
 #include "eff_random.h"
 #include "dds3_path.h"
-extern void func_00140BC8(const char *name);
+extern void fldApplyCurrentTaskScene(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
@@ -1508,12 +1508,12 @@ u32 fldCmdSetCurrentTaskScene(void) {
     const char *scene;
 
     if (fldIsSceneStateEight()) {
-        func_00140BC8(0);
+        fldApplyCurrentTaskScene(0);
         return 1;
     }
     scene = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
     if (scene) {
-        func_00140BC8(scene);
+        fldApplyCurrentTaskScene(scene);
     }
     return 1;
 }

@@ -1812,7 +1812,7 @@ extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 st
 extern void fldInitializeAlternateSequence(FieldSequenceRecord *, s32, s32, const char *);
 extern void fldInitializeSequenceWithNote(FieldSequenceRecord *, s32, s32, const char *, s32, const char *);
 
-void func_0013DF60(const char *name) {
+void fldApplyCurrentTaskScene(const char *name) {
     FieldSequenceRecord sequence;
     s32 vr[2];
     s32 event;

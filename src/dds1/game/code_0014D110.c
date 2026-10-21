@@ -7,7 +7,7 @@
 #include "fld_scene_record.h"
 #include "dds3_path.h"
 extern const char *fldGetTaskRecordValue(u32 task);
-extern void func_0013DF60(const char *name);
+extern void fldApplyCurrentTaskScene(const char *name);
 #include "sdf.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -1167,12 +1167,12 @@ u32 fldCmdSetCurrentTaskScene(void) {
     const char *scene;
 
     if (fldIsSceneStateEight()) {
-        func_0013DF60(0);
+        fldApplyCurrentTaskScene(0);
         return 1;
     }
     scene = fldGetTaskRecordValue((u32)scrGetCurrentContext()->task);
     if (scene) {
-        func_0013DF60(scene);
+        fldApplyCurrentTaskScene(scene);
     }
     return 1;
 }
