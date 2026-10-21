@@ -43,13 +43,13 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *obj);
 
-void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
-    Dds3PathCurveWork *data = dds3GetSlot1Data(obj);
+void evtSetWorldSlotScaleWrapEnabled(void *worldObject, s32 enabled) {
+    Dds3PathCurveWork *data = dds3GetSlot1Data(worldObject);
 
     if (data == NULL) {
         return;
     }
-    if (flag != 0) {
+    if (enabled != 0) {
         sdfEnableFloatCounterWrap(&data->counter);
     } else {
         sdfDisableFloatCounterWrap(&data->counter);

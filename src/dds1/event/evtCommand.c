@@ -113,7 +113,7 @@ void evtClearWorldSlotStatusFlag(void *unit);
 
 void evtSetWorldSlotValue(void *worldNode, u32 direction);
 
-void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
+void evtSetWorldSlotScaleWrapEnabled(void *unit, s32 enabled);
 
 
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
@@ -1259,7 +1259,7 @@ s32 evtCommandSetUnitScaledValueFlag(void)
             return 1;
         }
     }
-    evtToggleWorldSlotScaledValueFlag(slotObject, 1);
+    evtSetWorldSlotScaleWrapEnabled(slotObject, 1);
     return 1;
 }
 
@@ -1280,7 +1280,7 @@ s32 evtCommandClearUnitScaledValueFlag(void)
             return 1;
         }
     }
-    evtToggleWorldSlotScaledValueFlag(slotObject, 0);
+    evtSetWorldSlotScaleWrapEnabled(slotObject, 0);
     return 1;
 }
 

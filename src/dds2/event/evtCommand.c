@@ -94,7 +94,7 @@ extern u32 kwlnDrawControlFlags;
 void dds3RefreshStoredVec3(EffWorldNode *object);
 
 
-void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
+void evtSetWorldSlotScaleWrapEnabled(void *unit, s32 enabled);
 
 void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
 
@@ -1243,7 +1243,7 @@ s32 evtCommandSetUnitScaledValueFlag(void)
             return 1;
         }
     }
-    evtToggleWorldSlotScaledValueFlag(slotObject, 1);
+    evtSetWorldSlotScaleWrapEnabled(slotObject, 1);
     return 1;
 }
 
@@ -1264,7 +1264,7 @@ s32 evtCommandClearUnitScaledValueFlag(void)
             return 1;
         }
     }
-    evtToggleWorldSlotScaledValueFlag(slotObject, 0);
+    evtSetWorldSlotScaleWrapEnabled(slotObject, 0);
     return 1;
 }
 
