@@ -2965,7 +2965,35 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", ptySkillMenuDrawEntry);
+/* Draw one skill-menu row: its grid slot, then the skill's range, cost and icon,
+ * or the empty-row panel when the row holds no skill. */
+void ptySkillMenuDrawEntry(s32 x, s32 y, s32 depth, MenuList *list,
+                           MenuListNode *node, s32 texture) {
+    MenuContext *context = (MenuContext *)list->context;
+    u32 skill = node->sortKeyPrimary;
+    s32 selected = list->cursor == node;
+    s32 markerY = y;
+    s32 surfaceIndex = 0x53;
+
+    mnuDrawCampGridResourceSlot(x + 0x20, y, depth, (s32)list, (u32)node, texture);
+    if (skill != 0 && skill != 0xFFFF) {
+        mnuDrawRangeCostAndIcon(x + 0x970, markerY + 0x30, depth, 0x1F0, list->scale, NULL,
+                                (u16)skill, selected, node->flags48 & 1,
+                                (EffectSlotSet *)context->resourceHandle, surfaceIndex);
+        return;
+    }
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)context->resourceHandle;
+        s32 markerX = x + 0x1C0;
+        s32 entryIndex = selected + 0x1B;
+
+        markerY = y + 0x40;
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        mnuDrawRepeatedPanelSprites(markerX, markerY, depth, list->scale, 8,
+                                    resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+    }
+}
 
 /* Collect up to max pointers to occupied, frontline party slots. */
 void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
