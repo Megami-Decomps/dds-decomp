@@ -11923,6 +11923,8 @@ s32 func_002B8108(void) {
      * It consumes this tick's roll input as well. */
     if (sdfPadButtonStates[5] & 2) {
         if ((s8)D_003BD108 == 8 || (s8)D_003BD108 == -8) {
+            /* Retail 0x002B829C and 0x002B82A4 beq .L002B8320: increaseRoll is
+             * also entered by fall-through from the beql at 0x002B8318. */
             goto increaseRoll;
         }
         if ((s8)D_003BD109 == 15) {
@@ -11933,6 +11935,8 @@ s32 func_002B8108(void) {
         flags |= 2;
     } else if (sdfPadButtonStates[4] & 2) {
         if ((s8)D_003BD108 == 8 || (s8)D_003BD108 == -8) {
+            /* Retail 0x002B82DC and 0x002B82E4 beq .L002B834C: decreaseRoll is
+             * also entered by fall-through from the beqz at 0x002B8344. */
             goto decreaseRoll;
         }
         {

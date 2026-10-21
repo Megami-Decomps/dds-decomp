@@ -2901,9 +2901,11 @@ s32 fileUpdatePromptDialog(void) {
         case 1:
             decision = (s32)D_00437D20;
             if (decision == 1) {
+                /* Retail 0x002CEACC beq: shared yes tail (.L002CEDE0). */
                 goto yes;
             }
             if (decision >= 2) {
+                /* Retail 0x002CEAD4 beqz: shared checkNo tail (.L002CEDC0). */
                 goto checkNo;
             }
             if (decision != 0) {
@@ -2914,18 +2916,23 @@ s32 fileUpdatePromptDialog(void) {
                 D_00437D18 = -1;
                 return fileRestartSlotSelection();
             }
+            /* Retail 0x002CEAEC bne: shared begin tail (.L002CEDD0). */
             goto begin;
         case 2:
+            /* Retail 0x002CEAB8 beq: shared yes tail (.L002CEDE0). */
             goto yes;
         }
         requestStatus = (s32)D_00437D20;
         D_00437D1C = 5;
         switch (requestStatus) {
         case 0:
+            /* Retail 0x002CEB28 beqz: shared begin tail (.L002CEDD0). */
             goto begin;
         case 1:
+            /* Retail 0x002CEB14 beq: shared yes tail (.L002CEDE0). */
             goto yes;
         case 2:
+            /* Retail 0x002CEB38 beq: shared no tail (.L002CEE00). */
             goto no;
         }
         return 0;
@@ -2948,8 +2955,12 @@ s32 fileUpdatePromptDialog(void) {
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             }
             if (D_00437D18 == 0) {
+                /* Retail 0x002CEC20 b: enters the shared yes tail mid-block at .L002CEDE8;
+                 * its delay slot (sw $0,D_00437D1C) is the tail's first store. */
                 goto yes;
             }
+            /* Retail 0x002CEC18 bnez: enters the shared no tail mid-block at .L002CEE04;
+             * its delay slot (addiu $2,$0,-1) is the tail's first step. */
             goto no;
         } else if (D_0037F510[0x23] < 0) {
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
@@ -2969,21 +2980,28 @@ s32 fileUpdatePromptDialog(void) {
     case 2:
         decision = (s32)D_00437D20;
         if (decision == 1) {
+            /* Retail 0x002CEDA0 beq: shared yes tail (.L002CEDE0). */
             goto yes;
         }
         if (decision >= 2) {
+            /* Retail 0x002CEDA8 beqz: shared checkNo tail (.L002CEDC0). */
             goto checkNo;
         }
         if (decision == 0) {
+            /* Retail 0x002CEDB0 beqz: shared begin tail (.L002CEDD0). */
             goto begin;
         }
         return 0;
     default:
+        /* Retail 0x002CED88 beqz: shared restartRequest tail (.L002CEE20);
+         * the blezl at 0x002CED90 enters mid-block at .L002CEE24 (its delay slot does the tail's first store). */
         goto restartRequest;
     }
 checkNo:
     switch (decision) {
     case 2:
+        /* Retail 0x002CEDC0 beq: first insn of the shared checkNo tail;
+         * branches to the shared no tail (.L002CEE00). */
         goto no;
     default:
         return 0;
@@ -3008,8 +3026,9 @@ restartRequest:
     D_00437D40 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
     return (s32)filePollSlotDetectionAndBranch;
-    /* Retail's gotos reach one shared `return 0` block at 0x002CEE58 (twin of DDS1 0x0028FB30);
-     * a plain `return 0` per site lets the compiler reuse v0 == 0 from the fileReqPoll test (26 of 322 words differ). */
+    /* Retail `b` jumps (0x002CEB8C, 0x002CEBB8) reach one shared `return 0` block at 0x002CEE58 (twin of DDS1 0x0028FB30);
+     * the beql 0x002CEA98 / 0x002CED70 and bnez 0x002CEADC enter at 0x002CEE5C with v0 already zeroed by their delay slots.
+     * A plain `return 0` per site lets the compiler reuse v0 == 0 from the fileReqPoll test (26 of 322 words differ). */
 idle:
     return 0;
 }
