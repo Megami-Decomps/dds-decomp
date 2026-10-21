@@ -1328,7 +1328,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
 }
 
 /* Apply a selected INF graph branch and its view and extra actions. */
-s32 func_0013CEB0(s32 messageId, s32 slot) {
+s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     s32 row;
     s8 target;
     s8 extraAction = 0;
