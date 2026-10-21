@@ -1609,7 +1609,7 @@ void fldHitProgramAdd(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     D_0043617C++;
 }
 
-void func_0013B810(void) {
+void evtMessageExtraActionNoOp(void) {
 }
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);
 
