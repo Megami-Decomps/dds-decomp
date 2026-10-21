@@ -31,7 +31,7 @@ void sdfInitChipHeap(u32 heapSize) {
     s32 unitSize;
     s32 cellCount;
 
-    allocation = sdfAllocHeapMemory(heapSize);
+    allocation = malloc(heapSize);
     sdfChipPages = allocation;
     recordBytes = (heapSize / 0x1018U) * sizeof(SdfChipPage);
     recordEnd = (u8 *)allocation + recordBytes;
@@ -123,7 +123,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     u32 alignedStart;
     u32 alignedEnd;
 
-    heap->base = (u32)sdfAllocHeapMemory(heapSize);
+    heap->base = (u32)malloc(heapSize);
     heap->size = heapSize;
     freeBlock = sdfChipAllocDirect(0x10);
     alignedStart = (heap->base + SDF_MEM_ALIGNMENT_MASK) & ~SDF_MEM_ALIGNMENT_MASK;

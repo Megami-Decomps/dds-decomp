@@ -11685,7 +11685,7 @@ stream cancellation. It remains a distinct entry point from the standalone
 named-playback stop, despite using the same packet.
 
 `sdfPrintTextLine(const char *text)` explicitly forwards its string to libc's
-`puts` entry: DDS1 `func_003004E8`, DDS2 `puts`. The reentrant worker builds
+`puts` entry in both games (DDS1 `0x003004E8`, DDS2 `0x0035B7D8`). The reentrant worker builds
 two I/O vectors for the input string and one newline byte; the literal is
 `0x0A` at DDS1 `0x003B7AA0` and DDS2 `0x00431BE0`. Both pointer-taking
 definitions and their actual argument expressions match the whole native

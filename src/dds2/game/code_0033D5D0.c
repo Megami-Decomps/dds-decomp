@@ -777,7 +777,7 @@ void sdfDevLoadWholeFile(const char *fileName) {
     }
     fileBytes = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
     sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
-    bufferAddress = sdfAllocHeapMemory(fileBytes);
+    bufferAddress = malloc(fileBytes);
     D_004391A4 = bufferAddress;
     sdfDevReadFileBytes(fileHandle, bufferAddress, fileBytes);
     sceClose(fileHandle);

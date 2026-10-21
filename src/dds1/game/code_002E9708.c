@@ -1868,11 +1868,11 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
     return sdfDisableDmacChannel(4);
 }
 
-extern int func_003004E8(const char *);
+extern int puts(const char *);
 
 /* Print a string followed by a newline through libc puts. */
 void sdfPrintTextLine(const char *text) {
-    func_003004E8(text);
+    puts(text);
 }
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC968);

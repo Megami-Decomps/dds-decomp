@@ -1,5 +1,5 @@
 /* Keeps its own declaration of the functions below (see sdk_libc.h note). */
-#define SDK_SKIP_sdfAllocHeapMemory
+#define SDK_SKIP_malloc
 #include "sdk_ps2.h"
 #include "common.h"
 #include "mnu_callback_list.h"
@@ -50,7 +50,7 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
 /* SDK malloc wrapper: a successful result owns a fresh allocation. */
-extern void *sdfAllocHeapMemory(u32 bytes) __attribute__((malloc));
+extern void *malloc(u32 bytes) __attribute__((malloc));
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
@@ -1376,7 +1376,7 @@ void mnuFreeListValueCallback(u32 unused, u32 ptr) {
 
 /* Create two callback lists; removing a value from the second list releases it. */
 MnuCallbackListPair *mnuCreateCallbackPair(void) {
-    MnuCallbackListPair *pair = (MnuCallbackListPair *)sdfAllocHeapMemory(sizeof(*pair));
+    MnuCallbackListPair *pair = (MnuCallbackListPair *)malloc(sizeof(*pair));
 
     memset(pair, 0, sizeof(*pair));
     pair->first = mnuCreateCallbackNode(0);
