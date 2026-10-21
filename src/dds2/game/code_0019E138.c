@@ -1279,20 +1279,20 @@ void itfReleasePoolNode(ItfMesPoolNode *node, ItfMesPool *pool) {
 
 /* Multiply XYZ, cap only the positive product at 255 << 16, then shift by 16.
  * Negative products are not clamped; W comes from the argument. */
-void itfScaleVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
+void itfScaleVectors(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ,
                    s32 w, const TextVector *input, s32 count) {
     while (count > 0) {
         s32 x = scaleX * input->x;
         s32 y = scaleY * input->y;
         s32 z = scaleZ * input->z;
 
-        output->w = w;
+        output->components[3] = w;
         if (x > ITF_FIXED_COMPONENT_MAX) x = ITF_FIXED_COMPONENT_MAX;
         if (y > ITF_FIXED_COMPONENT_MAX) y = ITF_FIXED_COMPONENT_MAX;
         if (z > ITF_FIXED_COMPONENT_MAX) z = ITF_FIXED_COMPONENT_MAX;
-        output->x = x >> ITF_FIXED_FRACTION_BITS;
-        output->y = y >> ITF_FIXED_FRACTION_BITS;
-        output->z = z >> ITF_FIXED_FRACTION_BITS;
+        output->components[0] = x >> ITF_FIXED_FRACTION_BITS;
+        output->components[1] = y >> ITF_FIXED_FRACTION_BITS;
+        output->components[2] = z >> ITF_FIXED_FRACTION_BITS;
         output++;
         input++;
         count--;
@@ -1645,7 +1645,7 @@ void itfDrawFilledBarQuadRegions(s32 value, s32 limit, s32 highlight,
                    DrawVertex *bounds, u32 tail, DrawColorRec *filledColor,
                    DrawColorRec *remainingColor, SdfListHead *command) {
     DrawVertex vertices[6];
-    TextVector highlightColors[4];
+    DrawColorRec highlightColors[4];
     s32 left = bounds[0].x;
     s32 right = bounds[1].x;
     s32 width = (right - left) >> 4;
@@ -1674,9 +1674,9 @@ void itfDrawFilledBarQuadRegions(s32 value, s32 limit, s32 highlight,
         itfScaleVectors(highlightColors, filledColor->components[0],
                         filledColor->components[1], filledColor->components[2],
                         filledColor->components[3], D_003B43B8, 4);
-        itfEmitQuadListA(vertices, (DrawColorRec *)highlightColors,
+        itfEmitQuadListA(vertices, highlightColors,
                         D_003B43A8, D_003B43B0, 3, tail, command);
-        itfEmitQuadListA(vertices, (DrawColorRec *)highlightColors,
+        itfEmitQuadListA(vertices, highlightColors,
                         D_003B43A8 + 3, D_003B43B0 + 3, 3, tail, command);
     }
 }

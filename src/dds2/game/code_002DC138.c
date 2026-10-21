@@ -113,6 +113,7 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 }
 
 
+extern void *memcpy(void *, const void *, u32);
 EffModelOwner *effCreateModelOwner(void *input) {
     FileJobPayload *source = input;
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
@@ -144,7 +145,7 @@ void effDestroyModelOwner(EffModelOwner *owner) {
 
 EffModelOwner *effDuplicateEffectHeader(EffModelOwner *source) {
     EffModelOwner *owner = effCreateModelOwner(0);
-    *(u32 *)owner = *(u32 *)source;
+    memcpy(&owner->scale, &source->scale, sizeof(owner->scale));
     effRecreateModelFromSource(owner, source);
     return owner;
 }
@@ -282,7 +283,7 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     EffModelOwner *owner = effCreateModelOwner(0);
     s32 marked;
 
-    *(u32 *)owner = *(u32 *)source;
+    memcpy(&owner->scale, &source->scale, sizeof(owner->scale));
     effRecreateModelFromSource(owner, source);
     effUploadModelTextures(owner);
     marked = btlIsRuntimeAllocated();
@@ -474,7 +475,6 @@ typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model =
 
 extern void *effCreateResourceOwner(void *);
 extern void *memset(void *, s32, u32);
-extern void *memcpy(void *, const void *, u32);
 
 /* Decode the type-6 configuration, load its model and clone per-position queues. */
 void *effCreateResourceOwner(void *input) {

@@ -8,10 +8,13 @@ typedef struct EffLookAtRingEmitter {
     EffEmitterHead head; /* shared emitter prefix, 0x150 bytes */
     u8 mode;             /* 0x150 */
     u8 loop;             /* 0x151 */
-    u8 opaque152[10];
+    u8 opaque152[2];
+    s32 decayStep;        /* 0x154: frame delay between packet groups */
+    u8 opaque158[4];
     u32 period;          /* 0x15C */
     f32 f160;            /* 0x160; meaning remains unresolved */
     f32 f164;            /* 0x164; meaning remains unresolved */
+    u8 opaque168[8];      /* Complete 0x170-byte template allocation. */
 } EffLookAtRingEmitter;
 
 typedef char EffLookAtRingModeOffsetCheck[((u32)&((EffLookAtRingEmitter *)0)->mode) == 0x150 ? 1 : -1];
@@ -19,5 +22,6 @@ typedef char EffLookAtRingLoopOffsetCheck[((u32)&((EffLookAtRingEmitter *)0)->lo
 typedef char EffLookAtRingPeriodOffsetCheck[((u32)&((EffLookAtRingEmitter *)0)->period) == 0x15C ? 1 : -1];
 typedef char EffLookAtRingFloat160OffsetCheck[((u32)&((EffLookAtRingEmitter *)0)->f160) == 0x160 ? 1 : -1];
 typedef char EffLookAtRingFloat164OffsetCheck[((u32)&((EffLookAtRingEmitter *)0)->f164) == 0x164 ? 1 : -1];
+typedef char EffLookAtRingSizeCheck[sizeof(EffLookAtRingEmitter) == 0x170 ? 1 : -1];
 
 #endif

@@ -15736,3 +15736,29 @@ K&R providers have two pointer arguments (`u8 *obj`, `void *src`),
 so local prototypes can state both. Restore the generic callback data
 to its existing primary owner and use the record byte address only at
 that real byte-oriented provider boundary.
+
+## Owner-based color, emitter, and scalar transfers
+
+`itfScaleVectors` reads signed fixed-point `TextVector` templates but writes
+`DrawColorRec` channel words. The bar highlight buffer and all four provider/
+caller units use those actual types; the highlight is not a vector array
+reinterpreted at the draw call. Negative products remain unclamped before the
+signed shift, and the resulting representation words are stored unchanged.
+
+The look-at ring's complete allocation is `EffLookAtRingEmitter` (`0x170`
+bytes), not the larger generic packet-list template. Its scheduler consumes
+`decayStep` at `0x154` and `period` at `0x15C`; cloning copies the real tail
+starting at `mode`, and scale/update paths share the actual `f164` member.
+Both complete provider units remain exact with that single owner.
+
+When a model clone copies a scale's representation without doing arithmetic,
+`memcpy(&owner->scale, &source->scale, sizeof(owner->scale))` retains native
+integer loads/stores without reading the owner through a flat word pointer.
+This does not justify a second nominal model header.
+
+Task-state mode setters preserve only the low control halfword before replacing
+the high state bits. Express that as `(u16)item->flags`, a value conversion,
+not an aliasing halfword-pointer read. Solar timers likewise convert the signed
+primary layer age to `u16` before incrementing, then retain the native signed
+expiry comparison. Partial-width message/wait task stores belong in the actual
+task argument's word/halfword union.

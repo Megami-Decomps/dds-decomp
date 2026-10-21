@@ -92,7 +92,10 @@ extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 
 typedef struct BtlEffLink {
     BtlUnit *owner;  /* 0x00: effect owner */
-    s32 arg;    /* 0x04 */
+    union {
+        s32 arg;
+        u16 shortArg; /* Message/wait variants write only the low halfword. */
+    };             /* 0x04 */
     u32 elapsedTicks;  /* 0x08: elapsed callback updates */
 } BtlEffLink;
 
@@ -1085,7 +1088,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId) {
     task->callback = btlCompleteEffectTaskImmediately;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = messageId;
+    link->shortArg = messageId;
     link->elapsedTicks = 0;
     return task;
 }
@@ -1131,7 +1134,7 @@ s32 btlPollEffectWaitTask(void *arguments) {
 
     if (link->elapsedTicks == 0) {
         if (link->owner != 0) {
-            itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, *(u16 *)&link->arg, 0xD);
+            itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, link->shortArg, 0xD);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], 0x75);
     }
@@ -1156,7 +1159,7 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
     task->callback = btlPollEffectWaitTask;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = mode;
+    link->shortArg = mode;
     link->elapsedTicks = 0;
     return task;
 }

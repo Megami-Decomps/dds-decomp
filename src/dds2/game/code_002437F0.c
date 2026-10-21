@@ -33,14 +33,6 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u
                                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 
 
-typedef struct SolarLayerTimer {
-    u8 pad00[4];
-    u16 age;
-    union {
-        u8 byte;
-        s8 signedByte;
-    } active;
-} SolarLayerTimer;
 
 
 
@@ -229,28 +221,28 @@ void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 contex
 }
 
 /* Layer lifetimes differ, but both reset their activation byte on expiry. */
-s32 evtAdvanceSolarShortLayerTimer(SolarLayerTimer *timer) {
+s32 evtAdvanceSolarShortLayerTimer(SolarNoiseLayer *timer) {
     s32 nextAge;
 
-    nextAge = timer->age + 1;
+    nextAge = (u16)timer->age + 1;
     timer->age = nextAge;
     if ((f32)(s16)nextAge > 60.0f) {
         timer->age = 0;
-        timer->active.byte = 0;
+        timer->active = 0;
     }
-    return timer->active.signedByte;
+    return timer->active;
 }
 
-s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
+s32 evtAdvanceSolarLongLayerTimer(SolarNoiseLayer *timer) {
     s32 nextAge;
 
-    nextAge = timer->age + 1;
+    nextAge = (u16)timer->age + 1;
     timer->age = nextAge;
     if ((f32)(s16)nextAge > 80.0f) {
         timer->age = 0;
-        timer->active.byte = 0;
+        timer->active = 0;
     }
-    return timer->active.signedByte;
+    return timer->active;
 }
 
 
@@ -286,7 +278,7 @@ void evtAdvanceShortSolarNoiseLayers(SolarNoiseState *state) {
     active = &layer->active;
     for (i = 9; i >= 0; i--, layer++, active += sizeof(*layer)) {
         if (*active != 0 &&
-            evtAdvanceSolarShortLayerTimer((SolarLayerTimer *)layer) == 0) {
+            evtAdvanceSolarShortLayerTimer(layer) == 0) {
             state->activeCount--;
         }
     }
@@ -336,7 +328,7 @@ void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
         active = &layer->active;
         for (i = 9; i >= 0; i--, layer++, active += sizeof(*layer)) {
             if (*active != 0 &&
-                evtAdvanceSolarLongLayerTimer((SolarLayerTimer *)layer) == 0) {
+                evtAdvanceSolarLongLayerTimer(layer) == 0) {
                 state->activeCount--;
             }
         }
