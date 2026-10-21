@@ -7188,6 +7188,13 @@
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
 0x002F1290	sceGsPutIMR	inferred	libgraph sceGsPutIMR: reads the previous GS interrupt mask with GsGetIMR, installs the new mask with GsPutIMR and returns the previous value. DDS2 twin 0x0034A138.
 0x002F12D0	sceGsGetIMR	inferred	libgraph sceGsGetIMR: returns the GS interrupt mask read through the GsGetIMR kernel call. DDS2 twin 0x0034A178.
+0x002F1C50	scePadInit	inferred	libpad scePadInit: binds PADMAN's two RPC servers, reads the module version with scePadGetModVersion and prints 'libpad: Module version mismatch' unless the major version is 4, then resets the port slots; the pad setup calls it with mode 0. DDS2 twin 0x0034AAF8.
+0x002F2200	scePadRead	inferred	libpad scePadRead: copies the newer pad data frame of an opened port and slot into the caller's buffer and returns its length, or 0 when the slot is not open; sdfPadUpdatePort reads each pad through it. DDS2 twin 0x0034B0A8.
+0x002F2280	scePadGetState	inferred	libpad scePadGetState: returns the state byte of an opened port and slot (0x63 when it is not open), reporting 5 while a stable pad (6) still has a request executing (2); sdfPadUpdatePort polls it. DDS2 twin 0x0034B128.
+0x002F2398	scePadGetReqState	inferred	libpad scePadGetReqState: returns the request-state byte of an opened port and slot, 0 when it is not open; sdfPadUpdatePort polls it during actuator alignment. DDS2 twin 0x0034B240.
+0x002F2420	scePadInfoAct	inferred	libpad scePadInfoAct: with actuator -1 returns the actuator count, otherwise one of four attribute bytes (term 1 to 4) of the selected actuator; returns 0 unless the pad reports actuators. DDS2 twin 0x0034B2C8.
+0x002F2850	scePadSetActDirect	inferred	libpad scePadSetActDirect: copies six actuator bytes into the slot's actuator block and queues them for PADMAN, returning 1 when the request was accepted. DDS2 twin 0x0034B6F8.
+0x002F2E00	scePadGetModVersion	inferred	libpad scePadGetModVersion: sends PADMAN command 0x12 and returns the module version word; scePadInit compares its major byte with 4. DDS2 twin 0x0034BCA8.
 0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)
 0x002F61D8	sceMcOpen	inferred	Starts an asynchronous open for a path on the selected memory card; callers pass port, slot, path and open flags. DDS2 counterpart is 0x0034EFE0.
 0x002F6338	mcQueueCloseRequest	inferred	Queues memory-card command 3 for the close operation; DDS2 twin 0x0034F150.
