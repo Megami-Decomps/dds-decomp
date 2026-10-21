@@ -2208,7 +2208,7 @@ extern void fldLoadActorWaypointTable(s32);
  * find the first enabled kind-7 actor for the pending field, motion and
  * index, mark its floor and exploration bits, then submit its sequence and
  * clear the pending selection. DDS1 also publishes the command flag. */
-void func_0013EC68(void) {
+void fldSubmitSelectedActorWaypointTransition(void) {
     s32 stagePayload[1]; /* One-word payload for the field mode request. */
     FieldSequenceRecord record;
     s32 room;

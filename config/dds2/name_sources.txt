@@ -9868,6 +9868,7 @@
 0x001969B8	effDrawRotatingTriangleAtPosition	inferred	Builds and queues a three-vertex draw packet at the supplied position; each call advances its cached rotation angle by six degrees. DDS2 rotates around Y; paired with DDS1 0x0018ED80.
 0x0024CE18	evtViewCmdSetObjectTarget	inferred	Stores selected world-object targets and resolved name indices in the pending event-viewer command entry; paired title implementation.
 0x00120528	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldDrawConvertedTextGlyph
+0x00141898	fldSubmitSelectedActorWaypointTransition	inferred	confidence=high; matched-C; src/dds2/game/code_0013B818.c:1857: reads pending actor-transition state, selects the first enabled kind-7 waypoint entry, updates floor/exploration flags, clears the pending selection, and submits its field sequence; caller=src/dds2/game/code_00124040.c:2576; twin=0x0013EC68.
 0x001A7C08	itfMesDrawWindowBackground	inferred	confidence=high; builds the mode-dependent message-window background from window texture rectangle tables, queues panel and border quads, and appends the packets to the interface display list.
 0x0024B078	evtViewerReturnZero	inferred	Unconditionally returns zero; paired with the same event-viewer helper in DDS1 at 0x00230470.
 0x001BAB90	btlDrawAnalysisPanelVitalBars	inferred	Draws the analysis panel HP/MP bar frames and cropped fill from the selected unit's current and maximum values; paired DDS1 0x001AFF78 and analysis-panel caller.
