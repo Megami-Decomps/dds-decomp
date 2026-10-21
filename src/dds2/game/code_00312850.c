@@ -116,9 +116,9 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
 }
 
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
-    SdfTaskEntry *work = sdfChipAllocDirect(0x1C);
+    SdfTaskEntry *work = sdfChipAllocDirect(sizeof(*work));
 
-    memset(work, 0, 0x1C);
+    memset(work, 0, sizeof(*work));
     work->flags = SDF_TASK_ENTRY_UPDATE_ENABLED | SDF_TASK_ENTRY_CALLBACK_ENABLED |
                   SDF_TASK_ENTRY_INITIALIZE_ONCE | SDF_TASK_ENTRY_PENDING_ACTIVATION;
     work->key = item->key;
