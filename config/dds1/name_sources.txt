@@ -9904,3 +9904,4 @@
 0x001B2D80	btlUpdateAndDrawCommandSelectionHighlight	inferred	Updates command-selection highlight animation and selection trails, refreshes actor-panel presentation when needed, and draws the selected row and gradient marker quads. Paired DDS2 0x001BD9A0.
 0x001B2AC8	btlInitializeCommandOptionState	inferred	Initializes the command-option layout and restores its selection from the actor's saved command phase. Paired DDS2 0x001BD6E8.
 0x001BF040	btlCheckScenePairResult	inferred	Checks the acting unit and up to two linked partners for command-use results, returning the first nonzero result in actor/partner order. Paired DDS2 0x001CA390; title-specific result normalization may differ.
+0x001BD750	btlHandleBattleCommandPanelInput	inferred	Processes command-panel confirmation, cancellation, navigation, and follow-on selection flows. Paired DDS2 0x001C8A80; title-specific command eligibility remains distinct.

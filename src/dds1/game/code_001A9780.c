@@ -7897,7 +7897,7 @@ extern s16 D_003BB494;
 extern s16 D_003BB496;
 extern s16 D_003BB498;
 
-s32 func_001BD750(BattleSceneObject *object) {
+s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u16 count = btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 1);
     s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
@@ -8541,7 +8541,7 @@ extern void func_001AADF8(BattleSceneObject *);
 
 extern s32 func_001B4F10(KwlnTask *);
 
-extern s32 func_001BD750(BattleSceneObject *);
+extern s32 btlHandleBattleCommandPanelInput(BattleSceneObject *);
 
 extern void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *, s32);
 
@@ -8584,14 +8584,14 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
     case 5:
         return -1;
     case 1:
-        func_001BD750(object);
+        btlHandleBattleCommandPanelInput(object);
         btlUpdateSceneCommandSelection(object);
         if (btlHasHighPriorityState() && object->state == 1) {
             object->state = 2;
         }
         break;
     case 2:
-        func_001BD750(object);
+        btlHandleBattleCommandPanelInput(object);
     case 3:
     case 6:
     case 8:
@@ -8600,7 +8600,7 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
         btlUpdateSceneCommandSelection(object);
         break;
     case 7:
-        if (func_001BD750(object)) {
+        if (btlHandleBattleCommandPanelInput(object)) {
             btlUpdateSceneCommandSelection(object);
         } else {
             btlUpdateSceneCommandSelection(object);
