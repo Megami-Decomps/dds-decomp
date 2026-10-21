@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_entry_api.h"
@@ -42,7 +43,6 @@ extern void mnuSetPanelItemAuxiliaryValue(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
 extern s32 mnuRingCustomizationStatLabels[];
-extern s32 sprintf(char *, const char *, ...);
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);

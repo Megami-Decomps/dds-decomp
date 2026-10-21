@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 /*
  * Translation unit boundary recovered at func_001A5C40. btlGetActorEntryMultiplier
  * and the other helpers declared below belong to the preceding unit
@@ -687,7 +688,6 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
     return 0;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
                    BtlOperandGroup *results, s32 command) {

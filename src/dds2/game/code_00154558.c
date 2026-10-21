@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "fld_title_banner_menu.h"
 #include "fld_activation_entry.h"
@@ -264,7 +265,6 @@ extern s32 fldMirroredSolarThresholds[];
 
 extern char fldRoomNameSentinel[];
 
-extern char *strstr(const char *, const char *);
 
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 
@@ -298,7 +298,6 @@ extern s32 D_004360B8;
 
 extern void fldSetRoomSceneFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern int strcmp(const char *, const char *);
 
 extern char D_004363F0[]; /* "BARIA" */
 
@@ -346,7 +345,6 @@ extern u32 fldAreaDamageEffect;
 
 extern s32 fldAreaDamageEffectPlaced;
 
-extern s32 strcmp(const char *, const char *);
 
 extern s32 D_00436378;
 
@@ -661,7 +659,6 @@ s32 fldCmdCaptureObjectPose(void) {
     return 1;
 }
 
-extern char *strcpy(char *, const char *);
 
 s32 fldCmdSetRequestedSceneName(void) {
     char *name;
@@ -838,7 +835,6 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
 
 extern char D_00414090[];
 
-extern int sprintf(char *, const char *, ...);
 
 /* Numeric form of fldCmdApplyRoomModeGroupZero: the room number parameter is
  * formatted to a name and parsed like the string command's argument. */

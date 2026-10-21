@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
@@ -90,7 +91,6 @@ extern u32 btlNextScaledRandom(u32);
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
-extern void *memset(void *, s32, u32);
 
 extern void *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
 
@@ -918,11 +918,8 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 
-extern f32 cosf(f32);
 
-extern f32 sinf(f32);
 
-extern f32 tanf(f32);
 
 extern void sdfVuLoadRotationMatrixZ(f32);
 

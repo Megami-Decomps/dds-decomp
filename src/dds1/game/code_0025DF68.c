@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "brs_icon_record.h"
 #include "common.h"
 #include "snd_sequence_volume_pan.h"
@@ -172,7 +173,6 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 }
 
 #include "pty_bullet_item_count_api.h"
-extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern char D_003BC4F0[];
 

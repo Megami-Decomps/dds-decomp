@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "common.h"
 #include "fld_stop_entry.h"
@@ -54,7 +55,6 @@ extern u32 fldAuxRecordResource;
 
 extern u32 fldValueRecordResource;
 
-extern void *memset(void *s, s32 c, u32 n);
 
 extern s32 fldRainTextureResource;
 

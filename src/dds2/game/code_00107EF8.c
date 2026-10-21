@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_sel_state.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
@@ -58,7 +59,6 @@ extern void itfShutdownAdminInterfaceNoop(void);
 extern void itfStartFontTestScene(void);
 extern void mdlCreateViewerPackageTask(void);
 extern u32 mdlStopViewerPackageTask(void);
-extern void * memset(void *, s32, u32);
 extern void mnuCampDestroyPanelTasks(void);
 extern void mnuConfigTasksDestroy(void);
 extern void mnuCreateCampShopPopupTasks(const s32 *stockGroup);
@@ -1644,7 +1644,6 @@ void evtDestroyFontResourceChain(void) {
     }
 }
 
-extern s32 sdfVFormatString();
 /* printf into the dev console node when one exists. */
 INCLUDE_SDATA(const s32, "game/code_00107EF8", evtSelectionStateActive);
 
@@ -1791,9 +1790,7 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     }
 }
 
-extern s32 DIntr(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
-extern void EIntr(void);
 
 void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     SdfHeapOverlayBlock *snapshot;
@@ -1853,7 +1850,6 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 extern char D_00435D50[];
 extern char D_00435D58[];
-extern void sprintf(char *buffer, const char *format, ...);
 extern void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.

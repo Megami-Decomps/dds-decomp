@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mdl_dev_slot_color.h"
 #include "sdf_model_packet_callback.h"
 #include "ee_mmi.h"
@@ -270,7 +271,6 @@ typedef struct Hdr8 {
 
 extern u32 D_00367904[][2];
 extern u8 D_003BBB60[];
-extern char *strcat(char *dst, const char *src);
 
 
 extern MdlResourceTable D_00367900[];
@@ -373,8 +373,6 @@ BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     return btlFindGroupedEntity(group, id);
 }
 
-extern int SignalSema(int);
-extern int WaitSema(int);
 
 void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     mdlApplyGroupSetup(request->group, request->id, request->options, &request->payload);
@@ -425,8 +423,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-extern char *strrchr(const char *, s32);
-extern s32 strcasecmp(const char *, const char *);
 extern char D_003BBB68[];
 extern void sdfCreateSemaphoreFromOptions(void);
 extern s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg,
@@ -1160,7 +1156,6 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {
     sdfUpdateActiveResourceListScalars(ctx->inner->assetData, tint, amount);
 }
 
-extern unsigned int strlen(const char *);
 
 /* Copy a resource path's basename without its extension into destination. */
 void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
@@ -1234,7 +1229,6 @@ extern DevRequest *mdlCreateBufferedPartRequest(u32 count);
 extern void mdlAddBillboardPart(DevRequest *list, void *descriptor);
 extern void mdlAddEffectPart(DevRequest *list, struct EffNodeDescriptor *descriptor);
 
-extern void *memset(void *, int, unsigned int);
 
 /* Generic transports preserve the queue/payload alias relationship; see
  * docs/idioms.md, "Pointer transport aliasing: queued model packets". */

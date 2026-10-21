@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -26,7 +27,6 @@ void effBlurSecondInitSlots(EffBlurScaleWork *work) {
     }
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
 EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {

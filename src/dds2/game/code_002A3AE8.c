@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -358,7 +359,6 @@ extern void mnuDrawMovieMenuSpritePickList(PickList *, s32);
 extern s16 mnuMovieMenuPickSpritePositions[32][2];
 extern u8 D_00437A50[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Draw the pick list sprites and advance each entry's fade step; drop entries that finished. */
 void mnuDrawMovieMenuSpritePickList(PickList *work, s32 drawContext) {

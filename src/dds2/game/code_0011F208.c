@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "fld_npc_motion.h"
 #include "fld_label_rows.h"
@@ -29,7 +30,6 @@
 /* Declared before first use (were implicit int). */
 extern s32 fldFindTableEntry(s32 index);
 extern void fldResetViewState(void);
-extern void * memset(void *, s32, u32);
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -871,8 +871,6 @@ static inline void fldAppendToDisplaySurface(SdfListHead *list) {
 
     surface->append(surface, list);
 }
-
-extern void *memcpy(void *, const void *, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412BB8);
 

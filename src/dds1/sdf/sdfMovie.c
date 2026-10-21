@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -8,11 +9,6 @@
 #include "sdf_dev_state.h"
 
 s32 sdfFileCmdFileSize(DevState *state);
-s32 WaitSema(s32 semaphore);
-s32 SignalSema(s32 semaphore);
-void *memcpy(void *destination, const void *source, u32 size);
-s32 DIntr(void);
-s32 EIntr(void);
 extern s32 sdfMoviePacRingSemaphore;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */

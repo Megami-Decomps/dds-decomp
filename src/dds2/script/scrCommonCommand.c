@@ -1,3 +1,4 @@
+#include "dat_state.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_background_fade_api.h"
@@ -47,7 +48,6 @@ void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 extern char D_004126F0[];
 extern char D_004126B0[];
 
-extern ScrComGlobals *datGameState;
 
 extern s32 scrReadIntParameter(s32 parameterIndex);
 extern u32 scrGetCommandTimer(void);
@@ -940,19 +940,19 @@ s32 scrCommandResetFieldEffects(void)
 
 s32 scrCommandClearProcessControlFlag(void)
 {
-    datGameState->processControlFlag = 0;
+    datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 0;
     return 1;
 }
 
 s32 scrCommandSetProcessControlFlag(void)
 {
-    datGameState->processControlFlag = 1;
+    datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 1;
     return 1;
 }
 
 s32 scrCommandIsProcessControlFlagClear(void)
 {
-    return datGameState->processControlFlag == 0;
+    return datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] == 0;
 }
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);

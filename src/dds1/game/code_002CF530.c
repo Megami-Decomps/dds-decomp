@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
@@ -13,9 +14,6 @@ extern void (*sdfTickCallback)(void);
 extern SdfHandlerNode *sdfHandlerNodeListHead;
 
 extern s32 func_0030B500(s32);
-extern s32 RemoveIntcHandler(s32, s32);
-extern s32 RemoveDmacHandler(s32, s32);
-extern s32 RemoveSbusIntcHandler(s32);
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
@@ -67,7 +65,6 @@ void sdfPanicHaltPrintf(const char *format, ...) {
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 extern s32 func_0030A710(s32, s32, s32, s32);
 extern s32 func_0030A740(s32, s32, s32, s32);
-extern s32 AddSbusIntcHandler(s32, s32);
 
 SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
     SdfHandlerNode *node;

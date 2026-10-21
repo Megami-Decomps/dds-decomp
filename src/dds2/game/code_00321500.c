@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
@@ -44,7 +45,6 @@ extern MenuRuntimeList mnuRuntimeAnimationList;
 
 
 extern void mnuFreeOptionalBlock(u32);
-extern void *sdfAllocHeapMemory(u32 bytes);
 void mnuReleaseResourceBlockCallback(u32, u32);
 
 
@@ -60,7 +60,6 @@ MnuCallbackList *mnuCreateReleaseCallbackNode(void) {
 }
 extern void mnuClearResourceList(MnuCallbackList *list);
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Rebuild the row's named states and attach its tagged parameter groups. */
 void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord *row) {
@@ -153,7 +152,6 @@ void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeLi
     }
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* Allocate a zeroed 0x22-byte record with an eight-byte tag at offset 0xA. */
 MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
@@ -214,8 +212,6 @@ s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
 
 extern MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *);
 extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
-extern f64 cos(f64);
-extern f64 sin(f64);
 
 MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *state, MenuRuntimeList *runtimeList,
                                   s32 x, s32 y, f32 angle) {
@@ -348,9 +344,6 @@ void mnuDeactivateListRecord(MenuRuntimeList *list, MenuRuntimeRecord *record) {
 }
 
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
-extern f64 cos(f64);
-extern f64 sin(f64);
-extern s32 rand(void);
 
 void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
     MenuProgressParameters *parameters;

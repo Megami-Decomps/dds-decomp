@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff.h"
 #include "eff_event_draw.h"
@@ -44,11 +45,6 @@ extern EffBlurScatterParams evtMovieDefaultBlurScatter;
 extern EffBlurScaleParams evtMovieDefaultBlurScale;
 extern EffBlurQuad D_003C9470;
 
-/* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
- * offsets are relative to the start of the block. */
-
-extern void *memset(void *dst, s32 value, u32 size);
-extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 itfMesCreateWindow(u8 *messageSubData);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
@@ -823,7 +819,6 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
     return handle;
 }
 
-extern s32 sprintf(char *output, const char *format, ...);
 
 s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3) {
     sprintf(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
@@ -890,7 +885,6 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
 extern u32 D_00435CBC;
 extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3);
-extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
 extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);

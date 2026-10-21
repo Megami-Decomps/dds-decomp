@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
 #include "itf_draw_grid.h"
@@ -91,7 +92,6 @@ static inline MenuWindowContainer **getSkillPageSlot(MenuWindowContainer **windo
     return windows + index;
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 void ptySkillMenuCopyPageState(s32 context) {
     SkillMenuContext *work = (SkillMenuContext *)context;

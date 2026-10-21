@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
@@ -23,7 +24,6 @@ extern char D_003BB8A8[];
 
 extern s32 datActionAnimationRecords;
 
-extern void sprintf();
 
 extern void btlCopyUnitCurrentPosition(void *, void *);
 

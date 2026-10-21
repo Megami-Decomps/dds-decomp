@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_packet_params.h"
 #include "sdf_packet_header.h"
 #include "common.h"
@@ -262,7 +263,6 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
 
 extern u32 D_0034E6A0[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
 void *effCreateVertexDrawPacket(EffPacketParams *params) {
@@ -592,7 +592,6 @@ extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
  * second): link it into the mixer, duplicate each parameter row's work (with
  * the optional unit-scale callback) and count it as active. */
 extern void * sdfChipAllocDirect(s32 size);
-extern void *memset(void *, int, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_0015F4D0", D_003A0D70);
 

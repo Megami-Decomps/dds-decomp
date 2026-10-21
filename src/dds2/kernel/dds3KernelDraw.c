@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "kwln.h"
 #include "gs_packet.h"
@@ -122,7 +123,6 @@ void kwlnDrawCopyRow128(u128 *source) {
     PCP_COPY_VECTOR(&kwlnDefaultColorVector, source);
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Copy the five-word draw vector parameter body, without interpreting its words. */
 void kwlnDrawCopyWords20(KwlnDrawVectorParams *source) {
@@ -909,7 +909,6 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
 
 
 extern float fabsf(float);
-extern void *memset(void *, int, unsigned int);
 
 /* vu0 routine: shortest-arc quaternion rotating direction vf10 to vf11. */
 void kwlnBuildShortestArcQuaternion(void) {

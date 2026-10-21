@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
@@ -187,7 +188,6 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 extern EffPacketParams effTrackPolyDrawParams;
 extern const u32 effTrackPolyTriangleIndices[];
 
-extern void *memset(void *, int, unsigned int);
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;

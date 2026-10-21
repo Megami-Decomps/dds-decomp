@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_model_packet_callback.h"
 #include "sdf_measure_command.h"
@@ -30,7 +31,6 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
 
-extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 extern vu8 sdfCurrentBufferIndex;

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
@@ -312,7 +313,6 @@ void brsNoOpMessageInputCallback(void *work) {
 }
 
 extern u32 D_004379C0[];
-extern s32 sprintf();
 
 /* Draw the three reward icon rows: name, label shadow, value text and its shadow. */
 void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *res, s32 surface, BrsSkillPackageWork *work) {
@@ -359,7 +359,6 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
 extern u32 D_004379C8[];
 
 
-extern s32 sprintf();
 
 void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];

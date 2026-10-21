@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "common.h"
 #include "sdf_console_packet.h"
@@ -21,9 +22,7 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void func_0034CB60(s32);
-extern s32 sceClose(s32 fd);
 extern s32 sdfFileCmdFileSize(DevState *state);
-extern char * strchr(const char *, s32);
 /* Original-style implicit int, kept: matched code depends on it: iSignalSema, sdfFileCmdSeek, sdfDevSetFallbackDeviceWorker. */
 
 #define SDF_DEV_WORKER_COUNT 4
@@ -100,33 +99,24 @@ extern u32 sdfConsoleColorPalette[];
 
 extern char sdfDevCurrentDirectory[];
 
-extern s32 SignalSema(s32 sema);
 
 extern s32 sdfDeviceWorkerPriority;
 
 extern DevWorkerEntry sdfDeviceWorkerEntries[];
 
-extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
-extern s32 WaitSema(s32 sema);
 
 extern void func_0036C330(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
-extern void sceCdPowerOff(void *arg0);
 
 extern u8 D_00438B50[];
 
 extern u8 D_00438B58[];
 
-extern u32 strlen(const char *s);
 
-extern s32 GetThreadId(void);
 
-extern void sceSifSetRpcQueue(void *, s32);
 
-extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 
-extern void sceSifRpcLoop(void *);
 
 extern u8 sdfDevRpcBuffer[];
 
@@ -141,7 +131,6 @@ extern void func_0034CE40(s32);
 
 extern s32 func_0034D100(void);
 
-extern s32 sceCdSearchFile(void *, s32);
 
 extern DevState *sdfFileCmdReadOpen(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
@@ -179,7 +168,6 @@ extern u32 D_0043919C;
 
 extern u32 D_004391A0;
 
-extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_0034D400(s32, s32, s32);
 
@@ -191,9 +179,7 @@ typedef struct Bytes7 {
 
 extern Bytes7 D_00438AF0[];
 
-extern char *strcpy(char *, char *);
 
-extern char *strcat(char *, char *);
 
 /* SifCommand is the complete 0x10-byte input value. Console rendering uses
  * source/end as x/y storage, argument as depth bits, and command as RGBA.
@@ -202,7 +188,6 @@ extern void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *forma
 
 extern void sdfDevConsInit(void);
 
-extern s32 sdfVFormatString(char *destination, const char *format, void *args);
 
 struct SdfTex;
 
@@ -337,7 +322,6 @@ extern s32 func_00367B60(const char *, ...);
 
 
 
-extern void _StartThread(s32, s32);
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
 void sdfStartDevRpcServerAndBindClient(void) {
@@ -416,7 +400,6 @@ extern s32 sdfDiscReadPosition;
 
 extern s32 func_0034D430(s32 arg, u8 *options);
 
-extern s32 sceCdStatus(void);
 
 void sdfDevSeekDiscRequest(s32 request) {
     u8 options[4];
@@ -510,8 +493,6 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
 }
 
 extern SdfDiscFileRecord D_00476940;
-extern s32 sceOpen();
-extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
@@ -572,7 +553,6 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
     return &D_00476940;
 }
 
-extern s32 memcmp(const void *, const void *, u32);
 
 extern char D_00438AD0[]; /* cdrom */
 
@@ -781,15 +761,10 @@ s32 sdfDevGetFileSize(void) {
     return sdfOpenDiscFileRecord->size;
 }
 
-extern s32 sceOpen();
 
-extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
-extern s32 sdfAllocHeapMemory(s32);
 
-extern s32 sdfDevReadFileBytes(s32 fileHandle, s32 buffer, s32 byteCount);
 
-extern s32 sceClose(s32 fd);
 
 /* Read a whole named file into the loader's allocated EE buffer, then close it. */
 void sdfDevLoadWholeFile(const char *fileName) {
@@ -895,9 +870,7 @@ extern char D_00438B00[]; /* cdrom */
 
 extern u8 D_00438AE0;
 
-extern char *strchr(const char *, s32);
 
-extern s32 strncmp(const char *, const char *, u32);
 
 /* Return an allocated device path, normalizing disc-path case and separators. */
 char *sdfDevAllocateNormalizedPath(char *path) {
@@ -964,9 +937,7 @@ DevState *sdfDevCreateCommandState(const char *path) {
 
 extern char *sdfDevAllocateNormalizedPath();
 
-extern s32 sceOpen();
 
-extern s32 sceClose(s32 fd);
 
 s32 sdfPathExists(char *path) {
     char *resolved = sdfDevAllocateNormalizedPath(path);
@@ -1042,7 +1013,6 @@ void sdfDevSetFallbackDeviceWorker(s32 worker) {
     D_00438B1E = worker;
 }
 
-extern s32 DIntr();
 
 extern void sdfFileCmdStartThread(s32 index);
 
@@ -1052,7 +1022,6 @@ extern DevState *D_00438B0C;
 
 extern s16 D_00438B1C;
 
-extern void EIntr(void);
 
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfFileCmdEntry(DevState *state) {
@@ -1200,7 +1169,6 @@ void sdfFileCmdError(DevState *state, s32 result) {
     }
 }
 
-extern s32 sceWrite(s32 fileHandle, s32 buffer, s32 byteCount);
 
 /* Service queued host-file requests for one device worker. */
 INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E288);
@@ -1614,7 +1582,6 @@ char *sdfFileCmdMakeRealFileName(char *path, s32 worker) {
     return result;
 }
 
-extern s32 memcmp(const void *, const void *, u32);
 
 extern char D_00438B40[]; /* /movie/ */
 
@@ -1903,7 +1870,6 @@ void sdfPowerOffLoop(s32 semaphore) {
     }
 }
 
-extern int iSignalSema(int);
 
 void sdfPowerOffInterruptCallback(void *semaphore) {
     iSignalSema((s32)semaphore);
@@ -1929,7 +1895,6 @@ extern SdfPowerOffCallback func_0034C270(SdfPowerOffCallback, void *);
 
 extern s32 func_003698D8(void);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern s32 func_0036BE68(const char *, const char *, s32, const void *, s32);
 

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
 #include "snd_command_packet.h"
@@ -20,14 +21,8 @@
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
 #include "snd_midi_state_views.h"
-/* Declared before first use (were implicit int). */
-extern void EIntr(void);
-extern s32 SleepThread(void);
-extern s32 WaitSema(s32);
-extern char * strcpy(char *, const char *);
 
 extern s32 D_00439214;
-extern s32 iWakeupThread(s32 threadId);
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -97,13 +92,9 @@ extern s32 sdfSoundRpcSemaphore;
 
 extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
-extern s32 GetThreadId(void);
 
-extern void sceSifSetRpcQueue(void *, s32);
 
-extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 
-extern void sceSifRpcLoop(void *);
 
 extern u32 D_0047B440[16];
 
@@ -115,9 +106,7 @@ extern s32 D_004391F4;
 extern SdfStreamFrameNode *sdfStreamNodeListHead;
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
-extern s32 sceIpuSync(s32, s32);
 
-extern s32 DIntr(void);
 
 extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
@@ -211,8 +200,6 @@ void sndSendChannelGroupCommand110Duplicate(u8 channel) {
     sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
-extern void FlushCache(s32);
-extern s32 SignalSema(s32);
 
 /* Event 5 invalidates the EE cache before waking the waiting sound thread. */
 s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
@@ -1260,7 +1247,6 @@ void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
 }
 
 
-extern void FlushCache(s32);
 
 /* Allocate two width-by-height frames, using four bytes per pixel for mode zero, two otherwise. */
 void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
@@ -1388,8 +1374,6 @@ void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node) {
     } while (bufferIndex != 2);
 }
 
-/* The four bytes used to initialize the stream node; matches the DDS1 format. */
-extern void *memset(void *, s32, u32);
 
 /* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
 void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
@@ -1531,7 +1515,6 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     }
 }
 
-extern void *memcpy(void *dst, const void *src, u32 n);
 
 /* Fill at most seven of eight 8-KiB slots. A short non-EOF query waits for more
  * data; EOF permits a partial final read. Copy the final slot's trailing bytes
@@ -1659,7 +1642,6 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
     }
 }
 
-extern void sceIpuStopDMA(void *);
 
 
 /* Sleep for IPU completion, advance cycle state and requeue non-drained nodes;
@@ -1872,9 +1854,6 @@ extern s32 D_00439200;
 extern u8 sdfIpuStreamThreadStack[];
 extern s32 sdfAddHandler();
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern s32 sdfEnableDmacChannel(s32 channel);
-extern void sceIpuInit();
-extern void _StartThread();
 extern void sdfIpuDmaCompletionWorker();
 
 void sdfSoundInitIpuStream(void) {
@@ -1893,7 +1872,6 @@ void sdfSoundInitIpuStream(void) {
 extern s32 D_004391FC;
 extern s32 D_00439200;
 extern void sdfRemoveHandler();
-extern s32 sdfDisableDmacChannel(s32 channel);
 
 /* Remove both IPU handlers and forward the final completion-source disable result. */
 s32 sdfSoundShutdownIpuStreamHandlers(void) {
@@ -1909,7 +1887,6 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
     return sdfDisableDmacChannel(4);
 }
 
-extern int puts(const char *);
 
 /* Print a string followed by a newline through libc puts. */
 void sdfPrintTextLine(const char *text) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "dds3_path.h"
 #include "dds3_admin_control_api.h"
@@ -304,8 +305,6 @@ void mdlReleaseViewerSlotResources(void) {
 }
 
 
-extern u32 strlen(const char *);
-extern char *strcpy(char *, const char *);
 extern MdlResourceSelection *D_003BD880;
 extern MdlResourcePath *D_003BD884;
 
@@ -388,17 +387,11 @@ extern DebugModelFile *D_003BD87C;
 extern const char D_003ABA68[];
 extern DebugWorkPrefix D_003BBB78[];
 extern u8 sdfPfsDebugMode;
-extern s32 sceDopen(const char *);
-extern s32 sceDread(s32, DebugDirectoryEntry *);
-extern s32 sceDclose(s32);
-extern s32 memcmp(const void *, const void *, u32);
 
 static inline s32 debugFileUpper(s32 c) {
     return islower(c) ? c - 'a' + 'A' : c;
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
-extern void *memset(void *, int, unsigned int);
 
 void func_00218E20(void) {
     DebugDirectoryEntry directory;
@@ -2941,8 +2934,6 @@ extern char D_003BBCD8[]; /* "fog=" */
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
-extern s32 sscanf(const char *, const char *, ...);
-extern s32 memcmp(const void *, const void *, u32);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABEB0);
@@ -3018,7 +3009,6 @@ void mdlLoadViewerPresentationConfig(void) {
 }
 
 const char D_003ABF18[0x60] __attribute__((aligned(8))) = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
-extern s32 sprintf(char *, const char *, ...);
 void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];
     s32 size;

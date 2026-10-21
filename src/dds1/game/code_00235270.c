@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
 #include "kwln_background_fade_api.h"
@@ -34,8 +35,6 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
-extern s32 sceWrite(s32, const void *, s32);
-extern u32 strlen(const char *s);
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 extern s32 evtDrawFrameListColumnHeadings();
@@ -46,8 +45,6 @@ extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
-extern s32 sprintf(char *, char *, ...);
-extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
 extern void fldSetSwayMode(s32 mode);
@@ -4434,9 +4431,6 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 }
 
 extern u8 sdfPfsDebugMode;
-extern s32 sceOpen(const char *path, s32 flags, ...);
-extern s32 sceClose(s32 descriptor);
-extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 extern void *sdfDevGetPathBuffer(void);
 extern char D_003BC350[];
 extern char D_003BC358[];
@@ -4565,7 +4559,6 @@ u8 * evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
     return ((EvtExtendedRow *)work->subEntry4OtherData)[row].payload;
 }
 
-extern s32 strcmp(const char *a, const char *b);
 
 void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupMetadata *link) {
     s32 i;

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "dds3_object_flags.h"
 #include "eff_owner_bill_entry.h"
@@ -292,7 +293,6 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
 
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
-extern void *memset(void *, int, unsigned int);
 
 EffectObj *effObjCreateKindTwo(bill, vec, extra)
     void *bill;
@@ -522,7 +522,6 @@ EffectObj *effObjCreateBillboardFromFactory(u32 parameter, void *firstVector, s3
 
 extern const EffectEventVectorParameters D_00412950;
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     SoundMixer *source;

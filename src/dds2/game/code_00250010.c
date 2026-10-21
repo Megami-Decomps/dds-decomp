@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
 #include "kwln_background_fade_api.h"
@@ -36,7 +37,6 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
-extern s32 sprintf(char *, const char *, ...);
 /* Original-style implicit int, kept: matched code depends on it: sceWrite. */
 
 extern u32 evtSkyOverlayEnabled;
@@ -626,7 +626,6 @@ void evtDrawSelectableTextRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
     }
 }
 
-extern s32 strlen(const char *s);
 
 /* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
 s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
@@ -4047,7 +4046,6 @@ s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, EvtRuntime *runtime)
     return D_003C9928[actionIndex](x, y, runtime);
 }
 
-extern int sceWrite(int, const void *, int);
 
 void evtWriteOutputBytes(s32 output, s32 data, s32 size) {
     sceWrite(output, (const void *)data, size);
@@ -4669,10 +4667,6 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 
 extern u8 sdfPfsDebugMode;
 extern char *sdfDevGetPathBuffer(void);
-extern s32 sprintf(char *buffer, const char *format, ...);
-extern s32 sceOpen(const char *path, s32 flags, ...);
-extern s32 sceClose(s32 descriptor);
-extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
 extern char D_004377C8[];
@@ -4804,7 +4798,6 @@ u8 *evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
     return ((EvtExtendedRow *)work->subEntry4OtherData)[row].payload;
 }
 
-extern s32 strcmp(const char *a, const char *b);
 
 void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupMetadata *link) {
     s32 i;
@@ -5812,7 +5805,6 @@ typedef struct EvtEffectObject {
 
 extern EvtModelScaleEntry *D_00435DE0;
 extern EvtModelScaleEntry *D_00435DF0;
-extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
 

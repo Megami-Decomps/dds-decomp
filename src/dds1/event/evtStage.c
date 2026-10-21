@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "evt_scaled_value.h"
 #include "fld_area_path.h"
@@ -34,7 +35,6 @@ extern const char evtStageResourcePathFormat[0x10];
 extern char D_00367DF0[];
 extern char D_00367EB0[];
 extern char D_00367ED0[];
-extern void sprintf(char *, const char *, ...);
 
 void evtDestroySecondaryWorldNode(void)
 {

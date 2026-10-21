@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
@@ -6,8 +7,6 @@
 #include "sdf_pending.h"
 #include "sdf_named_resource_request_api.h"
 #include "sif_rpc_client_prefix.h"
-/* Declared before first use (were implicit int). */
-extern u32 strlen(const char *);
 
 #define SDF_HEAP_BLOCK_FREE 0
 #define SDF_HEAP_BLOCK_USED 1
@@ -19,14 +18,11 @@ extern u32 strlen(const char *);
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
 
-extern s32 DIntr(void);
-extern void EIntr(void);
 
 
 extern SdfPendingRequest sdfGeneralReleaseRequest;
 
 
-extern void *memcpy(void *destination, const void *source, unsigned int bytes);
 
 /* Resize backing storage while preserving this resource's allocation descriptor. */
 void sdfResizeResourceAllocation(SdfMemBlock *allocation, s32 size) {
@@ -272,7 +268,6 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
     return result;
 }
 
-extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
 void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath) {
     s32 retryStartTick;

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_alpha_register_api.h"
 #include "sdf_gs_register_submit_api.h"
@@ -799,7 +800,6 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     surface->append(surface, list);
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* vu0 routine: the SDK quadword copies are present at 002C12F0..002C130C. */
 void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f32 *third,

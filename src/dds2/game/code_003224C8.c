@@ -1,11 +1,11 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_sdfAllocHeapMemory
+#include "sdk_ps2.h"
 #include "common.h"
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
 #include "dds_nested_resource.h"
 #include "btl.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
-extern void sdfFreeHeapMemory(SdfListNode *);
 
 #define MNU_WORK_ACTIVE   1
 
@@ -166,9 +166,6 @@ MenuShortRecord *mnuFindMarkedShortListRecord(MenuShortRecordList *list) {
 extern void sdfVec3SetComponents(f32 *, f32, f32, f32);
 extern f32 sdfVec3Normalize(f32 *);
 extern void sdfVectorScale(f32, f32 *);
-extern f32 atan2f(f32, f32);
-extern f64 cos(f64);
-extern f64 sin(f64);
 
 static inline f32 mnuGetShortRecordInterpolationFactor(MenuWorkEntry *work,
                                                        MenuShortRecord *fixed)

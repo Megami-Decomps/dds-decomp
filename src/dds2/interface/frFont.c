@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "fr_font_draw_glyph.h"
 #include "fr_font_position.h"
@@ -17,8 +18,6 @@
 /* Declared before first use (were implicit int). */
 extern void evtLipsStopFunction(void);
 extern void frFontFreeEntry(s32 slotId);
-extern void * memset(void *, s32, u32);
-extern u32 strlen(const char *);
 /* frFontListInsert is void in the game font TU; preserve C89 call scope here.
  * An early void declaration moves the cache-count update at +0x5C/+0x60/+0x64
  * from retail $3 to $2 in frFontReleaseUnreferencedGlyphItem. */

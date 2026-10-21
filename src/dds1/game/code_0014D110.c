@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "fld_title_banner_menu.h"
 #include "common.h"
@@ -181,7 +182,6 @@ extern f32 fldBannerColorPhase;
 
 extern s32 fldRoomEffectEntryCount;
 
-extern int strcmp(const char *, const char *);
 
 extern u32 D_003BAFA4;
 
@@ -491,7 +491,6 @@ s32 fldCmdCaptureObjectPose(void) {
     return 1;
 }
 
-extern char *strcpy(char *, const char *);
 
 s32 fldCmdSetRequestedSceneName(void) {
     char *name;
@@ -567,7 +566,6 @@ s32 fldFindSearchId(const char *name) {
 
 extern char fldRoomNameSentinel[];
 
-extern char *strstr(const char *, const char *);
 
 s32 fldParseRoomNumberFromName(char *name) {
     s32 index;

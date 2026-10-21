@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_projected_sprite.h"
 #include "sdf_model_packet_callback.h"
 #include "fld_label_rows.h"
@@ -61,9 +62,6 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_alloc.h"
 
-/* Declared before first use; these were implicit int (the void ones changed $v0 allocation near their calls). */
-extern void *memset(void *, int, unsigned int);
-extern void *memcpy(void *, const void *, unsigned int);
 extern f32 fabsf(f32);
 extern s32 fldTitleIsActive(void);
 extern void sndSendSingleWordControlPacket(u32 controlWord);
@@ -189,7 +187,6 @@ extern s32 D_0039A0B8[];
 
 extern s32 D_0039A028[];
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern char D_00413F20[];
 
@@ -489,7 +486,6 @@ extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
 
 
-extern int strcmp(const char *, const char *);
 
 
 extern u8 fldGetCampSceneControlMode(void);
@@ -1140,7 +1136,6 @@ extern FldName28 D_003A25AC[];
 
 extern FldName24 D_0039A1D0[];
 
-extern s32 strlen(const char *);
 
 extern s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 
@@ -3607,7 +3602,6 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B78);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D380);
 
-extern void *memset(void *, s32, u32);
 
 extern s32 fldAreaDamageEffectPlaced;
 
@@ -3811,7 +3805,6 @@ void fldSetNpcPalette(const FldNpcPalette *src) {
     D_0044FD90 = *src;
 }
 
-extern s32 strcmp(const char *, const char *);
 
 s32 fldFindEffectByName(char *name) {
     s32 i;

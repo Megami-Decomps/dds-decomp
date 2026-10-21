@@ -1,3 +1,5 @@
+#include "sdk_ps2.h"
+#include "mnu_camp_display.h"
 #include "common.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -10,8 +12,6 @@
 #include "eff_event_work_api.h"
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 extern void scrDestroyAllNamedProcesses(void);
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -272,15 +272,6 @@ void evtReorderListNodes(EvtRuntimeGroup *list) {
     }
 }
 
-typedef struct CampDisplayDefaults {
-    s32 x, y;
-    u8 color[4];
-    f32 scaleY, scaleX;
-    s32 enabled, variant, unk1C;
-} CampDisplayDefaults;
-
-
-
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
                                           f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB);
@@ -445,7 +436,7 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
         key->p10.sb[3] = display.color[3];
         key->p14.f = display.scaleX;
         key->p18.f = display.scaleY;
-        key->p1C.sb[0] = display.unk1C;
+        key->p1C.sb[0] = display.preserveAlpha;
         break;
     case 25: {
         EvtCameraColorPayload *payload = sdfChipAllocDirect(0x40);

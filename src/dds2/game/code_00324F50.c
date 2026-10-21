@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
@@ -7,18 +8,14 @@
 
 extern f32 sdfVec3Normalize(f32 *);
 
-extern void *sdfAllocHeapMemory(u32);
 
 
 extern void (*sdfTickCallback)(void);
 
 extern f32 sdfVec3DotNormalized(void *, void *);
 
-extern f64 cos(f64);
 
-extern f64 sin(f64);
 
-extern f64 sqrt(f64);
 
 /* Keep all packed bytes opaque while the clone copies the complete header. */
 typedef struct SdfResourceVectorRecord1C {
@@ -28,7 +25,6 @@ typedef struct SdfResourceVectorRecord1C {
 
 typedef char SdfResourceVectorRecord1CSizeCheck[(sizeof(SdfResourceVectorRecord1C) == 0x1C) ? 1 : -1];
 
-extern void *memcpy(void *, const void *, u32);
 
 /* Append a value to the first resource list in a two-list owner. */ void dds3AppendFirstResourceListValue(MnuCallbackListPair *lists, u32 option);
 
@@ -48,7 +44,6 @@ void mnuRemoveLinkedResourceByHandle(MnuCallbackListPair *owner, u32 handle) {
     dds3RemoveListNodeAndNotify(owner->second, node);
 }
 
-extern void *memset(void *, int, unsigned int);
 
 DdsNestedHeader *sdfCloneNestedResourceRecord(MnuCallbackListPair *owner, MnuCallbackList **list) {
     SdfListNode *node;
@@ -430,7 +425,6 @@ extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
 
 extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
 
-extern void sdfFreeHeapMemory(void *);
 
 SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner, MnuCallbackList **source,
                                   MnuCallbackList **groups) {

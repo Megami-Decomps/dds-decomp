@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_quaternion.h"
@@ -30,7 +31,6 @@ extern s8 D_0037F510[];
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
-extern f32 acosf(f32);
 
 
 
@@ -42,7 +42,6 @@ extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 sinf(f32);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 #include "sdf_vector_transform.h"
@@ -58,12 +57,9 @@ extern u64 itfCreateTightFont3TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 itfCreateFont2TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-extern void *memset(void *, s32, u32);
 
 
 
-extern u32 strlen(const char *);
-extern s32 sprintf(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_script_resource_api.h"
@@ -9,7 +10,6 @@
 #include "scr.h"
 #include "bf_flw0_header.h"
 
-extern void sprintf(char *, const char *, const char *, s32);
 s32 btlFindScriptResource(char *name) {
     char path[128];
     BtlState *battle = (BtlState *)btlGetRuntime();

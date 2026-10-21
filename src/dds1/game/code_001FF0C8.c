@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "btl_skill_max_api.h"
 #include "btl_ai_slot.h"
@@ -106,7 +107,6 @@ extern s32 btlHasAdjacentActorRecordStatus(s32);
 extern u32 btlIsActorHighStateFlagClear(s32);
 extern s32 btlRunAiAction(BtlTask *, s32, u32);
 extern s32 btlSyncEligibleActorPanelHpMp(BtlTask *);
-extern void *memcpy(void *, const void *, u32);
 void func_001FF0C8(BtlTask *task, u32 mode) {
     BtlAiScratchWork *work;
     BtlUnit *unit;

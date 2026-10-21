@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -66,7 +67,6 @@ Motion *evtAttachScriptToObject(EffWorldNode *object, SdfModel *owner) {
 }
 
 
-extern void *memset(void *, int, unsigned int);
 
 s32 dds3AllocateObjectWork(EffWorldNode *obj) {
     obj->data = sdfChipAllocDirect(0x18);

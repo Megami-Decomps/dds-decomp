@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_timer.h"
@@ -179,7 +180,6 @@ extern void sdfGrReqDrawDelay(s32);
 extern void sdfPadBuildButtonStates(void);
 extern void sdfFileCmdThreadSetHiPrio(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
-extern void LoadExecPS2(const char *, s32, char **);
 
 extern s32 dds3ProcessMain(void);
 

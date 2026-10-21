@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
@@ -432,7 +433,6 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
 }
 
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {

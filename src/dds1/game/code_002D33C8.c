@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "ee_mmi.h"
 #include "sdf_scene_packet.h"
 #include "sdf_gs_gouraud_textured.h"
@@ -32,9 +33,6 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "sdf_dma_tag.h"
-/* Declared before first use (were implicit int). */
-extern s32 SignalSema(s32);
-extern s32 WaitSema(s32);
 extern s32 sdfFormatBitsPerPixelB(u32 format);
 extern void sdfSleepThreadCount(s32 requestedSleepCount);
 
@@ -83,7 +81,6 @@ extern void sdfSleepThreadCount(s32 requestedSleepCount);
 #define SDF_VIF_FLUSHE_HALFWORD 0x1000
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
 
-extern s32 EIntr(void);
 extern u16 D_003BD334;
 extern s32 D_003BD340;
 extern s8 D_003BDA05;
@@ -102,7 +99,6 @@ extern s32 sdfPacketCursor;
 extern s32 sdfPacketBufferEnd;
 
 extern s32 sdfGraphHasPendingWork(void);
-extern s32 DIntr(void);
 
 extern s32 sdfPendingQueueSemaphore;
 extern s32 sdfCreateSemaphore(u32, u32, u32);

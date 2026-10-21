@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "ui_color.h"
 #include "mnu.h"
@@ -132,7 +133,6 @@ extern void mnuDrawPartyRowFrameVariant(s32, s32, s32, MenuPageWindow *, s32, s3
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern s32 sprintf(char *, const char *, ...);
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern s32 frDestroyFontRequestAfter(struct FrFontGlyph *);
 /* Retail forwards the surface word; the selection helper uses five arguments. */

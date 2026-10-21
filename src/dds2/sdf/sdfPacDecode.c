@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -23,7 +24,6 @@ enum {
     PAC_STATE_ALLOCATE_HIGH = 2
 };
 
-extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet);

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dsp_channel.h"
 #include "mnu_input.h"
@@ -83,7 +84,6 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
     mnuReleaseResourceList(menu->resourceList);
 }
 
-extern void *memset(void *, s32, u32);
 
 extern s8 dds3AdminReadPreviousSignedSample(void);
 
@@ -250,7 +250,6 @@ u8 mnuIsFadeIdle(void) {
     return fadeActive == 0;
 }
 
-extern s32 sprintf(char *, const char *, s32);
 
 extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, u32, s32);
 
@@ -285,7 +284,6 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
 
 extern const StaffGridLabelRow D_003B2100[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
     StaffGridLabelRow rows[7];

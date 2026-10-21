@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
@@ -12,16 +13,12 @@
 
 extern s32 D_00437CC0;
 
-/* The open device state retains the resolved path at +0x10. */
-s32 WaitSema(s32 sema);
 
-s32 SignalSema(s32 sema);
 
 extern char fileManagerTaskName[];
 
 extern s32 (*fileIdleUpdateCallback)(void);
 
-void *memset(void *dst, s32 val, u32 len);
 
 s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 

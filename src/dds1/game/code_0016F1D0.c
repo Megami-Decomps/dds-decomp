@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_packet_params.h"
 #include "common.h"
 #include "eff_ring_color_slot.h"
@@ -72,7 +73,6 @@ typedef struct EffectRingBlock {
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 extern EffRandState effDefaultRandomState[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 EffRingWork *effCreateRingFan(EffRingWork *source)
@@ -355,7 +355,6 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
 }
 
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
-extern void *memset(void *dst, s32 value, u32 size);
 
 /* Allocate five 16-byte positions and five color words per group, then the 0x70-byte header. */
 EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
@@ -490,7 +489,6 @@ void effSetFanRecordPoolScale(EffRecordPool *work, f32 scale) {
 }
 
 
-extern void *memset(void *dst, s32 value, u32 size);
 
 /* Allocate three positions and three colors per triangle, then the header.
  * The complete block and shared packet-parameter record are cleared. */

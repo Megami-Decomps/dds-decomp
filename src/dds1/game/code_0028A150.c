@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memset
+#include "sdk_ps2.h"
 #include "common.h"
 #include "file_job_type.h"
 #include "sdf_vu_rotation_axes.h"
@@ -68,8 +71,6 @@ extern u8 frDisableMode(u8 mask);
 extern void frSetFontDrawOT(u32 renderFlags);
 extern s32 mcResetSlotMetadata(void);
 extern void sndReleaseTrackHandle(u32 trackHandle);
-extern char * strcpy(char *, const char *);
-extern u32 strlen(const char *s);
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
 struct MenuListNode;
@@ -116,8 +117,6 @@ extern s32 D_003BC87C;
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
-extern f32 acosf(f32);
-extern f32 atan2f(f32, f32);
 
 
 
@@ -161,7 +160,6 @@ extern u32 effModelUpdateControlFlags;
 
 extern u32 D_003BC888;
 
-extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern void *fileSaveReadBuffer;
 
@@ -4386,9 +4384,6 @@ extern char D_003BC928[];
 extern char D_003BC930[];
 extern char D_003BC938[];
 extern char *sdfDevGetPathBuffer(void);
-extern s32 sceOpen(const char *path, s32 flags, ...);
-extern s32 sceClose(s32 fd);
-extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
@@ -4973,7 +4968,6 @@ void fileJobCopyHeader(FileJob *dst, const FileJob *src) {
 }
 
 extern char fileQueueImagePaddingBytes[];
-extern s32 sceWrite(s32 fd, void *data, s32 size);
 extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
 /* Export a queue: the queue header, one relocated record per job, then each

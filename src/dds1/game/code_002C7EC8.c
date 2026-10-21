@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_math_vector4.h"
@@ -17,7 +18,6 @@ extern float fldNormalizedVectorDot(float *, float *);
 
 extern float fldVectorLength(float *vector);
 
-extern float acosf(float);
 
 
 
@@ -79,7 +79,6 @@ void fldRotateVectorAroundZ(f32 *vector, f32 angle) {
 
 extern float sdfVec3NormalizeInPlaceAndGetLength(float *vector);
 
-extern void *memset(void *, int, unsigned int);
 
 /* Rotate XYZ about a normalized copy of axis; copy inputs before writing XYZ and leave W untouched. */
 void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
@@ -278,7 +277,6 @@ void sdfTransposeMatrix(SdfMat4 *destination, SdfMat4 *source) {
     destination->m[15] = sourceCopy.m[15];
 }
 
-extern void *memcpy(void *, const void *, u32);
 
 /* Transform XYZ without translation. Matching quirk: the fourth copied output word is uninitialized. */
 #include "sdf_vector_transform.h"

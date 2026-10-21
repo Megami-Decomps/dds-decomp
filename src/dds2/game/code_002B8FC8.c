@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fr_font.h"
 #include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
@@ -295,14 +296,12 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void frFontDrawGlyphChain(s32, s32, s32);
-extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 
 
 extern void dspRequestMessageWindowModeOne(void);
 
 
-extern void *memset(void *, s32, u32);
 
 typedef struct MenuListDefaults {
     s32 indices[3];
@@ -810,7 +809,6 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
 }
 
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
-extern s32 sprintf(char *, const char *, ...);
 extern const char D_00437C28[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */

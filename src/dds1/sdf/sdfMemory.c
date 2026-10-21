@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -12,8 +13,6 @@ SdfMemHeap sdfGeneralHeap __attribute__((section(".bss"), aligned(8)));
 
 extern void (*D_003BD2DC)(s32);
 
-s32 DIntr(void);
-s32 EIntr(void);
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
 SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {

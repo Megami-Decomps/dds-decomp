@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
@@ -20,7 +21,6 @@ extern s32 dds3SlotRingCursor;
 
 extern s32 dds3UpdateMoverTransform(EffWorldNode *slotObject);
 
-extern void *memset(void *, s32, u32);
 
 /* Bind the owner, select a 16-byte ring entry, and advance the ten-entry cursor. */
 EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *owner) {

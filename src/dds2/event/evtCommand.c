@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "scr_integer_return_value_api.h"
 #include "common.h"
@@ -691,7 +692,6 @@ s32 evtCommandWaitCameraOwnerResourceScale(void) {
     }
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */

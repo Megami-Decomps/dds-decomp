@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "itf_draw_grid.h"
@@ -189,7 +190,6 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
     }
 }
 
-extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern const char D_003BC718[];
 
@@ -338,7 +338,6 @@ void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *entry, Ef
     entry->entryOption = option;
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
 void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
@@ -658,7 +657,6 @@ void mnuInitializeWindowSpriteGroup(MenuWindowSpriteGroup *group, u32 source, u3
 
 extern void mnuInitializeWindowSpriteGroup(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
-extern void *memset(void *, int, unsigned int);
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
@@ -2283,7 +2281,6 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 evtGetIndexedEventRecordId(s32);
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 sprintf(char *, const char *, ...);
 extern u8 *D_003BAA84;
 extern char D_003BC720[];
 extern u8 D_003BC730[];

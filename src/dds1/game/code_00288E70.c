@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "kwln_task_create.h"
 #include "file_pac.h"
@@ -16,11 +17,8 @@ extern s32 D_003BC7D8;
 
 extern s32 (*fileIdleUpdateCallback)(void);
 
-s32 WaitSema(s32 sema);
 
-s32 SignalSema(s32 sema);
 
-void *memset(void *dst, s32 val, u32 len);
 
 s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 

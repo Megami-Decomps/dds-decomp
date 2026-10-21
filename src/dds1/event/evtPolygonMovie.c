@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff.h"
 #include "eff_event_draw.h"
@@ -38,8 +39,6 @@ u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
 extern EvtUnit *effObjGetTransitionWork(EffWorldNode *object);
 extern void dds3ObjectBaseOnFlag(PolyMovieObject *obj, s32 flags);
 extern void dds3ObjectBaseOffFlag(PolyMovieObject *obj, s32 flags);
-extern void *memset(void *dst, s32 value, u32 size);
-extern void *memcpy(void *dst, const void *src, u32 size);
 
 extern f32 D_00368540[4];
 extern f32 D_00368550[4];
@@ -847,7 +846,6 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
     return handle;
 }
 
-s32 sprintf(char *output, const char *format, ...);
 
 s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3) {
     sprintf(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
@@ -913,7 +911,6 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
 
 extern u32 D_003BA8EC;
-extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
 extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);

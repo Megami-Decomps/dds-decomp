@@ -1,3 +1,5 @@
+#include "sdk_ps2.h"
+#include "dat_state.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "kwln.h"
@@ -12,7 +14,6 @@
 
 
 
-extern ScrProcGlobals *datGameState;
 
 ScrData *bfParseFLW0(void *header, s32 procedureIndex);
 
@@ -54,8 +55,8 @@ void scrClearProcessGlobals(void)
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (globalClearCountdown = 255; globalClearCountdown >= 0; globalClearCountdown--)
     {
-        datGameState->integers[255 - globalClearCountdown] = 0;
-        datGameState->floatBits[255 - globalClearCountdown] = 0;
+        datGameState->script.ints[255 - globalClearCountdown] = 0;
+        datGameState->script.floats[255 - globalClearCountdown] = 0;
     }
 }
 
@@ -114,7 +115,6 @@ void scrProcDestroyTask(ScrData *process) {
     sdfChipFreeDirect(process);
 }
 
-extern s32 strcmp(const char *a, const char *b);
 
 
 /* Walk the script-name table, releasing each node's task or process. */

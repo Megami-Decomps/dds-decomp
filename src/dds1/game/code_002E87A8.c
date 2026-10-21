@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "snd_ring.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
@@ -46,7 +47,6 @@ extern SndMergedWork sndMidiTrackState;
 extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 sndSynchronousCommandMode;
 extern s32 D_003BDA8C;
-extern s32 sceSifInitIopHeap(void);
 extern s32 sndStartIopCommandAndRpcWorkers(void);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
@@ -56,12 +56,7 @@ extern u32 D_003BD4A0;
 extern vu16 sndCommandReadIndex;
 extern vu16 sndCommandWriteIndex;
 extern s32 sndCommandThreadId;
-extern s32 WakeupThread(s32 thread);
 extern s32 sndTryDispatchQueuedCommand(void);
-extern void *memcpy(void *, const void *, u32);
-extern void FlushCache(s32);
-extern s32 sceSifSetDma(void *, s32);
-extern s32 sceSifDmaStat(s32);
 
 u32 sndQueueCommandPacket(u32 command, u32 channel, const void *packet, s32 payloadBytes) {
     s32 nextWriteIndex;
@@ -139,8 +134,6 @@ void sndCopyToIopAndWait(s32 destination, void *source, s32 size) {
 }
 
 extern u8 sdfPfsDebugMode;
-extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern s32 sceGetstat(const char *, SceIoStat *);
 
 /* Load the sound modules; debug PFS may override only the SDF sound manager. */
 void sndLoadIopSoundModules(void) {
@@ -291,7 +284,6 @@ void sndDispatchCommandWithoutPayload(u32 command) {
     sndQueueCommandPacket(command | 0x50, 0, 0, 0);
 }
 
-extern unsigned int strlen(const char *);
 
 /* Send a NUL-terminated command string; the transport excludes the terminator. */
 u32 sndSubmitTextCommandPayload(s32 command, char *text) {
@@ -436,7 +428,6 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
     return sndRequestedMidiBankId == id ? 2 : 0;
 }
 
-extern s32 sprintf();
 extern s32 (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */

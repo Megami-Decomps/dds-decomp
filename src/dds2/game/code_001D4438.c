@@ -1,3 +1,6 @@
+#include "sdk_ps2.h"
+#include "btl_sound.h"
+#include "dds3obj.h"
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
@@ -47,7 +50,6 @@ extern s32 btlGetLoggedIndexedCommandItem(s32 index);
 extern void btlInitializeBattleDebugMenu(void);
 extern s32 btlTestActorStatusPredicate(BtlUnit *unit);
 extern s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor);
-extern void * memset(void *, s32, u32);
 extern void sndSetStationedSeVolume(u32 sequence);
 /* Original-style implicit int, kept: matched code depends on it: sndGetResourceStatus, sndHasResourceFlagsOneOrEight, sndIsResourceNodeReferencedOrActive. */
 
@@ -94,10 +96,6 @@ typedef struct BattleEffectParams {
     f32 rotation[4];
     f32 scale[4];
 } BattleEffectParams;
-
-typedef struct SceneObject {
-    s32 state;
-} SceneObject;
 
 extern SceneObject *btlGetCommandPanelTaskWork(void);
 
@@ -428,24 +426,12 @@ extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
-typedef struct SoundResourceNode {
-    u32 flags;
-    u32 unk_04;
-    u32 unk_08;
-    s32 fadeCountdown;
-    u32 resourceHandle;
-    u32 unk_14;
-    struct SoundResourceNode *previous;
-    struct SoundResourceNode *next;
-} SoundResourceNode;
-
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern void btlRunTask(BtlRuntimeTask *);
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
-extern void sprintf();
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 

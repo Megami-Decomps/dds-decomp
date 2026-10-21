@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry.h"
 #include "dsp_entry_api.h"
 #include "dsp_name.h"
@@ -71,7 +72,6 @@ extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
 extern void mnuDrawPlacedSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                        s32 mode, s32 context);
-extern void sprintf(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Draw the selection strip from the last row back to the first. */
@@ -134,7 +134,6 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
     }
 }
 
-extern void *memset(void *, s32, u32);
 extern void prfCopyMantraNamePart(u32, s32, void *);
 extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const void *, s32, u32);
 

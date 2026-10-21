@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 /*
  * Translation unit boundary recovered at btlCalculateHpActionAmount (twin of
  * DDS1 code_001A5C40). btlCheckSpecialAbility and btlGetActorEntryMultiplier
@@ -197,7 +198,6 @@ extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 extern SdfPoolNode D_00380708;
 
-extern void *memset(void *destination, s32 value, u32 bytes);
 
 extern s32 D_00435CBC;
 

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_param.h"
 #include "sdf_vu_matrix.h"
@@ -1808,7 +1809,6 @@ typedef char EffThunderGroupHeadOffsetCheck[
 typedef char EffThunderGroupColorOffsetCheck[
     ((u32)&((EffThunderGroup *)0)->color == 0x120) ? 1 : -1];
 
-extern void *memset(void *, s32, u32);
 
 EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
     EffThunderGroup *group = sdfChipAllocDirect(sizeof(EffThunderGroup));
@@ -2710,7 +2710,6 @@ extern EffThunderDrawParams effThunderEndCapDrawParams;
 extern const f32 effThunderEndCapPoints[8][4];
 extern const u32 effThunderHistoryIndices[28];
 extern const u32 effThunderEndCapIndices[8];
-extern void *memcpy(void *, const void *, u32);
 
 /* Lay out history vertices/colors, eight cap vertices/colors, then the owner.
  * The two global draw descriptors are reset through their native 0x2C prefix.

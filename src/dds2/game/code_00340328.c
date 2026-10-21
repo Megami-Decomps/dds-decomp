@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "common.h"
 #include "ee_mmi.h"
@@ -37,7 +38,6 @@ extern u8 D_00438B50[];
 
 extern u8 D_00438B58[];
 
-extern u32 strlen(const char *s);
 
 extern f32 sdfNormalizedAsinSamples[];
 
@@ -126,7 +126,6 @@ loop:
     return dst;
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 char *sdfStrDup(const char *text) {
     u32 length;

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_block128.h"
 #include "eff_editor_menu.h"
 #include "eff_surface_grid_node.h"
@@ -90,9 +91,7 @@ extern void fileReadRecordSecondVector(void *record, u128 *out);
 extern void fileReadVectorPtr20(void *record, u128 *out);
 extern void fileSetRecordSecondVector(void *record, const u128 *value);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
-extern void * memset(void *, s32, u32);
 extern void mnuRecordSetVector(void *record, const u128 *value);
-extern char * strcpy(char *, const char *);
 
 
 
@@ -217,7 +216,6 @@ extern EffPacketParams D_003DC9E0;
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
 extern void effReleaseResourceRefs(EffTrackSet *);
 
-extern s32 sprintf(char *, const char *, ...);
 
 
 extern void effDrawSolidRectangle(void *);
@@ -5591,7 +5589,6 @@ void effFreeIndexedEntries(EffClassWork *work) {
 extern f32 D_0037E120[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 asinf(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
 void effUpdateRadialWavePointRows(EffClassWork *work) {
@@ -6099,8 +6096,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 asinf(f32);
-extern f32 atanf(f32);
 
 /* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
 void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
@@ -10751,7 +10746,6 @@ void effFileJobQueueRelease(u32 job) {
 
 extern char D_003BD080[];
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern const char D_003BD078[];
 
@@ -11894,11 +11888,8 @@ void effCopyCameraSnapshotSelection(void) {
     D_003BD10A = D_003DF840[0x8A];
 }
 
-extern f32 atan2f(f32, f32);
 #include "sdf_vu_matrix.h"
 extern u8 D_003BD10B;
-extern f32 acosf(f32);
-extern f32 atan2f(f32, f32);
 s32 func_002B8108(void) {
     f32 center[4];
     f32 point[4];

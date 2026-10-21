@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_object_node.h"
 #include "eff_model_owner.h"
@@ -22,8 +23,6 @@
 #include "eff_update_flags.h"
 #include "btl_runtime.h"
 #include "btl.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 typedef struct EffTexTable {

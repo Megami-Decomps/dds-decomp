@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 /* Transport definitions stay in the predecessor; see docs/idioms.md,
  * "Title-audio controller transport boundary". */
 
@@ -58,7 +59,6 @@ typedef struct MovieMenuState {
     s32 movieFrame;       /* 0x114 */
 } MovieMenuState;
 
-extern void *memcpy(void *, const void *, u32);
 
 extern u32 D_004285E0[4];
 
@@ -78,11 +78,8 @@ extern TitleAudioStreamState mnuTitleSoundBufferState;
 
 extern char D_00428680[];
 
-extern s32 WaitSema(u32);
 
-extern s32 SignalSema(u32);
 
-extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern u32 D_00437A20[2];
 
@@ -96,7 +93,6 @@ extern char D_00428610[];
 
 extern char D_00428628[];
 
-extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 s32 sndCopyWordsToIopSynchronously(const void *source, u32 iopAddress, u32 wordCount);
 
@@ -281,7 +277,6 @@ extern u32 mnuTitleSoundBufferDecoderState[];
 extern u8 mnuTitleStreamDecodedSamples[];
 extern u8 mnuTitleSoundBufferDecodedSamples[];
 
-extern void *memset(void *, int, unsigned int);
 
 void mnuInitializeTitleAudioStreams(void) {
     memset(mnuTitleAudioSilenceBuffer, 0, 0x1000);

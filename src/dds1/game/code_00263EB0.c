@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
@@ -16,7 +17,6 @@
 extern void dspRequestMessageWindowModeOne(void);
 extern u8 *D_003BAA70;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC550[];
 extern char D_003BC558[];
 extern char *D_0036D3A8[];
@@ -47,7 +47,6 @@ extern s32 evtStageTestUpdateCamera(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char brsStatConfirmationPopupEntry[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     BrsSkillPackageWork *work;
@@ -274,7 +273,6 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *input) {
 }
 
 
-extern void *memset(void *, int, unsigned int);
 
 u32 brsPrepareRewardMessage(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
@@ -591,7 +589,6 @@ void brsNoOpMessageInputCallback(void *work) {
 
 extern u8 *D_003BAA84;
 extern char D_003BC560[];
-extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 

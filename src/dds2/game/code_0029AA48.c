@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "ui_color.h"
 #include "fr_font.h"
@@ -23,7 +24,6 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
 struct FrFontGlyph;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
-extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];

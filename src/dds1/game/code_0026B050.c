@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "kwln_background_fade_api.h"
 #include "sdf_resource.h"
@@ -8,7 +9,6 @@
 
 
 extern void mnuStopMovieDrawTask(void);
-extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void mnuLoadTitleMenuAssets(void);

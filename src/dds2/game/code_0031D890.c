@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu_shooting.h"
@@ -52,7 +53,6 @@ typedef char PoolLayoutAssert[
      (unsigned long)&((CompactSlotPool *)0)->slots == 4 &&
      (unsigned long)&((CompactSlotPool *)0)->count == 8) ? 1 : -1];
 
-extern void *memset(void *, int, unsigned int);
 
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
 WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
@@ -112,7 +112,6 @@ void itfReleaseWideSlot(WideSlot *slot) {
 }
 
 extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
-extern s32 sprintf(char *destination, const char *format, ...);
 
 /* Draw decimal digits and optional tags with fade/rise; bit 0 pauses aging. */
 void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {

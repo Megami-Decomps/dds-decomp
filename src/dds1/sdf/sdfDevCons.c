@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
 #include "sdf.h"
@@ -19,18 +20,11 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
 void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers);
 void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *packetBuffers);
 void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes);
-s32 sdfVFormatString(char *destination, const char *format, void *args);
-s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
-void sceDmaSendN(void *ch, void *addr, s32 size);
-s32 sceGsSyncPath(s32 mode, s32 timeout);
-void *sceDmaGetChan(s32 id);
 struct SdfTex;
 extern struct SdfTex *sdfConsoleFontTexture;
 extern DevConsState *D_003BD3C0;
 extern u32 sdfConsoleGlyphTexcoords[];
 extern u32 sdfConsoleColorPalette[];
-extern void *memmove(void *dst, const void *src, u32 n);
-extern void *memset(void *dst, s32 c, u32 n);
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
 void sdfDevConsAdvanceRow(DevConsState *console) {

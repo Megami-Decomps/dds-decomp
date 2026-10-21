@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "btl_effect_position.h"
 #include "eff_random.h"
@@ -19,7 +20,6 @@ extern void effBossSetPosition(void *dst, void *src);
 extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
-extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u8 effBossLookAtReferenceAxis[];

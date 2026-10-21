@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
@@ -67,7 +68,6 @@
 #define EFF_EVENT_JITTER_BASE 0.7f
 
 
-extern void *memcpy(void *, const void *, u32);
 
 
 
@@ -453,7 +453,6 @@ extern u32 D_003B21A0[4];
 extern SdfPoolNode D_00380028;
 extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
-extern void *memset(void *, int, unsigned int);
 extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
 extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
 

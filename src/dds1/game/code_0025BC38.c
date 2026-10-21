@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_scene_sprite_entry.h"
 #include "common.h"
 #include "sdf_trig.h"
@@ -18,7 +19,6 @@
 #include "prf_requirement_fallback.h"
 /* Declared before first use (were implicit int). */
 extern void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *outInstance);
-extern void * memset(void *, s32, u32);
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15

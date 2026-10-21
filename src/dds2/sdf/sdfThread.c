@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf.h"
 #include "sdf_thread.h"
@@ -5,11 +6,8 @@
 s32 sdfTrackedThreadSemaphore __attribute__((section(".sbss")));
 SdfThreadNode *sdfTrackedThreadHead __attribute__((section(".sbss")));
 
-s32 GetThreadId(void);
 
-void WaitSema(s32 semaphoreId);
 
-void SignalSema(s32 semaphoreId);
 
 /* A negative ID means the calling thread; search under the list semaphore. */
 SdfThreadNode *sdfFindThreadNode(s32 threadId) {

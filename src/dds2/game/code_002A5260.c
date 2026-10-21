@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_movie.h"
 #include "common.h"
 #include "mnu_sprite_placement.h"
@@ -26,7 +27,6 @@ extern void mnuLoadStaffFonts(void);
 extern void mnuUnloadStaffFonts(void);
 #include "sdf_debug_api.h"
 extern s32 sdfPacCheckDecoderStatus(MovObj *job);
-extern s32 sprintf(char *, const char *, ...);
 
 
 /* Title menu's selected page, sequence timers and draw-task state. */
@@ -131,7 +131,6 @@ extern void mnuSetMovieWorkFlag(s32, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-extern void *memset(void *, s32, u32);
 extern void func_00345BA0(void *, SdfPoolNode *);
 extern void mnuSubmitMovieDrawPacket(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
@@ -1763,7 +1762,6 @@ s32 mnuRestartMovieStreamAfterStop(KwlnTask *task) {
 }
 
 
-extern char *strcpy(char *, const char *);
 
 /* Retain the current movie parameters while its stream is stopped, then queue
  * the replacement playback task. */

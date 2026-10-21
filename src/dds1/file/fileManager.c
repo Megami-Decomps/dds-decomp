@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_chip.h"
 #include "file.h"
 #include "sdf_pac_state.h"
@@ -10,8 +11,6 @@ FileManWork fileManagerWork __attribute__((section(".bss")));
 
 extern s32 btlDestroyStageTask(void *);
 
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 
 
 #define FILE_REQUEST_KIND_CALLBACK 0

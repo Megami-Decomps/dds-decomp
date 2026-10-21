@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
@@ -13,12 +14,8 @@
 #include "brs_result_counter.h"
 #include "dds3_world_counter.h"
 #include "snd_track_playback_api.h"
-/* Declared before first use (were implicit int). */
-extern void FlushCache(s32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
-extern s32 sceSifDmaStat(s32);
-extern s32 sceSifSetDma(void *, s32);
 extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
 extern void sdfSoundStopNamedPlayback(void);
 
@@ -234,8 +231,6 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 #include "fr_font_draw_glyph.h"
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
-extern void *memcpy(void *, const void *, u32);
-extern s32 sprintf(char *, const char *, ...);
 extern const char D_003BC578[];
 
 typedef struct BrsLevelCornerColors {
@@ -763,15 +758,12 @@ extern u8 D_003BC590[];
 
 extern u8 D_003BC598[];
 
-extern char *strcat(char *, char *);
 
 
 extern KwlnTask *mnuTitleSoundTask;
 
 extern char D_003771D8[];
 
-/* libc sprintf returns the signed vfprintf character count. */
-extern s32 sprintf(char *dst, const char *fmt, ...);
 
 #include "sdf_debug_api.h"
 
@@ -790,11 +782,8 @@ extern u32 D_003BC5B8;
 
 
 
-extern s32 sceSifInitIopHeap(void);
 
-extern s32 sceSifAllocIopHeap(s32 size);
 
-extern void Exit(s32 status);
 
 extern s32 sndStreamTransferIopHeapAddress;
 
@@ -1334,7 +1323,6 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously((const void *)D_003BC5B8, D_003BC5B0[1], wordCount);
 }
 
-extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 /* Send the per-core parameter commands for both sound cores, then the IOP
  * stream buffer with the transfer size. */
@@ -1351,7 +1339,6 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }
 
-extern int sceSdRemoteInit(void);
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();
@@ -1360,7 +1347,6 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
 }
 
 extern u64 D_003BD8B8;
-extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {
     u64 status = sndDispatchIopAudioCommand(1, 0x8100, 0);

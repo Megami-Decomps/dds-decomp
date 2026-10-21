@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_projection.h"
 #include "sdf_compact_vertex_vif_packet.h"
@@ -90,7 +91,6 @@ extern EffScreenDrawParams D_00355E48;
 extern EffSolidRectParams D_00355F88;
 extern EffResourceRectParams effResourceRectangleSetupParameters;
 extern EffBlurScaleParams effStaggeredBlurSetupParameters;
-extern void *memcpy(void *, const void *, u32);
 
 extern EffResourceRectWork *effTexturedSquareWork;
 
@@ -450,7 +450,6 @@ extern u32 D_00355870[4];
 extern SdfPoolNode D_00325028;
 extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
-extern void *memset(void *, int, unsigned int);
 extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
 extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
 

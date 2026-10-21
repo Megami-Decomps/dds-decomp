@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
@@ -5,7 +6,6 @@
 #include "pcp_vu0.h"
 #include "eff_quaternion_nlerp.h"
 
-void *memset(void *s, s32 c, u32 n);
 void effSplRelease(struct EffPrimitiveCurve *primitive);
 
 void dds3FreePathObject(Dds3PathCurveWork *path) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_boss_data_api.h"
@@ -132,7 +133,6 @@ s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     return 0;
 }
 
-extern void *memset(void *, s32, u32);
 
 typedef struct BtlScaleStageSource BtlScaleStageSource;
 

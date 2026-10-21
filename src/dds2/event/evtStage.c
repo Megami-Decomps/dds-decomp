@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "evt_scaled_value.h"
 #include "fld_area_path.h"
@@ -57,7 +58,6 @@ extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern void dds3DrawSetLightSourcePointer(void *lightSource, s32 index);
 extern void kwlnDrawCopyWords20(void *source);
 extern void kwlnDrawCopyRow128(u128 *source);
-extern void sprintf(char *, const char *, ...);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
 {
@@ -117,7 +117,6 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
     return 1;
 }
 
-extern void sprintf(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option);
 #include "sdf_debug_api.h"

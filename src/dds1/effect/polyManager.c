@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memcpy
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_trig.h"
@@ -68,7 +71,6 @@ typedef union {
 void polyUpdateBasicRingCells(PolyNode *node);
 void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex);
 void polyStripPushPairsApart(PolyNode *node, s32 cellIndex);
-extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 void polyInitializeBandRecordAges(PolyBand *band);

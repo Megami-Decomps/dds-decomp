@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "dds3_path.h"
 #include "sdf_request.h"
@@ -195,7 +196,6 @@ typedef struct MdlCountNode {
 
 
 
-extern void *memset(void *dst, s32 value, u32 size);
 
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 world, void *pos, void *rot);
@@ -351,8 +351,6 @@ void mdlReleaseViewerSlotResources(void) {
 }
 
 
-extern u32 strlen(const char *);
-extern char *strcpy(char *, const char *);
 extern MdlResourceSelection *D_00438F98;
 extern MdlResourcePath *D_00438F9C;
 
@@ -435,16 +433,11 @@ extern DebugModelFile *D_00438F94;
 extern const char D_00420FD8[];
 extern DebugWorkPrefix D_00436FB8[];
 extern u8 sdfPfsDebugMode;
-extern s32 sceDopen(const char *);
-extern s32 sceDread(s32, DebugDirectoryEntry *);
-extern s32 sceDclose(s32);
-extern s32 memcmp(const void *, const void *, u32);
 
 static inline s32 debugFileUpper(s32 c) {
     return islower(c) ? c - 'a' + 'A' : c;
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 void mdlRefreshDebugModelWorkFileList(void) {
     DebugDirectoryEntry directory;
@@ -2974,8 +2967,6 @@ extern char D_00437118[]; /* "fog=" */
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
-extern s32 sscanf(const char *, const char *, ...);
-extern s32 memcmp(const void *, const void *, u32);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421420);
@@ -3051,7 +3042,6 @@ void mdlLoadViewerPresentationConfig(void) {
 }
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
-extern s32 sprintf(char *, const char *, ...);
 
 void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "evt_unit.h"
 #include "effect_value_object.h"
@@ -123,7 +124,6 @@ void dds3LoadWorldTransformParams(EffWorldNode *worldNode, const WorldTransformP
 }
 
 
-extern void *memset(void *, int, unsigned int);
 
 s32 dds3AllocateUnitObjectWork(EffWorldNode *obj) {
     obj->data = sdfChipAllocDirect(0x1C);

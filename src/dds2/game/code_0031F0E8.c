@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_sdfAllocHeapMemory
+#include "sdk_ps2.h"
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
@@ -28,14 +31,8 @@ extern MnuCallbackListPair *sdfCloneOwnedSpriteRecordList(const void *, s32);
 
 extern void (*sdfTickCallback)(void);
 
-typedef struct SdkFileStream SdkFileStream;
 /* SDK malloc wrapper: a successful result owns a fresh allocation. */
 extern void *sdfAllocHeapMemory(u32 bytes) __attribute__((malloc));
-extern void sdfFreeHeapMemory(void *memory);
-extern SdkFileStream *sdfOpenFileStream(const char *name, const char *mode);
-extern u32 sdfReadFileStream(void *data, u32 size, u32 count, SdkFileStream *stream);
-extern u32 sdfWriteFileStream(const void *data, u32 size, u32 count, SdkFileStream *stream);
-extern s32 sdfCloseFileStream(SdkFileStream *stream);
 extern void mnuCallbackNodeNoOp(u32, u32);
 
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
@@ -90,7 +87,6 @@ typedef struct DdsAllocBlock {
     u32 buffer; /* 0x04 */
 } DdsAllocBlock;
 
-extern void *memset(void *, int, unsigned int);
 
 DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     DdsAllocBlock *block = (DdsAllocBlock *)sdfAllocHeapMemory(8);
@@ -174,7 +170,6 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
 }
 
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Append `bytes` copies of the source data into the object's 0x10000-byte allocation blocks, moving on to a fresh block when one fills up. */
 void dds3AppendPackedBytes(DdsPackedObject *object, const void *source, u32 bytes) {
@@ -207,12 +202,8 @@ void dds3WritePackedValue(destination, datum, size)
 }
 
 extern char D_00438960[];
-/* SDK sprintf returns the formatted byte count. */
-extern s32 sprintf(char *dst, const char *format, ...);
-extern char *strncpy(char *dst, const char *source, u32 bytes);
 extern char D_00438978[];
 
-extern int strncmp(const char *, const char *, unsigned int);
 
 void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
     DdsNamedNode *node = ((DdsNamedList *)object->namedReferences)->first;

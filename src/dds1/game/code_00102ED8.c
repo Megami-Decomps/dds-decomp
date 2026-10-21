@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
@@ -36,7 +37,6 @@ extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
 extern void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
-extern void * memset(void *, s32, u32);
 
 typedef struct {
     s8 r;
@@ -115,7 +115,6 @@ typedef void (*KwlnTaskDestroyCallback)();
 extern s32 kwlnDebugGraphUpdate(KwlnTask *task);
 extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
-extern s32 sprintf();
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 typedef struct EvtFrameStatePacket {
     SdfDmaTagHeader dma;
@@ -514,7 +513,6 @@ void kwlnPadResetInputAndMotorState(void) {
 }
 
 extern u8 sdfPadAnalogSticks[8];
-extern f32 acosf(f32);
 extern void kwlnUpdatePadMotorDurations(void);
 
 /* vu0 routine: native stick length, normalization and forward dot product. */

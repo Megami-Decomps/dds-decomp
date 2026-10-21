@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -71,7 +72,6 @@ extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
-extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern char D_004388A0[];
 extern void dspRequestMessageWindowModeOne(void);
@@ -352,7 +352,6 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
     return 0;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 void fldStartLmapTask(s32 mode) {
     SdfMemBlock *allocation = sdfMemAllocDirect(0x88);

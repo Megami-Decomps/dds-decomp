@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
@@ -73,7 +74,6 @@ EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name) {
     return obj;
 }
 
-extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
 
 Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {

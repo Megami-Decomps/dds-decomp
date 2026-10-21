@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
@@ -21,7 +22,6 @@ extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 extern void mnuRollExtraLevelReward(DatPartyRecord *, BrsSkillPackageWork *);
 extern u8 *D_00435E48;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void *memset(void *destination, s32 value, u32 size);
 
 extern s32 evtStageTestUpdateCamera(void);
 
@@ -32,7 +32,6 @@ extern void mnuClearItemSelectionSlots(BrsSkillPackageWork *);
 extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
 
-extern s32 sprintf(char *, const char *, ...);
 extern char D_004379B0[];
 extern char D_004379B8[];
 
@@ -58,7 +57,6 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char brsStatConfirmationPopupEntry[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 s32 mnuHandleStatPointAssignment(KwlnTask *task) {
     BrsSkillPackageWork *work;

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
 #include "fld_area_encounter_table.h"
@@ -48,8 +49,6 @@ extern f32 fabsf(f32);
 extern void fldResetTargetViewAndSound(void);
 extern void fldStopCurrentBgm(void);
 extern void func_00141898(void);
-extern void * memset(void *, s32, u32);
-extern char * strcpy(char *, const char *);
 
 extern EffWorldNode *dds3CreateConfiguredCameraObject(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
 

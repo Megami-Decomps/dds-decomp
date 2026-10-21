@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
@@ -108,7 +109,6 @@ extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 extern void fldDrawCameraColorScrollingGradient(void);
 extern s32 fldSetEncounterMode(s32 encounterMode);
-extern char * strcpy(char *, const char *);
 
 extern FldFileResource *D_003BD7B8;
 
@@ -118,10 +118,7 @@ struct EffWorldNode;
 
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 
-extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
-
-extern s32 strcmp(const char *left, const char *right);
-
+extern char D_0039FD50[]; 
 struct EffWorldNode *fldCreateDummyMatter(void) {
     u32 args[8];
     struct EffWorldNode *matter;
@@ -207,9 +204,7 @@ extern u32 D_003C91F0[];
 
 extern char D_003BAC40[];
 
-extern void *memset(void *, int, unsigned int);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern EffWorldNode *effObjCreateResourceKindZero(const char *, void *, s32);
 
@@ -698,7 +693,6 @@ extern void fldFormatAreaResourceName(char *out);
 
 extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 
-extern s32 strcmp(const char *a, const char *b);
 
 extern f32 D_003BAD20;
 
@@ -741,7 +735,6 @@ extern f32 D_00330670[];
 
 extern u32 D_003308B0[];
 
-extern void *memset(void *s, s32 c, u32 n);
 
 extern s32 fldUpdateTitleBannerTask(KwlnTask *task);
 
@@ -1185,7 +1178,6 @@ extern void dds3InvokeMoverUpdate(EffWorldNode *);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern char D_0039FE08[], D_0039FE18[], D_0039FE28[];
 
@@ -1334,10 +1326,7 @@ void fldSetPendingAreaAndFloor(u32 area, u32 floor) {
     fldPendingFloor = floor;
 }
 
-extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
-
-extern s32 sprintf(char *, const char *, ...);
-
+extern char D_0039FE38[]; 
 extern void fldFreeDisplayObjects(void);
 
 s32 fldLoadAreaResource(void) {
@@ -2008,9 +1997,7 @@ void fldReleaseFieldResources(void) {
     }
 }
 
-extern s32 sprintf(char *, const char *, ...);
 
-extern s32 sprintf(char *, const char *, ...);
 
 /* All 25 code words match. Check_unit rodata range extends beyond selector strings into the separately-owned next string. */
 void fldFormatAreaDirectory(char *path, s32 field, s32 unused) {

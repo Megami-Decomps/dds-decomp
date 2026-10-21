@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_command.h"
 #include "btl_ui.h"
 #include "btl_effect_position.h"
@@ -41,8 +42,6 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
 
-extern s32 sceDclose(s32 directory);
-extern s32 sceDread(s32 directory, SceDirent *entry);
 
 extern u64 btlStartTask(void *taskObject);
 
@@ -175,11 +174,9 @@ extern s32 D_003BE6E0[];
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 sceDopen(char *path);
 
 extern s32 btlBuiltinResourceNameIndex;
 
-extern s32 sprintf(char *buffer, const char *format, ...);
 
 
 
@@ -1172,7 +1169,6 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return activeCount;
 }
 
-extern f32 atan2f(f32, f32);
 extern u128 btlHorizontalAimIdentityQuaternion;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
@@ -3384,8 +3380,6 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
     sceDclose(directoryHandle);
 }
 
-extern char *strcpy(char *, const char *);
-extern unsigned int strlen(const char *);
 
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */

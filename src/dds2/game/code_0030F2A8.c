@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_math_vector4.h"
@@ -9,7 +10,6 @@
 #include "pcp_vu0.h"
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 acosf(f32);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
@@ -17,7 +17,6 @@ extern f32 fldVectorLength(f32 *);
 
 
 
-extern void *memset(void *, s32, u32);
 
 struct FrFontGlyph;
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *glyph, s8 mode);
@@ -276,7 +275,6 @@ void sdfTransposeMatrix(SdfMat4 *destination, SdfMat4 *source) {
 /* Transform XYZ without translation. Matching quirk: the fourth copied output word is uninitialized. */
 #include "sdf_vector_transform.h"
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
     f32 transformed[4];

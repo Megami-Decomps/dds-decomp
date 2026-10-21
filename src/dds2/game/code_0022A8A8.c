@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "btl_script_resource_api.h"
 #include "kwln_task_add_child.h"
@@ -11,7 +12,6 @@ extern void btlStartSkillEventTask(u32);
 
 
 
-extern void sprintf(char *, const char *, const char *, s32);
 
 
 extern char btlPrimaryScriptResourceName[];

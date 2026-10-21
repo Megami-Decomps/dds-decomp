@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
 #include "eff_random.h"
@@ -7,15 +8,9 @@
 #include "sdf_thread.h"
 
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
-extern void _StartThread(s32, s32);
 
-extern s32 CancelWakeupThread(s32 threadId);
 
-extern s32 GetThreadId(void);
 
-extern s32 SetAlarm(u16 delay, void (*callback)(s32 alarmId, u16 time, void *common), void *common);
 
 extern u8 D_00438A8C;
 
@@ -44,13 +39,11 @@ extern s32 D_004389C0;
 extern SdfThreadNode D_004390F0;
 extern u8 D_0045C8A0[0x2000];
 
-extern int iWakeupThread(int);
 
 void sdfWakeAlarmThread(s32 unused0, u16 unused1, void *threadId) {
     iWakeupThread((s32)threadId);
 }
 
-extern int SleepThread(void);
 
 /* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfSleepWithAlarm(u32 delay) {
@@ -130,9 +123,6 @@ void sdfSleepThreadCount(s32 requestedSleepCount) {
     } while (0 < requestedSleepCount);
 }
 
-extern void ExitDeleteThread(void);
-extern s32 TerminateThread(s32 threadId);
-extern s32 DeleteThread(s32 threadId);
 
 /* Unlink the tracked thread, then delete self or terminate/delete another thread. */
 void sdfDeleteTrackedThread(SdfThreadNode *node) {

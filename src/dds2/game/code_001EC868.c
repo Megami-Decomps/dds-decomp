@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_vec3.h"
 #include "btl_effect_node.h"
 #include "btl_motion_transform.h"
@@ -98,8 +99,6 @@ extern s32 sndGetMixerBankCallbackFrame(SoundMixer *mixer, u16 kind);
 extern s32 sndIsCommandBusySigned(void);
 extern void sndQueueNoPayloadCommand1A0(void);
 extern void sndQueueNoPayloadCommand210(void);
-extern char * strcpy(char *, const char *);
-extern u32 strlen(const char *);
 /* Original-style implicit int, kept: matched code depends on it: btlStartTask, effDrawSolidRectangle. */
 
 extern f32 D_003B6DC0[4];
@@ -183,7 +182,6 @@ extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
 extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 
@@ -331,7 +329,6 @@ extern void func_002034A8(struct SoundResourceLink *);
 
 extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
-extern void *memset(void *, s32, u32);
 
 extern f32 btlUnitGetTopY(BtlUnit *);
 
@@ -494,7 +491,6 @@ extern f32 fabsf(f32);
 extern f32 btlUnitGetBottomY(BtlUnit *);
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
-extern f32 tanf(f32);
 extern void sdfVuLoadRotationMatrixY(f32);
 
 void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *out, f32 tiltDegrees) {
@@ -632,7 +628,6 @@ void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *
     VU0_STORE_VF(vf10, out->direction);
 }
 
-extern f32 tanf(f32);
 
 /* The two default rows form one copied camera-preset bank. */
 typedef struct BattlePairCameraPresetSet {
@@ -1429,8 +1424,6 @@ f32 angle, f32 blend) {
 }
 
 extern f32 func_00352DB0(f32);
-extern f32 tanf(f32);
-extern f32 sinf(f32);
 extern void sdfVuLoadRotationMatrixY(f32);
 void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *pose, u8 mode) {
     BtlUnit *actor;
@@ -1765,9 +1758,6 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
 }
 
 
-extern f32 acosf(f32);
-extern f32 cosf(f32);
-extern f32 sinf(f32);
 /* vu0 routine: fit the action camera around one target and its reach. */
 void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out) {
     BtlUnit *user;
@@ -1871,7 +1861,6 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *action, BtlCamState *pose, BtlC
     }
 }
 
-extern f32 tanf(f32);
 
 s32 btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState *camera, s32 mask,
                    f32 *direction, f32 distance, f32 xOffset) {
@@ -2122,9 +2111,7 @@ void btlFlagUserAndTargetDefeat(BtlLinkedCommand *command, BtlLinkedCommand *unu
     }
 }
 
-extern f32 sinf(f32);
 
-extern f32 cosf(f32);
 
 #define BTL_APPROACH_DIST_START 0.55f
 
@@ -2566,7 +2553,6 @@ extern BtlUnit *btlFindNearestUnit(u32, BtlUnit *);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
-extern f32 cosf(f32);
 
 /* Frame the camera for a two-actor command: place the eye so the actor, the farthest
    and the nearest actors fit the view, then store the resulting distance. */
@@ -2870,9 +2856,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
 extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
-extern f32 cosf(f32);
 
-extern f32 tanf(f32);
 
 extern void btlInterpolateVectorStep(f32 *);
 

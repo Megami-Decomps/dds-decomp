@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
@@ -173,7 +174,6 @@ extern const char dds3PlayerChunkNames[17][20];
 extern const char dds3Pc013ChunkNames[17][20];
 extern const char D_003BA9C8[];
 extern const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId);
-extern s32 strcmp(const char *left, const char *right);
 extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 
 const char dds3PlayerModelName[16] = "player_a";

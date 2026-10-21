@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "mnu_input.h"
@@ -10,7 +11,6 @@
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 
-extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void mnuCreateStaffItemWindow(StaffDisplayContext *);
 

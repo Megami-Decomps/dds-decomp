@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
@@ -63,7 +64,6 @@ extern void * btlScheduleRefreshTask(u8 *owner);
 extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern void func_001F0CA0(BtlTask *task, BattleIndexWork *work);
 extern void func_001FF0C8(BtlTask *task, u32 mode);
-extern void * memset(void *, s32, u32);
 extern s32 sndHasActiveActor(void);
 /* Original-style implicit int, kept: matched code depends on it: btlCreateCommandSoundUpdateTask. */
 /* btlFlagUnitDefeatCandidate is void in its provider TU; preserve C89 call

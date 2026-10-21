@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
 #include "sdf_timer.h"
@@ -5,7 +6,6 @@
 #include "sdf_image_upload.h"
 #include "sdf_thread.h"
 #include "ee_mmi.h"
-extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -52,8 +52,6 @@ extern u8 D_003BD2F0;
 extern u8 *D_003BD2F4;
 extern void (*D_003BD2F8)(u8 *);
 
-extern s32 DIntr(void);
-extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
@@ -66,15 +64,10 @@ void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(u8 *))
     D_003BD2F0 = 1;
 }
 
-typedef struct sceGsStoreImage sceGsStoreImage;
 extern sceGsStoreImage sdfGsCaptureStoreImage;
 extern SdfGraphObj D_003980E0;
 extern volatile u8 D_003BD2F1;
-extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16, s16);
-extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
-extern s32 sceGsSyncPath(s32, s32);
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Interleave rows from both color buffers into the queued destination. */
 void sdfCaptureDeferredGsImage(void) {
@@ -169,17 +162,10 @@ extern volatile u8 D_003BD32D;
 extern volatile u8 D_003BD32C;
 extern u16 D_003BD32E;
 extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
-extern s32 sdfEnableDmacChannel(s32);
-extern s32 GetThreadId(void);
-extern s32 CancelWakeupThread(s32);
-extern s32 SleepThread(void);
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
 extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void sdfGrDrawFrame(void);
 extern s32 sdfGraphWakeDisplayThread(s32);
-extern void sceGsResetPath(void);
 
 void sdfRunGraphicsTransferWorker(void) {
     u32 startTicks;
@@ -227,7 +213,6 @@ extern s32 D_003BD2FC;
 extern volatile u8 sdfPacketSlotIndex;
 extern void sdfSleepThreadCount(s32);
 extern void sdfDevSignalPendingSemaphore(void);
-extern s32 WakeupThread(s32);
 extern void sdfGraphSelectDisplayBuffer(s32);
 
 /* GS CSR bit 13 supplies the double-buffer field selector. */
@@ -262,7 +247,6 @@ void sdfServiceGraphicsBuffers(void) {
 }
 
 extern s32 sdfCreateThread(void *, void *, s32, s32);
-extern s32 _StartThread(s32, s32);
 
 extern u8 D_003BD2E8;
 extern u8 D_003BD2E9;
@@ -785,10 +769,6 @@ s32 sdfWakeImageUploadThreadOnDmac(s32 channel, s32 threadId) {
 }
 
 extern s32 func_0030A740(s32 channel, s32 (*handler)(s32, s32), s32 arg, s32 threadId);
-extern void *sceDmaGetChan(s32 channel);
-extern void FlushCache(s32 mode);
-extern void sceDmaSend(void *channel, void *packet);
-extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
 extern u8 D_00398100[];
 
 /* Detach one queued batch, wait for its DMA, then release its owned source and packet allocations. */

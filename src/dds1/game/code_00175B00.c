@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_packet_params.h"
 #include "eff_random.h"
@@ -44,7 +45,6 @@ void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) 
 }
 
 extern EffPacketParams effScatterDrawParams;
-extern void *memset(void *, s32, u32);
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
 PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {

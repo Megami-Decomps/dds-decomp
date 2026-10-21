@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_param.h"
 #include "sdf_trig.h"
@@ -130,8 +131,6 @@ extern void effDrawTriangleRecordPool(EffRecordPool *pool);
 
 
 
-/* Retention exposes the address without replacing the allocation descriptor. */
-extern void *memcpy(void *dst, const void *src, u32 n);
 
 void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     f32 axis[4];

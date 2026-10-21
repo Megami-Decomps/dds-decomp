@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
@@ -512,7 +513,6 @@ extern s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask);
 extern s32 btlAverageAllLevelsForMask(u32 actorMask);
 
 
-extern void *memset(void *dst, s32 c, u32 n);
 extern DatPartyRecord *D_00435DD4;
 extern void mdlFlagSet(s32 flagIndex);
 

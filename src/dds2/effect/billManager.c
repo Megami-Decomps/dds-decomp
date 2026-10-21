@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
@@ -16,7 +17,6 @@
 #include "sdf.h"
 #include "sdf_texture_primary_buffer_api.h"
 
-extern void *memcpy(void *, const void *, u32);
 extern void billAppendChildQuad(BillObj *, BillChildPayload *);
 extern void billAppendPairedQuadEntry(BillObj *, BillRenderPair *);
 

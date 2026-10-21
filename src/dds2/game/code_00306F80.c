@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_alpha_register_api.h"
 #include "sdf_gs_register_submit_api.h"
@@ -901,7 +902,6 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     surface->append(surface, list);
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* vu0 routine: the SDK quadword copies are present at 00308D20..00308D3C. */
 void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f32 *third,
@@ -1091,8 +1091,6 @@ s32 itfSetWidgetFlagsAndActivateChild(GridTextWidget *widget, u32 flags) {
     return 1;
 }
 
-extern unsigned int strlen(const char *);
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Own a NUL-terminated text copy; store X scaled by 16 and Y scaled by 8. */
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
@@ -1463,8 +1461,6 @@ s32 itfGetGridChildLayoutMode(GridTextWidget *widget, GridTextListItem *target) 
     return 0;
 }
 
-extern char *strcpy(char *, const char *);
-extern s32 sprintf(char *, const char *, ...);
 extern double fptodp(f32);
 
 /* Format a native value row, then optionally prefix its decimal/hex row number. */

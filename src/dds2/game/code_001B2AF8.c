@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_selection_trail_work.h"
@@ -56,8 +57,6 @@ extern void * btlGetIndexedUiResource(BtlUnit *unit);
 extern u32 btlNextScaledRandom(u32 limit);
 extern void btlResetBattleHistoryCounters(void);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
-extern void * memset(void *, s32, u32);
-extern u32 strlen(const char *);
 /* Original-style implicit int, kept: matched code depends on it: btlBuildActorLinkageSkillList. */
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
  * An early void declaration recolors btlDrawItemCommandRows' loop carriers:
@@ -3326,7 +3325,6 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
 extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern char D_00436810[];
-extern s32 sprintf(char *, const char *, ...);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
@@ -3530,7 +3528,6 @@ static inline void btlSubmitSharedTextGlyph(struct FrFontGlyph *glyph) {
     frFontDrawGlyphWithSharedFlags(glyph, 1);
     frDestroyFontRequestAfter(glyph);
 }
-extern s32 sprintf(char *, const char *, ...);
 extern const u8 *D_00435E60;
 extern const u8 *D_00435E4C;
 extern const u8 *D_00435E58;
@@ -6607,7 +6604,6 @@ extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const char D_00436818[];
-extern s32 sprintf(char *, const char *, ...);
 
 extern void func_001C7020(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 bank, s16 alpha, s32 x, s32 y);
 
@@ -7041,7 +7037,6 @@ void btlDrawReservePanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s
 extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
-extern s32 sprintf(char *, const char *, ...);
 extern void btlDrawReservePanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const BattlePanelColors D_00416830;
@@ -10114,8 +10109,6 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 dspCloseChannel(void);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 sprintf(char *, const char *, ...);
-extern void *memset(void *, s32, u32);
 extern s32 btlUpdateCommandNoticeTask(KwlnTask *);
 extern s32 btlUpdateMajinTutorialTask(KwlnTask *);
 extern s32 btlUpdateLinkageNoticeTask(KwlnTask *);

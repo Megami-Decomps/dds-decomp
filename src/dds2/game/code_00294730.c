@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -196,7 +197,6 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 ptyCountBulletItem(s32);
 extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
-extern s32 sprintf(char *, const char *, ...);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 

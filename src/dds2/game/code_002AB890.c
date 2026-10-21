@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "mnu_input.h"
@@ -529,7 +530,6 @@ void mnuSelectStaffDisplayCategory(u32 context) {
 void mnuNoOpStaffDisplayTeardown(s32 object) {
 }
 
-extern void *memset(void *, int, unsigned int);
 
 u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);

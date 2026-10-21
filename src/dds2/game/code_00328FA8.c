@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -13,7 +14,6 @@
 
 extern u32 D_0045F0FC[];
 
-extern void *sdfAllocHeapMemory(u32 size);
 
 /* Allocate the chip heap and page records, initialize free pages and size classes. */
 void sdfInitChipHeap(u32 heapSize) {
@@ -113,7 +113,6 @@ void sdfGetChipHeapStats(SdfChipHeapStats *stats) {
     stats->partialBlockCount = partialBlocks;
 }
 
-extern void *sdfAllocHeapMemory(u32 size);
 extern s32 D_004389CC;
 extern SdfPendingRequest sdfGeneralReleaseRequest;
 

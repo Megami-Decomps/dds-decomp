@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "brs_icon_record.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
@@ -741,7 +742,6 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
 extern s32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(DatPartyRecord *unit) {
@@ -954,7 +954,6 @@ extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 extern s32 btlCaptureRewardSummary(BrsRewardSummary *rewards);
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *definition);
 extern s32 evtSetMessageWindowPageValue(s32 pageValue);
-extern void *memset(void *, int, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 

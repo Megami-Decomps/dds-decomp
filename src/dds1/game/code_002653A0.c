@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_random.h"
 #include "ui_color.h"
@@ -165,7 +166,6 @@ s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 
-extern void *memset(void *, int, unsigned int);
 
 s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;

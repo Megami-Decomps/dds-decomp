@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_light.h"
 #include "sdf_draw.h"
 #include "sdf_chip.h"
@@ -6,7 +7,6 @@
 
 void effObjFreeInner(EffWorldNode *object);
 void dds3DestroyObjectBase(ObjBase *object);
-void *memset(void *s, s32 c, u32 n);
 extern f32 (*D_00324770[4])[4];
 extern f32 kwlnDefaultColorVector[4];
 

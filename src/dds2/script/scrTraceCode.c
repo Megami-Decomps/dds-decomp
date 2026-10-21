@@ -1,3 +1,4 @@
+#include "dat_state.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
 #include "scr.h"
@@ -5,7 +6,6 @@
 #include "scr_arg_read.h"
 
 
-extern ScrVM *datGameState;
 extern u32 (*scrOpcodeHandlers[])(ScrData *scr);
 extern const ScrCommand D_00411408[];
 
@@ -23,13 +23,13 @@ u32 scrPushImmediateFloat(ScrData *scr) {
 }
 
 u32 scrPushGlobalInteger(ScrData *scr) {
-    scrPushInteger(scr, datGameState->ints[scr->instructions[scr->pc].parts.sOperand]);
+    scrPushInteger(scr, datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
 
 u32 scrPushGlobalFloat(ScrData *scr) {
-    bfStackPushFloat(scr, datGameState->floats[scr->instructions[scr->pc].parts.sOperand]);
+    bfStackPushFloat(scr, datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return 1;
 }
@@ -62,7 +62,7 @@ u32 scrPushReturnValue(ScrData *scr) {
 }
 
 u32 scrStoreGlobalInteger(ScrData *scr) {
-    datGameState->ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt(scr);
+    datGameState->script.ints[scr->instructions[scr->pc].parts.sOperand] = bfStackPopInt(scr);
     scr->pc++;
     return 1;
 }
@@ -71,7 +71,7 @@ u32 scrStoreGlobalFloat(ScrData *scr) {
     f32 floatValue;
 
     floatValue = bfStackPopFloat(scr);
-    datGameState->floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
+    datGameState->script.floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
     return 1;
 }
@@ -348,12 +348,12 @@ u32 bfOpNegate(ScrData *scr) {
         scr->stackValues[scr->sp - 1].f = -scr->stackValues[scr->sp - 1].f;
         break;
     case 2:
-        datGameState->ints[scr->stackValues[scr->sp - 1].i] =
-            -datGameState->ints[scr->stackValues[scr->sp - 1].i];
+        datGameState->script.ints[scr->stackValues[scr->sp - 1].i] =
+            -datGameState->script.ints[scr->stackValues[scr->sp - 1].i];
         break;
     case 3:
-        datGameState->floats[scr->stackValues[scr->sp - 1].i] =
-            -datGameState->floats[scr->stackValues[scr->sp - 1].i];
+        datGameState->script.floats[scr->stackValues[scr->sp - 1].i] =
+            -datGameState->script.floats[scr->stackValues[scr->sp - 1].i];
         break;
     case 4:
         break;
@@ -490,9 +490,9 @@ s32 scrReadIntParameter(s32 parameterIndex) {
     case 1:
         return scr->stackValues[stackIndex].f;
     case 2:
-        return datGameState->ints[scr->stackValues[stackIndex].i];
+        return datGameState->script.ints[scr->stackValues[stackIndex].i];
     case 3:
-        return datGameState->floats[scr->stackValues[stackIndex].i];
+        return datGameState->script.floats[scr->stackValues[stackIndex].i];
     }
     return 0;
 }
@@ -509,9 +509,9 @@ f32 bfWaitReadArgFloat(s32 parameterIndex)
     case 1:
         return scr->stackValues[stackIndex].f;
     case 2:
-        return (f32)datGameState->ints[scr->stackValues[stackIndex].i];
+        return (f32)datGameState->script.ints[scr->stackValues[stackIndex].i];
     case 3:
-        return datGameState->floats[scr->stackValues[stackIndex].i];
+        return datGameState->script.floats[scr->stackValues[stackIndex].i];
     }
     return 0.0f;
 }

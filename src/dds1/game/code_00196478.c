@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "itf_bit_range.h"
 #include "dds3_admin_control_api.h"
@@ -90,7 +91,6 @@ extern u32 itfTextLipsUnitId;
 extern u32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
-extern u32 strlen(const char *str);
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 

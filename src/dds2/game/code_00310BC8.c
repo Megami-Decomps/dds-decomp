@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -37,7 +38,6 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 
-extern f32 acosf(f32);
 
 
 
@@ -48,7 +48,6 @@ extern void sdfGridFollowCursorWithinMargins(u8 *);
 
 extern f32 sdfQuatDot(f32 *left, f32 *right);
 
-extern f32 sinf(f32);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 #include "sdf_vector_transform.h"
@@ -56,12 +55,9 @@ extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32 scale, f32 *vector);
 
-extern void *memset(void *, s32, u32);
 
 
 
-extern u32 strlen(const char *);
-extern s32 sprintf(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 
@@ -181,7 +177,6 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
     sdfQuaternionNormalize(out);
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
 void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {

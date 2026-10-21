@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_variant_sprite_placement.h"
 #include "common.h"
 #include "mnu_mantra_sprite_draw.h"
@@ -139,7 +140,6 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
     }
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
@@ -1027,7 +1027,6 @@ s32 mnuFreeTaskData(u32 unused, u32 taskData) {
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
 extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
-extern void *memcpy(void *, const void *, u32);
 extern const s32 D_003AF810[8];
 extern const u16 D_003AF830[8];
 
@@ -1081,7 +1080,6 @@ extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
 extern const s32 D_003AF840[];
 extern const s32 D_003AF850[];
-extern void *memcpy(void *, const void *, u32);
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
@@ -1628,7 +1626,6 @@ MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
     return (MnuMantraGridEntry *)(u32)scene->gridHandle->cursor->value;
 }
 
-extern void *memcpy(void *, const void *, u32);
 
 s32 mnuBeginMantraProfileSelection(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
@@ -2209,7 +2206,6 @@ typedef struct DspTableWindowContext {
 
 extern DspUnitSpriteTable D_003BC440[];
 extern DspMantraName *D_003BAA78;
-extern u32 strlen(const char *);
 extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
 
 /* Draw the selected mantra's display: sprite, fade-driven effect and its name (shifted left for long names). */

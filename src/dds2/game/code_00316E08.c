@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "mnu_sprite_placement.h"
 #include "sdf_chip.h"
@@ -27,7 +28,6 @@
 #include "evt_action_object.h"
 /* Declared before first use (were implicit int). */
 extern void fldDispatchDeferredFieldCommand(void);
-extern void * memset(void *, s32, u32);
 extern void mnuClearInactiveSoundBufferState(void);
 extern void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex);
 

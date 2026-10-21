@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 struct SdfPoolNode;
 struct EffNodeDescriptor;
 
@@ -74,7 +75,6 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId);
 extern void kwlnBuildShortestArcQuaternion(void);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY);
 
-extern void *memset(void *, int, unsigned int);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
@@ -767,7 +767,6 @@ EvtUnit *evtUnitGetNestedValue(EffWorldNode *unit) {
 
 extern f32 D_004215D0[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     EvtUnit *work;
@@ -923,7 +922,6 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 motionId, s32 startFrame, s32 
 
 extern const s32 D_004215E0[];
 extern const s32 D_004215F0[];
-extern f32 acosf(f32);
 extern void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 
@@ -1152,7 +1150,6 @@ extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 
 extern void evtResetObjectPendingValue(EffWorldNode *object);
 
-extern void *memset(void *dst, s32 c, u32 n);
 
 
 /* World object views used by the model-parameter opcodes. */

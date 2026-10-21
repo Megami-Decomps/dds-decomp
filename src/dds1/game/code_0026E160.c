@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
@@ -17,7 +18,6 @@ extern MnuStaffMovieWork *mnuMovieWork;
 
 
 
-extern void *memset(void *, s32, u32);
 
 extern u8 D_003BC620[];
 
