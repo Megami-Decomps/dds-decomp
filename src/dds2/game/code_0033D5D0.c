@@ -106,7 +106,7 @@ extern DevWorkerEntry sdfDeviceWorkerEntries[];
 
 
 
-extern void func_0036C330(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern void sceDevctl(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 
 extern u8 D_00438B50[];
@@ -1864,8 +1864,8 @@ void sdfPowerOffLoop(s32 semaphore) {
 
     for (;;) {
         WaitSema(semaphore);
-        func_0036C330(D_00438B50, 0x5003, 0, 0, 0, 0);
-        func_0036C330(D_00438B58, 0x4806, 0, 0, 0, 0);
+        sceDevctl(D_00438B50, 0x5003, 0, 0, 0, 0);
+        sceDevctl(D_00438B58, 0x4806, 0, 0, 0, 0);
         sceCdPowerOff(&status);
     }
 }
@@ -1896,7 +1896,7 @@ extern SdfPowerOffCallback sceCdPOffCallback(SdfPowerOffCallback, void *);
 extern s32 func_003698D8(void);
 
 
-extern s32 func_0036BE68(const char *, const char *, s32, const void *, s32);
+extern s32 sceMount(const char *, const char *, s32, const void *, s32);
 
 /* Load the HDD/PFS dev modules and mount path before enabling PFS debug mode. */
 void sdfDevInitializeHddPfsDebugMode(char *path) {
@@ -1929,7 +1929,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     sceCdPOffCallback(sdfPowerOffInterruptCallback, (void *)semaphore);
     func_003698D8();
     sprintf(buffer, "hdd0:%s,", path);
-    func_0036BE68(D_00438B60, buffer, 0, 0, 0);
+    sceMount(D_00438B60, buffer, 0, 0, 0);
     sdfPfsDebugMode = 1;
 }
 
