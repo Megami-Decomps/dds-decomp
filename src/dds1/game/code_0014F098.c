@@ -1,7 +1,9 @@
 #include "common.h"
-#include "scr_integer_return_value_api.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
+
+/* The setter returns the context it set the value in (scrTraceCode.c). */
+extern ScrData *scrSetIntegerReturnValue(s32 retVal);
 
 struct EvtUnit;
 
@@ -93,8 +95,8 @@ s32 fldCmdGetActorSlotAttribute(void) {
     return 1;
 }
 
-void fldCmdGetResolvedEventSelectorTarget(void) {
-    scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
+s32 fldCmdGetResolvedEventSelectorTarget(void) {
+    return (s32)scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
 }
 
 s32 fldCmdStartSelectedActorTask(void) {

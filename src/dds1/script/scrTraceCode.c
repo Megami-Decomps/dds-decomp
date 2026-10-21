@@ -1,6 +1,5 @@
 #include "dat_state.h"
 #include "common.h"
-#include "scr_integer_return_value_api.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
@@ -562,14 +561,29 @@ char *scrReadStringParameter(s32 parameterIndex)
     return NULL;
 }
 
-void scrSetIntegerReturnValue(s32 retVal)
+/* A command's return value: its type tag, then its value, in the running
+ * context's return slot. The tag goes through the context as read on entry,
+ * the value through scrCurrentContext read again, since the byte store may
+ * have changed it as far as C knows; retail reads it twice. */
+#define SCR_SET_RETURN_VALUE(scr, type, member, value)                   \
+    do {                                                                 \
+        (scr)->stackTypes[SCR_STACK_RET] = (type);                       \
+        scrCurrentContext->stackValues[SCR_STACK_RET].member = (value);  \
+    } while (0)
+
+/* The setters return the context they set the value in, which retail
+ * leaves in v0: a command that ends by setting its value returns it as its
+ * result, and a nonzero result tells bfOpWaitDispatch the command is done. */
+ScrData *scrSetIntegerReturnValue(s32 retVal)
 {
-    scrCurrentContext->stackTypes[SCR_STACK_RET] = 0;
-    scrCurrentContext->stackValues[SCR_STACK_RET].i = retVal;
+    ScrData *scr = scrCurrentContext;
+    SCR_SET_RETURN_VALUE(scr, 0, i, retVal);
+    return scr;
 }
 
-void scrSetFloatReturnValue(f32 retVal)
+ScrData *scrSetFloatReturnValue(f32 retVal)
 {
-    scrCurrentContext->stackTypes[SCR_STACK_RET] = 1;
-    scrCurrentContext->stackValues[SCR_STACK_RET].f = retVal;
+    ScrData *scr = scrCurrentContext;
+    SCR_SET_RETURN_VALUE(scr, 1, f, retVal);
+    return scr;
 }
