@@ -2107,11 +2107,12 @@ extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopSelectedRowTotal(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
-extern s32 D_003BC3D8[];
-
 typedef struct {
     s32 values[2];
 } MenuSelectionPair;
+
+/* Two-entry selection-pair tables (sdata, addressed through lui/addiu, so declared unsized). */
+extern MenuSelectionPair D_003BC3D8[];
 
 extern s32 mnuTickExtendedCommandPhase(ShopScene *);
 extern void mnuSetSelectionListTransition(struct MenuList *, u32);
@@ -2819,12 +2820,12 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     return 1;
 }
 
-extern s32 D_003BC3C0[];
+extern MenuSelectionPair D_003BC3C0[];
 
 /* Remove a sold-out sell row, handle an empty list, and resume the shop command. */
 s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);
-    MenuSelectionPair options = *(MenuSelectionPair *)D_003BC3C0;
+    MenuSelectionPair options = D_003BC3C0[0];
     MenuWindowContainer *window = scene->window;
     CampWindowParams *values = &window->list->cursor->camp;
     s32 operation;
@@ -2960,7 +2961,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
 s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     s32 selectedIndex;
-    MenuSelectionPair options = *(MenuSelectionPair *)D_003BC3D8;
+    MenuSelectionPair options = D_003BC3D8[0];
 
     if (state->extraOption != 0) {
         selectedIndex = state->ownedWindows[0]->list->cursor->index;
