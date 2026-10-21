@@ -9956,3 +9956,4 @@
 0x0039C3F8	__malloc_max_sbrked_mem	inferred	newlib's high-water mark of the memory taken from sbrk. DDS2 twin 0x0040F578.
 0x0039C400	__malloc_max_total_mem	inferred	newlib's high-water mark of the total memory. DDS2 twin 0x0040F580.
 0x0039C408	__malloc_current_mallinfo	inferred	newlib's mallinfo totals; its arena is the memory taken from sbrk. DDS2 twin 0x0040F588.
+0x0039C450	sbrkBreak	inferred	The heap's current end that sbrk moves (Sony's sbrk: checked against EndOfHeap with interrupts off), initialized to the end of the loaded image; newlib's allocator grows and trims through it. DDS2 twin 0x0040F5D0.

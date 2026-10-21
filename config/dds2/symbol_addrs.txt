@@ -7350,6 +7350,7 @@ __malloc_sbrk_base = 0x0040F570; // size:0x4
 __malloc_max_sbrked_mem = 0x0040F578; // size:0x8
 __malloc_max_total_mem = 0x0040F580; // size:0x8
 __malloc_current_mallinfo = 0x0040F588; // size:0x28
+sbrkBreak = 0x0040F5D0; // type:u32 size:0x4
 sdfModelColorTransform = 0x00476210; // type:u8 size:0x30
 sdfVuObjectBasisCache = 0x00476250; // type:u8 size:0x30
 sdfPowerLookupTextureState = 0x00438A78; // type:u32 size:0x8
