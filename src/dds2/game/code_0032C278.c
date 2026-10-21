@@ -1698,7 +1698,7 @@ void sdfInitializeObjectListRequest(void) {
 
 
 SdfDrawNode *sdfCreateDrawNode(void) {
-    SdfDrawNode *node = sdfAllocAndClearQuadwords(0x100);
+    SdfDrawNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
 
     node->color = 0x80808080;
     node->drawFlagMask = 0xFFFF;
