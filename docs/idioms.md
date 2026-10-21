@@ -15882,10 +15882,13 @@ use its explicit timed subobject, and read its actual `drawFlag` field.
 
 ## Surface-node APIs and scalar header snapshots
 
-Surface constructors, kind dispatch, and resource replacement helpers consume
-`EffectSurfaceNode *` end to end. Use its `kind` and resource members directly;
-the node is neither a `FileJob` nor a `FileQueue`. A stored numeric work slot
-is decoded only where it crosses that address-slot interface.
+`effCreateSurfaceNodeFromFile` returns `EffectSurfaceNode *`; kind dispatch
+and billboard/holder helpers receive that owner type. DDS2's existing numeric
+provider chain (`effCreateSurfaceNodeForGrid`, `effResourceReferenceReplaceFromFile`,
+and `effCreateSurfaceNodeFromPayload`) still carries node addresses as `s32`.
+Decode them explicitly once at the typed constructor or stored-word work-slot
+boundary. Use the node's `kind` and resource members directly; it is neither a
+`FileJob` nor a `FileQueue`.
 
 The growing strip's three texture-coordinate rows are `f32[3][4]`.
 `EffPacketParams.texcoords` receives the first row, `texcoords[0]`, not a
