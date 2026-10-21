@@ -2632,6 +2632,8 @@ void func_00147188(s32 unused) {
             alpha -= 0.1f;
             if (alpha < 0.0f) {
                 alpha = 0.0f;
+                /* Retail 0x00147228 bc1tl .L00147280: the clamp store has one entry
+                 * and falls into interpolate. */
                 goto storeClampedAlpha;
             }
             D_003BAEE8 = alpha;
@@ -2661,6 +2663,8 @@ void func_00147188(s32 unused) {
         break;
     }
 
+    /* Retail 0x00147278 b .L00147284: interpolate is shared by eight
+     * branches and the store block fall-through. */
     goto interpolate;
 storeClampedAlpha:
     D_003BAEE8 = alpha;

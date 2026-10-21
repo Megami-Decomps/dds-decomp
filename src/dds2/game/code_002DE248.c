@@ -7629,8 +7629,6 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
     u32 *colors;
     f32 *vertices;
     f32 *heightRows;
-    f32 one;
-    f32 zero = 0.0f;
 
     if (progress < frameLimit && progress != 0) {
         return;
@@ -7664,187 +7662,170 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
     layer = 0;
     flareCenter = config->flareCenter;
     rise = common->rise;
-    if (particleCount == 0) {
-        return;
-    }
-    one = 1.0f;
 
-    do {
+    for (; layer < particleCount; layer++, particles++) {
         EffBillColumnParticle *particle = particles;
         s32 age = particle->age;
         f32 ageF;
 
-        if (age == -2) {
-            goto skip_row;
-        }
+        if (age != -2) {
+            if (age == -1) {
+                f32 radius;
+                f32 radiusStep;
 
-        if (age == -1) {
-            f32 radius;
-            f32 radiusStep;
+                if (spawnRemaining != 0) {
+                    radius = common->radiusStart *
+                        (sdfGetRandFloat(effSharedRandomState) * common->radiusStartJitter +
+                         (1.0f - common->radiusStartJitter));
+                    radiusStep =
+                        (common->radiusEnd * (sdfGetRandFloat(effSharedRandomState) * common->radiusEndJitter +
+                                              (1.0f - common->radiusEndJitter)) - radius) /
+                        (f32)life;
+                    particle->radius = radius;
+                    particle->radiusStep = radiusStep;
+                    particle->drag = config->drag *
+                        (sdfGetRandFloat(effSharedRandomState) * config->dragJitter +
+                         (1.0f - config->dragJitter));
+                    particle->verticalOffset = -config->velocity * sdfGetRandFloat(effSharedRandomState);
+                    particle->flare = config->flare *
+                        (sdfGetRandFloat(effSharedRandomState) * config->flareJitter +
+                         (1.0f - config->flareJitter));
+                    particle->spinPhase = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
+                    particle->spin = config->spin *
+                        (sdfGetRandFloat(effSharedRandomState) * config->spinJitter +
+                         (1.0f - config->spinJitter));
+                    particle->width = common->width *
+                        (sdfGetRandFloat(effSharedRandomState) * common->widthJitter +
+                         (1.0f - common->widthJitter));
+                    particle->extent = common->extent *
+                        (sdfGetRandFloat(effSharedRandomState) * common->extentJitter +
+                         (1.0f - common->extentJitter)) * 10.0f;
+                    {
+                        f32 random = sdfGetRandFloat(effSharedRandomState);
+                        f32 height = common->height *
+                            (random * common->heightJitter + (1.0f - common->heightJitter));
+                        colors[0] = 0;
+                        particle->height = height;
+                    }
 
-            if (spawnRemaining == 0) {
-                goto skip_row;
-            }
-
-            radius = common->radiusStart *
-                (sdfGetRandFloat(effSharedRandomState) * common->radiusStartJitter +
-                 (one - common->radiusStartJitter));
-            radiusStep =
-                (common->radiusEnd * (sdfGetRandFloat(effSharedRandomState) * common->radiusEndJitter +
-                                      (one - common->radiusEndJitter)) - radius) /
-                (f32)life;
-            particle->radius = radius;
-            particle->radiusStep = radiusStep;
-            particle->drag = config->drag *
-                (sdfGetRandFloat(effSharedRandomState) * config->dragJitter +
-                 (one - config->dragJitter));
-            particle->verticalOffset = -config->velocity * sdfGetRandFloat(effSharedRandomState);
-            particle->flare = config->flare *
-                (sdfGetRandFloat(effSharedRandomState) * config->flareJitter +
-                 (one - config->flareJitter));
-            particle->spinPhase = sdfGetRandFloat(effSharedRandomState) * 6.2831853f;
-            particle->spin = config->spin *
-                (sdfGetRandFloat(effSharedRandomState) * config->spinJitter +
-                 (one - config->spinJitter));
-            particle->width = common->width *
-                (sdfGetRandFloat(effSharedRandomState) * common->widthJitter +
-                 (one - common->widthJitter));
-            particle->extent = common->extent *
-                (sdfGetRandFloat(effSharedRandomState) * common->extentJitter +
-                 (one - common->extentJitter)) * 10.0f;
-            {
-                f32 random = sdfGetRandFloat(effSharedRandomState);
-                f32 height = common->height *
-                    (random * common->heightJitter + (one - common->heightJitter));
+                    if (spawnAll) {
+                        s32 birthAge = sdfGetRand((EffRandState *)effSharedRandomState) % life;
+                        f32 gravityDisplacement;
+                        ageF = (f32)birthAge;
+                        gravityDisplacement = gravity * ageF * ageF * 0.5f;
+                        particle->age = birthAge;
+                        particle->radius += particle->radiusStep * ageF;
+                        particle->verticalOffset -= particle->drag * ageF;
+                        particle->verticalOffset += gravityDisplacement;
+                    } else {
+                        particle->age = 0;
+                    }
+                    spawnRemaining--;
+                }
+            } else if ((u32)age >= life) {
                 colors[0] = 0;
-                particle->height = height;
-            }
-
-            if (spawnAll) {
-                s32 birthAge = sdfGetRand((EffRandState *)effSharedRandomState) % life;
-                f32 gravityDisplacement;
-                ageF = (f32)birthAge;
-                gravityDisplacement = gravity * ageF * ageF * 0.5f;
-                particle->age = birthAge;
-                particle->radius += particle->radiusStep * ageF;
-                particle->verticalOffset -= particle->drag * ageF;
-                particle->verticalOffset += gravityDisplacement;
+                particle->age = respawn ? -1 : -2;
             } else {
-                particle->age = 0;
+                ageF = (f32)age;
+                {
+                    f32 angularStep = particle->spin + spinAccel * ageF * 0.5f;
+                    f32 angle = angularStep * ageF;
+                    f32 oldHeight;
+                    f32 radius;
+                    f32 currentY;
+                    f32 flare;
+                    f32 phaseOffset;
+                    f32 center[4];
+                    f32 direction[4];
+                    f32 width;
+                    f32 extentStep;
+                    f32 cosine;
+                    f32 sine;
+                    u32 segment;
+
+                    angle += particle->spinPhase;
+                    oldHeight = particle->height;
+                    radius = particle->radius;
+                    currentY = particle->verticalOffset;
+                    flare = particle->flare;
+                    phaseOffset = ageF / (f32)life - flareCenter;
+                    radius += phaseOffset * phaseOffset * flare;
+                    cosine = sdfCos(angle);
+                    sine = sdfSinPoly(angle);
+                    center[0] = cosine * radius;
+                    center[1] = currentY;
+                    center[2] = sine * radius;
+                    VU0_LOAD_VF(vf11, center);
+                    VU0_MOVE_VF_EXTENDED(vf12, vf11);
+
+                    currentY -= particle->drag;
+                    currentY += gravity * ageF;
+                    radius = particle->radius + particle->radiusStep;
+                    {
+                        f32 nextPhaseOffset = (ageF + 1.0f) / (f32)life - flareCenter;
+                        radius += nextPhaseOffset * nextPhaseOffset * flare;
+                    }
+
+
+                    center[0] = cosine * radius;
+                    center[1] = currentY;
+                    center[2] = sine * radius;
+                    VU0_LOAD_VF(vf10, center);
+                    VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                    VU0_NORMALIZE_VF10_EXTENDED();
+                    VU0_STORE_VF(vf10, direction);
+
+                    width = particle->width * 0.25f;
+                    extentStep = particle->extent / segmentCountAsFloat;
+                    particle->verticalOffset = currentY;
+                    particle->radius += particle->radiusStep;
+                    center[0] = cosine;
+                    center[1] = 0.0f;
+                    center[2] = sine;
+                    VU0_LOAD_VF(vf11, center);
+                    VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+                    VU0_SCALE_VF(vf10, width);
+                    VU0_MOVE_VF_EXTENDED(vf11, vf10);
+
+                    for (segment = 0; segment < segmentCount; segment++) {
+                        f32 fraction;
+                        f32 pointY;
+                        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices + 4);
+                        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices);
+                        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices + 8);
+                        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices + 12);
+                        vertices += 16;
+                        fraction = (f32)segment / segmentCountAsFloat;
+                        pointY = columnHeight * fraction + oldHeight;
+                        heightRows[1] = pointY;
+                        heightRows[3] = pointY;
+                        heightRows[5] = pointY;
+                        heightRows[7] = pointY;
+                        heightRows += 8;
+
+                        VU0_LOAD_VF(vf10, direction);
+                        VU0_SCALE_VF(vf10, extentStep);
+                        VU0_ADD_EXTENDED(vf12, vf12, vf10);
+                    }
+
+                    *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
+                                                           &common->header.emitterAlphaTrack, age, life);
+                    particle->age = (s32)((u32)particle->age + 1U);
+                    particle->height += rise;
+                }
+                continue;
             }
-            spawnRemaining--;
-            goto skip_row;
         }
-
-        if ((u32)age >= life) {
-            colors[0] = 0;
-            particle->age = respawn ? -1 : -2;
-            goto skip_row;
-        }
-
-        ageF = (f32)age;
-        {
-            f32 angularStep = particle->spin + spinAccel * ageF * 0.5f;
-            f32 angle = angularStep * ageF;
-            f32 oldHeight;
-            f32 radius;
-            f32 currentY;
-            f32 flare;
-            f32 phaseOffset;
-            f32 center[4];
-            f32 direction[4];
-            f32 width;
-            f32 extentStep;
-            f32 cosine;
-            f32 sine;
-            u32 segment;
-
-            angle += particle->spinPhase;
-            oldHeight = particle->height;
-            radius = particle->radius;
-            currentY = particle->verticalOffset;
-            flare = particle->flare;
-            phaseOffset = ageF / (f32)life - flareCenter;
-            radius += phaseOffset * phaseOffset * flare;
-            cosine = sdfCos(angle);
-            sine = sdfSinPoly(angle);
-            center[0] = cosine * radius;
-            center[1] = currentY;
-            center[2] = sine * radius;
-            VU0_LOAD_VF(vf11, center);
-            VU0_MOVE_VF_EXTENDED(vf12, vf11);
-
-            currentY -= particle->drag;
-            currentY += gravity * ageF;
-            radius = particle->radius + particle->radiusStep;
-            {
-                f32 nextPhaseOffset = (ageF + one) / (f32)life - flareCenter;
-                radius += nextPhaseOffset * nextPhaseOffset * flare;
-            }
-
-
-            center[0] = cosine * radius;
-            center[1] = currentY;
-            center[2] = sine * radius;
-            VU0_LOAD_VF(vf10, center);
-            VU0_SUB_EXTENDED(vf10, vf10, vf11);
-            VU0_NORMALIZE_VF10_EXTENDED();
-            VU0_STORE_VF(vf10, direction);
-
-            width = particle->width * 0.25f;
-            extentStep = particle->extent / segmentCountAsFloat;
-            particle->verticalOffset = currentY;
-            particle->radius += particle->radiusStep;
-            center[0] = cosine;
-            center[1] = zero;
-            center[2] = sine;
-            VU0_LOAD_VF(vf11, center);
-            VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
-            VU0_SCALE_VF(vf10, width);
-            VU0_MOVE_VF_EXTENDED(vf11, vf10);
-
-            for (segment = 0; segment < segmentCount; segment++) {
-                f32 fraction;
-                f32 pointY;
-                VU0_MOVE_VF_EXTENDED(vf10, vf12);
-                VU0_ADD_EXTENDED(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, vertices + 4);
-                VU0_ADD_EXTENDED(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, vertices);
-                VU0_MOVE_VF_EXTENDED(vf10, vf12);
-                VU0_SUB_EXTENDED(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, vertices + 8);
-                VU0_SUB_EXTENDED(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, vertices + 12);
-                vertices += 16;
-                fraction = (f32)segment / segmentCountAsFloat;
-                pointY = columnHeight * fraction + oldHeight;
-                heightRows[1] = pointY;
-                heightRows[3] = pointY;
-                heightRows[5] = pointY;
-                heightRows[7] = pointY;
-                heightRows += 8;
-
-                VU0_LOAD_VF(vf10, direction);
-                VU0_SCALE_VF(vf10, extentStep);
-                VU0_ADD_EXTENDED(vf12, vf12, vf10);
-            }
-
-            *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
-                                                   &common->header.emitterAlphaTrack, age, life);
-            particle->age = (s32)((u32)particle->age + 1U);
-            particle->height += rise;
-        }
-        goto next_particle;
-
-    skip_row:
         colors++;
         vertices += vertexStride * 4;
         heightRows += vertexStride * 2;
-    next_particle:
-        layer++;
-        particles++;
-    } while (layer < particleCount);
+    }
 }
 
 
@@ -14317,6 +14298,8 @@ s32 func_002FF360(void) {
      * It consumes this tick's roll input as well. */
     if (sdfPadButtonStates[5] & 2) {
         if ((s8)D_00438758 == 8 || (s8)D_00438758 == -8) {
+            /* Retail 0x002FF4F4 and 0x002FF4FC beq .L002FF578: increaseRoll is
+             * also entered by fall-through from the beql at 0x002FF570. */
             goto increaseRoll;
         }
         if ((s8)D_00438759 == 15) {
@@ -14327,6 +14310,8 @@ s32 func_002FF360(void) {
         flags |= 2;
     } else if (sdfPadButtonStates[4] & 2) {
         if ((s8)D_00438758 == 8 || (s8)D_00438758 == -8) {
+            /* Retail 0x002FF534 and 0x002FF53C beq .L002FF5A4: decreaseRoll is
+             * also entered by fall-through from the beqz at 0x002FF59C. */
             goto decreaseRoll;
         }
         {

@@ -164,6 +164,8 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         break;
     case 0xF10F:
         if (!(frFontSharedGlyphFlags & 4)) {
+            /* Retail 0x00196730 b .L00196774: advanceLine is also entered by
+             * fall-through from the beql at 0x0019676C. */
             goto advanceLine;
         }
         break;
@@ -172,6 +174,8 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         return 1;
     case 0xF111:
         if (!(frFontSharedGlyphFlags & 8)) {
+            /* Retail 0x00196750 beqz .L00196768: checkAutomaticLine has one entry
+             * and falls into the shared advanceLine call at 0x00196774. */
             goto checkAutomaticLine;
         }
         /* This flagged form requests the same stop as opcode F104. */

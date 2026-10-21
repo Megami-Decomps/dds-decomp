@@ -1281,88 +1281,86 @@ s32 func_001D22D8(BtlState *scene) {
             if (!btlReleaseScriptResourceB()) return 0;
             scene->endFlags |= 2;
         }
-        if (scene->scriptState == state) goto ready;
     }
-    if (scene->frame < scene->sceneState) {
-        if (scene->eventReady != 1 || scene->frame < 37 ||
-            ((s8)D_0037F510[0x21] >= 0 && (s8)D_0037F510[0x23] >= 0)) goto wait;
-    }
-ready:
-    if (scene->endDelay != 0) goto wait;
-    switch (scene->eventReady) {
-    case 0:
-        break;
-    case 1:
-        btlBossDebugPrintf(D_004171A0);
-        break;
-    case 2:
-    case 3:
-    case 7:
-        fldUnloadPlayerModel();
-        request = 0x29D;
-        dds3AdminSubmitModeRequest(6, &request, 4, 0);
-        btlBossDebugPrintf(D_004171B8);
-        break;
-    case 4:
-        btlResetActorEntryState();
-        btlBossDebugPrintf(D_004171E0);
-        break;
-    case 5:
-        btlBossDebugPrintf(D_00417200);
-        break;
-    case 6:
-        btlResetActorEntryState();
-        btlBossDebugPrintf(D_00417220);
-        break;
-    default:
-        break;
-    }
-    if (scene->eventReady != 5) btlAdvanceTitleState();
-    if (scene->eventReady == 1) {
-        if (!(scene->endFlags & 1)) {
+    if (!((scene->scriptState != 0xF000003 || scene->scriptState != state) &&
+          scene->frame < scene->sceneState &&
+          (scene->eventReady != 1 || scene->frame < 37 ||
+           ((s8)D_0037F510[0x21] >= 0 && (s8)D_0037F510[0x23] >= 0))) &&
+        scene->endDelay == 0) {
+        switch (scene->eventReady) {
+        case 0:
+            break;
+        case 1:
+            btlBossDebugPrintf(D_004171A0);
+            break;
+        case 2:
+        case 3:
+        case 7:
+            fldUnloadPlayerModel();
+            request = 0x29D;
+            dds3AdminSubmitModeRequest(6, &request, 4, 0);
+            btlBossDebugPrintf(D_004171B8);
+            break;
+        case 4:
+            btlResetActorEntryState();
+            btlBossDebugPrintf(D_004171E0);
+            break;
+        case 5:
+            btlBossDebugPrintf(D_00417200);
+            break;
+        case 6:
+            btlResetActorEntryState();
+            btlBossDebugPrintf(D_00417220);
+            break;
+        default:
+            break;
+        }
+        if (scene->eventReady != 5) btlAdvanceTitleState();
+        if (scene->eventReady == 1) {
+            if (!(scene->endFlags & 1)) {
+                sndQueueNoPayloadCommand210();
+                sndQueueNoPayloadCommand1A0();
+                sndLoadAndPlayStationedSe(0x1C);
+                scene->endFlags |= 1;
+            }
+        } else {
             sndQueueNoPayloadCommand210();
             sndQueueNoPayloadCommand1A0();
-            sndLoadAndPlayStationedSe(0x1C);
-            scene->endFlags |= 1;
         }
-    } else {
-        sndQueueNoPayloadCommand210();
-        sndQueueNoPayloadCommand1A0();
-    }
-    if (scene->eventReady == 5) {
-        task = scene->tasks;
-        scene->unk26C = 0;
-        scene->eventReady = 0;
-        scene->spawnCount = 0;
-        scene->turnCount = 0;
-        scene->defeatedLevelCount = 0;
-        scene->defeatedLevelTotal = 0;
-        while (task != NULL) {
-            if ((task->pendingFlags & 8) && (task->unit->status.flags & 0x400)) {
-                btlDestroyUnit(task->unit);
-                task->pendingFlags &= ~8;
-                if (task->state != 0x1F) btlDispatchStateHandler(task, 0x1F);
+        if (scene->eventReady == 5) {
+            task = scene->tasks;
+            scene->unk26C = 0;
+            scene->eventReady = 0;
+            scene->spawnCount = 0;
+            scene->turnCount = 0;
+            scene->defeatedLevelCount = 0;
+            scene->defeatedLevelTotal = 0;
+            while (task != NULL) {
+                if ((task->pendingFlags & 8) && (task->unit->status.flags & 0x400)) {
+                    btlDestroyUnit(task->unit);
+                    task->pendingFlags &= ~8;
+                    if (task->state != 0x1F) btlDispatchStateHandler(task, 0x1F);
+                }
+                task = task->next;
             }
-            task = task->next;
+            btlRemoveActorsWithFlags(0x400);
+            btlClearModelFlagRange();
+            nextMode = scene->requestArgument;
+            nextEntry = scene->nextAdjustmentEntryIndex;
+            flags = scene->battleFlags;
+            flags &= ~0x800;
+            flags &= ~0x400;
+            flags |= 0x4000;
+            flags &= ~0x20;
+            scene->battleMode = nextMode;
+            scene->adjustmentEntryIndex = nextEntry;
+            scene->battleFlags = flags;
+            scene->phase++;
+            return 4;
         }
-        btlRemoveActorsWithFlags(0x400);
-        btlClearModelFlagRange();
-        nextMode = scene->requestArgument;
-        nextEntry = scene->nextAdjustmentEntryIndex;
-        flags = scene->battleFlags;
-        flags &= ~0x800;
-        flags &= ~0x400;
-        flags |= 0x4000;
-        flags &= ~0x20;
-        scene->battleMode = nextMode;
-        scene->adjustmentEntryIndex = nextEntry;
-        scene->battleFlags = flags;
-        scene->phase++;
-        return 4;
+        event = scene->eventReady;
+        return event != 1 ? 11 : 10;
     }
-    event = scene->eventReady;
-    return event != 1 ? 11 : 10;
-wait:
     if (scene->endDelay > 0) scene->endDelay--;
     return 0;
 }

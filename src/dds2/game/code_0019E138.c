@@ -181,13 +181,15 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         break;
     case 0xF10F:
         if (!(frFontSharedGlyphFlags & 4)) {
-            goto advanceLine;
+            frFontAdvanceContextCursor(stream);
         }
         break;
     case 0xF110:
         D_0043654C |= 2;
         return 1;
     case 0xF111:
+        /* Retail 0x0019E43C beql .L0019E458: checkAutomaticLine has one entry
+         * and falls into the frFontAdvanceContextCursor call at 0x0019E460. */
         if (!(frFontSharedGlyphFlags & 8)) {
             goto checkAutomaticLine;
         }
@@ -200,7 +202,6 @@ checkAutomaticLine:
         if (!(frFontSharedGlyphFlags & 0x20)) {
             break;
         }
-advanceLine:
         frFontAdvanceContextCursor(stream);
         break;
     case 0xF112:

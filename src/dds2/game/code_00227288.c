@@ -1024,14 +1024,14 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
 }
 
 /* Set the linked-pair camera for actions 0x171/0x189; return 1 when handled.
- * Action 0x188 resets progress but returns 0. Keep the two native result joins. */
+ * Action 0x188 resets progress but returns 0. */
 s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
     ActionStateLink *scene;
 
     switch (command->actionCode) {
     case 0x188:
         command->motionProgress = 0;
-        goto unhandled;
+        return 0;
     case 0x189:
         btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 1.25f, 2.0f, 0.0f, 1, 0);
         command->motionParameter = 25.0f;
@@ -1040,13 +1040,14 @@ s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
         command->frontCamera.distance -= 300.0f;
         command->backCamera.distance += 150.0f;
         btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
-        goto handled;
+        return 1;
     case 0x171:
         scene = fldGetSceneGroupEntry(0);
         if (scene != NULL && (scene->pendingFlags & 8) && (scene->unit->status.flags & 0x200)) {
             command->link = scene;
             command->status = 9;
             btlUpdateActionPoseForLinkedTarget(command);
+            command->flags |= 0x800;
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
@@ -1057,16 +1058,12 @@ s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
                 btlSetEffectCameraKeys((s32)command, 661.7f, -200.6f, -349.7f, -0.011f, 0.269f, -0.02f, 0.953f, 254.2f,
                                        -445.6f, -431.6f, 0.152f, -0.129f, -0.036f, 0.97f, 40.0f, 30.0f);
             }
+            command->flags |= 0x800;
         }
-        command->flags |= 0x800;
-        goto handled;
+        return 1;
     default:
-        goto unhandled;
+        return 0;
     }
-handled:
-    return 1;
-unhandled:
-    return 0;
 }
 
 /* Initialize the linked command's target aim once in state 0x1E. Action 0x171
