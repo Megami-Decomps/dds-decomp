@@ -2027,9 +2027,9 @@ extern const MenuIconLayout D_0042AFD8;
 
 MenuIconBundle *mnuCreateIconBundle(EffectSlotSet *resource) {
     MenuIconLayout layout = D_0042AFD8;
-    MenuIconBundle *set = (MenuIconBundle *)sdfChipAllocDirect(0x20);
+    MenuIconBundle *set = (MenuIconBundle *)sdfChipAllocDirect(sizeof(*set));
     u32 i;
-    memset(set, 0, 0x20);
+    memset(set, 0, sizeof(*set));
     for (i = 0; i < 3; i++) {
         EffectSlotSet *sprite = effCreateResourceSlotSet(resource, layout.entry[i].id, 1);
         set->sprite[i] = sprite;
