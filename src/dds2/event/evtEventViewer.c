@@ -987,7 +987,7 @@ s32 evtCreateFrameVariableTask(void);
 
 s32 evtViewerScheduleFrameVariableTask(KwlnTask *task);
 
-extern u32 mnuCampGetPrimaryOption(void *scene);
+extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
 extern const char *D_003C91C0[];
 extern const char *D_003C91C8[];
 extern const char *D_003C91D0[];
@@ -2318,7 +2318,7 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
 
 extern u32 mnuShouldBlockViewerEndCountdown(void);
 extern s32 scrCommandIsProcessControlFlagClear(void);
-extern u32 mnuCampGetSecondaryOption(void *scene);
+extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);

@@ -80,7 +80,7 @@ extern void effSetCh75Id(SdfTex *texture);
 extern void effSetCh76Id(SdfTex *sourceHandle);
 
 
-extern u32 mnuCampGetPrimaryOption(void *scene);
+extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
 extern const char *D_00368410[];
 extern const char *D_00368418[];
 extern const char *D_00368420[];
@@ -2117,7 +2117,7 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
 
 extern s32 campAnyPackedFlagSet(void *scene);
 extern s32 scrCommandIsProcessControlFlagClear(void);
-extern u32 mnuCampGetSecondaryOption(void *scene);
+extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void sdfSoundSetChannelCount(u32 channels);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
