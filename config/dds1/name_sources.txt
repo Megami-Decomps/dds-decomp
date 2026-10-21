@@ -7206,8 +7206,10 @@
 0x002F6558	mcQueueReadRequest	inferred	Queues memory-card command 5 with the read buffer and completion callback; DDS2 twin 0x0034F370.
 0x002F6670	mcQueueWriteRequest	inferred	Queues memory-card command 6 with an aligned write payload; DDS2 twin 0x0034F490.
 0x002F6858	sceMcSync	inferred	Polls the active memory-card RPC command and returns its completion state through the command and result pointers. DDS2 counterpart is 0x0034F680.
+0x002F6990	sceMcGetInfo	inferred	libmc sceMcGetInfo: sends mcserv command 0x01 for a port and slot; the card type, free blocks and format flag come back through the three output pointers.
 0x002F6B80	sceMcGetDir	inferred	Starts a directory-entry query using port, slot, path, mode, entry limit and output table. DDS2 counterpart is 0x0034F9B0.
 0x002F6D50	sceMcChdir	inferred	Starts a directory change using port, slot, path and mode zero. DDS2 counterpart is 0x0034FB90.
+0x002F6E90	sceMcFormat	inferred	libmc sceMcFormat: sends mcserv command 0x10 (format) for a port and slot and records it as the pending command; fileReqStartCardDetection submits it.
 0x002F6F60	sceMcDelete	inferred	Starts deletion of a path on the selected memory-card port and slot. DDS2 counterpart is 0x0034FDA8.
 0x00305B08	sdfVFormatString	inferred	formats text into a destination buffer from a va_list and returns the formatted character count; DDS2 counterpart 0x00360E78.
 0x00312C08	DIntr	inferred	Binary Ninja: reads COP0 Status IE; returns 0 if already disabled, otherwise executes DI/SYNC until disabled and returns 1 for conditional EIntr restoration.
@@ -9124,6 +9126,7 @@
 0x002E6538	sdfFileCdImageCmdThread	inferred	slot 3 worker services disc-backed open, size, read, seek, write and close requests; dispatch in sdfFileCmdStartThread selects this alternate entry point. Twin: 0x0033F3E0 (DDS2). [retail-matched C behavior and paired worker dispatch, 2026-10-14]
 0x001A9780	btlSelectSerialEncounter	inferred	Choose the follow-up encounter through a scripted override, forced scene or random adjustment rows; btl:serial diagnostics and request mode/argument stores.
 0x002F5990	sndDispatchIopAudioCommand	inferred	DDS1 twin of DDS2 0x0034E820; dispatches IOP audio command IDs and packages requests for the shared SIF RPC. Its title-audio callers configure buffer uploads and stream controls; DDS2 naming and retail dispatcher behavior establish the shared API role.
+0x002F5E30	sceMcInit	inferred	libmc sceMcInit: creates the library semaphore, drains pending calls through sceMcSync, binds the memory card server (0x80000400) printing 'bind error libmc' until it answers, and rejects an old mcserv ('libmc: too old release of mcserv.irx'). DDS2 twin 0x0034EC40 keeps sdfInitializeMemoryCardRpcClient.
 0x0014F1A0	fldCmdGetResolvedEventSelectorTarget	inferred	Field script command stores fldResolveEventSelectorTarget(1) in the script integer-return slot; neighboring commands in the same unit use the fldCmd prefix.
 0x0028F630	fileUpdatePromptDialog	inferred	Asynchronous prompt-dialog state handler: fileBeginPromptDialog stores start/finish callbacks and mode, begins the memory-card request when needed, and returns this handler; it polls request/readiness state, updates prompt audio, invokes the selected continuation, and resumes slot selection on errors. Paired with DDS2 0x002CE958; both handlers have the same prompt-dialog callback role.
 0x002CB9C0	sdfGridCreate	inferred	Allocates and initializes an SdfGrid and its inline cells; identical DDS2 twin 0x00312E28, called by scene setup with grid dimensions and viewport metrics.
