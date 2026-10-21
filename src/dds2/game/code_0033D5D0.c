@@ -6,6 +6,7 @@
 #include "sdf_thread_workspace_api.h"
 #include "sdf_alarm.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -143,9 +144,6 @@ extern DevState *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 op
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
 extern u16 sdfDefaultDevRequestOptions;
-
-extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-
 extern void sceCdMmode(u32 discType);
 
 extern s32 sdfDevReplySemaphore;

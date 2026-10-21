@@ -4,6 +4,7 @@
 #include "sdf_console_packet.h"
 #include "sif_rpc_client_prefix.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -134,11 +135,6 @@ extern DevState *sdfFileCmdReadOpen(const char *path,
 
 
 extern void sceDevctl(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-
-
-
-extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 
 

@@ -11,6 +11,7 @@
 #include "sdf_chip.h"
 
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_texture_submit.h"
 #include "sdf_texture_lists.h"
@@ -67,9 +68,6 @@ extern SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
 extern SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 
 extern SdfTextureQueue sdfTextureQueueWork;
-
-s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-
 extern s8 sdfBufferSlotIndices[2];
 
 extern volatile s8 sdfBusyBufferIndex;

@@ -9,6 +9,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
@@ -261,9 +262,6 @@ void mnuRunTitleStreamThread(void) {
 extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
-
-extern s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum);
-
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
     sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,

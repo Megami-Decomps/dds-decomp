@@ -9,6 +9,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_texture_submit.h"
 #include "sdf_texture_lists.h"
@@ -53,7 +54,6 @@ extern u8 *sdfDeferredGsImageCaptureDestination;
 extern void (*sdfDeferredGsImageCaptureCallback)(u8 *);
 
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
-s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);

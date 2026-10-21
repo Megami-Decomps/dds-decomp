@@ -6,6 +6,7 @@
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "ee_mmi.h"
@@ -520,9 +521,6 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     }
     return D_003FF480;
 }
-
-
-extern s32 sdfCreateSemaphore(s32, s32, s32);
 extern s32 D_003BDAC4;
 extern u8 D_003FF380[];
 extern u8 sdfPfsDebugMode;
