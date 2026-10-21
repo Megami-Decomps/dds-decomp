@@ -3136,7 +3136,7 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
-extern s32 btlAimHorizontalDirectionVU(void *, void *);
+extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target) {
     u8 first[16];
@@ -3147,7 +3147,7 @@ void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target) {
         VU0_STORE_VF_UNCLOBBERED(vf10, first);
         btlUnitGetBodyPosVU(target);
         VU0_STORE_VF_UNCLOBBERED(vf10, second);
-        if (btlAimHorizontalDirectionVU(first, second) != 0) {
+        if (btlAimHorizontalDirectionVU((f32 *)first, (f32 *)second) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, result);
             btlSetUnitRotation(object, result);
         }
@@ -6112,7 +6112,7 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             btlUnitGetMuzzlePosVU(target);
             VU0_STORE_VF(vf10, &vec[0]);
             if (target->status.flags & 0x80000) {
-                if (btlAimHorizontalDirectionVU(&vec[0], pos) != 0) {
+                if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)pos) != 0) {
                     VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
                     btlSetUnitRotation(target, &vec[2]);
                 }
@@ -6142,7 +6142,7 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
             btlUnitGetMuzzlePosVU(target);
             VU0_STORE_VF(vf10, &vec[0]);
             if ((u32)target->status.flags & 0x80000) {
-                if (btlAimHorizontalDirectionVU(&vec[0], pos) != 0) {
+                if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)pos) != 0) {
                     VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
                     btlSetUnitRotation(target, &vec[2]);
                 }
