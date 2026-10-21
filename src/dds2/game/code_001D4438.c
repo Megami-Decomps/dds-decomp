@@ -497,7 +497,7 @@ extern char D_00418C58[];
 extern s32 sndHasActiveFileLoad(void);
 
 
-extern void func_003422F8(s32, s32);
+extern void func_003422F8(u32, s32);
 
 
 

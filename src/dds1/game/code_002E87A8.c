@@ -451,12 +451,12 @@ typedef struct SndFileRequestState {
     u8 path[0x100];
     s32 size;
     s32 pending;
-    s32 data;
+    u32 data;
 } SndFileRequestState;
 extern SndFileRequestState D_003FE990;
-extern s32 D_003BDA70;
-void func_002E9450(s32 data, s32 size) {
-    s32 *packet;
+extern u32 D_003BDA70;
+void func_002E9450(u32 data, s32 size) {
+    u32 *packet;
 
     D_003FE990.size = size;
     D_003FE990.pending = 1;
