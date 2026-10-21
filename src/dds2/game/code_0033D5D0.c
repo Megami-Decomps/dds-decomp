@@ -135,11 +135,11 @@ extern s32 sceCdGetDiskType(void);
 extern DevState *sdfFileCmdReadOpen(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
-extern s32 sdfFileCmdAnalyzeFileName(const char *path, void **outResolvedPath);
+extern s32 sdfFileCmdAnalyzeFileName(const char *path, char **outResolvedPath);
 
 extern void sdfFileCmdEntry(DevState *state);
 
-extern DevState *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
+extern DevState *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
 extern u16 sdfDefaultDevRequestOptions;
@@ -1588,7 +1588,7 @@ extern char D_00438B40[]; /* /movie/ */
 extern char D_00438B48[]; /* cdimg: */
 
 /* Split the device prefix off a path and report the worker that serves it. */
-s32 sdfFileCmdAnalyzeFileName(const char *path, void **resolvedPath) {
+s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
     s32 worker;
     s32 prefixLength;
     const char *suffix;
@@ -1629,10 +1629,10 @@ s32 sdfFileCmdAnalyzeFileName(const char *path, void **resolvedPath) {
 }
 
 /* Allocate a request state and retain the callback's opaque context word. */
-DevState *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
+DevState *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
     DevState *state = (DevState *)sdfAllocAndClearQuadwords(SDF_DEV_STATE_BYTES);
-    state->resolvedPath = resource;
+    state->resolvedPath = resolvedPath;
     state->workerIndex = workerIndex;
     state->operation = operation;
     state->state = 0;
@@ -1645,14 +1645,14 @@ DevState *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
 DevState *sdfFileCmdReadOpen(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext) {
-    void *resource;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfFileCmdNewHandle(resource, workerIndex, SDF_DEV_OPERATION_OPEN_READ, callback, callbackContext);
+    state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_OPEN_READ, callback, callbackContext);
     sdfFileCmdEntry(state);
     return state;
 }
@@ -1660,14 +1660,14 @@ DevState *sdfFileCmdReadOpen(const char *path, void (*callback)(DevState *, s32,
 /* Enqueue a write open; zero options select the device's default creation options. */
 DevState *sdfFileCmdWriteOpen(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
-    void *resource;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfFileCmdNewHandle(resource, workerIndex, SDF_DEV_OPERATION_OPEN_WRITE, callback, callbackContext);
+    state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_OPEN_WRITE, callback, callbackContext);
     state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
     sdfFileCmdEntry(state);
     return state;
@@ -1755,14 +1755,14 @@ s32 sdfFileCmdFree(DevState *state) {
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
 DevState *sdfDevCreateRequest(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
-    void *resource;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfFileCmdNewHandle(resource, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
+    state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
     state->requestData = buffer;
     state->operationArg = 0;
@@ -1774,14 +1774,14 @@ DevState *sdfDevCreateRequest(const char *path, void *buffer, s32 byteCount,
 DevState *sdfDevOpenRequest(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
-    void *resource;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfFileCmdNewHandle(resource, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
+    state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
     state->requestData = buffer;
     state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
