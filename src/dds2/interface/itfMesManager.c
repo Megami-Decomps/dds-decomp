@@ -2337,7 +2337,7 @@ s32 itfUpdateActiveMessageWindows(KwlnTask *task) {
     return 0;
 }
 
-extern s32 fldIsUpdateInhibited(void);
+extern u32 fldIsUpdateInhibited(void);
 
 s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     ItfMesPoolNode *node;

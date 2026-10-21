@@ -19,7 +19,7 @@
 extern char D_003ACAE0[];
 
 extern s32 fileMenuTaskExists(void);
-extern s32 fldIsUpdateInhibited(void);
+extern u32 fldIsUpdateInhibited(void);
 extern void fldSelectDisplayBuffer(u32 row);
 extern void fldSetGsAlphaBlendEquation(s32 arg);
 extern void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12,
