@@ -57,7 +57,6 @@ extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
 #define PRF_SKILL_TABLE_STRIDE 14
 #define PRF_PROFILE_COUNT 0x60
 #define PRF_REQUIRED_PROFILE_COUNT 8
-#define PRF_REQUIRED_PROFILE_IDS_OFFSET 0xC
 #define PRF_FALLBACK_GROUP_COUNT 4
 #define PRF_FALLBACK_FLAG_COUNT 2
 #define PRF_REQUIREMENT_RULES_BIT 4
@@ -84,14 +83,6 @@ extern u32 D_003BD2C8;
 extern u32 prfIsRequirementExcluded(u16);
 
 extern DatProfileRecord *ptyGetProfileRecord(DatPartyRecord *, u16);
-
-
-/* Profile prerequisite operands reuse +0x08 as the required threshold. */
-typedef struct PrfRequirementOperand {
-    u8 pad00[8];
-    u32 requiredValue;      /* 0x08 */
-    u8 profileIds[8];       /* 0x0C */
-} PrfRequirementOperand;
 
 
 extern FrFontTextBank frFontColoredGlyphResource;
@@ -915,9 +906,9 @@ u32 prfBuildSkillListState0(DatPartyRecord *unit, DatProfileRecord *unusedProfil
     return prfBuildSkillList(unit, unusedProfile, output, 0);
 }
 
-/* Count leading profile IDs up to the first zero or the eight-entry bound. */
-u32 prfCountProfileList(u8 *operand) {
-    u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+/* Count leading IDs in a DDS1 requirement slot up to the first zero or bound. */
+u32 prfCountProfileList(PrfDds1RequirementSlot *operand) {
+    u8 *profileIds = operand->profileIds;
     u32 profileIndex;
     for (profileIndex = 0; profileIndex < PRF_REQUIRED_PROFILE_COUNT; profileIndex++) {
         if (profileIds[profileIndex] == 0) {
@@ -928,11 +919,11 @@ u32 prfCountProfileList(u8 *operand) {
 }
 
 /* Require each listed profile's primary flag; an empty list succeeds. */
-s32 ptyHasAllReqProfiles(DatPartyRecord *unit, u8 *operand) {
+s32 ptyHasAllReqProfiles(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
-        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+        u8 *profileIds = operand->profileIds;
         do {
             if (ptyTestPrimaryProfileFlag(unit, profileIds[profileIndex++]) == 0) {
                 return 0;
@@ -943,48 +934,48 @@ s32 ptyHasAllReqProfiles(DatPartyRecord *unit, u8 *operand) {
 }
 
 /* Compare the number of flagged IDs in the list with its minimum count. */
-s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
+s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
     u32 matchedCount = 0;
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
-        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+        u8 *profileIds = operand->profileIds;
         do {
             if (ptyTestPrimaryProfileFlag(unit, profileIds[profileIndex++]) != 0) {
                 matchedCount++;
             }
         } while (profileIndex < profileCount);
     }
-    if (matchedCount < ((PrfRequirementOperand *)operand)->requiredValue) {
+    if (matchedCount < (u32)operand->sourceValue) {
         return 0;
     }
     return 1;
 }
 
 /* Count flagged profile rows whose byte-five value reaches the operand's threshold. */
-s32 ptyProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
+s32 ptyProfileCountAtLeast(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
     u32 profileIndex;
     u32 matchedCount = 0;
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
         if (ptyTestPrimaryProfileFlag(unit, (u16)profileIndex)) {
-            if (D_003907B0[profileIndex].value05 >= operand[5]) {
+            if (D_003907B0[profileIndex].value05 >= operand->unknown04[1]) {
                 matchedCount++;
             }
         }
     }
-    if (matchedCount < ((PrfRequirementOperand *)operand)->requiredValue) {
+    if (matchedCount < (u32)operand->sourceValue) {
         return 0;
     }
     return 1;
 }
 
 /* Each listed profile must be flagged in at least one occupied party slot. */
-s32 ptyAreReqProfilesInParty(u8 *operand) {
+s32 ptyAreReqProfilesInParty(PrfDds1RequirementSlot *operand) {
     s32 profileIndex = 0;
     s32 profileCount = prfCountProfileList(operand);
     if (profileCount > 0) {
-        u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
+        u8 *profileIds = operand->profileIds;
         do {
             s32 profilePresent = 0;
             s32 profileId = profileIds[profileIndex];
@@ -1007,16 +998,16 @@ s32 ptyAreReqProfilesInParty(u8 *operand) {
 }
 
 /* Compare the unit's level word with the prerequisite's byte threshold. */
-u32 prfReqCheckUnitLevel(DatPartyRecord *unit, u8 *operand) {
-    if (unit->level < operand[4]) {
+u32 prfReqCheckUnitLevel(DatPartyRecord *unit, PrfDds1RequirementSlot *operand) {
+    if (unit->level < operand->unknown04[0]) {
         return 0;
     }
     return 1;
 }
 
 /* Test the global currency counter against a prerequisite threshold. */
-u32 prfReqCheckGlobalCounter(u8 *operand) {
-    if (datGameState->header.currency < ((PrfRequirementOperand *)operand)->requiredValue) {
+u32 prfReqCheckGlobalCounter(PrfDds1RequirementSlot *operand) {
+    if (datGameState->header.currency < (u32)operand->sourceValue) {
         return 0;
     }
     return 1;
@@ -1052,42 +1043,42 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
     for (i = 0; i < 2; i++) {
         switch (rules[i].operation) {
         case 1:
-            if (ptyHasAllReqProfiles((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+            if (ptyHasAllReqProfiles((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 2:
-            if (ptyReqProfileCountAtLeast((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+            if (ptyReqProfileCountAtLeast((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 4:
-            if (ptyProfileCountAtLeast((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+            if (ptyProfileCountAtLeast((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 8:
-            if (ptyAreReqProfilesInParty((u8 *)&rules[i]) == expected) {
+            if (ptyAreReqProfilesInParty(&rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 16:
-            if (prfReqCheckUnitLevel((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+            if (prfReqCheckUnitLevel((DatPartyRecord *)unitAddress, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 32:
-            if (prfReqCheckGlobalCounter((u8 *)&rules[i]) == expected) {
+            if (prfReqCheckGlobalCounter(&rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
