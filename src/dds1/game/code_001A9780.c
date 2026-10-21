@@ -5,6 +5,7 @@
 #include "btl_guide_panel_work.h"
 #include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
+#include "btl_panel_transition_work.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
@@ -2191,24 +2192,6 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
     }
     return 0;
 }
-
-typedef struct BtlPanelTransitionWork {
-    KwlnTask *task;
-    const u8 *text;
-    s32 elapsed;
-    s32 frames;
-    s32 width;
-    s32 unk14;
-    s32 verticalShift;
-    s8 state;
-    u8 pad1D;
-    s16 fade;
-    s16 fadeLevels[4];
-    BattleSelectionPosition initial[2];
-    s8 phase;
-    u8 pad39[3];
-    BattleSelectionPosition current[2];
-} BtlPanelTransitionWork;
 
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 
