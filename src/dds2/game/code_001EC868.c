@@ -9334,7 +9334,7 @@ s32 sndResolveResourceId(s32 category, s32 id) {
 
 /* Allocate a cleared active-sound node and prepend it to its independent list. */
 ActiveSoundNode *sndAllocListNode(void) {
-    ActiveSoundNode *node = sdfAllocAndClearQuadwords(0x14);
+    ActiveSoundNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     BtlState *work = (BtlState *)btlGetRuntime();
     node->previous = 0;
     if (work->soundList != 0) {
