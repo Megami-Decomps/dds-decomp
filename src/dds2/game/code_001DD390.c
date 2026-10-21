@@ -45,6 +45,7 @@
 #include "eff_update_flags.h"
 #include "sdf.h"
 #include "btl_action.h"
+#include "btl_find_actor_for_owner_api.h"
 #include "btl_unit_tasks.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -1870,8 +1871,6 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
-
-extern BtlUnit *btlFindActorForOwner(u64);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 

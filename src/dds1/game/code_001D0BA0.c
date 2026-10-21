@@ -35,6 +35,7 @@
 #include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
 #include "btl_actor_work.h"
+#include "btl_find_actor_for_owner_api.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
 #include "btl_model_record.h"
@@ -75,8 +76,6 @@ extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
-
-extern BtlUnit *btlFindActorForOwner(s64);
 
 void btlPrepareSavedCommandTargets(BtlTask *, BattleIndexWork *);
 
@@ -5102,11 +5101,11 @@ void btlRemoveActorsWithFlags(u32 mask) {
     }
 }
 
-BtlUnit *btlFindActorForOwner(s64 target) {
+BtlUnit *btlFindActorForOwner(u64 ownerId) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlUnit *actor = context->units;
     while (actor != 0) {
-        if (actor->identity == target) {
+        if (actor->identity == ownerId) {
             return actor;
         }
         actor = actor->next;
