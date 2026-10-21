@@ -2798,11 +2798,13 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
     }
 }
 
-/* No prototype: retail calls it with no argument. */
+/* No prototype: the K&R definition follows. */
 void effInitParticleRecord();
 
-void effResetSingleParticleTemplate(void) {
-    effInitParticleRecord();
+/* The kind-nine restart callback (parRestartKind): the effect it is given
+   is the one the initializer reads. */
+void effResetSingleParticleTemplate(EffParticleOverlay *effect) {
+    effInitParticleRecord(effect);
 }
 
 /* Apply a uniform scale to the particle template's position. */
