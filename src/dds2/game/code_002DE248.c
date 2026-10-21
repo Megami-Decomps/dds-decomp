@@ -105,11 +105,11 @@ extern void evtDestroySelectionState(void);
 extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue);
 extern void fileReadRecordSecondVector(u8 *obj, void *dst);
 extern void fileReadVectorPtr20(u8 *obj, void *dst);
-extern void fileSetRecordSecondVector();
+extern void fileSetRecordSecondVector(u8 *obj, void *src);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
 extern void * memset(void *, s32, u32);
-extern void mnuRecordSetVector();
+extern void mnuRecordSetVector(u8 *obj, void *src);
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId);
 extern char * strcpy(char *, const char *);
 extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
@@ -5357,12 +5357,12 @@ void effUpdateSurfaceRecordAndDraw(u32 node) {
     func_002E8770(node);
 }
 
-void effMenuRecordVectorSet(s32 node) {
-    mnuRecordSetVector(((EffectSurfaceNode *)node)->record);
+void effMenuRecordVectorSet(void *node, f32 vector[4]) {
+    mnuRecordSetVector((u8 *)((EffectSurfaceNode *)node)->record, vector);
 }
 
-void effSetSurfaceRecordSecondaryVector(s32 node) {
-    fileSetRecordSecondVector(((EffectSurfaceNode *)node)->record);
+void effSetSurfaceRecordSecondaryVector(void *node, f32 vector[4]) {
+    fileSetRecordSecondVector((u8 *)((EffectSurfaceNode *)node)->record, vector);
 }
 
 void effSetSurfaceNodeColor(s32 node, u32 color) {
@@ -12138,7 +12138,7 @@ extern s32 *effCreateConfiguredSlotNode(s32 *);
 
 void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 *src);
 
-s32 *effCloneOwnedState(u8 *owner) {
+void *effCloneOwnedState(void *owner, u16 type) {
     s32 *source = (s32 *)((EffectSlotNode80 *)owner)->record->data1;
     s32 *work = effCreateConfiguredSlotNode(source);
     memcpy(&((EffectSlotNode80 *)work)->randomDirection,
@@ -12477,14 +12477,14 @@ void effUpdateSlotRecordAndDraw(u32 node) {
     func_002FAD98(node);
 }
 
-/* Set the retained record's first vector; preserve the abbreviated native call. */
-void effSetActiveSlotPrimaryRecordVector(s32 node) {
-    mnuRecordSetVector((u8 *)((EffectSlotNode80 *)node)->record);
+/* Set the retained record's first vector. */
+void effSetActiveSlotPrimaryRecordVector(void *node, f32 vector[4]) {
+    mnuRecordSetVector((u8 *)((EffectSlotNode80 *)node)->record, vector);
 }
 
-/* Set the retained record's second vector; preserve the abbreviated native call. */
-void effSetActiveSlotSecondaryRecordVector(s32 node) {
-    fileSetRecordSecondVector((u8 *)((EffectSlotNode80 *)node)->record);
+/* Set the retained record's second vector. */
+void effSetActiveSlotSecondaryRecordVector(void *node, f32 vector[4]) {
+    fileSetRecordSecondVector((u8 *)((EffectSlotNode80 *)node)->record, vector);
 }
 
 /* Set the active effect slot's packed color. */
@@ -12636,12 +12636,12 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 
 void effShareReferenceCountedEffectObject(s32 target, s32 source);
 
-s32 effCloneEffectRequest(u8 *src) {
+void *effCloneEffectRequest(void *src, u16 type) {
     u8 *dst = effCreateSharedEffectResourceWork(0);
 
     ((EffSharedEffectWork *)dst)->data = ((EffSharedEffectWork *)src)->data;
     effShareReferenceCountedEffectObject((s32)dst, (s32)src);
-    return (s32)dst;
+    return dst;
 }
 
 void effShareReferenceCountedEffectObject(s32 target, s32 source) {
