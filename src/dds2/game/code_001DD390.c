@@ -3687,7 +3687,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     f32 scale;
     f32 reach;
     f32 dist;
-    f32 pos[4];
+    f32 pos[4] __attribute__((aligned(16)));
     f32 fromPos[4] __attribute__((aligned(16)));
     f32 toPos[4] __attribute__((aligned(16)));
     scale = args->scale == 0.0f ? 1.0f : args->scale;
