@@ -1155,22 +1155,17 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             !(addedStatus & 0x290F)) {
             s32 counter = btlSelectCounterSkill(target, action->unit);
             if (counter > 0) {
-                s32 counterPhase;
                 ActionStateLink *reaction = btlFindUnitByActor(target);
                 fldAppendSceneGroupHandle(reaction);
-                if (counter >= 250) {
-                    goto normalCounterPhase;
+                switch (counter) {
+                case 248:
+                case 249:
+                    reaction->indexWork.phase = 2;
+                    break;
+                default:
+                    reaction->indexWork.phase = 1;
+                    break;
                 }
-                counterPhase = counter < 248;
-                if (counterPhase) {
-                    goto normalCounterPhase;
-                }
-                counterPhase = 2;
-                goto counterPhaseSelected;
-            normalCounterPhase:
-                counterPhase = 1;
-            counterPhaseSelected:
-                reaction->indexWork.phase = counterPhase;
                 reaction->indexWork.skillId = counter;
                 btlAppendIndexListEntry(reaction->indexWork.indices, action->unit);
                 btlBossDebugPrintf("btl:counter[%p][%X]\n", target, counter);
