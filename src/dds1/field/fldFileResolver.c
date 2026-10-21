@@ -1065,7 +1065,7 @@ extern void effObjSetRoomNumber(EffWorldNode *, u32);
 
 extern void dds3CreateObjectModelAndMotion(void *);
 
-extern void dds3RegisterObjectInHandlerIndex(void *);
+extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
     f32 position[4];

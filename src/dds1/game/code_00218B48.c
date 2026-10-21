@@ -3829,7 +3829,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
 }
 
 
-extern void dds3RegisterObjectInHandlerIndex(void *object);
+extern s32 dds3RegisterObjectInHandlerIndex(void *object);
 
 s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 position[4];
