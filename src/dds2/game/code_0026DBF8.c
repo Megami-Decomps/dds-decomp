@@ -254,11 +254,6 @@ typedef struct MantraCountState {
     s32 step;
 } MantraCountState;
 
-typedef struct MantraCountStateB {
-    u8 pad00[0x10];
-    s32 shown;
-    s32 step;
-} MantraCountStateB;
 
 typedef struct MantraFadeData {
     MantraIconPool *iconPool;
@@ -2799,7 +2794,7 @@ s32 mnuUpdateMantraRecordPanelFade(s32 unused, MantraDrawItem *item) {
     return 0;
 }
 
-extern void mnuDrawMantraCounterTweenB(u32, u32, u32, u32, MantraCountStateB *, u32);
+extern void mnuDrawMantraCounterTweenB(u32, u32, u32, u32, MantraRecordPanelState *, u32);
 
 s32 mnuDrawMantraRecordPanel(u32 pool, MantraDrawItem *item) {
     MantraRecordPanelState *record = (MantraRecordPanelState *)item->data;
@@ -2829,12 +2824,12 @@ s32 mnuDrawMantraRecordPanel(u32 pool, MantraDrawItem *item) {
     case 0:
         scaleFade = 1.0f - fade;
         mnuDrawMantraCounterTweenB(0, (s32)(scaleFade * -10.0f), 0, scale,
-                                   (MantraCountStateB *)record, 0x53);
+                                   record, 0x53);
         mnuDrawMantraSprite(0, 0, 0, (s32)((f32)scale * scaleFade), 0x66, 0, 0x53);
         break;
     case 1:
         mnuDrawMantraCounterTweenB(0, (s32)(fade * -10.0f), 0, scale,
-                                   (MantraCountStateB *)record, 0x53);
+                                   record, 0x53);
         mnuDrawMantraSprite(0, 0, 0, (s32)((f32)scale * fade), 0x66, 0, 0x53);
         mnuDrawMantraSprite(0, 0, 0, (s32)((f32)scale * returnFade), 0x67, 0, 0x53);
         break;
@@ -2842,7 +2837,7 @@ s32 mnuDrawMantraRecordPanel(u32 pool, MantraDrawItem *item) {
     return 0;
 }
 
-void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountStateB *state, u32 drawArg) {
+void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraRecordPanelState *state, u32 drawArg) {
     char text[16];
     u32 flags = fade | 0xA09DC300;
 

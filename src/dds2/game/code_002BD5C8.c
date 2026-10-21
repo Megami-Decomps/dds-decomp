@@ -116,7 +116,7 @@ extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
-extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437C38[];
 
 void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteArg) {
@@ -136,7 +136,7 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
         frSetFontColorNo((FrFontGlyph *)glyph, 4);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frDestroyFontRequestAfter((FrFontGlyph *)glyph);
-        effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, (EffectSlotSet *)sprite, spriteArg, 0x53);
         sprintf(text, D_00437C38, required);
         color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
         glyph = itfCreateFont2TextGlyph(thresholdX, y, 0, color, text, 0);
@@ -329,28 +329,8 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
 extern const s32 D_0042B028[8];
 extern const s32 D_00437C50[];
 
-/* Party-page slot, including the resource handles initialized by
- * mnuLoadPanelSectionResources and both queued commands. */
-typedef struct MenuPageSpriteSlot {
-    s32 kind;
-    u32 flags;
-    u8 pad08[8];
-    struct EffectSlotSet *icon[3];
-    MenuPageBar hp;
-    MenuPageBar mp;
-    struct EffectSlotSet *frame[8];
-    struct MenuSprites *windowSprites;
-    u32 iconBundle;
-    u32 sectionResources[3]; /* 0xE4 */
-    MenuQueuedCommand commands[2]; /* 0xF0 */
-} MenuPageSpriteSlot;
 
-typedef char MenuPageSpriteSlot_size_check[
-    sizeof(MenuPageSpriteSlot) == sizeof(MenuPageSlot) ? 1 : -1];
-typedef char MenuPageSpriteSlot_resources_check[
-    (u32)&((MenuPageSpriteSlot *)0)->sectionResources == 0xE4 ? 1 : -1];
-
-void mnuDrawMenuPageSpriteLayers(s32 x, s32 y, s32 z, MenuPageSpriteSlot *slot,
+void mnuDrawMenuPageSpriteLayers(s32 x, s32 y, s32 z, MenuPageSlot *slot,
                    s32 coordinateSet, s32 skipSprites, s32 spriteArg) {
     s32 firstPosition[2];
     s32 alternatePositions[8];
@@ -359,12 +339,12 @@ void mnuDrawMenuPageSpriteLayers(s32 x, s32 y, s32 z, MenuPageSpriteSlot *slot,
     memcpy(alternatePositions, D_0042B028, sizeof(alternatePositions));
     if (skipSprites == 0) {
         effDrawTextureSlotWithBlendedCornerColors(x + firstPosition[0], y + firstPosition[1], z,
-                      0x100, 1, slot->sectionResources[0], 0, spriteArg);
+                      0x100, 1, slot->panelResourceHandles[0], 0, spriteArg);
         effDrawTextureSlotWithBlendedCornerColors(x + alternatePositions[0], y + alternatePositions[1], z,
-                      0x100, 1, slot->sectionResources[1], 0, spriteArg);
+                      0x100, 1, slot->panelResourceHandles[1], 0, spriteArg);
         effDrawTextureSlotWithBlendedCornerColors(x + alternatePositions[coordinateSet * 2 + 2],
                       y + alternatePositions[coordinateSet * 2 + 3], z,
-                      0x100, 1, slot->sectionResources[2], 0, spriteArg);
+                      0x100, 1, slot->panelResourceHandles[2], 0, spriteArg);
     }
 }
 
