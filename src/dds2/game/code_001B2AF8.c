@@ -5,6 +5,7 @@
 #include "btl_guide_panel_work.h"
 #include "btl_panel_transition_work.h"
 #include "btl_registered_panel_work.h"
+#include "btl_command_layout_work.h"
 #include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
@@ -4923,17 +4924,6 @@ void btlReleasePsechgPanelWork(KwlnTask *task) {
     sdfChipFreeDirect((void *)dds3GetProcessData(task));
     btlSetTrackedTaskHandle(6, 0);
 }
-
-/* Command-option layout: two rows of position, extent, size and 12.4 fixed-point size. */
-typedef struct BattleCommandLayoutWork {
-    s32 state;
-    s32 positions[2][4];
-    s32 extents[2][2];
-    s16 selectedPositions[4];
-    s32 dimensions[2][4];
-    s32 fixedDimensions[2][4];
-    u8 pad7C[8];
-} BattleCommandLayoutWork;
 
 extern s32 fileTestSavedSlotFlags(u32);
 extern s32 D_004164C8[2][4];

@@ -7,6 +7,7 @@
 #include "btl_selection_trail_work.h"
 #include "btl_panel_transition_work.h"
 #include "btl_registered_panel_work.h"
+#include "btl_command_layout_work.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
@@ -4030,17 +4031,6 @@ void btlReleasePsechgPanelWork(KwlnTask *task) {
 
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 extern s32 D_003A2998[2][4];
-
-/* Command-option layout: two rows of position, extent, size and 12.4 fixed-point size. */
-typedef struct BattleCommandLayoutWork {
-    s32 state;
-    s32 positions[2][4];
-    s32 extents[2][2];
-    s16 selectedPositions[4];
-    s32 dimensions[2][4];
-    s32 fixedDimensions[2][4];
-    u8 pad7C[8];
-} BattleCommandLayoutWork;
 
 extern s32 fileTestSavedSlotFlags(u32);
 
