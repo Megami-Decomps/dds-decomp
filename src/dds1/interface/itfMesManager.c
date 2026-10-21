@@ -85,7 +85,7 @@ extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
 void itfMesReplaceTextSlotData();
 
-extern s32 frFontMeasureGlyphStripWidth();
+extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *glyph);
 
 void itfMesInitializePanelPlacementSprite(ItfMesState *panel);
 
