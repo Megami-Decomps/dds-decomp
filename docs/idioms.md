@@ -15702,3 +15702,21 @@ sample output and pass `sample.firstKey` to the scalar-copy consumer.
 `u32 sample[4]` beside that record view and reading `sample[0]` is not a
 generic boundary adaptation; the canonical interval removes both views.
 
+
+
+## Callback arguments follow the dispatcher contract
+
+`FileTypeCallbacks.createChild` is `void *(*)(void *, u16)`. A class
+handler still declares the actual `type` formal when that class does
+not use it, and returns its object pointer directly. The dispatcher
+passes the payload in `a0` and type in `a1`; omitting the latter is not
+a substitute for the published callback interface.
+
+The position and rotation callbacks receive `void *data` and
+`f32 vector[4]`. Their record forwarders must pass that vector to
+`mnuRecordSetVector` or `fileSetRecordSecondVector`, not rely on an
+unmentioned incoming `a1` surviving a one-argument call. The actual
+K&R providers have two pointer arguments (`u8 *obj`, `void *src`),
+so local prototypes can state both. Restore the generic callback data
+to its existing primary owner and use the record byte address only at
+that real byte-oriented provider boundary.
