@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x0023A968	evtUpdateLightAndBackgroundEditor	inferred	Draws the light/background editor, handles mode and value input, then applies or restores the selected light color, direction, background and slot vectors; paired DDS2 implementation at 0x00255818. The provider body supplies the behavior evidence; no direct C caller is named.
 0x00202F90	btlSelectLowestNonzeroHpTarget	inferred	Builds candidates, selects the lowest nonzero current HP and appends the winner; comparison prefers the later candidate on equal HP. DDS2 twin at 0x00215C70.
 0x002AFE68	effBuildQuantizedTexturedStrip	inferred	Writes quantized textured-strip positions, UVs and per-vertex color/alpha from EffBillQuantizedConfig; paired DDS2 implementation at 0x002F3258.
 0x001E9DE0	btlApplyTimedCameraInstruction	inferred	Applies the selected timed camera instruction to cursor camera tracks when its frame window is active; paired DDS2 implementation at 0x001FA480.

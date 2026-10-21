@@ -2557,7 +2557,7 @@ static inline s32 evtLightCaptionX(s32 panelOffset) {
     return (s32)(0x8740u + ((u32)panelOffset << 4));
 }
 
-s32 func_00255818(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *list;
     EvtRuntimeGroup *group;
     s32 mode;
