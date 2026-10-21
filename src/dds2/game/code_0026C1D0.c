@@ -571,19 +571,6 @@ void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, EvtPa
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, u32, s32);
 
-typedef struct EvtMantraNodePositionRecord {
-    union {
-        u32 packedHeader; /* Flags and signed ID also have a native word view. */
-        struct {
-            u16 flags;
-            s16 id;
-        };
-    };
-    s16 firstKey;  /* 0x04 */
-    s16 secondKey; /* 0x06 */
-    struct EvtMantraNodePositionRecord *neighbors[6];
-} EvtMantraNodePositionRecord; /* 0x20 */
-
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
     s32 height = mnuGetListViewportHeight(record->list) + 0x80;
 

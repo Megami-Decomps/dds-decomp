@@ -6,6 +6,7 @@
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "file_request_api.h"
 #include "prf_profile_cap.h"
@@ -26,19 +27,6 @@ extern EvtLoadedRecord *mnuMantraPanelPositionTable;
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
 
 extern EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress);
-
-typedef struct EvtMantraNodePositionRecord {
-    union {
-        u32 packedHeader; /* Flags and signed ID also have a native word view. */
-        struct {
-            u16 flags;
-            s16 id;
-        };
-    };
-    s16 firstKey;  /* 0x04 */
-    s16 secondKey; /* 0x06 */
-    struct EvtMantraNodePositionRecord *neighbors[6];
-} EvtMantraNodePositionRecord; /* 0x20 */
 
 /* Packed resource header in front of the record data and its relocation list. */
 typedef struct EvtLoadedRecordHeader {
@@ -139,20 +127,20 @@ s32 mnuFindMantraNodePositionRecord(s32 firstCoordinate, s32 secondCoordinate) {
     EvtLoadedRecord *loaded = mnuMantraNodePositionTable;
     s16 firstKey;
     s16 secondKey;
-    EvtMantraNodePositionRecord *record;
+    MantraNodePos *record;
     s32 index;
 
     firstCoordinate = (s16)firstCoordinate;
     secondCoordinate = (s16)secondCoordinate;
     firstKey = (s16)(firstCoordinate * 10 + ((secondCoordinate & 1) * 5));
     secondKey = (s16)(secondCoordinate * 10);
-    record = (EvtMantraNodePositionRecord *)loaded->records;
+    record = (MantraNodePos *)loaded->records;
 
     for (index = 0; index < (s32)loaded->recordCount; index++) {
-        if (record->firstKey == firstKey && record->secondKey == secondKey) {
+        if (record->x == firstKey && record->y == secondKey) {
             return (s32)record;
         }
-        record = (EvtMantraNodePositionRecord *)((u8 *)record + MNU_MANTRA_POSITION_RECORD_BYTES);
+        record = (MantraNodePos *)((u8 *)record + MNU_MANTRA_POSITION_RECORD_BYTES);
     }
     return 0;
 }
@@ -240,19 +228,19 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
     s32 rank;
     u32 selected;
     u16 *entry;
-    EvtMantraNodePositionRecord *node;
+    MantraNodePos *node;
     s32 i = 0;
 
     rank = mnuGetActiveMantraModelFlagState();
     evtPrintDeveloperConsoleMessage(D_00425098, rank);
     selected = scrGetSelectedScriptEntryId(unit);
     entry = work->entries;
-    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->records;
+    node = (MantraNodePos *)mnuMantraNodePositionTable->records;
     for (; i < (s32)mnuMantraNodePositionTable->recordCount; i++, node++, entry++) {
         *entry = 0;
         if (node->id != 0) {
             s32 rankMet;
-            if (rank < ((s32)(node->packedHeader << 24) >> 28)) {
+            if (rank < ((s32)(node->selector.packed << 24) >> 28)) {
                 rankMet = 0;
             } else {
                 rankMet = 1;
@@ -270,7 +258,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                 if (ptyGetProfileRecordCap(node->id) == ptyGetProfileRecordValue(unit, node->id)) {
                     *entry |= 0x100;
                 }
-                if ((node->packedHeader & 0xF) == 3) {
+                if ((node->selector.packed & 0xF) == 3) {
                     if (prfReqEvaluateRules(0, 4, unit, node->id, 0) == 0) {
                         *entry = (*entry & 0xFFF0) | 3;
                         continue;
@@ -285,14 +273,14 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                         *entry = (*entry & 0xFFF0) | 1;
                     }
                 } else if (prfCheckRequirementRules(0, unit, node->id) != 0 || rankMet) {
-                    switch ((s32)(node->packedHeader << 28) >> 28) {
+                    switch ((s32)(node->selector.packed << 28) >> 28) {
                     case 2:
                         if (evtTestMantraNodePartyRequirements(node->id, mode)) {
                             *entry |= 0x800;
                         }
                         if (prfReqEvaluateRules(1, 2, unit, node->id, 0)) {
                             if ((*entry >> 8) & 8) {
-                                if (node->packedHeader & 0x100) {
+                                if (node->selector.packed & 0x100) {
                                     *entry = (*entry & 0xFFF0) | 0x101;
                                 } else {
                                     *entry = (*entry & 0xFFF0) | 1;
@@ -303,7 +291,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                         } else {
                             *entry = (*entry & 0xFFF0) | 2;
                         }
-                        if ((node->packedHeader & 0x100) && ((*entry >> 8) & 8)) {
+                        if ((node->selector.packed & 0x100) && ((*entry >> 8) & 8)) {
                             *entry = (*entry & 0xFFF0) | 0x101;
                         }
                         break;
@@ -355,7 +343,7 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
 
 /* Like mnuCheckMantraNeighborRequirements, but a mode of 1 rejects the node and the profile caps alone decide. */
 s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
-    EvtMantraNodePositionRecord *record;
+    MantraNodePos *record;
     s8 satisfiedNeighbors;
     s32 partyIndex;
 
@@ -365,7 +353,7 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
     if (mode == 1) {
         return 0;
     }
-    record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord((s16)entry);
+    record = (MantraNodePos *)mnuGetMantraNodePositionRecord((s16)entry);
     if (record == NULL) {
         return 0;
     }
@@ -377,11 +365,11 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
         if ((u16)(datGameState->party[partyIndex].flags & 1) != 0) {
             DatPartyRecord *party = &datGameState->party[partyIndex];
             for (slot = 0; slot < 6; slot++) {
-                EvtMantraNodePositionRecord **neighborSlot = &record->neighbors[slot];
-                EvtMantraNodePositionRecord *neighbor = *neighborSlot;
+                MantraNodePos **neighborSlot = &record->neighbors[slot];
+                MantraNodePos *neighbor = *neighborSlot;
 
                 if (neighbor != NULL) {
-                    if ((neighbor->packedHeader & 0xF) == 1) {
+                    if ((neighbor->selector.packed & 0xF) == 1) {
                         u32 cap = ptyGetProfileRecordCap((u16)(*neighborSlot)->id);
 
                         if (cap == ptyGetProfileRecordValue(party, (u16)(*neighborSlot)->id)) {
@@ -408,19 +396,19 @@ typedef struct MantraNodeStates {
 } MantraNodeStates;
 
 void mnuUpdateMantraNeighborNodeStates(MantraNodeStates *states, s32 unused, s16 entry) {
-    EvtMantraNodePositionRecord *record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(entry);
+    MantraNodePos *record = (MantraNodePos *)mnuGetMantraNodePositionRecord(entry);
     u16 *origin = &states->cells[record->id];
     s32 slot;
 
     *origin |= 0x100;
     for (slot = 0; slot < 6; slot++) {
-        EvtMantraNodePositionRecord *neighbor = record->neighbors[slot];
+        MantraNodePos *neighbor = record->neighbors[slot];
 
         if (neighbor != NULL) {
             u16 *cell = &states->cells[neighbor->id];
-            s32 kind = neighbor->packedHeader & 0xF;
+            s32 kind = neighbor->selector.packed & 0xF;
 
-            if (kind == 1 || kind == 4 || ((neighbor->packedHeader & 0x10F) == 2 && ((*cell >> 8) & 8))) {
+            if (kind == 1 || kind == 4 || ((neighbor->selector.packed & 0x10F) == 2 && ((*cell >> 8) & 8))) {
                 if ((*cell & 0xF) == 2) {
                     *cell = (*cell & 0xFFF0) | 1;
                 }
@@ -435,14 +423,14 @@ extern s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context);
 
 /* Return true when all six neighbor conditions are satisfied across active party members. */
 s32 mnuCheckMantraNeighborRequirements(u16 entry) {
-    EvtMantraNodePositionRecord *record;
+    MantraNodePos *record;
     s8 satisfiedNeighbors;
     s32 partyIndex;
 
     if (mnuIsMantraNodeModelFlagSetForMember(entry, 0) != 0) {
         return 1;
     }
-    record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord((s16)entry);
+    record = (MantraNodePos *)mnuGetMantraNodePositionRecord((s16)entry);
     if (record == NULL) {
         return 0;
     }
@@ -454,11 +442,11 @@ s32 mnuCheckMantraNeighborRequirements(u16 entry) {
         if ((u16)(datGameState->party[partyIndex].flags & 1) != 0) {
             DatPartyRecord *party = &datGameState->party[partyIndex];
             for (slot = 0; slot < 6; slot++) {
-                EvtMantraNodePositionRecord **neighborSlot = &record->neighbors[slot];
-                EvtMantraNodePositionRecord *neighbor = *neighborSlot;
+                MantraNodePos **neighborSlot = &record->neighbors[slot];
+                MantraNodePos *neighbor = *neighborSlot;
 
                 if (neighbor != NULL) {
-                    if ((neighbor->packedHeader & 0xF) == 1) {
+                    if ((neighbor->selector.packed & 0xF) == 1) {
                         if (scrTestEntryFlagAtZeroBit0(party) != 0) {
                             if (scrTestEntryFlagBit15(party, (u8)(*neighborSlot)->id) != 0) {
                                 satisfiedNeighbors |= 1 << slot;
@@ -487,13 +475,13 @@ s32 mnuCheckMantraNeighborRequirements(u16 entry) {
 
 /* The sixth work stores the combined availability state for the five profiles. */
 void mnuMergePartyMantraProfileCapStates(EvtMantraWork **selectionWorks) {
-    EvtMantraNodePositionRecord *node;
+    MantraNodePos *node;
     u16 *combinedEntry;
     s32 recordCount;
     s32 remaining;
     s32 profileIndex;
 
-    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->records;
+    node = (MantraNodePos *)mnuMantraNodePositionTable->records;
     combinedEntry = selectionWorks[5]->entries;
     recordCount = (s32)mnuGetMantraNodePositionRecordCount();
     if (recordCount <= 0) {
