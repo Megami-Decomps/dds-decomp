@@ -7,6 +7,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
@@ -10384,7 +10385,6 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
 }
 
 extern void btlScaleEffectSlotSourceBounds(EffectSlotSet *, s32);
-extern s32 btlSetActorEffectParameter();
 extern s32 btlProjectForwardPositionToScreen(s32 *);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 

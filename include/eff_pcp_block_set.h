@@ -18,6 +18,21 @@ typedef struct EffPCPBlockSetParams {
     s32 tailStartFrame;
 } EffPCPBlockSetParams;
 
+/* Parameter-table view: named fields for gathering, pointer array for the
+ * block-set constructor's sequential input contract. */
+typedef union EffPCPBlockSetInputs {
+    struct {
+        void *block1;
+        void *group[5];
+        void *block7;
+        void *block8;
+        void *block9;
+        void *tail[5];
+        void *block15;
+    } named;
+    void *blocks[15];
+} EffPCPBlockSetInputs;
+
 /* Shared retained work owner used by construction, cloning, drawing and release.
    A non-NULL source borrows its resources; NULL owns the listed handles. */
 typedef struct EffPCPBlockSetWork {
@@ -40,6 +55,14 @@ typedef struct EffPCPBlockSetWork {
 
 typedef char EffPCPBlockSetParams_size_must_be_0x50[
     (sizeof(EffPCPBlockSetParams) == 0x50) ? 1 : -1];
+typedef char EffPCPBlockSetInputs_size_must_be_0x3C[
+    (sizeof(EffPCPBlockSetInputs) == 0x3C) ? 1 : -1];
+typedef char EffPCPBlockSetInputs_group_offset_must_be_0x04[
+    ((u32)&((EffPCPBlockSetInputs *)0)->named.group == 0x04) ? 1 : -1];
+typedef char EffPCPBlockSetInputs_tail_offset_must_be_0x24[
+    ((u32)&((EffPCPBlockSetInputs *)0)->named.tail == 0x24) ? 1 : -1];
+typedef char EffPCPBlockSetInputs_last_offset_must_be_0x38[
+    ((u32)&((EffPCPBlockSetInputs *)0)->named.block15 == 0x38) ? 1 : -1];
 typedef char EffPCPBlockSetParams_fadeInFrames_offset_must_be_0x10[
     ((u32)&((EffPCPBlockSetParams *)0)->fadeInFrames == 0x10) ? 1 : -1];
 typedef char EffPCPBlockSetParams_fadeOutFrames_offset_must_be_0x14[

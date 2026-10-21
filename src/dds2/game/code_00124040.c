@@ -119,7 +119,7 @@ extern void fldUpdateDevilizeEventSequence(void);
 
 extern void fldUpdateTargetGuideController(void);
 
-extern void func_00154F18(s32);
+extern void fldNoopWithMode(s32 mode);
 
 extern s32 fldUpdateTravelAndEncounters(void);
 
@@ -2328,10 +2328,10 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         if (fldGetSparkDialogPhase() != 0) fldUpdateDevilizeEventSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldIsTargetWithinInteractionRange() != 0 && fldAreaState.targetGuideActive == 1) {
-            func_00154F18(1);
+            fldNoopWithMode(1);
             fldUpdateTravelAndEncounters();
         } else if (fldTestSceneControlFlags(0x40) != 0) {
-            func_00154F18(1);
+            fldNoopWithMode(1);
             fldUpdateTravelAndEncounters();
         }
         if (fldTestSceneLifecycleFlags(2) == 1) {
@@ -2344,7 +2344,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     case 5:
         dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);
         fldSetEncounterMode(fldAreaState.encounterMode);
-        func_00154F18(0);
+        fldNoopWithMode(0);
         fldStopCurrentBgm();
         sndSetSequenceVolumePan(15, 127, 63);
         /* The ordinary and deferred exit cases share this release path. */

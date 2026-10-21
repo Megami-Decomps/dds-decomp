@@ -33,7 +33,7 @@ s32 scrGetWindow(void);
 
 s32 scrReadIntParameter(s32 parameterIndex);
 
-void func_0014DAF0(s32 arg0);
+void fldNoopWithMode(s32 mode);
 
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
@@ -155,7 +155,7 @@ s32 itfMesScriptActivatePanel(void) {
         return 1;
     }
     itfMesSetWindowHighFlags(window, ITF_MES_SCRIPT_PANEL_BIT);
-    func_0014DAF0(2);
+    fldNoopWithMode(2);
     return 1;
 }
 
@@ -173,7 +173,7 @@ s32 itfMesFinishScriptWindowIfActive(void) {
     scriptStatus = mes->flags & ITF_MES_LOWER_STATUS_PAIR_MASK;
     if (scriptStatus == ITF_MES_LOWER_STATUS_FIRST_BIT || scriptStatus == ITF_MES_LOWER_STATUS_SECOND_BIT) {
         itfMesFinishWindowAndClearStatus(window);
-        func_0014DAF0(3);
+        fldNoopWithMode(3);
     }
     return scriptStatus < 1;
 }

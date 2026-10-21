@@ -1009,7 +1009,7 @@ void effScatterSetRibbonColor(PcpScatterRibbonWork *work, u32 color)
     work->color = color;
 }
 
-void func_00172C60(void)
+void effScatterNoop(void)
 {
 }
 

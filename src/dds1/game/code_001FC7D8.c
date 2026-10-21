@@ -1,6 +1,8 @@
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
 #include "btl_ai_scratch.h"
@@ -12,6 +14,7 @@
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl.h"
+#include "btl_analysis_panel_wait_args.h"
 #include "btl_model_record.h"
 #include "sdf_chunk.h"
 #include "evt_unit.h"
@@ -178,7 +181,6 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     return (u32)btlRollAiBucket() < 0x46;
 }
 
-extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -197,7 +199,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     s32 x;
     s32 y;
 
-    if (btlSetActorEffectParameter((u8 *)unit, 2) != 0) {
+    if (btlSetActorEffectParameter(unit, 2) != 0) {
         if (unit->status.stateFlags & 0x80) {
             return;
         }
@@ -216,7 +218,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
-        if (btlSetActorEffectParameter((u8 *)unit, 1) != 0) {
+        if (btlSetActorEffectParameter(unit, 1) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
             visible = btlProjectForwardPositionToPackedScreen(screen);
             x = screen[0] >> 4;
@@ -342,7 +344,6 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
     }
 }
 
-extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 /* Select a side-adjusted effect ID from the current status/action; -1 means none. */
 s32 btlGetStatusActionEffectId(BtlTask *task) {
     BtlUnit *unit = task->unit;
@@ -1117,19 +1118,14 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
 
 extern u32 btlRequestAnalysisPanelClose(void);
 
-typedef struct BtlWaitTask {
-    s32 value;
-    u32 ticks;
-} BtlWaitTask;
-
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 
-s32 btlWaitEffectTask(BtlWaitTask *task) {
-    if (task->ticks == 0) {
+s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
+    if (task->elapsedTicks == 0) {
         btlCreateAnalysisPanelTask(task->value, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
-    if (task->ticks >= 0x11) {
+    if (task->elapsedTicks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
@@ -1138,7 +1134,7 @@ s32 btlWaitEffectTask(BtlWaitTask *task) {
             }
         }
     } else {
-        task->ticks += 1;
+        task->elapsedTicks += 1;
     }
     return 0;
 }

@@ -5,6 +5,8 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_unit_fade_task_args.h"
 #include "btl_special_ability.h"
@@ -19,6 +21,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "kwln.h"
@@ -147,7 +150,6 @@ extern void btlDestroyUnit(u8 *);
 extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
 
-extern s32 btlSetActorEffectParameter();
 
 
 extern SoundTask *btlDeferredTaskTail;
@@ -171,7 +173,6 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *object);
 
 u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
 
-void btlRaisePartyRecordStatusValue();
 
 extern EffRandState effSharedRandomState[];
 
@@ -243,8 +244,6 @@ typedef struct BtlFadeArgs {
     u32 count;
     u32 color;
 } BtlFadeArgs;
-
-extern s32 effOffsetIfOwnerFlagClear();
 
 extern s32 btlCountTasksByKind(u16 kind);
 

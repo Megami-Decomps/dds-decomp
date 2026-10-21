@@ -241,7 +241,7 @@ extern EffVec4 D_0039F720;
 extern EffVec4 D_0039F730;
 extern u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjInnerVecInit(ObjectTransform *transform);
-extern s32 func_00222ED8(ObjectTransform *, EffWorldNode *);
+extern s32 evtUpdateUnitMotion(ObjectTransform *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effMiscNormalizeVU(void);
@@ -264,7 +264,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     flag = 0;
     if (data->transitionWork != 0) {
         effObjInnerVecInit(&node);
-        if (func_00222ED8(&node, obj) != 0) {
+        if (evtUpdateUnitMotion(&node, obj) != 0) {
             effObjMultiplyInnerScale(obj, (u128 *)node.scale);
             effObjMultiplyInnerRotation(obj, (u128 *)node.rotation);
             effObjAddInnerPosition(obj, (u128 *)node.position);

@@ -10,6 +10,8 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_raise_party_record_status_value.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "kwln.h"
@@ -148,7 +150,6 @@ extern DatEnemyRecord *datEnemyRecords;
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
-void btlRaisePartyRecordStatusValue();
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 
@@ -225,8 +226,6 @@ void btlActionSeqStateSelect(u8 *task) {
         }
     }
 }
-
-extern s32 effOffsetIfOwnerFlagClear();
 
 void btlUnitTurnEndStateSelect(u8 *task) {
     BtlUnit *unit = *(BtlUnit **)(task + 0x18);

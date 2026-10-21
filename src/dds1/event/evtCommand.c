@@ -20,6 +20,7 @@
 #include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
+#include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
@@ -38,8 +39,6 @@ enum {
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
 
-
-s32 scrGetCommandTimer(void);
 
 void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 

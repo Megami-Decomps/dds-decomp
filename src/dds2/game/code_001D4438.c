@@ -4,12 +4,15 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
 #include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
@@ -366,7 +369,6 @@ extern u32 D_00436AD4;
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
-extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
 extern void mdlSetAmountOnAllContextResources(f32, s32);
@@ -605,8 +607,6 @@ void btlActionSeqStateSelect(ActionStateLink *task) {
     }
 }
 
-extern s32 effOffsetIfOwnerFlagClear();
-
 void btlUnitTurnEndStateSelect(u8 *task) {
     u8 *unit = (u8 *)((ActionStateLink *)task)->unit;
     u32 flags = ((BtlUnit *)unit)->status.flags;
@@ -726,7 +726,6 @@ void btlEnterStandbyDeadState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xfffffdff;
 }
 
-extern void btlRaisePartyRecordStatusValue();
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);

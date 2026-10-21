@@ -13,60 +13,14 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
-#include "poly_band.h"
+#include "poly_ring_variants.h"
 #include "poly_node.h"
-
-struct SdfMemBlock;
 
 enum {
     POLY_INACTIVE_ENTRY_AGE = -0xFFFFFF,
     POLY_RESET_ENTRY_AGE = 0xFFFFFF0,
     POLY_RESET_DURATION = 0xFFFFFFF
 };
-
-typedef struct {
-    PolyRingHead head;
-    u32 spawnDelayStep;
-    u32 segments;
-    f32 radialWidth;
-    f32 radius;
-    f32 radiusJitter;
-    void *dispatchArgB;            /* 0xD4 */
-    u8 padD8[4];
-    void *dispatchArgA;            /* 0xDC */
-    ParSystem *strip;              /* 0xE0 */
-    PolyArcRecord *records;        /* 0xE4 */
-    struct SdfMemBlock *allocation; /* 0xE8 */
-    u8 padEC[4];
-} PolyArc; /* 0xF0, followed by eight-byte records */
-
-typedef struct {
-    PolyRingHead head;
-    u32 spawnDelayStep;
-    u32 segments;
-    f32 radialWidth;
-    f32 initialRadius;
-    f32 targetRadius;
-    f32 initialRadiusJitter;
-    f32 targetRadiusJitter;
-    u32 spawnDelayGroupSize;
-    f32 rotationXDegrees;
-    f32 rotationStepDegrees;
-    void *dispatchArgB;            /* 0xE8 */
-    u8 padEC[4];
-    void *dispatchArgA;            /* 0xF0 */
-    ParSystem *strip;              /* 0xF4 */
-    PolyRotatingBandRecord *records; /* 0xF8 */
-    struct SdfMemBlock *allocation; /* 0xFC */
-} PolyRotatingBand; /* 0x100, followed by 20-byte records */
-
-/* The ring kinds share the template prefix and their leading parameter words;
- * the creation paths clamp the segment count through this shared view. */
-typedef union {
-    PolyBand band;
-    PolyArc arc;
-    PolyRotatingBand rotating;
-} PolyRing;
 
 void polyUpdateBasicRingCells(PolyNode *node);
 void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex);

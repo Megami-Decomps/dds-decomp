@@ -36,6 +36,8 @@ typedef struct SndWork {
     u32 eeWorkByteCount;
     u32 opaque200;
     u32 opaque204;
+    u32 opaque208;
+    u32 opaque20C;
 } SndWork;
 
 /* sceSifSetDma descriptor: four words filled before one descriptor is submitted. */
@@ -57,7 +59,11 @@ typedef char SndWorkArrayOffsetsAssert[
      (u32)&((SndWork *)0)->slots == 0x190 &&
      (u32)&((SndWork *)0)->eeWorkAddress == 0x1F8 &&
      (u32)&((SndWork *)0)->eeWorkByteCount == 0x1FC &&
-     sizeof(void *) == 4 && sizeof(SndWork) == 0x208) ? 1 : -1];
+     (u32)&((SndWork *)0)->opaque200 == 0x200 &&
+     (u32)&((SndWork *)0)->opaque204 == 0x204 &&
+     (u32)&((SndWork *)0)->opaque208 == 0x208 &&
+     (u32)&((SndWork *)0)->opaque20C == 0x20C &&
+     sizeof(void *) == 4 && sizeof(SndWork) == 0x210) ? 1 : -1];
 typedef char SifDmaTransferLayoutAssert[
     (sizeof(SifDmaTransfer) == 0x10 &&
      (u32)&((SifDmaTransfer *)0)->destination == 4 &&

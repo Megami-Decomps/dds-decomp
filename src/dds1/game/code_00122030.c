@@ -2034,7 +2034,7 @@ extern s32 fldGetSparkDialogPhase(void);
 
 extern void fldUpdateSparkEncounterScene(void);
 
-extern void func_0014DAF0(s32);
+extern void fldNoopWithMode(s32 mode);
 
 
 extern u32 D_003BABE8;
@@ -2200,7 +2200,7 @@ s32 fldProcSequence(KwlnTask *task) {
         if (fldGetSparkDialogPhase() != 0) fldUpdateSparkMessageSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldTestSceneControlFlags(0x40) != 0) {
-            func_0014DAF0(1);
+            fldNoopWithMode(1);
             fldUpdateTravelAndEncounters();
         }
         if (fldTestSceneLifecycleFlags(2) == 1) {
@@ -2213,7 +2213,7 @@ s32 fldProcSequence(KwlnTask *task) {
     case 5:
         dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);
         fldSetEncounterMode(fldAreaState.encounterMode);
-        func_0014DAF0(0);
+        fldNoopWithMode(0);
         fldStopCurrentBgm();
         sndSetSequenceVolumePan(15, 127, 63);
         /* Both exit phases release the same scene resources. */

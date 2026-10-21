@@ -5,6 +5,7 @@
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -24,7 +25,6 @@ extern void fldSetGsAlphaBlendEquation(s32 arg);
 extern void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12,
                                s32 bit14, s32 bit15, s32 unused, s32 bit17);
 extern u32 kwlnDrawControlFlags;
-extern s32 scrGetCommandTimer(void);
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
@@ -309,7 +309,7 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
         kwlnDrawControlFlags |= 0x2000000;
         return 1;
     }
-    if (scrGetCommandTimer() < scrReadIntParameter(0)) {
+    if ((s32)scrGetCommandTimer() < scrReadIntParameter(0)) {
         kwlnDrawControlFlags |= 0x2000000;
         return 0;
     }
