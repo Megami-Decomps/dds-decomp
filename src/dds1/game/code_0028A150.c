@@ -381,7 +381,7 @@ extern s32 fileScanSlotIconSysBegin(void);
 
 extern char D_003B2678[];
 
-extern u8 fileDirectoryEntryScratch[];
+extern sceMcTblGetDir fileDirectoryEntryScratch[];
 
 extern s32 mcHandleSlotWriteResult(void);
 

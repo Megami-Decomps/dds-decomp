@@ -430,7 +430,7 @@ extern s32 fileAbortSlotScanOnInput(void);
 
 extern char D_0042B6B8[];
 
-extern u8 fileDirectoryEntryScratch[];
+extern sceMcTblGetDir fileDirectoryEntryScratch[];
 
 extern s32 mcClearSlotMetadata(void);
 
