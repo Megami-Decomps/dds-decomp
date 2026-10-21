@@ -73,7 +73,6 @@ extern ActorSlotOrder *D_003BD840[2];
 
 
 
-extern void evtCreateMessageWindowIfMissing(void *text);
 
 
 

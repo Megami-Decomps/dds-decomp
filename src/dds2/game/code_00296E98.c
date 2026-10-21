@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "brs_icon_record.h"
 #include "common.h"
+#include "evt_message_window_api.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "evt_stage_test_api.h"
@@ -952,7 +953,6 @@ extern s32 brsBuildProfileCapList(BrsRewardBatch *);
 extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 
 extern s32 btlCaptureRewardSummary(BrsRewardSummary *rewards);
-extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *definition);
 extern s32 evtSetMessageWindowPageValue(s32 pageValue);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);

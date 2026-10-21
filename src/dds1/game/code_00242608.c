@@ -80,7 +80,6 @@ extern void fldDrawCameraColorLayerPass(void);
 
 
 extern void evtLoadResourcePair(const char *, EvtResourcePair *);
-extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 mnuCampGetShopPriceStage();
 extern struct EffectSlotSet *D_003BC520;
 extern void mnuUnpackNibbleFields();
@@ -1421,7 +1420,7 @@ ShopScene *mnuShopCreateScene(void) {
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", &obj->messageResource);
-    evtCreateMessageWindowIfMissing(obj->messageResource.dataAddress);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)obj->messageResource.dataAddress);
     D_003BC520 = obj->spriteResource;
     obj->pendingPriceStage = mnuCampGetShopPriceStage();
     obj->activePartyCount = mnuCountActivePartyEntries();

@@ -84,7 +84,6 @@ extern s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index);
 extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
 extern void sdfInitializeMapCounterSelection(s32 selectedCounterIndex, s32 cameraVectorCount);
 extern void fldCreateMapRequestQueues(void);
-extern void evtCreateMessageWindowIfMissing(s32);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void sdfEnableFlagListViewTargetRelativeMode(void);
@@ -635,7 +634,7 @@ void fldInitializeLocalMapScene(void) {
     fldCreateMapRequestQueues();
     dspCloseChannel();
     D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
-    evtCreateMessageWindowIfMissing(D_004388A8);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_004388A8);
     evtSetSolarOverlayFullyVisible();
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();

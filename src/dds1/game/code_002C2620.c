@@ -459,7 +459,6 @@ s32 fldStartAndPollLocalMapTrack(void) {
     return 0;
 }
 
-extern s32 evtCreateMessageWindowIfMissing(s32 sub);
 extern void evtSetSolarOverlayFullyVisible(void);
 
 void fldInitializeLocalMapScene(void) {
@@ -489,7 +488,7 @@ void fldInitializeLocalMapScene(void) {
     fldCreateMapRequestQueues();
     dspCloseChannel();
     D_003BD254 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_003BD258, NULL);
-    evtCreateMessageWindowIfMissing(D_003BD258);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_003BD258);
     evtSetSolarOverlayFullyVisible();
     fldApplyLightSetIndex(1);
     fldInitializeCameraColorResource();

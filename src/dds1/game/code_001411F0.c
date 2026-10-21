@@ -184,7 +184,6 @@ extern s32 D_0032E4C4[];
 
 extern u8 D_0034D8F0[];
 
-extern s32 evtCreateMessageWindowIfMissing(s32 unused);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -4365,7 +4364,7 @@ void func_0014C468(void) {
         return;
     }
     if (mdlFlagTest(0x819) != 0) {
-        evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+        evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
         dspStartEntry(6);
         D_0032E4B4[0] = 1;
         fldSparkControlState.dialogPhase = 12;
@@ -4374,7 +4373,7 @@ void func_0014C468(void) {
         fldResetPlayerSceneObjectState();
         return;
     }
-    evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
     if (mdlFlagTest(0x81A) != 0) {
         dspStartEntry(1);
     } else {
@@ -4491,7 +4490,7 @@ void fldUpdateSparkMessageSequence(void) {
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 4;
                 fldSparkControlState.dialogTimer = 0;
-                evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+                evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
                 dspStartEntry(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
                 evtSetMessageWindowOptionWhenOpen(0);
@@ -4669,7 +4668,7 @@ void fldUpdateSparkEncounterScene(void) {
             fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
             fldSparkControlState.phase = 3;
-            evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+            evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
             dspStartEntry(4);
             fldResetPlayerSceneObjectState();
             fldClearObjectEntryHandles();
@@ -4772,7 +4771,7 @@ void fldResetEventSceneState(void) {
 }
 
 void fldStartDeferredFieldExit(void) {
-    evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
     dspStartEntry(5);
     fldResetPlayerSceneObjectState();
     D_0032E4C4[0] = 2;

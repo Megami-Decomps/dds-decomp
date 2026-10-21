@@ -355,7 +355,6 @@ extern s32 D_00389884[];
 
 extern u8 D_003A9EB0[];
 
-extern void evtCreateMessageWindowIfMissing(void *definition);
 
 
 extern void fldResetPlayerSceneObjectState(void);
