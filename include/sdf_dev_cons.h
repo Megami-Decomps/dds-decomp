@@ -3,8 +3,10 @@
 
 #include "common.h"
 
+struct SdfMemBlock;
+
 typedef struct DevConsState {
-    u8 pad0[4]; /* 0x00 */
+    struct DevConsState *next; /* 0x00: forward console-list link. */
     struct DevConsState *previousNode; /* 0x04: linked-list predecessor; the global head is the tail. */
     u16 screenOriginX; /* 0x08: GS 12.4 X coordinate used for the console sprite/grid. */
     u16 screenOriginY; /* 0x0A: GS 12.4 Y coordinate used for the console sprite/grid. */
@@ -16,7 +18,7 @@ typedef struct DevConsState {
     u8 pad15;
     u8 textAttribute; /* 0x16 */
     u8 tabWidth; /* 0x17: used to advance tabs to the next column stop */
-    u8 pad18[4]; /* 0x18 */
+    struct SdfMemBlock *bufferAllocation; /* 0x18: owns the cell buffer. */
     u8 *cells; /* 0x1C: two bytes per character cell */
 } DevConsState;
 

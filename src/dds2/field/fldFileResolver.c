@@ -143,7 +143,6 @@ EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *resourceEntry
 #include "fld_spawn_collision.h"
 
 struct EffNodeDescriptor;
-struct EffectObj;
 
 
 /* Complete serialized descriptors shared with their existing consumers. */
@@ -155,14 +154,14 @@ extern u32 D_00438EBC;
 extern u32 D_00444920[];
 extern u32 D_00444940[];
 extern char D_00435FD0[];
-extern struct EffectObj *effObjCreateResourceKindZero(const char *, void *, s32);
-extern struct EffectObj *effObjCreateResourceKindOne(const char *, void *, s32);
-extern struct EffectObj *effObjSpawnSharedBillNodeClone(struct EffectObj *, void *, s32);
-extern struct EffectObj *effObjSpawnSharedBillClone(struct EffectObj *, void *, s32);
-extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
-extern struct EffectObj *effObjCreateNamedScaledEffect(const char *, void *, void *, f32);
-extern void effObjSetFlags(struct EffectObj *, u32);
-extern void effObjClearFlags(struct EffectObj *, u32);
+extern EffWorldNode *effObjCreateResourceKindZero(const char *, void *, s32);
+extern EffWorldNode *effObjCreateResourceKindOne(const char *, void *, s32);
+extern EffWorldNode *effObjSpawnSharedBillNodeClone(EffWorldNode *, void *, s32);
+extern EffWorldNode *effObjSpawnSharedBillClone(EffWorldNode *, void *, s32);
+extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
+extern EffWorldNode *effObjCreateNamedScaledEffect(const char *, void *, void *, f32);
+extern void effObjSetFlags(EffWorldNode *, u32);
+extern void effObjClearFlags(EffWorldNode *, u32);
 extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
 extern EffWorldNode *evtSpawnActionObj9(s32);
 extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);

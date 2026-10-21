@@ -582,7 +582,10 @@ void effDecrementFirstCountdown(BtlLinkedEffectArgs *args) {
 
 typedef struct BtlObjLink {
     void *owner; /* 0x00: effect owner */
-    s32 arg; /* Some effect variants write/read only the low halfword. */
+    union {
+        s32 arg;
+        u16 shortArg; /* Message/wait variants store only the low halfword. */
+    };
     s32 elapsedTicks; /* 0x08: elapsed callback updates */
 } BtlObjLink;
 
@@ -1035,7 +1038,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId) {
     task->callback = btlCompleteEffectTaskImmediately;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = messageId;
+    link->shortArg = messageId;
     link->elapsedTicks = 0;
     return task;
 }
@@ -1082,7 +1085,7 @@ s32 btlPollEffectWaitTask(BtlObjLink *link) {
 
     if (link->elapsedTicks == 0) {
         if (link->owner != 0) {
-            itfMesSetTextSlotFromValue(((BtlJyokyoState *)battleState)->dialogId, 0, *(u16 *)&link->arg, 0xD);
+            itfMesSetTextSlotFromValue(((BtlJyokyoState *)battleState)->dialogId, 0, link->shortArg, 0xD);
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)battleState)->dialogId, 0x75);
     }
@@ -1107,7 +1110,7 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
     task->callback = btlPollEffectWaitTask;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = mode;
+    link->shortArg = mode;
     link->elapsedTicks = 0;
     return task;
 }

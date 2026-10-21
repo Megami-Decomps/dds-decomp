@@ -786,21 +786,21 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
     }
     switch (taskItemMode) {
     case SDF_TASK_ITEM_MODE_CALLBACK_ONLY:
-        item->flags = (*(u16 *)&item->flags & ~SDF_TASK_ENTRY_UPDATE_ENABLED) |
+        item->flags = ((u16)item->flags & ~SDF_TASK_ENTRY_UPDATE_ENABLED) |
                       SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_CALLBACK_ENABLED;
         break;
     case SDF_TASK_ITEM_MODE_UPDATE_ONLY:
-        item->flags = (*(u16 *)&item->flags & ~SDF_TASK_ENTRY_CALLBACK_ENABLED) |
+        item->flags = ((u16)item->flags & ~SDF_TASK_ENTRY_CALLBACK_ENABLED) |
                       SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_UPDATE_ENABLED;
         break;
     case SDF_TASK_ITEM_MODE_SUSPENDED:
-        item->flags = *(u16 *)&item->flags | SDF_TASK_ENTRY_SUSPENDED;
+        item->flags = (u16)item->flags | SDF_TASK_ENTRY_SUSPENDED;
         break;
     case SDF_TASK_ITEM_MODE_PENDING_ACTIVATION:
-        item->flags = *(u16 *)&item->flags | SDF_TASK_ENTRY_PENDING_ACTIVATION;
+        item->flags = (u16)item->flags | SDF_TASK_ENTRY_PENDING_ACTIVATION;
         break;
     case SDF_TASK_ITEM_MODE_ENABLE_UPDATE_AND_CALLBACK:
-        item->flags = *(u16 *)&item->flags | SDF_TASK_ENTRY_ACTIVE |
+        item->flags = (u16)item->flags | SDF_TASK_ENTRY_ACTIVE |
                       SDF_TASK_ENTRY_UPDATE_ENABLED | SDF_TASK_ENTRY_CALLBACK_ENABLED;
         break;
     }

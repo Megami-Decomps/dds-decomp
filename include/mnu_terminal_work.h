@@ -16,8 +16,7 @@ typedef struct MenuTerminalWork {
     s32 popupState;         /* 0x54 */
     u32 dispatchTable;       /* 0x58 */
     EvtResourcePair messageResources; /* 0x5C: loader handle and message data address */
-    EffectSlotSet *batch;  /* 0x64 */
-    EffectSlotSet *secondResource;     /* 0x68 */
+    EffectSlotSet *resourceSets[2]; /* 0x64: the two loaded terminal sprite sets. */
     EffectSlotSet *alternateBatch; /* 0x6C */
     struct MenuList *commandLists[1]; /* 0x70: owned command-list array */
     struct MenuList *list; /* 0x74 */
@@ -44,5 +43,8 @@ typedef struct MenuTerminalWork {
     u32 bgmHandle;           /* 0x160: encoded bank/track handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
 typedef char MenuTerminalWork_size[(sizeof(MenuTerminalWork) == 0x164) ? 1 : -1];
+
+void mnuLoadResourceHandles(MenuTerminalWork *work);
+void mnuReleaseResourceHandles(MenuTerminalWork *work);
 
 #endif

@@ -20,12 +20,6 @@ typedef struct PanelRect {
     s32 y1;
 } PanelRect;
 
-/* Point written by the panel vertex builders. */
-typedef struct PanelVertex {
-    s32 x;
-    s32 y;
-} PanelVertex;
-
 /* Panel table payload. Only the status byte in this subrecord is interpreted. */
 typedef struct PanelRecSub {
     u8 bytes[0x10];
@@ -101,8 +95,5 @@ typedef char PanelHold_items_at_0x0C[
     ((u32)&((PanelHold *)0)->items == 0x0C) ? 1 : -1];
 typedef char PanelHold_size_must_be_0x20C[
     sizeof(PanelHold) == 0x20C ? 1 : -1];
-typedef char PanelVertex_size_must_be_8[sizeof(PanelVertex) == 8 ? 1 : -1];
-typedef char PanelVertex_y_at_0x04[
-    ((u32)&((PanelVertex *)0)->y == 4) ? 1 : -1];
 
 #endif

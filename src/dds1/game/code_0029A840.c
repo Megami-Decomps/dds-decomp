@@ -130,7 +130,7 @@ extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
 EffModelOwner *effDuplicateEffectHeader(EffModelOwner *source) {
     EffModelOwner *effect = effCreateModelOwner(0);
-    *(u32 *)effect = *(u32 *)source;
+    memcpy(&effect->scale, &source->scale, sizeof(effect->scale));
     effRecreateModelFromSource(effect, source);
     return effect;
 }
@@ -264,7 +264,7 @@ extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     EffModelOwner *owner = effCreateModelOwner(0);
 
-    *(u32 *)owner = *(u32 *)source;
+    memcpy(&owner->scale, &source->scale, sizeof(owner->scale));
     effRecreateModelFromSource(owner, source);
     effUploadModelTextures(owner);
     if (btlIsRuntimeAllocated() != 0 && btlIsCurrentActorFullyMarked() == 0) {

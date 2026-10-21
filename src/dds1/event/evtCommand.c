@@ -43,12 +43,11 @@ s32 scrGetCommandTimer(void);
 
 void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
 
-struct EffectObj;
-s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
-s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
-                                     struct EffectObj *second, struct EffectObj *third,
-                                     struct EffectObj *fourth);
-s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
+s32 effObjBindValidatedOwner(EffWorldNode *obj, EffWorldNode *owner);
+s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *obj, EffWorldNode *first,
+                                     EffWorldNode *second, EffWorldNode *third,
+                                     EffWorldNode *fourth);
+s32 effObjBindOwnerBillEntry(EffWorldNode *obj, EffWorldNode *owner, s32 entryId);
 
 void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
 
@@ -152,9 +151,9 @@ extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 
 /* Copy two source points into the primary effect object. */
 s32 evtCommandCopyEffectSourcePoints(void) {
-    struct EffectObj *primaryEffect;
-    struct EffectObj *sourcePoint0;
-    struct EffectObj *sourcePoint1;
+    EffWorldNode *primaryEffect;
+    EffWorldNode *sourcePoint0;
+    EffWorldNode *sourcePoint1;
 
     primaryEffect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (primaryEffect == NULL) {
@@ -189,11 +188,11 @@ extern char D_003AC958[];
 
 /* Apply four effect parameters after resolving every input object. */
 s32 evtCommandSetMagatuhiSourcePoints(void) {
-    struct EffectObj *primaryEffect;
-    struct EffectObj *sourcePoint0;
-    struct EffectObj *sourcePoint1;
-    struct EffectObj *sourcePoint2;
-    struct EffectObj *sourcePoint3;
+    EffWorldNode *primaryEffect;
+    EffWorldNode *sourcePoint0;
+    EffWorldNode *sourcePoint1;
+    EffWorldNode *sourcePoint2;
+    EffWorldNode *sourcePoint3;
 
     primaryEffect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (primaryEffect == NULL) {
@@ -234,7 +233,7 @@ s32 evtCommandEnablePathUnit(void)
 /* Bind the selected effect path to the first owner found in kinds 4..9.
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommandAssignEffectObjectOwner(void) {
-    struct EffectObj *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    EffWorldNode *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     void *owner;
     s32 objectKind;
 
@@ -255,7 +254,7 @@ s32 evtCommandAssignEffectObjectOwner(void) {
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
-    struct EffectObj *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    EffWorldNode *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     void *owner;
     s32 objectKind;
 

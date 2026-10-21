@@ -10,7 +10,7 @@
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
-#include "btl_world_camera_view.h"
+#include "evt_world.h"
 #include "snd_pad.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -5970,19 +5970,19 @@ extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 extern void sdfSetViewFieldOfView(f32);
 
 void btlRefreshWorldCameraHandle(void) {
-    WorldObj *object;
+    EffWorldNode *object;
     EffWorldNode *handle;
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetWorldObject();
         if (object != NULL) {
-            handle = dds3GetWorldCameraObject((EffWorldNode *)object);
+            handle = dds3GetWorldCameraObject(object);
             if (handle != 0) {
-                if (((EffWorldNode *)handle)->next != NULL) {
+                if (handle->next != NULL) {
                     handle = handle->next;
                 } else {
-                    handle = (EffWorldNode *)object->head->sub->handle;
+                    handle = ((EvtWorldTable *)object->data)->slots[EFF_WORLD_KIND_CAMERA].head;
                 }
-                dds3SetWorldCameraObject((EffWorldNode *)object, handle);
+                dds3SetWorldCameraObject(object, handle);
                 sdfSetViewFieldOfView(dds3GetCameraFieldOfView(handle));
             }
         }

@@ -1752,9 +1752,8 @@ void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
         sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
     }
     if (remaining > 0) {
-        u16 *counts = (u16 *)&parDrawControl;
-        counts[0] = remaining / 3;
-        counts[1] = remaining;
+        parDrawControl.parameterCount = remaining / 3;
+        parDrawControl.vertexCount = remaining;
         sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
     }
     parAppendDrawSurfacePool(emitter, list);

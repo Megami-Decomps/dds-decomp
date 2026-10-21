@@ -113,14 +113,14 @@ extern char D_003BC3F0[];
 
 /* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuTerminalWork *work) {
-    effResolveAndReleaseResource(work->batch);
-    effResolveAndReleaseResource(work->secondResource);
+    effResolveAndReleaseResource(work->resourceSets[0]);
+    effResolveAndReleaseResource(work->resourceSets[1]);
 }
 
 /* Release/reset the two resources' texture slots without freeing the work object. */
 void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
-    effReleaseTextureHandlesAndResetSlots(work->batch);
-    effReleaseTextureHandlesAndResetSlots(work->secondResource);
+    effReleaseTextureHandlesAndResetSlots(work->resourceSets[0]);
+    effReleaseTextureHandlesAndResetSlots(work->resourceSets[1]);
 }
 
 extern MenuTextEntry D_00347C68[];
@@ -215,10 +215,10 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     s32 fade;
     s32 status;
 
-    effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->batch, 0x1B, priority);
+    effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->resourceSets[0], 0x1B, priority);
     if (list->cursor == node) {
-        effDrawSpriteWithCornerFade(0x480, rowY + 0x88, depth, scale, 0, host->batch, 0x2C, priority);
-        effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->batch, 0x1C, priority);
+        effDrawSpriteWithCornerFade(0x480, rowY + 0x88, depth, scale, 0, host->resourceSets[0], 0x2C, priority);
+        effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->resourceSets[0], 0x1C, priority);
         sprintf(text, D_003BC3F0, entry->requiredAmount);
         glyph = itfCreateFont3TextGlyph(0x1740, 0x2D8, depth,
             uiBlendColors(0xA09DC380, 0xA09DC300, scale), text, 0);
@@ -227,7 +227,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
         frDestroyFontRequestAfter(glyph);
         selected = 1;
     }
-    effDrawSpriteWithCornerFade(0x500, rowY + 0x80, depth, scale, 0, host->batch,
+    effDrawSpriteWithCornerFade(0x500, rowY + 0x80, depth, scale, 0, host->resourceSets[0],
         portraitCodes[record->unitId - 1] + selected, priority);
     mnuCreateNumberSprite(0xA30, rowY + 0x98, depth, scale, record->hp,
         mnuGetPanelRatioColor(0, record->hp, record->maxHp), priority);
@@ -244,7 +244,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     }
     status = mnuGetSelectionFromFlags(record);
     if (status >= 0) {
-        effDrawSpriteWithCornerFade(0x14D0, rowY - 0x60, depth, scale, 0, host->batch,
+        effDrawSpriteWithCornerFade(0x14D0, rowY - 0x60, depth, scale, 0, host->resourceSets[0],
             statusCodes[status], priority);
     }
 }
@@ -368,9 +368,9 @@ void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
     }
     if (isCurrent) {
         s32 base = (list->windowOffset * 21 + 0x76) << 3;
-        effDrawSpriteWithCornerFade(x - 0xE0, base, 0, width, 0, host->batch, 0x18, priority);
-        effDrawSpriteWithCornerFade(x + 0x600, base, 0, width, 0, host->batch, 0x19, priority);
-        effDrawSpriteWithCornerFade(x + 0xB0, base + 0x18, 0, width, 0, host->batch, 0x15, priority);
+        effDrawSpriteWithCornerFade(x - 0xE0, base, 0, width, 0, host->resourceSets[0], 0x18, priority);
+        effDrawSpriteWithCornerFade(x + 0x600, base, 0, width, 0, host->resourceSets[0], 0x19, priority);
+        effDrawSpriteWithCornerFade(x + 0xB0, base + 0x18, 0, width, 0, host->resourceSets[0], 0x15, priority);
         chainFlags = 4;
     }
     color = (node->flags48 & 1) ? 0xA09DC340 : 0xA09DC380;
@@ -476,14 +476,14 @@ void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 depth, struct Men
 
         index++;
         effDrawSpriteWithCornerFade(x - 0x40, base, 0, value, 0,
-                      owner->batch, 0x16, drawContext);
+                      owner->resourceSets[0], 0x16, drawContext);
         effDrawSpriteWithCornerFade(x + 0x4C0, base, 0, value, 0,
-                      owner->batch, 0x17, drawContext);
+                      owner->resourceSets[0], 0x17, drawContext);
         effDrawSpriteWithCornerFade(x + 0xB0, base + 0x18, 0, value, 0,
-                      owner->batch, 0x15, drawContext);
+                      owner->resourceSets[0], 0x15, drawContext);
     }
     effDrawSpriteWithCornerFade(x + 0x1C0, y + 0x68, 0, value, 0,
-                  owner->batch, index, drawContext);
+                  owner->resourceSets[0], index, drawContext);
 }
 
 
@@ -879,7 +879,6 @@ void mnuTerminalSelectResourceBank(MenuTerminalWork *work) {
     sndEnsureMidiBankResident(work->bgmHandle & MNU_BGM_BANK_MASK);
 }
 
-extern void mnuLoadResourceHandles(u32 *);
 
 extern void mnuTerminalBuildMenus(MenuTerminalWork *host);
 
@@ -906,7 +905,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     obj->allocation = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);
-    mnuLoadResourceHandles((u32 *)obj);
+    mnuLoadResourceHandles(obj);
     mnuTerminalCreateEffects(obj);
     obj->mode = reduced;
     obj->reduced = reduced;
@@ -922,7 +921,6 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     return (u8 *)obj;
 }
 
-extern void mnuReleaseResourceHandles(u32 *work);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
@@ -937,7 +935,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
-        mnuReleaseResourceHandles((u32 *)work);
+        mnuReleaseResourceHandles(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, task);
         dspCloseChannel();
@@ -1132,7 +1130,7 @@ void mnuDrawAndStepTerminalPanelFade(s32 close, s32 context) {
         }
         for (i = 0, position = positions; i < 3; i++, position++) {
             effDrawSpriteWithCornerFade((*position)[0], (*position)[1], 0, work->panelFade,
-                1, (s32)work->secondResource, i, 0x53);
+                1, (s32)work->resourceSets[1], i, 0x53);
         }
         if (close == 0) {
             if (work->panelFade < 0x100) {
@@ -1172,18 +1170,18 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
     }
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting(state->batch, *slot,
+        effConfigureWithDefaultSetting(state->resourceSets[0], *slot,
                                        state->effect[4], 0, 5, 2);
         break;
     case 2:
-        effConfigureWithDefaultSetting(state->batch, *slot,
+        effConfigureWithDefaultSetting(state->resourceSets[0], *slot,
                                        state->effect[5], 0, 0, 2);
         break;
     case 3:
-        effConfigureWithDefaultSetting(state->batch, *slot,
+        effConfigureWithDefaultSetting(state->resourceSets[0], *slot,
                                        state->effect[4], 0, 0, 2);
         if (slot[1] >= 0) {
-            effConfigureWithDefaultSetting(state->batch, slot[1],
+            effConfigureWithDefaultSetting(state->resourceSets[0], slot[1],
                                            state->effect[5], 0, 0, 2);
         }
         break;
@@ -1228,7 +1226,7 @@ void mnuDrawTerminalSelectedSlots(s32 state) {
     for (i = 0, slot = work->cursor; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
         if (*slot >= 0) {
             itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                        work->batch, *slot, MNU_TEXT_DRAW_PRIORITY);
+                                        work->resourceSets[0], *slot, MNU_TEXT_DRAW_PRIORITY);
         }
     }
     if (work->mode == 2) {
@@ -1255,7 +1253,7 @@ u8 mnuGetTerminalFrameFade(MenuTerminalWork *scene) {
     s32 index;
 
     index = fldGetModeFrameRecordIndex(scene);
-    return (*(u8 *)&scene->batch->workEntries[index].geometry.cornerColors[0]);
+    return (*(u8 *)&scene->resourceSets[0]->workEntries[index].geometry.cornerColors[0]);
 }
 
 
@@ -1285,14 +1283,14 @@ void mnuConfigureTerminalSlotEffects(u32 mode, MenuTerminalWork *work) {
     index = fldGetModeFrameRecordIndex(work);
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting(work->batch, index,
+        effConfigureWithDefaultSetting(work->resourceSets[0], index,
                                        work->effect[0], 0, 0, 2);
-        effConfigureWithDefaultSetting(work->batch, 4,
+        effConfigureWithDefaultSetting(work->resourceSets[0], 4,
                                        work->effect[6], 0, 0, 14);
-        effConfigureWithDefaultSetting(work->batch, 6,
+        effConfigureWithDefaultSetting(work->resourceSets[0], 6,
                                        work->effect[0], 0, 0, 2);
-        itfSetGridEntryQuantizedAndRefresh(work->batch, 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting(work->batch, 7,
+        itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting(work->resourceSets[0], 7,
                                        work->effect[5], 0, 5, 3);
         i = 0;
         entries = (s32 *)work->alternateBatch->workEntries[0].geometry.cornerColors;
@@ -1301,17 +1299,17 @@ void mnuConfigureTerminalSlotEffects(u32 mode, MenuTerminalWork *work) {
         }
         break;
     case 2:
-        effConfigureWithDefaultSetting(work->batch, index,
+        effConfigureWithDefaultSetting(work->resourceSets[0], index,
                                        work->effect[3], 0, 0xF, 2);
-        effConfigureWithDefaultSetting(work->batch, 6,
+        effConfigureWithDefaultSetting(work->resourceSets[0], 6,
                                        work->effect[3], 0, 0xF, 2);
-        itfSetGridEntryQuantizedAndRefresh(work->batch, 7, 0, 0, 0, 0);
-        effConfigureWithDefaultSetting(work->batch, 7,
+        itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], 7, 0, 0, 0, 0);
+        effConfigureWithDefaultSetting(work->resourceSets[0], 7,
                                        work->effect[3], 0, 0, 2);
         return;
     case 3:
-        itfSetGridEntryQuantizedAndRefresh(work->batch, 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting(work->batch, 7,
+        itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting(work->resourceSets[0], 7,
                                        work->effect[5], 0, 0, 3);
         effConfigureWithDefaultSetting(work->alternateBatch, 0,
                                        work->effect[5], 0, 0, 2);
@@ -1330,26 +1328,26 @@ void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
     memcpy(positions, D_003AF6B0, sizeof(positions));
     index = fldGetModeFrameRecordIndex(work);
     itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x81,
-        work->batch, index, MNU_TEXT_DRAW_PRIORITY);
-    scale = ((u32)(*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) << 8) /
-        (*(u8 *)&work->batch->workEntries[index].savedColors[0]);
+        work->resourceSets[0], index, MNU_TEXT_DRAW_PRIORITY);
+    scale = ((u32)(*(u8 *)&work->resourceSets[0]->workEntries[index].geometry.cornerColors[0]) << 8) /
+        (*(u8 *)&work->resourceSets[0]->workEntries[index].savedColors[0]);
     if (work->mode != 2) {
         effDrawSpriteWithCornerFade(positions[1][0], positions[1][1], 0, scale, 0x81,
-            work->batch, 4, MNU_TEXT_DRAW_PRIORITY);
+            work->resourceSets[0], 4, MNU_TEXT_DRAW_PRIORITY);
     }
     itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
-        work->batch, 7, MNU_TEXT_DRAW_PRIORITY);
+        work->resourceSets[0], 7, MNU_TEXT_DRAW_PRIORITY);
     itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
         work->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
     if (work->reduced != 2) {
         itfDrawGridWithResolvedSlot(positions[2][0], positions[2][1], 0, 0x81,
-            work->batch, 6, MNU_TEXT_DRAW_PRIORITY);
+            work->resourceSets[0], 6, MNU_TEXT_DRAW_PRIORITY);
         mnuQueueFontGlyphFromAtlasSlot(positions[4][0], positions[4][1], 0,
-            (*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300,
+            (*(u8 *)&work->resourceSets[0]->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300,
             work->selectedSlot, work->reduced);
     } else {
         effDrawSpriteWithCornerFade(positions[5][0], positions[5][1], 0, scale, 0x81,
-            work->batch, 0x33, MNU_TEXT_DRAW_PRIORITY);
+            work->resourceSets[0], 0x33, MNU_TEXT_DRAW_PRIORITY);
     }
 }
 
@@ -1408,12 +1406,12 @@ void mnuAnimateTerminalSelection(u32 mode, MenuTerminalWork *work) {
     resourceOffset = sizeof(work->effect[0]) * effect;
     resourceOffset += (s32)((u8 *)&work->effect[0] - (u8 *)work);
     resource = (EffMappedResource **)((u8 *)work + resourceOffset);
-    itfSetGridEntryQuantizedAndRefresh(work->batch, 8, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(work->batch, 8,
+    itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], 8, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(work->resourceSets[0], 8,
                                    *resource, 0, style, layer);
     selected = mnuGetTerminalListSlotForCount(work);
-    itfSetGridEntryQuantizedAndRefresh(work->batch, selected, 0, width, 0, height);
-    effConfigureWithDefaultSetting(work->batch, selected,
+    itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], selected, 0, width, 0, height);
+    effConfigureWithDefaultSetting(work->resourceSets[0], selected,
                                    *resource, 0, style, layer);
 }
 
@@ -1433,11 +1431,11 @@ void mnuDrawTerminalSelectionListAndStep(s32 close, MenuTerminalWork *work) {
 
     memcpy(positions, D_003AF6E0, sizeof(positions));
     itfDrawGridWithResolvedSlot(positions[1][0], positions[1][1], 0, 0x80,
-        work->batch, mnuGetTerminalListSlotForCount(work), 0x53);
+        work->resourceSets[0], mnuGetTerminalListSlotForCount(work), 0x53);
     mnuCallInitWide(0x330, 0x340, 0, (s32)work->commandLists[0], 0x53);
     itfDrawGridWithResolvedSlot(positions[0][0], positions[0][1], 0, 0x80,
-        work->batch, 8, 0x53);
-    frames = work->batch;
+        work->resourceSets[0], 8, 0x53);
+    frames = work->resourceSets[0];
     progress = ((u32)(*(u8 *)&frames->workEntries[8].geometry.cornerColors[0]) << 8) /
                (*(u8 *)&frames->workEntries[8].savedColors[0]);
     if (close != 0) {
@@ -1494,10 +1492,10 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 state) {
     effectOffset = effectIndex * sizeof(work->effect[0]) +
                    (u32)&((MenuTerminalWork *)0)->effect;
     effect = (EffMappedResource **)(state + effectOffset);
-    itfSetGridEntryQuantizedAndRefresh(work->batch, 9, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(work->batch, 9, *effect, 0, materialFlags, stateFlags);
-    itfSetGridEntryQuantizedAndRefresh(work->batch, 10, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(work->batch, 10, *effect, 0, materialFlags, stateFlags);
+    itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], 9, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(work->resourceSets[0], 9, *effect, 0, materialFlags, stateFlags);
+    itfSetGridEntryQuantizedAndRefresh(work->resourceSets[0], 10, 0, yOffset, 0, height);
+    effConfigureWithDefaultSetting(work->resourceSets[0], 10, *effect, 0, materialFlags, stateFlags);
 }
 
 void mnuDrawOwnerProgressAndFade(s32 close, MenuTerminalWork *work) {
@@ -1506,11 +1504,11 @@ void mnuDrawOwnerProgressAndFade(s32 close, MenuTerminalWork *work) {
     EffectSlotSet *frames;
 
     itfDrawGridWithResolvedSlot(positions.entries[1].firstValue, positions.entries[1].secondValue, 0, 0x80,
-                                work->batch, 10, 0x53);
+                                work->resourceSets[0], 10, 0x53);
     mnuCallInitWide(0x330, 0x2E8, 0, (s32)work->owner, 0x53);
     itfDrawGridWithResolvedSlot(positions.entries[0].firstValue, positions.entries[0].secondValue, 0, 0x80,
-                                work->batch, 9, 0x53);
-    frames = work->batch;
+                                work->resourceSets[0], 9, 0x53);
+    frames = work->resourceSets[0];
     progress = ((u32)(*(u8 *)&frames->workEntries[9].geometry.cornerColors[0]) << 8) /
                (*(u8 *)&frames->workEntries[9].savedColors[0]);
     if (close != 0) {
@@ -1556,8 +1554,8 @@ void mnuApplyGridPanelHostSetting(u32 kind, MenuTerminalWork *host) {
         slot = 3;
         break;
     }
-    itfSetGridEntryQuantizedAndRefresh(host->batch, 0x1A, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(host->batch, 0x1A,
+    itfSetGridEntryQuantizedAndRefresh(host->resourceSets[0], 0x1A, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(host->resourceSets[0], 0x1A,
                                    host->effect[slot], 0, value, flags);
 }
 
@@ -1571,9 +1569,9 @@ void mnuSlideTerminalThresholdList(s32 close, MenuTerminalWork *work) {
     s32 scale;
 
     itfDrawGridWithResolvedSlot(positions.entries[0].firstValue,
-        positions.entries[0].secondValue, 0, 0x80, work->batch, 0x1A, 0x53);
-    scale = ((u32)(*(u8 *)&work->batch->workEntries[0x1A].geometry.cornerColors[0]) << 8) /
-        (*(u8 *)&work->batch->workEntries[0x1A].savedColors[0]);
+        positions.entries[0].secondValue, 0, 0x80, work->resourceSets[0], 0x1A, 0x53);
+    scale = ((u32)(*(u8 *)&work->resourceSets[0]->workEntries[0x1A].geometry.cornerColors[0]) << 8) /
+        (*(u8 *)&work->resourceSets[0]->workEntries[0x1A].savedColors[0]);
     if (close != 0) {
         if (work->list->scale > 0) {
             work->list->scale -= 0x40;
@@ -2027,7 +2025,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
     index = fldGetModeFrameRecordIndex(work);
     sprintf(text, D_003BC3F0, datGameState->header.currency);
     if (fading == 0) {
-        color = (*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
+        color = (*(u8 *)&work->resourceSets[0]->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, work->list->scale);
     }

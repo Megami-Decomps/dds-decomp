@@ -641,7 +641,7 @@ BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner
             if (entry->paramKind != 0xFFFE) {
                 *workSlot = effParamWorkDuplicate(entry->value.work);
                 if (callbackEnabled != 0 && owner != NULL &&
-                    (entry->aimParams.scaleKind == 0 || entry->aimParams.scaleKind == 4)) {
+                    (entry->aimParams.kind == 0 || entry->aimParams.kind == 4)) {
                     f32 scale = effGetActorScaleForParameterWork((struct BtlUnit *)effect->owner);
                     effParamWorkCallback1(*workSlot, scale);
                 }

@@ -126,7 +126,7 @@ extern u32 D_003BDA2C;
 
 extern u32 D_003BDA28;
 
-extern ConsNode *D_003BD3C0;
+extern DevConsState *D_003BD3C0;
 
 extern u32 D_003BD3C4;
 
@@ -1552,11 +1552,11 @@ u32 *sdfDevConsGetGlyphUvTable(void) {
 }
 
 /* Append to the next-linked list and move its stored tail to this node. */
-void sdfDevConsListInsert(ConsNode *node) {
-    ConsNode *previousTail = D_003BD3C0;
+void sdfDevConsListInsert(DevConsState *node) {
+    DevConsState *previousTail = D_003BD3C0;
 
     node->next = NULL;
-    node->prev = previousTail;
+    node->previousNode = previousTail;
     if (previousTail != NULL) {
         previousTail->next = node;
     }
@@ -1564,12 +1564,12 @@ void sdfDevConsListInsert(ConsNode *node) {
 }
 
 /* Unlink this node, moving the stored tail when its next link is NULL. */
-void sdfDevConsListRemove(ConsNode *node) {
-    ConsNode *nextNode = node->next;
-    ConsNode *previousNode = node->prev;
+void sdfDevConsListRemove(DevConsState *node) {
+    DevConsState *nextNode = node->next;
+    DevConsState *previousNode = node->previousNode;
 
     if (nextNode != NULL) {
-        nextNode->prev = previousNode;
+        nextNode->previousNode = previousNode;
     } else {
         D_003BD3C0 = previousNode;
     }
@@ -1579,38 +1579,38 @@ void sdfDevConsListRemove(ConsNode *node) {
 }
 
 /* Unlink the console, release its cell-buffer allocation, then free the node. */
-void sdfDevConsNodeDestroy(ConsNode *node) {
+void sdfDevConsNodeDestroy(DevConsState *node) {
     sdfDevConsListRemove(node);
     sdfMemFreeDirect(node->bufferAllocation);
     sdfChipFreeDirect(node);
 }
 
 /* Reset both cursor coordinates and clear the two-byte character-cell grid. */
-void sdfDevConsNodeClear(ConsNode *node) {
+void sdfDevConsNodeClear(DevConsState *node) {
     node->cursorColumn = 0;
     node->cursorRow = 0;
     memset(node->cells, 0, node->columns * node->rows * SDF_CONSOLE_CELL_BYTES);
 }
 
 /* Reset a console through the existing clear operation. */
-void sdfDevConsResetNode(ConsNode *node) {
+void sdfDevConsResetNode(DevConsState *node) {
     sdfDevConsNodeClear(node);
 }
 
 /* Allocate a two-byte character grid and link it for cleanup.
  * Allocation uses the supplied dimensions; clearing uses their stored s16
  * values. Dimensions and the two opaque halfword inputs are not validated. */
-ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
-    ConsNode *node;
+DevConsState *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
+    DevConsState *node;
     struct SdfMemBlock *bufferAllocation;
 
     sdfDevConsInit();
-    node = sdfChipAllocDirect(sizeof(ConsNode));
+    node = sdfChipAllocDirect(sizeof(DevConsState));
     node->screenOriginX = screenOriginX;
     node->screenOriginY = screenOriginY;
     node->columns = columns;
     node->rows = rows;
-    node->opaque17 = 8;
+    node->tabWidth = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
     bufferAllocation = sdfMemAllocDirect((columns * rows) * SDF_CONSOLE_CELL_BYTES);
