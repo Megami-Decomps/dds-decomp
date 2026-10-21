@@ -709,7 +709,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
     return 1;
 }
 
-void func_00154F18(s32 unusedMode) {
+void fldNoopWithMode(s32 mode) {
 }
 
 u32 func_00154F20(void) {
