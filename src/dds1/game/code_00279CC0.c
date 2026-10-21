@@ -287,17 +287,7 @@ extern void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fa
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
 extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
 
-/* Draw a linkage-skill row: a ranged skill draws its range cost and icon,
- * an empty slot its frame, word table and highlight marker.
- *
- * surfaceIndex is set before the branch, as `layer`/`surfaceIndex` are in
- * DDS2 mnuDrawCampFieldSkillPage and mnuDrawCampScaledTexture. A constant
- * pseudo set in one block and used once in another is moved next to its use
- * by local-alloc's update_equiv_regs (REG_BASIC_BLOCK < 0), so retail loads
- * 0x53 into $2 right before its stack store; a literal argument stays in the
- * range block, is scheduled early by sched1 and takes the beq delay slot
- * (cc1probe --sched --alloc). The else-block locals are what sched1 moves
- * into the first block, as in the sibling ptySkillMenuDrawEquippedSkillEntry. */
+/* Draw a linkage skill's range and cost, or the empty-slot frame and marker. */
 void ptyDrawLinkageSkillEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
                               struct MenuListNode *node, s32 texture) {
     CampMenuContext *context = (CampMenuContext *)list->context;
