@@ -7,6 +7,11 @@
 #include "dat_state.h"
 #include "mnu_scroll_panel.h"
 #include "mdl_flag_api.h"
+#include "sdk_libc.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "ui_color.h"
+#include "eff.h"
 /* Declared before first use (were implicit int). */
 extern void mnuCreateConfigTasks(s32 mode);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface);
@@ -291,7 +296,59 @@ s32 mtrMantraFindIndex(s32 mantraId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", mnuDrawCampGridEntry);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
+extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
+extern char D_00437BB8[];
+extern char D_00437BC0[];
+extern char D_00437BC8[];
+
+/* Draw one camp item row: the owned-count label and quantity when the item is
+ * held, otherwise an empty placeholder bar under the highlight index. */
+void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *list,
+                          struct MenuListNode *node, s32 texture) {
+    s32 scale = list->scale;
+    MenuStaffContext *context;
+    u32 color;
+    s32 markerY;
+    char buffer[32];
+
+    context = (MenuStaffContext *)list->context;
+    color = uiBlendColors(0xA09DC380, 0xA09DC300, scale);
+    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    markerY = y + 0x40;
+    if (datGameState->inventory.counts[node->sortKeySecondary] != 0) {
+        struct FrFontGlyph *glyph;
+
+        if (node->flags48 & 1) {
+            color = 0xA09DC320;
+        }
+        glyph = itfCreateFont2TextGlyph(x + offset + 0x840, y + 0x20, depth, color, D_00437BB8, 0);
+        frSetFontColorNo(glyph, 0);
+        sprintf(buffer, D_00437BC0, datGameState->inventory.counts[node->sortKeySecondary]);
+        glyph = itfCreateFont2TextGlyph(x + offset + 0x910, y + 0x20, depth, color, buffer, glyph);
+        frFontDrawGlyphChain(glyph, 1, texture);
+        frDestroyFontRequestAfter(glyph);
+    } else {
+        EffectSlotSet *resource = context->resources.baseResources[1];
+        s32 entryIndex;
+        s32 markerX;
+
+        node->value = D_00437BC8;
+        {
+            s32 highlight = list->cursor == node;
+
+            entryIndex = highlight + 0x1B;
+        }
+        markerX = x + offset + 0x1C0;
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        mnuDrawRepeatedPanelSprites(markerX, markerY, depth, scale, 8,
+                                    resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437B88);
 
