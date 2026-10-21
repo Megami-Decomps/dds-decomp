@@ -80,7 +80,7 @@ extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
 void btlPrepareSavedCommandTargets(BtlTask *, BattleIndexWork *);
 
-extern s32 btlIsUnitInActiveList(void *unit);
+extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -5877,7 +5877,7 @@ f32 btlGetPoseBlendProgress(s32 unit) {
     return *(f32 *)(unit + 0x128);
 }
 
-s32 btlIsUnitInActiveList(void *unit) {
+s32 btlIsUnitInActiveList(BtlUnit *unit) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlTask *slot = work->cameraCommand.task;
     u32 count;

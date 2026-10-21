@@ -75,7 +75,7 @@ extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
 extern void btlClearAllUnitDefeatCandidates(void);
 
-extern s32 btlIsUnitInActiveList(void *unit);
+extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
@@ -6074,7 +6074,7 @@ f32 btlGetPoseBlendProgress(u8 *unit) {
     return ((BtlLinkedCommand *)unit)->progress;
 }
 
-s32 btlIsUnitInActiveList(void *unit) {
+s32 btlIsUnitInActiveList(BtlUnit *unit) {
     u8 *work = (u8 *)btlGetRuntime();
     u8 *slot = (u8 *)((BtlState *)work)->cameraCommand.link;
     u32 count;
