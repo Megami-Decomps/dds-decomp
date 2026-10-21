@@ -725,7 +725,7 @@ extern void dds3SetPathStateValue(EffWorldNode *path, u32 value);
 extern EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name);
 extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
-extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
+extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32 mode, u32 pointId, f32 *rotation,
                             f32 x, f32 y, f32 z);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);
@@ -862,7 +862,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     break;
                 case 1:
                     spawnedObject = evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, spawnResource->name);
-                    func_0013BAB8(spawnResource, spawnedObject);
+                    fldRegisterRoomObject(spawnResource, spawnedObject);
                     break;
                 case 2:
                     if (D_00389874[0] != 0) {
