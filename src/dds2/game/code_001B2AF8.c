@@ -5101,7 +5101,7 @@ extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s3
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416520);
 
-void func_001BD9A0(BattleSceneObject *object, s32 kind) {
+void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 kind) {
     /* Retail copies the rodata colors at 001B2DBC..001B2DD8. */
     BattlePanelColors colors = D_00416520;
     s32 row = 0;
@@ -9877,14 +9877,14 @@ extern void func_001B5A20(BattleSceneObject *);
 /* Task-update result: retail returns 0 or -1, even when this caller discards it. */
 extern s32 func_001BFB58(KwlnTask *);
 extern s32 func_001C8A80(BattleSceneObject *);
-extern void func_001BD9A0(BattleSceneObject *, s32);
+extern void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *, s32);
 extern s32 btlHasHighPriorityState(void);
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 
 /* The same native command-selection sequence occurs in four switch paths. */
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     btlDrawCommandClassRows((s32)object);
-    func_001BD9A0(object, btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex));
+    btlUpdateAndDrawCommandSelectionHighlight(object, btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex));
 }
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004169F0);
