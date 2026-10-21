@@ -89,7 +89,7 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
 extern void itfPanelSetStatus(s32 windowIndex, s32 status);
 extern void itfPanelSetPairFirst(s32 windowIndex, s32 status);
-extern void itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
+extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern char mnuTerminalPopupEntries[];
 extern void itfMesDestroyWindowIfPresent(s32 window);
 extern u8 *D_003BAA70;
