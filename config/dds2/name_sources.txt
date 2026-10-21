@@ -9991,3 +9991,4 @@
 0x0040F588	__malloc_current_mallinfo	inferred	newlib's mallinfo totals; its arena is the memory taken from sbrk. DDS1 twin 0x0039C408.
 0x0040F5D0	sbrkBreak	inferred	The heap's current end that sbrk moves (Sony's sbrk: checked against EndOfHeap with interrupts off), initialized to the end of the loaded image; newlib's allocator grows and trims through it. DDS1 twin 0x0039C450.
 0x0040F5C8	fileioLibraryVersion	inferred	The EE FILEIO library's version ("2500" here): the library's open compares the IOP FILEIO's reply at 0x00486FA8 with it, or with "....", and refuses a mismatch. DDS1 twin 0x0039C448.
+0x00306030	sdfDrawTexturedQuad	inferred	DDS1's sdfDrawTexturedQuad (0x002BE8A8) with one parameter more, the aspect mode it passes to itfRotateScreenOffset; DDS1's C compiles to it.
