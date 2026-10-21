@@ -962,7 +962,7 @@ void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) 
     }
 }
 
-extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, struct EffectSlotSet *, s32);
 extern char D_0042AD08[];
 
 s32 mnuDrawStaffValuePage(KwlnTask *task) {
@@ -1004,7 +1004,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
-            mnuDrawRemainingAndTotalCounts(0x770, 0xB98, 0x100, selectionId, (s32)context->resources.baseResources[1], 0x2C);
+            mnuDrawRemainingAndTotalCounts(0x770, 0xB98, 0x100, selectionId, context->resources.baseResources[1], 0x2C);
         }
     } else {
         effDrawTextureSlotWithBlendedCornerColors(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,
