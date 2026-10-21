@@ -632,23 +632,23 @@ extern void fldLoadBattleSkyAndFilter(void);
 extern void fldResetSceneResourceTables(void);
 
 void fldInitializeDisplayAndTables(void) {
-    sdfDebugPrintf(D_003BAB70);
+    printf(D_003BAB70);
     fldInitDisplayObjects();
-    sdfDebugPrintf(D_003BAB78);
+    printf(D_003BAB78);
     fldResetPlayerSceneTransformState();
-    sdfDebugPrintf(D_003BAB80);
+    printf(D_003BAB80);
     fldResetPendingSounds();
-    sdfDebugPrintf(D_003BAB88);
+    printf(D_003BAB88);
     sdfRandomize(D_0032F240, 0x1e240);
-    sdfDebugPrintf(D_003BAB90);
+    printf(D_003BAB90);
     fldParseMixLb();
-    sdfDebugPrintf(D_003BAB98);
+    printf(D_003BAB98);
     fldLoadBattleSkyAndFilter();
-    sdfDebugPrintf(D_003BABA0);
+    printf(D_003BABA0);
     fldResetSceneResourceTables();
-    sdfDebugPrintf(D_003BABA8);
+    printf(D_003BABA8);
     fldLoadFieldTables();
-    sdfDebugPrintf(D_003BABB0);
+    printf(D_003BABB0);
 }
 
 void fldResetPlayerSceneTransformState(void) {

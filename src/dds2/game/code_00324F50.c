@@ -453,7 +453,7 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     relocations = sdfAllocateOwnedResourceBuffer(owner, *relocationHeader);
     memset(relocations, 0, *relocationHeader);
     dds3ApplyRelocationOffsets(data, data, relocations, *relocationHeader);
-    sdfFreeHeapMemory(relocations);
+    free(relocations);
     result->data = data;
     result->firstCount = (*source)->count;
     for (node = (*groups)->head; node != NULL; node = node->next) {

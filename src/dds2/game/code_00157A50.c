@@ -57,7 +57,7 @@ void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
                 *(f32 *)(payload + 0x10);
         }
         if (type < 2 && descriptor->arg == 0) {
-            sdfDebugPrintf("effManager:par spiral old version!![%f]\n", descriptor->version);
+            printf("effManager:par spiral old version!![%f]\n", descriptor->version);
         }
     }
 }
@@ -105,7 +105,7 @@ void effInitializeBillResourceOwners(void) {
         } while (node != NULL);
     }
     btlStageTaskCleanupCallback(archive);
-    sdfDebugPrintf(D_004142C0, D_004142B0);
+    printf(D_004142C0, D_004142B0);
 }
 
 void effBillDispatchAll(void) {

@@ -101,7 +101,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
     s32 characterCount = 0;
     s32 character;
     __builtin_stdarg_start(arguments, format);
-    sdfVFormatString(textBuffer, format, arguments);
+    vsprintf(textBuffer, format, arguments);
     character = textBuffer[0];
     if (character != 0) {
         do {

@@ -33,7 +33,7 @@ void effReleaseBattleVoiceOwner(BattleEffect *owner) {
     }
     sndUnlinkVoice(owner);
     owner->state->active--;
-    sdfDebugPrintf(D_00414478, owner->kind, owner->state,
+    printf(D_00414478, owner->kind, owner->state,
                   owner->state->active);
     sdfChipFreeDirect(owner);
 }
@@ -198,7 +198,7 @@ void effBattleUpdate(BattleEffect *work) {
             if (list->shake < 0x1F) {
                 kwlnFadeSetupFrames(list->shakeFade, list->shake * 10);
             } else {
-                sdfDebugPrintf("effBattle : shake over[%d]\n", list->shake);
+                printf("effBattle : shake over[%d]\n", list->shake);
                 kwlnFadeSetupFrames(list->shakeFade, 0x12C);
             }
         }

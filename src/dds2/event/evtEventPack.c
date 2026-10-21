@@ -59,7 +59,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 case 5:
                     entrySize = entry->dataSize;
                     modelPayload = packState->data + entry->dataOffset;
-                    sdfDebugPrintf(D_00424830, resourceId, entrySize);
+                    printf(D_00424830, resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
                     case 0x2AC:
@@ -76,7 +76,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                     if (evtNextCameraSlotViewerKey >= 0x7D0) {
                         evtNextCameraSlotViewerKey = 0x3E8;
                     }
-                    sdfDebugPrintf(D_00424850, evtNextCameraSlotViewerKey, entrySize);
+                    printf(D_00424850, evtNextCameraSlotViewerKey, entrySize);
                     return viewerObjectKey;
                 }
             }
@@ -176,7 +176,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
                     evtSetBgmVolumePan(motionSeParams->eventTaskId, cues[cueIndex].fade);
-                    sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
+                    printf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
         }
@@ -219,7 +219,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventDirectoryId;
     struct FileRequest *request;
 
-    sdfDebugPrintf(D_004377E0);
+    printf(D_004377E0);
     eventId = state->eventId;
     eventDirectoryId = eventId - eventId % 10;
     sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, eventDirectoryId, eventId, eventId);
@@ -258,7 +258,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             }
         }
     } else {
-        sdfDebugPrintf(D_004377E8);
+        printf(D_004377E8);
         state->loaded = EVT_PACK_LOAD_COMPLETE;
     }
 }

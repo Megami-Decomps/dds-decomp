@@ -1075,7 +1075,7 @@ void evtEventViewerApplyDurationScaledEffectAlpha(EvtRuntimeGroup *group, EvtRun
     if (key->duration >= elapsed) {
         node = ((EvtViewerObjectData *)viewer->objects[key->p08.sb[0]]->data)->parameterNode;
         alpha = (s32)((128.0f / key->duration) * elapsed);
-        sdfDebugPrintf("alpha=%d\n", alpha);
+        printf("alpha=%d\n", alpha);
         color = ((u32)alpha << 24) | 0x808080;
         effSetNodeParameterValue(node, color);
     }

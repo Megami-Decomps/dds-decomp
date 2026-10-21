@@ -6820,9 +6820,9 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
         f32 halfDepth = (maxZ - minZ) * 0.5f;
         f32 halfHeight = highestOffset * 0.5f;
 
-        sdfDebugPrintf("----------------------------------\n");
-        sdfDebugPrintf("Len[ %f %f %f]\n", (f64)halfWidth, (f64)halfHeight, (f64)halfDepth);
-        sdfDebugPrintf("----------------------------------\n");
+        printf("----------------------------------\n");
+        printf("Len[ %f %f %f]\n", (f64)halfWidth, (f64)halfHeight, (f64)halfDepth);
+        printf("----------------------------------\n");
 
         if (halfDepth < halfWidth) {
             radius = halfHeight;

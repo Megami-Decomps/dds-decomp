@@ -9873,3 +9873,7 @@
 0x001EB368	btlUpdateCameraCursorPose	inferred	Updates the battle camera pose from the active camera cursor across its supported cursor kinds.
 0x001B1C88	btlUpdatePhasePanelSecondaryAnimation	inferred	Advances the phase-change panel's secondary animation through its mode-specific bounds, echo positions, fades, flags, and phase transitions. Paired DDS2 0x001BC8A8.
 0x001B2390	btlDrawPhaseChangePanelEchoes	inferred	Draws the phase-change panels and their trailing echoes using the current phase, mode-specific slots, crop bounds, textures, and fade colors. Paired DDS2 0x001BCFB0.
+0x003003F0	printf	inferred	newlib printf: between _printf_r and _puts_r in the stdio objects, formats through vfprintf to stdout. DDS2 twin 0x0035B6E0.
+0x00305B08	vsprintf	inferred	newlib vsprintf: formats into a caller buffer through vfprintf with a string FILE. DDS2 twin 0x00360E78.
+0x002FF590	free	inferred	newlib free: follows malloc in mallocr, passes its pointer to _free_r with the reentrancy state. DDS2 twin 0x0035A880.
+0x00307308	fread	inferred	newlib fread: copies buffered bytes with memcpy and refills through __srefill. DDS2 twin 0x00359B18.

@@ -132,7 +132,7 @@ void fileUnlinkNode(FileManWork *work, FileRequest *job) {
 struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
     FilePacRequest *request;
 
-    sdfDebugPrintf("pac load %s\n", requestName);
+    printf("pac load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(sizeof(FilePacRequest));
     sdfPacInitializeDispatchPacket(&request->packet, dispatchValue);
     if (flags != 0) {
@@ -159,7 +159,7 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
     FileRequest *request;
 
-    sdfDebugPrintf("file load %s\n", requestName);
+    printf("file load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
     request->allocationMode = callbackMode;
     fileManQueueNamedRequest(request, FILE_REQUEST_KIND_CALLBACK, requestName,

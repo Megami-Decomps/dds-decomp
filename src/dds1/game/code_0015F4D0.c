@@ -422,7 +422,7 @@ void dds3StartCrossfade(s32 frames) {
         D_003BB020 = frames;
         D_003BB018 = 1;
         D_003BB01C = 0;
-        sdfDebugPrintf("dds3CrossfadeStart\n");
+        printf("dds3CrossfadeStart\n");
     }
 }
 
@@ -524,7 +524,7 @@ void dds3EndCrossfade(void) {
     kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
     D_003BB018 = 0;
-    sdfDebugPrintf(D_003A0D70);
+    printf(D_003A0D70);
 }
 
 extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *src);
@@ -656,7 +656,7 @@ BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner
     }
 
     effect->currentFrame = 0;
-    sdfDebugPrintf("effBTL:cut %d handle create(%p)[%d]\n",
+    printf("effBTL:cut %d handle create(%p)[%d]\n",
                   effect->kind, effect->state,
                   effect->state->active);
     effect->state->active++;

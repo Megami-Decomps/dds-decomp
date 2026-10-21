@@ -1048,7 +1048,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         unit->effObj->inner->rotation[vectorComponentIndex] = savedB[vectorComponentIndex];
     }
     if (simulatedStepCount == 0) {
-        sdfDebugPrintf("ymove frameno = 0\n");
+        printf("ymove frameno = 0\n");
         unit->stepCount = 0;
         unit->speedY = 0;
         return 0;
@@ -1059,7 +1059,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     VU0_STORE_VF(vf10, delta);
     unit->stepCount = simulatedStepCount;
     unit->speedY = delta[1] / (f32)simulatedStepCount;
-    sdfDebugPrintf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", simulatedStepCount, unit->speedY, delta[1]);
+    printf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", simulatedStepCount, unit->speedY, delta[1]);
     return simulatedStepCount;
 }
 
@@ -1481,7 +1481,7 @@ s32 evtUpdateUnitMotion(ObjectTransform *unused, EffWorldNode *object) {
         if (enabled != 0) {
             if (unit->slotFlags[i] & 2) {
                 unit->slotFlags[i] &= ~2;
-                sdfDebugPrintf("set exmot %d_%d\n", i, unit->slotA[i]);
+                printf("set exmot %d_%d\n", i, unit->slotA[i]);
                 if (unit->slotFlags[i] & 8) {
                     mdlAddEntryFlaggedEx(model, i, unit->slotA[i], (f32)unit->slotB[i], (f32)unit->slotC[i]);
                 } else {
@@ -1822,36 +1822,36 @@ u32 evtOpModelLodChg(void) {
     s32 max;
 
     lod = scrReadIntParameter(1);
-    sdfDebugPrintf("call: MODEL_LOD_CHG(int,int)\n");
+    printf("call: MODEL_LOD_CHG(int,int)\n");
     world = dds3GetWorldObject();
     unit = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 5);
     if (unit == NULL) {
-        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
+        printf("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
         return 1;
     }
     data = unit->data;
     if (data->modelHolder == NULL) {
-        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
+        printf("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
         return 1;
     }
     modelHolder = data->modelHolder;
     if (modelHolder->resourceHandle == 0) {
-        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
+        printf("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
         return 1;
     }
     context = (MdlCtx *)modelHolder->resourceHandle;
     model = context->inner;
     if (model == NULL) {
-        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
+        printf("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
         return 1;
     }
     max = (s32)sdfGetLodChunkValue(model);
     if (max < lod) {
-        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
+        printf("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
         return 1;
     }
     model->lodIndex = lod;
-    sdfDebugPrintf("success: MODEL_LOD_CHG(int,int)\n");
+    printf("success: MODEL_LOD_CHG(int,int)\n");
     return 1;
 }
 
@@ -1935,7 +1935,7 @@ u32 evtOpDeprecatedModelMotion(void) {
         return 1;
     }
     evtPrepareUnitMotionState(unit, scrReadIntParameter(1), scrReadIntParameter(2), scrReadIntParameter(3), 0);
-    sdfDebugPrintf(D_00421810);
+    printf(D_00421810);
     return 1;
 }
 
@@ -1996,16 +1996,16 @@ void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
         }
     }
     if (unit == NULL) {
-        sdfDebugPrintf("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
+        printf("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
     if (motionId >= mdlGetNodeRefHalf(model, 2)) {
-        sdfDebugPrintf("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
+        printf("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
     evtConfigureUnitMotionSlot(unit, 2, motionId, 0, 5, 1);
     D_004371F0 = unitUniqueId;
-    sdfDebugPrintf("<lips %d %d> \n", unitUniqueId, motionId);
+    printf("<lips %d %d> \n", unitUniqueId, motionId);
 }
 
 void evtLipsStopFunction(void) {
@@ -2024,15 +2024,15 @@ void evtLipsStopFunction(void) {
         }
     }
     if (unit == NULL) {
-        sdfDebugPrintf("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
+        printf("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
     if (mdlGetNodeRefHalf(model, 2) == 0) {
-        sdfDebugPrintf("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
+        printf("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
     evtConfigureUnitMotionSlot(unit, 2, 0, 0, 3, 2);
-    sdfDebugPrintf("<lips_stop> stopunitid = %d\n", D_004371F0);
+    printf("<lips_stop> stopunitid = %d\n", D_004371F0);
     D_004371F0 = 0;
 }
 
@@ -2228,7 +2228,7 @@ u32 evtCmdPrepareUnitMotionAndLogState(void) {
         return 1;
     }
     evtPrepareUnitMotionState(unit, scrReadIntParameter(1), 5, 7, 1);
-    sdfDebugPrintf("\xA2\xA8\xC3\xED\xB0\xD5:MODEL_MOVE_MOT()\xA4\xB3\xA4\xCE\xA5\xB3\xA5\xDE\xA5\xF3\xA5\xC9"
+    printf("\xA2\xA8\xC3\xED\xB0\xD5:MODEL_MOVE_MOT()\xA4\xB3\xA4\xCE\xA5\xB3\xA5\xDE\xA5\xF3\xA5\xC9"
                   "\xA4\xCF\xBA\xA3\xB8\xE5\xBB\xC8\xCD\xD1\xB6\xD8\xBB\xDF\xA4\xCB\xA4\xCA\xA4\xEA\xA4\xDE\xA4\xB9\xA1\xA3\n");
     return 1;
 }
@@ -2590,7 +2590,7 @@ u32 evtOpSpawnBoundEffectFromTaskResource(void) {
     }
     object = effObjSpawnDescriptorBoundEffect(descriptor, firstVector, secondVector);
     if (object == NULL) {
-        sdfDebugPrintf(D_00421A78, 1);
+        printf(D_00421A78, 1);
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(object, 1);
@@ -2610,8 +2610,8 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
     resourceName = scrReadStringParameter(0);
     unit = effObjSpawnLoadedResourceEffect((const char *)resourceName, buf1, buf2);
     if (unit == NULL) {
-        sdfDebugPrintf(D_00421A90, 1);
-        sdfDebugPrintf(D_00421AC0, scrReadStringParameter(0));
+        printf(D_00421A90, 1);
+        printf(D_00421AC0, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -2632,8 +2632,8 @@ u32 evtOpCreateAndFlagObjectFromResourceName(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjCreateFromResolvedResource(param0, buf1, buf2);
     if (unit == NULL) {
-        sdfDebugPrintf(D_00421A90, 1);
-        sdfDebugPrintf(D_00421AC0, scrReadStringParameter(0));
+        printf(D_00421A90, 1);
+        printf(D_00421AC0, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -2744,8 +2744,8 @@ u32 evtCmdCreateEffectObjectFromResource(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjCreateKindFromResource(1, param0);
     if (unit == NULL) {
-        sdfDebugPrintf(D_00421B20, 1);
-        sdfDebugPrintf(D_00421AC0, scrReadStringParameter(0));
+        printf(D_00421B20, 1);
+        printf(D_00421AC0, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -2792,8 +2792,8 @@ u32 evtScriptCreateEffectObjectFromResource(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjCreateKindFromResource(2, param0);
     if (unit == NULL) {
-        sdfDebugPrintf(D_00421B70, 1);
-        sdfDebugPrintf(D_00421AC0, scrReadStringParameter(0));
+        printf(D_00421B70, 1);
+        printf(D_00421AC0, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);

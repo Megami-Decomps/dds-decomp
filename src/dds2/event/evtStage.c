@@ -136,7 +136,7 @@ void evtKillFieldScriptTasks(void) {
         for (taskIndex = 0; taskIndex < dds3GetProcessCount(taskState); taskIndex++) {
             task = dds3SearchProcessNumber(taskState, taskIndex);
             if (task->priority == 0x3EA) {
-                sdfDebugPrintf(evtFieldScriptTerminationFormat, task->name);
+                printf(evtFieldScriptTerminationFormat, task->name);
                 dds3KillProcess(task, 0);
                 /* Destruction changes the queue, so restart the current scan. */
                 goto restartStateScan;

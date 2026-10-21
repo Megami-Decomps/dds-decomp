@@ -721,7 +721,7 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
         BillPluralRecord *records;
         u32 i = 0;
 
-        sdfDebugPrintf("billAnim..PLURAL SET\n");
+        printf("billAnim..PLURAL SET\n");
         obj->modeFlags = 0x10000000;
         obj->animationEntryIndex = animationEntryIndex;
         obj->entryCount = entry->frameCount;
@@ -731,7 +731,7 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
             (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
         }
     } else if (entry->entryModeFlags & 0xC0) {
-        sdfDebugPrintf("billAnim..(A)MTEX SET\n");
+        printf("billAnim..(A)MTEX SET\n");
         obj->modeFlags = entry->entryModeFlags;
         obj->animationEntryIndex = animationEntryIndex;
         obj->entryCount = 2;
@@ -744,7 +744,7 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
         billResolveEntry(data, animationEntryIndex, obj->resolvedEntries);
     }
     if (entry->entryModeFlags & 0x100) {
-        sdfDebugPrintf("billAnim..P2A POLYGON\n");
+        printf("billAnim..P2A POLYGON\n");
     }
     obj->animationActive = 1;
 }
@@ -780,14 +780,14 @@ BillData *billCreateAnimationDataFromResource(void *resourceData) {
         BillAnimationEntry *entry = &data->entries[resourceIndex];
         if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
             data->entryCount = entry->frameCount;
-            sdfDebugPrintf("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
+            printf("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
             if (entry->entryModeFlags & 0x40) {
                 data->entryCount = 2;
-                sdfDebugPrintf("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
+                printf("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
             } else if (entry->entryModeFlags & 0x80) {
                 data->entryCount = 2;
-                sdfDebugPrintf("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
+                printf("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
             }
         }
     }

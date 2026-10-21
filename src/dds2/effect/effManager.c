@@ -170,7 +170,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     EffLegacyNodeInstanceView *instance;
 
     if (descriptor->version < 1.03f) {
-        sdfDebugPrintf("old version!![%f]\n", descriptor->version);
+        printf("old version!![%f]\n", descriptor->version);
         effConvertLegacyNodeDescriptor(descriptor);
     }
     node = effCreateNode((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
@@ -186,7 +186,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
             EE_MMI_UNIT_MATRIX(&instance->matrixAt20);
             break;
         }
-        sdfDebugPrintf("effManager:set Identity matrix\n");
+        printf("effManager:set Identity matrix\n");
     }
     return node;
 }
@@ -200,7 +200,7 @@ struct EffNode *effLoadResourceNode(const char *resource) {
     struct SdfMemBlock *resourceHandle;
     struct EffNode *node;
 
-    sdfDebugPrintf("d3p file read...[%s]\n", resource);
+    printf("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
     sdfMemFreeDirect(resourceHandle);

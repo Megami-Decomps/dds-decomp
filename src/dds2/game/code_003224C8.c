@@ -1369,7 +1369,7 @@ MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) 
 /* Removal supplies an index and value; release only the non-null value allocation. */
 void mnuFreeListValueCallback(u32 unused, u32 ptr) {
     if (ptr != 0) {
-        sdfFreeHeapMemory(ptr);
+        free(ptr);
     }
 }
 
@@ -1392,7 +1392,7 @@ void mnuReleaseEffectPairAndNode(u32 node) {
     if (pair != NULL) {
         dds3DestroyCallbackNodeAfterLastNotification(pair->first);
         dds3DestroyCallbackNodeAfterLastNotification(pair->second);
-        sdfFreeHeapMemory(pair);
+        free(pair);
     }
 }
 

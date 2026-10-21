@@ -953,7 +953,7 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
         if (owner != NULL) {
             itfMesSetTextSlotFromValue(state->dialogId, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
-        sdfDebugPrintf("JYOKYO ID : %d\n", state->dialogId);
+        printf("JYOKYO ID : %d\n", state->dialogId);
         btlReplaceDialogTasksAndQueueMessage(state->dialogId, link->arg);
     }
     if (btlHasRegisteredAphNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x2D) {

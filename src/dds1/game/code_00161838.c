@@ -64,7 +64,7 @@ void effBTLFieldColorGetBaseColor(s32 colorId, s16 variant, s16 kind, f32 *outpu
     s16 index = variant - 200;
 
     if ((u16)index >= 40 || kind <= 0 || kind >= 11) {
-        sdfDebugPrintf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
+        printf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
         VU0_LOAD_VF(vf10, D_00352880);
     } else {
         VU0_LOAD_VF(vf10, D_00350F60[(index * 10) + kind - 1]);

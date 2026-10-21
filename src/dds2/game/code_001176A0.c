@@ -456,7 +456,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
         address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
     sdfMemFreeDirect(block);
-    sdfDebugPrintf(D_00412AB0, table->path);
+    printf(D_00412AB0, table->path);
 }
 
 void sdfResetChannels(void) {
@@ -812,7 +812,7 @@ u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     hit = 1;
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
-        sdfDebugPrintf(D_00412B08, scaled, ratio, mask);
+        printf(D_00412B08, scaled, ratio, mask);
         roll = sdfGetRandInt(0, 100);
         hit = roll < scaled;
     }

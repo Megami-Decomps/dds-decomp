@@ -30,7 +30,7 @@ void mnuInitializeHighScoreState(MnuShootingWork *work) {
     work->peakScore = datGameState->highScore;
     work->pendingScore = datGameState->highScore;
     work->currentScore = 0;
-    sdfDebugPrintf("************************Score Init!![%d]\n",
+    printf("************************Score Init!![%d]\n",
                   datGameState->highScore);
 }
 
@@ -44,7 +44,7 @@ void mnuClampPendingScoreToPeak(MnuShootingWork *work) {
         work->pendingScore = peakScore;
         pendingScore = peakScore;
     }
-    sdfDebugPrintf("************************Score SetGlobal!![%d / %d]\n", (s32)pendingScore, (s32)peakScore);
+    printf("************************Score SetGlobal!![%d / %d]\n", (s32)pendingScore, (s32)peakScore);
 }
 
 
@@ -58,7 +58,7 @@ void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
     } else {
         mdlFlagClear(0x815);
     }
-    sdfDebugPrintf("************************Score Update!![%d / %d]\n",
+    printf("************************Score Update!![%d / %d]\n",
                   datGameState->highScore, work->pendingScore);
 }
 
@@ -69,7 +69,7 @@ void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *work) {
 
     work->peakScore = pendingScore;
     work->currentScore = pendingScore;
-    sdfDebugPrintf("************************Score Reset!![%d]\n", pendingScore);
+    printf("************************Score Reset!![%d]\n", pendingScore);
 }
 
 struct SoundSlot;

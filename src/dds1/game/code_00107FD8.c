@@ -1616,7 +1616,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
 
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
-        sdfVFormatString(messageBuffer, format, formatArgs);
+        vsprintf(messageBuffer, format, formatArgs);
         sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }

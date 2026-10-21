@@ -1849,7 +1849,7 @@ void btlPushSavedPartyUnitStates(void) {
                        sizeof(btlSavedPartyUnitStates[count].entrySlots));
                 btlSavedPartyUnitStates[count].status = unit->partyRecord.status & 0xEFF9;
                 count++;
-                sdfDebugPrintf("btl:state push[%d:%X]\n", count,
+                printf("btl:state push[%d:%X]\n", count,
                               unit->partyRecord.unitId);
             }
         }
@@ -1885,7 +1885,7 @@ void btlRestorePartySlotSnapshots(void) {
                             unit->status.flags |= 0x20;
                             unit->partyRecord.hp = 0;
                         }
-                        sdfDebugPrintf("btl:state pos[%d:%X]\n", slot, unit->partyRecord.unitId);
+                        printf("btl:state pos[%d:%X]\n", slot, unit->partyRecord.unitId);
                         break;
                     }
                 }

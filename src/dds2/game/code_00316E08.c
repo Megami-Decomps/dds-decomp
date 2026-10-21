@@ -386,28 +386,28 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             case 14:
                 evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->packageEntryIndex].name);
                 work->objects = mnuLoadSectionObjectListWithRelocations(data);
-                sdfDebugPrintf(D_0042D578);
+                printf(D_0042D578);
                 break;
             case 7:
             case 11:
             case 15:
-                sdfDebugPrintf(D_0042D588, D_0040A970[work->packageEntryIndex].name);
+                printf(D_0042D588, D_0040A970[work->packageEntryIndex].name);
                 work->playerObjects = mnuLoadSectionObjectListWithRelocations(data);
-                sdfDebugPrintf(D_0042D578);
+                printf(D_0042D578);
                 break;
             case 8:
             case 12:
             case 16:
-                sdfDebugPrintf(D_0042D5B0, D_0040A970[work->packageEntryIndex].name);
+                printf(D_0042D5B0, D_0040A970[work->packageEntryIndex].name);
                 work->mapObjects = mnuLoadSectionObjectListWithRelocations(data);
-                sdfDebugPrintf(D_0042D578);
+                printf(D_0042D578);
                 break;
             case 9:
             case 13:
             case 17:
-                sdfDebugPrintf(D_0042D5D0, D_0040A970[work->packageEntryIndex].name);
+                printf(D_0042D5D0, D_0040A970[work->packageEntryIndex].name);
                 work->drawObjects = mnuLoadSectionObjectListWithRelocations(data);
-                sdfDebugPrintf(D_0042D578);
+                printf(D_0042D578);
                 break;
             default:
                 break;
@@ -415,11 +415,11 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             break;
 
         case 1:
-            sdfDebugPrintf(D_0042D5F0, D_0040A970[work->packageEntryIndex].name);
+            printf(D_0042D5F0, D_0040A970[work->packageEntryIndex].name);
             break;
 
         case 2:
-            sdfDebugPrintf(D_0042D608, D_0040A970[work->packageEntryIndex].name);
+            printf(D_0042D608, D_0040A970[work->packageEntryIndex].name);
             break;
 
         case 5: {
@@ -1337,7 +1337,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
             instance->scale = (f32)parameters->scale / 100.0f;
             func_00319A58(entry, work);
         } else {
-            sdfDebugPrintf("sprite none\n");
+            printf("sprite none\n");
         }
     }
     evtPrintDeveloperConsoleMessage("---------------------create!!\n");

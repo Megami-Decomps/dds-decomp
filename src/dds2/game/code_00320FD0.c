@@ -44,7 +44,7 @@ void mnuClearResourceList(MnuCallbackList *list) {
                 SdfListNode *current = node;
                 node = node->next;
                 list->onRemove(current->index, (u32)current->value);
-                sdfFreeHeapMemory(current);
+                free(current);
             } while (node != NULL);
         }
         list->tail = NULL;

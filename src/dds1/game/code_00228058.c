@@ -75,7 +75,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     if (work->task == NULL) {
-        sdfDebugPrintf(D_003ACA78);
+        printf(D_003ACA78);
         return 1;
     }
     id = scrReadIntParameter(0);
@@ -99,7 +99,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     if (work->task == NULL) {
-        sdfDebugPrintf(D_003ACAE0);
+        printf(D_003ACAE0);
         return 1;
     }
     task = evtCreateTask(0x2afe, scrReadStringParameter(0));

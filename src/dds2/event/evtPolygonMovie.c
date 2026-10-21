@@ -706,7 +706,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         case 21:
             work->subEntry21Data = (u8 *)secondaryHeader + work->subEntries[arrayIndex].offset;
             work->subEntry21Count = work->subEntries[arrayIndex].value;
-            sdfDebugPrintf("object table set ok.\n");
+            printf("object table set ok.\n");
             break;
         case 25:
             work->subEntry25Data = (u8 *)secondaryHeader + work->subEntries[arrayIndex].offset;
@@ -762,7 +762,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work) {
         if (mnuQueryTitleSoundBusy() == 1) {
             mnuStopTitleVoicePlayback();
         }
-        sdfDebugPrintf("sound stop all. \n");
+        printf("sound stop all. \n");
         sdfChipFreeDirect(work);
     }
 }
@@ -850,12 +850,12 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     PolyMovieWork *work;
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
-    sdfDebugPrintf(evtMovieBeforePrimaryLoadMessage);
+    printf(evtMovieBeforePrimaryLoadMessage);
     handle1 = sdfReadNamedResource(path1, (u32 *)&address1, 0);
     if (address1 == 0) {
         return NULL;
     }
-    sdfDebugPrintf(evtMoviePrimaryLoadedMessage);
+    printf(evtMoviePrimaryLoadedMessage);
     if (mode == 0) {
         handle2 = sdfReadNamedResource(path2, (u32 *)&address2, 0);
     } else {
@@ -863,17 +863,17 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     }
     if (mode == 0 && sdfPathExists(path3) == 1) {
         handle3 = sdfReadNamedResource(path3, (u32 *)&address3, 0);
-        sdfDebugPrintf(evtMovieTertiaryLoadedMessage);
+        printf(evtMovieTertiaryLoadedMessage);
     } else {
         handle3 = evtPolygonMovieSynthesizePmd3Header(&address3);
     }
-    sdfDebugPrintf(evtMovieResourcesReadyMessage);
+    printf(evtMovieResourcesReadyMessage);
     work = evtPolygonMovieAllocWork();
     evtPolygonMovieInitWork(work, address1, address2, address3);
     if (work == NULL) {
         return NULL;
     }
-    sdfDebugPrintf(evtMovieWorkInitializedMessage);
+    printf(evtMovieWorkInitializedMessage);
     work->mainResource.handle = handle1;
     work->secondaryResource.handle = handle2;
     work->tertiaryResource.handle = handle3;

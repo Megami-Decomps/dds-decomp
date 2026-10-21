@@ -20,7 +20,7 @@ void *memmove(void *dst, const void *src, u32 size);
 void *memset(void *dst, s32 value, u32 size);
 #endif
 #ifndef SDK_SKIP_sdfVFormatString
-s32 sdfVFormatString(char *dst, const char *format, void *args);
+s32 vsprintf(char *dst, const char *format, void *args);
 #endif
 #ifndef SDK_SKIP_sprintf
 s32 sprintf(char *dst, const char *format, ...);

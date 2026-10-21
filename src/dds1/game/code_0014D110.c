@@ -559,7 +559,7 @@ s32 fldFindSearchId(const char *name) {
     if (entry != 0) {
         return entry->key;
     }
-    sdfDebugPrintf("field SEARCH_ID NotFound:[%s]\n", name);
+    printf("field SEARCH_ID NotFound:[%s]\n", name);
     return -1;
 }
 

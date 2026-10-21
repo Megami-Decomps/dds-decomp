@@ -100,8 +100,8 @@ DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
 }
 
 void dds3ReleasePackedValueBuffer(u32 node) {
-    sdfFreeHeapMemory((void *)((DdsAllocBlock *)node)->buffer);
-    sdfFreeHeapMemory((void *)node);
+    free((void *)((DdsAllocBlock *)node)->buffer);
+    free((void *)node);
 }
 
 
@@ -117,8 +117,8 @@ DdsNamedRecord *dds3AllocateNamedReference(void) {
 
 /* Release a named reference's owned name buffer and the reference record. */
 void dds3ReleaseNamedReference(DdsNamedRecord *record) {
-    sdfFreeHeapMemory(record->name);
-    sdfFreeHeapMemory(record);
+    free(record->name);
+    free(record);
 }
 
 
@@ -166,7 +166,7 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
     dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[0]);
     dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[1]);
     dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[2]);
-    sdfFreeHeapMemory((void *)node);
+    free((void *)node);
 }
 
 
@@ -297,7 +297,7 @@ u32 dds3RegisterPendingNamedReferences(u32 *object, SdkFileStream *stream) {
     DdsNamedNode *node = ((DdsNamedList *)object[1])->first;
     while (node) {
         DdsAllocBlock *record = node->record;
-        sdfWriteFileStream((const void *)record->buffer, record->used, 1, stream);
+        fwrite((const void *)record->buffer, record->used, 1, stream);
         node = node->next;
     }
     return object[0];
@@ -321,7 +321,7 @@ s32 dds3WritePackedReferenceFile(u32 *object, s32 directory, s32 name) {
     pendingValues = (u32 *)dds3WritePendingNamedReferenceValues((u32)object);
     record[0] = object[0];
     record[1] = pendingValues[0];
-    sdfWriteFileStream(record, 8, 1, handle);
+    fwrite(record, 8, 1, handle);
     dds3RegisterPendingNamedReferences(object, handle);
     dds3RegisterPendingNamedReferences(pendingValues, handle);
     fclose(handle);
@@ -585,8 +585,8 @@ s32 dds3WriteArraySpriteFile(const char *directory, const char *name, u32 **sour
     sprintf(path, D_00438988, directory, name);
     file = fopen(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream(&header, sizeof(header), 1, file);
-        sdfWriteFileStream(info, sizeof(info), 1, file);
+        fwrite(&header, sizeof(header), 1, file);
+        fwrite(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
         fclose(file);
@@ -604,7 +604,7 @@ MnuCallbackListPair *dds3LoadOwnedSpriteRecordList(const char *source, const cha
 
     buffer = dds3ReadRelocatedSpriteFile(source, request, metadata);
     result = sdfCloneOwnedSpriteRecordList(buffer, metadata[0]);
-    sdfFreeHeapMemory(buffer);
+    free(buffer);
     return result;
 }
 
@@ -633,8 +633,8 @@ s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, u32 **sou
     sprintf(path, D_00438988, directory, name);
     file = fopen(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream(&header, sizeof(header), 1, file);
-        sdfWriteFileStream(info, sizeof(info), 1, file);
+        fwrite(&header, sizeof(header), 1, file);
+        fwrite(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
         fclose(file);
@@ -652,7 +652,7 @@ MnuCallbackListPair *dds3LoadOwnedSpriteRecordListDuplicate(const char *source, 
 
     buffer = dds3ReadRelocatedSpriteFile(source, request, metadata);
     result = sdfCloneOwnedSpriteRecordList(buffer, metadata[0]);
-    sdfFreeHeapMemory(buffer);
+    free(buffer);
     return result;
 }
 
@@ -681,8 +681,8 @@ s32 dds3WriteSpriteFile(const char *directory, const char *name, u32 **source) {
     sprintf(path, D_00438988, directory, name);
     file = fopen(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream(&header, sizeof(header), 1, file);
-        sdfWriteFileStream(info, sizeof(info), 1, file);
+        fwrite(&header, sizeof(header), 1, file);
+        fwrite(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
         fclose(file);
@@ -701,7 +701,7 @@ MnuCallbackListPair *dds3LoadSpriteRecords(const char *directory, const char *na
 
     buffer = dds3ReadRelocatedSpriteFile(directory, name, metadata);
     result = sdfCloneSpriteRecords(buffer, metadata[0]);
-    sdfFreeHeapMemory(buffer);
+    free(buffer);
     return result;
 }
 
@@ -730,8 +730,8 @@ s32 dds3WriteExtendedSpriteFile(const char *directory, const char *name, u32 **s
     sprintf(path, D_00438988, directory, name);
     file = fopen(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream(&header, sizeof(header), 1, file);
-        sdfWriteFileStream(info, sizeof(info), 1, file);
+        fwrite(&header, sizeof(header), 1, file);
+        fwrite(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
         fclose(file);
@@ -750,7 +750,7 @@ MnuCallbackListPair *dds3LoadExtendedSpriteRecords(const char *directory, const 
 
     buffer = dds3ReadRelocatedSpriteFile(directory, name, metadata);
     result = sdfCloneExtendedSpriteRecords(buffer, metadata[0]);
-    sdfFreeHeapMemory(buffer);
+    free(buffer);
     return result;
 }
 
@@ -782,17 +782,17 @@ void *dds3ReadRelocatedSpriteFile(const char *directory, const char *name, u32 *
     sprintf(path, D_00438988, directory, name);
     file = fopen(path, "rb");
     if (file != NULL) {
-        sdfReadFileStream(&header, sizeof(header), 1, file);
-        sdfReadFileStream(info, sizeof(info), 1, file);
+        fread(&header, sizeof(header), 1, file);
+        fread(info, sizeof(info), 1, file);
         data = malloc(info[0]);
         memset(data, 0, info[0]);
-        sdfReadFileStream(data, info[0], 1, file);
+        fread(data, info[0], 1, file);
         offsets = malloc(info[3]);
         memset(offsets, 0, info[3]);
-        sdfReadFileStream(offsets, info[3], 1, file);
+        fread(offsets, info[3], 1, file);
         fclose(file);
         dds3ApplyRelocationOffsets(data, (u32)data, offsets, info[3]);
-        sdfFreeHeapMemory(offsets);
+        free(offsets);
         *countOut = info[1];
         return data;
     }
@@ -814,7 +814,7 @@ void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *node) {
     if (node != 0) {
         mnuClearResourceList(node);
         node->onDestroy(-1, node->userData);
-        sdfFreeHeapMemory(node);
+        free(node);
     }
 }
 
@@ -943,6 +943,6 @@ SdfListNode *dds3RemoveListNodeAndNotify(MnuCallbackList *list, SdfListNode *nod
     }
     remaining = dds3DetachIndexedListNodeAndRenumber(list, node);
     list->onRemove(node->index, (u32)node->value);
-    sdfFreeHeapMemory(node);
+    free(node);
     return remaining;
 }

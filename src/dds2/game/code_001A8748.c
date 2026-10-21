@@ -253,7 +253,7 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EC8);
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EE0);
 
 void itfPrintTestMessageCallback(void) {
-    sdfDebugPrintf("********* AAAA ********\n");
+    printf("********* AAAA ********\n");
 }
 
 typedef struct ItfFovPanelWork {
@@ -3421,7 +3421,7 @@ void btlPushSavedPartyUnitStates(void) {
                        sizeof(btlSavedPartyUnitStates[count].entrySlots));
                 btlSavedPartyUnitStates[count].status = unit->partyRecord.status & 0xCFF9;
                 count++;
-                sdfDebugPrintf("btl:state push[%d:%X]\n", count,
+                printf("btl:state push[%d:%X]\n", count,
                               unit->partyRecord.unitId);
             }
         }
@@ -3458,7 +3458,7 @@ void btlRestorePartySlotSnapshots(void) {
                             unit->partyRecord.hp = 0;
                             unit->status.flags |= 0x20;
                         }
-                        sdfDebugPrintf(D_00415340, index,
+                        printf(D_00415340, index,
                                       unit->partyRecord.unitId);
                         break;
                     }
