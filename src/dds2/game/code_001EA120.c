@@ -828,15 +828,11 @@ void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
 
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
-extern void btlBuildTargetGroupFramingCameraPose(void *, void *);
-
-
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
-extern void btlBuildTargetGroupFramingCameraPose(void *, void *);
+extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlSelectActionCameraPose(BtlLinkedCommand *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
@@ -1032,7 +1028,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
 void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     BtlState *work;
     s32 category;
-    u8 *out;
+    BtlCamState *out;
     if (btlUsesSpecialLinkedCameraPath(action) != 0) {
         btlAdvanceActionSkillCamera(action);
         return;
@@ -1054,18 +1050,18 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, action->camera.direction);
             action->camera.distance += 150.0f;
-            out = (u8 *)&action->backCamera;
+            out = &action->backCamera;
         } else {
-            u8 *pose = (u8 *)&action->frontCamera;
-            out = (u8 *)&action->backCamera;
+            BtlCamState *pose = &action->frontCamera;
+            out = &action->backCamera;
             btlBuildTargetGroupFramingCameraPose(action, pose);
-            btlCopyMotionTransform((BtlCamState *)out, (BtlCamState *)pose);
+            btlCopyMotionTransform(out, pose);
             action->backCamera.distance += 100.0f;
             action->flags |= 0x41;
             action->state = 0;
             action->motionParameter = 30.0f;
         }
-        btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)out);
+        btlAdjustCameraDirectionForDefaultPlane(out);
         return;
     }
     if (action->stepKind == 0xD) {
