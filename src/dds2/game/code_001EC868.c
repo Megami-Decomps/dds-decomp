@@ -8771,7 +8771,7 @@ void btlMarkTaskReady(SoundResourceLink *resource) {
 }
 
 SoundLink *sndAllocLink(BtlUnit *owner) {
-    SoundLink *link = sdfAllocAndClearQuadwords(0x10);
+    SoundLink *link = sdfAllocAndClearQuadwords(sizeof(*link));
     link->owner = owner;
     link->effectHandle = 0;
     link->commandEffectId = 0;
