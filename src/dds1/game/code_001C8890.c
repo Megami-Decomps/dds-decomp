@@ -65,7 +65,7 @@ extern void btlResetActiveUnitList(void);
 extern void * btlScheduleRefreshTask(u8 *owner);
 extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern void btlSetCommandEffectLinkFlags(BtlTask *task, BattleIndexWork *work);
-extern void func_001FF0C8(BtlTask *task, u32 mode);
+extern void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode);
 extern s32 sndHasActiveActor(void);
 /* Original-style implicit int, kept: matched code depends on it: btlCreateCommandSoundUpdateTask. */
 /* btlFlagUnitDefeatCandidate is void in its provider TU; preserve C89 call
@@ -516,23 +516,23 @@ void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
     }
     switch (*(u16 *)((u8 *)unit + 0x12E) & 0x7FFF) {
     case 0x200:
-        func_001FF0C8(battleTask, 0);
+        btlSelectAndRunModeAiAction(battleTask, 0);
         btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 0x2000:
-        func_001FF0C8(battleTask, 1);
+        btlSelectAndRunModeAiAction(battleTask, 1);
         btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 0x20:
         if ((u32)((BtlTask *)battleTask)->unit->status.flags & 0x200) {
-            func_001FF0C8(battleTask, 2);
+            btlSelectAndRunModeAiAction(battleTask, 2);
         } else {
-            func_001FF0C8(battleTask, 3);
+            btlSelectAndRunModeAiAction(battleTask, 3);
         }
         btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 0x40:
-        func_001FF0C8(battleTask, 4);
+        btlSelectAndRunModeAiAction(battleTask, 4);
         btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 1:
@@ -856,9 +856,9 @@ void btlCommandStartSoundTasks(u8 *task) {
         }
         if ((*(u16 *)((u8 *)unit + 0x12E) & 0x7FFF) == 0x20) {
             if ((u32)((BtlTask *)task)->unit->status.flags & 0x200) {
-                func_001FF0C8(task, 2);
+                btlSelectAndRunModeAiAction(task, 2);
             } else {
-                func_001FF0C8(task, 3);
+                btlSelectAndRunModeAiAction(task, 3);
             }
             btlDispatchStateHandler(task, 0xC);
         }
