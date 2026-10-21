@@ -6,6 +6,7 @@
 #include "sdf_trig.h"
 #include "fld_scene_record.h"
 #include "dds3_path.h"
+#include "dds3_slot1_handler_api.h"
 extern const char *fldGetTaskRecordValue(u32 task);
 extern void fldApplyCurrentTaskScene(const char *name);
 #include "sdf.h"
@@ -101,8 +102,6 @@ extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *ent
 extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
 extern void fldSetCameraNodeModeWithTen(void);
-
-extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 

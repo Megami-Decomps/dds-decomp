@@ -13,6 +13,7 @@
 #include "eff_manager_task.h"
 #include "eff_random.h"
 #include "dds3_path.h"
+#include "dds3_slot1_handler_api.h"
 extern void fldApplyCurrentTaskScene(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
@@ -500,13 +501,11 @@ s32 fldCmdRestoreCameraNodeMode(void) {
 
 extern s32 D_003898B0[];
 
-extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
-
 s32 fldCmdReleaseCurrentObject(void) {
     if (fldPlayerObject == 0) {
         return 1;
     }
-    dds3SetSlot1HandlerCallback((void *)fldPlayerObject, 0);
+    dds3SetSlot1HandlerCallback((EffWorldNode *)fldPlayerObject, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     D_003898B0[0] = 0;

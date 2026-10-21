@@ -8,6 +8,7 @@
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
+#include "dds3_slot1_handler_api.h"
 #include "dds3obj.h"
 #include "dds3_object_mode.h"
 #include "eff_object.h"
@@ -588,15 +589,13 @@ void dds3EnsureSlotData(void *object) {
     }
 }
 
-u8 dds3SetSlot1HandlerCallback(void *, Dds3MoverUpdate);
-
 u8 dds3SetObjectSlot1MoverCallback(EffWorldNode *object, Dds3MoverUpdate update) {
     return dds3SetSlot1HandlerCallback(object, update);
 }
 
 /* Returns whether a slot-1 handler took the callback (0/1). The bool-width result is why
  * the wrapper above stays jal + epilogue in retail (001127A8, not a sibling j). */
-u8 dds3SetSlot1HandlerCallback(void *obj, Dds3MoverUpdate update) {
+u8 dds3SetSlot1HandlerCallback(EffWorldNode *obj, Dds3MoverUpdate update) {
     void *handler;
 
     handler = dds3GetSlot(obj, 1);
