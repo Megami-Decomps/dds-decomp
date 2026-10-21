@@ -9872,3 +9872,4 @@
 0x002F1888	effDrawRibbon	inferred	Paired DDS1 0x002AE498; builds and submits the ribbon work strip geometry and texture packets, returning when it has no segments or its color is transparent.
 0x0015A4B0	effDrawBillboardInstance	inferred	Builds and appends the billboard instance's transformed textured child-quad draw packets; twin 0x001528C0.
 0x0015EE70	effInitRadialEmitterPacket	inferred	Seeds packet position, radial velocity, delay, scale and spin before subeffect initialization; twin 0x00157280.
+0x0023DA70	evtUpdateUnitMotion	inferred	Advances the event unit motion state and per-slot animations, applies movement/wobble updates, refreshes endpoint work, and returns whether the unit moved; called each frame by effUpdateFollowModelTransform. Paired with DDS1 0x00222ED8.
