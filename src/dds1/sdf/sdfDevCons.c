@@ -19,7 +19,7 @@ void sdfDevConsFinalizeGlyphTag(ConsBuf *packetBuffers);
 void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
 void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers);
 void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *packetBuffers);
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes);
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
 struct SdfTex;
 extern struct SdfTex *sdfConsoleFontTexture;
 extern DevConsState *D_003BD3C0;
@@ -274,7 +274,7 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *storageBase, s32 storageCapacityBytes) {
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
