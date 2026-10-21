@@ -601,7 +601,7 @@ s32 btlSelectEnemyAiConditionalTargets(s32 actor) {
 INCLUDE_ASM(const s32, "game/code_00202178", btlSelectLowestRankTarget);
 
 /* Select the highest current MP, preferring later entries on a tie. */
-s32 func_00203BA8(s32 actor, s32 unused) {
+s32 btlSelectHighestCurrentMpTarget(s32 actor, s32 unused) {
     u32 matching;
     u32 count;
     BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);

@@ -43,7 +43,7 @@ extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
 extern s32 btlSelectLowestRankTarget(s32, s32);
-extern void func_00203BA8(s32, s32);
+extern void btlSelectHighestCurrentMpTarget(s32, s32);
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
 extern void btlSelectTargetsByActionMask(s32, s32);
 extern void btlSelectTargetsWithoutActionMask(s32, s32);
@@ -1316,7 +1316,7 @@ void btlPickCommandLowestLevelTarget(s32 context) {
 
 /* Select the highest-current-MP candidate through the native mode-zero entry. */
 void btlPickCommandHighestMpTarget(s32 context) {
-    func_00203BA8(context, 0);
+    btlSelectHighestCurrentMpTarget(context, 0);
 }
 
 /* Select by group element checks; action is the query input, not a status mask. */
