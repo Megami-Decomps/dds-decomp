@@ -89,13 +89,6 @@ extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
-typedef struct {
-    u8 unk00[0x110];
-    u32 flags;
-    u8 unk114[0x10];
-    u16 objectId;
-} BattleEntryHeader;
-
 extern char D_00436A28[];
 
 extern u32 D_00436A98;
