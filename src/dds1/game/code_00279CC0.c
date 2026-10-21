@@ -1,3 +1,4 @@
+#include "camp_menu_context.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -280,7 +281,40 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", ptyDrawLinkageSkillEntry);
+extern void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
+                   DatPartyRecord *actor, u16 rangeId, s32 style, s32 dim,
+                   EffectSlotSet *specialResource, EffectSlotSet *costResource, u32 texture);
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
+extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
+
+/* Draw a linkage skill's range and cost, or the empty-slot frame and marker. */
+void ptyDrawLinkageSkillEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
+                              struct MenuListNode *node, s32 texture) {
+    CampMenuContext *context = (CampMenuContext *)list->context;
+    s32 skill = node->sortKeyPrimary;
+    s32 selected = list->cursor == node;
+    s32 surfaceIndex = 0x53;
+
+    if (skill != 0 && skill != 0xFFFF) {
+        mnuDrawRangeCostAndIcon(x + 0x930, y + 0x30, depth, 0, list->scale, 0, (u16)skill, selected,
+                                node->flags48 & 1, (EffectSlotSet *)(u32)context->unk68,
+                                (EffectSlotSet *)(u32)context->displayVariant, surfaceIndex);
+        return;
+    }
+    {
+        s32 highlight = selected != 0;
+        EffectSlotSet *resource = (EffectSlotSet *)(u32)context->unk68;
+        s32 markerX = x + 0x90;
+        s32 markerY = y + 0x30;
+        s32 entryIndex = highlight + 9;
+
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        itfDrawGridWithResolvedSlot(markerX, markerY, depth, 1, resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+        itfDrawGridWithResolvedSlot(x + 0x9A0, markerY, depth, 1,
+                                    (EffectSlotSet *)(u32)context->unk68, highlight + 0xB, texture);
+    }
+}
 
 
 /* Collect up to max pointers to occupied, frontline party slots. */
