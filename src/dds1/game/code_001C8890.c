@@ -103,7 +103,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
-
 /* Generic scheduler header; task-specific arguments follow at byte 0x70.
  * next/prev link registration order, independently of the deferred queue. */
 typedef struct SoundTask {
@@ -151,8 +150,6 @@ extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 
-extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
-
 extern void sndSetStationedSeVolume(u32);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
@@ -176,7 +173,6 @@ extern s32 btlGetSlotRateKind(u8 *, s32);
 extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
-
 
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
@@ -912,7 +908,6 @@ void btlCommandStartSoundTasks(u8 *task) {
 
 extern char D_003A3648[]; /* "btl:command=%d\n" */
 
-extern char D_003A3648[]; /* "btl:command=%d\n" */
 
 void btlResolveActionTargetResults(BtlTask *task, BattleIndexWork *work);
 
@@ -966,7 +961,6 @@ extern SoundResourceNode *sndCreateResourceNode(SoundMixer *);
 extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern const char D_003A3658[];
 extern const char D_003A3670[];
-extern s32 btlGetSlotRateKind(u8 *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
@@ -1452,35 +1446,9 @@ void btlEnterLinkageActionState(void) {
 extern char D_003A36A8[];
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
-extern s32 btlGetSlotRateKind(u8 *, s32);
-extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
-extern s32 btlResolveSkillCategory(s32, u32);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
-extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
-extern void *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
-extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
-extern u8 *btlScheduleEpPacketTask(u8 *, s32);
-extern void *btlScheduleMoneyPacketTask(u8 *, u32);
-extern void *btlCreateRefreshEligibleActorsTask(void);
-extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
-extern SoundTask *btlCreateUpdateUnitEffectsTask(void);
-extern void *btlCreateWaitUnitListIdleTask(u32);
-extern void *btlCreateApplyToActiveActorsTask(u32);
-extern SoundTask *btlCreateFadeStateResetTask(void);
-extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *, s32);
-extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *, u16);
-extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
-extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
     SoundResourceNode *, BtlUnit *, u16, s32, u32);
-extern SoundTask *sndCreateSetStateTask(void);
-extern SoundTask *sndCreateClearStateTask(void);
-extern void *btlScheduleActorUpdate(u8 *);
-extern void *btlCreateClearActorEntrySelectionTask(BtlUnit *);
-extern u8 *btlCreateActorPositionEffectTask(u8 *);
-extern const char D_003A3670[];
 
-extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
 extern void *btlCreateEffectTaskWithSourceParams(u8 *, u32);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
@@ -1499,7 +1467,6 @@ extern SoundTask *sndCreateSkillSeTask(s32, u16);
 extern void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
 extern void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
 
-extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
 /* Schedule the LINKAGE action task chain (inferred role). */
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
@@ -2248,7 +2215,6 @@ void btlEnterBatActionState(s32 task) {
     ;
 }
 
-extern u8 *btlCreateModelChangeTask(u8 *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);
 
 /* Retail BAT state: schedule the status-table model; BAT's meaning is not expanded. */
 void btlScheduleBatStateModelChange(u8 *task) {
@@ -2376,11 +2342,6 @@ u64 btlCommandTaskReturnStart(u8 *task) {
     return btlStartTask(object);
 }
 
-extern s32 btlCountTasksByKind(u16 kind);
-
-extern s32 btlRepositionPartyAroundBattleCenter(void);
-
-extern s32 btlMarkInactiveActorCandidates(void);
 
 extern void fldUpdateSceneGroupTask(s32 task);
 
@@ -2438,7 +2399,6 @@ extern u8 *btlCreateControlObject(void);
 extern BtlTask *btlCreateActionSeq(void);
 extern void btlBindActorTaskAndSelectActionNumber(BtlTask *, BtlUnit *);
 extern void btlSetSceneTaskActiveFlag(BtlTask *);
-extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
@@ -2681,11 +2641,6 @@ u64 btlStartOwnerEffectTasks(s32 *arguments) {
 
 extern void btlSynchronizePartyActorRecords(BtlUnit *, u8);
 
-extern u8 *btlCreateGunLoadPollTask(u8 *);
-
-extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
-
-extern void btlResetUnitLinks(BtlUnit *);
 
 extern void btlReleaseUnitResources(BtlUnit *);
 
@@ -2866,14 +2821,10 @@ void btlScheduleEscapeResultTasks(BtlTask *task) {
 void btlEnterStatusDamageState(void) {
 }
 
-extern s32 btlCountTasksForOwner(s64);
 
 extern s32 btlSumOtherTargetHitAmounts(u8 *);
 
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
-
-extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
-
 
 
 /* After owned tasks finish, queue ailment damage, penalties and their effects. */
@@ -2960,7 +2911,6 @@ void btlSchedulePressStateSceneAction(u8 *unit) {
 void btlEnterPacketActionState(void) {
 }
 
-extern s32 btlCountTasksForOwner(s64);
 
 void btlAdvanceStateWhenLinkedTasksFinish(s32 object) {
     s32 owner = *(s32 *)(object + 0x18);
@@ -3012,8 +2962,6 @@ extern void btlAccumulateEnemyDefeatRewards(s32);
 
 
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
-
-extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
 
 
 void btlStartActorDefeatTransition(s32 command) {
