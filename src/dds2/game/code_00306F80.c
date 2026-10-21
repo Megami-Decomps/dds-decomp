@@ -1095,11 +1095,11 @@ s32 itfSetWidgetFlagsAndActivateChild(GridTextWidget *widget, u32 flags) {
 /* Own a NUL-terminated text copy; store X scaled by 16 and Y scaled by 8. */
 GridTextWidget *itfCreateGridTextWidget(const char *text, s32 x, s32 y, s32 columns, s32 rows,
                                         u32 reference) {
-    GridTextWidget *widget = (GridTextWidget *)sdfChipAllocDirect(0x40);
+    GridTextWidget *widget = (GridTextWidget *)sdfChipAllocDirect(sizeof(*widget));
     u32 textBytes;
     char *textCopy;
 
-    memset(widget, 0, 0x40);
+    memset(widget, 0, sizeof(*widget));
     textBytes = strlen(text) + 1;
     textCopy = (char *)sdfChipAllocDirect(textBytes);
     widget->textLength = textBytes;
@@ -1204,13 +1204,13 @@ u32 itfGetGridListLinkFlags(GridTextWidget *owner) {
 }
 
 GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text, u32 value) {
-    GridTextListItem *item = (GridTextListItem *)sdfChipAllocDirect(0x2C);
+    GridTextListItem *item = (GridTextListItem *)sdfChipAllocDirect(sizeof(*item));
     GridTextListItem *tail;
     s32 length;
     s32 allocation;
     char *copy;
 
-    memset(item, 0, 0x2C);
+    memset(item, 0, sizeof(*item));
     if (owner->itemCount == 0) {
         owner->firstVisible = item;
         owner->selected = item;
