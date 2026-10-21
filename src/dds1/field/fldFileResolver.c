@@ -7990,7 +7990,7 @@ void fldHitProgramAdd(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     D_003BADEC++;
 }
 
-void func_00138C28(void) {
+void evtMessageExtraActionNoOp(void) {
 }
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0138);

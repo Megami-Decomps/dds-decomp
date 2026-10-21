@@ -274,7 +274,7 @@ extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Build a normalized plane from three vertices spaced four floats apart. * Snap near-zero normal components before deriving D from the third vertex. * Degenerate triangles retain the native divide-by-zero behavior. */ void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant);
 
-void func_0013B810(void);
+void evtMessageExtraActionNoOp(void);
 
 /* Reset room records and selection sentinels, then apply actor-slot defaults. */
 void fldResetZoneRecordsAndActorSlots(void) {
@@ -1064,7 +1064,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     }
     if (extraAction != 0) {
         if ((s16)D_0038E2D0.extraActions[extraAction].action == 1) {
-            func_0013B810();
+            evtMessageExtraActionNoOp();
         } else if ((s16)D_0038E2D0.extraActions[extraAction].action == 2) {
             ptyAdjustItemQuantity(D_0038E2D0.extraActions[extraAction].parameter0,
                                   D_0038E2D0.extraActions[extraAction].parameter1);

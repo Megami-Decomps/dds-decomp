@@ -540,7 +540,7 @@ void fldUpdateCameraViewFromPlayer(void);
 
 void fldUpdateFieldCameraViewState(void);
 
-void func_00138C28(void);
+void evtMessageExtraActionNoOp(void);
 
 typedef struct FldRoomPlanes {
     f32 plane[6][4];
@@ -1365,7 +1365,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     }
     if (extraAction != 0) {
         if ((s16)D_00332E30.extraActions[extraAction].action == 1) {
-            func_00138C28();
+            evtMessageExtraActionNoOp();
         } else if ((s16)D_00332E30.extraActions[extraAction].action == 2) {
             ptyAdjustItemQuantity(D_00332E30.extraActions[extraAction].parameter0,
                                   D_00332E30.extraActions[extraAction].parameter1);
