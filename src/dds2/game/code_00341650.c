@@ -345,7 +345,7 @@ extern s32 sndRequestedMidiBankId;
 
 extern u8 D_0047AA50[];
 
-extern s32 D_004391D0;
+extern u32 D_004391D0;
 
 extern void InvalidDCache(void *a0, void *a1);
 
@@ -444,12 +444,11 @@ typedef struct SndFileRequestState {
     u8 path[0x100];
     s32 size;
     s32 pending;
-    s32 data;
+    u32 data;
 } SndFileRequestState;
 extern SndFileRequestState D_0047B310;
-extern s32 D_004391D0;
-void func_003422F8(s32 data, s32 size) {
-    s32 *packet;
+void func_003422F8(u32 data, s32 size) {
+    u32 *packet;
 
     D_0047B310.size = size;
     D_0047B310.pending = 1;

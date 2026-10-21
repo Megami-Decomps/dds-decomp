@@ -250,7 +250,7 @@ extern char D_00418C58[];
 
 extern s32 sndHasActiveFileLoad(void);
 
-extern void func_003422F8(s32, s32);
+extern void func_003422F8(u32, s32);
 
 extern f32 *D_0037F770[];
 
@@ -9222,7 +9222,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     if ((node->flags & SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED) == 0) {
         if (fileIsRequestReadyInCurrentMode(request->request)) {
             s32 size;
-            s32 data;
+            u32 data;
             btlBossDebugPrintf("btl:sound file load end[%s]\n", request->filename);
             request->resourceAllocation = fileGetResourceHandle(request->request);
             size = (s32)fileGetResourceSize(request->request);
@@ -9745,7 +9745,7 @@ void btlUpdateMotionSoundLoading(void) {
                     u32 address = sdfMemoryGetBlockAddress(
                         work->resourceHandles[owner->work.pendingSlot]);
 
-                    func_003422F8((s32)address, size);
+                    func_003422F8(address, size);
                     owner->flags = (owner->flags & ~SOUND_SLOT_TRACK_LOAD_REQUESTED) | SOUND_SLOT_TRACK_LOADING;
                     owner->flags &= ~SOUND_SLOT_TRACK_READY;
                     break;
