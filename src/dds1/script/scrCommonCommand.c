@@ -23,9 +23,9 @@ s32 kwlnDrawSetD30Clamped(s32 count, f32 phaseStep, f32 spacing,
 s32 evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget);
 void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color);
 void kwlnDrawSetC70FloatTriple(f32 rotation, f32 scale, u32 blendControl);
-s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
-s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
-s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
+void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
+void kwlnSetBackgroundColorTarget(s32 blendFrames, f32 *color);
+void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
 void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnDrawSetDc8Second(s32 blendControl);
 s32 kwlnDrawSetE08Fifth(s32 blendControl);
@@ -314,7 +314,7 @@ s32 scrCmdStoreDirectionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_CLEAR_W(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    kwlnSetLightColorTarget(scrReadIntParameter(0), 0, &v);
+    kwlnSetLightColorTarget(scrReadIntParameter(0), 0, &v.x);
     return 1;
 }
 
@@ -337,7 +337,7 @@ s32 scrCommandSetSceneLightDirection(void) {
         evtPrintDeveloperConsoleMessage(scrSceneLightDirectionZeroWarning);
         return 1;
     }
-    kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction);
+    kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction.x);
     return 1;
 }
 
@@ -355,7 +355,7 @@ s32 scrCmdStorePositionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_SET_W_ONE(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    kwlnSetBackgroundColorTarget(scrReadIntParameter(0), &v);
+    kwlnSetBackgroundColorTarget(scrReadIntParameter(0), &v.x);
     return 1;
 }
 
