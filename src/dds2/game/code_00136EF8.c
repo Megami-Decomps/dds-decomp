@@ -33,7 +33,7 @@
 #include "fld_action_row.h"
 #include "dds3_world_counter.h"
 /* Declared before first use (were implicit int). */
-extern void func_00136EF8(void);
+extern void fldDrawCameraColorScrollingGradient(void);
 
 extern void evtSetDrawSurfaceIndex();
 
@@ -74,7 +74,7 @@ extern s32 D_0043617C;
 
 extern f32 fldDotVector(f32 *, f32 *);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldDrawCameraColorScrollingGradient);
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
@@ -89,7 +89,7 @@ void fldInitializeCameraColorResource(void) {
 }
 
 void func_00137888(void) {
-    func_00136EF8();
+    fldDrawCameraColorScrollingGradient();
 }
 
 void fldReleaseCameraColorEffect(void) {
