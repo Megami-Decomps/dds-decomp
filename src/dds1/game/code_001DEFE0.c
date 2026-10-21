@@ -5759,7 +5759,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 ((f32)CURSOR->frame < instruction->startFrame + instruction->duration ||
                  instruction->duration == 1000.0f)) {
-                unit = (kind == 31) ? btlGetIndexListEntry(action->targetList, 0) : action->task->unit;
+                unit = (kind == 31) ? (BtlUnit *)btlGetIndexListEntry(action->targetList, 0) : action->task->unit;
                 btlUnitGetPosVU(unit, 1);
                 VU0_STORE_VF_UNCLOBBERED(vf10, actorPosition);
                 VU0_LOAD_VF(vf10, pose->direction);
