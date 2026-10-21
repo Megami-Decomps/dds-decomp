@@ -664,7 +664,7 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *unit) {
 
 extern char D_00415440[]; /* "btl:fear ratio[%d]\n" */
 
-extern s32 btlRollAiBucket();
+extern s32 btlRollAiBucket(void);
 
 s32 btlRollFearChance(s32 unused, BtlUnit *unit, s32 flagsA, s32 flagsB) {
     s32 threshold;
