@@ -10716,8 +10716,9 @@ local-alloc priority property were then confirmed by trace.** This is not
 claimed as trace-first discovery.
 
 With the earlier initializer, sched1 ranks the `0.125f` constant and the
-`channel->display->value` load equally at priority 3, register weight 1 and
-cost 2. The original-order LUID tier issues the constant first. Its local
+`channel->display->value` load (now named `channel->counterDisplay->value`)
+equally at priority 3, register weight 1 and cost 2. The original-order LUID
+tier issues the constant first. Its local
 quantity consequently has two references and lifetime `[34,46]` (12),
 priority 1666. The ten-frame divisor/quotient quantity has four references
 and lifetime `[4,50]` (46), priority 1739, so it obtains `$f0` first and
@@ -15919,3 +15920,13 @@ rows, and the message/draw consumers use the same label pointer as a string.
 Declare the rows as character arrays and the display's label as `const char *`,
 rather than transporting the text through a word-pointer field.
 
+## Timed slide bars own the shared control
+
+`SlideBarTimed` embeds the real `SlideBar control` as its first member, just
+like `PickList`. Its queued mode and countdown remain at `+8` and `+0x0C`,
+and the complete timed record remains `0x10` bytes. The native setter writes
+the same active/position pair at `+0`/`+4`.
+
+Timed producers and readers use `control.active` / `control.pos`. Generic
+bar updaters receive `&mnuMovieMenuState->timedB.control`, not a cast of the
+complete timed owner to a second nominal prefix type.
