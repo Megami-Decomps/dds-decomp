@@ -3,6 +3,7 @@
 #include "btl_analysis_panel_work.h"
 #include "btl_command_hint_work.h"
 #include "btl_guide_panel_work.h"
+#include "btl_panel_transition_work.h"
 #include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
@@ -3120,24 +3121,6 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 
 extern void btlFreeRegisteredTaskData(KwlnTask *);
-
-typedef struct BtlPanelTransitionWork {
-    KwlnTask *task;
-    const u8 *text;
-    s32 elapsed;
-    s32 frames;
-    s32 width;
-    s32 unk14;
-    s32 verticalShift;
-    s8 state;
-    u8 pad1D;
-    s16 fade;
-    s16 fadeLevels[4];
-    BattleSelectionPosition initial[2];
-    s8 phase;
-    u8 pad39[3];
-    BattleSelectionPosition current[2];
-} BtlPanelTransitionWork;
 
 /* Replace conflicting label tasks and create a skill-name transition; returns one. */
 s32 btlCreateSkillNamePanel(const u8 *text) {
