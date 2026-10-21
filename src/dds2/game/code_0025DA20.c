@@ -3749,7 +3749,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
     return result;
 }
 
-extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void mnuDrawTerminalPanelListRows(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawTerminalPanelValues(s32, s32, s32, void *, s32, s32, s32);
