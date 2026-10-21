@@ -11,39 +11,6 @@
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
 
-typedef struct {
-    f32 *unk0;
-    f32 *unk4;
-    f32 unk8;
-} BlendArg;
-
-
-
-
-typedef SdfMotionTextParamSnapshot Blk;
-
-
-
-typedef struct {
-    u8 pad[0x14];
-    void *unk14;
-} HasLink14;
-
-typedef struct {
-    u16 u0;
-    u16 n;
-    void **tbl;
-    s32 data[1];
-} KeysH;
-
-typedef struct FuncTab {
-    void *w0;
-    void (*w4)(void *a0, void *a1);
-    void (*w8)(void *a0, void *a1, f32 t);
-    void (*wC)(void *a0);
-    void (*w10)(void *a0, f32 t1, f32 t2);
-} FuncTab;
-
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval);
 extern s32 (*D_003981B8[])(void *binding, s32 selector);
@@ -822,9 +789,9 @@ void sdfMotionBlendFiveFloatKeys(SdfMotionIndexedTextBinding *binding, f32 frame
 
 /* Save the current primary text scalars for the blend callback. */
 void sdfMotionCapturePrimaryTextParams(SdfMotionIndexedTextBinding *binding) {
-    Blk *textParams;
+    SdfMotionTextParamSnapshot *textParams;
 
-    textParams = (Blk *)sdfEnsurePrimaryTextSubParam(binding->target);
+    textParams = (SdfMotionTextParamSnapshot *)sdfEnsurePrimaryTextSubParam(binding->target);
     binding->capture.snapshot = *textParams;
 }
 
@@ -858,9 +825,9 @@ void sdfMotionBlendSecondaryTextKeys(SdfMotionIndexedTextBinding *binding, f32 f
 
 /* Save the current secondary text scalars for the blend callback. */
 void sdfMotionCaptureSecondaryTextParams(SdfMotionIndexedTextBinding *binding) {
-    Blk *textParams;
+    SdfMotionTextParamSnapshot *textParams;
 
-    textParams = (Blk *)sdfEnsureSecondaryTextSubParam(binding->target);
+    textParams = (SdfMotionTextParamSnapshot *)sdfEnsureSecondaryTextSubParam(binding->target);
     binding->capture.snapshot = *textParams;
 }
 
