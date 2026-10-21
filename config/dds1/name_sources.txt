@@ -9825,3 +9825,6 @@
 0x0030B458	InvalidDCache	inferred	libkernl InvalidDCache(start, end): disables interrupts when they are enabled and invalidates the data cache lines of the 64-byte-aligned range through _sceIDC; the sound track load status check uses it. DDS2 twin 0x003666D8.
 0x0030B4D8	iInvalidDCache	inferred	libkernl iInvalidDCache: the interrupt-context form of InvalidDCache, a direct 64-byte alignment and jump to _sceIDC. DDS2 twin 0x00366758.
 0x0030B500	DisableIntc	inferred	libkernl DisableIntc: wraps _DisableIntc with interrupt-state preservation like EnableIntc; sdfRemoveHandler masks an INTC cause through it. DDS2 twin 0x00366780.
+0x001AFF78	btlDrawAnalysisPanelVitalBars	inferred	Draws the analysis panel HP/MP bar frames and cropped fill from the selected unit's current and maximum values; paired DDS2 0x001BAB90 and analysis-panel caller.
+0x001B8CB8	btlUpdateActorPanelCursorState	inferred	Advances pending cursor selection, settle offsets, pulse phase and cursor echoes; paired DDS2 0x001C3EC0 and actor-panel update caller.
+0x001BB440	btlUpdateActorVitalEffectState	inferred	Advances and clears the actor panel HP/MP change-effect states, offsets, timers and highlight levels; paired DDS2 0x001C6648 and actor-panel update caller.
