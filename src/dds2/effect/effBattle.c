@@ -186,12 +186,12 @@ void effBattleUpdate(BattleEffect *work) {
 
     if ((flags & 8) != 0) {
         if ((flags & 2) != 0) {
-            effBattleApplyUnitColorDirection(unit, (EffBattleUnitColorCommand *)list->colorKeys, frame);
+            effBattleApplyUnitColorDirection(unit, &list->colorCommand, frame);
             flags = work->flags;
         }
         if ((flags & 4) != 0) {
             effBattleApplyUnitRgbKeyframe(unit,
-                (EffBattleUnitRgbCommand *)list->rgbKeys, frame);
+                &list->rgbCommand, frame);
         }
 
         if (list->shake != 0 && list->shakeFrame == frame) {

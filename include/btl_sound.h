@@ -4,6 +4,7 @@
 #include "common.h"
 #include "active_sound_node.h"
 #include "eff.h"
+#include "eff_battle_color_keyframe.h"
 
 enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
 
@@ -50,8 +51,10 @@ typedef struct EffBattleEntryList {
     u16 shake;                     /* 0x06: screen-shake amount; 31 or more logs and caps at 300 frames */
     u16 shakeFrame;                /* 0x08: frame at which the shake starts */
     u16 shakeFade;                 /* 0x0A: fade applied with the shake */
-    u8 colorKeys[0x24];            /* 0x0C: colour keyframes read by the unit colour keyframe routine */
-    u8 rgbKeys[0x18];              /* 0x30: RGB keyframes read by the unit RGB keyframe routine */
+    EffBattleUnitColorCommand colorCommand; /* 0x0C: single command read by the voice updater */
+    u8 opaque2C[4];                /* 0x2C: retained bytes not read by the update routine */
+    EffBattleUnitRgbCommand rgbCommand;     /* 0x30: single command read by the voice updater */
+    u8 opaque44[4];                /* 0x44: retained bytes not read by the update routine */
     s32 callbackFrame;             /* 0x48 */
     u8 pad4C[0x20];
     u16 count;                     /* 0x6C */
@@ -80,6 +83,10 @@ typedef char EffBattleEntryList_size_must_be_0x90[
     (sizeof(EffBattleEntryList) == 0x90) ? 1 : -1];
 typedef char EffBattleEntryList_callbackFrame_at_0x48[
     ((u32)&((EffBattleEntryList *)0)->callbackFrame == 0x48) ? 1 : -1];
+typedef char EffBattleEntryList_colorCommand_at_0x0C[
+    ((u32)&((EffBattleEntryList *)0)->colorCommand == 0x0C) ? 1 : -1];
+typedef char EffBattleEntryList_rgbCommand_at_0x30[
+    ((u32)&((EffBattleEntryList *)0)->rgbCommand == 0x30) ? 1 : -1];
 typedef char EffBattleEntryList_count_at_0x6C[
     ((u32)&((EffBattleEntryList *)0)->count == 0x6C) ? 1 : -1];
 typedef char EffBattleEntryList_entries_at_0x78[
