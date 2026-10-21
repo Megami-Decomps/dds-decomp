@@ -541,7 +541,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
     return 1;
 }
 
-void func_0014DAF0(s32 phase) {
+void fldNoopWithMode(s32 mode) {
 }
 
 u32 func_0014DAF8(void) {

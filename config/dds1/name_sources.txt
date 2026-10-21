@@ -2687,7 +2687,8 @@
 0x0019B320	itfPanelGetPairSecond	inferred	reads second s16 of pair at record +0x52
 0x0019B340	itfMesScriptSetPanelValue	inferred	selects window and passes script argument to func_0019C060
 0x0019B390	itfMesScriptSetWindowValue	inferred	selects window and passes script argument to func_0019C080
-0x0019B3E0	itfMesScriptActivatePanel	inferred	sets the 0x200000 flag and signals func_0014DAF0
+0x0019B3E0	itfMesScriptActivatePanel	inferred	sets the 0x200000 flag and calls fldNoopWithMode; that hook has an empty body in both titles.
+0x0014DAF0	fldNoopWithMode	inferred	confidence=high; empty body in DDS1 and paired DDS2 0x00154F18, with no observable effect; callers pass mode values 0–3 from field-transition and message-window flows. Name describes only the confirmed no-op behavior, not the caller's intended phase semantics.
 0x0019B428	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x0019B4A0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
 0x0019B530	itfMesNoOpCommand4	inferred	Script dispatch table slot 4: performs no state change and returns 1, so the wait dispatcher continues without yielding.

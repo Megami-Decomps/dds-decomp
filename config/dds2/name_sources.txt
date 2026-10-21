@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x00154F18	fldNoopWithMode	inferred	confidence=high; empty body in DDS2 and paired DDS1 0x0014DAF0, with no observable effect; callers pass mode values 0–3 from field-transition and message-window flows. Name describes only the confirmed no-op behavior, not the caller's intended phase semantics.
 0x001B3B10	btlAverageActorAttribute	inferred	Native wrapper averages a requested actor attribute for a party-record flags mask by tail-jumping btlSumOrAverageActorAttribute with skip-down zero; not a division runtime helper.
 0x0024C650	evtViewerStoreMenuValueInPendingKey	inferred	Stores the edited menu value into the selected pending timeline key field; counterpart of DDS1 00231950.
 0x001206D0	fldConfigureCameraMoveTracking	inferred	DDS2 twin of DDS1 0x0011E810: resolves two table selectors into tracking endpoints and configures the camera move mode for a valid ordered range.
