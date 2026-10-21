@@ -21,7 +21,7 @@
 #include "sdf_disc_file_record.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
-extern void func_0034CB60(s32);
+extern void sceCdInit(s32);
 extern s32 sdfFileCmdFileSize(DevState *state);
 /* Original-style implicit int, kept: matched code depends on it: iSignalSema, sdfFileCmdSeek, sdfDevSetFallbackDeviceWorker. */
 
@@ -127,9 +127,9 @@ void sdfDevWaitForDisc(void);
 
 extern s32 sdfDiscLoadFilename;
 
-extern void func_0034CE40(s32);
+extern void sceCdDiskReady(s32);
 
-extern s32 func_0034D100(void);
+extern s32 sceCdGetDiskType(void);
 
 
 extern DevState *sdfFileCmdReadOpen(const char *path,
@@ -146,7 +146,7 @@ extern u16 sdfDefaultDevRequestOptions;
 
 extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
-extern void func_0034D038(u32 discType);
+extern void sceCdMmode(u32 discType);
 
 extern s32 sdfDevReplySemaphore;
 
@@ -169,7 +169,7 @@ extern u32 D_0043919C;
 extern u32 D_004391A0;
 
 
-extern void func_0034D400(s32, s32, s32);
+extern void sceCdStInit(s32, s32, s32);
 
 extern void sdfDevLoadWholeFile(const char *fileName);
 
@@ -378,8 +378,8 @@ void sdfDevWaitForDisc(void) {
     WaitSema(sdfDiscSemaphore);
     for (;;) {
         sdfSleepWithAlarm(100);
-        func_0034CE40(0);
-        status = func_0034D100();
+        sceCdDiskReady(0);
+        status = sceCdGetDiskType();
         if (sdfDiscType == 2) {
             if (status != 20) {
                 continue;
@@ -398,7 +398,7 @@ extern u8 sdfDiscReadMode;
 
 extern s32 sdfDiscReadPosition;
 
-extern s32 func_0034D430(s32 arg, u8 *options);
+extern s32 sceCdStStart(s32 arg, u8 *options);
 
 
 void sdfDevSeekDiscRequest(s32 request) {
@@ -415,7 +415,7 @@ void sdfDevSeekDiscRequest(s32 request) {
     options[3] = 0;
     for (;;) {
         WaitSema(sdfDiscSemaphore);
-        ready = func_0034D430(request, options);
+        ready = sceCdStStart(request, options);
         SignalSema(sdfDiscSemaphore);
         if (ready != 0) {
             break;
@@ -452,7 +452,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
         WaitSema(sdfDiscSemaphore);
         sdfDiscRequestPending = 1;
         WaitSema(sdfDiscRequestSemaphore);
-        ready = func_0034D430(request, options);
+        ready = sceCdStStart(request, options);
         SignalSema(sdfDiscSemaphore);
         if (ready != 0) {
             break;
@@ -466,7 +466,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
     sdfDiscReadPosition = request;
 }
 
-extern s32 func_0034D500(s32 size, s32 buffer, s32 count, s32 *status);
+extern s32 sceCdStRead(s32 size, s32 buffer, s32 count, s32 *status);
 
 void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
     s32 status;
@@ -474,7 +474,7 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
 
     for (;;) {
         WaitSema(sdfDiscSemaphore);
-        result = func_0034D500(size, buffer, 1, &status);
+        result = sceCdStRead(size, buffer, 1, &status);
         SignalSema(sdfDiscSemaphore);
         if (status == 0 && result == size) {
             break;
@@ -484,7 +484,7 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
             sdfDevSeekDiscRequest(sdfDiscReadPosition);
         } else {
             WaitSema(sdfDiscSemaphore);
-            func_0034D4C8();
+            sceCdStStop();
             SignalSema(sdfDiscSemaphore);
             sdfDevSeekDiscRequest(sdfDiscReadPosition);
         }
@@ -727,7 +727,7 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 byteCount) {
 void sdfServicePendingOperationUnderSemaphore(void) {
     if (sdfOpenDiscFileRecord != 0) {
         WaitSema(sdfDiscSemaphore);
-        func_0034D4C8();
+        sceCdStStop();
         SignalSema(sdfDiscSemaphore);
         sdfOpenDiscFileRecord = 0;
     }
@@ -796,15 +796,15 @@ void sdfDevStartLoad(const char *discFileName, const char *preloadFileName) {
     D_004391A0 = discFileRecord[0];
     iopHeapAddress = sceSifAllocIopHeap(SDF_DEV_IOP_BUFFER_BYTES);
     D_0043919C = iopHeapAddress;
-    func_0034D400(0x50, 5, (iopHeapAddress + SDF_DEV_IOP_ALIGNMENT_BIAS) & SDF_DEV_IOP_ALIGNMENT_MASK);
+    sceCdStInit(0x50, 5, (iopHeapAddress + SDF_DEV_IOP_ALIGNMENT_BIAS) & SDF_DEV_IOP_ALIGNMENT_MASK);
 }
 
 void sdfInitDeviceSemaphores(void) {
     sdfDiscSemaphore = sdfCreateSemaphore(1, 0xff, 0);
     sdfDiscRequestSemaphore = sdfCreateSemaphore(0, 0xff, 0);
     sdfDiscRequestPending = 0;
-    func_0034CB60(0);
-    func_0034D038(sdfDiscType);
+    sceCdInit(0);
+    sceCdMmode(sdfDiscType);
 }
 
 extern char sdfDiscPathPrefix[];
@@ -1891,7 +1891,7 @@ extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, 
 
 typedef void (*SdfPowerOffCallback)(void *);
 
-extern SdfPowerOffCallback func_0034C270(SdfPowerOffCallback, void *);
+extern SdfPowerOffCallback sceCdPOffCallback(SdfPowerOffCallback, void *);
 
 extern s32 func_003698D8(void);
 
@@ -1926,7 +1926,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     semaphore = sdfCreateSemaphore(0, 1, 0);
     thread = sdfCreateThread((void *)sdfPowerOffLoop, D_00477180, 0x800, 1);
     _StartThread(thread, semaphore);
-    func_0034C270(sdfPowerOffInterruptCallback, (void *)semaphore);
+    sceCdPOffCallback(sdfPowerOffInterruptCallback, (void *)semaphore);
     func_003698D8();
     sprintf(buffer, "hdd0:%s,", path);
     func_0036BE68(D_00438B60, buffer, 0, 0, 0);
