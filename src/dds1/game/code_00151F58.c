@@ -1654,7 +1654,7 @@ void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
 }
 
 /* Spawn each packet, then overwrite its tag with a zero-based, period-grouped schedule. */
-void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
+void effInitLookAtRingPacketSchedule(EffLookAtRingEmitter *effect) {
     EffectBufferRecord *packetCursor;
     u32 packetIndex;
     u32 nextPacketIndex;
@@ -1665,11 +1665,11 @@ void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
     packetCursor = effect->head.buffer->records;
     if (effect->head.particleCount != 0) {
         do {
-            effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, packetIndex);
+            effEmitterLookAtRingSpawn(effect, packetIndex);
             packetCursor->age = packetTag;
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-            if (nextPacketIndex % effect->tailWords[0] == 0) {
+            if (nextPacketIndex % effect->period == 0) {
                 packetTag = packetTag - effect->decayStep;
             }
             packetIndex = nextPacketIndex;
@@ -1678,28 +1678,28 @@ void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
 }
 
 /* Scale position and the third variant-specific tail value. */
-void effScaleLookAtRingTemplate(float scale, EffTemplatePacketList *effect) {
+void effScaleLookAtRingTemplate(float scale, EffLookAtRingEmitter *effect) {
     effect->head.scale[0] = effect->head.scale[0] * scale;
     effect->head.scale[1] = effect->head.scale[1] * scale;
     effect->head.scale[2] = effect->head.scale[2] * scale;
-    effect->tailValues[2] = effect->tailValues[2] * scale;
+    effect->f164 = effect->f164 * scale;
 }
 
 /* Clone the look-at ring prefix/tail and spawn its staggered packet schedule. */
-s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfChipAllocDirect(0x170);
-    s32 tailBytes = 0x20;
+EffLookAtRingEmitter *effCloneLookAtRingTemplate(EffLookAtRingEmitter *source) {
+    EffLookAtRingEmitter *clone = sdfChipAllocDirect(sizeof(*clone));
+    s32 tailBytes = sizeof(*clone) - sizeof(clone->head);
 
-    memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->head.templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    effInitializeEmitterHead((void *)clone);
+    memset(clone, 0, sizeof(*clone));
+    memcpy(clone, source, source->head.templateSize);
+    memcpy(&clone->mode, (u8 *)source + source->head.templateSize, tailBytes);
+    effInitializeEmitterHead(&clone->head);
     effInitLookAtRingPacketSchedule(clone);
     return clone;
 }
 
-void effFreeLookAtRingTemplate(u32 effect) {
-    effDestroyResources(effect);
+void effFreeLookAtRingTemplate(EffLookAtRingEmitter *effect) {
+    effDestroyResources(&effect->head);
     sdfChipFreeDirect(effect);
 }
 
@@ -1809,7 +1809,7 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
         age++;
         if (age >= lifetimeFrames) {
             if (repeatEnabled) {
-                effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, packetIndex);
+                effEmitterLookAtRingSpawn(effect, packetIndex);
                 age = packet->age;
             } else {
                 parDispatchKindInit(&effect->head.sub, packetIndex);

@@ -6,6 +6,7 @@
 #include "itf_mes_window.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
+#include "itf_text_vector.h"
 #include "itf_panel_api.h"
 #include "itf_panel_layouts.h"
 
@@ -36,9 +37,9 @@ extern u32 scrGetWindow(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesResetWindow(s32 window);
 extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
-extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
-extern s32 itfPanelColorTemplates[];
-extern s32 D_00357B50[];
+extern void itfScaleVectors(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const TextVector *input, s32 count);
+extern TextVector itfPanelColorTemplates[];
+extern TextVector D_00357B50[];
 extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command);
 extern u8 D_003BB1C8[8];
 extern u8 D_003BB1D0[8];
@@ -50,8 +51,8 @@ extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);
 extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
 extern u8 D_003BB1D8[8];
 extern u8 D_003BB1E0[8];
-extern s32 itfPanelGradientColorTemplate[];
-extern s32 itfPanelGradientColorPair[];
+extern TextVector itfPanelGradientColorTemplate[];
+extern TextVector itfPanelGradientColorPair[];
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
@@ -261,7 +262,7 @@ void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32
     panelSetVec4(colorRow, red, green, blue, 1);
     colorRow = (u32 *)(base + 0x150);
     panelSetVec4(colorRow, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
+    itfScaleVectors((DrawColorRec *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
 }
 
 /* Write the two color rows, then scale four template rows; the first fourth component is one. */
@@ -271,7 +272,7 @@ void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) 
     panelSetVec4(colorRow, red, green, blue, 1);
     colorRow = (u32 *)(base + 0x110);
     panelSetVec4(colorRow, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x120), red, green, blue, alpha, D_00357B50, 4);
+    itfScaleVectors((DrawColorRec *)(base + 0x120), red, green, blue, alpha, D_00357B50, 4);
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
@@ -279,8 +280,8 @@ void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha)
     u32 *colorRow = (u32 *)(base + 0x20);
 
     panelSetVec4(colorRow, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
-    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
+    itfScaleVectors((DrawColorRec *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
+    itfScaleVectors((DrawColorRec *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path. */

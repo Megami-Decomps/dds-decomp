@@ -3641,10 +3641,9 @@ void fileCopyRecordHeader(FileSavePreviewRecord *destination, const void *source
 
 void fileApplyMenuFlagsToModel(MenuWork *work) {
     u32 i;
-    s32 *bits = (s32 *)work + 1;
 
     for (i = 0; i < 0x4F; i++) {
-        if ((bits[8 + (i >> 5)] >> (i & 0x1F)) & 1) {
+        if (((s32)work->header.saveWords.words[i >> 5] >> (i & 0x1F)) & 1) {
             mdlFlagSet(0xB40 + i);
         } else {
             mdlFlagClear(0xB40 + i);
