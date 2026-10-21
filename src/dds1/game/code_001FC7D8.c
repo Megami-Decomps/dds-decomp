@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
 #include "btl_ai_scratch.h"
@@ -342,7 +343,6 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
     }
 }
 
-extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 /* Select a side-adjusted effect ID from the current status/action; -1 means none. */
 s32 btlGetStatusActionEffectId(BtlTask *task) {
     BtlUnit *unit = task->unit;

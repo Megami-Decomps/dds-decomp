@@ -17,6 +17,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "btl_task_state.h"
@@ -537,8 +538,6 @@ extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit
 extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command);
 
 extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
-
-extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 

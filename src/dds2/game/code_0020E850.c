@@ -2,6 +2,7 @@
 #include "common.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
 #include "dds3obj.h"
@@ -435,8 +436,6 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
         } while (digitCount != 0);
     }
 }
-
-extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 /* Select the owner's effect variant for its current condition and task action. */
 s32 btlGetStatusActionEffectId(ActionStateLink *task) {
