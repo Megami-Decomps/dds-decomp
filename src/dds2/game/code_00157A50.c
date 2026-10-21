@@ -1,4 +1,4 @@
-#include "file_pac.h"
+#include "file_request.h"
 #include "bill_object_api.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -72,7 +72,7 @@ extern char D_004142B0[];
 extern char D_004142C0[];
 
 void effInitializeBillResourceOwners(void) {
-    FilePacRequest *archive;
+    FileRequest *archive;
     PacWork *node;
     f32 *scale;
     u8 *configTable;
@@ -83,8 +83,8 @@ void effInitializeBillResourceOwners(void) {
     u32 configOffset;
 
     billPendingChildList = 0;
-    archive = (FilePacRequest *)fileQueuePlainDispatchRequest(D_004142B0);
-    fileWaitForRequestReady((struct FileRequest *)archive);
+    archive = fileQueuePlainDispatchRequest(D_004142B0);
+    fileWaitForRequestReady(archive);
     node = archive->packet.queueHead;
     if (node != NULL) {
         configTable = (u8 *)D_003AA880;

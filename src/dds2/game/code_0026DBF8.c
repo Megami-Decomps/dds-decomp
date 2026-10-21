@@ -1,5 +1,5 @@
 #include "sdk_ps2.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "sdf_gs_alpha_register_api.h"
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
@@ -557,8 +557,8 @@ void mnuReleaseMantraSpriteSlots(void) {
 }
 
 s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
-    FilePacRequest *request = (FilePacRequest *)dds3GetProcessData(task);
-    s32 result = fileRequestIsReady((struct FileRequest *)request);
+    FileRequest *request = (FileRequest *)dds3GetProcessData(task);
+    s32 result = fileRequestIsReady(request);
     if (result != 0) {
         PacWork *entry = request->packet.queueHead;
         s32 i;

@@ -6,8 +6,7 @@
 #include "file_slot_flags.h"
 #include "file_request_entry.h"
 #include "file_manager_api.h"
-#include "file_transfer_job.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 

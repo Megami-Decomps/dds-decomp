@@ -2,9 +2,8 @@
 #define FILE_REQUEST_API_H
 
 #include "common.h"
+#include "file_request_callback.h"
 
-struct FileRequest;
-struct FilePacRequest;
 struct SdfMemBlock;
 
 /* Return the request's allocation descriptor without changing ownership. */
@@ -16,14 +15,14 @@ s32 filePollEntryCleanup(struct FileRequest *request);
 
 #ifdef VERSION_DDS1
 struct FileRequest *fileAllocateDispatchRequest(const char *requestName, u32 flags, u32 dispatchValue,
-                                                u32 onComplete, u32 userData);
+                                                FileRequestCallback onComplete, void *userData);
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, u32 callbackMode,
-                                              u32 callbackAddress, u32 userData);
+                                              FileRequestCallback callback, void *userData);
 #else
-struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
-                                             s32 onComplete, s32 userData);
+struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
+                                             FileRequestCallback onComplete, void *userData);
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode,
-                                              s32 callbackAddress, s32 userData);
+                                              FileRequestCallback callback, void *userData);
 #endif
 
 struct FileRequest *fileQueuePlainDispatchRequest(const char *requestName);

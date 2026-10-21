@@ -15,7 +15,7 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "itf.h"
-#include "evt_scaled_value.h"
+#include "sdf_float_counter.h"
 #include "evt_blend_vec_color.h"
 
 /* Polygon-movie event parameter blocks blended by the functions below. */
@@ -473,7 +473,7 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits) {
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
 s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame) {
-    PolyMovieClip *clip;
+    SdfFloatCounter *clip;
     s32 elapsedFrames;
     s32 duration;
 
@@ -487,18 +487,18 @@ s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame
         if (duration <= elapsedFrames) {
             elapsedFrames = duration;
         }
-        evtScaleValueByMultiplier((EvtScaledValue *)clip, (f32)elapsedFrames / (f32)duration);
+        evtScaleValueByMultiplier(clip, (f32)elapsedFrames / (f32)duration);
         if (undo == 0) {
-            sdfFreezeFloatCounter((EvtScaledValue *)clip);
+            sdfFreezeFloatCounter(clip);
         } else {
-            sdfUnfreezeFloatCounter((EvtScaledValue *)clip);
+            sdfUnfreezeFloatCounter(clip);
         }
     }
 }
 
 /* Store elapsed frames plus an offset, bounded below by zero and above by clip duration. */
 void evtSetMovieClipPositionClampedToDuration(EffWorldNode *movie, s32 unused, s32 start, s32 end, s32 offset) {
-    PolyMovieClip *clip;
+    SdfFloatCounter *clip;
 
     clip = ((PolyMovieState *)movie->data)->clip;
     if (clip != NULL) {
@@ -510,7 +510,7 @@ void evtSetMovieClipPositionClampedToDuration(EffWorldNode *movie, s32 unused, s
         if ((s32)clip->duration <= elapsedFrames) {
             elapsedFrames = (s32)clip->duration;
         }
-        clip->position = (f32)elapsedFrames;
+        clip->time = (f32)elapsedFrames;
     }
 }
 

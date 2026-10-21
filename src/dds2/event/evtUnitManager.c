@@ -9,7 +9,7 @@ struct EffNodeDescriptor;
 #include "dds3_path.h"
 #include "evt_unit.h"
 #include "evt_unit_motion_setup.h"
-#include "evt_scaled_value.h"
+#include "sdf_float_counter.h"
 #include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
@@ -50,12 +50,12 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
     f32 t = step;
     f32 segmentLength;
 
-    savedScaleFactor = evtGetValueScaleFactor((EvtScaledValue *)path);
-    evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
+    savedScaleFactor = evtGetValueScaleFactor(&path->counter);
+    evtScaleValueByMultiplier(&path->counter, 0.0f);
     dds3InterpolatePathVectorVU(path);
     do {
         VU0_MOVE_VF(vf11, vf10);
-        evtScaleValueByMultiplier((EvtScaledValue *)path, t);
+        evtScaleValueByMultiplier(&path->counter, t);
         dds3InterpolatePathVectorVU(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
@@ -64,7 +64,7 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
         VU0_MOVE_VF(vf10, vf12);
         t += step;
     } while (t <= 1.0f);
-    evtScaleValueByMultiplier((EvtScaledValue *)path, savedScaleFactor);
+    evtScaleValueByMultiplier(&path->counter, savedScaleFactor);
     return length;
 }
 
@@ -1065,7 +1065,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
 s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
-    sdfStepWrappingFloatCounter((Dds3PathCurveWork *)unit->pathHandle);
+    sdfStepWrappingFloatCounter(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
     dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
     VU0_STORE_VF($vf10, v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
@@ -1133,7 +1133,6 @@ typedef char Entry270_size_check[(sizeof(Entry270) == 0x270) ? 1 : -1];
 extern Entry270 *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
-extern void sdfSetFloatCounterDirection(s32 destination, s32 direction);
 
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 
@@ -1281,11 +1280,11 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 pathObjectKey, s32 frames, s32 valu
     work->pathHandle = (s32)path;
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
-        evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
-        sdfSetFloatCounterDirection((s32)path, 0);
+        evtScaleValueByMultiplier(&path->counter, 0.0f);
+        sdfSetFloatCounterDirection(&path->counter, 0);
     } else {
-        evtScaleValueByMultiplier((EvtScaledValue *)path, 1.0f);
-        sdfSetFloatCounterDirection((s32)path, 1);
+        evtScaleValueByMultiplier(&path->counter, 1.0f);
+        sdfSetFloatCounterDirection(&path->counter, 1);
         work->pathSpeed = -work->pathSpeed;
     }
     switch (pathFollowMode) {

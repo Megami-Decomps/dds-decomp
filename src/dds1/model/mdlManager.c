@@ -18,7 +18,7 @@
 #include "snd_slot.h"
 #include "sdf_resource.h"
 #include "eff_ref_obj.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "dat_state.h"
 #include "btl_state.h"
 #include "btl_sound.h"
@@ -382,7 +382,8 @@ void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     sdfChipFreeDirect(request);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRequest *destination) {
+void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, void *userData) {
+    MdlLoadRequest *destination = userData;
     const SdfTextureOffsetListHeader *loadedData;
     DevRequest *resourceList;
 
@@ -396,7 +397,8 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
-void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
+void mdlFinishLoadCmd(struct FileRequest *resource, void *userData) {
+    MdlLoadRequest *request = userData;
     request->payload.requestAllocation = fileGetResourceHandle(resource);
     request->payload.itemList = (struct SdfItemListRef *)sdfRelocatePackedResourcePayload(
         (SdfPackedRelocationHeader *)fileGetLoadedDataAddress(resource));
@@ -408,7 +410,8 @@ void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
 
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
-void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
+void mdlFinishLoadJob(struct FileRequest *resource, void *userData) {
+    MdlLoadRequest *request = userData;
     request->payload.motionResource = fileGetResourceHandle(resource);
     request->payload.motionTable = (struct MotionTable *)sdfRelocatePackedResourceWordsFromHeader(
         (SdfPackedRelocationHeader *)fileGetLoadedDataAddress(resource));
@@ -477,14 +480,14 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
         if (paths->resourceListPath != NULL) {
             request->resourceListRequested = 1;
             mdlBuildPrefixedString(requestPath, paths->resourceListPath);
-            fileCreateCallbackRequest(requestPath, 0, (u32)mdlRecordLoadedSizeAndReleaseHandle, (u32)request);
+            fileCreateCallbackRequest(requestPath, 0, mdlRecordLoadedSizeAndReleaseHandle, request);
         }
         request->itemsRequested = 1;
         mdlBuildPrefixedString(requestPath, paths->path);
-        fileCreateCallbackRequest(requestPath, 0, (u32)mdlFinishLoadCmd, (u32)request);
+        fileCreateCallbackRequest(requestPath, 0, mdlFinishLoadCmd, request);
         if (paths->motionPath != NULL) {
             mdlBuildPrefixedString(requestPath, paths->motionPath);
-            fileCreateCallbackRequest(requestPath, 0, (u32)mdlFinishLoadJob, (u32)request);
+            fileCreateCallbackRequest(requestPath, 0, mdlFinishLoadJob, request);
         }
     }
     if (blocking != 0) {
@@ -1388,7 +1391,8 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */
-void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *completionJob) {
+void mdlCompleteGroupedJobAndNotify(FileRequest *requestOwner, void *userData) {
+    MdlDoneJob *completionJob = userData;
     completionJob->owner = requestOwner;
     mdlApplyGroupedPartPackets(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
     WaitSema(mdlGroupJobSemaphore);
@@ -1400,7 +1404,7 @@ void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *co
     }
 }
 
-extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
+extern void mdlCompleteGroupedJobAndNotify(FileRequest *, void *);
 
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up
@@ -1408,18 +1412,18 @@ extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
  * Preserve the generic callback and user-data word parameters. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(sizeof(MdlDoneJob));
-    FilePacRequest *requestSlot;
+    FileRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
     completionJob->arg = jobArg;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = (FilePacRequest *)fileAllocateDispatchRequest(requestPath, 0, 0,
-                                                                (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
+    requestSlot = fileAllocateDispatchRequest(requestPath, 0, 0,
+                                                                mdlCompleteGroupedJobAndNotify, completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        fileWaitForRequestReady((struct FileRequest *)requestSlot);
+        fileWaitForRequestReady(requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

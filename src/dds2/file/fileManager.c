@@ -1,12 +1,11 @@
 #include "sdk_ps2.h"
 #include "sdf_chip.h"
 #include "file.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "sdf_pac_state.h"
 #include "file_request_api.h"
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
-#include "file_request.h"
 
 FileManWork fileManagerWork __attribute__((section(".bss")));
 
@@ -45,7 +44,7 @@ extern char *sdfStrDup(const char *text);
  * semaphore. Start processing only after an empty-to-nonempty transition.
  * The caller supplies initialized next linkage; this function does not clear it. */
 void fileManQueueNamedRequest(FileRequest *request, s32 kind, const char *requestName,
-                   void *callback, void *userData) {
+                   FileRequestCallback callback, void *userData) {
     FileManWork *work;
     char *duplicatedName;
     s32 startsQueue;
@@ -129,23 +128,23 @@ void fileUnlinkNode(FileManWork *work, FileRequest *job) {
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
-struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
-    FilePacRequest *request;
+struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, FileRequestCallback onComplete, void *userData) {
+    FileRequest *request;
 
     sdfDebugPrintf("pac load %s\n", requestName);
-    request = sdfAllocAndClearQuadwords(sizeof(FilePacRequest));
+    request = sdfAllocAndClearQuadwords(sizeof(FileRequest));
     sdfPacInitializeDispatchPacket(&request->packet, dispatchValue);
     if (flags != 0) {
         sdfPacUseHighAddressAllocator(&request->packet);
     }
-    fileManQueueNamedRequest((FileRequest *)request, FILE_REQUEST_KIND_PAC, requestName,
-                             (void *)onComplete, (void *)userData);
+    fileManQueueNamedRequest(request, FILE_REQUEST_KIND_PAC, requestName,
+                             onComplete, userData);
     return request;
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
 struct FileRequest *fileQueuePlainDispatchRequest(const char *requestName) {
-    return (struct FileRequest *)fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
+    return fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
 }
 
 /* Queue PAC work with extra packet setup enabled and no completion context. */
@@ -154,16 +153,16 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
 }
 
 /* Clear kind-zero request work and narrow callbackMode into byte three.
- * callbackAddress is the queue callback; userData is its context, not another
- * callback. Keep the raw byte store and existing provider parameter types. */
-struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
+ * callback receives the request and userData context, not another
+ * callback. */
+struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, FileRequestCallback callback, void *userData) {
     FileRequest *request;
 
     sdfDebugPrintf("file load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
     request->allocationMode = callbackMode;
     fileManQueueNamedRequest(request, FILE_REQUEST_KIND_CALLBACK, requestName,
-                             (void *)callbackAddress, (void *)userData);
+                             callback, userData);
     return request;
 }
 
@@ -251,15 +250,15 @@ void fileWaitIdle(void) {
 
 /* Create a kind-two request with the caller's source buffer and byte count.
  * Its address is stored in the existing value word at +0x24. */
-FileRequest *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
+FileRequest *fileWindowSlotCreate(const char *requestName, const void *sourceData, s32 sourceByteCount, FileRequestCallback callback, void *userData) {
     FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
 
     request->retainedAddress = (u32)sourceData;
     request->transferAddress = (u32)sourceData;
     request->totalBytes = sourceByteCount;
     request->transferBytes = sourceByteCount;
-    fileManQueueNamedRequest(request, FILE_REQUEST_KIND_VALUE_PAIR, requestName, (void *)callbackAddress,
-                             (void *)userDataAddress);
+    fileManQueueNamedRequest(request, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callback,
+                             userData);
     return request;
 }
 

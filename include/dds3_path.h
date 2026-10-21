@@ -2,6 +2,7 @@
 #define DDS3_PATH_H
 
 #include "common.h"
+#include "sdf_float_counter.h"
 
 struct EffPrimitiveCurve;
 
@@ -53,10 +54,7 @@ typedef struct Dds3PathCurveTable {
 
 /* Complete 0x24-byte state allocated by dds3CreatePathCurveWork. */
 typedef struct Dds3PathCurveWork {
-    s32 direction; /* 0 counts up, 1 counts down; other values do not step. */
-    u32 flags;
-    f32 duration; /* Greatest final frame across the retained channels. */
-    f32 time;
+    SdfFloatCounter counter; /* Duration is the greatest final channel frame. */
     struct EffPrimitiveCurve *primitiveCurve; /* 0x10: derived from position samples. */
     Dds3PathKeyframes *positionKeys; /* 0x14 */
     Dds3PathKeyframes *rotationKeys; /* 0x18 */
@@ -108,7 +106,6 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path);
 void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path);
 void dds3InterpolatePathOutput(Dds3PathCurveWork *path, struct WorldTransformParams *out);
 f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *path);
-s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path);
 f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path);
 
 #endif

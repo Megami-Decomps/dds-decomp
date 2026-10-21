@@ -9,7 +9,7 @@
 #include "fld_room_effect_entry.h"
 #include "fld_object_slot.h"
 #include "fld_npc_palette.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
@@ -3229,7 +3229,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
 void fldParseMixLb(void) {
-    FilePacRequest *lb;
+    FileRequest *lb;
     PacWork *node;
     u32 index;
 
@@ -3255,8 +3255,8 @@ void fldParseMixLb(void) {
     D_00438EDC = sdfReadNamedResource("/fld/f/bin/DAMAGE_1.D3P", &D_00438EE0, 0);
     D_00438EE4 = sdfReadNamedResource("/fld/f/bin/DAMAGE_2.D3P", &D_00438EE8, 0);
     D_00438EEC = sdfReadNamedResource("/fld/f/bin/DAMAGE_3.D3P", &D_00438EF0, 0);
-    lb = (FilePacRequest *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
-    fileWaitForRequestReady((struct FileRequest *)lb);
+    lb = fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    fileWaitForRequestReady(lb);
     for (node = lb->packet.queueHead; node != NULL; node = node->next, index++) {
         switch (index) {
         case 5:
