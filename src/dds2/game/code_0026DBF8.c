@@ -79,7 +79,8 @@ MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void);
 void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj);
 extern void mnuDrawCellScaledGrid();
 struct MantraDrawPool;
-extern struct MantraDrawItem *mnuRegisterMantraDrawItem(struct MantraDrawPool *, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
+struct MantraDrawItem;
+extern struct MantraDrawItem *mnuRegisterMantraDrawItem(struct MantraDrawPool *, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(struct MantraDrawItem *), s16, s16, u32);
 extern s32 mnuUpdateMantraFadeA();
 extern u32 mnuDrawMantraIconList(u32, u32);
 typedef struct MantraNodePos {
@@ -111,12 +112,12 @@ extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);
 extern u32 mnuCreateMantraIconListA();
 extern u32 mnuCreateMantraIconListB();
 extern u32 mnuCreateMantraIconListC();
-extern void mnuReleaseMantraFadeData(s32);
+extern void mnuReleaseMantraFadeData(struct MantraDrawItem *);
 s32 mnuUpdateMantraLimitLineFade();
 s32 mnuDrawMantraLimitLine();
 u32 mnuCreateMantraLimitLineFadeData(u32 list);
 void mnuMantraSetupSlot(u32);
-void mnuReleaseMantraFadeDrawData();
+void mnuReleaseMantraFadeDrawData(struct MantraDrawItem *);
 typedef struct MantraIconEntry {
     /* 0x0 */ u32 active : 1;
     u32 state : 4;
@@ -142,26 +143,26 @@ typedef char MantraIconPool_size_must_be_0x14[(sizeof(MantraIconPool) == 0x14) ?
 MantraIconEntry *mnuSpawnMantraIcon(s32, s32, MantraIconPool *, u32);
 extern s32 mnuUpdateMantraBackgroundFade();
 extern u32 mnuInitMantraBackgroundDraw();
-extern void mnuReleaseMantraBackgroundDraw();
+extern void mnuReleaseMantraBackgroundDraw(struct MantraDrawItem *);
 extern s32 mnuUpdateMantraBackgroundMaskFade();
 extern s32 mnuDrawMantraBackgroundMaskPulse();
 extern u32 mnuInitMantraBackgroundMaskDraw();
-extern void mnuReleaseMantraBackgroundMaskDraw();
+extern void mnuReleaseMantraBackgroundMaskDraw(struct MantraDrawItem *);
 extern s32 mnuUpdateMantraTitleBlinkFade();
 extern s32 mnuDrawMantraTitle();
 extern u32 mnuInitMantraTitleDraw();
-extern void mnuReleaseMantraTitleDraw();
+extern void mnuReleaseMantraTitleDraw(struct MantraDrawItem *);
 extern s32 mnuUpdateMantraInfoPulseFade();
 extern s32 mnuDrawMantraInfoPanel();
 extern u32 mnuInitMantraInfoDraw();
-extern void mnuReleaseMantraInfoDraw();
+extern void mnuReleaseMantraInfoDraw(struct MantraDrawItem *);
 extern s32 mnuDrawMantraGauge();
 extern u32 mnuInitMantraGaugeData();
-extern void mnuReleaseMantraGaugeData();
+extern void mnuReleaseMantraGaugeData(struct MantraDrawItem *);
 extern s32 mnuUpdateMantraRecordPanelFade();
 extern s32 mnuDrawMantraRecordPanel();
 extern u32 mnuCreateTypeOneRecord(void);
-extern void mnuReleaseMantraRecordPanelData();
+extern void mnuReleaseMantraRecordPanelData(struct MantraDrawItem *);
 extern u32 mnuMantraSpriteSlots[12];
 
 
@@ -212,7 +213,7 @@ typedef struct MantraDisplayNode {
 } MantraDisplayNode;
 
 /* One draw process: construction supplies data, update requests completion,
- * draw runs each active frame, and release may also be called without arguments. */
+ * draw runs each active frame, and release receives the item record. */
 typedef struct MantraDrawItem {
     u32 kind;
     union {
@@ -227,7 +228,7 @@ typedef struct MantraDrawItem {
         } bits;
     };
     u32 (*create)();
-    void (*release)();
+    void (*release)(struct MantraDrawItem *);
     s32 (*update)();
     void (*draw)();
     s16 startDelay;    /* 0x18: delay before construction */
@@ -348,7 +349,7 @@ extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
 extern s32 mnuDrawMantraUnitPanel();
 extern u32 mnuInitMantraUnitPanelDraw();
-extern void mnuReleaseMantraUnitPanelDraw();
+extern void mnuReleaseMantraUnitPanelDraw(struct MantraDrawItem *);
 void mnuStorePanelEntry(u32, u32);
 struct SdfMemBlock;
 
@@ -966,7 +967,7 @@ void mnuMantraSetupSlot(u32 item) {
     MantraDrawItem *entry = (MantraDrawItem *)item;
     if (!((entry->flags >> 11) & 1)) {
         if (entry->release != 0) {
-            entry->release();
+            entry->release(entry);
         }
         entry->flags |= 0x800;
     }
@@ -986,7 +987,7 @@ MantraDrawItem *mnuFindFreeMantraDrawItem(MantraDrawPool *address) {
 }
 
 /* Claim an inactive slot; null update/draw callbacks use the zero-return stub. */
-MantraDrawItem *mnuRegisterMantraDrawItem(MantraDrawPool *pool, u32 kind, s32 (*update)(), void (*draw)(), u32 (*create)(), void (*release)(), s16 startDelay, s16 endDelay, u32 createArg) {
+MantraDrawItem *mnuRegisterMantraDrawItem(MantraDrawPool *pool, u32 kind, s32 (*update)(), void (*draw)(), u32 (*create)(), void (*release)(MantraDrawItem *), s16 startDelay, s16 endDelay, u32 createArg) {
     MantraDrawItem *item = mnuFindFreeMantraDrawItem(pool);
 
     memset(item, 0, MNU_MANTRA_DRAW_ITEM_BYTES);
@@ -1152,8 +1153,8 @@ u32 mnuInitMantraBackgroundDraw(void) {
     return data;
 }
 
-void mnuReleaseMantraBackgroundDraw(u32 obj) {
-    s32 data = (s32)((MantraDrawItem *)obj)->data;
+void mnuReleaseMantraBackgroundDraw(MantraDrawItem *item) {
+    s32 data = (s32)item->data;
     mnuReleaseMantraBackgroundBurstPool(((MantraBackgroundState *)data)->burstPool);
     sdfChipFreeDirect(data);
     evtPrintDeveloperConsoleMessage("BG Draw Release\n");
@@ -1404,8 +1405,8 @@ u32 mnuInitMantraBackgroundMaskDraw(void) {
     return data;
 }
 
-void mnuReleaseMantraBackgroundMaskDraw(u32 obj) {
-    sdfChipFreeDirect(((MantraDrawItem *)obj)->data);
+void mnuReleaseMantraBackgroundMaskDraw(MantraDrawItem *item) {
+    sdfChipFreeDirect(item->data);
     evtPrintDeveloperConsoleMessage("BGMask Draw Release\n");
 }
 
@@ -1562,8 +1563,8 @@ u32 mnuCreateMantraLimitLineFadeData(u32 pool) {
     return (u32)work;
 }
 
-void mnuReleaseMantraFadeDrawData(u32 obj) {
-    sdfChipFreeDirect(((MantraDrawItem *)obj)->data);
+void mnuReleaseMantraFadeDrawData(MantraDrawItem *item) {
+    sdfChipFreeDirect(item->data);
 }
 
 
@@ -1958,8 +1959,8 @@ u32 mnuInitMantraTitleDraw(void) {
     return data;
 }
 
-void mnuReleaseMantraTitleDraw(u32 obj) {
-    sdfChipFreeDirect(((MantraDrawItem *)obj)->data);
+void mnuReleaseMantraTitleDraw(MantraDrawItem *item) {
+    sdfChipFreeDirect(item->data);
     evtPrintDeveloperConsoleMessage("Title Draw Release\n");
 }
 
@@ -2154,8 +2155,8 @@ u32 mnuInitMantraInfoDraw(void) {
     return data;
 }
 
-void mnuReleaseMantraInfoDraw(u32 obj) {
-    sdfChipFreeDirect(((MantraDrawItem *)obj)->data);
+void mnuReleaseMantraInfoDraw(MantraDrawItem *item) {
+    sdfChipFreeDirect(item->data);
     evtPrintDeveloperConsoleMessage("Info Draw Release\n");
 }
 
@@ -2455,8 +2456,8 @@ u32 mnuInitMantraGaugeData(void) {
     return data;
 }
 
-void mnuReleaseMantraGaugeData(u32 obj) {
-    sdfChipFreeDirect(((MantraDrawItem *)obj)->data);
+void mnuReleaseMantraGaugeData(MantraDrawItem *item) {
+    sdfChipFreeDirect(item->data);
     evtPrintDeveloperConsoleMessage("ScrollCursor Draw Release\n");
 }
 
@@ -2650,8 +2651,8 @@ u32 mnuInitMantraUnitPanelDraw(u32 ctx, MantraPanelListInput *resources) {
     return (u32)data;
 }
 
-void mnuReleaseMantraUnitPanelDraw(u32 obj) {
-    MantraLampState *data = ((MantraDrawItem *)obj)->data;
+void mnuReleaseMantraUnitPanelDraw(MantraDrawItem *item) {
+    MantraLampState *data = item->data;
     mnuReleaseDisplayListNodes(&data->list);
     sdfChipFreeDirect(data);
     evtPrintDeveloperConsoleMessage("UnitPanel Draw Release\n");
@@ -2744,8 +2745,8 @@ u32 mnuCreateTypeOneRecord(void) {
     return (u32)record;
 }
 
-void mnuReleaseMantraRecordPanelData(u32 obj) {
-    sdfChipFreeDirect(((MantraDrawItem *)obj)->data);
+void mnuReleaseMantraRecordPanelData(MantraDrawItem *item) {
+    sdfChipFreeDirect(item->data);
 }
 
 s32 mnuUpdateMantraRecordPanelFade(s32 unused, MantraDrawItem *item) {
@@ -3687,8 +3688,8 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
     return data;
 }
 
-void mnuReleaseMantraFadeData(s32 obj) {
-    MantraFadeData *fade = (MantraFadeData *)((MantraDrawItem *)obj)->data;
+void mnuReleaseMantraFadeData(MantraDrawItem *item) {
+    MantraFadeData *fade = (MantraFadeData *)item->data;
     mnuReleaseMantraIconSprite(fade->iconPool);
     sdfChipFreeDirect(fade);
 }
