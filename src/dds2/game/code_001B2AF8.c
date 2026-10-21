@@ -79,7 +79,7 @@ extern SdfTex *sndTestMessageTexture;
 
 extern u64 D_004366E8;
 
-extern s32 btlRuntime;
+extern BtlState *btlRuntime;
 extern BattleCmdPanel *btlCommandPanelWork;
 
 extern const char *btlMahenPanelTaskNameRef;

@@ -12,14 +12,14 @@
 
 extern s32 fileActiveCardDetectionRequestIndex;
 
-s32 func_002F6990(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
+s32 sceMcGetInfo(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
 
 
 /* This unit builds with -fno-optimize-sibling-calls (config/dds1/cflags.txt), so
  * the card-info query stays jal + epilogue. */
 void fileReqInit(s32 request) {
     FileReqEntry *entry = &fileRequestEntries[request];
-    func_002F6990(request, 0, &entry->cardType, &entry->sizeKiB, &entry->formatted);
+    sceMcGetInfo(request, 0, &entry->cardType, &entry->sizeKiB, &entry->formatted);
 }
 
 /* Select and reinitialize one file request, then clear its +0x10 byte. */

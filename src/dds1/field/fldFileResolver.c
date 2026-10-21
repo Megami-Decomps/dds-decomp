@@ -577,7 +577,7 @@ extern s32 D_003BAE68;
 
 extern u32 fldAuxRecordBuffer;
 
-extern u32 fldValueRecords;
+extern FldValueRecord *fldValueRecords;
 
 extern u32 fldAuxRecordResource;
 
@@ -1687,7 +1687,7 @@ extern char D_003BACA0[];
 
 extern char D_003BACA8[];
 
-extern FieldPlayerSceneWork D_0032F1A0;
+extern FieldPlayerSceneWork fldPlayerSceneWork;
 
 extern void fldAllocateBackgroundBuffer(void);
 
@@ -1712,7 +1712,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     void *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;
-    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
     s32 area;
     s32 room;
     s32 isField;
@@ -3612,10 +3612,10 @@ void fldProbeCameraSupportSurface(void) {
     } else {
         return;
     }
-    if (fldValueRecords == 0) {
+    if (fldValueRecords == NULL) {
         return;
     }
-    node = ((FldValueRecord *)fldValueRecords)[index].worldNode;
+    node = fldValueRecords[index].worldNode;
     if (node != NULL) {
         offset[0] = node->inner->position[0];
         offset[1] = node->inner->position[1];
@@ -3626,15 +3626,15 @@ void fldProbeCameraSupportSurface(void) {
         offset[2] = 0.0f;
     }
     cam = &fldAreaState;
-    xs[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][0] + offset[0];
-    ys[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][1] + offset[1];
-    zs[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][2] + offset[2];
-    xs[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][0] + offset[0];
-    ys[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][1] + offset[1];
-    zs[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][2] + offset[2];
-    xs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][0] + offset[0];
-    ys[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][1] + offset[1];
-    zs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][2] + offset[2];
+    xs[0] = fldValueRecords[index].vertices[0][0] + offset[0];
+    ys[0] = fldValueRecords[index].vertices[0][1] + offset[1];
+    zs[0] = fldValueRecords[index].vertices[0][2] + offset[2];
+    xs[1] = fldValueRecords[index].vertices[1][0] + offset[0];
+    ys[1] = fldValueRecords[index].vertices[1][1] + offset[1];
+    zs[1] = fldValueRecords[index].vertices[1][2] + offset[2];
+    xs[2] = fldValueRecords[index].vertices[2][0] + offset[0];
+    ys[2] = fldValueRecords[index].vertices[2][1] + offset[1];
+    zs[2] = fldValueRecords[index].vertices[2][2] + offset[2];
     x = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
     cam->unk5C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
@@ -6538,7 +6538,7 @@ void fldHitAlloc(void) {
 
     fldValueRecordResource = (u32)allocation;
     storage = (void *)sdfMemLock(allocation);
-    fldValueRecords = (u32)storage;
+    fldValueRecords = storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
     allocation = sdfMemAllocDirect(FIELD_AUX_RECORD_STORAGE_SIZE);
     fldAuxRecordResource = (u32)allocation;
@@ -6551,7 +6551,7 @@ void fldHitAlloc(void) {
 void fldHitFree(void) {
     sdfMemUnlock((struct SdfMemBlock *)fldValueRecordResource);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldValueRecordResource);
-    fldValueRecords = 0;
+    fldValueRecords = NULL;
     sdfMemUnlock((struct SdfMemBlock *)fldAuxRecordResource);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
@@ -6609,7 +6609,7 @@ EffWorldNode *fldHitGetMatter(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
-        FldValueRecord *record = (FldValueRecord *)fldValueRecords;
+        FldValueRecord *record = fldValueRecords;
         do {
             if (record->id == id) {
                 return record->worldNode;
@@ -6626,8 +6626,8 @@ void fldHitLinkMatter(s32 id, EffWorldNode *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (((FldValueRecord *)fldValueRecords)[index].id == id) {
-            ((FldValueRecord *)fldValueRecords)[index].worldNode = worldNode;
+        if (fldValueRecords[index].id == id) {
+            fldValueRecords[index].worldNode = worldNode;
         }
     }
 }
@@ -6635,7 +6635,7 @@ void fldHitLinkMatter(s32 id, EffWorldNode *worldNode) {
 void fldClrCollision(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
-        ((FldValueRecord *)fldValueRecords)[index].worldNode = 0;
+        fldValueRecords[index].worldNode = 0;
     }
     fldValueRecordCount = 0;
     fldAreaState.unkA0 = -1;
@@ -6643,7 +6643,7 @@ void fldClrCollision(void) {
     fldAreaState.unkAC = -1;
     D_003BADF8 = 0;
     D_003BADEC = 0;
-    if (fldValueRecords != 0) {
+    if (fldValueRecords != NULL) {
         fldHitFree();
     }
 }
@@ -6679,7 +6679,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
     f32 runningMinimum;
     s32 i;
     s32 component;
-    if (fldValueRecords == 0) {
+    if (fldValueRecords == NULL) {
         fldHitAlloc();
     }
     for (pass = 0; pass < 5; pass++) {
@@ -6695,7 +6695,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
             remaining = faceCount;
             for (; remaining != 0; remaining--, face++, trianglesRemaining--) {
                 u32 vertexIndex;
-                record = &((FldValueRecord *)fldValueRecords)[fldValueRecordCount];
+                record = &fldValueRecords[fldValueRecordCount];
                 record->count = trianglesRemaining > 0 ? 3 : 4;
                 vertexIndex = face->vertexIndices[0];
                 vertices[0][0] = sourceVertices[vertexIndex][0] + translation[0];
@@ -7336,16 +7336,16 @@ void fldHitChkUnitElvOnly(f32 *input) {
     absoluteDelta[2] = ffabsf(input[2] - D_00330750[2]);
     margin = 45.0f;
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x80)) {
+        if (!(fldValueRecords[index].face->attributes & 0x80)) {
             continue;
         }
         if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                 ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
+                                 fldValueRecords[index].sceneFlag)) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].ownerIndex > 0) {
+        if (fldValueRecords[index].ownerIndex > 0) {
             if (fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                            ((FldValueRecord *)fldValueRecords)[index].ownerIndex)) {
+                                            fldValueRecords[index].ownerIndex)) {
                 continue;
             }
         }
@@ -7355,8 +7355,8 @@ void fldHitChkUnitElvOnly(f32 *input) {
         savedPrevious[0] = previous[0];
         savedPrevious[1] = previous[1];
         savedPrevious[2] = previous[2];
-        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
+        if (fldValueRecords[index].worldNode != 0) {
+            transform = fldValueRecords[index].worldNode->inner;
             relative = 1;
             position[0] -= transform->position[0];
             position[1] -= transform->position[1];
@@ -7367,30 +7367,30 @@ void fldHitChkUnitElvOnly(f32 *input) {
         } else {
             relative = 0;
         }
-        distance = fldDotVector(position, ((FldValueRecord *)fldValueRecords)[index].normal);
-        distance -= ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        distance = fldDotVector(position, fldValueRecords[index].normal);
+        distance -= fldValueRecords[index].planeConstant;
         if (ffabsf(distance) < margin) {
-            record = &((FldValueRecord *)fldValueRecords)[index];
+            record = &fldValueRecords[index];
             fldClassifyPositionInZoneWithMargin(&clearance, record->mode, record->count, 45.0f, position, record);
             inside = clearance < 0.0f ? 0 : 1;
             if (inside == 1) {
-                if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
+                if (fldValueRecords[index].worldNode != 0) {
                     if (fldAreaState.unk90 == -1 ||
-                        ((FldValueRecord *)fldValueRecords)[fldAreaState.unk90].worldNode->key ==
-                            ((FldValueRecord *)fldValueRecords)[index].worldNode->key) {
+                        fldValueRecords[fldAreaState.unk90].worldNode->key ==
+                            fldValueRecords[index].worldNode->key) {
                         fldAreaState.unk90 = index;
                     } else {
                         fldAreaState.unk94 = index;
                     }
-                    anchor = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
-                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = anchor->position[0];
-                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = anchor->position[1];
-                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = anchor->position[2];
+                    anchor = fldValueRecords[index].worldNode->inner;
+                    fldValueRecords[index].previousPosition[0] = anchor->position[0];
+                    fldValueRecords[index].previousPosition[1] = anchor->position[1];
+                    fldValueRecords[index].previousPosition[2] = anchor->position[2];
                 }
             }
         }
         if (relative) {
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
+            transform = fldValueRecords[index].worldNode->inner;
             position[0] += transform->position[0];
             position[1] += transform->position[1];
             position[2] += transform->position[2];
@@ -7417,33 +7417,33 @@ void fldHitChkUnitElv(f32 *position) {
     }
     index = fldAreaState.unk90;
     if (index != -1) {
-        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
+        if (fldValueRecords[index].worldNode != 0) {
             ObjectTransform *transform;
 
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
-            movement[0] = transform->position[0] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[0];
-            movement[1] = transform->position[1] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[1];
-            movement[2] = transform->position[2] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[2];
-            ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = transform->position[0];
-            ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = transform->position[1];
-            ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = transform->position[2];
+            transform = fldValueRecords[index].worldNode->inner;
+            movement[0] = transform->position[0] - fldValueRecords[index].previousPosition[0];
+            movement[1] = transform->position[1] - fldValueRecords[index].previousPosition[1];
+            movement[2] = transform->position[2] - fldValueRecords[index].previousPosition[2];
+            fldValueRecords[index].previousPosition[0] = transform->position[0];
+            fldValueRecords[index].previousPosition[1] = transform->position[1];
+            fldValueRecords[index].previousPosition[2] = transform->position[2];
         }
         if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                               ((FldValueRecord *)fldValueRecords)[index].sceneFlag) == 0) {
+                               fldValueRecords[index].sceneFlag) == 0) {
             index = fldAreaState.unk94;
             if (index != -1 && fldTestRoomSceneFlag(fldAreaState.area,
                         fldAreaState.floor + 1,
-                        ((FldValueRecord *)fldValueRecords)[index].sceneFlag) == 0) {
-                if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
+                        fldValueRecords[index].sceneFlag) == 0) {
+                if (fldValueRecords[index].worldNode != 0) {
                     ObjectTransform *transform;
 
-                    transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
-                    movement[0] += transform->position[0] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[0];
-                    movement[1] += transform->position[1] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[1];
-                    movement[2] += transform->position[2] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[2];
-                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = transform->position[0];
-                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = transform->position[1];
-                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = transform->position[2];
+                    transform = fldValueRecords[index].worldNode->inner;
+                    movement[0] += transform->position[0] - fldValueRecords[index].previousPosition[0];
+                    movement[1] += transform->position[1] - fldValueRecords[index].previousPosition[1];
+                    movement[2] += transform->position[2] - fldValueRecords[index].previousPosition[2];
+                    fldValueRecords[index].previousPosition[0] = transform->position[0];
+                    fldValueRecords[index].previousPosition[1] = transform->position[1];
+                    fldValueRecords[index].previousPosition[2] = transform->position[2];
                 }
             }
             newPosition[0] = position[0] + movement[0];
@@ -7520,16 +7520,16 @@ void fldHitChkUnitDamage(f32 *position) {
             do {
                 EffWorldNode *node;
 
-                margin = ((FldValueRecord *)fldValueRecords)[recordIndex].mode == 1 ? 45.0f : 60.0f;
+                margin = fldValueRecords[recordIndex].mode == 1 ? 45.0f : 60.0f;
                 if (pass == 0) {
-                    if (((FldValueRecord *)fldValueRecords)[recordIndex].mode == selectedAxis) {
+                    if (fldValueRecords[recordIndex].mode == selectedAxis) {
                         continue;
                     }
-                } else if (((FldValueRecord *)fldValueRecords)[recordIndex].mode != selectedAxis) {
+                } else if (fldValueRecords[recordIndex].mode != selectedAxis) {
                     continue;
                 }
 
-                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, ((FldValueRecord *)fldValueRecords)[recordIndex].sceneFlag) != 0) {
+                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, fldValueRecords[recordIndex].sceneFlag) != 0) {
                     continue;
                 }
 
@@ -7540,7 +7540,7 @@ void fldHitChkUnitDamage(f32 *position) {
                 savedReference[1] = reference[1];
                 savedReference[2] = reference[2];
 
-                node = ((FldValueRecord *)fldValueRecords)[recordIndex].worldNode;
+                node = fldValueRecords[recordIndex].worldNode;
                 if (node != 0) {
                     point[0] = savedPoint[0] - node->inner->position[0];
                     point[1] = savedPoint[1] - node->inner->position[1];
@@ -7550,10 +7550,10 @@ void fldHitChkUnitDamage(f32 *position) {
                     reference[2] = savedReference[2] - node->inner->position[2];
                 }
 
-                planeDistance = fldDotVector(point, ((FldValueRecord *)fldValueRecords)[recordIndex].normal);
+                planeDistance = fldDotVector(point, fldValueRecords[recordIndex].normal);
                 {
-                    u32 faceAttributes = ((FldValueRecord *)fldValueRecords)[recordIndex].face->attributes;
-                    planeDistance = ffabsf(planeDistance - ((FldValueRecord *)fldValueRecords)[recordIndex].planeConstant);
+                    u32 faceAttributes = fldValueRecords[recordIndex].face->attributes;
+                    planeDistance = ffabsf(planeDistance - fldValueRecords[recordIndex].planeConstant);
                     if ((faceAttributes & 0x4000) == 0) {
                         continue;
                     }
@@ -7564,10 +7564,10 @@ void fldHitChkUnitDamage(f32 *position) {
                         }
                         fldClassifyPositionInZoneWithMargin(
                             &classifiedMargin,
-                            ((FldValueRecord *)fldValueRecords)[recordIndex].mode,
-                            ((FldValueRecord *)fldValueRecords)[recordIndex].count,
+                            fldValueRecords[recordIndex].mode,
+                            fldValueRecords[recordIndex].count,
                             margin, point,
-                            &((FldValueRecord *)fldValueRecords)[recordIndex]);
+                            &fldValueRecords[recordIndex]);
                         if (!(classifiedMargin < 0.0f)) {
                             accepted = 1;
                         }
@@ -7670,21 +7670,21 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (((FldValueRecord *)fldValueRecords)[index].mode == 1) {
-            if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x100)) {
+        if (fldValueRecords[index].mode == 1) {
+            if (!(fldValueRecords[index].face->attributes & 0x100)) {
                 continue;
             }
         }
-        if (((FldValueRecord *)fldValueRecords)[index].face->attributes & 0xA01) {
+        if (fldValueRecords[index].face->attributes & 0xA01) {
             continue;
         }
         if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                 ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
+                                 fldValueRecords[index].sceneFlag)) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
+        if (fldValueRecords[index].worldNode != 0) {
             relative = 1;
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
+            transform = fldValueRecords[index].worldNode->inner;
             origin[0] -= transform->position[0];
             origin[1] -= transform->position[1];
             origin[2] -= transform->position[2];
@@ -7700,10 +7700,10 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
         probeEnd[0] = target[0];
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
-        startDistance = fldDotVector(probeStart, ((FldValueRecord *)fldValueRecords)[index].normal) -
-                        ((FldValueRecord *)fldValueRecords)[index].planeConstant;
-        endDistance = fldDotVector(probeEnd, ((FldValueRecord *)fldValueRecords)[index].normal) -
-                      ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        startDistance = fldDotVector(probeStart, fldValueRecords[index].normal) -
+                        fldValueRecords[index].planeConstant;
+        endDistance = fldDotVector(probeEnd, fldValueRecords[index].normal) -
+                      fldValueRecords[index].planeConstant;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
             endDistance = ffabsf(endDistance);
@@ -7718,11 +7718,11 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = fldGetPositionZoneClearance(((FldValueRecord *)fldValueRecords)[index].mode, ((FldValueRecord *)fldValueRecords)[index].count, 2.0f, probeStart, &((FldValueRecord *)fldValueRecords)[index]);
+            clearance = fldGetPositionZoneClearance(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
             if (0.0f <= clearance) {
-                if (((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x400) {
-                    entry = &((FldStopEntry *)((FldValueRecord *)fldValueRecords)[index].stopData)
-                                [((FldValueRecord *)fldValueRecords)[index].face->stop];
+                if (fldValueRecords[index].face->attributes & 0x400) {
+                    entry = &((FldStopEntry *)fldValueRecords[index].stopData)
+                                [fldValueRecords[index].face->stop];
                     dds3SetObjectPayloadWord8(dds3FindIndexedObjectChainNodeByName(secondary, 6, entry->name), 4);
                 } else {
                 found = index;
@@ -7743,7 +7743,7 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
             }
         }
         if (relative) {
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
+            transform = fldValueRecords[index].worldNode->inner;
             origin[0] += transform->position[0];
             origin[1] += transform->position[1];
             origin[2] += transform->position[2];
@@ -7784,27 +7784,27 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (((FldValueRecord *)fldValueRecords)[index].mode == 1) {
-            if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x100)) {
+        if (fldValueRecords[index].mode == 1) {
+            if (!(fldValueRecords[index].face->attributes & 0x100)) {
                 continue;
             }
         }
-        if (((FldValueRecord *)fldValueRecords)[index].face->attributes & 0xA01) {
+        if (fldValueRecords[index].face->attributes & 0xA01) {
             continue;
         }
         if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                 ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
+                                 fldValueRecords[index].sceneFlag)) {
             continue;
         }
-        if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x8000)) {
+        if (!(fldValueRecords[index].face->attributes & 0x8000)) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].face->special[0] != 4) {
+        if (fldValueRecords[index].face->special[0] != 4) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].worldNode != 0) {
+        if (fldValueRecords[index].worldNode != 0) {
             relative = 1;
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
+            transform = fldValueRecords[index].worldNode->inner;
             origin[0] -= transform->position[0];
             origin[1] -= transform->position[1];
             origin[2] -= transform->position[2];
@@ -7820,10 +7820,10 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
         probeEnd[0] = target[0];
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
-        startDistance = fldDotVector(probeStart, ((FldValueRecord *)fldValueRecords)[index].normal) -
-                        ((FldValueRecord *)fldValueRecords)[index].planeConstant;
-        endDistance = fldDotVector(probeEnd, ((FldValueRecord *)fldValueRecords)[index].normal) -
-                      ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        startDistance = fldDotVector(probeStart, fldValueRecords[index].normal) -
+                        fldValueRecords[index].planeConstant;
+        endDistance = fldDotVector(probeEnd, fldValueRecords[index].normal) -
+                      fldValueRecords[index].planeConstant;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
             endDistance = ffabsf(endDistance);
@@ -7838,7 +7838,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = fldGetPositionZoneClearance(((FldValueRecord *)fldValueRecords)[index].mode, ((FldValueRecord *)fldValueRecords)[index].count, 2.0f, probeStart, &((FldValueRecord *)fldValueRecords)[index]);
+            clearance = fldGetPositionZoneClearance(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
             if (0.0f <= clearance) {
                 found = index;
                 ratio = (startDistance + clearance) / total;
@@ -7857,7 +7857,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
             }
         }
         if (relative) {
-            transform = ((FldValueRecord *)fldValueRecords)[index].worldNode->inner;
+            transform = fldValueRecords[index].worldNode->inner;
             origin[0] += transform->position[0];
             origin[1] += transform->position[1];
             origin[2] += transform->position[2];

@@ -364,7 +364,7 @@ typedef struct {
     /* 0x7 */ u8 unk7;
 } SndTrackVolume;
 
-extern void func_0030B458(void *dst, void *src);
+extern void InvalidDCache(void *dst, void *src);
 
 extern SndTrackVolume D_003FE0D0[];
 
@@ -417,7 +417,7 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
     SndTrackSlot *slot;
     s32 slotIndex;
 
-    func_0030B458(work, (u8 *)work + 0x8D0);
+    InvalidDCache(work, (u8 *)work + 0x8D0);
     slot = work->slots;
     for (slotIndex = 0; slotIndex < 13; slotIndex++) {
         if (slot->id == id) {

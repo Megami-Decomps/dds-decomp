@@ -2966,7 +2966,7 @@ void btlWriteActorModelTableFile(void) {
     }
     sceWrite(fd, (s32)buffer, cursor - buffer);
     sceClose(fd);
-    sdfPfsSendPathRequest(D_00436F58, 0);
+    sceSync(D_00436F58, 0);
     sdfFreeMemoryFromEitherHeap(buffer);
 }
 

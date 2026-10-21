@@ -159,7 +159,7 @@ MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
     if (tagData == 0) {
         return 0;
     }
-    record = sdfAllocHeapMemory(sizeof(*record));
+    record = malloc(sizeof(*record));
     memset(record, 0, sizeof(*record));
     memcpy(&record->tag, tagData, sizeof(record->tag));
     return record;

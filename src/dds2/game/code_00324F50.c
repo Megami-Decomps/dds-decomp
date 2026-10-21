@@ -32,7 +32,7 @@ typedef char SdfResourceVectorRecord1CSizeCheck[(sizeof(SdfResourceVectorRecord1
 void *sdfAllocateOwnedResourceBuffer(MnuCallbackListPair *owner, u32 bytes) {
     void *handle;
 
-    handle = sdfAllocHeapMemory(bytes);
+    handle = malloc(bytes);
     dds3AppendIndexedListNode(owner->second, 0, (u32)handle);
     return handle;
 }

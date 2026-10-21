@@ -1507,7 +1507,7 @@ extern s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle)
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];
-extern FieldPlayerSceneWork D_0038A640;
+extern FieldPlayerSceneWork fldPlayerSceneWork;
 extern void fldAllocateBackgroundBuffer(void);
 #include "fld_object_slot_api.h"
 extern void fldReleaseResourceSlots();
@@ -1530,7 +1530,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     void *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;
-    FieldPlayerSceneWork *sceneWork = &D_0038A640;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
     s32 area;
     s32 room;
     s32 isField;
@@ -3396,7 +3396,7 @@ void fldUpdateLookAtSegmentDistance(void) {
     *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
 }
 
-extern u32 fldValueRecords;
+extern FldValueRecord *fldValueRecords;
 extern f32 fldGetTriangleHeightAtXZ(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
@@ -3419,10 +3419,10 @@ void fldProbeCameraSupportSurface(void) {
     } else {
         return;
     }
-    if (fldValueRecords == 0) {
+    if (fldValueRecords == NULL) {
         return;
     }
-    node = ((FldValueRecord *)fldValueRecords)[index].worldNode;
+    node = fldValueRecords[index].worldNode;
     if (node != NULL) {
         offset[0] = node->inner->position[0];
         offset[1] = node->inner->position[1];
@@ -3433,15 +3433,15 @@ void fldProbeCameraSupportSurface(void) {
         offset[2] = 0.0f;
     }
     cam = &fldAreaState;
-    xs[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][0] + offset[0];
-    ys[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][1] + offset[1];
-    zs[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][2] + offset[2];
-    xs[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][0] + offset[0];
-    ys[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][1] + offset[1];
-    zs[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][2] + offset[2];
-    xs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][0] + offset[0];
-    ys[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][1] + offset[1];
-    zs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][2] + offset[2];
+    xs[0] = fldValueRecords[index].vertices[0][0] + offset[0];
+    ys[0] = fldValueRecords[index].vertices[0][1] + offset[1];
+    zs[0] = fldValueRecords[index].vertices[0][2] + offset[2];
+    xs[1] = fldValueRecords[index].vertices[1][0] + offset[0];
+    ys[1] = fldValueRecords[index].vertices[1][1] + offset[1];
+    zs[1] = fldValueRecords[index].vertices[1][2] + offset[2];
+    xs[2] = fldValueRecords[index].vertices[2][0] + offset[0];
+    ys[2] = fldValueRecords[index].vertices[2][1] + offset[1];
+    zs[2] = fldValueRecords[index].vertices[2][2] + offset[2];
     x = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
     cam->unk5C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);

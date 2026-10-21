@@ -81,7 +81,7 @@ extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 typedef struct MenuListNode MenuListNode;
 
-extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
+extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
@@ -1075,7 +1075,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     if (ascending != 0) {
         keyIndex += MNU_SORT_KEY_COUNT;
     }
-    func_00300508(items, nodeCount, MNU_LIST_POINTER_BYTES, comparators[keyIndex]);
+    qsort(items, nodeCount, MNU_LIST_POINTER_BYTES, comparators[keyIndex]);
     mnuLinkItemList(items, nodeCount);
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
