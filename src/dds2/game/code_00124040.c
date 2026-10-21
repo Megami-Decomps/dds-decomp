@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "scr.h"
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
 #include "fld_area_encounter_table.h"
@@ -211,7 +212,6 @@ void fldClearPrimarySceneFlag(void);
 
 extern char D_00412F30[];
 
-extern struct ScrData *scrFindNamedProcessNode(char *name);
 
 extern char D_00412F58[];
 

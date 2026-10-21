@@ -748,7 +748,6 @@ extern s32 D_003BADEC;
 
 extern u8 D_003BA734;
 
-extern ScrData *scrFindNamedProcessNode(char *name);
 
 extern struct SdfMemBlock *fldAreaCachedResource;
 

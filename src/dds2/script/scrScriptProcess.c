@@ -171,7 +171,7 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 }
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
-ScrData *scrFindNamedProcessNode(char *name) {
+ScrData *scrFindNamedProcessNode(const char *name) {
     ScrData *processNode = scrNamedProcessHead;
 
     while (processNode != NULL) {

@@ -75,6 +75,7 @@ extern ScrData *scrNamedProcessHead;
 extern ScrData *scrNamedProcessTail;
 
 ScrData *scrGetCurrentContext(void);
+ScrData *scrFindNamedProcessNode(const char *name);
 void *scrGetCurrentCommandWork(void);
 void *scrGetCurrentActor(KwlnTask *task);
 void scrSetCurrentActor(KwlnTask *task, void *actor);
