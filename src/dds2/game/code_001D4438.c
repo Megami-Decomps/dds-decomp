@@ -518,7 +518,6 @@ extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlUnit *);
 
 extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
-extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
 
 extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
