@@ -103,40 +103,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
-/* Generic scheduler header; task-specific arguments follow at byte 0x70.
- * next/prev link registration order, independently of the deferred queue. */
-typedef struct SoundTask {
-    TaskCondition startCondition;
-    TaskCondition endCondition;
-    u16 taskId;
-    u16 state; /* 0 waiting, 1 start delay, 2 running, 3 end delay. */
-    u16 flags;
-    u8 unk_26[2];
-    s32 startDelay;
-    s32 endDelay;
-    u32 pollCount; /* Eligible scheduler polls, including wait/delay phases. */
-    u32 runCount;  /* Callback updates that continued the running phase. */
-    u64 handle; /* Installed by btlStartTask; independent of owner. */
-    u64 owner;
-    void (*onStart)(u32);
-    union {
-        void (*update)(void);
-        s32 (*playSound)(u32 *);
-        u32 (*process)(void);
-        u32 (*commandSound)(u32 *);
-        u32 (*playCustomSound)(u8 *);
-        s32 (*releaseSound)(u16 *);
-        s32 (*acquireSound)(u32 *);
-        s32 (*run)(void *);
-    } callback;
-    void (*onFinish)(u32 *);
-    void *args;
-    struct SoundTask *next;
-    struct SoundTask *prev;
-    struct SoundTask *deferNext;
-    struct SoundTask *deferPrev;
-    u8 pad68[8];
-} SoundTask;
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
@@ -444,7 +410,7 @@ extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
  * others roll a script-supplied chance (capped at 70, scaled by ability 0x232). */
-extern SoundTask * btlCreateCommandSoundUpdateTask(void);
+extern BtlRuntimeTask * btlCreateCommandSoundUpdateTask(void);
 
 /* Roll ailment recovery, queue status removal and advance the acting unit's state. */
 void btlProcessStatusRecoveryAction(BtlTask *link) {
@@ -971,16 +937,16 @@ extern u8 *btlScheduleEpPacketTask(u8 *, s32);
 extern void *btlScheduleMoneyPacketTask(u8 *, u32);
 extern void *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
-extern SoundTask *btlCreateUpdateUnitEffectsTask(void);
+extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
 extern void *btlCreateWaitUnitListIdleTask(u32);
 extern void *btlCreateApplyToActiveActorsTask(u32);
-extern SoundTask *btlCreateFadeStateResetTask(void);
+extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *, u16);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *, BtlUnit *, u16, s32, u32);
-extern SoundTask *sndCreateSetStateTask(void);
-extern SoundTask *sndCreateClearStateTask(void);
+extern BtlRuntimeTask *sndCreateSetStateTask(void);
+extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern void *btlScheduleActorUpdate(u8 *);
 extern void *btlCreateClearActorEntrySelectionTask(BtlUnit *);
 extern u8 *btlCreateActorPositionEffectTask(u8 *);
@@ -1463,7 +1429,7 @@ extern u8 *btlCreateFlaggedCommandItemConsumeTask(s32, s32);
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
 extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
-extern SoundTask *sndCreateSkillSeTask(s32, u16);
+extern BtlRuntimeTask *sndCreateSkillSeTask(s32, u16);
 extern void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
 extern void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
 
@@ -1973,9 +1939,9 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;
-    SoundTask *sound;
-    SoundTask *change;
-    SoundTask *spawned;
+    BtlRuntimeTask *sound;
+    BtlRuntimeTask *change;
+    BtlRuntimeTask *spawned;
     BtlRuntimeTask *load;
     u16 *status;
     s32 motion;
@@ -1994,19 +1960,19 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     if (!(unit->status.flags & 0x400020)) {
         unit->status.flags &= ~0x1000;
         unit->partyRecord.flags &= ~0x1000;
-        sound = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x11);
+        sound = (BtlRuntimeTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x11);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
-                spawned = (SoundTask *)btlScheduleRefreshTask((u8 *)other);
+                spawned = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)other);
                 spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startDelay = 1;
                 spawned->startCondition.value.handle = sound->handle;
-                spawned->owner = unit->identity;
+                spawned->ownerId = unit->identity;
                 btlStartTask(spawned);
             }
         }
-        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x18,
+        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x18,
                                                        0);
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
@@ -2018,17 +1984,17 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
                 load->startCondition.value.handle = change->handle;
                 load->ownerId = unit->identity;
                 btlStartTask(load);
-                spawned = (SoundTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
+                spawned = (BtlRuntimeTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
                 spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startCondition.value.handle = load->handle;
-                spawned->owner = unit->identity;
+                spawned->ownerId = unit->identity;
                 btlStartTask(spawned);
             }
         }
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
-        spawned = (SoundTask *)btlCreateEffObjA(unit, task->indexWork.phase);
+        spawned = (BtlRuntimeTask *)btlCreateEffObjA(unit, task->indexWork.phase);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2036,23 +2002,23 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlCreateSecondaryCommandSoundTask();
+        spawned = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlCreateCommandSoundTask((s32)task, 0xE);
+        spawned = (BtlRuntimeTask *)btlCreateCommandSoundTask((s32)task, 0xE);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
+        spawned = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
                                                                 btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
+        spawned = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
-        spawned->owner = unit->identity;
+        spawned->ownerId = unit->identity;
         btlStartTask(spawned);
         if (task->unit->partyRecord.status & 0x480) {
             btlDispatchStateHandler(task, 0x18);
@@ -2077,7 +2043,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         }
         unit->status.flags &= ~0x1000;
         unit->partyRecord.flags &= ~0x1000;
-        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x12,
+        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelId, unit->modelVariant, motion, 0x12,
                                                        3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
@@ -2105,9 +2071,9 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;
-    SoundTask *sound;
-    SoundTask *change;
-    SoundTask *spawned;
+    BtlRuntimeTask *sound;
+    BtlRuntimeTask *change;
+    BtlRuntimeTask *spawned;
     BtlRuntimeTask *load;
     u16 *status;
     s32 motion;
@@ -2126,19 +2092,19 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     if (!(unit->status.flags & 0x20000020)) {
         unit->status.flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        sound = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x10);
+        sound = (BtlRuntimeTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x10);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
-                spawned = (SoundTask *)btlScheduleRefreshTask((u8 *)other);
+                spawned = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)other);
                 spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startDelay = 1;
                 spawned->startCondition.value.handle = sound->handle;
-                spawned->owner = unit->identity;
+                spawned->ownerId = unit->identity;
                 btlStartTask(spawned);
             }
         }
-        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x18,
+        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x18,
                                                        0);
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
@@ -2150,17 +2116,17 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
                 load->startCondition.value.handle = change->handle;
                 load->ownerId = unit->identity;
                 btlStartTask(load);
-                spawned = (SoundTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
+                spawned = (BtlRuntimeTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
                 spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startCondition.value.handle = load->handle;
-                spawned->owner = unit->identity;
+                spawned->ownerId = unit->identity;
                 btlStartTask(spawned);
             }
         }
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
-        spawned = (SoundTask *)btlCreateEffObjA(unit, task->indexWork.phase);
+        spawned = (BtlRuntimeTask *)btlCreateEffObjA(unit, task->indexWork.phase);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
@@ -2168,23 +2134,23 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlCreateSecondaryCommandSoundTask();
+        spawned = (BtlRuntimeTask *)btlCreateSecondaryCommandSoundTask();
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlCreateCommandSoundTask((s32)task, 0xE);
+        spawned = (BtlRuntimeTask *)btlCreateCommandSoundTask((s32)task, 0xE);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x10,
+        spawned = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x10,
                                                                 btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
-        spawned = (SoundTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
+        spawned = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
         spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
-        spawned->owner = unit->identity;
+        spawned->ownerId = unit->identity;
         btlStartTask(spawned);
         if (task->unit->partyRecord.status & 0x480) {
             btlDispatchStateHandler(task, 0x18);
@@ -2194,7 +2160,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     } else {
         unit->status.flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x12,
+        change = (BtlRuntimeTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x12,
                                                        3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
@@ -2969,7 +2935,7 @@ void btlStartActorDefeatTransition(s32 command) {
     BtlTask *commandTask = (BtlTask *)command;
     BtlUnit *actor = commandTask->unit;
     DatPartyRecord *profile = &actor->partyRecord;
-    SoundTask *soundTask;
+    BtlRuntimeTask *soundTask;
     BtlRuntimeTask *object;
     s64 sequence;
     s32 entryFlags;
@@ -2979,7 +2945,7 @@ void btlStartActorDefeatTransition(s32 command) {
     btlRaisePartyRecordStatusValue(&actor->partyRecord, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (!(commandTask->flags & 0x100)) {
-        soundTask = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)actor, 11);
+        soundTask = (BtlRuntimeTask *)btlCreateMoveOtherUnitsTask((u8 *)actor, 11);
         btlStartTask(soundTask);
         sequence = soundTask->handle;
     } else {

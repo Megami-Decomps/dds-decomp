@@ -48,42 +48,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
-/* Generic scheduler header; task-specific arguments follow at byte 0x70.
- * next/prev link registration order, independently of the deferred queue. */
-typedef struct SoundTask {
-    TaskCondition startCondition;
-    TaskCondition endCondition;
-    u16 taskId;
-    u16 state; /* 0 waiting, 1 start delay, 2 running, 3 end delay. */
-    u16 flags;
-    u8 unk_26[2];
-    s32 startDelay;
-    s32 endDelay;
-    u32 pollCount; /* Eligible scheduler polls, including wait/delay phases. */
-    u32 runCount;  /* Callback updates that continued the running phase. */
-    u64 handle; /* Installed by btlStartTask; independent of owner. */
-    u64 owner;
-    void (*onStart)(u32);
-    union {
-        void (*update)(void);
-        s32 (*playSound)(u32 *);
-        u32 (*process)(void);
-        u32 (*commandSound)(BtlCommandSoundTaskArgs *);
-        u32 (*playCustomSound)(u8 *);
-        s32 (*releaseSound)(u16 *);
-        s32 (*acquireSound)(u32 *);
-        s32 (*run)(void *);
-    } callback;
-    void (*onFinish)(u32 *);
-    void *args;
-    struct SoundTask *next;
-    struct SoundTask *prev;
-    struct SoundTask *deferNext;
-    struct SoundTask *deferPrev;
-    u8 pad68[8];
-} SoundTask;
-
-extern SoundTask *btlDeferredTaskHead;
 
 extern DatEnemyRecord *datEnemyRecords;
 

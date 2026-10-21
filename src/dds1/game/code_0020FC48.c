@@ -150,7 +150,6 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 extern s32 abs(s32);
 
-struct SoundTask;
 
 
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32 value);
