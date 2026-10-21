@@ -31,6 +31,7 @@
 #include "itf_draw_grid.h"
 #include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
+#include "eff_scaled_class_frame_rows.h"
 #include "eff_random.h"
 #include "kwln_fade.h"
 #include "eff_point_set.h"
@@ -4470,18 +4471,6 @@ void effReleaseClassDrawResources(s32 work) {
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
     sdfMemFreeDirect(((EffClassDrawState *)work)->allocation);
 }
-
-typedef struct EffClassFrameResource {
-    u8 pad_00[8];
-    u32 frameCount;
-    u8 pad_0C[4];
-    u8 *rows;
-} EffClassFrameResource;
-
-typedef struct EffClassRowOutput {
-    u8 pad_00[0x1C];
-    u8 *rows;
-} EffClassRowOutput;
 
 extern void effAdvanceClassFrame(EffClassWork *);
 
