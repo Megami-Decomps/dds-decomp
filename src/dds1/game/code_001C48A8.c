@@ -427,7 +427,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
 }
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
-extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
+extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern u8 *btlCreateSecondaryCommandSoundTask(void);
 extern void *btlCreateCommandSoundTask(s32, s32);
 extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
@@ -437,7 +437,7 @@ extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
-extern struct SoundTask *sndCreateEarringTask(void);
+extern struct BtlRuntimeTask *sndCreateEarringTask(void);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
 
@@ -878,9 +878,9 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
 
 void fldEnableSceneGroupAdvancement(void);
 
-struct SoundTask;
+struct BtlRuntimeTask;
 extern s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex);
-extern struct SoundTask * btlCreateFadeStateResetTask(void);
+extern struct BtlRuntimeTask * btlCreateFadeStateResetTask(void);
 extern void * btlCreateApplyToActiveActorsTask(u32 sound);
 extern void * btlCreateWaitUnitListIdleTask(u32 sound);
 
@@ -945,11 +945,11 @@ extern s32 btlDestroyTaskC(void);
 extern s32 btlDestroyTaskD(void);
 extern s32 btlChooseAvailableUnit(void);
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
-extern struct SoundTask *sndCreateClearBattleFlagTask(void);
+extern struct BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 extern void btlAdvanceTitleState(void);
-extern struct SoundTask *sndCreateCustomTask(u32, u32);
+extern struct BtlRuntimeTask *sndCreateCustomTask(u32, u32);
 extern void btlSyncPlayerWork(BtlUnit *);
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 extern s32 btlCountAvailableParticipants(void);

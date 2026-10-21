@@ -110,8 +110,8 @@ extern u32 D_003BB6C8;
 
 extern u8 D_003BB820[];
 
-struct SoundTask;
-extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
+struct BtlRuntimeTask;
+extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 
 typedef struct BtlActor {
@@ -2530,7 +2530,7 @@ u32 btlScriptFlagEnemyDefeatCandidates(void) {
 }
 
 extern u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h);
-extern struct SoundTask *btlScheduleContextReset(void);
+extern struct BtlRuntimeTask *btlScheduleContextReset(void);
 
 extern u64 btlStartTask(void *taskObject);
 

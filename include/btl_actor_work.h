@@ -8,13 +8,15 @@
 /* Observed prefix of the DDS1 singleton battle work. Actor/task registration,
  * resource-node lists, and packed battle tint share this owner; intervening
  * words without a proved role remain opaque. */
+struct BtlRuntimeTask;
+
 typedef struct BtlActorWork {
     u8 pad_00[0x208];
     s32 unk208;
     u8 pad20C[0x1C];
     BtlUnit *actorList; /* 0x228 */
-    struct SoundTask *taskTail; /* Newest registration; reverse traversal. */
-    struct SoundTask *taskHead; /* Oldest registration; forward traversal. */
+    struct BtlRuntimeTask *taskTail; /* Newest registration; reverse traversal. */
+    struct BtlRuntimeTask *taskHead; /* Oldest registration; forward traversal. */
     struct SoundResourceNode *soundResourceHead; /* Allocated resource nodes. */
     struct ActiveSoundNode *soundList; /* Independent active-node list. */
     struct SoundSlotOwner *soundSlotOwners; /* Shared category/id owners. */
