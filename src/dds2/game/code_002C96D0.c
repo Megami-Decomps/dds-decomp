@@ -399,7 +399,7 @@ extern void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job);
-extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
+extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileQueue *queue);
 extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
 
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
@@ -6040,7 +6040,7 @@ void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) 
     }
 }
 
-void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
+void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileQueue *queue) {
     u32 count = node->record->count;
     u32 i;
     s32 size;
@@ -6057,7 +6057,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     if (size != 0) {
         node->queueAllocation = sdfMemAllocDirect(size);
         node->queues = sdfMemLock(node->queueAllocation);
-        node->queues[0] = fileCloneQueueEntries((FileQueue *)job);
+        node->queues[0] = fileCloneQueueEntries(queue);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);
         }

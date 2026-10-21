@@ -20,9 +20,9 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     Dds3PathKeyframes *keyframes;
     Dds3PathPositionSample *entries;
 
-    if (path->flags & DDS3_PATH_POSITION_CHANNEL) {
+    if (path->counter.flags & DDS3_PATH_POSITION_CHANNEL) {
         keyframes = path->positionKeys;
-        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->time);
+        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.position;
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1][0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1][1]);
@@ -47,9 +47,9 @@ void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path) {
     Dds3PathRotationSample *entries;
     Dds3PathRotationSample *firstKey;
     Dds3PathRotationSample *secondKey;
-    if (path->flags & DDS3_PATH_ROTATION_CHANNEL) {
+    if (path->counter.flags & DDS3_PATH_ROTATION_CHANNEL) {
         keyframes = path->rotationKeys;
-        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->time);
+        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.rotation;
         firstKey = &entries[segmentIndex];
         VU0_LOAD_VF_MEMORY(vf10, firstKey);
@@ -68,9 +68,9 @@ void dds3InterpolatePathOutput(Dds3PathCurveWork *path, WorldTransformParams *tr
     Dds3PathKeyframes *keyframes;
     struct WorldTransformParams *entries;
 
-    if (path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
+    if (path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
         keyframes = path->transformKeys;
-        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->time);
+        dds3SamplePathKeyframeInterval(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.worldTransform;
         VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].rotation[0]);
         VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].rotation[1]);

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf.h"
+#include "sdf_float_counter.h"
 
 struct KwlnTask;
 struct EvtRuntime;
@@ -111,25 +112,15 @@ typedef struct PolyMovieWork {
     s32 *buffer;       /* 0x118 */
 } PolyMovieWork;
 
-/* Accessed by the polygon-movie progress helpers in both title providers.
- * Only these consumed members are described; surrounding storage remains opaque. */
-typedef struct PolyMovieClip {
-    u8 opaque_00[8];
-    f32 duration; /* 0x8: compared as the clip's whole-frame duration */
-    f32 position; /* 0xC: clamped whole-frame position stored as float */
-} PolyMovieClip;
-
 typedef struct PolyMovieState {
     u8 opaque_00[4];
-    PolyMovieClip *clip; /* 0x4 */
+    SdfFloatCounter *clip; /* 0x4 */
 } PolyMovieState;
 
 typedef char PolyMovieWork_size_must_be_0x11C[(sizeof(PolyMovieWork) == 0x11C) ? 1 : -1];
 typedef char PolyMovieWork_handle_at_0x104[((u32)&((PolyMovieWork *)0)->handle == 0x104) ? 1 : -1];
 typedef char PolyMovieWork_task_at_0x108[((u32)&((PolyMovieWork *)0)->task == 0x108) ? 1 : -1];
 typedef char PolyMovieWork_eventId_at_0x10C[((u32)&((PolyMovieWork *)0)->eventId == 0x10C) ? 1 : -1];
-typedef char PolyMovieClip_duration_at_0x8[((u32)&((PolyMovieClip *)0)->duration == 0x8) ? 1 : -1];
-typedef char PolyMovieClip_position_at_0xC[((u32)&((PolyMovieClip *)0)->position == 0xC) ? 1 : -1];
 typedef char PolyMovieState_clip_at_0x4[((u32)&((PolyMovieState *)0)->clip == 0x4) ? 1 : -1];
 
 PolyMovieWork *evtPolygonMovieAllocWork(void);

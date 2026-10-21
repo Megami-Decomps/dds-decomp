@@ -91,9 +91,9 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
     work = sdfChipAllocDirect(sizeof(*work));
     i = 0;
     memset(work, 0, sizeof(*work));
-    work->direction = 0;
-    work->time = 0.0f;
-    work->duration = 0.0f;
+    work->counter.direction = 0;
+    work->counter.time = 0.0f;
+    work->counter.duration = 0.0f;
     for (; i < table->count; i++, entry++) {
         u32 lastFrame;
 
@@ -101,26 +101,26 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
         switch (entry->kind) {
         case DDS3_PATH_CURVE_SCALAR:
             work->scalarKeys = keys;
-            work->flags |= DDS3_PATH_SCALAR_CHANNEL;
+            work->counter.flags |= DDS3_PATH_SCALAR_CHANNEL;
             break;
         case DDS3_PATH_CURVE_POSITION:
             positionSamples = keys->data.position;
-            work->flags |= DDS3_PATH_POSITION_CHANNEL;
+            work->counter.flags |= DDS3_PATH_POSITION_CHANNEL;
             work->positionKeys = keys;
             work->primitiveCurve = effCreatePrimitiveCurve(positionSamples[0], keys->count, 1);
             break;
         case DDS3_PATH_CURVE_ROTATION:
             work->rotationKeys = keys;
-            work->flags |= DDS3_PATH_ROTATION_CHANNEL;
+            work->counter.flags |= DDS3_PATH_ROTATION_CHANNEL;
             break;
         case DDS3_PATH_CURVE_WORLD_TRANSFORM:
             work->transformKeys = keys;
-            work->flags |= DDS3_PATH_WORLD_TRANSFORM_CHANNEL;
+            work->counter.flags |= DDS3_PATH_WORLD_TRANSFORM_CHANNEL;
             break;
         }
         lastFrame = keys->frames[keys->count - 1];
-        if (work->duration < (f32)lastFrame) {
-            work->duration = (f32)lastFrame;
+        if (work->counter.duration < (f32)lastFrame) {
+            work->counter.duration = (f32)lastFrame;
         }
     }
     return work;

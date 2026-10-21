@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "evt_scaled_value.h"
+#include "sdf_float_counter.h"
 #include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -13,7 +13,6 @@
 #include "kwln_task_state.h"
 #include "sdf_texture_offset_list.h"
 
-extern void sdfSetFloatCounterDirection(u32 *destination, u32 direction);
 
 
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
@@ -153,7 +152,7 @@ void evtSetWorldSlotStatusFlag(void *object) {
 
     slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        sdfFreezeFloatCounter((struct EvtScaledValue *)slotData);
+        sdfFreezeFloatCounter(&slotData->counter);
         return;
     }
 }
@@ -163,7 +162,7 @@ void evtClearWorldSlotStatusFlag(void *object) {
 
     slotData = dds3GetSlot1Data(object);
     if (slotData != 0) {
-        sdfUnfreezeFloatCounter((struct EvtScaledValue *)slotData);
+        sdfUnfreezeFloatCounter(&slotData->counter);
         return;
     }
 }
@@ -181,7 +180,7 @@ void evtScaleSlotByClampedMultiplier(void *worldNode, f32 multiplier) {
         if (multiplier > 1.0f) {
             multiplier = 1.0f;
         }
-        evtScaleValueByMultiplier((EvtScaledValue *)slotData, multiplier);
+        evtScaleValueByMultiplier(&slotData->counter, multiplier);
     }
 }
 
@@ -190,7 +189,7 @@ void evtSetWorldSlotValue(void *worldNode, u32 direction) {
 
     slotData = dds3GetSlot1Data(worldNode);
     if (slotData != 0) {
-        sdfSetFloatCounterDirection((u32 *)&slotData->direction, direction);
+        sdfSetFloatCounterDirection(&slotData->counter, direction);
     }
 }
 

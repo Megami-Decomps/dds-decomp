@@ -818,7 +818,6 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
 
 
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
-extern void sdfSetFloatCounterDirection(u32 *destination, u32 direction);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
 s32 evtCommandAttachObjectPath(void) {
@@ -859,7 +858,7 @@ s32 evtCommandAttachObjectPath(void) {
         return 1;
     switch (scrReadIntParameter(2)) {
     case 0:
-        sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
+        sdfSetFloatCounterDirection(&path->counter, 0);
         if (target->value != 0) {
             roomNumber = fldParseRoomNumberFromName((char *)target->value);
             if (roomNumber > 0)
@@ -867,7 +866,7 @@ s32 evtCommandAttachObjectPath(void) {
         }
         break;
     case 1:
-        sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
+        sdfSetFloatCounterDirection(&path->counter, 1);
         if (target->value != 0) {
             roomNumber = fldParseRoomNumberFromName((char *)target->value);
             if (roomNumber > 0)
@@ -928,10 +927,10 @@ s32 evtCommandReattachObjectPath(void) {
     mode = scrReadIntParameter(2);
     switch (mode) {
     case 0:
-        sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
+        sdfSetFloatCounterDirection(&path->counter, 0);
         break;
     case 1:
-        sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
+        sdfSetFloatCounterDirection(&path->counter, 1);
         break;
     }
     return 1;

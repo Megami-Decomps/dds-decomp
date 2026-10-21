@@ -203,10 +203,6 @@ typedef struct EffAimState {
     f32 length;
 } EffAimState;
 
-typedef struct EffDrawableAsset {
-    u8 pad00[0x1C];
-    f32 opacity;
-} EffDrawableAsset;
 
 typedef struct EffDrawableAssetWork {
     u32 unk00;
@@ -1420,14 +1416,14 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
 extern EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 
 /* Build kind work from a file job and retain its optional secondary asset holder. */
-EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
-    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
+EffKindWork *effCreateKindWorkFromFile(FileJobPayload *work) {
+    void *source = fileResolvePrimaryBuffer(work);
     EffKindWork *effect = effAllocateKindWork(work->option, source);
-    s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+    s32 *secondary = fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
         if (D_003E9810[effect->kind].initialize != NULL) {
-            EffKindAssetHolder *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
+            EffKindAssetHolder *child = effCreateResourceHolderFromSelectedKind(secondary, work->primary.selector);
             effect->target = child;
             D_003E9810[effect->kind].initialize(effect, child->resource);
         }
@@ -1518,14 +1514,14 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
 }
 
 /* Create alternate-kind work from a primary file payload and a supported secondary asset. */
-EffKindWork *effCreateAlternateKindWorkFromFile(FileJob *work) {
-    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
+EffKindWork *effCreateAlternateKindWorkFromFile(FileJobPayload *work) {
+    void *source = fileResolvePrimaryBuffer(work);
     EffKindWork *effect = effAllocateAlternateKindWork(work->option, source);
-    s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+    s32 *secondary = fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
         if (D_003E98A0[effect->kind].initialize != NULL) {
-            EffKindAssetHolder *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
+            EffKindAssetHolder *child = effCreateResourceHolderFromSelectedKind(secondary, work->primary.selector);
             effect->target = child;
             D_003E98A0[effect->kind].initialize(effect, child->resource);
         }
@@ -1615,7 +1611,7 @@ EffKindAssetHolder *effRetainKindSecondaryAsset(EffKindAssetHolder *work) {
     return work;
 }
 
-u8 *effCreateBillboardWork(u8 *source) {
+u8 *effCreateBillboardWork(FileJobPayload *source) {
     u8 *work = (u8 *)sdfChipAllocDirect(0x68);
     memset(work, 0, 0x68);
     ((EffBillboardWork *)work)->frame = 0;
@@ -1626,10 +1622,10 @@ u8 *effCreateBillboardWork(u8 *source) {
     if (source == NULL) {
         return work;
     }
-    memcpy(work + 0x2C, fileResolvePrimaryBuffer((FileJobPayload *)source),
-           ((FileJob *)source)->slots[0].size);
+    memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
+           source->primary.size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer((FileJobPayload *)source));
+        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer(source));
     return work;
 }
 
@@ -4996,13 +4992,13 @@ s32 effCreateSurfaceNodeForGrid(s32 source) {
 extern void effRebuildSurfaceHandles(s32, s32, s32);
 extern void effReplaceResourceRef(s32, s32, s32);
 
-s32 effResourceReferenceReplaceFromFile(u8 *source) {
-    s32 primary = (s32)fileResolvePrimaryBuffer((FileJobPayload *)source);
+s32 effResourceReferenceReplaceFromFile(FileJobPayload *source) {
+    s32 primary = (s32)fileResolvePrimaryBuffer(source);
     s32 next = primary + 0x1C;
     s32 object = effCreateSurfaceNodeForGrid(next);
 
-    effRebuildSurfaceHandles(object, ((FileJob *)source)->option, primary);
-    effReplaceResourceRef(object, ((FileJob *)source)->option, next);
+    effRebuildSurfaceHandles(object, source->option, primary);
+    effReplaceResourceRef(object, source->option, next);
     return object;
 }
 
@@ -5053,11 +5049,11 @@ void effConfigureSurfaceNodeByKind(s32 *object, s32 kind, s32 *settings) {
     object[3] = type;
 }
 
-s32 effCreateSurfaceNodeFromFile(s32 *source) {
-    s32 *object = (s32 *)effResourceReferenceReplaceFromFile((u8 *)source);
-    s32 *data = fileResolveSecondaryBuffer((FileJobPayload *)source);
+s32 effCreateSurfaceNodeFromFile(FileJobPayload *source) {
+    s32 *object = (s32 *)effResourceReferenceReplaceFromFile(source);
+    s32 *data = fileResolveSecondaryBuffer(source);
     if (data != NULL) {
-        effConfigureSurfaceNodeByKind(object, ((FileJob *)source)->slots[0].selector, data);
+        effConfigureSurfaceNodeByKind(object, source->primary.selector, data);
     }
     return (s32)object;
 }
@@ -6089,7 +6085,8 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
 
 /* Per-frame update of a five-point-group class: tint every active set and draw it under the class transform. */
 void effDrawTintedFivePointGroupRows(EffClassWork *work) {
-    EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
+    EffBillPointConfig *config = (EffBillPointConfig *)work->payload;
+    EffBillTimedHeader *header = &config->timed;
     EffPointSetRow *row = ((EffPointSetTable *)work->resource)->rows;
     s32 frame = work->frame;
     s32 time = header->time.duration;
@@ -6138,7 +6135,7 @@ void effDrawTintedFivePointGroupRows(EffClassWork *work) {
             blended[0] = packed;
             set->color = blended[0];
             set->type = header->alphaTrack.surfaceIndex;
-            set->flag = ((u8 *)header)[0x5C];
+            set->flag = config->drawFlag;
             effDrawFivePointGroups(set, mtx);
         }
     }
@@ -6809,7 +6806,8 @@ typedef struct EffPointSetCompactTable {
 
 /* Per-frame update of a compact five-point-group class (rows without the radial phase). */
 void effDrawTintedCompactPointGroups(EffClassWork *work) {
-    EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
+    EffBillPointConfig *config = (EffBillPointConfig *)work->payload;
+    EffBillTimedHeader *header = &config->timed;
     EffPointSetCompactRow *row = ((EffPointSetCompactTable *)work->resource)->rows;
     s32 frame = work->frame;
     s32 time = header->time.duration;
@@ -6858,7 +6856,7 @@ void effDrawTintedCompactPointGroups(EffClassWork *work) {
             blended[0] = packed;
             set->color = blended[0];
             set->type = header->alphaTrack.surfaceIndex;
-            set->flag = ((u8 *)header)[0x5C];
+            set->flag = config->drawFlag;
             effDrawFivePointGroups(set, mtx);
         }
     }
@@ -7046,8 +7044,8 @@ EffectStripNode *effCreateStripNodeFromGrid(u8 *source) {
 
 extern void effReplaceFileResourceRef(EffectStripNode *, u32, void *);
 
-EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
-    u8 *primary = fileResolvePrimaryBuffer((FileJobPayload *)work);
+EffectStripNode *effFileResourceReferenceReplace(FileJobPayload *work) {
+    u8 *primary = fileResolvePrimaryBuffer(work);
     u8 *source = primary + 0x20;
     EffectStripNode *node = effCreateStripNodeFromGrid(source);
 
@@ -10254,8 +10252,8 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     for (i = 0; i < 5; i++) {
         Dds3PathCurveWork *object = objects[i];
         if (object != 0) {
-            object->direction = 0;
-            object->time = 0.0f;
+            object->counter.direction = 0;
+            object->counter.time = 0.0f;
         }
     }
 }
@@ -10524,7 +10522,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
     dds3SetCameraFieldOfView(camera, D_00437E90);
     data->fovUpdatePending |= 1;
     dds3SetRotPoseSet(camera, &D_003E9F80);
-    return sdfStepWrappingFloatCounter(path);
+    return sdfStepWrappingFloatCounter(&path->counter);
 }
 
 
@@ -11187,11 +11185,11 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
     EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfAllocAndClearQuadwords(0xC);
-    EffDrawableAsset *position;
+    SdfAsset *asset;
     work->state = 0;
-    position = (EffDrawableAsset *)sdfCreateAssetWithDrawEntries();
-    work->asset = (SdfAsset *)position;
-    position->opacity = 1.0f;
+    asset = sdfCreateAssetWithDrawEntries();
+    work->asset = asset;
+    asset->primaryStateFloat = 1.0f;
     return work;
 }
 
@@ -14754,7 +14752,7 @@ typedef struct EffMappingRequest {
 typedef struct EffMappingObject {
     u32 value00;
     u8 pad04[0x30];
-    union { u32 bits; s32 signedValue; } value34; // 0x34
+    s32 value34;       // 0x34
     u32 value38;       // 0x38
     s32 value3C;
     u8 pad40[0xC];
@@ -14768,7 +14766,7 @@ typedef struct EffMappingObject {
     u8 pad_88[4];
     s32 value8C;       // 0x8C
     u8 pad_90[0x28];
-    union { u32 bits; s32 signedValue; } valueB8; // 0xB8
+    u32 valueB8;       // 0xB8
     u8 pad_BC[0x18];
     s32 valueD4;       // 0xD4
     s32 valueD8;       // 0xD8
@@ -14784,8 +14782,7 @@ s32 effMapObjectWithTemporaryMappingTable(s32 request) {
 
     effMappingState.rows = D_003FFF58;
     effMappingState.count = 8;
-    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
-    result = effEditColorTrack(object + 0x2c, object + 0x50, *(s32 *)(object + 0xb8));
+    result = effEditColorTrack(object + 0x2c, object + 0x50, ((EffMappingObject *)object)->valueB8);
     effMappingState.rows = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -14809,14 +14806,14 @@ s32 effEditBfColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8);
 }
 
 extern u8 D_00459E30[] __attribute__((aligned(4)));
 
 /* HELPER's COLOR callback edits the shared default color/alpha data. */
 void effEditHlpColorTrack(void) {
-    effEditColorTrack(D_00459E30, D_00459E30 + 0x24, ((EffMappingObject *)D_00459E30)->value34.bits);
+    effEditColorTrack(D_00459E30, D_00459E30 + 0x24, ((EffMappingObject *)D_00459E30)->value34);
 }
 
 /* Edit T-BOARD color/alpha tracks using the alternate property-option table. */
@@ -14837,7 +14834,7 @@ s32 effEditRainColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 /* Pass the E-FLARE request's color/alpha tracks and frame bound to the editor. */
@@ -14853,7 +14850,7 @@ s32 effEditSColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 /* Edit R-NOMAL/R-CRCLE COLOR tracks, then restore the default option table. */
@@ -14863,8 +14860,7 @@ s32 effEditRColorTrack(s32 request) {
 
     effMappingState.rows = D_003FFE98;
     effMappingState.count = 8;
-    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
-    result = effEditColorTrack(object, object + 0x24, *(s32 *)(object + 0x34));
+    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
     effMappingState.rows = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -14875,7 +14871,7 @@ s32 effEditRTrackColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 /* COLOR property callback shared by native D-/O-family descriptors. */
@@ -14883,7 +14879,7 @@ s32 effEditDoColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 s32 effResolveMappingWithTemporaryTable(s32 request) {
@@ -14903,7 +14899,7 @@ s32 effEditNColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 /* Edit COLOR in the N-family descriptors' nested POLYGON data. */
@@ -14919,7 +14915,7 @@ s32 effEditUCylinderColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 /* Edit COLOR in U-CYLND's nested POLYGON data. */
@@ -14956,7 +14952,7 @@ s32 effEditCrackPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
 }
 
 /* COLOR callback for the native FLASH POLYGON descriptor. */
@@ -15296,7 +15292,7 @@ extern s32 effEditScalarTrack(EffScalarTrack *, u32, void *, void *);
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
 s32 effEditPScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
 }
 
 extern u8 D_004001A0[];
@@ -15304,7 +15300,7 @@ extern u8 D_004001A0[];
 /* Edit the requested P-family ROTATE track with its independent editor state. */
 s32 effEditPRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
@@ -15324,19 +15320,19 @@ s32 effEditKRotationTrack(s32 *work) {
 /* SCALE property callback for native B-family descriptors. */
 s32 effEditBScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
 s32 effEditBRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
 s32 effEditBfAreaTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */

@@ -1049,7 +1049,6 @@ extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
-extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
@@ -1097,7 +1096,7 @@ void fldActivateRoomFlagObjects(void) {
                 dds3SetSlotKey(slot, path);
                 dds3ReplaceObjectResource(slot);
             }
-            sdfSetFloatCounterDirection((u32 *)dds3GetObjectResourceHandle(slot), 0);
+            sdfSetFloatCounterDirection(&dds3GetObjectResourceHandle(slot)->counter, 0);
             evtScaleSlotByClampedMultiplier(object, 1.0f);
             dds3InvokeMoverUpdate(slot);
         }
