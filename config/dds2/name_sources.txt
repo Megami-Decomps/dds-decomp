@@ -2557,6 +2557,7 @@
 0x001CCC38	btlCreateTargetSelectionTask	inferred	Existing matched creator closes auxiliary battle panels, creates the target-selection input/draw task and records its handle; identifier only.
 0x001CCD50	btlRequestTargetSelectionClose	inferred	Native 001C1838/001C183C and twin 001CCD68/001CCD6C store state 6; selector callback case 6 returns -1, so this requests closing rather than marking active; identifier only.
 0x001CE3E8	btlScaleEffectSlotSourceBounds	inferred	Scales the selected scene record's X by sixteen and Y by eight into its displayed-coordinate fields.
+0x001CE418	btlScaleEffectSlotGeometryAndGetCenterOffset	inferred	Scales an effect-slot geometry's displayed width and height by a percentage and returns the offsets that keep the scaled bounds centered; paired DDS1 implementation at 0x001C2E90.
 0x001CE548	fldSetSceneSlotRange	inferred	Extends active scene slot range, initializes new slot flags and records upper bound.
 0x001CF500	fldInitSceneFadeRecords	inferred	copies the active scene slots into the 8 fading records (alpha 0x80, target -1) and clears the rest [names_M91_D2Battle.tsv]
 0x001CF630	btlFindSceneSlotRecord	inferred	Existing matched borrowed-record getter follows btlFindSceneSlotById, returning runtime slots[index] or zero; preserves D1typed pointer and D2integer-argument/u8-pointer signatures; identifier only.
