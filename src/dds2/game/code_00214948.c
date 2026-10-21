@@ -180,7 +180,7 @@ extern s32 btlHasSpecialAbility274(BtlUnit *, u32);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 btlGroup400UnitHasAction(void *, s32);
+extern s32 btlGroup400UnitHasAction(BtlUnit *, s32);
 
 extern s8 D_00438F84;
 
@@ -270,7 +270,7 @@ s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     return 1;
 }
 
-s32 btlUnitHasEitherSpecialAction(void *unit) {
+s32 btlUnitHasEitherSpecialAction(BtlUnit *unit) {
     if (btlGroup400UnitHasAction(unit, 0x1b2) != 0 ||
         btlGroup400UnitHasAction(unit, 0x1b6) != 0 ||
         btlGroup400UnitHasAction(unit, 0x1ba) != 0 ||
@@ -291,10 +291,10 @@ s32 btlActionMatchesUnit(s32 unit, s32 action) {
     return 0;
 }
 
-s32 btlGroup400UnitHasAction(void *unit, s32 action) {
+s32 btlGroup400UnitHasAction(BtlUnit *unit, s32 action) {
     btlGetRuntime();
-    if ((btlUnitStatusPair((BtlUnit *)unit) & 0x421) == 0x401) {
-        if (btlHasRequiredCommandAffinityPartners((BtlUnit *)unit, action) != 0) {
+    if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
+        if (btlHasRequiredCommandAffinityPartners(unit, action) != 0) {
             return 1;
         }
     }
