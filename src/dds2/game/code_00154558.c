@@ -2,7 +2,6 @@
 #include "fld_area_work.h"
 #include "fld_title_banner_menu.h"
 #include "fld_activation_entry.h"
-#include "scr_integer_return_value_api.h"
 #include "fld_scene_record.h"
 #include "common.h"
 #include "fld_scene_status_api.h"
@@ -23,6 +22,9 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "fld_player_scene_state.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
+
+/* The setter returns the context it set the value in (scrTraceCode.c). */
+extern ScrData *scrSetIntegerReturnValue(s32 retVal);
 
 struct EvtUnit;
 
@@ -1640,8 +1642,8 @@ s32 fldCmdGetActorSlotAttribute(void) {
     return 1;
 }
 
-void fldCmdGetResolvedEventSelectorTarget(void) {
-    scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
+s32 fldCmdGetResolvedEventSelectorTarget(void) {
+    return (s32)scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
 }
 
 s32 fldCmdStartSelectedActorTask(void) {

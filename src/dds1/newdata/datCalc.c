@@ -10,7 +10,6 @@
 #include "pty_roster_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
-#include "scr_integer_return_value_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -418,7 +417,8 @@ extern ScrData *evtWorkScriptTask;
 extern EvtScriptContext evtWorkScriptContext;
 
 extern s32 scrReadIntParameter(s32 idx);
-extern void scrSetFloatReturnValue(f32 value);
+extern struct ScrData *scrSetIntegerReturnValue();
+extern struct ScrData *scrSetFloatReturnValue(f32 value);
 extern DatPartyRecord *dds3FindEntry(s32 rosterIndex);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(DatPartyRecord *unit);
@@ -1655,18 +1655,18 @@ s32 evtPushAvailableIntegerValue(void) {
     return 1;
 }
 
-void evtPushLevelMaxHpGrowth(void) {
-    scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
+s32 evtPushLevelMaxHpGrowth(void) {
+    return (s32)scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
-void evtPushLevelMaxMpGrowth(void) {
-    scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
+s32 evtPushLevelMaxMpGrowth(void) {
+    return (s32)scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
-void evtSelectStatGrade(void) {
+s32 evtSelectStatGrade(void) {
     s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)evtWorkScriptContext.secondArgument);
     s32 currentHp = ((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
@@ -1690,26 +1690,26 @@ void evtSelectStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(datBattleParameters->hpGradeValues[gradeIndex]);
+    return (s32)scrSetFloatReturnValue(datBattleParameters->hpGradeValues[gradeIndex]);
 }
 
-void evtPushLevelValueA(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesA[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
+s32 evtPushLevelValueA(void) {
+    return (s32)scrSetFloatReturnValue(datBattleParameters->levelValuesA[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
-void evtPushLevelValueB(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
+s32 evtPushLevelValueB(void) {
+    return (s32)scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
-void evtPushLevelValueCCommand18D(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
+s32 evtPushLevelValueCCommand18D(void) {
+    return (s32)scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
-void evtPushLevelValueCCommand18E(void) {
-    scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
+s32 evtPushLevelValueCCommand18E(void) {
+    return (s32)scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->level - 1]);
 }
 
-void evtScriptSelectRandomValue(void) {
+s32 evtScriptSelectRandomValue(void) {
     s32 resultCode;
     s32 roll;
 
@@ -1720,15 +1720,15 @@ void evtScriptSelectRandomValue(void) {
         roll = sdfGetRandInt(0, 0x30);
         resultCode = roll != 0 ? 0 : 0x80;
     }
-    scrSetIntegerReturnValue(resultCode);
+    return (s32)scrSetIntegerReturnValue(resultCode);
 }
 
-void evtPushRosterBaseValue(void) {
-    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId].base);
+s32 evtPushRosterBaseValue(void) {
+    return (s32)scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)evtWorkScriptContext.firstArgument)->unitId].base);
 }
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
-void evtSelectFineStatGrade(void) {
+s32 evtSelectFineStatGrade(void) {
     s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)evtWorkScriptContext.secondArgument);
     s32 currentHp = ((DatPartyRecord *)evtWorkScriptContext.secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
@@ -1761,7 +1761,7 @@ void evtSelectFineStatGrade(void) {
             }
         }
     }
-    scrSetFloatReturnValue(datBattleParameters->hpFineGradeValues[gradeIndex]);
+    return (s32)scrSetFloatReturnValue(datBattleParameters->hpFineGradeValues[gradeIndex]);
 }
 
 
