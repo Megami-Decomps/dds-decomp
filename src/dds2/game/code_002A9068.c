@@ -1157,7 +1157,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
     }
 }
 
-void mnuDrawCampScreenDefault(u32 task) {
+void mnuDrawCampScreenDefault(KwlnTask *task) {
     mnuDrawCampIconBackdropByKind(0, task);
 }
 

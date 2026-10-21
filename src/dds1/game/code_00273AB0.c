@@ -22,7 +22,6 @@
 extern void dspRequestMessageWindowModeOne(void);
 
 
-extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);

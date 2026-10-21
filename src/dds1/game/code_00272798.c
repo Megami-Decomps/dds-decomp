@@ -88,7 +88,6 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
                       &context->images[0]->list->stateFlags);
     return 0;
 }
-extern void mnuDrawCampScreenDefault(KwlnTask *);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, const void *, StaffMenuWork *, s32, s32);
 extern void mnuDrawStaffCampSlotsAndCurrency(s32, s32, s32, struct EffectSlotSet *, struct EffectSlotSet *, s32);
 extern const u8 mnuCampCommandHelpTextBank[];

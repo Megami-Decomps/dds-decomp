@@ -29,7 +29,6 @@
 #include "mnu_staff.h"
 /* Declared before first use (were implicit int). */
 extern void itfSetTextDrawLimit(s32 limit);
-extern void mnuDrawCampScreenDefault(u32 task);
 extern void mnuResetWorkFloats(void);
 /* Original-style implicit int, kept: matched code depends on it: mnuSetStaffDisplayMode. */
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);

@@ -45,6 +45,8 @@ void mnuInitPartyPanelSlots(PartyPanel *party);
 
 void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *page);
 struct KwlnTask;
+/* Draw the default camp screen for its scheduler task. */
+void mnuDrawCampScreenDefault(struct KwlnTask *task);
 /* Test whether the skill menu retains a selected list-node ID. */
 u32 mnuHasSelectedListNodeId(struct KwlnTask *callback);
 #ifdef VERSION_DDS1
