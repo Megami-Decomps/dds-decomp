@@ -5390,6 +5390,7 @@
 0x00288B88	fileGetResourceHandle	inferred	Returns the file work's resource handle, released by callers through func_002D0918.
 0x00288B90	fileGetLoadedDataAddress	inferred	confidence=high; src/dds1/file/fileManager.c:func_00288B90; Returns the file-work data address consumed by ready-file parsers, including the viewer configuration loader. [names_qp9.tsv]
 0x00288B98	fileGetResourceSize	inferred	Returns the file work's loaded resource size used by sound buffer transfer.
+0x00288BA0	fileGetRemainingTransferBytes	inferred	Returns FileRequest.transferBytes, initialized from sourceByteCount and decremented as chunks are consumed by fileManager's transfer handlers; paired with DDS2 0x002C8120.
 0x00288BA8	fileIsRequestReadyInCurrentMode	inferred	Returns whether request reached ready state; one mode additionally requires a nonzero field. [names_reviewed6.tsv]
 0x00288C08	fileWaitReady	inferred	spins until func_00288BA8 reports ready, pumping system tasks each pass
 0x00288C50	fileWaitForRequestReady	inferred	src/dds1/file/fileManager.c; forwards FileRequest unchanged to fileWaitReady, which pumps updates until request readiness; paired 002C81D0.

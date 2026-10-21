@@ -189,7 +189,7 @@ u32 fileGetResourceSize(const struct FileRequest *request) {
 }
 
 /* Return the request's remaining transfer byte count. */
-u32 func_00288BA0(FileRequest *request) {
+u32 fileGetRemainingTransferBytes(FileRequest *request) {
     return request->transferBytes;
 }
 
