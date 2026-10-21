@@ -7,6 +7,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
 #include "btl_actor_status_table_api.h"
@@ -283,8 +284,6 @@ extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void btlUnitGetBodyPosVU(u8 *);
 
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
-
-extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
 
 extern u8 D_0037E110[];
 
