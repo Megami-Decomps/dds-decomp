@@ -58,8 +58,8 @@ typedef struct SdfThreadNode SdfThreadNode;
 extern void func_00356F58(void);
 extern void sdfInitDeviceSemaphores(void);
 extern s32 func_0036DD28(void);
-extern void func_0034CB60(s32);
-extern void func_0034D038(u32 discType);
+extern void sceCdInit(s32);
+extern void sceCdMmode(u32 discType);
 extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
 extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
 extern void sdfDevSetCurrentDirectory(const char *path);
@@ -97,8 +97,8 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     sceSifInitIopHeap();
     sceSifLoadFileReset();
     sceFsReset();
-    func_0034CB60(0);
-    func_0034D038(D_00435C0C);
+    sceCdInit(0);
+    sceCdMmode(D_00435C0C);
     while (sceSifLoadModule(D_004110C8, 0, 0) < 0) {
     }
     while (sceSifLoadModule(D_004110E8, 0, 0) < 0) {
