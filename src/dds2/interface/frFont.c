@@ -231,7 +231,9 @@ s32 frFontGetParentGlyphCount(void) {
 }
 
 /* Glyph setup queries its initial Y here for flag 0x10; retail always returns zero. */
-u32 frFontGetInitialGlyphY() {
+u32 frFontGetInitialGlyphY(s8 fontIndex, s32 glyphIndex) {
+    (void)fontIndex;
+    (void)glyphIndex;
     return 0;
 }
 
