@@ -4808,16 +4808,15 @@ void fldFinishEventFieldState(void) {
     }
 }
 
-struct EffectObj;
 extern struct FileRequest *D_004363A0;
 extern struct SdfMemBlock *D_004363A4;
 extern u32 D_004363A8;
 extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void *effObjCreateEventNode(void *, void *, void *);
-extern void effObjClearFlags(struct EffectObj *, u32);
-extern void effObjSetFlags(struct EffectObj *, u32);
-extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
+extern void effObjClearFlags(EffWorldNode *, u32);
+extern void effObjSetFlags(EffWorldNode *, u32);
+extern void effObjReplaceActiveEventNode(EffWorldNode *, u32);
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void fldDrawSparkStatusOverlay(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);

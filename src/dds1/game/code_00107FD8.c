@@ -101,7 +101,7 @@ enum {
     BF_FLW0_SECTION_STRINGS = 4
 };
 
-extern ConsNode *evtConsoleFontResourceChain;
+extern DevConsState *evtConsoleFontResourceChain;
 
 extern s32 fldLmapTaskExists(void);
 
@@ -1588,8 +1588,8 @@ u8 evtWaitLmapTaskGone(void) {
 u32 evtEnsureFontResourceChain(void) {
     if (evtConsoleFontResourceChain == 0) {
         evtConsoleFontResourceChain = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
-        sdfDevConsSetControlByte((DevConsState *)evtConsoleFontResourceChain, 2);
-        sdfDevConsSetTextAttribute((DevConsState *)evtConsoleFontResourceChain, 7);
+        sdfDevConsSetControlByte(evtConsoleFontResourceChain, 2);
+        sdfDevConsSetTextAttribute(evtConsoleFontResourceChain, 7);
     }
     return 0;
 }
@@ -1617,7 +1617,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
         sdfVFormatString(messageBuffer, format, formatArgs);
-        sdfDevConsPrintf((DevConsState *)evtConsoleFontResourceChain, "%s", messageBuffer);
+        sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
 

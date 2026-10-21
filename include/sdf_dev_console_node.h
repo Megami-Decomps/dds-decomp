@@ -1,40 +1,10 @@
 #ifndef SDF_DEV_CONSOLE_NODE_H
 #define SDF_DEV_CONSOLE_NODE_H
 
-#include "common.h"
+#include "sdf_dev_cons.h"
 
-struct SdfMemBlock;
 
-typedef struct ConsNode {
-    struct ConsNode *next;
-    struct ConsNode *prev;
-    u16 screenOriginX; /* 0x08: packed into the GS sprite/grid XY coordinate. */
-    u16 screenOriginY; /* 0x0A */
-    s16 columns;
-    s16 rows;
-    u16 cursorColumn;
-    u16 cursorRow;
-    u8 controlByte;
-    u8 opaque15;
-    u8 textAttribute;
-    u8 opaque17;
-    struct SdfMemBlock *bufferAllocation; /* 0x18: owns the cell buffer. */
-    u8 *cells;
-} ConsNode;
-
-typedef char ConsNodeSizeCheck[(sizeof(ConsNode) == 0x20) ? 1 : -1];
-typedef char ConsNodeScreenOriginXOffsetCheck[
-    (((unsigned int)&((ConsNode *)0)->screenOriginX) == 0x08) ? 1 : -1];
-typedef char ConsNodeScreenOriginYOffsetCheck[
-    (((unsigned int)&((ConsNode *)0)->screenOriginY) == 0x0A) ? 1 : -1];
-typedef char ConsNodeDimensionsOffsetCheck[
-    (((unsigned int)&((ConsNode *)0)->columns) == 0x0C) ? 1 : -1];
-typedef char ConsNodeBufferAllocationOffsetCheck[
-    (((unsigned int)&((ConsNode *)0)->bufferAllocation) == 0x18) ? 1 : -1];
-typedef char ConsNodeCellsOffsetCheck[
-    (((unsigned int)&((ConsNode *)0)->cells) == 0x1C) ? 1 : -1];
-
-ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows);
-void sdfDevConsNodeDestroy(ConsNode *node);
+DevConsState *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows);
+void sdfDevConsNodeDestroy(DevConsState *node);
 
 #endif /* SDF_DEV_CONSOLE_NODE_H */

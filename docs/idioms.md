@@ -5931,25 +5931,34 @@ remains assembly. All 17 actual `mnu_result.h` clients gate 596 match,
 0 differ with no context, rodata or undefined-symbol rows after resplit.
 
 
-## EffectObj and EffWorldNode merger is parked on the kind alias contract
+## Effect owners retain their word storage and read its actual kind byte
 
-The constructor allocates the same 0x44-byte object described by both
-owners: identity at +04, kind-7 payload at +18 and `ObjectTransform` at +1C.
-Retail writes the kind word at +0C (DDS1 0010F418 / DDS2 0010F640), but
-effect providers read its high byte at +0F (001158B8 / 00115B20).
+The constructor allocates the same 0x44-byte `EffWorldNode` described by
+the former `EffectObj` owner: identity at +04, kind-7 payload at +18 and
+`ObjectTransform` at +1C. Retail writes the kind word at +0C (DDS1
+0010F418 / DDS2 0010F640), but effect providers read its high byte at +0F
+(001158B8 / 00115B20).
 
-A real word/byte union makes both effect units exact, but regresses both
-constructors by 12/54 words. Retail reads the operations-table slot before
-initialization (DDS1 0010F45C..0010F464, before SW at 0010F468); the union
-prevents gcc from hoisting that read. Explicitly reading it first leaves
-four instruction differences; an unsigned 24/8-bit field view still leaves
-the original twelve. The operations tables live in `.data`, so qualifying
-their externs `const` is not an acceptable fix.
+Keep `kindTag` as the original word and read the kind through
+`((u8 *)&node->kindTag)[3]`, as the DDS1 provider already did. A word/byte
+union changes the constructors' alias dependencies; a shift expression
+changes store scheduling in `effObjBindValidatedOwner`. Neither is needed:
+all ten source users now share `EffWorldNode`, without the parallel owner,
+an extra union, a const operations table, or a store-order search.
 
-Keeping the original word field and using `kindTag >> 24` emits LBU but
-reorders four stores in `effObjBindValidatedOwner` (+3C/+44/+4C/+54).
-The merger and union therefore remain private, and existing matching C
-is retained. No alias cast, dummy qualifier, or store-order search is used.
+Kind-five entry forwarding also has real nested owners. Its data is
+`EffectObjectData`, whose `modelHolder` is `ObjBase *`. Resource state zero
+selects `MdlCtx` at `resourceHandle`, and that context's `inner` is the
+`SdfModel *` argument. The object-model constructor and release dispatcher
+establish this discrimination. Use those fields rather than
+`EffOwnerBillPayloadView` and `EffOwnerBillParamView`; both complete basic
+effect units retain `38 match, 0 differ` with these views removed.
+
+The same node owns polygon-movie `PolyMovieState` through `data`. Camera
+fallbacks follow the actual `EvtWorldTable` slot indexed by
+`EFF_WORLD_KIND_CAMERA`, not a second world-head/subobject layout. Cut over
+providers, consumers and typed getters together, then gate every includer
+of each changed shared header, not just the function that exposed the view.
 
 ## DDS2 stat gauge span is signed; pulse division is still unresolved
 

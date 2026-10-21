@@ -101,26 +101,13 @@ extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
 /* Every compact timeline precedes one variant-specific SDK parameter payload.
    Respawn copies that payload only, not its live resource/allocation tail. */
-typedef struct {
-    u32 left, top, right, bottom;
-} EffPCPRectBounds;
-
-typedef struct {
-    u32 extent;
-    u32 centerX;
-    u32 centerY;
-    u32 color;
-    u32 blendControl;
-    EffPCPRectBounds bounds;
-} EffPCPRectParams;
-
 typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
 
 
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
-    EffPCPRectParams res;
+    EffResourceRectParams res;
 } EffPCPCompactRectParams;
 
 typedef struct {
@@ -993,21 +980,6 @@ void effPcpSpawnOnceSetColor(EffPCPSpawnOnceWork *work, u32 value) {
     work->color = value;
 }
 
-/* Shared scratch parameter block handed to the particle spawner (effSharedSpawnParams)
- * and the shared spawn origin vector at +0x10 (D_003B1680, separate symbol). */
-typedef struct EffSpawnParams {
-    f32 pos[4];
-    f32 vel[4];
-    u8 pad20[0x0C];
-    f32 speed;       /* 0x2C: randomised motion speed */
-    u8 pad30[0x08];
-    s16 lifetime;    /* 0x38: randomised particle lifetime */
-    u8 pad3A[0x0A];
-    f32 bandWidth;
-    u8 pad48[0x04];
-    f32 edgeWidth;
-    u8 pad50[0x04];
-} EffSpawnParams;
 
 /* The 8-, 12- and 30-particle variants allocate a common prefix followed
    by their actual handle count. Spawn, shift and release use the same tail. */
@@ -1021,7 +993,7 @@ typedef struct EffPCPThunderGroup {
 
 #define EFF_DEG2RAD 0.017453292f
 
-extern EffSpawnParams effSharedSpawnParams[];
+extern EffThunderFragmentParams effSharedSpawnParams[];
 extern u8 D_003B1680[];
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
@@ -1053,9 +1025,9 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
         effSharedSpawnParams->bandWidth = spread * 1.25f;
         effSharedSpawnParams->edgeWidth = spread * 12.5f;
         radius = (sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
-        effSharedSpawnParams->vel[1] = 0;
-        effSharedSpawnParams->vel[0] = sinv * radius;
-        effSharedSpawnParams->vel[2] = cosv * radius;
+        effSharedSpawnParams->end[1] = 0;
+        effSharedSpawnParams->end[0] = sinv * radius;
+        effSharedSpawnParams->end[2] = cosv * radius;
         dir[0] = sinv;
         dir[1] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
@@ -1079,9 +1051,9 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effSharedSpawnParams->lifetime = life;
-        effSharedSpawnParams->speed = speed;
-        *out = effThunderFragCreate((EffThunderFragmentParams *)effSharedSpawnParams);
+        effSharedSpawnParams->halfLife = life;
+        effSharedSpawnParams->waveAmplitude = speed;
+        *out = effThunderFragCreate(effSharedSpawnParams);
         out++;
         i++;
     } while (i < 12);
@@ -1157,7 +1129,7 @@ void effPcpSetRadialParticleColor(EffPCPThunderGroup *work, u32 value) {
     work->unk18 = value;
 }
 
-extern EffSpawnParams effNarrowConeSpawnParams[];
+extern EffThunderFragmentParams effNarrowConeSpawnParams[];
 
 /* 12-piece spread on a cone around a random axis (rotation matrix built by
  * sdfBuildVuRotationFromAxisAngle into the VU0 matrix registers). */
@@ -1187,19 +1159,19 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        effNarrowConeSpawnParams->vel[1] = 0;
-        effNarrowConeSpawnParams->vel[0] = sinv * radius;
-        effNarrowConeSpawnParams->vel[2] = cosv * radius;
+        effNarrowConeSpawnParams->end[1] = 0;
+        effNarrowConeSpawnParams->end[0] = sinv * radius;
+        effNarrowConeSpawnParams->end[2] = cosv * radius;
         sdfBuildVuRotationFromAxisAngle(-(sdfGetRandFloat(effDefaultRandomState) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (sdfGetRandFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effNarrowConeSpawnParams->pos[0] = 0;
-        effNarrowConeSpawnParams->pos[2] = 0;
-        effNarrowConeSpawnParams->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effNarrowConeSpawnParams->pos);
+        effNarrowConeSpawnParams->start[0] = 0;
+        effNarrowConeSpawnParams->start[2] = 0;
+        effNarrowConeSpawnParams->start[1] = -height;
+        VU0_LOAD_VF($vf10, effNarrowConeSpawnParams->start);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effNarrowConeSpawnParams->pos);
-        effNarrowConeSpawnParams->pos[0] += effNarrowConeSpawnParams->vel[0];
-        effNarrowConeSpawnParams->pos[2] += effNarrowConeSpawnParams->vel[2];
+        VU0_STORE_VF($vf10, effNarrowConeSpawnParams->start);
+        effNarrowConeSpawnParams->start[0] += effNarrowConeSpawnParams->end[0];
+        effNarrowConeSpawnParams->start[2] += effNarrowConeSpawnParams->end[2];
         if (height < 300.0f) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1207,9 +1179,9 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effNarrowConeSpawnParams->lifetime = life;
-        effNarrowConeSpawnParams->speed = speed;
-        group->handles[i] = effThunderFragCreate((EffThunderFragmentParams *)effNarrowConeSpawnParams);
+        effNarrowConeSpawnParams->halfLife = life;
+        effNarrowConeSpawnParams->waveAmplitude = speed;
+        group->handles[i] = effThunderFragCreate(effNarrowConeSpawnParams);
         i++;
     } while (i < 12);
 }
@@ -1254,7 +1226,7 @@ void effPcpSetNarrowConeColor(EffPCPThunderGroup *work, u32 value) {
     work->unk18 = value;
 }
 
-extern EffSpawnParams effVariableHeightSpawnParams[];
+extern EffThunderFragmentParams effVariableHeightSpawnParams[];
 
 /* 30-piece spread: pieces are placed on a cone around a random axis (rotation
  * matrix built by sdfBuildVuRotationFromAxisAngle into the VU0 matrix registers). */
@@ -1279,22 +1251,22 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
         spread = sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f;
         effVariableHeightSpawnParams->bandWidth = spread * 1.25f;
         effVariableHeightSpawnParams->edgeWidth = spread * 12.5f;
-        effVariableHeightSpawnParams->vel[1] = 0;
-        effVariableHeightSpawnParams->vel[0] = sinv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
-        effVariableHeightSpawnParams->vel[2] = cosv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
+        effVariableHeightSpawnParams->end[1] = 0;
+        effVariableHeightSpawnParams->end[0] = sinv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
+        effVariableHeightSpawnParams->end[2] = cosv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         sdfBuildVuRotationFromAxisAngle(-(sdfGetRandFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (sdfGetRandFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effVariableHeightSpawnParams->pos[0] = 0;
-        effVariableHeightSpawnParams->pos[2] = 0;
-        effVariableHeightSpawnParams->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effVariableHeightSpawnParams->pos);
+        effVariableHeightSpawnParams->start[0] = 0;
+        effVariableHeightSpawnParams->start[2] = 0;
+        effVariableHeightSpawnParams->start[1] = -height;
+        VU0_LOAD_VF($vf10, effVariableHeightSpawnParams->start);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effVariableHeightSpawnParams->pos);
-        effVariableHeightSpawnParams->pos[0] += effVariableHeightSpawnParams->vel[0];
-        effVariableHeightSpawnParams->pos[2] += effVariableHeightSpawnParams->vel[2];
+        VU0_STORE_VF($vf10, effVariableHeightSpawnParams->start);
+        effVariableHeightSpawnParams->start[0] += effVariableHeightSpawnParams->end[0];
+        effVariableHeightSpawnParams->start[2] += effVariableHeightSpawnParams->end[2];
         if (height < 300.0f) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1302,9 +1274,9 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effVariableHeightSpawnParams->lifetime = life;
-        effVariableHeightSpawnParams->speed = speed;
-        group->handles[i] = effThunderFragCreate((EffThunderFragmentParams *)effVariableHeightSpawnParams);
+        effVariableHeightSpawnParams->halfLife = life;
+        effVariableHeightSpawnParams->waveAmplitude = speed;
+        group->handles[i] = effThunderFragCreate(effVariableHeightSpawnParams);
         i++;
     } while (i < 30);
 }
@@ -1349,7 +1321,7 @@ void effPcpSetVariableHeightParticleColor(EffPCPThunderGroup *work, u32 value) {
     work->unk18 = value;
 }
 
-extern EffSpawnParams effWideConeSpawnParams[];
+extern EffThunderFragmentParams effWideConeSpawnParams[];
 
 /* Same spread as effPcpSpawnConeTwelve with a wider cone and its own parameter block. */
 void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
@@ -1378,19 +1350,19 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        effWideConeSpawnParams->vel[1] = 0;
-        effWideConeSpawnParams->vel[0] = sinv * radius;
-        effWideConeSpawnParams->vel[2] = cosv * radius;
+        effWideConeSpawnParams->end[1] = 0;
+        effWideConeSpawnParams->end[0] = sinv * radius;
+        effWideConeSpawnParams->end[2] = cosv * radius;
         sdfBuildVuRotationFromAxisAngle(-(sdfGetRandFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (sdfGetRandFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effWideConeSpawnParams->pos[0] = 0;
-        effWideConeSpawnParams->pos[2] = 0;
-        effWideConeSpawnParams->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effWideConeSpawnParams->pos);
+        effWideConeSpawnParams->start[0] = 0;
+        effWideConeSpawnParams->start[2] = 0;
+        effWideConeSpawnParams->start[1] = -height;
+        VU0_LOAD_VF($vf10, effWideConeSpawnParams->start);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effWideConeSpawnParams->pos);
-        effWideConeSpawnParams->pos[0] += effWideConeSpawnParams->vel[0];
-        effWideConeSpawnParams->pos[2] += effWideConeSpawnParams->vel[2];
+        VU0_STORE_VF($vf10, effWideConeSpawnParams->start);
+        effWideConeSpawnParams->start[0] += effWideConeSpawnParams->end[0];
+        effWideConeSpawnParams->start[2] += effWideConeSpawnParams->end[2];
         if (height < 300.0f) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1398,9 +1370,9 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effWideConeSpawnParams->lifetime = life;
-        effWideConeSpawnParams->speed = speed;
-        group->handles[i] = effThunderFragCreate((EffThunderFragmentParams *)effWideConeSpawnParams);
+        effWideConeSpawnParams->halfLife = life;
+        effWideConeSpawnParams->waveAmplitude = speed;
+        group->handles[i] = effThunderFragCreate(effWideConeSpawnParams);
         i++;
     } while (i < 12);
 }
@@ -1445,30 +1417,30 @@ void effPcpSetWideConeColor(EffPCPThunderGroup *work, u32 value) {
     work->unk18 = value;
 }
 
-extern EffSpawnParams effFixedOriginSpawnParams[];
+extern EffThunderFragmentParams effFixedOriginSpawnParams[];
 
 /* 12 pieces thrown from a fixed origin along a random angle; the param block
  * (of two) is picked at random. */
 void effPcpSpawnFixedOriginTwelve(EffPCPThunderGroup *group) {
     s32 i;
-    EffSpawnParams *params;
+    EffThunderFragmentParams *params;
     f32 angle;
     f32 dist;
     s32 life;
 
     for (i = 0; i < 12; i++) {
         params = &effFixedOriginSpawnParams[sdfGetRand((EffRandState *)effDefaultRandomState) & 1];
-        params->speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 20.0f;
+        params->waveAmplitude = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 20.0f;
         life = sdfGetRand((EffRandState *)effDefaultRandomState) % 6 + 15;
-        params->pos[0] = -150.0f;
-        params->pos[1] = -500.0f;
-        params->pos[2] = 0;
-        params->lifetime = life;
+        params->start[0] = -150.0f;
+        params->start[1] = -500.0f;
+        params->start[2] = 0;
+        params->halfLife = life;
         angle = sdfGetRandFloat(effDefaultRandomState) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
         dist = (sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 600.0f;
-        params->vel[0] = params->pos[0] + sdfCos(angle) * dist;
-        params->vel[1] = params->pos[1] + sdfSinPoly(angle) * dist;
-        params->vel[2] = 0;
+        params->end[0] = params->start[0] + sdfCos(angle) * dist;
+        params->end[1] = params->start[1] + sdfSinPoly(angle) * dist;
+        params->end[2] = 0;
         group->handles[i] = effThunderFragCreate(params);
     }
 }
@@ -1514,34 +1486,34 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 value) {
 }
 
 extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
-extern EffSpawnParams effSideBurstSpawnParams[];
+extern EffThunderFragmentParams effSideBurstSpawnParams[];
 
 /* 8 pieces flung sideways from below; three rotation-matrix loads compose the
  * VU0 matrix before the particle positions are transformed. */
 void effPcpSpawnSidewaysEight(EffPCPThunderGroup *group) {
     s32 i;
-    EffSpawnParams *params;
+    EffThunderFragmentParams *params;
 
     for (i = 0; i < 8; i++) {
         params = &effSideBurstSpawnParams[sdfGetRand((EffRandState *)effDefaultRandomState) & 1];
         if (i & 1) {
-            params->vel[0] = sdfGetRandFloat(effDefaultRandomState) * 500.0f;
+            params->end[0] = sdfGetRandFloat(effDefaultRandomState) * 500.0f;
         } else {
-            params->vel[0] = sdfGetRandFloat(effDefaultRandomState) * -500.0f;
+            params->end[0] = sdfGetRandFloat(effDefaultRandomState) * -500.0f;
         }
-        params->vel[1] = 0;
-        params->vel[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 250.0f;
-        params->pos[0] = 0;
-        params->pos[1] = -600.0f;
-        params->pos[2] = 0;
+        params->end[1] = 0;
+        params->end[2] = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 250.0f;
+        params->start[0] = 0;
+        params->start[1] = -600.0f;
+        params->start[2] = 0;
         sdfVuLoadRotationMatrixX((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         sdfVuLoadSecondaryRotationMatrixZ((sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         sdfMultiplyVuMatrixInPlace();
-        VU0_LOAD_VF($vf10, params->pos);
+        VU0_LOAD_VF($vf10, params->start);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, params->pos);
-        params->pos[0] += params->vel[0];
-        params->pos[2] += params->vel[2];
+        VU0_STORE_VF($vf10, params->start);
+        params->start[0] += params->end[0];
+        params->start[2] += params->end[2];
         group->handles[i] = effThunderFragCreate(params);
     }
 }
@@ -1667,7 +1639,7 @@ void effPcpSetExpandingThunderFadeColor(EffPCPFadeWork *work, u32 value) {
     work->color = value;
 }
 
-extern EffSpawnParams effConeBurstSpawnParams[];
+extern EffThunderFragmentParams effConeBurstSpawnParams[];
 
 /* Same spread as effPcpSpawnVariableHeightParticles with its own parameter block. */
 void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
@@ -1691,22 +1663,22 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
         spread = sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f;
         effConeBurstSpawnParams->bandWidth = spread * 1.25f;
         effConeBurstSpawnParams->edgeWidth = spread * 12.5f;
-        effConeBurstSpawnParams->vel[1] = 0;
-        effConeBurstSpawnParams->vel[0] = sinv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
-        effConeBurstSpawnParams->vel[2] = cosv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
+        effConeBurstSpawnParams->end[1] = 0;
+        effConeBurstSpawnParams->end[0] = sinv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
+        effConeBurstSpawnParams->end[2] = cosv * ((sdfGetRandFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         sdfBuildVuRotationFromAxisAngle(-(sdfGetRandFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (sdfGetRandFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
-        effConeBurstSpawnParams->pos[0] = 0;
-        effConeBurstSpawnParams->pos[2] = 0;
-        effConeBurstSpawnParams->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effConeBurstSpawnParams->pos);
+        effConeBurstSpawnParams->start[0] = 0;
+        effConeBurstSpawnParams->start[2] = 0;
+        effConeBurstSpawnParams->start[1] = -height;
+        VU0_LOAD_VF($vf10, effConeBurstSpawnParams->start);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effConeBurstSpawnParams->pos);
-        effConeBurstSpawnParams->pos[0] += effConeBurstSpawnParams->vel[0];
-        effConeBurstSpawnParams->pos[2] += effConeBurstSpawnParams->vel[2];
+        VU0_STORE_VF($vf10, effConeBurstSpawnParams->start);
+        effConeBurstSpawnParams->start[0] += effConeBurstSpawnParams->end[0];
+        effConeBurstSpawnParams->start[2] += effConeBurstSpawnParams->end[2];
         if (height < 300.0f) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -1714,9 +1686,9 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
             speed = (sdfGetRandFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = sdfGetRand((EffRandState *)effDefaultRandomState) % 6 + 15;
         }
-        effConeBurstSpawnParams->lifetime = life;
-        effConeBurstSpawnParams->speed = speed;
-        group->handles[i] = effThunderFragCreate((EffThunderFragmentParams *)effConeBurstSpawnParams);
+        effConeBurstSpawnParams->halfLife = life;
+        effConeBurstSpawnParams->waveAmplitude = speed;
+        group->handles[i] = effThunderFragCreate(effConeBurstSpawnParams);
         i++;
     } while (i < 30);
 }
@@ -2020,7 +1992,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params
     EffPCPCompactFadeWork *work;
 
     work = sdfChipAllocDirect(0x3C);
-    work->resource.rectangle = effCloneResourceTemplate((EffResourceRectParams *)&params->res);
+    work->resource.rectangle = effCloneResourceTemplate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2029,7 +2001,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.draw.rgba;
     return work;
 }
 

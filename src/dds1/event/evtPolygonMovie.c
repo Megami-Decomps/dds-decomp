@@ -37,8 +37,8 @@ u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
  * offsets are relative to the start of the block. */
 
 extern EvtUnit *effObjGetTransitionWork(EffWorldNode *object);
-extern void dds3ObjectBaseOnFlag(PolyMovieObject *obj, s32 flags);
-extern void dds3ObjectBaseOffFlag(PolyMovieObject *obj, s32 flags);
+extern void dds3ObjectBaseOnFlag(EffWorldNode *obj, s32 flags);
+extern void dds3ObjectBaseOffFlag(EffWorldNode *obj, s32 flags);
 
 extern f32 D_00368540[4];
 extern f32 D_00368550[4];
@@ -438,14 +438,14 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     }
 }
 
-void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags)
+void evtPolygonMovieSetObjectMode(EffWorldNode *obj, u32 mode, s32 setFlags, s32 clearFlags)
 {
     switch (mode) {
     case 0:
-        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;
+        effObjGetTransitionWork(obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;
         break;
     case 1:
-        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
+        effObjGetTransitionWork(obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
         break;
     case 2:
         dds3ObjectBaseOffFlag(obj, 0x400);
@@ -494,7 +494,7 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
-s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 startFrame, s32 endFrame)
+s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame)
 {
     PolyMovieClip *clip;
     s32 elapsedFrames;
@@ -504,7 +504,7 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 startFr
     if (elapsedFrames < 0) {
         elapsedFrames = 0;
     }
-    clip = movie->state->clip;
+    clip = ((PolyMovieState *)movie->data)->clip;
     if (clip != NULL) {
         duration = (s32)clip->duration;
         if (duration <= elapsedFrames) {
@@ -520,7 +520,7 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 startFr
 }
 
 /* Store elapsed frames, bounded below by zero and above by clip duration. */
-void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32 end)
+void evtPolygonMovieClampTime(EffWorldNode *movie, s32 unused, s32 start, s32 end)
 {
     PolyMovieClip *clip;
     s32 elapsedFrames;
@@ -529,7 +529,7 @@ void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32
     if (elapsedFrames < 0) {
         elapsedFrames = 0;
     }
-    clip = movie->state->clip;
+    clip = ((PolyMovieState *)movie->data)->clip;
     if (clip != NULL) {
         if ((s32)clip->duration <= elapsedFrames) {
             elapsedFrames = (s32)clip->duration;

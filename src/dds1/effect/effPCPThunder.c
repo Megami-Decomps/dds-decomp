@@ -1844,9 +1844,9 @@ void effThunderGroupRelease(EffThunderGroup *group) {
     sdfChipFreeDirect(group);
 }
 
-/* Preserve the address word; the paired blur caller fills the leading point vectors. */
-EffBlurVectorRecord *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource) {
-    return (EffBlurVectorRecord *)resource;
+/* Expose the group parameters; the paired blur caller fills the leading points. */
+EffThunderGroupParams *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource) {
+    return &resource->head;
 }
 
 /* Sets the blend colour word of a resource handle (see the blur caller in

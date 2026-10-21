@@ -516,28 +516,27 @@ s32 evtEventViewerAddName(const char *name, EvtRuntime *viewer)
     return newNameIndex;
 }
 
-struct EffectObj;
 
 /* Look up a named kind-7 effect object by index. */
-struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
+EffWorldNode *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
 {
     if (index < 0) {
         return NULL;
     }
-    return (struct EffectObj *)dds3FindIndexedObjectChainNodeByName(
+    return dds3FindIndexedObjectChainNodeByName(
         (EffWorldNode *)dds3GetWorldObject(),
         EFF_WORLD_KIND_EFFECT_OBJECT,
         (const u8 *)viewer->entryName[index]);
 }
 
-extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
-extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
+extern s32 effObjBindOwnerBillEntry(EffWorldNode *, EffWorldNode *, s32);
+extern s32 effObjBindValidatedOwner(EffWorldNode *, EffWorldNode *);
 extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
     EffWorldNode *owner;
-    struct PolyMovieObject *movieObject;
+    EffWorldNode *movieObject;
     s32 currentFrame;
 
     if (effectObject == 0) {
@@ -556,8 +555,8 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
     switch (owner->kindTag >> 24) {
     case EFF_WORLD_KIND_FOLLOW_MODEL:
         if (billboardEntry >= 0) {
-            effObjBindOwnerBillEntry((struct EffectObj *)effectObject,
-                                    (struct EffectObj *)owner, billboardEntry);
+            effObjBindOwnerBillEntry(effectObject,
+                                    owner, billboardEntry);
             break;
         }
         /* A negative entry selects the normal owner link instead. */
@@ -567,7 +566,7 @@ void evtViewerBindNamedOwner(EffWorldNode *effectObject, s32 ownerNameIndex, s32
     case EFF_WORLD_KIND_RESOURCE_OWNER:
     case EFF_WORLD_KIND_LIGHT:
     case EFF_WORLD_KIND_TRANSFORM_SOURCE:
-        effObjBindValidatedOwner((struct EffectObj *)effectObject, (struct EffectObj *)owner);
+        effObjBindValidatedOwner(effectObject, owner);
         break;
     case EFF_WORLD_KIND_ACTION_10:
         evtStageRelinkOwnedNodeResource(owner, (void *)effectObject);
@@ -586,12 +585,12 @@ extern void effObjSetFlags(s32 obj, s32 flags);
 extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 struct EffNodeDescriptor;
-extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
+extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern s32 effObjCreateBillboardFromFactory(s32 arg, f32 *vec0, f32 *vec1);
-extern struct EffectObj *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
-extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
-                                               struct EffectObj *second, struct EffectObj *third,
-                                               struct EffectObj *fourth);
+extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
+extern s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *obj, EffWorldNode *first,
+                                               EffWorldNode *second, EffWorldNode *third,
+                                               EffWorldNode *fourth);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
 s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, EvtRuntime *viewer) {
@@ -599,9 +598,9 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
     f32 vec1[4];
     s32 handle = 0;
     s32 slot;
-    struct EffectObj *n0;
-    struct EffectObj *n1;
-    struct EffectObj *n2;
+    EffWorldNode *n0;
+    EffWorldNode *n1;
+    EffWorldNode *n2;
 
     memset(vec0, 0, 0x10);
     memset(vec1, 0, 0x10);
@@ -644,7 +643,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
         n0 = evtEventViewerGetNameObject(key->p0C.sb[0], viewer);
         n1 = evtEventViewerGetNameObject(key->p0C.sb[1], viewer);
         n2 = evtEventViewerGetNameObject(key->p0C.sb[2], viewer);
-        effObjCopyMagatuhiSourceParameters((struct EffectObj *)handle, n0, n1, n2,
+        effObjCopyMagatuhiSourceParameters((EffWorldNode *)handle, n0, n1, n2,
                                            evtEventViewerGetNameObject(key->p0C.sb[3], viewer));
         if (key->p08.sb[1] != 0) {
             effObjDispatchReadyState((EffWorldNode *)handle);
@@ -813,8 +812,8 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 }
 
 extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);
-extern struct EffectObj *evtEventViewerGetNameObject(s32, EvtRuntime *);
-extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *, struct EffectObj *, struct EffectObj *, struct EffectObj *, struct EffectObj *);
+extern EffWorldNode *evtEventViewerGetNameObject(s32, EvtRuntime *);
+extern s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *, EffWorldNode *, EffWorldNode *, EffWorldNode *, EffWorldNode *);
 extern void evtEventViewerFreeBuffer(EvtRuntimeChild *);
 extern void *evtEventViewerCreateOriginEffect(void *, u32, s32, s32, u32, EvtRuntime *);
 extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
@@ -846,7 +845,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
 
 void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame, s32 unused, EvtRuntime *viewer) {
     s32 nibbles[2];
-    struct EffectObj *object;
+    EffWorldNode *object;
     s32 selectedText;
 
     nibbles[0] = 0;
@@ -865,7 +864,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (key->p08.sb[0] < 0) {
             break;
         }
-        object = (struct EffectObj *)viewer->objects[key->p08.sb[0]];
+        object = (EffWorldNode *)viewer->objects[key->p08.sb[0]];
         if (object == 0) {
             break;
         }
@@ -1712,8 +1711,8 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
             break;
         }
     }
-    evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, objectMode, 0, 0);
-    evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
+    evtPolygonMovieSetObjectMode((EffWorldNode *)track->info, objectMode, 0, 0);
+    evtPolygonMovieSetObjectMode((EffWorldNode *)track->info, unitMode, setFlags, clearFlags);
 }
 
 extern void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer);
@@ -1917,7 +1916,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                 } else {
                                     startFrame = trackEntry->metadata.value;
                                 }
-                                evtPolygonMovieClampTime((PolyMovieObject *)movieObject, 0, startFrame, endTime);
+                                evtPolygonMovieClampTime((EffWorldNode *)movieObject, 0, startFrame, endTime);
                                 break;
                             }
                             trackEntry = trackEntry->next;

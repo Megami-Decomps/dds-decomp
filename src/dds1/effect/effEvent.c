@@ -1206,7 +1206,7 @@ void effEventSetState(EffEventWork *work, void *actor) {
 #include "evt_unit.h"
 #include "mdl.h"
 
-extern void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params);
+extern void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffectVectorRequest *params);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 extern const f32 D_003A12E0[4];
@@ -1240,19 +1240,19 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
     color = work->init.color;
     for (entryIndex = 0; entryIndex < count; entryIndex++, entry++) {
         if (entry->zeroKindCount < frame && effect->parameterWorks[entryIndex] != NULL) {
-            if (entry->aimParams.scaleKind != 5 || work->actor == NULL) {
+            if (entry->aimParams.kind != 5 || work->actor == NULL) {
                 effEventLoadSelectedAimPositionVu(&work->init, &entry->aimParams);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
                 effParamWorkCallback0(effect->parameterWorks[entryIndex], position);
                 effParamWorkCallback2(effect->parameterWorks[entryIndex], rotationMatrix);
             } else {
                 model = work->actor->owner->inner;
-                sdfLoadMapRecordPositionVector(model, entry->aimParams.aimMode);
+                sdfLoadMapRecordPositionVector(model, entry->aimParams.count);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
                 effParamWorkCallback0(effect->parameterWorks[entryIndex], position);
                 /* The callback can change the entry's scale kind. */
-                if (entry->aimParams.scaleKind == 5) {
-                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.aimMode);
+                if (entry->aimParams.kind == 5) {
+                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.count);
                     VU0_LOAD_MATRIX_B(rotationMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
@@ -1260,7 +1260,7 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
                 } else {
                     mdlLoadTertiaryVectorVU(work->actor->owner);
                     VU0_GET_VF10_X(scale);
-                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.aimMode);
+                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.count);
                     if (scale != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALAR_OP(1.0f / scale, "vmulx.xyzw vf10, vf10, vf2x");
@@ -1352,16 +1352,16 @@ extern u8 sdfViewUpVector[];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
-void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params) {
+void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffectVectorRequest *params) {
     f32 out[EFF_EVENT_VECTOR_COMPONENTS];
     f32 dir[EFF_EVENT_VECTOR_COMPONENTS];
     f32 pos[EFF_EVENT_VECTOR_COMPONENTS];
     f32 radius;
     f32 half;
     f32 y;
-    s32 rangeOverride = params->rangeOverride;
+    s32 rangeOverride = params->extentOverride;
     u8 directionMode = params->directionMode;
-    u8 aimMode = params->aimMode;
+    u8 aimMode = params->count;
 
     if (rangeOverride == 0) {
         radius = source->range;

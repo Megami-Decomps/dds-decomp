@@ -9078,8 +9078,8 @@ void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
     if (soundIndex != 0) {
         v = D_00435E0C[soundIndex].opaque04[0];
     }
-    if (((DatBattleSceneAudioSelectionView *)&datBattleSceneRecords[sceneIndex])->audioStreamSelectionOverride != 0) {
-        v = ((DatBattleSceneAudioSelectionView *)&datBattleSceneRecords[sceneIndex])->audioStreamSelectionOverride;
+    if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
+        v = datBattleSceneRecords[sceneIndex].unk24;
     } else if (*(u8 *)(work + 0x26E) == 3) {
         v = 1;
     }

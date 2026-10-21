@@ -24,9 +24,8 @@ void dds3ResetWorldResourceState(EffWorldNode *owner) {
     resource->flags &= ~8;
 }
 
-struct EffectObj;
 struct BillObj;
-extern void effObjSetFlags(struct EffectObj *object, u32 flags);
+extern void effObjSetFlags(EffWorldNode *object, u32 flags);
 extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
@@ -43,7 +42,7 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
     resource->sourcePosition[1] = source->position[1];
     resource->sourcePosition[2] = source->position[2];
     resource->sourcePosition[3] = source->position[3];
-    effObjSetFlags((struct EffectObj *)owner, 0x10);
+    effObjSetFlags(owner, 0x10);
     switch (resource->config->kind) {
     case 0:
     case 3:

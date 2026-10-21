@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "active_sound_node.h"
+#include "eff.h"
 
 enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
 
@@ -28,14 +29,6 @@ typedef char BattleSoundArchiveTable_extent_must_be_0x24C[
 typedef struct BattleEffect BattleEffect;
 typedef void (*BattleEffectCallback)(BattleEffect *effect);
 
-typedef struct EffAimParams {
-    u8 scaleKind;
-    u8 aimMode;           /* 0x01 */
-    u8 directionMode;     /* 0x02 */
-    u8 pad3;
-    s32 rangeOverride;    /* 0x04: zero uses the source range */
-} EffAimParams;
-
 typedef union EffBattleParameterValue {
     u32 sourceOffset;
     struct EffParamWork *work;
@@ -45,7 +38,7 @@ typedef struct EffBattleEntry {
     u16 paramKind;                 /* 0x00 */
     u8 pad02[2];
     EffBattleParameterValue value; /* 0x04 */
-    EffAimParams aimParams;        /* 0x08 */
+    EffectVectorRequest aimParams;        /* 0x08 */
     u32 zeroKindCount;             /* 0x10 */
     u8 kind;                       /* 0x14 */
     u8 pad15[3];
@@ -75,8 +68,6 @@ typedef struct SoundBank {
     u8 pad98[0x580];
 } SoundBank;
 
-typedef char EffAimParams_size_must_be_8[
-    (sizeof(EffAimParams) == 8) ? 1 : -1];
 typedef char EffBattleEntry_size_must_be_0x18[
     (sizeof(EffBattleEntry) == 0x18) ? 1 : -1];
 typedef char EffBattleEntry_aimParams_at_0x08[

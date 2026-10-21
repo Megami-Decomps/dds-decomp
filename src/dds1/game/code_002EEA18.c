@@ -677,7 +677,7 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
 }
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
-void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
+void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyPoolNode *item) {
     SdfKeyTreeNode *path[SDF_KEY_TREE_PATH_LIMIT];
     s32 depth = 0;
     SdfKeyTreeNode **link = tree;
@@ -686,21 +686,23 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     f32 key = item->key;
 
     while (cur != NULL) {
-        if (key == cur->item->key) {
-            item->replaced = cur->item;
+        f32 currentKey = cur->item->key;
+
+        if (key == currentKey) {
+            item->next = cur->item;
             cur->item = item;
             return;
         }
         path[depth] = cur;
         depth++;
-        if (cur->item->key < key) {
+        if (currentKey < key) {
             link = &cur->right;
         } else {
             link = &cur->left;
         }
         cur = *link;
     }
-    item->replaced = NULL;
+    item->next = NULL;
     node = sdfAllocPacketAligned(0x10);
     node->right = NULL;
     node->left = NULL;
@@ -720,8 +722,7 @@ void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
             node->next = pool->freeHead;
             pool->freeHead = node;
         } else {
-            /* The key tree views the pool node's +0xC word as its float key. */
-            sdfInsertFloatKeyTreeItem(pool->keyTree, (SdfKeyTreeItem *)node);
+            sdfInsertFloatKeyTreeItem(pool->keyTree, node);
         }
     }
 }

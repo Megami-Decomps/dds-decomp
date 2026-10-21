@@ -5831,7 +5831,7 @@ void effDrawTintedFivePointGroupRows(EffClassWork *work) {
             EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
             blended[0] = packed;
             set->color = blended[0];
-            set->type = ((u32 *)header)[10];
+            set->type = header->alphaTrack.surfaceIndex;
             set->flag = ((u8 *)header)[0x5C];
             effDrawFivePointGroups(set, mtx);
         }

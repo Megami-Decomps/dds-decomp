@@ -15,10 +15,12 @@
 #include "kwln_fade.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "evt_viewer.h"
 #include "evt_camera_color_track_api.h"
 #include "sdf_resource.h"
 #include "mnu.h"
+#include "mnu_terminal_work.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -1140,38 +1142,26 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
 }
 
 
-typedef struct ShopBatchGraphics {
-    u8 pad00[0x20];
-    s32 *params; /* 0x20 */
-} ShopBatchGraphics;
-
-typedef struct ShopBatch {
-    u8 pad00[8];
-    ShopBatchGraphics *graphics; /* 0x08 */
-} ShopBatch;
 
 void mnuInitializeShopStatusBatches(ShopScene *scene) {
     struct EffMappedResource *batchHandle;
-    ShopBatch *batchObject;
-    ShopBatchGraphics *batchGraphics;
+    EffMappedRecord *batchGraphics;
     s32 *batchParameters;
     s32 initialParameter = CAMP_STATUS_INITIAL_PARAMETER;
     scene->batchState = 0;
     batchHandle = effCreateStatusBatch(6);
-    batchObject = (ShopBatch *)batchHandle;
-    batchGraphics = batchObject->graphics;
+    batchGraphics = batchHandle->records;
     scene->batches[0] = batchHandle;
-    batchParameters = batchGraphics->params;
+    batchParameters = (s32 *)batchGraphics->status;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
     batchParameters[2] = 0;
     batchParameters[3] = 0;
     batchParameters[4] = 0;
     batchHandle = effCreateStatusBatch(1);
-    batchObject = (ShopBatch *)batchHandle;
-    batchGraphics = batchObject->graphics;
+    batchGraphics = batchHandle->records;
     scene->batches[1] = batchHandle;
-    batchParameters = batchGraphics->params;
+    batchParameters = (s32 *)batchGraphics->status;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
 }
@@ -3386,33 +3376,33 @@ void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
 extern const char mnuTerminalSpriteDirectory[];
 extern s32 mnuTerminalPrimarySpriteNames[];
 
-/* Keep the two loaded handles and their derived slot set in the menu work array. */
-void mnuLoadResourceHandles(u32 *menuWork) {
+/* Load the terminal sprite bank, then derive its additional slot set. */
+void mnuLoadResourceHandles(MenuTerminalWork *menuWork) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
         struct EffectSlotSet *resourceHandle = effLoadIndexedResource(
             mnuTerminalSpriteDirectory, (const char *)mnuTerminalPrimarySpriteNames[resourceIndex], 1);
 
-        menuWork[0x19 + resourceIndex] = (u32)resourceHandle;
+        menuWork->resourceSets[resourceIndex] = resourceHandle;
         effResolveAndReleaseResource(resourceHandle);
     }
-    menuWork[0x1B] = (u32)effCreateResourceSlotSet((struct EffectSlotSet *)menuWork[0x19], 7, 1);
+    menuWork->alternateBatch = effCreateResourceSlotSet(menuWork->resourceSets[0], 7, 1);
 }
 
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 
 /* Destroy the stored slot sets, then release and clear any optional effect handle. */
-void mnuReleaseResourceHandles(u32 *menuWork) {
+void mnuReleaseResourceHandles(MenuTerminalWork *menuWork) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)menuWork[0x19 + resourceIndex]);
+        effDestroyResourceSlotSet(menuWork->resourceSets[resourceIndex]);
     }
-    effDestroyResourceSlotSet((struct EffectSlotSet *)menuWork[0x1B]);
-    if (menuWork[0x56] != 0) {
-        mnuReleaseEffectResource((MenuResourceWork *)menuWork[0x56]);
-        menuWork[0x56] = 0;
+    effDestroyResourceSlotSet(menuWork->alternateBatch);
+    if (menuWork->effectHandle != 0) {
+        mnuReleaseEffectResource((MenuResourceWork *)menuWork->effectHandle);
+        menuWork->effectHandle = 0;
     }
 }
 

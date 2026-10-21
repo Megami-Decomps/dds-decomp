@@ -3,30 +3,23 @@
 
 #include "common.h"
 
-struct SdfKeyTreeItem;
-
-/* Pool release logic tests the packet head address and kind at 0xC;
- * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
- * same +0xC word through SdfKeyTreeItem. DDS1/2 game/code_002EEA18/003478C0.c. */
+/* Pool nodes retain the same next link when chained at an equal tree key.
+ * At +0xC, the free-node sentinel shares storage with the float sort key. */
 typedef struct SdfKeyPoolNode {
     struct SdfKeyPoolNode *next; /* 0x00 */
     s32 packetHeadAddress;       /* 0x04: first DMA packet address. */
     u8 unk8[4];                  /* 0x08 */
-    s32 kind;                    /* 0x0C */
+    union {
+        s32 kind; /* 0x0C: free-node sentinel */
+        f32 key;  /* 0x0C: key-sorted packet nodes */
+    };
 } SdfKeyPoolNode;
 
-/* Tree view of a pool node: the link word at +0 becomes the replaced-item
- * link, +0x4..+0xB stay opaque, and +0xC is compared as a float key. */
-typedef struct SdfKeyTreeItem {
-    struct SdfKeyTreeItem *replaced; /* 0x00 */
-    u8 pad04[8];                     /* 0x04: opaque */
-    f32 key;                         /* 0x0C */
-} SdfKeyTreeItem;
 
 typedef struct SdfKeyTreeNode {
     struct SdfKeyTreeNode *right; /* 0x00 */
     struct SdfKeyTreeNode *left;  /* 0x04 */
-    struct SdfKeyTreeItem *item;  /* 0x08 */
+    SdfKeyPoolNode *item;         /* 0x08 */
     s32 balance;                  /* 0x0C */
 } SdfKeyTreeNode;
 
@@ -42,14 +35,13 @@ typedef struct SdfPool {
     SdfKeyTreeNode *keyTree[1];                                /* 0x18: first root; allocation continues */
 } SdfPool;
 
-void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item);
+void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyPoolNode *item);
 
 typedef char SdfKeyPoolNode_size_must_be_0x10[(sizeof(SdfKeyPoolNode) == 0x10) ? 1 : -1];
 typedef char SdfKeyPoolNode_kind_must_be_at_C[
     ((u32)&((SdfKeyPoolNode *)0)->kind == 0x0C) ? 1 : -1];
-typedef char SdfKeyTreeItem_size_must_be_0x10[(sizeof(SdfKeyTreeItem) == 0x10) ? 1 : -1];
-typedef char SdfKeyTreeItem_key_must_be_at_C[
-    ((u32)&((SdfKeyTreeItem *)0)->key == 0x0C) ? 1 : -1];
+typedef char SdfKeyPoolNode_key_must_be_at_C[
+    ((u32)&((SdfKeyPoolNode *)0)->key == 0x0C) ? 1 : -1];
 typedef char SdfKeyTreeNode_size_must_be_0x10[(sizeof(SdfKeyTreeNode) == 0x10) ? 1 : -1];
 typedef char SdfPool_size_must_be_0x1C[(sizeof(SdfPool) == 0x1C) ? 1 : -1];
 

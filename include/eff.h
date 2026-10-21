@@ -1023,16 +1023,7 @@ typedef struct EffThunderGroupParams {
 } EffThunderGroupParams;
 typedef struct EffThunderGroup EffThunderGroup;
 
-/* The paired blur effect writes the first four vectors of a thunder group's
- * point array through this prefix view. */
-typedef struct EffBlurVectorRecord {
-    f32 start[4];     /* 0x00: sampled actor position */
-    f32 oneThird[4];  /* 0x10 */
-    f32 twoThirds[4]; /* 0x20 */
-    f32 end[4];       /* 0x30: paired effect start vector */
-} EffBlurVectorRecord;
-
-EffBlurVectorRecord *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource);
+EffThunderGroupParams *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource);
 void effSetResourceBlendColor(EffThunderGroup *resource, u32 color);
 
 typedef struct PairedEffectParams {
@@ -1057,12 +1048,6 @@ typedef struct PairedEffectResources {
 typedef char EffThunderGroupParamsSizeCheck[sizeof(EffThunderGroupParams) == 0xF8 ? 1 : -1];
 typedef char EffThunderGroupParamsCountOffsetCheck[((u32)&((EffThunderGroupParams *)0)->count == 0xA0) ? 1 : -1];
 typedef char EffThunderGroupParamsFragmentOffsetCheck[((u32)&((EffThunderGroupParams *)0)->params == 0xA4) ? 1 : -1];
-typedef char EffBlurVectorRecordSizeCheck[sizeof(EffBlurVectorRecord) == 0x40 ? 1 : -1];
-typedef char EffBlurVectorRecordOffsetsCheck[
-    ((u32)&((EffBlurVectorRecord *)0)->oneThird == 0x10 &&
-     (u32)&((EffBlurVectorRecord *)0)->twoThirds == 0x20 &&
-     (u32)&((EffBlurVectorRecord *)0)->end == 0x30 &&
-     (u32)&((EffThunderGroupParams *)0)->points == 0x00) ? 1 : -1];
 typedef char PairedEffectParamsSizeCheck[sizeof(PairedEffectParams) == 0x70 ? 1 : -1];
 typedef char PairedEffectResourcesSizeCheck[sizeof(PairedEffectResources) == 0x80 ? 1 : -1];
 typedef char PairedEffectFragmentOffsetCheck[((u32)&((PairedEffectResources *)0)->fragment == 0x10) ? 1 : -1];

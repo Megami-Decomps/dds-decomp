@@ -43,7 +43,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
     f32 t;
     u32 blendColor;
     u32 resourceIndex;
-    EffBlurVectorRecord *record;
+    EffThunderGroupParams *record;
     f32 actorPosition[4];
     if (actor != 0) {
         if (frame < total) {
@@ -67,14 +67,14 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 record = effGetPairedBlurResourceVectorRecordAddress(work->resource[resourceIndex]);
                 VU0_LOAD_VF(vf10, actorPosition);
                 VU0_MOVE_VF(vf12, vf10);
-                VU0_STORE_VF(vf10, record->start);
+                VU0_STORE_VF(vf10, record->points[0]);
                 VU0_LOAD_VF(vf11, work->startVec);
                 VU0_LERP_VF10(0.33f);
-                VU0_STORE_VF(vf10, record->oneThird);
+                VU0_STORE_VF(vf10, record->points[1]);
                 VU0_MOVE_VF(vf10, vf12);
                 VU0_LERP_VF10(0.66f);
-                VU0_STORE_VF(vf10, record->twoThirds);
-                VU0_STORE_VF(vf11, record->end);
+                VU0_STORE_VF(vf10, record->points[2]);
+                VU0_STORE_VF(vf11, record->points[3]);
                 effSetResourceBlendColor(work->resource[resourceIndex], blendColor);
                 effThunderUpdateChainSegments(work->resource[resourceIndex]);
                 resourceIndex++;

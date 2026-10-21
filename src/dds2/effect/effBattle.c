@@ -294,7 +294,7 @@ void effBattleUpdate(BattleEffect *work) {
             }
 
             if ((work->flags & 0x10) == 0) {
-                EffectVectorRequest *request = (EffectVectorRequest *)&entry->aimParams;
+                EffectVectorRequest *request = &entry->aimParams;
                 effBattleMiscQueryPosition(unit, request, (u128 *)localVector);
                 effParamWorkCallback0(work->parameterWorks[entryIndex], localVector);
                 switch (request->kind) {
@@ -317,7 +317,7 @@ void effBattleUpdate(BattleEffect *work) {
                 case 3:
                     break;
                 case 5:
-                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.aimMode);
+                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.count);
                     VU0_LOAD_MATRIX_B(baseMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
@@ -330,7 +330,7 @@ void effBattleUpdate(BattleEffect *work) {
                     } else {
                         scalar = 0.0f;
                     }
-                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.aimMode);
+                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALE_VF(vf10, 1.0f / scalar);
@@ -347,7 +347,7 @@ void effBattleUpdate(BattleEffect *work) {
                     } else {
                         scalar = 0.0f;
                     }
-                    btlSetAlternateEffectParameterOrMuzzlePosition(overrideOwner, entry->aimParams.aimMode);
+                    btlSetAlternateEffectParameterOrMuzzlePosition(overrideOwner, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALE_VF(vf10, 1.0f / scalar);
@@ -364,7 +364,7 @@ void effBattleUpdate(BattleEffect *work) {
                     } else {
                         scalar = 0.0f;
                     }
-                    btlSetAlternateEffectParameterOrMuzzlePosition(finalOwner, entry->aimParams.aimMode);
+                    btlSetAlternateEffectParameterOrMuzzlePosition(finalOwner, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALE_VF(vf10, 1.0f / scalar);

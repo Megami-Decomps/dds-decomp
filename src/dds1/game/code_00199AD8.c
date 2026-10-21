@@ -74,7 +74,7 @@ void itfPanelDispatchHandler(UiSprite *panel, SdfListHead *list) {
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
    Coordinates and inset remain in the renderer's native integer units. */
-void itfPanelSetFourColumnVertices(PanelVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetFourColumnVertices(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 columnIndex;
 
@@ -99,7 +99,7 @@ void itfPanelSetFourColumnVertices(PanelVertex *vertices, s32 x0, s32 y0, s32 x1
 extern s32 D_00357AE0[4];
 
 /* Emit the frame grid and three table-offset rows above and below it. */
-void itfBuildPanelBorderVertexGrid(PanelVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfBuildPanelBorderVertexGrid(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -142,7 +142,7 @@ void itfBuildPanelBorderVertexGrid(PanelVertex *vertices, s32 x0, s32 y0, s32 x1
     }
 }
 
-void itfPanelSetInsetFrameVertices(PanelVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetInsetFrameVertices(DrawVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -186,8 +186,8 @@ void itfPanelSetInsetFrameVertices(PanelVertex *vertices, s32 x0, s32 y0, s32 x1
 }
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
-void itfPanelSetRectVerts(PanelVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
-    PanelVertex *p;
+void itfPanelSetRectVerts(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+    DrawVertex *p;
 
     v->x = x0;
     v->y = y0;
@@ -203,7 +203,7 @@ void itfPanelSetRectVerts(PanelVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
-void itfSetPanelCornerGrid(PanelVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfSetPanelCornerGrid(DrawVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     s32 rowIndex;
@@ -367,16 +367,16 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
 }
 
 void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
-    PanelVertex vertices[12];
+    DrawVertex vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
-    PanelVertex *input = (PanelVertex *)buf;
+    DrawVertex *input = (DrawVertex *)buf;
     s32 i;
 
     for (i = 0; i < 3; i++) {
         s32 xOffset = i * 16;
         s32 yOffset = i * 8;
-        PanelVertex *out = &vertices[i * 4];
+        DrawVertex *out = &vertices[i * 4];
 
         out[0].x = input[0].x + xOffset;
         out[0].y = input[0].y + yOffset;

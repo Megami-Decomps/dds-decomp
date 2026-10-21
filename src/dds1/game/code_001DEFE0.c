@@ -9794,8 +9794,8 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
     if (adjustmentIndex != 0) {
         selection = D_003BAA3C[adjustmentIndex].streamSelection;
     }
-    if (((DatBattleSceneAudioSelectionView *)&datBattleSceneRecords[sceneIndex])->audioStreamSelectionOverride != 0) {
-        selection = ((DatBattleSceneAudioSelectionView *)&datBattleSceneRecords[sceneIndex])->audioStreamSelectionOverride;
+    if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
+        selection = datBattleSceneRecords[sceneIndex].unk24;
     } else if (runtime->unk24A != 0) {
         selection = 2;
     }
