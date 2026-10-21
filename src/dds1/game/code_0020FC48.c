@@ -1976,11 +1976,11 @@ void btlMarkRuntimeUpdatePending(void) {
     }
 }
 
-extern s32 *D_003BAA08;
+extern s32 *datAffinityTablePrimary;
 
-extern s32 *D_003BAA0C;
+extern s32 *datAffinityTableAlternate;
 
-extern s32 *D_003BAA2C;
+extern s32 *datExternalAffinityTable;
 
 extern char D_003BBA98[];
 
@@ -2094,12 +2094,12 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
         btlBossDebugPrintfN(x, y, 0, D_003BBA98);
         if ((unit->status.flags & 0x200) != 0) {
             if ((unit->status.flags & 0x1000) != 0) {
-                row = ((BtlAffinityRow *)D_003BAA08)[unit->partyRecord.unitId];
+                row = ((BtlAffinityRow *)datAffinityTablePrimary)[unit->partyRecord.unitId];
             } else {
-                row = ((BtlAffinityRow *)D_003BAA0C)[unit->partyRecord.unitId];
+                row = ((BtlAffinityRow *)datAffinityTableAlternate)[unit->partyRecord.unitId];
             }
         } else {
-            row = ((BtlAffinityRow *)D_003BAA2C)[unit->partyRecord.unitId];
+            row = ((BtlAffinityRow *)datExternalAffinityTable)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
             row.value[i] = btlGetUnitElementAffinity(unit, i);

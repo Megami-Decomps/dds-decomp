@@ -9862,3 +9862,6 @@
 0x001A5C40	btlCalculateHpAttackOrRestoreAmount	inferred	Calculates a command's HP attack or recovery amount using HP effect parameters; debug output uses btl:hp labels, and its caller stores attack and restore results separately.
 0x001A6118	btlCalculateMpAttackOrRestoreAmount	inferred	Calculates a command's MP attack or recovery amount using MP effect parameters; debug output uses btl:mp labels, and its caller stores attack and restore results separately.
 0x003EB820	sdfDisplayEnvironment	inferred	Initialized through the uncached sceGsSetDefDispEnv alias; receives the selected display buffer page and is submitted through sceGsPutDispEnv. Paired DDS2 0x004681D0.
+0x003BAA08	datAffinityTablePrimary	inferred	Selected by datGetEffectiveAffinity when unit flags include 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS2 0x00435DD8.
+0x003BAA0C	datAffinityTableAlternate	inferred	Selected by datGetEffectiveAffinity when unit flags omit 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS2 0x00435DDC.
+0x003BAA2C	datExternalAffinityTable	inferred	Selected for external-skill-table records and supplies override rows 381–383; also read by affinity debug and special-command consumers. Paired DDS2 0x00435DFC.

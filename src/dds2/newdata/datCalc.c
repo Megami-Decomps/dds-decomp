@@ -229,9 +229,9 @@ s32 datRaiseCalculatedValueFloor(DatPartyRecord *unit, s32 packedValue) {
     return packedValue;
 }
 
-extern s32 *D_00435DD8;
-extern s32 *D_00435DDC;
-extern s32 *D_00435DFC;
+extern s32 *datAffinityTablePrimary;
+extern s32 *datAffinityTableAlternate;
+extern s32 *datExternalAffinityTable;
 
 s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     s32 calculatedValue;
@@ -250,9 +250,9 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     unitId = unit->unitId;
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         if (unit->flags & 0x1000) {
-            calculatedValue = D_00435DD8[unitId * 19 + element];
+            calculatedValue = datAffinityTablePrimary[unitId * 19 + element];
         } else {
-            calculatedValue = D_00435DDC[unitId * 19 + element];
+            calculatedValue = datAffinityTableAlternate[unitId * 19 + element];
         }
         if (mdlFlagTest(0x80E) && calculatedValue < 0) {
             calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) |
@@ -260,9 +260,9 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
         }
     } else {
         if (unit->affinityTableIndex != 0) {
-            calculatedValue = D_00435DFC[unit->affinityTableIndex * 19 + element];
+            calculatedValue = datExternalAffinityTable[unit->affinityTableIndex * 19 + element];
         } else {
-            calculatedValue = D_00435DFC[unitId * 19 + element];
+            calculatedValue = datExternalAffinityTable[unitId * 19 + element];
         }
     }
 
@@ -270,13 +270,13 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
         calculatedValue = datRaiseCalculatedValueFloor(unit, calculatedValue);
     }
     if (unit->flags & 0x2000) {
-        calculatedValue = D_00435DFC[383 * 19 + element];
+        calculatedValue = datExternalAffinityTable[383 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
-        calculatedValue = D_00435DFC[382 * 19 + element];
+        calculatedValue = datExternalAffinityTable[382 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
-        calculatedValue = D_00435DFC[381 * 19 + element];
+        calculatedValue = datExternalAffinityTable[381 * 19 + element];
     }
 
     low = calculatedValue & 0xFFFF;
@@ -2554,9 +2554,9 @@ s32 ptyScriptCheckOrRebalanceFrontline(void) {
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DD8);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datAffinityTablePrimary);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DDC);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datAffinityTableAlternate);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DE0);
 
@@ -2572,7 +2572,7 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", datEnemyAiRecords);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DF8);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DFC);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datExternalAffinityTable);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435E00);
 

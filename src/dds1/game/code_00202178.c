@@ -4665,7 +4665,7 @@ s32 func_0020A860(void) {
     return -1;
 }
 
-extern s32 *D_003BAA2C;
+extern s32 *datExternalAffinityTable;
 
 /* Unit 0x11B command hook: when the command's mapped skill is a present enemy
  * unit, return that command's entry from affinity row 0x175. */
@@ -4688,7 +4688,7 @@ s32 func_0020AB08(DatPartyRecord *record, s32 command) {
             if (flags & 1) {
                 if (flags & 0x400) {
                     if (unit->partyRecord.unitId == skill) {
-                        return D_003BAA2C[0x175 * 19 + command];
+                        return datExternalAffinityTable[0x175 * 19 + command];
                     }
                 }
             }
