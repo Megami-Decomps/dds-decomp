@@ -698,16 +698,6 @@ const char *fldGetTaskRecordValue(u32 task) {
     return 0;
 }
 
-/* The compact state header follows the room geometry. */
-typedef struct FldRoomStateHeader {
-    s16 unk130;
-    s16 roomId;
-    s16 unk134;
-    s16 mode;
-    s16 entryIndex;
-    s16 axisMode;
-    s32 shapeKind;
-} FldRoomStateHeader;
 
 extern FldActionRow D_0038BE50[];
 
@@ -740,7 +730,6 @@ void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     EffWorldNode *child;
     s32 index;
     s32 roomIndex;
-    FldRoomStateHeader *state;
     u32 counter;
     s32 slot;
 
@@ -763,10 +752,9 @@ void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     D_0038BE50[index].childResource.name = (const char *)D_0038BC00;
     child = evtSpawnActionObj11(D_0038BE50[index].childResource.id, (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform, D_0038BC10);
     roomIndex = func_0013BAB8(&D_0038BE50[index].childResource, child);
-    state = (FldRoomStateHeader *)&fldRoomRecords[roomIndex].unk130;
-    state->roomId = roomId;
-    state->mode = 2;
-    state->entryIndex = -1;
+    fldRoomRecords[roomIndex].roomId = roomId;
+    fldRoomRecords[roomIndex].mode = 2;
+    fldRoomRecords[roomIndex].entryIndex = -1;
     D_004361C4++;
 }
 
