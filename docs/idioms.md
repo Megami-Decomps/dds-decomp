@@ -7333,12 +7333,12 @@ is not its contract. The 512-byte packet body remains assembly.
 DDS1 counter dispatch at `002C4AD8..002C4AF0` deliberately sets
 `$4..$9`: x, y, z, the counter runtime, the channel, and the incoming
 draw context. The last value is saved from incoming `$8` and forwarded
-through `$9`; it is not a residual register. Use the existing six-formal
-`SdfCounterDrawFn` convention from DDS1 `code_002C5FD8` and DDS2
-`code_0030B838` in DDS1 `code_002C3868` too. Its label-plate provider
-receives a named `s32 drawContext` formal even though that provider does
-not consume it. This contract change leaves both its dispatcher and
-label-plate machine code unchanged.
+through `$9`; it is not a residual register. Dispatch through the actual
+`MenuList.drawCallback` slot with a `struct MenuList *` runtime and a
+`struct MenuListNode *` channel, not parallel counter-owner typedefs.
+DDS1's label-plate provider receives a named `s32 drawContext` formal even
+though that provider does not consume it. The dispatcher and label-plate
+machine code retain all six native arguments.
 
 
 ## Draw-packet payload getters forward opaque pointers
@@ -15898,4 +15898,24 @@ The action-animation delay predicate masks the first eight bytes of the real
 party-record header as one scalar value. Copy those bytes into a `u64` with
 `memcpy` before applying the mask; do not read the record's halfword fields
 through a `u64 *` lvalue.
+
+## Counter lists use the generic menu-list owner
+
+The local-map counter allocator returns the actual `struct MenuList` and its
+node allocator returns `struct MenuListNode`. Counter viewport/cursor state
+uses the existing list fields; do not recreate the same owner as a padded
+counter runtime, a nested selection-state prefix, or a second channel struct.
+
+The counter's `context` holds a separately allocated `SdfCounterTimer` (`0x24`
+bytes). Its node's `counterDisplay` user-pointer variant holds the separately
+allocated `SdfCounterDisplay` (`0x10` bytes). Retail DDS1 `0x002C43F8` and DDS2
+`0x0030C480` store that payload at node `+0x70`; both teardown paths free and
+clear it, then free and clear list `context` before destroying the actual list.
+Casting the generic `void *context` to its real timer payload is an opaque
+user-data boundary, not an alternate view of the list owner.
+
+Display labels are text: both retail name banks contain `0x18`-byte character
+rows, and the message/draw consumers use the same label pointer as a string.
+Declare the rows as character arrays and the display's label as `const char *`,
+rather than transporting the text through a word-pointer field.
 

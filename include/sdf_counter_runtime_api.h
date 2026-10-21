@@ -1,9 +1,9 @@
 #ifndef SDF_COUNTER_RUNTIME_API_H
 #define SDF_COUNTER_RUNTIME_API_H
 
-struct SdfCounterRuntime;
+struct MenuList;
 
-extern struct SdfCounterRuntime *sdfActiveCounterRuntime;
-void sdfCounterDestroyRuntime(struct SdfCounterRuntime *runtime);
+extern struct MenuList *sdfActiveCounterRuntime;
+void sdfCounterDestroyRuntime(struct MenuList *runtime);
 
 #endif

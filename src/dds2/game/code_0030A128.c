@@ -23,7 +23,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
-#include "sdf_counter_channel.h"
+#include "sdf_counter_display.h"
 
 typedef struct SdfSlotSet SdfSlotSet;
 

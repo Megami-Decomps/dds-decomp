@@ -3,9 +3,10 @@
 #include "fld_map_selection.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
-#include "sdf_counter_channel.h"
-#include "sdf_counter_runtime.h"
+#include "sdf_counter_display.h"
+#include "sdf_counter_timer.h"
 #include "sdf_counter_runtime_api.h"
+#include "mnu_list.h"
 #include "sdf_textured_rect.h"
 #include "sdf_resource.h"
 #include "fpu.h"
@@ -62,27 +63,27 @@ s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     return count;
 }
 
-void sdfCounterSelectChannelByIndex(SdfCounterRuntime *rt, s32 target) {
-    SdfCounterChannel *channel;
-    SdfCounterChannel *prev;
+void sdfCounterSelectChannelByIndex(struct MenuList *rt, s32 target) {
+    struct MenuListNode *channel;
+    struct MenuListNode *prev;
     s32 i;
 
-    if (target < rt->state.active) {
-        channel = rt->state.first;
-        rt->state.scroll = 0;
-        rt->state.channel = channel;
-        rt->state.selected = channel;
+    if (target < rt->count) {
+        channel = rt->first;
+        rt->windowOffset = 0;
+        rt->cursor = channel;
+        rt->head = channel;
         for (i = 0; i <= target; i++) {
             prev = channel->prev;
             if (prev != NULL) {
-                if (rt->state.active - i >= rt->state.base - 1) {
-                    rt->state.selected = prev;
-                    rt->state.scroll = 1;
+                if (rt->count - i >= rt->visibleCount - 1) {
+                    rt->head = prev;
+                    rt->windowOffset = 1;
                 } else {
-                    rt->state.scroll = rt->state.scroll + 1;
+                    rt->windowOffset = rt->windowOffset + 1;
                 }
             }
-            rt->state.channel = channel;
+            rt->cursor = channel;
             channel = channel->next;
             if (channel == NULL) {
                 break;
@@ -145,13 +146,13 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32,
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, const u8 *);
 
 void sdfCounterDrawFadingLabelPanel(s32 x, s32 y) {
-    SdfCounterDisplay *display = sdfActiveCounterRuntime->state.channel->display;
+    SdfCounterDisplay *display = sdfActiveCounterRuntime->cursor->counterDisplay;
     f32 fade = 1.0f;
     s32 color;
     s32 width;
     u32 style;
 
-    fade -= (f32)sdfActiveCounterRuntime->state.timer->value / 10.0f;
+    fade -= (f32)((SdfCounterTimer *)sdfActiveCounterRuntime->context)->value / 10.0f;
     evtSubmitDefaultDepthGradientRect(0, 0x120, 0x200, 0xA0, 0, 0,
                  (s32)(fade * 64.0f) << 24, (s32)(fade * 64.0f) << 24);
     fade *= 128.0f;
