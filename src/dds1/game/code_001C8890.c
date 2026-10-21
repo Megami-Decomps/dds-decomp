@@ -76,7 +76,7 @@ enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
 void btlPrepareSavedCommandTargets(BtlTask *, BattleIndexWork *);
 
-extern s32 btlIsUnitInActiveList(void *unit);
+extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 
 extern AiSpecies *datEnemyAiRecords;
 

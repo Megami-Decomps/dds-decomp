@@ -601,7 +601,7 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-extern s32 btlIsUnitInActiveList(u8 *);
+extern s32 btlIsUnitInActiveList(BtlUnit *);
 extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(u16);
 
@@ -672,7 +672,7 @@ s32 btlPollActorResourceCleanup(BtlUnit *actor) {
     if (actor->effectLink.referenceCount != 0) {
         return 0;
     }
-    if (btlIsUnitInActiveList((u8 *)actor) != 0) {
+    if (btlIsUnitInActiveList(actor) != 0) {
         btlResetActiveUnitList();
         return 0;
     }
