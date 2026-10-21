@@ -6963,8 +6963,20 @@
 0x00352B50	cos	inferred	fdlibm s_cos: |x|<=pi/4 calls __kernel_cos, quadrant switch after __ieee754_rem_pio2
 0x00352C78	sin	inferred	fdlibm s_sin: |x|<=pi/4 calls __kernel_sin(x,0,0)
 0x00353300	__ieee754_rem_pio2	inferred	argument reduction called by sin/cos for |x|>pi/4
+0x00353BD8	__ieee754_acosf	inferred	newlib ef_acos.c __ieee754_acosf: the routine behind acosf, which tail-jumps to it; calls __ieee754_sqrtf. DDS1 twin 0x002FA208.
+0x00354000	__ieee754_asinf	inferred	newlib ef_asin.c __ieee754_asinf: the routine behind asinf, which tail-jumps to it; calls fabsf and __ieee754_sqrtf. DDS1 twin 0x002FA630.
+0x003543A0	__ieee754_atan2f	inferred	newlib ef_atan2.c __ieee754_atan2f: the routine behind atan2f, which tail-jumps to it; calls fabsf and atanf. DDS1 twin 0x002FA9D0.
+0x00354580	__ieee754_rem_pio2f	inferred	newlib ef_rem_pio2.c __ieee754_rem_pio2f: reduces an argument modulo pi/2 for sinf, cosf and tanf, falling back to __kernel_rem_pio2f for large arguments. DDS1 twin 0x002FABB0.
+0x00354930	__ieee754_sqrtf	inferred	newlib ef_sqrt.c __ieee754_sqrtf: bit-by-bit single-precision square root (no sqrt.s), returning (x-x)/(x-x) for negative input; called by __ieee754_acosf and __ieee754_asinf. DDS1 twin 0x002FAF60.
 0x00354A00	__kernel_cos	inferred	two-argument kernel called by sin/cos
 0x00355828	__kernel_sin	inferred	three-argument kernel (iy in $6) called by sin/cos
+0x00355A60	__kernel_cosf	inferred	newlib kf_cos.c __kernel_cosf: cosine polynomial on the reduced argument, called by cosf and sinf. DDS1 twin 0x002FB030.
+0x00355BB0	__kernel_rem_pio2f	inferred	newlib kf_rem_pio2.c __kernel_rem_pio2f: large-argument reduction modulo pi/2 over 24-bit chunks, built on scalbnf and floorf. DDS1 twin 0x002FB180.
+0x00356418	__kernel_sinf	inferred	newlib kf_sin.c __kernel_sinf: sine polynomial on the reduced argument, called by sinf and cosf. DDS1 twin 0x002FB9E8.
+0x00356520	__kernel_tanf	inferred	newlib kf_tan.c __kernel_tanf: tangent polynomial on the reduced argument; calls fabsf; used by tanf. DDS1 twin 0x002FBAF0.
+0x00356BE0	floorf	inferred	newlib sf_floor.c floorf: rounds toward negative infinity by masking the fraction bits; called by __kernel_rem_pio2f. DDS1 twin 0x002FBD78.
+0x00356CB8	scalbnf	inferred	newlib sf_scalbn.c scalbnf: scales a float by a power of two by adjusting its exponent, using copysignf on overflow; called by __kernel_rem_pio2f. DDS1 twin 0x002FBE50.
+0x00356DC8	copysignf	inferred	newlib sf_copysign.c copysignf: combines the magnitude of the first float with the sign of the second; called by scalbnf. DDS1 twin 0x002FBF18.
 0x00356F90	fptodp	evidence	libgcc soft-float single-to-double helper; cc1 emits calls to it for float varargs (func_0021EC60 printf)
 0x00357230	dpadd	inferred	ee-gcc soft-double add libcall, beside fptodp/dptofp
 0x00357288	dpsub	inferred	soft-double subtract; fdlibm sin/cos return x-x through it for Inf/NaN
@@ -9032,6 +9044,7 @@
 0x00133F08	fldUpdateCameraHeadingTransition	inferred	Advances the field camera yaw toward targetAngle by max(one fifth of the wrapped angular delta, 2 degrees), clears point/angle transition state at completion, and refreshes transforms for the primary and secondary camera nodes. Called during field travel and scene transition updates. [Binary Ninja HLIL; field camera state and caller contexts, 2026-10-14]
 0x0016BCC8	effThunderPassThroughValue	inferred	Returns its u32 input unchanged. The callback registration role remains unknown; the name describes only the observed identity operation. [paired thunder indexed-vector provider, exact-unit audit, 2026-10-14]
 0x00353040	cosf	inferred	Returns the cosine of its radian angle. Paired rotation callers store this result as c; model and battle geometry callers use it for projected extents. DDS1 counterpart 0x002F9F60 is used the same way. [paired DDS1/DDS2 callers, exact-unit audit, 2026-10-14]
+0x00353118	fabsf	inferred	newlib sf_fabs.c fabsf: clears the sign bit of the float. DDS1 twin 0x002FA038.
 0x00353140	sinf	inferred	Returns the sine of its radian angle. Paired rotation callers store this result as s; interpolation callers use sine weights, and geometry callers use it for projected extents. DDS1 counterpart 0x002FA060 is used the same way. [paired DDS1/DDS2 callers, exact-unit audit, 2026-10-14]
 0x003532B8	acosf	inferred	Returns the inverse cosine of its float argument; DDS2 callers convert normalized vector and quaternion components to angles. DDS1 counterpart 0x002FA1C0 has the same call pattern. [paired DDS1/DDS2 geometry callers, 2026-10-14]
 0x003532D0	atanf	inferred	Returns the inverse tangent of its float argument; DDS2 terrain callers convert slope ratios to angles. DDS1 counterpart 0x002FA1D8 is used with the same delta/segmentLength ratio. [paired DDS1/DDS2 terrain callers, 2026-10-14]
