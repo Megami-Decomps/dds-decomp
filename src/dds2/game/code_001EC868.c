@@ -1409,7 +1409,7 @@ f32 angle, f32 blend) {
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-extern f32 func_00352DB0(f32);
+extern f32 atanf(f32);
 extern void sdfVuLoadRotationMatrixY(f32);
 void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *pose, u8 mode) {
     BtlUnit *actor;
@@ -1516,7 +1516,7 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
         sideLength = fsqrtf(midpointDistance * midpointDistance - sideReach * sideReach);
         angleScale = sideReach;
     }
-    angle = func_00352DB0(angleScale / sideLength);
+    angle = atanf(angleScale / sideLength);
 
     if (!alternate) {
         if (targetMuzzle[0] > actorMuzzle[0]) {

@@ -32,7 +32,7 @@
 
 #define SDF_VU_COLORED_BATCH_LIMIT 0x18
 
-extern u32 D_003BDA28;
+extern u32 sdfVuSelectedTransformMatrix;
 
 extern u128 *D_003EB860[][3];
 
@@ -724,7 +724,7 @@ void sdfVuEmitSelectedNodePacket(VuWork *work) {
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */
-void func_002DE980(VuWork *work, const u128 *parameters);
+void sdfVuVertexAlphaClamp(VuWork *work, const u128 *parameters);
 
 void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
     SdfAssetEntry *node;
@@ -732,7 +732,7 @@ void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
     u32 secondaryColor;
     u32 primaryStateWordSecond;
 
-    func_002DE868((void *)work->dmaBase, work->param1, work->secondCoordinates,
+    sdfVuTransformTextureCoordinates((void *)work->dmaBase, work->param1, work->secondCoordinates,
                   (u8 *)work->node + 0x80);
     sdfVuBlendNodeXY(work->blendList);
     node = work->node;
@@ -746,10 +746,10 @@ void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
             if (primaryStateWordSecond != secondaryColor) {
                 u128 parameters[3];
 
-                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, D_003BDA28, work->packedColor,
+                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, sdfVuSelectedTransformMatrix, work->packedColor,
                               secondaryColor, node->unk04, node->unk1C,
                               node->x + work->offsetX, node->y + work->offsetY);
-                func_002DE980(work, parameters);
+                sdfVuVertexAlphaClamp(work, parameters);
             }
             break;
         case 3:
