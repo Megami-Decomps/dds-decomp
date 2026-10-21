@@ -17,11 +17,11 @@
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
+#include "brs_ui_update_allowed_api.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "kwln_task_lifecycle.h"
 
-extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *);
 extern s32 evtStageTestPollModelRequest(void);
 
 

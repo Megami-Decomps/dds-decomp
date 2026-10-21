@@ -14,6 +14,7 @@
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
+#include "brs_ui_update_allowed_api.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
 #include "brs_task.h"
