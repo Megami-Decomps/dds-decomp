@@ -6023,7 +6023,7 @@ f32 btlBuildUnitTargetSphereVU(BtlUnit *first, BtlUnit *second, u8 firstMode, u8
     return result;
 }
 
-f32 func_001FE068(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *to, const f32 *extra, f32 extraRadius) {
+f32 btlMeasureBattleSideBoundsWithSeed(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *to, const f32 *extra, f32 extraRadius) {
     f32 pos[4];
     f32 target[4];
     f32 direction[4];
@@ -6261,7 +6261,7 @@ f32 func_001FE068(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *
     return radius;
 }
 
-f32 func_001FE5C0(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
+f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
                   f32 *outMaxHeight, f32 *outMinHeight, const f32 *from, const f32 *to) {
     f32 center[4] __attribute__((aligned(16)));
     f32 rotated[4] __attribute__((aligned(16)));
@@ -6491,7 +6491,7 @@ f32 func_001FE5C0(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
     return radius;
 }
 
-f32 func_001FEC00(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
+f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
                   f32 *outMaxHeight, f32 *outMinHeight, const f32 *from, const f32 *to, s8 keepSide) {
     f32 center[4] __attribute__((aligned(16)));
     f32 rotated[4] __attribute__((aligned(16)));
@@ -6504,7 +6504,7 @@ f32 func_001FEC00(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
     f32 maxHeight, minHeight;
     f32 maxX, minX, maxZ, minZ;
     /* Retail retains this unused radius maximum beside the live extrema
-     * at 001FEE80, as in the adjacent func_001FE5C0 bounds loop. */
+     * at 001FEE80, as in the adjacent btlMeasureFilteredActorBounds bounds loop. */
     f32 actorRadius;
     f32 verticalOffset;
     f32 radius;

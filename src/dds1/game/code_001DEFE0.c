@@ -4046,11 +4046,11 @@ extern BtlUnit *btlFindActiveActorById(s32 id);
 
 extern u32 btlCountUnitsByFlags(u32);
 
-extern f32 func_001ED5C8(s32, f32 *, f32 *, const f32 *, const f32 *, const f32 *, f32);
+extern f32 btlMeasureBattleSideBoundsWithSeed(s32, f32 *, f32 *, const f32 *, const f32 *, const f32 *, f32);
 
-extern f32 func_001EDB20(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 *, const f32 *);
+extern f32 btlMeasureFilteredActorBounds(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 *, const f32 *);
 
-extern f32 func_001EE160(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 *, const f32 *, s8);
+extern f32 btlMeasureSideFilteredActorBounds(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 *, const f32 *, s8);
 
 extern f32 btlBuildProjectedActorPairBoundsVU(s32, BtlUnit *, BtlUnit *, s8, s8, f32 *, f32 *, const f32 *, const f32 *);
 
@@ -4294,7 +4294,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             mask = p->focusPolicy.kind == 8 ? 0x200 : 0x400;
         }
         /* Native passes the KIND byte here, intentionally not the mode. */
-        span = func_001EDB20(mask, NULL, NULL, (s8)p->focusPolicy.kind,
+        span = btlMeasureFilteredActorBounds(mask, NULL, NULL, (s8)p->focusPolicy.kind,
                             NULL, NULL, NULL, NULL);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         framingDistance = span / tanf(halfFov);
@@ -4318,7 +4318,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         boundsMask = 0x600;
         btlMeasureMaskedUnitBounds(0x400, NULL, NULL);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        span = func_001ED5C8(boundsMask, NULL, NULL, NULL, NULL,
+        span = btlMeasureBattleSideBoundsWithSeed(boundsMask, NULL, NULL, NULL, NULL,
                             terminalPoint, 600.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         framingDistance = span / tanf(halfFov);
@@ -4431,7 +4431,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             VU0_STORE_VF_UNCLOBBERED(vf10, destination);
             terminalPoint[0] = destination[0];
         }
-        span = func_001ED5C8(0x400, NULL, NULL, NULL, NULL,
+        span = btlMeasureBattleSideBoundsWithSeed(0x400, NULL, NULL, NULL, NULL,
                             terminalPoint, 600.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         framingDistance = span / tanf(halfFov);
@@ -4520,7 +4520,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode, 1.0f, 1.0f);
         framingDistance = span / tanf(halfFov);
         if (p->eyePolicy.kind == 0x32) {
-            func_001EDB20(0x400, unit, 0, 0, 0, 0, 0, 0);
+            btlMeasureFilteredActorBounds(0x400, unit, 0, 0, 0, 0, 0, 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, destination);
             btlUnitGetPosVU(unit, 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
@@ -4691,7 +4691,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
                 unit = action->task->unit;
             }
         } else unit = action->task->unit;
-        func_001EDB20(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
+        btlMeasureFilteredActorBounds(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         btlUnitGetPosVU(unit, p->eyePolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
@@ -4705,7 +4705,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, eye);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        span = func_001EDB20(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, focus, eye);
+        span = btlMeasureFilteredActorBounds(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, focus, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
         measuredDistance = span / tanf(halfFov);
         VU0_LOAD_VF(vf10, eye);
@@ -4726,7 +4726,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     case 0x2A: /* 001E82B0 */ {
         s32 centerMask = 0x200;
         unit = btlGetIndexListEntry(action->targetList, 0);
-        span = func_001EE160(0x200, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0, 0);
+        span = btlMeasureSideFilteredActorBounds(0x200, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         btlUnitGetPosVU(action->task->unit, p->eyePolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
@@ -4761,7 +4761,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         /* 001E847C: the second target-list lookup/frame call is real. */
         unit = btlGetIndexListEntry(action->targetList, 0);
-        span = func_001EE160(0x200, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0, 0);
+        span = btlMeasureSideFilteredActorBounds(0x200, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
         VU0_LOAD_VF(vf10, eye);
@@ -5033,7 +5033,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             else mask = 0x400;
         }
         unit = btlGetIndexListEntry(action->targetList, 0);
-        span = func_001EDB20(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
+        span = btlMeasureFilteredActorBounds(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
         measuredDistance = span / tanf(halfFov);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         VU0_LOAD_VF(vf10, eye);
@@ -5239,7 +5239,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             VU0_STORE_VF_UNCLOBBERED(vf10, destination);
             terminalPoint[0] = destination[0];
         }
-        span = func_001ED5C8(0x400, 0, 0, focus, eye, terminalPoint, p->boundsRadius);
+        span = btlMeasureBattleSideBoundsWithSeed(0x400, 0, 0, focus, eye, terminalPoint, p->boundsRadius);
         measuredDistance = span / tanf(halfFov);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
@@ -5260,7 +5260,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, angles);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint); /* the first store is intentionally overwritten */
         boundsMask = 0x600;
-        func_001ED5C8(boundsMask, 0, 0, 0, 0, terminalPoint, 600.0f);
+        btlMeasureBattleSideBoundsWithSeed(boundsMask, 0, 0, 0, 0, terminalPoint, 600.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         tanf(halfFov); /* native ignored scalar */
         VU0_LOAD_VF(vf10, direction);
@@ -5269,7 +5269,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         eye[1] += p->eyePolicy.height;
-        span = func_001ED5C8(boundsMask, 0, 0, focus, eye, terminalPoint, 600.0f);
+        span = btlMeasureBattleSideBoundsWithSeed(boundsMask, 0, 0, focus, eye, terminalPoint, 600.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
@@ -6722,7 +6722,7 @@ BtlUnit *btlFindActiveActorById(s32 id) {
     return 0;
 }
 
-f32 func_001ED5C8(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *to, const f32 *extra, f32 extraRadius) {
+f32 btlMeasureBattleSideBoundsWithSeed(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *to, const f32 *extra, f32 extraRadius) {
     f32 pos[4];
     f32 target[4];
     f32 direction[4];
@@ -6961,7 +6961,7 @@ f32 func_001ED5C8(s32 sides, f32 *top, f32 *bottom, const f32 *from, const f32 *
 }
 
 #include "sdf_vu_matrix.h"
-f32 func_001EDB20(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
+f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
                   f32 *outMaxHeight, f32 *outMinHeight, const f32 *from, const f32 *to) {
     f32 center[4] __attribute__((aligned(16)));
     f32 rotated[4] __attribute__((aligned(16)));
@@ -7191,7 +7191,7 @@ f32 func_001EDB20(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
     return radius;
 }
 
-f32 func_001EE160(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
+f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
                   f32 *outMaxHeight, f32 *outMinHeight, const f32 *from, const f32 *to, s8 keepSide) {
     f32 center[4] __attribute__((aligned(16)));
     f32 rotated[4] __attribute__((aligned(16)));
@@ -7204,7 +7204,7 @@ f32 func_001EE160(s32 mask, BtlUnit *included, BtlUnit *excluded, s8 mode,
     f32 maxHeight, minHeight;
     f32 maxX, minX, maxZ, minZ;
     /* Retail retains this unused radius maximum beside the live extrema
-     * at 001EE3E0, as in the adjacent func_001EDB20 bounds loop. */
+     * at 001EE3E0, as in the adjacent btlMeasureFilteredActorBounds bounds loop. */
     f32 actorRadius;
     f32 verticalOffset;
     f32 radius;

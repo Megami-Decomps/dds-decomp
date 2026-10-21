@@ -9901,3 +9901,6 @@
 0x00435DD8	datAffinityTablePrimary	inferred	Selected by datGetEffectiveAffinity when unit flags include 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS1 0x003BAA08.
 0x00435DDC	datAffinityTableAlternate	inferred	Selected by datGetEffectiveAffinity when unit flags omit 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS1 0x003BAA0C.
 0x00435DFC	datExternalAffinityTable	inferred	Selected for external-skill-table records and supplies override rows 381–383; also read by affinity debug. Paired DDS1 0x003BAA2C.
+0x001FE068	btlMeasureBattleSideBoundsWithSeed	inferred	Measures active battle-side bounds, optionally seeded by a line segment and extra sphere, and returns the framing radius. DDS1 twin 0x001ED5C8.
+0x001FE5C0	btlMeasureFilteredActorBounds	inferred	Measures filtered active actor bounds using a side mask, optional included/excluded units, a position mode, and an optional line segment; writes optional height extrema and returns framing radius. DDS1 twin 0x001EDB20.
+0x001FEC00	btlMeasureSideFilteredActorBounds	inferred	Measures filtered active actor bounds with the same optional unit and line filters plus a side-retention policy; writes optional height extrema and returns framing radius. DDS1 twin 0x001EE160.
