@@ -19,7 +19,7 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 extern void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes);
 
 
-extern s64 fileConsumeConfigTaskReady(void);
+extern s32 fileConsumeConfigTaskReady(void);
 
 extern u8 mnuCampCommandReturnPopupEntry[];
 

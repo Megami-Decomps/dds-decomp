@@ -304,8 +304,9 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src) {
     f32 secondBasePoint[4];
     f32 firstPointDelta[4];
     f32 secondPointDelta[4];
-    f32 firstSample[4];
-    f32 secondSample[4];
+    /* A sample's pair, first then second: effTrackPolyAppendPointPair reads
+       them as two consecutive quadwords, as retail's frame keeps them. */
+    f32 samplePair[2][4];
     s32 activePointCount = data->activePointCount;
     s32 sampleCount = data->step;
     f32 sampleWeightStep;
@@ -332,8 +333,8 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src) {
         sampleWeightStep = 1.0f / (f32)sampleCount;
         effTrackPolyAdvancePosition(data, 2);
         if (sampleCount > 0) {
-            firstSampleOutput = (u128 *)firstSample;
-            secondSampleOutput = (u128 *)secondSample;
+            firstSampleOutput = (u128 *)samplePair[0];
+            secondSampleOutput = (u128 *)samplePair[1];
             firstSampleOutputBase = firstSampleOutput;
             sampleIndex = sampleCount;
             do {
@@ -365,8 +366,8 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src) {
         sampleWeightStep = 1.0f / (f32)sampleCount;
         sampleIndex = 0;
         if (sampleCount > 0) {
-            firstSampleOutput = (u128 *)firstSample;
-            secondSampleOutput = (u128 *)secondSample;
+            firstSampleOutput = (u128 *)samplePair[0];
+            secondSampleOutput = (u128 *)samplePair[1];
             firstSampleOutputBase = firstSampleOutput;
             do {
                 sampleWeight += sampleWeightStep;
@@ -395,16 +396,16 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, const u128 *src) {
         sampleWeightStep = 1.0f / (f32)sampleCount;
         if (sampleCount > 0) {
             sampleIndex = sampleCount;
-            firstSampleOutput = (u128 *)firstSample;
+            firstSampleOutput = (u128 *)samplePair[0];
             do {
                 sampleWeight += sampleWeightStep;
                 sampleIndex--;
-                firstSample[0] = firstBasePoint[0] + firstPointDelta[0] * sampleWeight;
-                firstSample[1] = firstBasePoint[1] + firstPointDelta[1] * sampleWeight;
-                firstSample[2] = firstBasePoint[2] + firstPointDelta[2] * sampleWeight;
-                secondSample[0] = secondBasePoint[0] + secondPointDelta[0] * sampleWeight;
-                secondSample[1] = secondBasePoint[1] + secondPointDelta[1] * sampleWeight;
-                secondSample[2] = secondBasePoint[2] + secondPointDelta[2] * sampleWeight;
+                samplePair[0][0] = firstBasePoint[0] + firstPointDelta[0] * sampleWeight;
+                samplePair[0][1] = firstBasePoint[1] + firstPointDelta[1] * sampleWeight;
+                samplePair[0][2] = firstBasePoint[2] + firstPointDelta[2] * sampleWeight;
+                samplePair[1][0] = secondBasePoint[0] + secondPointDelta[0] * sampleWeight;
+                samplePair[1][1] = secondBasePoint[1] + secondPointDelta[1] * sampleWeight;
+                samplePair[1][2] = secondBasePoint[2] + secondPointDelta[2] * sampleWeight;
                 effTrackPolyAppendPointPair(data, firstSampleOutput);
             } while (sampleIndex != 0);
         }

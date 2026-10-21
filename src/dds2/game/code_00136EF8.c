@@ -1254,7 +1254,7 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
     return clearance;
 }
 
-extern void fldToggleWorldNodeState(s32 enabled);
+extern void fldToggleWorldNodeState(s64 enabled);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 

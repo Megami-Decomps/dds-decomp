@@ -767,7 +767,7 @@ extern void fldInitDisplayObjects();
 
 extern void fldResetPendingSounds();
 
-extern void sdfRandomize();
+extern void sdfRandomize(void *state, u32 seed);
 
 extern void fldParseMixLb();
 

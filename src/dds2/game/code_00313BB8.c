@@ -178,7 +178,7 @@ extern u8 D_0045C828[];
 
 
 
-extern void fprintf(s32, const char *, s32, s32);
+extern void fprintf(SdkFileStream *, const char *, s32, s32);
 
 
 extern char sdfDebugLogAppendMode[];
@@ -195,8 +195,8 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
-    s32 file = fopen("debug.log", sdfDebugLogAppendMode);
-    if (file != 0) {
+    SdkFileStream *file = fopen("debug.log", sdfDebugLogAppendMode);
+    if (file != NULL) {
         fprintf(file, sdfDebugLogPairFormat, left, right);
         fclose(file);
     }

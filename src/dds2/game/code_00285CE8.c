@@ -7,7 +7,7 @@
 #include "mdl_flag_api.h"
 
 
-extern void evtPrintDeveloperConsoleMessage();
+extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 
 
 

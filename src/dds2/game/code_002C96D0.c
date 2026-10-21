@@ -5071,7 +5071,8 @@ FileQueue *effCloneQueueForNode(u32 unused, FileQueue *source) {
 }
 
 void camFollowOffsetVec(FileJob *job, void *dst);
-extern void camAimRotation();
+struct CamAim;
+extern void camAimRotation(struct CamAim *obj, void *dst);
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start frame (job+0x80) has been reached; the frame counter only advances when the effect-frame pause flag is clear. */
 void fileQueueUpdate(FileQueue *queue)
@@ -5085,7 +5086,7 @@ void fileQueueUpdate(FileQueue *queue)
 
     if (queue->transformFlags & 0x60) {
         PCP_COPY_VECTOR(savedQuat, queue->quat);
-        camAimRotation(queue, aimQuat);
+        camAimRotation((struct CamAim *)queue, aimQuat);
         fileQueueSetRotation(queue, aimQuat);
         PCP_COPY_VECTOR(queue->quat, savedQuat);
     }
@@ -5117,7 +5118,7 @@ void fileQueueUpdate(FileQueue *queue)
             fileJobInvokePositionCallback((FileJobPayload *)job->id, pos);
         }
         if (job->xformFlags & 0x60) {
-            camAimRotation(job, aimQuat);
+            camAimRotation((struct CamAim *)job, aimQuat);
             fileJobInvokeRotationCallback((FileJobPayload *)job->id, aimQuat);
         }
         fileJobInvokeTypeCallback((FileJobPayload *)job->id);

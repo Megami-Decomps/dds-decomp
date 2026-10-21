@@ -364,7 +364,7 @@ void effParamForwardVector(void *work, void *vector) {
 /* Initialize only three components before the quadword VU load.
  * The fourth component is not initialized here; retain the native array size. */
 void effParamBuildVector(void *work, f32 scalar) {
-    f32 components[3];
+    f32 components[4];
 
     components[0] = components[1] = components[2] = scalar;
     VU0_LOAD_VF_MEMORY(vf10, components);
