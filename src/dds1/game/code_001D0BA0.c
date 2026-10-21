@@ -43,6 +43,7 @@
 #include "btl_sound.h"
 #include "btl_selected_unit_effect_task_args.h"
 #include "btl_approach_task_args.h"
+#include "btl_unit_base_light_task_args.h"
 #include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
@@ -4451,11 +4452,6 @@ BtlRuntimeTask *btlCreateNoOpTask(void) {
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     return task;
 }
-
-typedef struct BtlUnitBaseLightArgs {
-    BtlUnit *unit;
-    s32 delay;
-} BtlUnitBaseLightArgs;
 
 extern f32 *D_00324770[];
 
