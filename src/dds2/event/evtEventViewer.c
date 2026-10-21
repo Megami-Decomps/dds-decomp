@@ -2316,7 +2316,7 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
     }
 }
 
-extern s32 mnuShouldBlockViewerEndCountdown(void *scene);
+extern u32 mnuShouldBlockViewerEndCountdown(void);
 extern s32 scrCommandIsProcessControlFlagClear(void);
 extern u32 mnuCampGetSecondaryOption(void *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
@@ -2328,7 +2328,7 @@ extern void fldSetTitleDrawMode(s32 active);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
 void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
-    if (mnuShouldBlockViewerEndCountdown(viewer) == 1 || scrCommandIsProcessControlFlagClear() == 0) {
+    if (mnuShouldBlockViewerEndCountdown() == 1 || scrCommandIsProcessControlFlagClear() == 0) {
         if (viewer->glyphTickCount == 0) {
             viewer->glyphTickCount = 1;
         }
