@@ -2930,9 +2930,8 @@ void mnuReleaseMantraIconSprite(MantraIconPool *pool) {
 
 MantraIconEntry *mnuClaimMantraIconEntry(MantraIconPool *pool, u32 flags) {
     s32 i;
-    u32 *item;
-    u32 *tail;
-    u32 header;
+    MantraIconEntry *item;
+    MantraIconEntry *tail;
 
     if (flags & 0x20) {
         if (pool->current != 0) {
@@ -2945,28 +2944,27 @@ MantraIconEntry *mnuClaimMantraIconEntry(MantraIconPool *pool, u32 flags) {
         }
         return pool->chainTail;
     }
-    item = (u32 *)pool->entries;
-    for (i = 0; i < pool->count; i++, item += 3) {
-        if ((item[0] & 1) == 0) {
-            memset(item, 0, 0xC);
-            header = item[0] | 1;
-            item[0] = header;
+    item = pool->entries;
+    for (i = 0; i < pool->count; i++, item++) {
+        if (!item->active) {
+            memset(item, 0, sizeof(*item));
+            item->active = 1;
             if (flags & 0x10) {
-                tail = (u32 *)pool->chainTail;
+                tail = pool->chainTail;
                 if (tail != 0) {
-                    if (((tail[0] >> 1) & 0xF) == 9) {
-                        tail[0] = (tail[0] & 0xFFFFFFE1) | 8;
+                    if (tail->state == 9) {
+                        tail->state = 4;
                     } else {
-                        tail[0] = (tail[0] & 0xFFFFFFE1) | 6;
+                        tail->state = 3;
                     }
-                    tail[2] = 0;
+                    tail->timer = 0;
                 }
-                pool->chainTail = (MantraIconEntry *)item;
+                pool->chainTail = item;
             } else {
-                pool->current = (MantraIconEntry *)item;
-                item[0] = header | 0x40;
+                pool->current = item;
+                item->shortLoop = 1;
             }
-            return (MantraIconEntry *)item;
+            return item;
         }
     }
     return 0;

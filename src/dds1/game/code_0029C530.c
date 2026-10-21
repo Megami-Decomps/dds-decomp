@@ -4917,12 +4917,12 @@ void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
 
 /* Replace the per-cell grid handles from the copied source header. kind is unused here. */
 void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
-    u32 *params = source;
+    EffSurfaceParams *params = source;
     u32 size;
     u32 i;
     EffSurfaceGridNode *handle;
 
-    node->params = *(EffSurfaceParams *)params;
+    node->params = *params;
     size = node->handleCount * 4;
     if (size == 0) {
         return;
@@ -4936,9 +4936,9 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
     node->handleBuffer = sdfMemAllocDirect(size);
     node->index = sdfMemLock(node->handleBuffer);
     for (i = 0; i < node->handleCount; i++) {
-        handle = effCreateSurfaceGridNode(params[0], params[1]);
+        handle = effCreateSurfaceGridNode(params->opaque00[0], params->opaque00[1]);
         ((u32 *)node->index)[i] = (u32)handle;
-        effFillSurfaceGridColorGradient(handle, params + 2);
+        effFillSurfaceGridColorGradient(handle, params->opaque00 + 2);
     }
 }
 
@@ -10227,32 +10227,39 @@ void effBattleTintTransitionInitialize(void) {
     btlInitTintTransitionDefault(0xc);
 }
 
-/* Halfword IDs overlaid on the timer pair's word-oriented payload. */
-typedef struct EffTintTransitionIds {
-    u8 pad00[8];
+/* The final timer word also supplies the default tint's halfword ID. */
+typedef struct EffTintTransitionParams {
+    u32 duration;
+    u32 resourceArgument;
     u16 resourceKind;
-    u8 pad0A[2];
-    u16 defaultKind;
-} EffTintTransitionIds;
+    u16 unk0A;
+    union {
+        u32 delay;
+        struct {
+            u16 defaultKind;
+            u16 unk0E;
+        } ids;
+    } tail;
+} EffTintTransitionParams;
 
 void effUpdateSlotTimerPair(u8 *work) {
-    u32 *slotData;
+    EffTintTransitionParams *slotData;
     u32 elapsed;
     u32 duration;
 
     btlGetRuntime();
     elapsed = ((EffActiveResource *)work)->frame;
     slotData = ((EffActiveResource *)work)->payload;
-    duration = slotData[0];
-    if (duration < slotData[3]) {
+    duration = slotData->duration;
+    if (duration < slotData->tail.delay) {
         return;
     }
     if (elapsed == 0) {
-        btlInitTintTransitionResource(slotData[1], ((EffTintTransitionIds *)slotData)->resourceKind);
-        duration = slotData[0];
+        btlInitTintTransitionResource(slotData->resourceArgument, slotData->resourceKind);
+        duration = slotData->duration;
     }
-    if (duration != 0 && elapsed == duration - slotData[3]) {
-        btlInitTintTransitionDefault(((EffTintTransitionIds *)slotData)->defaultKind);
+    if (duration != 0 && elapsed == duration - slotData->tail.delay) {
+        btlInitTintTransitionDefault(slotData->tail.ids.defaultKind);
     }
 }
 
