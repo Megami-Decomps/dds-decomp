@@ -2,11 +2,11 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "brs_ui_update_allowed_api.h"
 
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
-extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *work);
 extern void brsNoOpMessageInputCallback(void *);
 extern s32 brsPollResultCounterCompletion(void);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
@@ -22,7 +22,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
     context = (BrsSkillPackageWork *)dds3GetProcessData(input);
     transitionState = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
-    if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
+    if (brsTaskIsUiUpdateAllowed(context) == 0) {
         return 0;
     }
     result = menuRunPanel(context, 0, input);
@@ -44,7 +44,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
 s32 mnuStaffRunPanel1(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
         mnuRefreshPanelLayer(context);
         return menuRunPanel(context, 1, (void *)task);
     }
@@ -55,7 +55,7 @@ extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
 s32 mnuStaffRunPanel2(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
         brsDecaySharedAnimCounter(context);
         return menuRunPanel(context, 2, (void *)task);
     }

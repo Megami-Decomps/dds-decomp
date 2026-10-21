@@ -8,6 +8,7 @@
 #include "mnu_reset_selection_widths_api.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "brs_ui_update_allowed_api.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
@@ -20,8 +21,6 @@ extern void dspRequestMessageWindowModeOne(void);
 
 
 extern void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *);
-
-extern s32 brsTaskIsUiUpdateAllowed(s32);
 
 extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
 
@@ -64,7 +63,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
     context = (BrsSkillPackageWork *)dds3GetProcessData(input);
     transitionState = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
-    if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
+    if (brsTaskIsUiUpdateAllowed(context) == 0) {
         return 0;
     }
     result = mnuDispatchPopupTransition(&context->transition, transitionState, 0, input);
@@ -85,7 +84,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
 s32 mnuStaffRunPanel1(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
         return menuSetHandler(context, 1, (void *)task);
     }
@@ -94,7 +93,7 @@ s32 mnuStaffRunPanel1(KwlnTask *task) {
 s32 mnuStaffRunPanel2(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != 0) {
         brsDecaySharedAnimCounter(context);
         return menuSetHandler(context, 2, (void *)task);
     }
