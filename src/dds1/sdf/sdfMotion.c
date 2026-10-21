@@ -13,8 +13,8 @@
 
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval);
-extern s32 (*D_003981B8[])(void *binding, s32 selector);
-extern s32 (*D_00398248[])(void *handlerContext, s32 handlerIndex);
+extern s32 (*D_003981B8[])(void *binding, s32 selector, s32 targetIndex);
+extern s32 (*D_00398248[])(void *handlerContext, s32 handlerIndex, s32 targetIndex);
 extern SdfMotionBindingDispatch D_003981D0;
 extern SdfMotionBindingDispatch D_003981E8;
 extern SdfMotionBindingDispatch D_00398200;
@@ -355,8 +355,8 @@ void sdfMotionBlendFiveKeyValues(SdfMotionKeyInterval *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
-s32 sdfDispatchMotionBySelector(void *binding, s32 selector) {
-    return D_003981B8[(u16)selector](binding, selector);
+s32 sdfDispatchMotionBySelector(void *binding, s32 selector, s32 targetIndex) {
+    return D_003981B8[(u16)selector](binding, selector, targetIndex);
 }
 
 void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
@@ -598,8 +598,8 @@ void sdfMotionCaptureScaleVector(void *bindingData) {
     PCP_COPY_VECTOR(binding->capturedVector, binding->node->scale);
 }
 
-s32 sdfDispatchMotionHandler(void *handlerContext, s32 handlerIndex) {
-    return D_00398248[(u16)handlerIndex](handlerContext, handlerIndex);
+s32 sdfDispatchMotionHandler(void *handlerContext, s32 handlerIndex, s32 targetIndex) {
+    return D_00398248[(u16)handlerIndex](handlerContext, handlerIndex, targetIndex);
 }
 
 void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
