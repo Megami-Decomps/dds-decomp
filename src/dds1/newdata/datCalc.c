@@ -10,6 +10,7 @@
 #include "pty_roster_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
+#include "scr_integer_return_value_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -417,7 +418,6 @@ extern ScrData *evtWorkScriptTask;
 extern EvtScriptContext evtWorkScriptContext;
 
 extern s32 scrReadIntParameter(s32 idx);
-extern void scrSetIntegerReturnValue();
 extern void scrSetFloatReturnValue(f32 value);
 extern DatPartyRecord *dds3FindEntry(s32 rosterIndex);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
