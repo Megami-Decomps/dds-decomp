@@ -520,7 +520,7 @@ s32 btlHasAnyOperandLowFlag(s32 unused, BattleIndexWork *state) {
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void func_001B4AA0(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
+extern void btlBuildCombinedActorUnit(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
 extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 
@@ -679,7 +679,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     if (datCommandSelectors[command].kind != 1) {
         source = action->unit;
     } else {
-        func_001B4AA0(&combinedUnit, action->unit, action->indexWork.companionA,
+        btlBuildCombinedActorUnit(&combinedUnit, action->unit, action->indexWork.companionA,
                      action->indexWork.companionB);
         source = &combinedUnit;
     }
