@@ -67,7 +67,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     soundFormat.playbackCadenceStep = descriptor->playbackCadenceStep;
 
     if (!isPac) {
-        stream = sdfAllocAndClearQuadwords(0x14);
+        stream = sdfAllocAndClearQuadwords(sizeof(*stream));
         owner->stream.linear = stream;
         allocation = sdfMemAllocDirect(0x20000);
         stream->allocation = allocation;
