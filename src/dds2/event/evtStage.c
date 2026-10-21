@@ -11,6 +11,7 @@
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_query.h"
 #include "kwln_task_state.h"
+#include "kwln.h"
 #include "sdf_texture_offset_list.h"
 
 
@@ -47,13 +48,13 @@ void evtDrainSecondaryWorldNodes(void) {
 }
 
 extern char D_003C8BA0[];
-extern char D_003C8C60[];
+extern KwlnDrawVectorParams D_003C8C60[];
 extern char D_003C8C80[];
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern void dds3DrawSetLightSourcePointer(void *lightSource, s32 index);
-extern void kwlnDrawCopyWords20(void *source);
+extern void kwlnDrawCopyWords20(KwlnDrawVectorParams *source);
 extern void kwlnDrawCopyRow128(u128 *source);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
