@@ -1142,7 +1142,14 @@ void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
 
-extern s32 itfDrawTexturedSpriteRect();
+struct EffSpriteUV;
+struct SdfTex;
+union EffSpriteColor;
+extern void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
+                                      const struct EffSpriteUV *uvRect,
+                                      const union EffSpriteColor *color, u32 flipFlags,
+                                      u32 blendKind, s32 mode, struct SdfTex *texture,
+                                      s32 surfaceId);
 
 
 /* Draw only when a texture is present; native X/Y extent scaling differs. */
@@ -1163,7 +1170,10 @@ void itfDrawBackgroundSprite(void) {
         color[1] = ITF_NEUTRAL_COLOR;
         color[2] = ITF_NEUTRAL_COLOR;
         color[3] = ITF_NEUTRAL_COLOR;
-        itfDrawTexturedSpriteRect(0, 0, 0, width * 0x10, height * 8, origin, color, 0, 0, 1, itfBackgroundSpriteTexture, 0x52);
+        itfDrawTexturedSpriteRect(0, 0, 0, width * 0x10, height * 8,
+                                  (const struct EffSpriteUV *)origin,
+                                  (const union EffSpriteColor *)color, 0, 0, 1,
+                                  itfBackgroundSpriteTexture, 0x52);
     }
 }
 
