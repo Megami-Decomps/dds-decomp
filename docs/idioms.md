@@ -15880,3 +15880,19 @@ not a serializer over padding or a new nominal model-header view.
 Point-group renderers likewise obtain the complete `EffBillPointConfig`,
 use its explicit timed subobject, and read its actual `drawFlag` field.
 
+## Surface-node APIs and scalar header snapshots
+
+Surface constructors, kind dispatch, and resource replacement helpers consume
+`EffectSurfaceNode *` end to end. Use its `kind` and resource members directly;
+the node is neither a `FileJob` nor a `FileQueue`. A stored numeric work slot
+is decoded only where it crosses that address-slot interface.
+
+The growing strip's three texture-coordinate rows are `f32[3][4]`.
+`EffPacketParams.texcoords` receives the first row, `texcoords[0]`, not a
+word-pointer cast or an incompatible pointer to the complete row array.
+
+The action-animation delay predicate masks the first eight bytes of the real
+party-record header as one scalar value. Copy those bytes into a `u64` with
+`memcpy` before applying the mask; do not read the record's halfword fields
+through a `u64 *` lvalue.
+

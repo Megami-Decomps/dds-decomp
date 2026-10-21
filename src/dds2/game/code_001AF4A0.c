@@ -823,9 +823,13 @@ s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId) {
     s32 *delay;
 
     if (actionId == 0 || datCommandSelectors[actionId].kind == 5) {
-        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200 &&
-            (*(u64 *)&unit->partyRecord.flags & 0xFFFF00000010ULL) == 0x600000000ULL) {
-            return 9;
+        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
+            u64 partyHeader;
+
+            memcpy(&partyHeader, &unit->partyRecord, sizeof(partyHeader));
+            if ((partyHeader & 0xFFFF00000010ULL) == 0x600000000ULL) {
+                return 9;
+            }
         }
     }
     if (actionId == 0) {

@@ -5012,19 +5012,19 @@ s32 effCreateSurfaceNodeFromPayload(u16 kind, s32 source) {
     return object;
 }
 
-extern void effReplaceSurfacePrimaryBillboard(s32 *, s32 *);
+extern void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *, s32 *);
 
-extern void effReplaceSurfaceFlaggedBillboard(s32 *, s32 *);
+extern void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *, s32 *);
 
-extern void effSetSurfaceRetainedResource(s32 *, s32);
+extern void effSetSurfaceRetainedResource(EffectSurfaceNode *, s32);
 
 extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
 
 extern void effSurfaceNodeCreateQueues(EffectSurfaceNode *, void *);
 
-extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
+extern void effReplaceSurfaceResourceHolder(EffectSurfaceNode *node, u32 resource);
 
-void effConfigureSurfaceNodeByKind(s32 *object, s32 kind, s32 *settings) {
+void effConfigureSurfaceNodeByKind(EffectSurfaceNode *object, s32 kind, s32 *settings) {
     u16 type = kind;
     switch (type) {
     case 1:
@@ -5037,25 +5037,25 @@ void effConfigureSurfaceNodeByKind(s32 *object, s32 kind, s32 *settings) {
         effSetSurfaceRetainedResource(object, *settings);
         break;
     case 5:
-        effRebuildSurfaceJobs((EffectSurfaceNode *)object, settings);
+        effRebuildSurfaceJobs(object, settings);
         break;
     case 6:
-        effSurfaceNodeCreateQueues((EffectSurfaceNode *)object, settings);
+        effSurfaceNodeCreateQueues(object, settings);
         break;
     case 7:
-        effReplaceSurfaceResourceHolder((s32)object, (u32)settings);
+        effReplaceSurfaceResourceHolder(object, (u32)settings);
         break;
     }
-    object[3] = type;
+    object->kind = type;
 }
 
-s32 effCreateSurfaceNodeFromFile(FileJobPayload *source) {
-    s32 *object = (s32 *)effResourceReferenceReplaceFromFile(source);
+EffectSurfaceNode *effCreateSurfaceNodeFromFile(FileJobPayload *source) {
+    EffectSurfaceNode *object = effResourceReferenceReplaceFromFile(source);
     s32 *data = fileResolveSecondaryBuffer(source);
     if (data != NULL) {
         effConfigureSurfaceNodeByKind(object, source->primary.selector, data);
     }
-    return (s32)object;
+    return object;
 }
 
 
@@ -5233,39 +5233,34 @@ void effReplaceResourceRef(s32 nodeAddr, s32 entryId, s32 resource) {
     node->record = fileAllocateGridRecordSlots(entryId & 0xffff, node->handleCount, (const void *)resource);
 }
 
-void effSetSurfaceRetainedResource(s32 *node, s32 resourceId) {
-    u8 *work = (u8 *)node;
-    if (((EffectSurfaceNode *)work)->resource != 0) {
-        billDispatchByKind(((EffectSurfaceNode *)work)->resource);
+void effSetSurfaceRetainedResource(EffectSurfaceNode *node, s32 resourceId) {
+    if (node->resource != 0) {
+        billDispatchByKind(node->resource);
     }
-    ((EffectSurfaceNode *)work)->resource = effCreateBillboardSharingIndexedResource(resourceId);
-    if (((EffectSurfaceNode *)work)->record != 0) {
-        billSetBillboardMode(((EffectSurfaceNode *)work)->resource, (s16)((FileKeyBlock *)((EffectSurfaceNode *)work)->record->data0)->alphaTrack.surfaceIndex);
-    }
-}
-
-void effReplaceSurfacePrimaryBillboard(s32 *object, s32 *settings) {
-    u8 *work = (u8 *)object;
-
-    if (((EffectSurfaceNode *)work)->resource != 0) {
-        billDispatchByKind(((EffectSurfaceNode *)work)->resource);
-    }
-    ((EffectSurfaceNode *)work)->resource = billCreateIndexed(0, (u32)settings);
-    if (((EffectSurfaceNode *)work)->record != 0) {
-        billSetBillboardMode(((EffectSurfaceNode *)work)->resource, (s16)((FileKeyBlock *)((EffectSurfaceNode *)work)->record->data0)->alphaTrack.surfaceIndex);
+    node->resource = effCreateBillboardSharingIndexedResource(resourceId);
+    if (node->record != 0) {
+        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
-void effReplaceSurfaceFlaggedBillboard(s32 *object, s32 *settings) {
-    u8 *work = (u8 *)object;
-
-    if (((EffectSurfaceNode *)work)->resource != 0) {
-        billDispatchByKind(((EffectSurfaceNode *)work)->resource);
+void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *object, s32 *settings) {
+    if (object->resource != 0) {
+        billDispatchByKind(object->resource);
     }
-    ((EffectSurfaceNode *)work)->resource = billCreateIndexed(1, (u32)settings);
-    billMarkKindOneFlag(((EffectSurfaceNode *)work)->resource);
-    if (((EffectSurfaceNode *)work)->record != 0) {
-        billSetBillboardMode(((EffectSurfaceNode *)work)->resource, (s16)((FileKeyBlock *)((EffectSurfaceNode *)work)->record->data0)->alphaTrack.surfaceIndex);
+    object->resource = billCreateIndexed(0, (u32)settings);
+    if (object->record != 0) {
+        billSetBillboardMode(object->resource, (s16)((FileKeyBlock *)object->record->data0)->alphaTrack.surfaceIndex);
+    }
+}
+
+void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *object, s32 *settings) {
+    if (object->resource != 0) {
+        billDispatchByKind(object->resource);
+    }
+    object->resource = billCreateIndexed(1, (u32)settings);
+    billMarkKindOneFlag(object->resource);
+    if (object->record != 0) {
+        billSetBillboardMode(object->resource, (s16)((FileKeyBlock *)object->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5318,14 +5313,14 @@ void effSurfaceNodeCreateQueues(EffectSurfaceNode *node, void *source) {
     }
 }
 
-void effReplaceSurfaceResourceHolder(s32 node, u32 resource) {
+void effReplaceSurfaceResourceHolder(EffectSurfaceNode *node, u32 resource) {
     struct EffExpandedList *holder;
 
-    if (((EffectSurfaceNode *)node)->resourceHolder != 0) {
-        effReleaseReferenceHolder(((EffectSurfaceNode *)node)->resourceHolder);
+    if (node->resourceHolder != 0) {
+        effReleaseReferenceHolder(node->resourceHolder);
     }
     holder = effCreateTextureAnimationSet(resource);
-    ((EffectSurfaceNode *)node)->resourceHolder = holder;
+    node->resourceHolder = holder;
 }
 
 void effClearSurfaceNodeRecordReferences(s32 node) {
@@ -10857,7 +10852,7 @@ u32 *effAllocateSurfaceNodeSlot(u32 owner) {
 u32 *effCreateConfiguredSurfaceNodeWork(s32 source, u16 kind, s32 *settings) {
     u32 *work = effAllocateSurfaceNodeSlot(source);
     *work = effCreateSurfaceNodeFromPayload(7, source);
-    effConfigureSurfaceNodeByKind((s32 *)*work, kind, settings);
+    effConfigureSurfaceNodeByKind((EffectSurfaceNode *)*work, kind, settings);
     return work;
 }
 
@@ -11609,7 +11604,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     farZ = length - pivotLength;
     texSplit = pivotLength / length;
     D_004584C0.positions = (u128 *)positions;
-    D_004584C0.texcoords = (u32 *)texcoords;
+    D_004584C0.texcoords = texcoords[0];
     positions[0][0] = left;
     positions[0][1] = -1.0f;
     positions[0][2] = nearZ;

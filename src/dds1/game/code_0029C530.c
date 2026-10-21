@@ -4772,7 +4772,7 @@ EffectSurfaceNode *effResourceReferenceReplaceFromFile(FileJobPayload *work) {
 
 extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
 
-extern void effReplaceSurfaceResourceHolder(s32 node, u32 resource);
+extern void effReplaceSurfaceResourceHolder(EffectSurfaceNode *node, u32 resource);
 
 void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId);
 void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId);
@@ -4803,7 +4803,7 @@ EffectSurfaceNode *effInitializeSurfaceForKind(FileJobPayload *work) {
     case 6:
         break;
     case 7:
-        effReplaceSurfaceResourceHolder((s32)node, (u32)secondary);
+        effReplaceSurfaceResourceHolder(node, (u32)secondary);
         break;
     }
     node->kind = work->primary.selector;
@@ -5010,14 +5010,14 @@ void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
     }
 }
 
-void effReplaceSurfaceResourceHolder(s32 node, u32 resource) {
+void effReplaceSurfaceResourceHolder(EffectSurfaceNode *node, u32 resource) {
     struct EffExpandedList *holder;
 
-    if (((EffectSurfaceNode *)node)->resourceHolder != 0) {
-        effReleaseReferenceHolder(((EffectSurfaceNode *)node)->resourceHolder);
+    if (node->resourceHolder != 0) {
+        effReleaseReferenceHolder(node->resourceHolder);
     }
     holder = effCreateTextureAnimationSet(resource);
-    ((EffectSurfaceNode *)node)->resourceHolder = holder;
+    node->resourceHolder = holder;
 }
 
 void effClearSurfaceNodeRecordReferences(s32 node) {
