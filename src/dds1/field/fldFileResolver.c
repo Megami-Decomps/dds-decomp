@@ -1688,7 +1688,7 @@ extern char D_003BACA0[];
 
 extern char D_003BACA8[];
 
-extern FieldPlayerSceneWork D_0032F1A0;
+extern FieldPlayerSceneWork fldPlayerSceneWork;
 
 extern void fldAllocateBackgroundBuffer(void);
 
@@ -1713,7 +1713,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     void *roomData;
     FldTransferChunk *chunk;
     struct FileRequest *request;
-    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
+    FieldPlayerSceneWork *sceneWork = &fldPlayerSceneWork;
     s32 area;
     s32 room;
     s32 isField;

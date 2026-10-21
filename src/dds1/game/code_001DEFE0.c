@@ -9792,7 +9792,7 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
     s32 selection = 0;
 
     if (adjustmentIndex != 0) {
-        selection = D_003BAA3C[adjustmentIndex].streamSelection;
+        selection = datBattleAdjustmentRecords[adjustmentIndex].streamSelection;
     }
     if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
         selection = datBattleSceneRecords[sceneIndex].unk24;

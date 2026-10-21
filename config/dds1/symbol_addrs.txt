@@ -34,6 +34,9 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+fldStageCoordinateRecords = 0x0032DDB0;
+fldPlayerSceneWork = 0x0032F1A0;
+datBattleAdjustmentRecords = 0x003BAA3C;
 sceSifLoadStartModule = 0x00312618; // type:func
 sceSifSyncIop = 0x00312AC0; // type:func
 sceFsInit = 0x0030E620; // type:func

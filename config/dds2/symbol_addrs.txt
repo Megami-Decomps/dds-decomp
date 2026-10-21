@@ -28,6 +28,8 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+fldStageCoordinateRecords = 0x00389170;
+fldPlayerSceneWork = 0x0038A640;
 sceSifLoadStartModule = 0x0036D880; // type:func
 sceSifSyncIop = 0x0036DD28; // type:func
 sceSync = 0x0036BCD0; // type:func

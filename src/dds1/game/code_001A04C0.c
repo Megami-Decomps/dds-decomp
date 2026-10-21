@@ -595,9 +595,9 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
         btlRuntime->battleMode = (u16)encounter;
         btlBossDebugPrintf("enc[pack:%X,no:%X,index:%X,encNo:%X]\n", pack, (u8)(encounter >> 24), (u8)(encounter >> 16), (u16)encounter);
         if (pack > 0) {
-            paramA = D_003BAA3C[pack].encounterParamA;
+            paramA = datBattleAdjustmentRecords[pack].encounterParamA;
             btlRuntime->encounterParamA = paramA;
-            paramB = D_003BAA3C[pack].encounterParamB;
+            paramB = datBattleAdjustmentRecords[pack].encounterParamB;
             btlRuntime->encounterParamB = paramB;
             evtPrintDeveloperConsoleMessage("Pack:0x%X Maj:%d Min:%d\n", pack, (s16)paramA, (s16)paramB);
             if (btlRuntime->encounterParamA == 0 && btlRuntime->encounterParamB == 0) {
