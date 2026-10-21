@@ -15234,7 +15234,8 @@ from both `newdata/datCalc.c` providers; no implicit integer return is retained.
 
 ## Consumed name epochs: local string HIGHs also preserve the reload ring
 
-DDS2 `func_00140BC8` (`0x00140BC8`, 1580 bytes) finishes actor-name lookup
+DDS2 `fldApplyCurrentTaskScene` (`0x00140BC8`, 1580 bytes) resolves the
+enabled actor waypoint selected by task scene name (or scene state eight)
 before constructing its elevator request. The matching C then gives the
 two consumed text pointers their request roles: `entryName` receives
 `"01pos_01"` and `name` receives `"elvstart_label"`, and both are passed to
@@ -15251,7 +15252,7 @@ This is not instruction-count inflation: even the revised loop count
 would still admit the old life-7 HIGH.
 
 Qualified commands use `tools/cc1probe.sh` with `--as-unit
-src/dds2/game/code_0013B818.c --version dds2 --func func_00140BC8`.
+src/dds2/game/code_0013B818.c --version dds2 --func fldApplyCurrentTaskScene`.
 The old `probe_renewed_dds2_reload` capture (`--reload --sched`) shows the
 HIGH/ring dependency at `decisions.log:1326-1335`. The matching
 `probe_renewed_exact_name_epochs` capture (`--cse --alloc --reload`) shows
