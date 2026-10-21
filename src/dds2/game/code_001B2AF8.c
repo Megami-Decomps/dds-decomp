@@ -6536,7 +6536,7 @@ extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const char D_00436818[];
 
-extern void func_001C7020(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 bank, s16 alpha, s32 x, s32 y);
+extern void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 bank, s16 alpha, s32 x, s32 y);
 
 s32 func_001C1F10(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -6571,7 +6571,7 @@ s32 func_001C1F10(KwlnTask *task) {
             btlDrawActorPanelHighlights(unit, work, slot, 0);
             btlWriteTriangleHighlightPulse(unit, work, slot);
             btlDrawActorPanelTransitionTriangles(unit, work, slot);
-            func_001C7020(unit, work, slot, 0, work->activeEntries[slot].presentation.fade,
+            btlDrawActorPanelEntry(unit, work, slot, 0, work->activeEntries[slot].presentation.fade,
                           work->activeEntries[slot].position[0], work->activeEntries[slot].position[1]);
             btlUpdateActorVitalChangeEffects(unit, work, slot);
             btlTrackActorVitalChanges(unit, work, slot, 0);
@@ -7008,7 +7008,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
             btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
             btlUpdateActorPanelHighlights(unit, work, i, 1);
             btlDrawActorPanelHighlights(unit, work, i, 1);
-            func_001C7020(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
+            btlDrawActorPanelEntry(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
                           work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
 
             if (work->reserveEntries[i].presentation.fade >= 0x80) {
@@ -8377,7 +8377,7 @@ extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIconFixed64(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIcon(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
-void func_001C7020(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
+void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
                    s8 bank, s16 alpha, s32 x, s32 y) {
     BattleHudOffsets offsets = {{{10, 43}, {51, 47}, {23, 62}, {54, 49}, {26, 64}}};
     BattleHudSprites sprites = D_00416920;

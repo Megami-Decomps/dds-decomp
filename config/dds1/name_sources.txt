@@ -9907,3 +9907,4 @@
 0x001BD750	btlHandleBattleCommandPanelInput	inferred	Processes command-panel confirmation, cancellation, navigation, and follow-on selection flows. Paired DDS2 0x001C8A80; title-specific command eligibility remains distinct.
 0x001BEB58	btlDrawLinkageSkillOptions	inferred	Renders linkage-skill option rows with availability feedback, combined command power, slot-cost icons, and cost-mode indicators. Paired DDS2 0x001C9EA0; title-specific option-count and cost helpers differ.
 0x001BC540	btlDrawActorVitalGauge	inferred	Crops and draws an actor HP/MP gauge, including an optional current-value trail and fading copies, then restores shared sprite geometry. Paired DDS2 0x001C7760; DDS2 additionally clamps its displayed fill ratio.
+0x001BBE18	btlDrawActorPanelEntry	inferred	Draws an active or reserve actor's panel entry, including its sprites, status indicators, and HP/MP gauges. Paired DDS2 0x001C7020.
