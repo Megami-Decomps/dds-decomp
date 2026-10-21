@@ -3002,6 +3002,8 @@ void func_0014B0F8(void) {
             progress -= 0.1f;
             if (progress < 0.0f) {
                 progress = 0.0f;
+                /* Retail 0x0014B198 bc1tl .L0014B1F0: the clamp store has one entry
+                 * and falls into interpolate. */
                 goto storeClampedProgress;
             }
             D_0043627C = progress;
@@ -3030,6 +3032,8 @@ void func_0014B0F8(void) {
         progress = D_0043627C;
         break;
     }
+    /* Retail 0x0014B1A0 b .L0014B1F4: interpolate is shared by six
+     * branches and the store block fall-through. */
     goto interpolate;
 storeClampedProgress:
     D_0043627C = progress;

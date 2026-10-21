@@ -5503,6 +5503,9 @@ s32 mnuDrawMantraPanelBTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPoo
                 activePulsePhase = (120 - panel->frame) / 30.0f;
             } else {
                 accentPulse = 0.0f;
+                /* Retail 0x0027EA80 beql .L0027EAB0 (delay slot sets accentPulse):
+                 * the join is also entered from the bnez at 0x0027EA58 and by
+                 * fall-through from 0x0027EAAC. */
                 goto accent_pulse_ready;
             }
             accentPulse = activePulsePhase;

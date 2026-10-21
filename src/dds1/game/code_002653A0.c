@@ -383,9 +383,13 @@ void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit) {
             if (total >= 100) {
                 if (overCapCount == 0) {
                     overflow = total - 99;
+                    /* Retail 0x00265DD0 b .L00265DE0: cap_gain is also entered by
+                     * fall-through from the bnel at 0x00265DD8. */
                     goto cap_gain;
                 }
                 if (eligibleCount != 0) {
+                    /* Retail 0x00265DD8 bnel .L00265DF0: counted is also entered by
+                     * fall-through from cap_gain at 0x00265DEC. */
                     goto counted;
                 }
 cap_gain:
