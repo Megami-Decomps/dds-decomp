@@ -3,8 +3,8 @@
 #include "mnu_list.h"
 #include "prf_profile_cap.h"
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern DatProfileRecord *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 struct MantraPanelAnimation;
 extern struct MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);

@@ -26,6 +26,7 @@ extern void memset();
 #include "fr_font.h"
 #include "dat_state.h"
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "prf_profile_cap.h"
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
@@ -168,7 +169,6 @@ extern u8 D_0045C828[];
 
 
 
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
 
 

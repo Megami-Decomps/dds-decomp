@@ -347,11 +347,11 @@ void mtrRefreshMantraStateForUnit7(void) {
 }
 
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern struct MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
 
 void mtrSynchronizeMantraFlagsAcrossParty(void) {

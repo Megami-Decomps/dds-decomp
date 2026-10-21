@@ -105,7 +105,6 @@ typedef struct MantraMenu {
     u8 pad00[0x240];
     MantraMenuWork work;
 } MantraMenu;
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern DatPartyRecord *mnuGetSelectedNodeValue(u8 *);
 extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);
