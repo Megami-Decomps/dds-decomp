@@ -6,6 +6,7 @@
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
+#include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -119,7 +120,6 @@ typedef struct BtlActiveSlot {
 } BtlActiveSlot;
 
 
-extern void btlRaisePartyRecordStatusValue(void *, s32);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
@@ -1428,7 +1428,7 @@ u32 btlApplyDeferredUnitStatus(void *taskArgs) {
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, taskData[1]);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord, taskData[1]);
     btlRefreshUnitMotionSelection(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
@@ -1457,7 +1457,7 @@ s32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     }
     if (datCommandRecords[args->category].flags & 8) {
         btlAdjustUnitHp(&unit->partyRecord, -0x7FFF);
-    btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, 0x4000);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord, 0x4000);
         unit->status.flags |= 0x20;
     }
     if (args->amount == 0) {
@@ -1788,7 +1788,7 @@ u32 btlRefreshEligibleActors(void) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->status.stateFlags & 8) == 0) {
                                 u16 prior = unit->partyRecord.status;
-                                btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, 1);
+                                btlRaisePartyRecordStatusValue(&unit->partyRecord, 1);
                                 btlRefreshUnitMotionSelection(unit);
                                 if (unit->partyRecord.status == 1 && prior != unit->partyRecord.status) {
                                     unit->status.stateFlags |= 4;
