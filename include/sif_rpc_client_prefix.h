@@ -34,10 +34,6 @@ typedef void (*SifMRpcEnd)(void *argument);
 s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
 s32 sceSifMCallRpc(SifRpcClientDataPrefix *client, s32 function, s32 mode, void *send, s32 sendSize,
                    void *receive, s32 receiveSize, SifMRpcEnd end, void *endArgument);
-#if defined(VERSION_DDS1)
-void func_002F4A38(s32 mode);
-#elif defined(VERSION_DDS2)
-void func_0034D8E0(s32 mode);
-#endif
+void sceSifMInitRpc(s32 mode);
 
 #endif

@@ -28,6 +28,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sceSifMInitRpc = 0x0034D8E0; // type:func
 sceCdPOffCallback = 0x0034C270; // type:func
 sceCdInit = 0x0034CB60; // type:func
 sceCdDiskReady = 0x0034CE40; // type:func
@@ -11541,7 +11542,6 @@ func_0034D688 = 0x0034D688; // type:func
 sceCdStResume = 0x0034D6D8; // type:func
 func_0034D730 = 0x0034D730; // type:func
 sceCdStream = 0x0034D778; // type:func
-func_0034D8E0 = 0x0034D8E0; // type:func
 func_0034D9A8 = 0x0034D9A8; // type:func
 func_0034D9B8 = 0x0034D9B8; // type:func
 func_0034DA60 = 0x0034DA60; // type:func
