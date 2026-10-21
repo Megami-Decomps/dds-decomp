@@ -139,7 +139,7 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
 
             destinationNode->flags = sourceNode->flags;
             destinationNode->color = sourceNode->color;
-            destinationNode->unk16 = sourceNode->unk16;
+            destinationNode->drawFlagMask = sourceNode->drawFlagMask;
             PCP_COPY_VECTOR(destinationNode->quaternion, sourceNode->quaternion);
             PCP_COPY_VECTOR(destinationNode->translation, sourceNode->translation);
             PCP_COPY_VECTOR(destinationNode->scale, sourceNode->scale);
