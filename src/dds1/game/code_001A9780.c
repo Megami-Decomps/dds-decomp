@@ -3806,7 +3806,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2928);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2938);
 
-void func_001B1C88(BattlePhasePanelWork *work) {
+void btlUpdatePhasePanelSecondaryAnimation(BattlePhasePanelWork *work) {
     s32 modeOneSlots[2];
     s32 modeZeroSlots[2];
     s32 modeOneBounds[2][2];
@@ -3925,7 +3925,7 @@ extern const s32 D_003A2978[4];
 extern const s32 D_003A2988[4];
 extern s32 btlDrawGouraudTexturedPanelQuad(s32, s32, s32, s32, s32, s32, s32, s32,
                                          s32, s32, s32, s32, const s32 *, SdfTex *);
-void func_001B2390(BattlePhasePanelWork *work) {
+void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
     f32 bounds[4];
     s32 modeOneSlots[4];
     s32 modeZeroSlots[4];
@@ -4058,9 +4058,9 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001B19F8(state);
     }
-    func_001B1C88(state);
+    btlUpdatePhasePanelSecondaryAnimation(state);
     if (btlTrackedTaskHandles->phaseGate == 0) {
-        func_001B2390(state);
+        btlDrawPhaseChangePanelEchoes(state);
     }
     ++state->frames;
     return state->frames < 50 ? 0 : -1;
