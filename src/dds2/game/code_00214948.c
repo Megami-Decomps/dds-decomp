@@ -4599,8 +4599,8 @@ f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     return scale;
 }
 
-/* Native caller 0x21F8B8 passes zero; this provider does not use arguments. */
-BtlUnit *btlFindUnitByMode() {
+/* Selects the marked unit matching target mode; the callback actor is unused. */
+BtlUnit *btlFindUnitByMode(BtlUnit *unusedActor) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BattleSub *sub = work->sub;
     BtlUnit *unit;

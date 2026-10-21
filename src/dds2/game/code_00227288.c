@@ -1463,7 +1463,7 @@ extern s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit);
 extern s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle);
 extern s32 btlFilterActionByUnitFlags(BtlUnit *unit, s32 action);
 extern s32 btlFilterRestrictedCommand(BtlUnit *battler, s32 command);
-extern BtlUnit *btlFindUnitByMode(void);
+extern BtlUnit *btlFindUnitByMode(BtlUnit *unusedActor);
 extern s32 btlFlagAbadonHpMpTrigger(s32 unit, s32 unused, s32 action);
 extern u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action);
 extern void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer);
