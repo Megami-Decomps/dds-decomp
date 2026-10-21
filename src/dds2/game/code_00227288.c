@@ -11,6 +11,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_find_actor_for_owner_api.h"
 #include "btl_unit_tasks.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
@@ -426,7 +427,6 @@ void btlUpdateLinkedActorGroundHeight(void) {
     }
 }
 
-extern BtlUnit *btlFindActorForOwner(u64);
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 extern void btlBeginEffectActorFadeOut(void);
 

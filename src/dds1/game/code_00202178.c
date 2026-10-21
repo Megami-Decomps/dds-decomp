@@ -23,6 +23,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "btl_action.h"
+#include "btl_find_actor_for_owner_api.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
 #include "btl_unit_tasks.h"
@@ -2097,7 +2098,6 @@ void btlUpdateRahuEffectActorHeights(void) {
     }
 }
 
-extern BtlUnit *btlFindActorForOwner(s64);
 extern void fldAppendSceneGroupHandle(void *);
 
 /* Rahu turn hook. While linked (active 1), a lone surviving head gets the 0x11
