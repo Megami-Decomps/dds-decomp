@@ -57,7 +57,7 @@ typedef struct SdfThreadNode SdfThreadNode;
 
 extern void __main(void);
 extern void sdfInitDeviceSemaphores(void);
-extern s32 func_00312AC0(void);
+extern s32 sceSifSyncIop(void);
 extern void sceCdInit(s32);
 extern void sceCdMmode(u32);
 extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
@@ -92,7 +92,7 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     sdfInitDeviceSemaphores();
     while (sceSifRebootIop(D_0039DF28) == 0) {
     }
-    while (func_00312AC0() == 0) {
+    while (sceSifSyncIop() == 0) {
     }
     sceSifInitRpc(0);
     sceSifInitIopHeap();
