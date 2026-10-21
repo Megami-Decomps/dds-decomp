@@ -8115,7 +8115,7 @@ extern void func_001BDF60(BattleSceneObject *, u16, u16, u16);
 
 void func_001BE590(BattleSceneObject *object);
 
-void func_001BEB58(BattleSceneObject *object);
+void btlDrawLinkageSkillOptions(BattleSceneObject *object);
 
 void btlDrawCommandClassRows(s32 sceneContext) {
     switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
@@ -8123,7 +8123,7 @@ void btlDrawCommandClassRows(s32 sceneContext) {
         func_001BDF60((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
-        func_001BEB58((BattleSceneObject *)sceneContext);
+        btlDrawLinkageSkillOptions((BattleSceneObject *)sceneContext);
         return;
     case 2:
         btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
@@ -8423,7 +8423,7 @@ static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
     colors->values[3] = color;
 }
 
-void func_001BEB58(BattleSceneObject *object) {
+void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     char text[16];
     BattlePanelColors colors = D_003A2EA0;
     u16 count;

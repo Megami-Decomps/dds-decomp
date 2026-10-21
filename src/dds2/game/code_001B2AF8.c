@@ -9271,7 +9271,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
 
 extern void func_001C92A0(BattleSceneObject *, u16, u16, u16);
 
-extern void func_001C9EA0(s32);
+extern void btlDrawLinkageSkillOptions(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
@@ -9285,7 +9285,7 @@ void btlDrawCommandClassRows(s32 sceneContext) {
         func_001C92A0((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
-        func_001C9EA0(sceneContext);
+        btlDrawLinkageSkillOptions(sceneContext);
         return;
     case 2:
         btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
@@ -9690,7 +9690,7 @@ static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
 
 extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
-void func_001C9EA0(s32 sceneContext) {
+void btlDrawLinkageSkillOptions(s32 sceneContext) {
     BattleSceneObject *object = (BattleSceneObject *)sceneContext;
     char text[16];
     BattlePanelColors colors = D_00416A10;
