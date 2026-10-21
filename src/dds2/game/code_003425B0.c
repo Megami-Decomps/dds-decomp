@@ -1933,7 +1933,7 @@ typedef struct SdfMovieDrawPacket {
     SdfGsRegisterWrite vertexExtent;
 } SdfMovieDrawPacket;
 
-void func_00345BA0(MovObj *movie, SdfPoolNode *pool) {
+void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
     SdfMovieDrawPacket *packet;
     SdfListHead *list;
     u16 width;

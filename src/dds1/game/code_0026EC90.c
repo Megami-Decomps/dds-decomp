@@ -41,7 +41,7 @@ extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void mnuInitializeMovieRollEntry(void);
 extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
-extern void func_002ECCF8(MovObj *, SdfPoolNode *);
+extern void sdfMovieDrawFrame(MovObj *, SdfPoolNode *);
 
 /* Three signed image-relative control points per movie image bank. */
 typedef struct StaffImageCorners {
@@ -511,7 +511,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(KwlnTask *task) {
-    func_002ECCF8(&mnuMovieDrawContext, &D_003253C8);
+    sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003253C8);
     return 0;
 }
 

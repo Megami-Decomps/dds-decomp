@@ -1915,7 +1915,7 @@ typedef struct SdfMovieDrawPacket {
     SdfGsRegisterWrite vertexExtent;
 } SdfMovieDrawPacket;
 
-void func_002ECCF8(MovObj *movie, SdfPoolNode *pool) {
+void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
     SdfMovieDrawPacket *packet;
     SdfListHead *list;
     u16 width;
