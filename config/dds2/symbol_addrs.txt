@@ -28,6 +28,8 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sceGsPutIMR = 0x0034A138; // type:func
+sceGsGetIMR = 0x0034A178; // type:func
 btlAverageActorAttribute = 0x001B3B10; // type:func
 frFontSubmitAtlasSetupPackets = 0x0019E918; // type:func
 evtViewCmdSetObjectTarget = 0x0024CE18; // type:func
@@ -11458,8 +11460,6 @@ sceGsSyncPath = 0x003492E8; // type:func
 sceGsSetDefLoadImage = 0x00349600; // type:func
 sceGsSetDefStoreImage = 0x003497E8; // type:func
 sceGsExecLoadImage = 0x00349928; // type:func
-func_0034A138 = 0x0034A138; // type:func
-func_0034A178 = 0x0034A178; // type:func
 func_0034A198 = 0x0034A198; // type:func
 func_0034A208 = 0x0034A208; // type:func
 func_0034A290 = 0x0034A290; // type:func

@@ -7186,6 +7186,8 @@
 0x002EFD30	sdfInstallPoolNodeReleaseCallbacks	inferred	Registers release and recycling callbacks on a pool work item. [names_reviewed10.tsv]
 0x002F0034	sceGsDefDispEnv	evidence	string "sceGsDefDispEnv:Not support displaymode for 0x%x!!" (Sony libgraph)
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
+0x002F1290	sceGsPutIMR	inferred	libgraph sceGsPutIMR: reads the previous GS interrupt mask with GsGetIMR, installs the new mask with GsPutIMR and returns the previous value. DDS2 twin 0x0034A138.
+0x002F12D0	sceGsGetIMR	inferred	libgraph sceGsGetIMR: returns the GS interrupt mask read through the GsGetIMR kernel call. DDS2 twin 0x0034A178.
 0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)
 0x002F61D8	sceMcOpen	inferred	Starts an asynchronous open for a path on the selected memory card; callers pass port, slot, path and open flags. DDS2 counterpart is 0x0034EFE0.
 0x002F6338	mcQueueCloseRequest	inferred	Queues memory-card command 3 for the close operation; DDS2 twin 0x0034F150.
