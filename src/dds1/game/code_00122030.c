@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "scr.h"
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
 #include "fld_area_encounter_table.h"
@@ -107,7 +108,6 @@ extern char D_0039FCC8[];
 extern void fldDispatchSceneAction(u32 action);
 
 
-extern struct ScrData *scrFindNamedProcessNode(char *name);
 
 
 

@@ -101,7 +101,6 @@ extern s32 D_004361F8;
 
 extern u32 D_0038BD50[];
 
-extern ScrData *scrFindNamedProcessNode(char *name);
 
 extern s32 fldTaskSlotCount;
 
@@ -627,7 +626,7 @@ s32 fldRestartSceneResourceTask(void) {
     D_00387D60[0] = 0;
     D_00435F24 = 0;
     object = fldSelectCurrentActorOnNextFloor();
-    if (scrFindNamedProcessNode((char *)object) == 0) {
+    if (scrFindNamedProcessNode((const char *)object) == 0) {
         evtStartSceneResourceTask(dds3GetWorldObject(), object);
     }
     return 1;

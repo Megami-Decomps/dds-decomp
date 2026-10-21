@@ -294,7 +294,6 @@ extern s32 D_003BADF8;
 
 extern s32 D_003BADEC;
 
-extern ScrData *scrFindNamedProcessNode(char *name);
 
 extern struct SdfMemBlock *fldAreaCachedResource;
 
@@ -931,7 +930,7 @@ s32 fldRestartSceneResourceTask(void) {
     D_0032C9A0[0] = 0;
     D_003BAB3C = 0;
     object = fldSelectCurrentActorOnNextFloor();
-    if (scrFindNamedProcessNode((char *)object) == 0) {
+    if (scrFindNamedProcessNode((const char *)object) == 0) {
         evtStartSceneResourceTask(dds3GetWorldObject(), (const char *)object);
     }
     return 1;
