@@ -32,7 +32,7 @@ extern void frFontFreeAllEntries(void);
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
 
-extern void fmGslReleaseActiveResourceBuffers(void);
+extern s32 fmGslReleaseActiveResourceBuffers(void);
 
 
 extern u32 frFontSlotLoadedFlags[];

@@ -27,7 +27,7 @@ extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 extern u32 frFontSlotLoadedFlags[];
 extern void frFontFreeAllEntries(void);
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
-extern void fmGslReleaseActiveResourceBuffers(void);
+extern s32 fmGslReleaseActiveResourceBuffers(void);
 
 /* Insert after the list's fixed anchor and update the entry count. */
 void frFontListInsert(FntNode *node) {
