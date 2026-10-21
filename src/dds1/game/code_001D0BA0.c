@@ -100,7 +100,7 @@ typedef struct BtlRotationTaskArgs BtlRotationTaskArgs;
 
 extern s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *);
 
-extern u64 btlAdvanceRuntimeSequenceCounter();
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 

@@ -49,7 +49,7 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
-extern u64 btlAdvanceRuntimeSequenceCounter();
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern void btlUpdateScene(void);
 extern void btlUpdateBattleCameraFrame(void);
