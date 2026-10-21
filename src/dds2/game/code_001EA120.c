@@ -87,13 +87,6 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
-typedef struct {
-    u8 unk00[0x110];
-    u32 flags;
-    u8 unk114[0x10];
-    u16 objectId;
-} BattleEntryHeader;
-
 extern char D_00436A28[];
 
 extern u32 D_00436A98;

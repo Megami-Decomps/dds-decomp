@@ -3269,13 +3269,6 @@ void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale) {
     }
 }
 
-typedef struct {
-    u8 unk00[0x110];
-    u32 flags;
-    u8 unk114[0x10];
-    u16 objectId;
-} BattleEntryHeader;
-
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004179E0);
 
 s32 btlClassifySpecialEntryObject(BtlUnit *entry) {

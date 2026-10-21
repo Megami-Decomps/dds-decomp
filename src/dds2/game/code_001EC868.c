@@ -315,13 +315,6 @@ extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern s32 btlAimHorizontalDirectionClampedVU(f32 *, f32 *, f32);
 
-typedef struct {
-    u8 unk00[0x110];
-    u32 flags;
-    u8 unk114[0x10];
-    u16 objectId;
-} BattleEntryHeader;
-
 
 extern void effBattleUpdate(BattleEffect *);
 
