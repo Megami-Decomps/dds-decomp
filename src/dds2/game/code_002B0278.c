@@ -13,6 +13,7 @@
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
 #include "mnu.h"
+#include "mnu_party_menu_data.h"
 #include "brs_level_progress_api.h"
 #include "mnu_panel_state.h"
 #include "sdf_resource.h"
@@ -292,28 +293,6 @@ typedef struct MenuContext {
 
 typedef struct MenuListNode MenuListNode;
 
-
-
-/* One allocated party-selection work area: original/current/backup entries,
- * saved panel payloads, and fade state all belong to this same allocation. */
-typedef struct PartyMenuData {
-    struct SdfMemBlock *allocation;
-    u8 pad04[4];
-    MenuWindowContainer *primaryWindow; /* 0x08 */
-    DatPartyRecord original[5];         /* 0x0C */
-    DatPartyRecord current[5];          /* 0x8E0 */
-    s32 activeCount;                    /* 0x11B4 */
-    DatPartyRecord backup[5];           /* 0x11B8 */
-    s32 selection;                      /* 0x1A8C */
-    MenuPageBar panelSnapshots[5][2]; /* 0x1A90: paired HP/MP snapshots */
-    s32 fadeA;                 /* 0x1DB0 */
-    s32 fadeB;                 /* 0x1DB4 */
-    s32 previousSelection;
-    s32 profileSaved;
-    s32 profilePhase;
-    u32 profileWords[5];
-    s32 freezePanel; /* 0x1DD8: set on transition; skips the panel update */
-} PartyMenuData; /* 0x1DDC: native party-selection allocation */
 
 
 /* Native selection-state allocation is 0x30 bytes, distinct from item state. */
