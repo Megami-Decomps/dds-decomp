@@ -9906,3 +9906,4 @@
 0x001FEC00	btlMeasureSideFilteredActorBounds	inferred	Measures filtered active actor bounds with the same optional unit and line filters plus a side-retention policy; writes optional height extrema and returns framing radius. DDS1 twin 0x001EE160.
 0x001B9C70	btlUpdateAnalysisPanelWindowGeometry	inferred	Updates the analysis panel anchor and corners through its opening, inset, and expansion phases.
 0x001BA1E8	btlDrawAnalysisPanelSilhouette	inferred	Builds the analysis panel edge color ramp and submits its silhouette geometry.
+0x001FBAC0	btlUpdateCameraCursorPose	inferred	Updates the battle camera pose from the active camera cursor across its supported cursor kinds.

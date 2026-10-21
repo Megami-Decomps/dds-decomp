@@ -476,7 +476,7 @@ extern s32 D_003BC0C8[];
 extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
+extern void btlUpdateCameraCursorPose(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
