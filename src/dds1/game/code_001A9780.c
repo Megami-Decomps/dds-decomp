@@ -3,6 +3,7 @@
 #include "btl_analysis_panel_work.h"
 #include "btl_selection_trail_work.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
 #include "fr_font_context.h"
 /* Declared before first use (were implicit int). */
@@ -8959,7 +8960,6 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
     }
 }
 
-extern s32 btlSetActorEffectParameter();
 extern s32 btlProjectForwardPositionToScreen(s32 *);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 

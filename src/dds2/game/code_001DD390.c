@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -118,7 +119,6 @@ typedef struct BtlActiveSlot {
 } BtlActiveSlot;
 
 
-extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 extern void btlRaisePartyRecordStatusValue(void *, s32);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);

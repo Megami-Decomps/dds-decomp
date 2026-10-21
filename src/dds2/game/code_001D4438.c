@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
@@ -367,7 +368,6 @@ extern u32 D_00436AD4;
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
-extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
 extern void mdlSetAmountOnAllContextResources(f32, s32);

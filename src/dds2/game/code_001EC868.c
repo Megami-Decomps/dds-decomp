@@ -7,6 +7,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_rain_effect_api.h"
@@ -152,7 +153,6 @@ extern u32 D_00436AD4;
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
-extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);

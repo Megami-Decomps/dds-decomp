@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_unit_fade_task_args.h"
 #include "btl_special_ability.h"
@@ -148,7 +149,6 @@ extern void btlDestroyUnit(u8 *);
 extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
 
-extern s32 btlSetActorEffectParameter();
 
 
 extern SoundTask *btlDeferredTaskTail;
