@@ -57,9 +57,6 @@ extern SdfMotionBindingDispatch D_0040B3C8;
 
 extern SdfMotionBindingDispatch D_0040B3E0;
 
-typedef SdfMotionTextParamSnapshot Blk;
-
-
 /* Release the allocation retained by this motion binding. */
 void sdfInvokeMotionObjectCallback(SdfMotionBindingHead *binding) {
     binding->dispatch->releaseStorage(binding);
@@ -817,9 +814,9 @@ void sdfMotionBlendFiveFloatKeys(SdfMotionIndexedTextBinding *binding, f32 frame
 
 /* Save the current primary text scalars for the blend callback. */
 void sdfMotionCapturePrimaryTextParams(SdfMotionIndexedTextBinding *binding) {
-    Blk *textParams;
+    SdfMotionTextParamSnapshot *textParams;
 
-    textParams = (Blk *)sdfEnsurePrimaryTextSubParam(binding->target);
+    textParams = (SdfMotionTextParamSnapshot *)sdfEnsurePrimaryTextSubParam(binding->target);
     binding->capture.snapshot = *textParams;
 }
 
@@ -853,9 +850,9 @@ void sdfMotionBlendSecondaryTextKeys(SdfMotionIndexedTextBinding *binding, f32 f
 
 /* Save the current secondary text scalars for the blend callback. */
 void sdfMotionCaptureSecondaryTextParams(SdfMotionIndexedTextBinding *binding) {
-    Blk *textParams;
+    SdfMotionTextParamSnapshot *textParams;
 
-    textParams = (Blk *)sdfEnsureSecondaryTextSubParam(binding->target);
+    textParams = (SdfMotionTextParamSnapshot *)sdfEnsureSecondaryTextSubParam(binding->target);
     binding->capture.snapshot = *textParams;
 }
 
