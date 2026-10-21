@@ -89,9 +89,9 @@ extern void evtDestroySelectionState(void);
 extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue);
 extern void fileReadRecordSecondVector(void *record, u128 *out);
 extern void fileReadVectorPtr20(void *record, u128 *out);
-extern void fileSetRecordSecondVector(void *record, const u128 *value);
+extern void fileSetRecordSecondVector(void *record, const void *src);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
-extern void mnuRecordSetVector(void *record, const u128 *value);
+extern void mnuRecordSetVector(void *record, const void *src);
 
 
 
