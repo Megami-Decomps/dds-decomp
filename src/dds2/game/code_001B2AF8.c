@@ -2,6 +2,7 @@
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_command_hint_work.h"
+#include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
 #include "evt_message_window_api.h"
@@ -5806,17 +5807,6 @@ s32 btlDestroyTaskC(void) {
     }
     return 0;
 }
-
-/* Shared with the battle message task creator, which clears 24 bytes. */
-typedef struct BtlTutorialDialogWork {
-    s8 phase;
-    u8 pad01[3];
-    s32 counter;
-    u16 alpha;
-    u8 pad0A[0xA];
-    s32 itemIndex;
-} BtlTutorialDialogWork;
-typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
 
 extern const BattlePanelColors D_00416650;
 extern u8 *D_00435E64;
