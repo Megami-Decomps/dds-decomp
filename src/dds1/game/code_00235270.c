@@ -507,8 +507,8 @@ extern const char *D_003AE0D8[];
 extern char D_003BC080[];
 extern char D_003BC088[];
 /* The camp provider owns the scene type (EvtRuntime); the viewer passes its runtime. */
-extern u32 mnuCampGetPrimaryOption(void *scene);
-extern u32 mnuCampGetSecondaryOption(void *scene);
+extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
+extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 
 /* Draw a project-menu command, including its current toggle/skip option. */
 void evtDrawProjectCommandRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
