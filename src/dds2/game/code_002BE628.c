@@ -646,8 +646,7 @@ extern const s32 D_0042B108[];
 extern const s32 D_0042B118[];
 extern const s32 D_00437C60[];
 extern char D_00437C68[];
-struct MenuPageSpriteSlot;
-extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
+extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, MenuPageSlot *, s32, s32, s32);
 extern void mnuDrawPartyCommandPage(s32, s32, s32, s32, MenuSprites *, s32);
 extern void mnuDrawPartyProfileAndExpOverlay(s32, s32, s32, MenuPageSlot *, s32, u32, s32);
 extern s32 mnuClearWindowPendingFlagAfterSelection();
@@ -684,7 +683,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     if (panel->panelResourceHandles[0] != NULL && (panel->flags & 0x40) != 0) {
         effDrawTextureSlotWithBlendedCornerColors(iconX, iconY, z,
                       0x40, 1, panel->icon[0], 0, surface);
-        mnuDrawMenuPageSpriteLayers(x, y, z, (struct MenuPageSpriteSlot *)panel,
+        mnuDrawMenuPageSpriteLayers(x, y, z, panel,
                       panelIndex, 0, surface);
         return;
     }
@@ -787,8 +786,6 @@ extern const s32 D_0042B130[4];
 extern const s32 D_0042B140[4];
 extern const s32 D_00437C70[];
 extern char D_00437C68[]; /* "%2d", shared with mnuDrawPartyMemberCommandPanel. */
-struct MenuPageSpriteSlot;
-extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
 extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
 /* Both native page renderers also forward the surface word; the
  * selection helper consumes only its first five arguments. */
@@ -829,7 +826,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     iconX = x + positions[0];
     iconY = y + positions[1];
     if (panel->panelResourceHandles[0] != 0 && (panel->flags & 0x40)) {
-        mnuDrawMenuPageSpriteLayers(x, y, z, (struct MenuPageSpriteSlot *)panel,
+        mnuDrawMenuPageSpriteLayers(x, y, z, panel,
                       panelIndex, 1, surface);
         return;
     }
