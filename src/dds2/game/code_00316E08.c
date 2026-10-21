@@ -44,18 +44,6 @@ typedef struct MnuSectionObjectList {
 } MnuSectionObjectList;
 
 
-/* Package entries are walked through their first-word link by the loader. */
-typedef struct MnuPackageEntry {
-    struct MnuPackageEntry *next;
-    u8 pad04[4];
-    SdfMemBlock *allocation;
-    s32 unk0C;
-    u8 kind;
-    u8 pad11;
-    u16 unk12;
-    u8 pad14[8];
-    s32 unk1C;
-} MnuPackageEntry;
 
 
 extern MenuWorkEntry D_0040ABF8;
@@ -263,7 +251,7 @@ extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
 #include "sdf_debug_api.h"
 extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data);
-void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
+void mdlLoadViewerPackageFromWork(PacWork *entry);
 
 /* Advance the shooting package loader; only the completed state returns one. */
 s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
@@ -509,7 +497,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
 
             while (entry != NULL) {
                 if (entry->packet[0] == 1) {
-                    mdlLoadViewerPackageFromWork((MnuPackageEntry *)entry);
+                    mdlLoadViewerPackageFromWork(entry);
                     sdfMemFreeDirect((SdfMemBlock *)entry->resourceHandle);
                 }
                 entry = entry->next;
@@ -545,9 +533,13 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
 }
 
 
-/* Forward the stored package-request words without interpreting their roles. */
-void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry) {
-    mdlLoadViewerPackage(5, entry->unk12, 0x101, entry->unk0C, entry->unk1C);
+/* Read the inline packet header, then forward its request through the legacy ABI. */
+void mdlLoadViewerPackageFromWork(PacWork *entry) {
+    u32 commandWord;
+
+    memcpy(&commandWord, entry->packet, sizeof(commandWord));
+    mdlLoadViewerPackage(5, commandWord >> 16, 0x101, (s32)entry->dataCursor,
+                         ((const SdfPacStreamPacketHeader *)entry->packet)->decodedSize);
 }
 
 extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size);
@@ -810,7 +802,7 @@ extern void mnuBindMovementRecordTable(MenuMovementRecord18 *records, u32 count)
 extern void mnuBindResourceRecordTable(MenuResourceRecord *, s32);
 extern void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
 extern MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts);
-extern void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w);
+extern void mnuInitializeNodeTransforms(MnuNodeList *group, f32 x, f32 y, f32 z, f32 w);
 extern void mnuPopulateModelNodeList(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z);
 extern void mnuDeactivateAllModelNodes(MnuNodeList *list);
 extern MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts);
@@ -869,7 +861,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     groups = work->modelWork->groups;
     records = (MenuRegistryParameters *)work->drawObjects->objects;
     for (i = 0; i < work->modelWork->count; i++) {
-        mnuInitializeNodeTransforms((u32 *)&groups[i], 1.0f, 1.0f, 1.0f, 1.0f);
+        mnuInitializeNodeTransforms(&groups[i], 1.0f, 1.0f, 1.0f, 1.0f);
         if (i == 8) {
             mnuPopulateModelNodeList(&groups[i], records[i].major, records[i].minor, 0, 1.0f, 1.0f, 3.0f);
         } else {
@@ -1291,7 +1283,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     return 0;
 }
 
-extern u8 *mnuAcquireUnusedModelNode(u32 *group);
+extern MnuModelNode *mnuAcquireUnusedModelNode(MnuNodeList *group);
 extern ModelInstance *itfClaimFreeModelInstance(ModelInstanceList *list);
 extern MnuModelNode *D_00438928;
 
@@ -1313,8 +1305,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
         mnuLoadTitleSoundBufferEntry(0x12);
         mnuClearInactiveSoundBufferState();
         parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
-        D_00438928 = (MnuModelNode *)mnuAcquireUnusedModelNode(
-            (u32 *)&groups[8]);
+        D_00438928 = mnuAcquireUnusedModelNode(&groups[8]);
         evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
         break;
     case MNU_WORK_TAG_REGISTRY_TABLE: {
@@ -1329,8 +1320,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
 
     if (kind != 1) {
         if (kind == 3) {
-            MnuModelNode *node = (MnuModelNode *)mnuAcquireUnusedModelNode(
-                (u32 *)&groups[parameterIndex]);
+            MnuModelNode *node = mnuAcquireUnusedModelNode(&groups[parameterIndex]);
             entry->object.modelNode = node;
             if (node != NULL) {
                 if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) node->flags |= 2;
