@@ -217,10 +217,11 @@ void mnuDestroyTerminalCampAnimation(MenuCampEffect *context) {
     effDestroyPackedBatch(context->resources.animationHandle);
 }
 
-/* Return whether model flag 0x31 is set; its storyline meaning is not asserted. */
-u8 mnuIsReducedTerminalModeEnabled() {
+/* Return whether model flag 0x31 is set; the caller's context is not read. */
+u8 mnuIsReducedTerminalModeEnabled(MenuSlotState *unusedContext) {
     s32 unlocked;
 
+    (void)unusedContext;
     unlocked = mdlFlagTest(0x31);
     return unlocked != 0;
 }
