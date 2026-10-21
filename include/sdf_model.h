@@ -77,6 +77,11 @@ void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
                                 s32 listIndex);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
+/* Build the kind-3 command packet; zero means there is no packet to append. */
+u32 sdfModelBuildKind3CommandPacket(SdfDrawNode *node, void *payload,
+                                   s32 nodeFlags, s32 color,
+                                   f32 firstScalar, f32 secondScalar,
+                                   s32 frame, s32 skipCommands);
 /* The draw node owns the lazily allocated workspace; callers receive a borrowed
  * pointer to it, and must not release it independently. */
 u8 *sdfEnsureFreeRootWorkspace(SdfDrawNode *root);

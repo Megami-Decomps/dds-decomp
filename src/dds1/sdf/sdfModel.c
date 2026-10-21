@@ -514,7 +514,6 @@ extern void *D_003BD378;
 extern f32 D_003BD358, D_003BD35C;
 extern f32 D_00398470[16];
 extern void sdfVuSetGlobalScale(f32);
-extern u32 sdfModelBuildKind3CommandPacket(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
     s32 frame;
