@@ -12,7 +12,7 @@ extern s32 sdfGraphicsTransferThreadId;
 #define SDF_GS_FRAMEBUFFER_PAGE_SHIFT 11
 
 
-extern u8 D_004389D8;
+extern u8 sdfCurrentDisplayModeIndex;
 
 extern u8 D_0043913C;
 
@@ -21,7 +21,7 @@ extern SdfGraphObj D_0040B290;
 
 
 void sdfGraphSetDisplayMode(s32 displayModeIndex) {
-    D_004389D8 = (u8)displayModeIndex;
+    sdfCurrentDisplayModeIndex = (u8)displayModeIndex;
     sdfGrSetFrameSetMode(&D_0040B290, displayModeIndex, 0);
     D_0043913C = 1;
 }
@@ -72,7 +72,7 @@ extern u8 D_004389D9;
 void sdfGraphResetDeviceForCurrentMode(void) {
     s32 inter;
     s32 ffmode;
-    u16 interlace = D_0040B260[D_004389D8].interlace;
+    u16 interlace = D_0040B260[sdfCurrentDisplayModeIndex].interlace;
 
     switch (interlace) {
     case 0:
@@ -100,7 +100,7 @@ s32 sdfGraphWakeDisplayThread(s32 channel) {
     return 0;
 }
 
-u8 D_004389D8 __attribute__((section(".sdata"))) = 0;
+u8 sdfCurrentDisplayModeIndex __attribute__((section(".sdata"))) = 0;
 
 u8 D_004389D9 __attribute__((section(".sdata"))) = 0;
 
