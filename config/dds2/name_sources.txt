@@ -9981,3 +9981,11 @@
 0x00438A78	sdfPowerLookupTextureState	inferred	the primary texture state (TEX0) of the texture sdfConsCreatePowerLookupTexture makes, set by sdfInitializeResourceQueuesAndTextureWords; sdfVuNodeVertexLighting passes it to sdfBuildChunkedVuNodeTransfer. DDS1 twin 0x003BD388.
 0x00439188	sdfVuSelectedTransformMatrix	inferred	the matrix block address sdfVuSelectTransformMatrix sets and sdfVuClearTransformCache clears; the colour transforms and sdfVuNodeVertexLighting read it. DDS1 twin 0x003BDA28.
 0x00352DB0	atanf	inferred	newlib's atanf: an exact twin of DDS1's atanf 0x002F9CD0, just before cosf as there; called with a ratio for an angle.
+0x0035A8C8	malloc_extend_top	inferred	newlib's malloc_extend_top (static in mallocr): grows the top chunk through sbrk, page-aligned once the sbrk base is set, freeing the old top when the new memory is not contiguous. DDS1 twin 0x002FF5D8, the same instructions apart from relocations.
+0x0040F158	__malloc_av_	inferred	newlib's bin array: two words a bin, 128 bins, the top chunk in bin 0's forward link and the binblocks map in its size word. DDS1 twin 0x0039BFD8.
+0x0040F560	__malloc_trim_threshold	inferred	newlib's trim threshold, an unsigned long (64 bits on the EE): free trims the top chunk at or past it. DDS1 twin 0x0039C3E0.
+0x0040F568	__malloc_top_pad	inferred	newlib's top pad, an unsigned long: what malloc_extend_top asks sbrk for beyond the request, and malloc_trim keeps. DDS1 twin 0x0039C3E8.
+0x0040F570	__malloc_sbrk_base	inferred	newlib's sbrk base: (char *)-1 until malloc_extend_top's first sbrk. DDS1 twin 0x0039C3F0.
+0x0040F578	__malloc_max_sbrked_mem	inferred	newlib's high-water mark of the memory taken from sbrk. DDS1 twin 0x0039C3F8.
+0x0040F580	__malloc_max_total_mem	inferred	newlib's high-water mark of the total memory. DDS1 twin 0x0039C400.
+0x0040F588	__malloc_current_mallinfo	inferred	newlib's mallinfo totals; its arena is the memory taken from sbrk. DDS1 twin 0x0039C408.
