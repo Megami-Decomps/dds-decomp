@@ -9901,3 +9901,4 @@
 0x003B7170	at3decFallingWindow	inferred	libat3dec: 128-entry falling window, the overlap stage's and at3decCarrySilentBand's; read by its routines. DDS2 twin 0x00430EC0.
 0x0039A820	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9A0.
 0x0039A870	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9F0.
+0x001B2D80	btlUpdateAndDrawCommandSelectionHighlight	inferred	Updates command-selection highlight animation and selection trails, refreshes actor-panel presentation when needed, and draws the selected row and gradient marker quads. Paired DDS2 0x001BD9A0.
