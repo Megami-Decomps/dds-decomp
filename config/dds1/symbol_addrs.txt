@@ -34,6 +34,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sceSifMInitRpc = 0x002F4A38; // type:func
 sceCdPOffCallback = 0x002F33C8; // type:func
 sceCdInit = 0x002F3CB8; // type:func
 sceCdDiskReady = 0x002F3F98; // type:func
@@ -10226,7 +10227,6 @@ func_002F47E0 = 0x002F47E0; // type:func
 sceCdStResume = 0x002F4830; // type:func
 func_002F4888 = 0x002F4888; // type:func
 sceCdStream = 0x002F48D0; // type:func
-func_002F4A38 = 0x002F4A38; // type:func
 func_002F4B00 = 0x002F4B00; // type:func
 func_002F4B10 = 0x002F4B10; // type:func
 func_002F4BB8 = 0x002F4BB8; // type:func
