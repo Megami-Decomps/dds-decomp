@@ -12,6 +12,7 @@
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl.h"
+#include "btl_analysis_panel_wait_args.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -85,11 +86,6 @@ extern void btlSelectTargetsByMode(s32, s32);
 extern s8 D_0037F510[];
 
 extern u32 btlRequestAnalysisPanelClose(void);
-
-typedef struct BtlWaitTask {
-    s32 value;
-    u32 ticks;
-} BtlWaitTask;
 
 extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 
@@ -1165,12 +1161,12 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 s32 btlWaitEffectTask(void *arguments) {
-    BtlWaitTask *task = arguments;
-    if (task->ticks == 0) {
+    BtlAnalysisPanelWaitArgs *task = arguments;
+    if (task->elapsedTicks == 0) {
         btlCreateAnalysisPanelTask(task->value, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
-    if (task->ticks >= 0x11) {
+    if (task->elapsedTicks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
@@ -1179,7 +1175,7 @@ s32 btlWaitEffectTask(void *arguments) {
             }
         }
     } else {
-        task->ticks += 1;
+        task->elapsedTicks += 1;
     }
     return 0;
 }
