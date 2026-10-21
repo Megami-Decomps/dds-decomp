@@ -899,17 +899,17 @@ SdfMotionIndexedTextBinding *sdfMotionCreateDirectTextKeyBinding(Motion *motion,
 }
 
 void sdfMotionApplySelectedTextKey(SdfMotionIndexedTextBinding *binding, f32 frame) {
-    u32 sample[4];
+    SdfMotionKeyInterval sample;
 
-    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)sample, frame);
-    sdfCopyPrimaryTextScalars(binding->target, sample[0]);
+    sdfFindMotionKeyInterval(&binding->keys, &sample, frame);
+    sdfCopyPrimaryTextScalars(binding->target, sample.firstKey);
 }
 
 void sdfMotionApplySampleToTarget(SdfMotionIndexedTextBinding *binding, f32 frame) {
-    u32 sample[4];
+    SdfMotionKeyInterval sample;
 
-    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)sample, frame);
-    sdfCopyPrimaryTextScalars(binding->target, sample[0]);
+    sdfFindMotionKeyInterval(&binding->keys, &sample, frame);
+    sdfCopyPrimaryTextScalars(binding->target, sample.firstKey);
 }
 
 /* Direct primary-text sampling has an intentionally empty capturePrevious callback. */
@@ -926,15 +926,15 @@ SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextSampleBinding(Motion *m
 }
 
 void sdfMotionApplySampledSecondaryTextValue(SdfMotionIndexedTextBinding *binding, f32 frame) {
-    u32 sample[4];
+    SdfMotionKeyInterval sample;
 
-    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)sample, frame);
-    sdfCopySecondaryTextScalars(binding->target, sample[0]);
+    sdfFindMotionKeyInterval(&binding->keys, &sample, frame);
+    sdfCopySecondaryTextScalars(binding->target, sample.firstKey);
 }
 
 void sdfMotionSampleTextScalarsAtTime(SdfMotionIndexedTextBinding *binding, f32 frame) {
-    u32 sample[4];
+    SdfMotionKeyInterval sample;
 
-    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, (SdfMotionKeyInterval *)sample, frame);
-    sdfCopySecondaryTextScalars(binding->target, sample[0]);
+    sdfFindMotionKeyInterval(&binding->keys, &sample, frame);
+    sdfCopySecondaryTextScalars(binding->target, sample.firstKey);
 }

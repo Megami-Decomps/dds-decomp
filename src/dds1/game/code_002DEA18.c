@@ -474,8 +474,8 @@ void func_002DF710(VuWork *work) {
 
             } else goto appendInsidePair;
             continue;
-        threeDifferentRegions: {
-            if (aRegion != 0 || (bRegion ^ cRegion) != 3) goto rotateTriangle;
+        threeDifferentRegions:
+            if (aRegion == 0 && (bRegion ^ cRegion) == 3) {
         d = vuAllocNode(work);
         e = vuAllocNode(work);
         f = vuAllocNode(work);
@@ -502,7 +502,7 @@ void func_002DF710(VuWork *work) {
         out += 5;
             continue;
         }
-        rotateTriangle: {
+        {
             VuBlendNode *oldA = a;
             u32 oldRegion = aRegion;
             a = b; b = c; c = oldA;

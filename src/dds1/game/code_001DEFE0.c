@@ -1761,7 +1761,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
 }
 
 void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
-    s128 vec[3];
+    f32 vec[3][4] __attribute__((aligned(16)));
     BtlUnit *unit = command->task->unit;
     u32 mask = 0;
     u32 i;
@@ -1773,12 +1773,12 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
     }
     if (unit->status.flags & 0x80000) {
         btlMeasureMaskedUnitBounds(mask, 0, 0);
-        VU0_STORE_VF(vf10, &vec[0]);
+        VU0_STORE_VF(vf10, vec[0]);
         btlUnitGetBodyPosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU((f32 *)&vec[1], (f32 *)&vec[0]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
-            btlSetUnitRotation(unit, &vec[2]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
+        if (btlAimHorizontalDirectionVU(vec[1], vec[0]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, vec[2]);
+            btlSetUnitRotation(unit, vec[2]);
         }
     }
 }
@@ -7493,7 +7493,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
         }
 
         VU0_STORE_VF(vf10, &vectors[0]);
-        projection = btlProjectOnPlaneVU((f32 *)&vectors[1], (f32 *)&vectors[2], (f32 *)&vectors[0]);
+        projection = btlProjectOnPlaneVU(vectors[1].component, vectors[2].component, vectors[0].component);
         VU0_STORE_VF(vf10, &vectors[0]);
         upperX = (vectors[0].component[0] + projection) + radius;
         lowerX = (vectors[0].component[0] - projection) - radius;
@@ -11187,7 +11187,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
     BtlUnit *front = 0;
     BtlUnit *back = 0;
     BtlUnit *target;
-    s128 vec[3];
+    f32 vec[3][4] __attribute__((aligned(16)));
     s32 count;
 
     if (link->unit->status.flags & 0x1000) {
@@ -11215,12 +11215,12 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
         btlUnitFaceTarget(front, target);
     } else {
         btlUnitGetMuzzlePosVU(front);
-        VU0_STORE_VF(vf10, &vec[0]);
+        VU0_STORE_VF(vf10, vec[0]);
         btlMeasureMaskedUnitBounds(target->status.flags & 0x600, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
-            btlSetUnitRotation(front, &vec[2]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
+        if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, vec[2]);
+            btlSetUnitRotation(front, vec[2]);
         }
     }
     btlUnitFaceTarget(back, front);

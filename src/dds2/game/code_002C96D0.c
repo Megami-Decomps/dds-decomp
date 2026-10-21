@@ -4998,7 +4998,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
     FileJob *entry;
     FileJob *job;
-    s128 vec;
+    f32 vec[4] __attribute__((aligned(16)));
 
     PCP_COPY_VECTOR(queue->offset, source->offset);
     PCP_COPY_VECTOR(queue->axis, source->offset);
@@ -5057,9 +5057,9 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
             } while (--count != 0);
         }
     }
-    VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, (const f32 *)&vec);
-    fileQueueSetRotation(queue, (const f32 *)&vec);
+    VU0_STORE_VF(vf0, vec);
+    fileQueueSetPosition(queue, vec);
+    fileQueueSetRotation(queue, vec);
     fileQueueSetScale(queue, 1.0f);
     fileQueueSetColor(queue, 0x80808080);
     return queue;
@@ -5145,7 +5145,7 @@ void fileQueueDestroy(FileQueue *queue) {
 FileQueue *fileQueueClone(const FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
     const FileJob *src;
-    s128 vec;
+    f32 vec[4] __attribute__((aligned(16)));
 
     PCP_COPY_VECTOR(queue, source);
     PCP_COPY_VECTOR(queue->axis, source->axis);
@@ -5157,9 +5157,9 @@ FileQueue *fileQueueClone(const FileQueue *source) {
         fileJobCopyHeader(job, src);
         fileQueueAppend(queue, job);
     }
-    VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, (const f32 *)&vec);
-    fileQueueSetRotation(queue, (const f32 *)&vec);
+    VU0_STORE_VF(vf0, vec);
+    fileQueueSetPosition(queue, vec);
+    fileQueueSetRotation(queue, vec);
     fileQueueSetScale(queue, 1.0f);
     fileQueueSetColor(queue, 0x80808080);
     return queue;
@@ -5311,10 +5311,10 @@ u32 fileGetQueueColor(FileQueue *queue) {
 }
 
 void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
-    s128 vec;
+    f32 vec[4] __attribute__((aligned(16)));
     sdfVuMatrixToQuaternion(matrix);
-    VU0_STORE_VF(vf10, &vec);
-    fileQueueSetRotation(queue, (const f32 *)&vec);
+    VU0_STORE_VF(vf10, vec);
+    fileQueueSetRotation(queue, vec);
 }
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);

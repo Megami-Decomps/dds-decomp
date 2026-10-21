@@ -531,9 +531,9 @@ s32 btlArrangeFormationSlots(s32 filter) {
 }
 
 s32 btlRepositionPartyAroundBattleCenter(void) {
-    s128 v;
-    PCP_COPY_VECTOR(&v, btlGetRuntime());
-    return btlExpandPartyFormationAroundCenter((f32 *)&v);
+    f32 v[4] __attribute__((aligned(16)));
+    PCP_COPY_VECTOR(v, btlGetRuntime());
+    return btlExpandPartyFormationAroundCenter(v);
 }
 
 s32 btlArrangeOpponentFormationSlots(void) {
@@ -752,7 +752,8 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     BtlUnit *front = 0;
     BtlUnit *back = 0;
     BtlUnit *target;
-    s128 vec[3];
+    f32 vec[2][4] __attribute__((aligned(16)));
+    s128 rot;
     s32 count;
     if (link->unit->status.flags & 0x1000) {
         back = link->unit;
@@ -779,12 +780,12 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
         btlUnitFaceTarget(front, target);
     } else {
         btlUnitGetMuzzlePosVU(front);
-        VU0_STORE_VF(vf10, &vec[0]);
+        VU0_STORE_VF(vf10, vec[0]);
         btlMeasureFilteredUnitGroupBounds(target->status.flags & 0x600, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
-            btlSetUnitRotation(front, &vec[2]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
+        if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
+            btlSetUnitRotation(front, &rot);
         }
     }
     btlUnitFaceTarget(back, front);

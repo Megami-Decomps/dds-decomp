@@ -594,7 +594,7 @@ s32 dds3WriteArraySpriteFile(const char *directory, const char *name, u32 **sour
     sprintf(path, D_00438988, directory, name);
     file = sdfOpenFileStream(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream((u32 *)&header, sizeof(header), 1, file);
+        sdfWriteFileStream(&header, sizeof(header), 1, file);
         sdfWriteFileStream(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
@@ -642,7 +642,7 @@ s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, u32 **sou
     sprintf(path, D_00438988, directory, name);
     file = sdfOpenFileStream(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream((u32 *)&header, sizeof(header), 1, file);
+        sdfWriteFileStream(&header, sizeof(header), 1, file);
         sdfWriteFileStream(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
@@ -690,7 +690,7 @@ s32 dds3WriteSpriteFile(const char *directory, const char *name, u32 **source) {
     sprintf(path, D_00438988, directory, name);
     file = sdfOpenFileStream(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream((u32 *)&header, sizeof(header), 1, file);
+        sdfWriteFileStream(&header, sizeof(header), 1, file);
         sdfWriteFileStream(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);
@@ -739,7 +739,7 @@ s32 dds3WriteExtendedSpriteFile(const char *directory, const char *name, u32 **s
     sprintf(path, D_00438988, directory, name);
     file = sdfOpenFileStream(path, D_00438990);
     if (file != 0) {
-        sdfWriteFileStream((u32 *)&header, sizeof(header), 1, file);
+        sdfWriteFileStream(&header, sizeof(header), 1, file);
         sdfWriteFileStream(info, sizeof(info), 1, file);
         dds3RegisterPendingNamedReferences(packed, file);
         dds3RegisterPendingNamedReferences(references, file);

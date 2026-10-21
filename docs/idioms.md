@@ -15648,3 +15648,55 @@ native bytes with the direct receiver. This removes an incompatible
 intermediate argument type; it changes no callback signature, payload
 layout, compiler flag, or instruction macro.
 
+
+## A completed triangle case can guard its own emission
+
+In DDS1 `func_002DF710`, the three-region case emits five triangles and
+continues the real input-triangle loop only when `aRegion == 0` and
+`(bRegion ^ cRegion) == 3`. Guard that emission with the positive condition;
+all other cases fall through to the existing vertex/region rotation.
+There is no need for a forward `goto rotateTriangle` or a separate label.
+The rotation block still scopes the two genuine swap temporaries.
+The other four flagged gotos are independent issues.
+
+## Float components and native quadword interfaces
+
+Local VU positions and quaternions can use `f32 vector[4]` or
+`f32 vectors[count][4]` with `__attribute__((aligned(16)))`. This preserves
+the sixteen-byte transfer extent and alignment while giving scalar math
+real float elements. An existing vector union can supply its actual
+`component` member instead of a cast over the union's address.
+
+Keep the real API contract at each boundary. DDS2 `btlSetUnitRotation`
+still takes `s128 *` and reads the input only with `VU0_LOAD_VF`. Keep an
+opaque rotation output in its real `s128` buffer, separate from float
+position inputs, rather than adding a cast back from a float array.
+A one-qword `s128 result[1]` is genuine opaque VU register-image storage
+for this API, not a numeric scalar view. No rotation prototype change is
+needed for that split.
+
+These retypes are optional hygiene for a proven register image:
+`VU0_STORE_VF` has a global memory clobber, and retail camera code shows
+`SQC2` followed by `LWC1` from the same image. Such float reads do not by
+themselves make the buffer forbidden. This exception requires the
+exercised global-barrier register-image contract; it is not general
+permission for alias casts. `PCP_COPY_VECTOR_F32` has its separate bounded
+float-memory contract and negative control.
+
+The same principle favors a real `MenuEffectPair[5][2]` saved-panel array
+when its rows are the actual two-record snapshots. Their row extent
+remains `0xA8`, and the second record is element one rather than byte
+offset `0x54`. Byte-stream writers likewise take a header's address
+directly when their existing parameter is `const void *`.
+
+None of this permits one function to alternate between a flat word
+array and a record view of its own known local payload. Those cases need
+one canonical representation and field accesses, not a new alias.
+
+
+The motion-key wrappers use the existing `SdfMotionKeyInterval` for their
+sample output and pass `sample.firstKey` to the scalar-copy consumer.
+`&binding->keys` is the actual embedded binding subobject. Keeping a
+`u32 sample[4]` beside that record view and reading `sample[0]` is not a
+generic boundary adaptation; the canonical interval removes both views.
+

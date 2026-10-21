@@ -3600,8 +3600,8 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     f32 reach;
     f32 dist;
     f32 pos[4];
-    s128 fromPos;
-    s128 toPos;
+    f32 fromPos[4] __attribute__((aligned(16)));
+    f32 toPos[4] __attribute__((aligned(16)));
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
         BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
@@ -3609,12 +3609,12 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &fromPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, fromPos);
     btlUnitGetMuzzlePosVU(target);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &toPos);
-    ((f32 *)&toPos)[1] = ((f32 *)&fromPos)[1];
-    VU0_LOAD_VF(vf10, &fromPos);
-    VU0_LOAD_VF(vf11, &toPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, toPos);
+    toPos[1] = fromPos[1];
+    VU0_LOAD_VF(vf10, fromPos);
+    VU0_LOAD_VF(vf11, toPos);
     VU0_MOVE_VF(vf12, vf10);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -3623,7 +3623,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     VU0_MOVE_VF(vf11, vf12);
     VU0_LERP_VF10(0.8f / scale);
     VU0_STORE_VF(vf10, pos);
-    VU0_LOAD_VF(vf11, &fromPos);
+    VU0_LOAD_VF(vf11, fromPos);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(dist);
     VU0_LOAD_VF(vf10, &unit->orientation);
