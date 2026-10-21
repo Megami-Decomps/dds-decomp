@@ -463,11 +463,6 @@ extern void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *, BtlCamState *,
 /* Initialize the action's front/back pair from presets rotated with its actor. */
 void btlInitializeRotatedPresetCameraPair(BtlLinkedCommand *action);
 
-typedef struct {
-    u8 unk00[0x674];
-    s32 (*allowDefaultSound)(void *);
-} SoundEventCallbacks;
-
 extern void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlRunDefaultActionPoseUnlessHooked(void *actor);

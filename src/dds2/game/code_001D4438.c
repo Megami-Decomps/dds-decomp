@@ -432,37 +432,6 @@ extern SoundCommand D_003BDC90;
 
 extern u32 btlTintTransitionHoldCount;
 
-typedef struct {
-    union {
-        void *actor;
-        s32 value;
-    };
-    union {
-        s32 option;
-        u16 optionId;
-        f32 scale;
-    };
-    u32 unk_08;
-    union {
-        u32 unk_0C;
-        f32 scale2;
-        s8 mode;
-    };
-    u32 unk_10;
-    union {
-        u32 unk_14;
-        f32 scale14;
-    };
-    union {
-        u32 unk_18;
-        struct {
-            u8 flag18;
-            u8 flag19;
-        };
-    };
-    u32 unk_1C;
-} SoundTaskArgs;
-
 extern BtlRuntimeTask *btlAllocTask(s32);
 extern u8 D_0037F510[];
 
