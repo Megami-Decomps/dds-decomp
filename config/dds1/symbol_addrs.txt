@@ -7687,6 +7687,7 @@ __malloc_max_sbrked_mem = 0x0039C3F8; // size:0x8
 __malloc_max_total_mem = 0x0039C400; // size:0x8
 __malloc_current_mallinfo = 0x0039C408; // size:0x28
 sbrkBreak = 0x0039C450; // type:u32 size:0x4
+fileioLibraryVersion = 0x0039C448; // type:u8 size:0x4
 sdfModelColorTransform = 0x003F9860; // type:u8 size:0x30
 sdfVuObjectBasisCache = 0x003F98A0; // type:u8 size:0x30
 sdfPowerLookupTextureState = 0x003BD388; // type:u32 size:0x8
