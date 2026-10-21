@@ -8,7 +8,7 @@
 #include "fld_room_effect_entry.h"
 #include "fld_object_slot.h"
 #include "fld_npc_palette.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "evt_world.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
@@ -2883,14 +2883,14 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0698);
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A06B0);
 
 void fldParseMixLb(void) {
-    FileRequest *lb;
+    FilePacRequest *lb;
     PacWork *node;
     u32 index;
     struct SdfMemBlock *allocation;
 
     index = 0;
-    lb = fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
-    fileWaitForRequestReady(lb);
+    lb = (FilePacRequest *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    fileWaitForRequestReady((struct FileRequest *)lb);
     for (node = lb->packet.queueHead; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:

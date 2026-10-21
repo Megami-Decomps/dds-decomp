@@ -646,21 +646,21 @@ void sdfSetTextScalarPair(SdfAsset *asset, f32 first, f32 second) {
 /* Allocate both native draw-entry command blocks and mark every change group dirty. */
 SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     SdfAsset *asset;
-    SdfAssetEntry *entry;
+    u32 *entryWords;
     s32 entryIndex;
 
     sdfLiveAssetCount++;
     asset = sdfAllocAndClearQuadwords(sizeof(SdfAsset));
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
-        entry = sdfChipAllocDirect(SDF_ASSET_DRAW_ENTRY_BYTES);
-        asset->drawEntries[entryIndex] = entry;
-        entry->vifColorUnpackCommand = 0x6E05C000;
-        entry->vifStateUnpackCommand = 0x6005C005;
-        entry->vifTextureCommands[0] = 0;
-        entry->vifTextureCommands[1] = 0x640CC00A;
-        entry->vifItopCommand = 0x0400000C;
-        entry->vifMscalCommand = 0x14000000;
+        entryWords = sdfChipAllocDirect(SDF_ASSET_DRAW_ENTRY_BYTES);
+        asset->drawEntries[entryIndex] = (SdfAssetEntry *)entryWords;
+        entryWords[0] = 0x6E05C000;
+        entryWords[0x18 / 4] = 0x6005C005;
+        entryWords[0x30 / 4] = 0;
+        entryWords[0x34 / 4] = 0x640CC00A;
+        ((SdfAssetEntry *)entryWords)->vifItopCommand = 0x0400000C;
+        ((SdfAssetEntry *)entryWords)->vifMscalCommand = 0x14000000;
     }
     asset->scalarPairFirst = 0;
     asset->scalarPairSecond = 0;

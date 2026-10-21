@@ -5960,40 +5960,6 @@ fallbacks follow the actual `EvtWorldTable` slot indexed by
 providers, consumers and typed getters together, then gate every includer
 of each changed shared header, not just the function that exposed the view.
 
-## Path and movie helpers share an actual four-word counter
-
-The counter providers read direction, flags, duration and current time at
-`+0/+4/+8/+C`. `SdfFloatCounter` owns those four words; the complete
-`Dds3PathCurveWork` embeds it before its five channel pointers, preserving
-the constructor's 0x24-byte allocation. Movie progress uses the same counter
-type directly. The former 0x1C-byte `EvtScaledValue` and partial
-`PolyMovieClip` are not additional objects and are removed.
-
-Pass `&path->counter` to the direction, freeze, wrap and scaling APIs.
-Keep the direction getter's unsigned return contract even though direction
-storage is signed. Playback iteration obtains the real path from
-`Dds3SlotResource` and the motion owner from `EffectTransformData`, not a
-common eight-byte overlay of those unrelated payloads.
-
-Both games' 24 edited source units are exact, including the complete
-44/45-function counter-provider units and both field-resolver canaries.
-All 102 units in the composed counter/model-header closure gate without
-instruction, context, rodata or undefined-symbol differences.
-
-## Viewer binding APIs consume the primary resource record
-
-`mdlDispatchResourceEntry` already holds a `MdlRecord *`. Its billboard,
-effect and object branches pass that record unchanged to their consumers.
-The primary record's real unions therefore own the signed resource ID,
-deferred-init threshold, optional anchor scale and object-part byte/halfword
-parameters. Binding and claim providers use those fields directly rather
-than `MdlPartRec` or `MdlEntryRec`.
-
-The anchor-scale extension retains the native unsigned 17-byte threshold
-on `nextOffset`; a signed comparison would change that contract. Both
-complete provider units remain exact at 114/0 and 115/0, and the obsolete
-record-view header is removed.
-
 ## DDS2 stat gauge span is signed; pulse division is still unresolved
 
 The unit-private `MenuPanelItem.value10` at +10 is a signed pixel span.
@@ -6016,7 +5982,7 @@ has been identified, so the body stays assembly.
 `func_0030AC10` retains `LmapTaskState + 0x78` throughout the loader switch:
 file request at +00, PAC request at +04, signed phase/index at +08/+0A,
 and an unknown word at +0C. Keep this as the primary `LmapLoadState`, with
-the shared `FileRequest` owning the PAC queue rather than another view.
+the shared `FilePacRequest` owning the PAC queue rather than another view.
 
 `func_0030A8A8` forwards `dds3GetProcessData` in `$4` through the matched
 `func_0030ABF0` wrapper to the loader. Both receive `LmapTaskState *`;
@@ -15851,55 +15817,3 @@ not an aliasing halfword-pointer read. Solar timers likewise convert the signed
 primary layer age to `u16` before incrementing, then retain the native signed
 expiry comparison. Partial-width message/wait task stores belong in the actual
 task argument's word/halfword union.
-
-## Message relocation and inspector helpers use their real owners
-
-`ItfMesSub` owns the relocation-table offset/length, relocated byte and
-entry array at `+0x20`. Relocation and magic recognition consume that same
-resource, not an `ItfMesRelocHeader` shadow. The relocation word API receives
-the entry-array address as its packed payload base.
-
-The inspector's opacity helper receives `ItfMesBlkA4 *`: `sprite` at `+4`
-and `fadeLimit` at `+0x28` are already real panel fields. The former
-`SndPadStepper` did not cross into another allocation; it duplicated the
-complete panel owner. Keep the helper's declaration with the window APIs
-and remove the obsolete overlay header.
-
-## File manager request kinds share one owner and callback contract
-
-`FileRequest` has a common `0x30`-byte header and a kind-dependent tail.
-PAC requests include their actual dispatch packet, readiness halfword and
-callback-list link through `+0x6C`; callback and value-pair requests retain
-their native header-only allocations. `FILE_REQUEST_HEADER_BYTES` names
-that real allocation boundary, not the full PAC extent.
-
-Queue providers, transfer state, completion dispatch, model loaders and
-effect controllers all retain this request owner. Completion receives
-`FileRequest *` and the caller's `void *` context; each handler decodes its
-own independently allocated context once. There are no parallel
-`FilePacRequest` or `FileTransferJob` record views or incompatible callback
-function-pointer casts.
-
-## File constructor payloads are not runtime queue entries
-
-The file operation table passes a separately allocated `FileJobPayload`
-(`0x2C`) to constructors. Runtime `FileJob` queue entries are distinct
-`0xC0` allocations. Constructors and buffer resolvers consume the payload,
-including its real primary selector and secondary size, rather than
-casting queue-entry prefixes. Queue replacement consumes `FileQueue *`.
-
-The model payload's encoded scale word is copied into the existing
-`owner->scale` with `memcpy`; that is a scalar representation transfer,
-not a serializer over padding or a new nominal model-header view.
-Point-group renderers likewise obtain the complete `EffBillPointConfig`,
-use its explicit timed subobject, and read its actual `drawFlag` field.
-
-## Draw-entry VIF command words belong to the draw entry
-
-`SdfAssetEntry` owns its color/state UNPACK words, the two consecutive
-texture command words at `+0x30/+0x34` (NOP then V2_32 UNPACK), and its
-ITOP/MSCAL words. Both constructors allocate and retain `SdfAssetEntry *`
-and initialize these real fields directly. A flat `u32 *` cursor and casts
-back into the typed entry are unnecessary; the paired command array is
-wire-format storage, not padding repurposed to avoid the owner schema.
-

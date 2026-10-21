@@ -2,7 +2,7 @@
 #define BTL_MODEL_CACHE_ENTRY_H
 
 #include "common.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "snd_slot.h"
 
 /* One linked cache owner for a requested battle model and its optional
@@ -13,7 +13,7 @@ typedef struct BattleModelEntry {
     s32 refCount;                     /* 0x08: retained users */
     s8 state;                         /* 0x0C: nonzero bypasses request checks */
     u8 pad0D[3];
-    FileRequest *packRequest;      /* 0x10 */
+    FilePacRequest *packRequest;      /* 0x10 */
     SoundSlotOwner *soundOwner;       /* 0x14 */
     struct BattleModelEntry *prev;    /* 0x18 */
     struct BattleModelEntry *next;    /* 0x1C */

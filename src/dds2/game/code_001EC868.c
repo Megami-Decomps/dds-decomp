@@ -40,7 +40,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_field_load_task_args.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
@@ -7476,13 +7476,13 @@ u32 btlPollFieldArchiveLoad(args)
         fldFormatAreaDirectory(directory, args->stage, 1);
         sprintf(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
-        args->request = fileQueuePlainDispatchRequest(path);
+        args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
-        if (args->request != NULL && fileRequestIsReady(args->request)) {
-            FileRequest *request = args->request;
+        if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
+            FilePacRequest *request = args->request;
             node = request->packet.queueHead;
             i = 0;
             while (node != NULL) {
@@ -8963,11 +8963,11 @@ INCLUDE_RODATA(const s32, "game/code_001EC868", D_00419170);
 
 void sndLoadSysEffLb(void) {
     const char *path = "/battle/SYSEFF.LB";
-    FileRequest *archive = fileQueuePlainDispatchRequest(path);
+    FilePacRequest *archive = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
     PacWork *node;
     u32 i;
 
-    fileWaitForRequestReady(archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf("btl:[%s]\n", path);
     node = archive->packet.queueHead;
     i = 0;

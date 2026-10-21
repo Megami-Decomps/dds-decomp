@@ -24,7 +24,7 @@
 #include "snd_slot.h"
 #include "sdf_resource.h"
 #include "eff_ref_obj.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
@@ -1101,7 +1101,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    requestReady = fileRequestIsReady((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
 }
 
@@ -1136,7 +1136,7 @@ void btlLoadModelPack(s32 modelKind, s32 modelId) {
         mdlRequestAsset(modelKind, modelId, 0);
         if (sndFindListNodeForChannel(modelKind, modelId) == 0) {
             btlFormatModelResourcePath(modelKind, modelId, resourcePath);
-            cacheEntry->packRequest = fileQueuePlainDispatchRequest(resourcePath);
+            cacheEntry->packRequest = (FilePacRequest *)fileQueuePlainDispatchRequest(resourcePath);
             btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", resourcePath, modelKind, modelId);
         } else {
             cacheEntry->packRequest = 0;
@@ -1169,7 +1169,6 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     PacWork *node;
     SoundSlotTableEntry *parts;
-    FileRequest *request;
     s32 i;
 
     if (entry->state == 0) {
@@ -1178,8 +1177,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
             if (entry->soundOwner->work.refCount == 1) {
                 s32 count = kind == 0 ? 0x1D : 0x17;
                 parts = (SoundSlotTableEntry *)btlSelectSideIndexedActorParameterTable(kind, id);
-                request = entry->packRequest;
-                node = request->packet.queueHead;
+                node = entry->packRequest->packet.queueHead;
                 for (i = 0; i < count; i++) {
                     /* Capture the row before field access; see docs/idioms.md,
                      * "Trace-justified pointer staging: sound-table row". */
@@ -1194,19 +1192,11 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
                     }
                 }
             } else {
-                /* The release callbacks may change the retained request. Reload
-                 * it only after a nonempty walk has actually called them. */
-                request = entry->packRequest;
-                node = request->packet.queueHead;
-                if (node != NULL) {
-                    do {
-                        sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
-                        node = node->next;
-                    } while (node != NULL);
-                    request = entry->packRequest;
+                for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
+                    sdfMemFreeDirect((struct SdfMemBlock *)node->resourceHandle);
                 }
             }
-            btlStageTaskCleanupCallback(request);
+            btlStageTaskCleanupCallback(entry->packRequest);
             entry->packRequest = NULL;
         }
         entry->state = 1;

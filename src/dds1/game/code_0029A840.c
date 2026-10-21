@@ -52,7 +52,7 @@ extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);
 
-extern EffModelOwner *effCreateModelOwner(void *);
+extern EffModelOwner *effCreateModelOwner();
 
 extern u32 effSharedTextureReferenceCount;
 extern SdfTex *D_003BC958;
@@ -98,18 +98,15 @@ void effDestroyModelContext(MdlCtx *model) {
     mdlDestroyContext(model);
 }
 
-EffModelOwner *effCreateModelOwner(void *input) {
-    FileJobPayload *source = input;
+EffModelOwner *effCreateModelOwner(u8 *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(EffModelOwner));
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
-        u32 scaleBits;
-        scaleBits = *(u32 *)fileResolvePrimaryBuffer(source);
-        memcpy(&owner->scale, &scaleBits, sizeof(owner->scale));
-        data = fileResolveSecondaryBuffer(source);
+        *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer((FileJobPayload *)source);
+        data = fileResolveSecondaryBuffer((FileJobPayload *)source);
         if (data != 0) {
-            owner->model = effLoadViewerModelWithVUState(data, source->secondary.size);
+            owner->model = effLoadViewerModelWithVUState(data, ((FileJob *)source)->slots[1].size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU(owner->model);
@@ -469,8 +466,7 @@ typedef struct {
 
 
 /* Create an empty owner, or load its model and per-record queues from a file job. */
-u8 *effCreateResourceOwner(void *input) {
-    FileJobPayload *source = input;
+u8 *effCreateResourceOwner(void *source) {
     EffResourceOwner *owner = sdfChipAllocDirect(sizeof(EffResourceOwner));
     u8 *data;
     u32 i;
@@ -480,7 +476,7 @@ u8 *effCreateResourceOwner(void *input) {
         data = fileResolvePrimaryBuffer(source);
         memcpy((u8 *)owner + 8, data, sizeof(EffectModelHeaderCopy));
         owner->model = effLoadViewerModelWithVUState(data + 0x40,
-                                                   source->primary.size - 0x40);
+                                                   ((FileJob *)source)->slots[0].size - 0x40);
         if (owner->model->first != NULL) {
             if (owner->plainEntry != 0) {
                 mdlAddEntryPlain(owner->model, 0, 0);

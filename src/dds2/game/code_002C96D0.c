@@ -399,7 +399,7 @@ extern void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId);
 extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job);
-extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileQueue *queue);
+extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
 extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
 
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
@@ -2625,7 +2625,7 @@ void fileResetMenuFlowState(void) {
     fileClearAllSlotFlags();
 }
 
-#include "file_request.h"
+#include "file_pac.h"
 
 extern void *memset(void *dst, s32 value, s32 size);
 
@@ -2638,7 +2638,7 @@ extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 void fileInitCursorPulse(void);
 
 void fileStartMemoryCardMenuForMode(s32 mode) {
-    FileRequest *request;
+    FilePacRequest *request;
     PacWork *node;
     u32 index = 0;
     struct SdfMemBlock *titleNamesAllocation;
@@ -2646,8 +2646,8 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     void *world;
 
     fileSetMemoryCardOperationActive();
-    request = fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    fileWaitForRequestReady(request);
+    request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
+    fileWaitForRequestReady((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {
@@ -6040,7 +6040,7 @@ void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) 
     }
 }
 
-void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileQueue *queue) {
+void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     u32 count = node->record->count;
     u32 i;
     s32 size;
@@ -6057,7 +6057,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileQueue *queue) {
     if (size != 0) {
         node->queueAllocation = sdfMemAllocDirect(size);
         node->queues = sdfMemLock(node->queueAllocation);
-        node->queues[0] = fileCloneQueueEntries(queue);
+        node->queues[0] = fileCloneQueueEntries((FileQueue *)job);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);
         }

@@ -2,11 +2,12 @@
 #include "btl_enc_bg_entry.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
-#include "itf.h"
+#include "snd_pad_step.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "sdf_pac_reloc.h"
+#include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
@@ -63,7 +64,7 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 u8 *itfMesGetTableItem(ItfMesTable *table, s32 index);
 u8 *itfMesGetNextEntrySelectedItem(ItfMesState *mes);
 
-void itfMesRelocate(ItfMesSub *resource);
+void itfMesRelocate(ItfMesRelocHeader *resource);
 
 u32 scrGetWindow(void);
 
@@ -842,7 +843,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     ItfMesEntry *entry;
     u8 *temporaryFontEntry;
     mes->sub = sub;
-    itfMesRelocate(sub);
+    itfMesRelocate((ItfMesRelocHeader *)sub);
     entry = itfMesGetNextEntry(sub);
     temporaryFontEntry = 0;
     if (sub->magic == ITF_MES_MAGIC_MSG1) {
@@ -1058,7 +1059,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
             }
             break;
         case 2:
-            sndStepIndexByPad(panel);
+            sndStepIndexByPad((SndPadStepper *)panel);
             if (D_0037F510.secondaryCancel < 0) {
                 D_003B4770.mode = 0;
             }
@@ -1135,13 +1136,13 @@ void itfMesDestroyWindow(s32 window) {
 
 /* Relocate packed payload words once, then set the resource's relocated marker. */
 /* Semantic reference: Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c). */
-void itfMesRelocate(ItfMesSub *resource)
+void itfMesRelocate(ItfMesRelocHeader *resource)
 {
     u8 *payload;
     u8 *fixupTable;
     s32 fixupSize;
     if (resource->relocated == 0) {
-        payload = (u8 *)resource->entries;
+        payload = resource->payload;
         fixupTable = (u8 *)resource + resource->fixupTableOffset;
         fixupSize = resource->fixupTableBytes;
         sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload, fixupTable, fixupSize);
@@ -1150,7 +1151,7 @@ void itfMesRelocate(ItfMesSub *resource)
 }
 
 /* Recognize MSG0/MSG1 magic only; this is not complete format validation. */
-u32 itfMesIsMsgData(ItfMesSub *resource) {
+u32 itfMesIsMsgData(ItfMesRelocHeader *resource) {
     u32 isMessageResource;
 
     isMessageResource = 0;
@@ -2437,8 +2438,8 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
     }
 }
 
-/* Step the panel fade limit by pad input: one per press, ten with the fast modifier held. */
-void sndStepIndexByPad(ItfMesBlkA4 *panel) {
+/* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
+void sndStepIndexByPad(SndPadStepper *stepper) {
     s32 step;
 
     if (D_0037F510.coarseDown & 2) {
@@ -2455,11 +2456,11 @@ void sndStepIndexByPad(ItfMesBlkA4 *panel) {
         step *= 10;
     }
     if (step != 0) {
-        s32 alpha = (panel->fadeLimit + step) & 0xFF;
+        s32 index = (stepper->index + step) & 0xFF;
 
-        panel->fadeLimit = alpha;
-        if (panel->sprite != NULL) {
-            panel->sprite->alpha = alpha;
+        stepper->index = index;
+        if (stepper->target != NULL) {
+            stepper->target->alpha = index;
         }
     }
 }

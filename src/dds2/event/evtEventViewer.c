@@ -4,8 +4,8 @@
 #include "evt_window_shade_packet.h"
 #include "evt_camera_color_track_api.h"
 #include "kwln_background_fade_api.h"
-#include "sdf_float_counter.h"
-#include "dds3_path.h"
+#include "evt_scaled_value.h"
+#include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
 #include "mnu_camp_font_api.h"
@@ -2539,7 +2539,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     EvtRuntimeGroup *found;
     EvtRuntimeChild *key;
     Motion *motion;
-    Dds3PathCurveWork *path;
+    struct EvtScaledValue *counter;
     void *movie;
     s32 useTrackTime;
 
@@ -2565,7 +2565,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     }
     object = table->slots[6].head;
     while (object != NULL) {
-        motion = ((EffectTransformData *)object->data)->resourceState->motion;
+        motion = ((EvtViewerPlaybackData *)object->data)->object->motion;
         if (motion != NULL) {
             if (mode == 0) {
                 sdfMotionSampleAtFrame(motion, (f32)frame);
@@ -2578,12 +2578,12 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     }
     object = table->slots[3].head;
     while (object != NULL) {
-        path = ((Dds3SlotResource *)object->data)->path;
-        if (path != NULL) {
+        counter = ((EvtViewerPlaybackData *)object->data)->counter;
+        if (counter != NULL) {
             if (mode == 0) {
-                sdfFreezeFloatCounter(&path->counter);
+                sdfFreezeFloatCounter(counter);
             } else {
-                sdfUnfreezeFloatCounter(&path->counter);
+                sdfUnfreezeFloatCounter(counter);
             }
         }
         object = object->next;

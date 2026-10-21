@@ -9,8 +9,10 @@
 #define FILE_REQ_WORDS_PER_ENTRY 0x19
 #define FILE_IO_MAX_CHUNK_BYTES 0x8000
 
-struct FileRequest;
+struct FilePacRequest;
 struct FileQueue;
+struct FileRequest;
+struct FileTransferJob;
 struct SdfMemBlock;
 
 /* Selects the operation and callback rows used by a file job. */
@@ -192,8 +194,8 @@ typedef struct FileManWork {
     u8 freeSlots;             /* 0x07 */
     struct FileRequest *head;            /* 0x08: queued requests, linked through next */
     struct FileRequest *tail;            /* 0x0C */
-    struct FileRequest *done;        /* 0x10: completed callbacks, linked through completionNext */
-    struct FileRequest *pacCallbackHead; /* 0x14: queued PAC completion callbacks */
+    struct FileTransferJob *done;        /* 0x10: completed callbacks, linked through completionNext */
+    struct FilePacRequest *pacCallbackHead; /* 0x14: queued PAC completion callbacks */
     struct FileRequest *closingJobs;     /* 0x18: finished jobs whose device state is still open */
     u8 *buffer;               /* 0x1C: retained base of the four device-read slots */
     FileManSlot slots[4];     /* 0x20 */

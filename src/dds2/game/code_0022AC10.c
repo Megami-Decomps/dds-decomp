@@ -25,7 +25,7 @@
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
 #include "btl_action.h"
@@ -1338,7 +1338,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    requestReady = fileRequestIsReady((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
 }
 
@@ -1373,7 +1373,7 @@ void btlLoadModelPack(s32 modelKind, s32 modelId) {
         mdlRequestAsset(modelKind, modelId, 0);
         if (sndFindListNodeForChannel(modelKind, modelId) == 0) {
             btlFormatModelResourcePath(modelKind, modelId, resourcePath);
-            cacheEntry->packRequest = fileQueuePlainDispatchRequest(resourcePath);
+            cacheEntry->packRequest = (FilePacRequest *)fileQueuePlainDispatchRequest(resourcePath);
             btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", resourcePath, modelKind, modelId);
         } else {
             cacheEntry->packRequest = 0;

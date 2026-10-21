@@ -42,7 +42,7 @@
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_field_load_task_args.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
@@ -8250,13 +8250,13 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
         fldFormatAreaDirectory(directory, args->stage, 1);
         sprintf(path, D_003A4B50, directory, args->stage, args->variant);
         btlBossDebugPrintf(D_003A4B60, path);
-        args->request = fileQueuePlainDispatchRequest(path);
+        args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
-        if (args->request != NULL && fileRequestIsReady(args->request)) {
-            FileRequest *request = args->request;
+        if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
+            FilePacRequest *request = args->request;
             node = request->packet.queueHead;
             i = 0;
             while (node != NULL) {
@@ -9669,11 +9669,11 @@ extern char D_003A5020[];
 /* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
 void sndLoadSysEffLb(void) {
     const char *path = D_003A5008;
-    FileRequest *archive = fileQueuePlainDispatchRequest(path);
+    FilePacRequest *archive = (FilePacRequest *)fileQueuePlainDispatchRequest(path);
     PacWork *node;
     u32 i;
 
-    fileWaitForRequestReady(archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf(D_003A5020, path);
     node = archive->packet.queueHead;
     i = 0;

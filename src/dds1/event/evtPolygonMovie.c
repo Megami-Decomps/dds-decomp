@@ -15,7 +15,7 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "itf.h"
-#include "sdf_float_counter.h"
+#include "evt_scaled_value.h"
 #include "evt_blend_vec_color.h"
 
 /* Polygon-movie event parameter blocks blended by the functions below.
@@ -496,7 +496,7 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
 s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame)
 {
-    SdfFloatCounter *clip;
+    PolyMovieClip *clip;
     s32 elapsedFrames;
     s32 duration;
 
@@ -510,11 +510,11 @@ s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame
         if (duration <= elapsedFrames) {
             elapsedFrames = duration;
         }
-        evtScaleValueByMultiplier(clip, (f32)elapsedFrames / (f32)duration);
+        evtScaleValueByMultiplier((EvtScaledValue *)clip, (f32)elapsedFrames / (f32)duration);
         if (undo == 0) {
-            sdfFreezeFloatCounter(clip);
+            sdfFreezeFloatCounter((EvtScaledValue *)clip);
         } else {
-            sdfUnfreezeFloatCounter(clip);
+            sdfUnfreezeFloatCounter((EvtScaledValue *)clip);
         }
     }
 }
@@ -522,7 +522,7 @@ s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame
 /* Store elapsed frames, bounded below by zero and above by clip duration. */
 void evtPolygonMovieClampTime(EffWorldNode *movie, s32 unused, s32 start, s32 end)
 {
-    SdfFloatCounter *clip;
+    PolyMovieClip *clip;
     s32 elapsedFrames;
 
     elapsedFrames = end - start;
@@ -534,7 +534,7 @@ void evtPolygonMovieClampTime(EffWorldNode *movie, s32 unused, s32 start, s32 en
         if ((s32)clip->duration <= elapsedFrames) {
             elapsedFrames = (s32)clip->duration;
         }
-        clip->time = (f32)elapsedFrames;
+        clip->position = (f32)elapsedFrames;
     }
 }
 
