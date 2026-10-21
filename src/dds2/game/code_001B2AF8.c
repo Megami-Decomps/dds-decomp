@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
+#include "btl_command_hint_work.h"
 #include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
 #include "evt_message_window_api.h"
@@ -5532,17 +5533,17 @@ void btlReleaseDialogTaskData(KwlnTask *handle) {
 }
 
 void btlCreateMessageWindow(void) {
-    u8 *window;
+    BtlCommandHintWork *window;
     btlGetRuntime();
-    window = (u8 *)sdfAllocAndClearQuadwords(0x40);
+    window = (BtlCommandHintWork *)sdfAllocAndClearQuadwords(sizeof(*window));
     D_004367F8 = (u32)window;
-    *(s32 *)(window + 0x10) = 0x14;
-    *(s32 *)(window + 0x18) = 0x1800080;
-    *(s32 *)(window + 0x1C) = 0x40800080;
-    *(s32 *)(window + 0x20) = 0x40800080;
-    *(s32 *)(window + 0x24) = 0x60808080;
-    *(s32 *)(window + 0x38) = 0xBB;
-    *(s32 *)(window + 0x3C) = 0x196;
+    window->unk10 = 0x14;
+    window->colors[0] = 0x1800080;
+    window->colors[1] = 0x40800080;
+    window->colors[2] = 0x40800080;
+    window->colors[3] = 0x60808080;
+    window->x = 0xBB;
+    window->y = 0x196;
     btlSetTrackedTaskHandle(4, 1);
 }
 
@@ -5554,8 +5555,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BF978);
 
-/* btlCreateMessageWindow allocates0x40 bytes; native fade halfword+0x14, coordinates+0x38/+0x3C. */
-typedef struct BtlCommandHintWork {u8 pad00[0x10];s32 unk10;s16 fade;u8 pad16[2];u32 colors[4];u8 pad28[0x10];s32 x;s32 y;} BtlCommandHintWork;
 extern const BattlePanelColors D_00416620;
 extern s32 fldGetSceneObjectState(void);
 extern u32 btlGetActorCommandClass(s32,s8);
