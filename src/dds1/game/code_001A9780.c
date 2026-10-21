@@ -2,6 +2,7 @@
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_command_hint_work.h"
+#include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -4911,17 +4912,6 @@ s32 btlDestroyTaskC(void) {
     }
     return 0;
 }
-
-/* The shared dialog creator clears 24 bytes; native counter/alpha/cursor are +4/+8/+14. */
-typedef struct BtlTutorialDialogWork {
-    s8 phase;
-    u8 pad01[3];
-    s32 counter;
-    u16 alpha;
-    u8 pad0A[0xA];
-    s32 itemIndex;
-} BtlTutorialDialogWork;
-typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
 
 extern const BattlePanelColors D_003A2B20;
 extern u8 *D_003BAA8C;
