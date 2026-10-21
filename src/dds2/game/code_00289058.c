@@ -3,6 +3,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "prf_requirement.h"
 #include "common.h"
 #include "mnu_title_stream.h"
@@ -20,7 +21,6 @@ extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
 extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);

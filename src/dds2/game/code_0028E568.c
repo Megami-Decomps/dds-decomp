@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "mdl_flag_api.h"
 
 #include "common.h"
@@ -22,7 +23,6 @@ typedef struct MantraProfileRequirement {
 
 
 
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
 extern const MantraProfileRequirement mnuMantraState0ProfileRequirements[16];

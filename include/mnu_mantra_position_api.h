@@ -8,4 +8,7 @@ struct MantraNodePos;
 /* Return a panel-position record by its signed 16-bit table index. */
 struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index);
 
+/* Return a node-position record by its signed 16-bit table index. */
+struct MantraNodePos *mnuGetMantraNodePositionRecord(s16 index);
+
 #endif

@@ -332,7 +332,6 @@ s32 mnuClassifyMantraNeighborStatus(MnuStatusResource *resource, MantraNodePos *
     return result;
 }
 
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *, s8);
 extern MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *, u16, s8);
 typedef struct MantraNeighborIds {

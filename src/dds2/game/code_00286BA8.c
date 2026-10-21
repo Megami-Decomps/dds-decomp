@@ -3,6 +3,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -92,7 +93,6 @@ extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32)
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
@@ -397,7 +397,6 @@ s32 mtrMantraEquipInit(void) {
 
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
 extern void mtrMantraEquipReleaseHookNoOp();

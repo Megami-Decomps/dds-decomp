@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "prf_profile_cap.h"
 #include "mdl_flag_api.h"
 
@@ -9,7 +10,6 @@ extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *);
 extern void mtrMantraBitResetUnit(DatPartyRecord *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
-extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
