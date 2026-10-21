@@ -12,15 +12,15 @@
 
 extern SdfMotionBindingDispatch D_003982D0;
 
-extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command);
+extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command, s32 targetIndex);
 extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
 
 /* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
 void sdfMotionCaptureSecondaryTextNoOp(void) {
 }
 
-s32 sdfDispatchMotionCommand(void *object, s32 command) {
-    return sdfMotionCommandHandlers[(u16)command](object, command);
+s32 sdfDispatchMotionCommand(void *object, s32 command, s32 targetIndex) {
+    return sdfMotionCommandHandlers[(u16)command](object, command, targetIndex);
 }
 
 /* Bind the selected pair of model slot indices and weights. */
