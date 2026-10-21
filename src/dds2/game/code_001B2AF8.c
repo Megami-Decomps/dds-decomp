@@ -8220,7 +8220,7 @@ void btlUpdateActorVitalEffectState(BtlUnit *unit, BattleActorPanelWork *work, s
     }
 }
 
-extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s16, s8, s8);
+extern void btlDrawActorVitalGauge(BtlUnit *, s32, s32, s32, s32, s32, s32, s16, s8, s8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004168C8);
 
@@ -8239,7 +8239,7 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
         type = work->activeEntries[slot].presentation.hpEffectState == 0x11 ? 1 : 2;
         alpha = work->activeEntries[slot].presentation.fade < 0x80 ?
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.hpEffectFade;
-        func_001C7760(unit, unit->partyRecord.hp, work->activeEntries[slot].presentation.hpTarget,
+        btlDrawActorVitalGauge(unit, unit->partyRecord.hp, work->activeEntries[slot].presentation.hpTarget,
                       unit->partyRecord.maxHp, 10,
                       work->activeEntries[slot].position[0] + offsets.hp.x,
                       work->activeEntries[slot].position[1] + offsets.hp.y, alpha, type, 0);
@@ -8260,7 +8260,7 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
         type = work->activeEntries[slot].presentation.mpEffectState == 0x11 ? 1 : 2;
         alpha = work->activeEntries[slot].presentation.fade < 0x80 ?
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.mpEffectFade;
-        func_001C7760(unit, unit->partyRecord.mp, work->activeEntries[slot].presentation.mpTarget,
+        btlDrawActorVitalGauge(unit, unit->partyRecord.mp, work->activeEntries[slot].presentation.mpTarget,
                       unit->partyRecord.maxMp, 11,
                       work->activeEntries[slot].position[0] + offsets.mp.x,
                       work->activeEntries[slot].position[1] + offsets.mp.y, alpha, type, 1);
@@ -8489,10 +8489,10 @@ void func_001C7020(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
             (y + offsets.values[i][1]) << 3, 0, colors.values, 0,
             btlResourceBlock->resA, sprites.values[i], 0x53);
     }
-    func_001C7760(unit, unit->partyRecord.hp, unit->partyRecord.hp,
+    btlDrawActorVitalGauge(unit, unit->partyRecord.hp, unit->partyRecord.hp,
         unit->partyRecord.maxHp, sprites.values[3],
         x + offsets.values[3][0], y + offsets.values[3][1], alpha, 0, 0);
-    func_001C7760(unit, unit->partyRecord.mp, unit->partyRecord.mp,
+    btlDrawActorVitalGauge(unit, unit->partyRecord.mp, unit->partyRecord.mp,
         unit->partyRecord.maxMp, sprites.values[4],
         x + offsets.values[4][0], y + offsets.values[4][1], alpha, 0, 1);
 }
@@ -8501,7 +8501,7 @@ extern const BattlePanelColors D_00416948;
 
 /* Crop the HP/MP sprite to the selected amount, draw its change overlay, then
  * restore the resource-owned geometry and crop parameters for later users. */
-void func_001C7760(BtlUnit *unit, s32 current, s32 displayed, s32 maximum,
+void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maximum,
                    s32 sprite, s32 x, s32 y, s16 alpha, s8 mode, s8 stat) {
     BattlePanelColors colors = D_00416948;
     s32 flags = 0;
