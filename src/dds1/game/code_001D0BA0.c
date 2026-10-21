@@ -3062,7 +3062,7 @@ void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
 }
 
 s32 btlIsUnitAtStoredPosition(u8 *object) {
-    f32 position[3];
+    f32 position[4];
     btlCopyUnitCurrentPosition(object, position);
     if (*(f32 *)(object + 0x30) == position[0] &&
         *(f32 *)(object + 0x34) == position[1] &&

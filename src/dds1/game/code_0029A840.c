@@ -194,7 +194,7 @@ void effBroadcastModelMask(EffModelOwner *owner, u32 color) {
 }
 
 void effApplyScaledModelTertiaryVector(EffModelOwner *owner, float scale) {
-    float v[3];
+    float v[4];
     float t;
 
     t = owner->scale * scale;
