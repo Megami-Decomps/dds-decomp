@@ -846,7 +846,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         /* fallthrough */
     case 26:
     case 31:
-        if (mnuMovieMenuState->timedA.pos < 0x200) {
+        if (mnuMovieMenuState->timedA.control.pos < 0x200) {
             if (mnuMovieMenuState->movieDrawn == 0) {
                 mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
             }
@@ -1289,8 +1289,8 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     }
 
     mnuAdvanceTimedSlideBar(&mnuMovieMenuState->timedA, 0x52);
-    mnuAdvanceMultiSpriteSlideBar((SlideBar *)&mnuMovieMenuState->timedB, 0x52);
-    mnuDrawMovieMenuSlideBar(&mnuMovieMenuState->timedA, (SlideBar *)&mnuMovieMenuState->timedB, 0x52);
+    mnuAdvanceMultiSpriteSlideBar(&mnuMovieMenuState->timedB.control, 0x52);
+    mnuDrawMovieMenuSlideBar(&mnuMovieMenuState->timedA, &mnuMovieMenuState->timedB.control, 0x52);
     mnuDrawExpandingMovieMenuPulseBar((MovieMenuPulse *)mnuMovieMenuState->barSmall, 0x52);
     mnuAdvancePairedSlideBars((SlideBarPair *)mnuMovieMenuState->movie, 0x52);
     mnuAdvanceSlideBarValue((SlideBar *)mnuMovieMenuState->barB, 0x52);

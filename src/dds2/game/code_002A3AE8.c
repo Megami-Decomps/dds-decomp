@@ -605,10 +605,10 @@ void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer) {
         return;
     }
     switch (mode) {
-    case 2: bar->pos = 0; mode = 0; break;
-    case 3: mode = 1; bar->pos = 0x200; break;
+    case 2: bar->control.pos = 0; mode = 0; break;
+    case 3: mode = 1; bar->control.pos = 0x200; break;
     }
-    bar->active = mode;
+    bar->control.active = mode;
 }
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
@@ -620,20 +620,20 @@ void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 drawContext) {
             mnuTimedSlideBarSetState(bar, bar->id, 0);
         }
     }
-    if (bar->active == 0 && bar->pos == 0) {
+    if (bar->control.active == 0 && bar->control.pos == 0) {
         return;
     }
-    mnuDrawSprite(0, 0, 0, bar->pos / 4, 0, 0x12, drawContext);
-    if (bar->active != 0) {
-        bar->pos += 0x10;
+    mnuDrawSprite(0, 0, 0, bar->control.pos / 4, 0, 0x12, drawContext);
+    if (bar->control.active != 0) {
+        bar->control.pos += 0x10;
     } else {
-        bar->pos -= 8;
+        bar->control.pos -= 8;
     }
-    if (bar->pos > 0x200) {
-        bar->pos = 0x200;
+    if (bar->control.pos > 0x200) {
+        bar->control.pos = 0x200;
     }
-    if (bar->pos < 0) {
-        bar->pos = 0;
+    if (bar->control.pos < 0) {
+        bar->control.pos = 0;
     }
 }
 
@@ -669,7 +669,7 @@ typedef struct MovieMenuFadeState {
 
 void mnuDrawMovieMenuSlideBar(SlideBarTimed *primary, SlideBar *secondary, s32 drawContext) {
     MovieMenuFadeState *fade;
-    s32 primaryPos = primary->pos;
+    s32 primaryPos = primary->control.pos;
     s32 x;
 
     if (primaryPos == 0 && secondary->pos == 0) {

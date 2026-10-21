@@ -977,11 +977,14 @@ typedef struct SlideBar {
 
 /* Sliding bar that switches to a queued mode after a countdown. */
 typedef struct SlideBarTimed {
-    s32 active;
-    s32 pos;
+    SlideBar control;
     s32 id;
     s32 timer;
 } SlideBarTimed;
+typedef char SlideBarTimed_size_must_be_0x10[
+    sizeof(SlideBarTimed) == 0x10 ? 1 : -1];
+typedef char SlideBarTimed_timer_at_0x0C[
+    ((u32)&((SlideBarTimed *)0)->timer == 0x0C) ? 1 : -1];
 
 typedef struct MovieMenuEffectSlot {
     s32 active;
