@@ -3628,7 +3628,7 @@
 0x0023AE70	evtSetWorldSlotValue	inferred	confidence=high; matched-C; src/dds2/event/evtStage.c:114:func_0023AE70; Finds world slot data and stores provided value through simple slot setter.; twin=0x00220300, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0023AEB0	evtStageRelinkOwnedNodeResource	inferred	Rekeys a stage-owned node to a world object and replaces its resource. [names_reviewed12.tsv]
 0x0023AF20	evtCheckWorldObjectResourceScale	inferred	Compares the world-object resource scale to the value selected by its kind. [names_reviewed8.tsv]
-0x0023AFC8	evtToggleWorldSlotScaledValueFlag	inferred	Sets or clears a scaled-value flag in the world object secondary slot. [names_reviewed11.tsv]
+0x0023AFC8	evtSetWorldSlotScaleWrapEnabled	inferred	Sets or clears the world-slot float counter wrap mode according to the enabled argument. [names_reviewed11.tsv]
 0x0023B018	evtCreateWorldObjectAtTransform	inferred	Allocates a world object at a position and rotation and sets its inner scale. [names_reviewed8.tsv]
 0x0023B078	evtDispatchSupportedNodeOnClear	inferred	Only node kinds 1, 7, 8 dispatch on clear; callback has no proven effect-node identity. [names_reviewed11.tsv]
 0x0023B0D0	evtApplyIndexValueToWorldNodes	inferred	Computes an indexed value and sends it to every world node. [names_reviewed8.tsv]
