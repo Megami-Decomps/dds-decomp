@@ -134,7 +134,7 @@ extern void mnuSetMovieWorkFlag(s32, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-extern void func_00345BA0(void *, SdfPoolNode *);
+extern void func_00345BA0(MovObj *, SdfPoolNode *);
 extern void mnuSubmitMovieDrawPacket(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
