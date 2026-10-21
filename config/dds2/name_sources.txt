@@ -9898,3 +9898,6 @@
 0x00435E90	btlSelectedConditionalEncounterIndex	inferred	Stores encounterIndex when a weighted scene passes the party-level eligibility check. Paired DDS1 0x003BAABC.
 0x00435E94	btlSelectedConditionalEncounterResult	inferred	Stores the returned packed group, entry, and scene value on successful selection. Paired DDS1 0x003BAAC0.
 0x004681D0	sdfDisplayEnvironment	inferred	Initialized through the uncached sceGsSetDefDispEnv alias; receives the selected display buffer page and is submitted through sceGsPutDispEnv. Paired DDS1 0x003EB820.
+0x00435DD8	datAffinityTablePrimary	inferred	Selected by datGetEffectiveAffinity when unit flags include 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS1 0x003BAA08.
+0x00435DDC	datAffinityTableAlternate	inferred	Selected by datGetEffectiveAffinity when unit flags omit 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS1 0x003BAA0C.
+0x00435DFC	datExternalAffinityTable	inferred	Selected for external-skill-table records and supplies override rows 381–383; also read by affinity debug. Paired DDS1 0x003BAA2C.

@@ -211,9 +211,9 @@ s32 datRaiseCalculatedValueFloor(DatPartyRecord *unit, s32 packedValue) {
     return packedValue;
 }
 
-extern s32 *D_003BAA08;
-extern s32 *D_003BAA0C;
-extern s32 *D_003BAA2C;
+extern s32 *datAffinityTablePrimary;
+extern s32 *datAffinityTableAlternate;
+extern s32 *datExternalAffinityTable;
 
 s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     s32 calculatedValue;
@@ -231,15 +231,15 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     unitId = unit->unitId;
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         if (unit->flags & 0x1000) {
-            calculatedValue = D_003BAA08[unitId * 19 + element];
+            calculatedValue = datAffinityTablePrimary[unitId * 19 + element];
         } else {
-            calculatedValue = D_003BAA0C[unitId * 19 + element];
+            calculatedValue = datAffinityTableAlternate[unitId * 19 + element];
         }
     } else {
         if (unit->affinityTableIndex != 0) {
-            calculatedValue = D_003BAA2C[unit->affinityTableIndex * 19 + element];
+            calculatedValue = datExternalAffinityTable[unit->affinityTableIndex * 19 + element];
         } else {
-            calculatedValue = D_003BAA2C[datEnemyRecords[unitId].affinityTableIndex * 19 + element];
+            calculatedValue = datExternalAffinityTable[datEnemyRecords[unitId].affinityTableIndex * 19 + element];
         }
     }
 
@@ -247,13 +247,13 @@ s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
         calculatedValue = datRaiseCalculatedValueFloor(unit, calculatedValue);
     }
     if (unit->flags & 0x2000) {
-        calculatedValue = D_003BAA2C[383 * 19 + element];
+        calculatedValue = datExternalAffinityTable[383 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
-        calculatedValue = D_003BAA2C[382 * 19 + element];
+        calculatedValue = datExternalAffinityTable[382 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
-        calculatedValue = D_003BAA2C[381 * 19 + element];
+        calculatedValue = datExternalAffinityTable[381 * 19 + element];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 4) {
         if (element < 2) {
@@ -2034,9 +2034,9 @@ s32 evtPushRequestedRosterPresence(void) {
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA08);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datAffinityTablePrimary);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA0C);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datAffinityTableAlternate);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA10);
 
@@ -2052,7 +2052,7 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", datEnemyAiRecords);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA28);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA2C);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datExternalAffinityTable);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA30);
 
