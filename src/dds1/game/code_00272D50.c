@@ -265,7 +265,7 @@ void mnuSelectStaffDisplayCategory(u32 context) {
     mnuSetStaffDisplayMode(2, context);
 }
 
-void mnuNoOpStaffDisplayTeardown() {
+void mnuNoOpStaffDisplayTeardown(StaffDisplayContext *context) {
 }
 
 s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
