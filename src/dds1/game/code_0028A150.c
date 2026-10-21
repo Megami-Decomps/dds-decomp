@@ -360,9 +360,9 @@ extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
 
 
-extern void mnuRecordSetVector(void *record, const u128 *vector);
+extern void mnuRecordSetVector(void *record, const void *src);
 
-extern void fileSetRecordSecondVector(void *record, const u128 *vector);
+extern void fileSetRecordSecondVector(void *record, const void *src);
 
 extern void dds3AdminSubmitModeRequest(s32 kind, void *data, s32 size, s32 flags);
 
@@ -7426,16 +7426,16 @@ void fileReadVectorPtr20(void *record, u128 *out) {
     PCP_COPY_VECTOR(out, ((FileSlotTable *)record)->data0);
 }
 
-void mnuRecordSetVector(void *record, const u128 *value) {
-    PCP_COPY_VECTOR(((FileSlotTable *)record)->data0, value);
+void mnuRecordSetVector(void *record, const void *src) {
+    PCP_COPY_VECTOR(((FileSlotTable *)record)->data0, src);
 }
 
 void fileReadRecordSecondVector(void *record, u128 *out) {
     PCP_COPY_VECTOR(out, (u128 *)((FileSlotTable *)record)->data0 + 1);
 }
 
-void fileSetRecordSecondVector(void *record, const u128 *value) {
-    PCP_COPY_VECTOR((u128 *)((FileSlotTable *)record)->data0 + 1, value);
+void fileSetRecordSecondVector(void *record, const void *src) {
+    PCP_COPY_VECTOR((u128 *)((FileSlotTable *)record)->data0 + 1, src);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", effModelUpdateControlFlags);
