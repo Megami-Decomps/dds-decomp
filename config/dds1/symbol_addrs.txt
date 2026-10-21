@@ -11116,6 +11116,7 @@ sdfGraphicsBufferThread = 0x003BD9D0;
 sdfGraphicsBufferThreadStack = 0x003E2820;
 sdfGraphicsTransferThreadStack = 0x003E3820;
 sdfGraphicsTransferThreadId = 0x003BD9D8;
+sdfGraphBufferRecreationPending = 0x003BD9DC;
 sdfGsModeResetRequested = 0x003BD9DD;
 sdfMotionCommandHandlers = 0x00398360;
 sdfMotionSlotPairDispatch = 0x00398368;
