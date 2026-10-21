@@ -83,11 +83,6 @@ extern s32 fldCountSceneSlots(void);
 
 extern char D_003A1A40[];
 
-typedef struct BattleFearState {
-    u8 pad_000[0x1FC];
-    u32 flags;
-} BattleFearState;
-
 extern s32 dds3FindEntryIndex(s32);
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
