@@ -12,6 +12,7 @@ typedef struct MenuThresholdEntry {
 } MenuThresholdEntry;
 
 struct DatPartyRecord;
+struct SdfCounterDisplay;
 
 /* Native list owner, shared by both games' allocator and window consumers. */
 struct MenuListNode {
@@ -47,11 +48,15 @@ struct MenuListNode {
         void *childPanel;
         char *title;
         struct DatPartyRecord *partyRecord;
+        /* Separate 0x10-byte payload: DDS1 2C43F8 / DDS2 30C480. */
+        struct SdfCounterDisplay *counterDisplay;
     };
 };
 typedef char MenuListNode_sprite_word_must_be_4[
     (sizeof(((struct MenuListNode *)0)->sprites[0].sprite) == 4) ? 1 : -1];
 typedef char MenuListNode_size_must_be_0x74[(sizeof(struct MenuListNode) == 0x74) ? 1 : -1];
+typedef char MenuListNode_counterDisplay_at_0x70[
+    ((u32)&((struct MenuListNode *)0)->counterDisplay == 0x70) ? 1 : -1];
 struct MenuList {
     u32 stateFlags;     /* 0x00: cursor and selection-control bits */
     u32 flags;
@@ -72,6 +77,9 @@ struct MenuList {
     u32 categoryMarkerEnabled; /* 0x38: draw the active category marker. */
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
+typedef char MenuList_size_must_be_0x40[(sizeof(struct MenuList) == 0x40) ? 1 : -1];
+typedef char MenuList_context_at_0x30[
+    ((u32)&((struct MenuList *)0)->context == 0x30) ? 1 : -1];
 
 /* Reset the list viewport and optionally replay its saved cursor. */
 void mnuResetNodeLinks(struct MenuList *list, s32 restoreCursor);
