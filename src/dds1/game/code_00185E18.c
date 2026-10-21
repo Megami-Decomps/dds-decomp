@@ -105,7 +105,7 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-extern s32 fldIsUpdateInhibited();
+extern u32 fldIsUpdateInhibited();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
@@ -404,7 +404,7 @@ void effDrawBlurListWithFramePacket(void *list) {
     D_003253E8.append(&D_003253E8, list);
 }
 
-extern s32 fldIsUpdateInhibited();
+extern u32 fldIsUpdateInhibited();
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */

@@ -60,7 +60,7 @@ extern SdfPoolNode D_003253E8;
 extern SdfPoolNode D_003253C8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern s32 fldIsUpdateInhibited();
+extern u32 fldIsUpdateInhibited();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 

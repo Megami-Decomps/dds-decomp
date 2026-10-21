@@ -375,7 +375,7 @@ extern void kwlnDrawBackgroundFadeBands(void);
 extern void kwlnFadeUpdate(void);
 extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
-extern s32 fldIsUpdateInhibited(void);
+extern u32 fldIsUpdateInhibited(void);
 extern void func_002EA5C0(s32);
 extern void sdfGrReqDraw(SdfListHead *, SdfPacketChain *);
 extern SdfPoolNode *D_00325788[13][4];
