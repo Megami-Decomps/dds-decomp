@@ -47,18 +47,18 @@ void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
     graph->buffers[1] = sdfAllocImageBuffer(width, height, bufferFormat);
 }
 
-extern SdfDisplayEnvView D_003EB820;
+extern SdfDisplayEnvView sdfDisplayEnvironment;
 
 /* Select the indexed image buffer for display; the index and pointer are unchecked. */
 void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
     SdfTexResource *displayBuffer = D_003980E0.buffers[bufferIndex];
 
     /* Initialize the environment through its uncached main-RAM alias. */
-    sceGsSetDefDispEnv((void *)(((u32)&D_003EB820 & SDF_GRAPH_CPU_ADDRESS_MASK) | SDF_GRAPH_UNCACHED_ALIAS),
+    sceGsSetDefDispEnv((void *)(((u32)&sdfDisplayEnvironment & SDF_GRAPH_CPU_ADDRESS_MASK) | SDF_GRAPH_UNCACHED_ALIAS),
                       0, D_003980E0.width, D_003980E0.height, 0, 0);
     /* VRAM offsets are in 32-bit words; FBP counts 2048-word (8 KiB) pages. */
-    D_003EB820.framebufferPage = displayBuffer->word >> SDF_GS_FRAMEBUFFER_PAGE_SHIFT;
-    sceGsPutDispEnv(&D_003EB820);
+    sdfDisplayEnvironment.framebufferPage = displayBuffer->word >> SDF_GS_FRAMEBUFFER_PAGE_SHIFT;
+    sceGsPutDispEnv(&sdfDisplayEnvironment);
 }
 
 extern SdfGraphModeDefaults D_003980B0[];

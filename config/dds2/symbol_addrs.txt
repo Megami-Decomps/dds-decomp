@@ -7258,6 +7258,7 @@ sdfInstalledSpriteSlots = 0x0045C7C0;
 mnuStepCounterThreshold = 0x0045C866;
 sdfChipClassTable = 0x0045F0A0;
 sdfGeneralHeap = 0x0045F0F8;
+sdfDisplayEnvironment = 0x004681D0; // size:0x28
 sdfTextureQueueWork = 0x004681F8;
 sdfPadPorts = 0x00476480;
 sndMidiTrackState = 0x0047AA40;

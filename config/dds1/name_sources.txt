@@ -9861,3 +9861,4 @@
 0x003BAAC0	btlSelectedConditionalEncounterResult	inferred	Stores the returned packed group, entry, and scene value on successful selection. Paired DDS2 0x00435E94.
 0x001A5C40	btlCalculateHpAttackOrRestoreAmount	inferred	Calculates a command's HP attack or recovery amount using HP effect parameters; debug output uses btl:hp labels, and its caller stores attack and restore results separately.
 0x001A6118	btlCalculateMpAttackOrRestoreAmount	inferred	Calculates a command's MP attack or recovery amount using MP effect parameters; debug output uses btl:mp labels, and its caller stores attack and restore results separately.
+0x003EB820	sdfDisplayEnvironment	inferred	Initialized through the uncached sceGsSetDefDispEnv alias; receives the selected display buffer page and is submitted through sceGsPutDispEnv. Paired DDS2 0x004681D0.

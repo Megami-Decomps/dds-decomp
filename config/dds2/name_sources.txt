@@ -9897,3 +9897,4 @@
 0x00435E8C	btlConditionalEncounterCachedInterval	inferred	Caches the sampled interval while positive; a successful eligible-scene selection and dds3WorkClear reset it to zero. Paired DDS1 0x003BAAB8.
 0x00435E90	btlSelectedConditionalEncounterIndex	inferred	Stores encounterIndex when a weighted scene passes the party-level eligibility check. Paired DDS1 0x003BAABC.
 0x00435E94	btlSelectedConditionalEncounterResult	inferred	Stores the returned packed group, entry, and scene value on successful selection. Paired DDS1 0x003BAAC0.
+0x004681D0	sdfDisplayEnvironment	inferred	Initialized through the uncached sceGsSetDefDispEnv alias; receives the selected display buffer page and is submitted through sceGsPutDispEnv. Paired DDS1 0x003EB820.
