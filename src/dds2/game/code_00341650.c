@@ -363,7 +363,7 @@ extern u8 D_0047AA50[];
 
 extern s32 D_004391D0;
 
-extern void func_003666D8(void *a0, void *a1);
+extern void InvalidDCache(void *a0, void *a1);
 
 static inline u32 sndSendCommand(u32 command, const void *packet, u32 size) {
     return sndSendCommandPacket(command, 0, packet, size);
@@ -410,7 +410,7 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
     SndTrackSlot *slot;
     s32 i;
 
-    func_003666D8(work, (u8 *)work + 0x8D0);
+    InvalidDCache(work, (u8 *)work + 0x8D0);
     slot = work->slots;
     for (i = 0; i < 13; i++) {
         if (slot->id == id) {

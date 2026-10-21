@@ -318,7 +318,7 @@ extern s8 D_00438AB8;
 
 extern char D_00438AC0[];
 
-extern s32 func_00367B60(const char *, ...);
+extern s32 scePrintf(const char *, ...);
 
 
 
@@ -353,7 +353,7 @@ void sdfDevPrintText(const char *text) {
             sceSifMCallRpc(&sdfDevRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
-        func_00367B60(D_00438AC0, text);
+        scePrintf(D_00438AC0, text);
     }
 }
 

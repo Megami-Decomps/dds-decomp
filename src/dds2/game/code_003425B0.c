@@ -1862,9 +1862,9 @@ void sdfSoundInitIpuStream(void) {
     sdfSoundNodeHead = 0;
     D_00439204 = NULL;
     D_004391FC = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
-    sdfEnableDmacChannel(3);
+    EnableDmac(3);
     D_00439200 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
-    sdfEnableDmacChannel(4);
+    EnableDmac(4);
     D_00439214 = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     _StartThread(D_00439214, 0);
 }
@@ -1879,12 +1879,12 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
         sdfRemoveHandler(D_004391FC);
         D_004391FC = 0;
     }
-    sdfDisableDmacChannel(3);
+    DisableDmac(3);
     if (D_00439200 != 0) {
         sdfRemoveHandler(D_00439200);
         D_00439200 = 0;
     }
-    return sdfDisableDmacChannel(4);
+    return DisableDmac(4);
 }
 
 
