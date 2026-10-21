@@ -445,7 +445,7 @@ extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity,
 
 
 
-extern DatPartyRecord *dds3FindEntry();
+extern DatPartyRecord *dds3FindEntry(s32 rosterIndex);
 
 extern ScrData *evtWorkScriptTask;
 
@@ -922,9 +922,7 @@ u16 dds3Clamp99(s32 entryAddress) {
 }
 
 /* Find the first occupied slot with this roster identifier, or return zero. */
-DatPartyRecord *dds3FindEntry(rosterIndex)
-    s32 rosterIndex;
-{
+DatPartyRecord *dds3FindEntry(s32 rosterIndex) {
     s32 slotIndex = 0;
     DatPartyRecord *entry = datGameState->party;
     do {
