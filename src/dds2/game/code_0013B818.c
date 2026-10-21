@@ -1854,7 +1854,7 @@ void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
  * find the first enabled kind-7 actor for the pending field, motion and
  * index, mark its floor and exploration bits, then submit its sequence and
  * clear the pending selection. */
-void func_00141898(void) {
+void fldSubmitSelectedActorWaypointTransition(void) {
     FieldSequenceRecord record;
     s32 stage;
     s32 room;

@@ -49,7 +49,7 @@ extern void evtDestroySecondaryWorldNode(void);
 extern f32 fabsf(f32);
 extern void fldStopCurrentBgm(void);
 extern void fldUpdateCameraTarget(void);
-extern void func_0013EC68(void);
+extern void fldSubmitSelectedActorWaypointTransition(void);
 
 extern EffWorldNode *dds3CreateConfiguredCameraObject(s32 key, void *targetPosition, u128 *worldEye, u128 *localUp);
 
@@ -2453,7 +2453,7 @@ void fldProcessDeferredSceneCommand(void) {
         fldDispatchDeferredFieldCommand();
         return;
     }
-    func_0013EC68();
+    fldSubmitSelectedActorWaypointTransition();
 }
 
 void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
