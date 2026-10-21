@@ -587,7 +587,81 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
     return &D_003F9FC0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevFindDiscFileRecordByPath);
+extern s32 memcmp(const void *, const void *, u32);
+
+extern u32 D_003BDA40;
+
+extern char D_003BD3E0[]; /* cdrom */
+
+extern char D_003B4548[]; /* filename too long : %s */
+
+/* Walk a '/'-separated path through the preloaded disc index: each directory
+ * holds its children sorted by name, with a negative size whose magnitude is
+ * the child count, so every segment is a binary search. */
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+    char name[32];
+    char *path = (char *)pathAddress;
+    char *flag = (char *)flagAddress;
+    char *segment;
+    char *cursor;
+    SdfDiscFileRecord *entries;
+    SdfDiscFileRecord *node;
+    u32 base;
+    s32 character;
+    u32 length;
+    s32 low;
+    s32 high;
+    s32 mid;
+    s32 order;
+
+    if (memcmp(path, D_003BD3E0, 5) == 0) {
+        return sdfDevFindDiscFileRecordByCdromPath(pathAddress, sectorOut, flagAddress);
+    }
+    base = D_003BDA44;
+    node = (SdfDiscFileRecord *)base;
+    segment = path;
+    do {
+        character = *segment;
+        if (character == '/') {
+            segment++;
+        }
+        cursor = segment;
+        while (*cursor != '/' && *cursor != 0) {
+            cursor++;
+        }
+        length = cursor - segment;
+        if (length >= 32) {
+            sdfPanicHaltPrintf(D_003B4548, path);
+        }
+        memcpy(name, segment, length);
+        name[length] = 0;
+        entries = (SdfDiscFileRecord *)(base + node->field4);
+        low = 0;
+        high = -node->size;
+        for (;;) {
+            if (low >= high) {
+                return NULL;
+            }
+            mid = (low + high) >> 1;
+            node = &entries[mid];
+            order = strcmp(name, (char *)(base + node->field0));
+            if (order == 0) {
+                break;
+            }
+            if (order < 0) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        segment = cursor;
+    } while (*cursor != 0);
+    *(u32 *)sectorOut = D_003BDA40 + node->field4;
+    if (flag != NULL) {
+        *flag = 0;
+    }
+    return node;
+}
 
 s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 result;

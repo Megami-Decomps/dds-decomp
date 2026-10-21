@@ -572,7 +572,79 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
     return &D_00476940;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevFindDiscFileRecordByPath);
+extern s32 memcmp(const void *, const void *, u32);
+
+extern char D_00438AD0[]; /* cdrom */
+
+extern char D_0042E258[]; /* filename too long : %s */
+
+/* Walk a '/'-separated path through the preloaded disc index: each directory
+ * holds its children sorted by name, with a negative size whose magnitude is
+ * the child count, so every segment is a binary search. */
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+    char name[32];
+    char *path = (char *)pathAddress;
+    char *flag = (char *)flagAddress;
+    char *segment;
+    char *cursor;
+    SdfDiscFileRecord *entries;
+    SdfDiscFileRecord *node;
+    u32 base;
+    s32 character;
+    u32 length;
+    s32 low;
+    s32 high;
+    s32 mid;
+    s32 order;
+
+    if (memcmp(path, D_00438AD0, 5) == 0) {
+        return sdfDevFindDiscFileRecordByCdromPath(pathAddress, sectorOut, flagAddress);
+    }
+    base = D_004391A4;
+    node = (SdfDiscFileRecord *)base;
+    segment = path;
+    do {
+        character = *segment;
+        if (character == '/') {
+            segment++;
+        }
+        cursor = segment;
+        while (*cursor != '/' && *cursor != 0) {
+            cursor++;
+        }
+        length = cursor - segment;
+        if (length >= 32) {
+            sdfPanicHaltPrintf(D_0042E258, path);
+        }
+        memcpy(name, segment, length);
+        name[length] = 0;
+        entries = (SdfDiscFileRecord *)(base + node->field4);
+        low = 0;
+        high = -node->size;
+        for (;;) {
+            if (low >= high) {
+                return NULL;
+            }
+            mid = (low + high) >> 1;
+            node = &entries[mid];
+            order = strcmp(name, (char *)(base + node->field0));
+            if (order == 0) {
+                break;
+            }
+            if (order < 0) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        segment = cursor;
+    } while (*cursor != 0);
+    *(u32 *)sectorOut = D_004391A0 + node->field4;
+    if (flag != NULL) {
+        *flag = 0;
+    }
+    return node;
+}
 
 extern s32 D_004391AC;
 
