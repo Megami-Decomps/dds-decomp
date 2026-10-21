@@ -37,19 +37,31 @@ typedef struct EvtPackLoadState {
     EvtPackEntry *entries;        /* 0x18 */
     u8 *entryPoint;               /* 0x1C */
     u8 pad20[4];
-    s32 sceneAllocation1;         /* 0x24 */
+    struct SdfMemBlock *sceneAllocation1; /* 0x24: descriptor released at teardown. */
     u8 pad28[8];
-    s32 sceneAllocation2;         /* 0x30 */
+    struct SdfMemBlock *sceneAllocation2; /* 0x30: descriptor released at teardown. */
     u8 pad34[4];
     struct SdfTex *effect72;      /* 0x38 */
-    s32 effect71;                 /* 0x3C */
-    s32 effect76;                 /* 0x40 */
-    s32 effect75;                 /* 0x44 */
+    struct SdfTex *effect71;      /* 0x3C: retained channel texture. */
+    struct SdfTex *effect76;      /* 0x40: retained channel texture. */
+    struct SdfTex *effect75;      /* 0x44: retained channel texture. */
 } EvtPackLoadState;
 
 typedef char EvtPackEntry_size_must_be_0x20[(sizeof(EvtPackEntry) == 0x20) ? 1 : -1];
 typedef char EvtPackHeader_size_must_be_0x20[(sizeof(EvtPackHeader) == 0x20) ? 1 : -1];
 typedef char EvtPackLoadState_size_must_be_0x48[(sizeof(EvtPackLoadState) == 0x48) ? 1 : -1];
+typedef char EvtPackLoadState_sceneAllocation1_at_0x24[
+    ((u32)&((EvtPackLoadState *)0)->sceneAllocation1 == 0x24) ? 1 : -1];
+typedef char EvtPackLoadState_sceneAllocation2_at_0x30[
+    ((u32)&((EvtPackLoadState *)0)->sceneAllocation2 == 0x30) ? 1 : -1];
+typedef char EvtPackLoadState_effect72_at_0x38[
+    ((u32)&((EvtPackLoadState *)0)->effect72 == 0x38) ? 1 : -1];
+typedef char EvtPackLoadState_effect71_at_0x3C[
+    ((u32)&((EvtPackLoadState *)0)->effect71 == 0x3C) ? 1 : -1];
+typedef char EvtPackLoadState_effect76_at_0x40[
+    ((u32)&((EvtPackLoadState *)0)->effect76 == 0x40) ? 1 : -1];
+typedef char EvtPackLoadState_effect75_at_0x44[
+    ((u32)&((EvtPackLoadState *)0)->effect75 == 0x44) ? 1 : -1];
 
 /* These numeric task IDs resolve to the camp-owned event-pack state. */
 EvtPackLoadState *evtGetEventPackLoadState(u32 taskId);
