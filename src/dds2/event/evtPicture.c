@@ -27,7 +27,7 @@ s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
     EvtPictureWork *picture;
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);
-    if (picture->flags & EVT_PICTURE_FLAG_DRAW_ENABLED) {
+    if (picture->drawEnabled & EVT_PICTURE_FLAG_DRAW_ENABLED) {
         if (picture->texture != 0) {
             evtSubmitPictureDrawPacket(picture->texture);
         }

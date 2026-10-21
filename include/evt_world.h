@@ -23,11 +23,15 @@ struct SdfMemBlock;
 
 /* The picture-task allocator creates this complete 0x08-byte state. */
 typedef struct EvtPictureWork {
-    u32 flags;
+    u32 drawEnabled; /* Only EVT_PICTURE_FLAG_DRAW_ENABLED is set or tested. */
     struct SdfTex *texture;
 } EvtPictureWork;
 
 typedef char EvtPictureWork_size_must_be_0x08[(sizeof(EvtPictureWork) == 0x08) ? 1 : -1];
+typedef char EvtPictureWork_drawEnabled_at_0x00[
+    ((u32)&((EvtPictureWork *)0)->drawEnabled == 0x00) ? 1 : -1];
+typedef char EvtPictureWork_texture_at_0x04[
+    ((u32)&((EvtPictureWork *)0)->texture == 0x04) ? 1 : -1];
 
 /* Native resource handle and the loader's corresponding data address. */
 typedef struct EvtResourcePair {
