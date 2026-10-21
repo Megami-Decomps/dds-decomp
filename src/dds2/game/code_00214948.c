@@ -1031,36 +1031,36 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     return 1;
 }
 
-s32 func_00216B40(s32 actor) {
+s32 btlSelectTargetsByTargetType(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    u8 mode = datCommandRecords[((ActionStateLink *)actor)->indexWork.skillId].targetType;
+    u8 targetType = datCommandRecords[((ActionStateLink *)actor)->indexWork.skillId].targetType;
     u32 count;
-    u16 picked[12];
+    u16 selectionFlags[12];
     u32 i;
-    s32 found;
+    s32 candidateCount;
     s32 result;
 
     btlBuildUnitIndexList((void *)actor, list, 2, 0, 0);
-    if (mode != 0) {
+    if (targetType != 0) {
         btlCopyIndexList(((ActionStateLink *)actor)->indexWork.indices, list);
         btlFreeIndexList(list);
         result = 1;
     } else {
         count = btlGetIndexListCount(list);
-        found = 0;
-        memset(picked, 0, sizeof(picked));
+        candidateCount = 0;
+        memset(selectionFlags, 0, sizeof(selectionFlags));
         for (i = 0; i < count; i++) {
             if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
-                picked[found] = 1;
-                found++;
+                selectionFlags[candidateCount] = 1;
+                candidateCount++;
             }
         }
-        if (found == 0) {
+        if (candidateCount == 0) {
             btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, ((ActionStateLink *)actor)->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlSelectRandomUnitFromMask(list, picked, count));
+        btlAppendIndexListEntry(((ActionStateLink *)actor)->indexWork.indices, btlSelectRandomUnitFromMask(list, selectionFlags, count));
         btlFreeIndexList(list);
         result = 1;
     }
