@@ -43,6 +43,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_rotate_block_inputs.h"
 #include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
 #include "eff_pcp_rotate_work.h"
@@ -3263,21 +3264,12 @@ EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     return work;
 }
 
-typedef struct EffPCPBlockSetInputs {
-    void *head[3];
-    void *selectedHead; /* Replaced by the current head before each child build. */
-    void *group[5];
-    void *mid[3];
-    void *tail[5];
-    void *last;
-} EffPCPBlockSetInputs;
-
 /* Gathers 17 parameter blocks from the effect table (the first goes to the
  * rotate effect as its source, the rest into an on-stack block set). */
 void effPcpRotateCreateFromTable(args)
     void *args;
 {
-    EffPCPBlockSetInputs set;
+    EffPCPRotateBlockInputs set;
     void **group;
     void *first;
     s32 idx;
