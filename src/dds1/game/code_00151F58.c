@@ -470,7 +470,7 @@ extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
 extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
 
-void func_001528C0(EffUnitObject *instance) {
+void effDrawBillboardInstance(EffUnitObject *instance) {
     EffPacketParams params;
     s32 modeValues[3];
     f32 matrix[4][4];
@@ -2606,7 +2606,7 @@ void effFreePacketRecordScaleTemplate(u32 effect) {
 }
 
 /* vu0 routine: seed radial placement, normalized velocity and activation age. */
-void func_00157280(EffTemplatePacketList *effect, s32 index) {
+void effInitRadialEmitterPacket(EffTemplatePacketList *effect, s32 index) {
     f32 direction[4];
     EffectBufferRecord *packet = effect->head.buffer->records;
     f32 radius;
@@ -2718,7 +2718,7 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
         f32 magnitude;
 
         if (age == EFF_PACKET_INITIAL_TAG) {
-            func_00157280(effect, index);
+            effInitRadialEmitterPacket(effect, index);
             age = packet->age;
         }
         if (age >= 0) {
