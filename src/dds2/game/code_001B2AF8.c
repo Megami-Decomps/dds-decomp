@@ -179,8 +179,6 @@ extern u32 sdfGetRandInt(void *, u32);
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
-extern s32 btlRollAiBucket();
-
 extern s32 fldCountSceneSlots(void);
 
 extern u8 *datRosterDetails;

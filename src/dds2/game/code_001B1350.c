@@ -64,8 +64,6 @@ extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-extern s32 btlRollAiBucket();
-
 extern s32 btlGetActionRecordLookupValue(s32);
 
 u32 btlEncodeActorIndexAsSelectionMask(u32 id);
