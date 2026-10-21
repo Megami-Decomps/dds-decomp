@@ -625,14 +625,6 @@ extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
 
 
-typedef struct EffectNodeHeader {
-    u8 *entries;
-    u32 unk_04;
-    struct SdfMemBlock *allocation;
-} EffectNodeHeader;
-
-
-
 extern u128 *D_0037F770[];
 
 extern u128 D_00458460[];
@@ -7318,7 +7310,7 @@ void effResetBillTable(u8 *p) {
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
     struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -7480,7 +7472,7 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
     struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -7863,7 +7855,7 @@ void effResetParticleBillFrameCounters(u8 *p) {
 
 u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
     struct SdfMemBlock *base = sdfMemAllocDirect(config->common.header.timed.count * 0x2C + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -7984,7 +7976,7 @@ typedef struct EffSpiralParticle {
 /* vu0 routine: native matrix, cross/normalize and ribbon extrusion. */
 void effUpdateBillSpiral(EffClassWork *work) {
     EffBillSpiralConfig *config = (EffBillSpiralConfig *)work->payload;
-    EffectNodeHeader *state;
+    EffFrameState *state;
     EffRibbonWork *asset;
     EffSpiralParticle *particle;
     f32 pos[4];
@@ -8029,9 +8021,9 @@ void effUpdateBillSpiral(EffClassWork *work) {
         spawn = config->common.header.spawnRate;
     }
     segments = config->common.header.segments + 1;
-    state = (EffectNodeHeader *)work->resource;
+    state = (EffFrameState *)work->resource;
     /* The creator stores the ribbon address in this actual 12-byte header. */
-    asset = (EffRibbonWork *)state->unk_04;
+    asset = (EffRibbonWork *)state->asset;
     particle = (EffSpiralParticle *)state->entries;
     respawn = config->common.header.respawn;
     /* Config reads before the ribbon's buffer loads: in retail the spin acceleration load (+0xD4) precedes the
@@ -8507,7 +8499,7 @@ void effResetAnimationFrameEntries(u8 *p) {
 
 u8 *effAllocateAnimationBuffer(EffBillFlameConfig *config) {
     struct SdfMemBlock *base = sdfMemAllocDirect(config->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfMemLock(base);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
     u32 count = config->header.segments;
     u8 *entries = (u8 *)(node + 1);
 
