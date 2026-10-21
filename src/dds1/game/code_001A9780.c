@@ -6,6 +6,7 @@
 #include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "btl_panel_transition_work.h"
+#include "btl_registered_panel_work.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
@@ -3492,23 +3493,6 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
 }
 
 extern const char *D_003BB3C0;
-
-typedef struct BattleRegisteredPanelWork {
-    s32 state;
-    s32 mode;
-    s32 variant;
-    s32 x;
-    s32 y;
-    s32 spriteAlpha;
-    s32 overlayAlpha;
-    s32 backdropAlpha;
-} BattleRegisteredPanelWork;
-
-typedef char BattleRegisteredPanelWork_size_check[
-    sizeof(BattleRegisteredPanelWork) == 0x20 ? 1 : -1];
-
-typedef char BattleRegisteredPanelWork_backdrop_offset_check[
-    (u32)&((BattleRegisteredPanelWork *)0)->backdropAlpha == 0x1C ? 1 : -1];
 
 extern s32 btlUpdateRegisteredPanelTask(KwlnTask *);
 
