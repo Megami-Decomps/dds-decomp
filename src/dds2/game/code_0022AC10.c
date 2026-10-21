@@ -197,50 +197,17 @@ extern void ptyAdjustItemQuantity(u32, u32);
 
 extern s32 btlDrawCapturedScreenTileOverlay(u32, u32);
 
-extern u32 btlAllocTask(u32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 
 struct BattleScriptTaskData;
 
-extern u32 btlRunSceneActorEventTask(struct BattleScriptTaskData *);
+extern s32 btlRunSceneActorEventTask(struct BattleScriptTaskData *);
 
 extern void btlStartSkillEventTask(u32);
 
 
 extern BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 
-struct BattleScriptTaskData;
-
-/* 0x70-byte queued-task header, distinct from the 0x180-byte ActionStateLink.
- * The callback union preserves each consumer's actual function prototype. */
-typedef struct BattleTask {
-    u8 enabled;
-    u8 pad01[0xF];
-    u8 status;
-    u8 pad11[0xF];
-    u16 taskId;
-    u16 state;
-    u16 flags;
-    u8 pad26[2];
-    s32 startDelay;
-    s32 endDelay;
-    u32 unk30;
-    u32 unk34;
-    u64 sequence;
-    u64 owner;
-    void (*onStart)(u32);
-    union {
-        void (*update)(void);
-        s32 (*run)(void *);
-        u32 (*processScript)(struct BattleScriptTaskData *);
-    } callback;
-    void (*onFinish)(u32 *);
-    void *args;
-    struct BattleTask *next;
-    struct BattleTask *nextActive;
-    struct BattleTask *deferNext;
-    struct BattleTask *deferPrev;
-    u8 pad68[8];
-} BattleTask;
 
 typedef struct BattleScriptTaskData {
     BtlUnit *object;
@@ -834,7 +801,7 @@ u32 btlCommandAddOneItem(void) {
     return 1;
 }
 
-u32 btlRunSceneActorEventTask(BattleScriptTaskData *record) {
+s32 btlRunSceneActorEventTask(BattleScriptTaskData *record) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     void *resource;
 
@@ -860,21 +827,21 @@ u32 btlRunSceneActorEventTask(BattleScriptTaskData *record) {
 
 /* Queue script-resource work for object/group and return its scheduler task. */
 BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
-    BattleTask *task = (BattleTask *)btlAllocTask(12);
+    BtlRuntimeTask *task = btlAllocTask(12);
     BattleScriptTaskData *data;
-    task->enabled = 1;
+    task->startCondition.kind = 1;
     task->taskId = 0x68;
-    task->callback.processScript = btlRunSceneActorEventTask;
-    task->status = 0;
+    task->callback = btlRunSceneActorEventTask;
+    task->endCondition.kind = 0;
     data = btlGetTaskArguments(task);
     data->object = object;
     data->group = group;
     data->frames = 0;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 /* Start the event on frame zero, bind its actor, and return 1 on completion. */
-u32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
+s32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
     if (record->frames == 0) {
         BtlState *battle = (BtlState *)btlGetRuntime();
         u32 object;
@@ -893,13 +860,13 @@ u32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
 
 /* Queue object/group event processing with zero elapsed frames; return the task. */
 void *btlCreateActionTask(void *object, s32 group) {
-    BattleTask *task = (BattleTask *)btlAllocTask(12);
+    BtlRuntimeTask *task = btlAllocTask(12);
     BattleScriptTaskData *data;
 
-    task->enabled = 1;
+    task->startCondition.kind = 1;
     task->taskId = 0x69;
-    task->callback.processScript = btlUpdateScriptResourceTask;
-    task->status = 0;
+    task->callback = btlUpdateScriptResourceTask;
+    task->endCondition.kind = 0;
     data = btlGetTaskArguments(task);
     data->object = object;
     data->group = group;
