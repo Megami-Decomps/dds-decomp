@@ -515,7 +515,7 @@ void fldClearCameraFacingPointRequest(void);
 
 void fldClearCameraHeadingRequest(void);
 
-void fldDrawConvertedTextGlyph();
+void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
 
 void fldEnableCameraObjectFlag(void);
 

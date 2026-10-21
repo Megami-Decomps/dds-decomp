@@ -71,7 +71,7 @@ extern s32 scrSetFlag(DatPartyRecord *work, u16 flagId);
 #define SDF_FLAG_SLOT_TABLE_SHIFT 7
 #define SDF_FLAG_SLOT_COUNT 16
 
-extern void memset();
+extern void memset(void *dst, s32 value, s32 size);
 extern PtyPresetRecord D_00393A80[];
 extern void ptyMergeStockSkills(DatPartyRecord *);
 

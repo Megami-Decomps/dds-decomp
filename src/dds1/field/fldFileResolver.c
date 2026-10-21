@@ -517,7 +517,7 @@ extern void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMoti
 
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 
-extern void fldToggleWorldNodeState(s32);
+extern void fldToggleWorldNodeState(s64);
 
 extern void fldProbeCameraSupportSurface(void);
 
