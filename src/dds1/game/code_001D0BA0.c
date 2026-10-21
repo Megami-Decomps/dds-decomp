@@ -6,6 +6,7 @@
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
+#include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_unit_fade_task_args.h"
 #include "btl_special_ability.h"
@@ -172,7 +173,6 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *object);
 
 u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *object);
 
-void btlRaisePartyRecordStatusValue();
 
 extern EffRandState effSharedRandomState[];
 
