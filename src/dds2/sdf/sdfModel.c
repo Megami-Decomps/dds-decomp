@@ -620,7 +620,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         if (node->flags & SDF_DRAW_NODE_FLAG_USE_NODE_COLOR) {
             color = node->color;
         }
-        nodeFlags = modelDrawFlags & (u16)node->unk16;
+        nodeFlags = modelDrawFlags & node->drawFlagMask;
         for (variant = 0; variant != 4; variant++) {
             variantLists[variant] = NULL;
         }

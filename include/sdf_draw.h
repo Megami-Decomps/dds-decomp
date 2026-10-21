@@ -116,7 +116,7 @@ typedef struct SdfDrawNode {
     struct SdfDrawNode *children; /* 0x0C */
     struct SdfModel *root;        /* 0x10: backlink installed by sdfAppendBufferedRouteNode */
     u16 flags;                   /* 0x14 */
-    s16 unk16;                   /* 0x16: constructor sentinel is -1 */
+    u16 drawFlagMask;             /* 0x16: all model draw flags enabled by default */
     s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
     u32 color;                   /* 0x1C */
     u8 pad20[8];

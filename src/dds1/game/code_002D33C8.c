@@ -1688,7 +1688,7 @@ SdfDrawNode *sdfCreateDrawNode(void) {
     SdfDrawNode *node = sdfAllocAndClearQuadwords(sizeof(SdfDrawNode));
 
     node->color = 0x80808080;
-    node->unk16 = -1;
+    node->drawFlagMask = 0xFFFF;
     node->previous = node;
     node->next = node;
     VU0_STORE_VF($vf0, node->quaternion);
