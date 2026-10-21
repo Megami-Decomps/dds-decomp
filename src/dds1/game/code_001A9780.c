@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
+#include "btl_command_hint_work.h"
 #include "btl_selection_trail_work.h"
 #include "common.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -99,19 +100,6 @@ extern SceneAiWork *btlGetTargetSelectionWork(void);
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
-
-/* The command hint window is a 0x40-byte allocation in btlCreateMessageWindow. */
-typedef struct BtlCommandHintWork {
-    u8 pad00[0x10];
-    s32 unk10;
-    s16 fade;
-    u8 pad16[2];
-    u32 colors[4];
-    u8 pad28[0x10];
-    s32 x;
-    s32 y;
-} BtlCommandHintWork;
-typedef char BtlCommandHintWorkSize[sizeof(BtlCommandHintWork) == 0x40 ? 1 : -1];
 
 extern BtlCommandHintWork *D_003BB3DC;
 
