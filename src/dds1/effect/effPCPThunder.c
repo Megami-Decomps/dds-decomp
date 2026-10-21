@@ -666,8 +666,6 @@ void effThunderSparkInit(EffThunderSparkWork *work, s32 index) {
     spark->orbitRadius = work->head.orbitRadius * (sdfGetRandFloat(effDefaultRandomState) * randomness + (1.0f - randomness));
 }
 
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-
 /* Build one spark's kind-0 strip between its lowered and current positions.
  * Every iteration emits two two-vector rows into that spark's own cell.
  */
@@ -1007,8 +1005,6 @@ void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index) {
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-
 /* Build the first strip from the work's own start point. Each step emits
  * two five-vector rows; later chain segments reuse the final row as a seed.
  */
@@ -1310,8 +1306,6 @@ void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index) {
     fragment->activeFrames = sdfGetRand((EffRandState *)effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
-
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 
 /* Build synchronized kind-0 core and kind-1 outer strips. Each step emits
  * two rows of two core vertices and three outer vertices from the same path.
@@ -1855,8 +1849,6 @@ void effSetResourceBlendColor(EffThunderGroup *resource, u32 color) {
     resource->color = color;
 }
 
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-
 /* Continue a strip from the preceding segment's final five-vector row.
  * Each iteration emits two rows; seed[3] is the connection anchor used by
  * this profile, not its middle vertex. XYZ calculations and drawing ignore W.
@@ -2262,7 +2254,6 @@ typedef struct {
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void effResetFragmentHistory(EffPcpThunderFragmentResources *history);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u128 *source);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
