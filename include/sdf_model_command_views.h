@@ -26,6 +26,28 @@ typedef struct SdfModelPacket {
 typedef char SdfModelPacket_size_must_be_0x10[
     (sizeof(SdfModelPacket) == 0x10) ? 1 : -1];
 
+/* The 0x40-byte lighting/reference packet appended for each node variant. */
+typedef struct SdfModelLightingCallPacket {
+    SdfModelPacket address;
+    u64 firstHeader;
+    u64 secondHeader;
+    u32 lightingCommand;
+    s32 color;
+    u32 command;
+    u32 modelScalar;
+    f32 firstScalar;
+    f32 secondScalar;
+    u32 finalCommand;
+    u32 finalAddress;
+} SdfModelLightingCallPacket;
+
+typedef char SdfModelLightingCallPacket_size[
+    (sizeof(SdfModelLightingCallPacket) == 0x40) ? 1 : -1];
+typedef char SdfModelLightingCallPacket_secondHeader_at_0x18[
+    ((u32)&((SdfModelLightingCallPacket *)0)->secondHeader == 0x18) ? 1 : -1];
+typedef char SdfModelLightingCallPacket_finalAddress_at_0x3C[
+    ((u32)&((SdfModelLightingCallPacket *)0)->finalAddress == 0x3C) ? 1 : -1];
+
 /* Fields read by sdfModelBuildIndexedCommandPayload; the kind-specific gap
  * remains opaque, and no extent beyond these demonstrated words is claimed. */
 typedef struct SdfIndexedCommandView {
