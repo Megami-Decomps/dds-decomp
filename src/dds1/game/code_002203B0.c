@@ -41,8 +41,6 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
     return 1;
 }
 
-extern Dds3PathCurveWork *dds3GetSlot1Data(void *obj);
-
 void evtSetWorldSlotScaleWrapEnabled(void *worldObject, s32 enabled) {
     Dds3PathCurveWork *data = dds3GetSlot1Data(worldObject);
 

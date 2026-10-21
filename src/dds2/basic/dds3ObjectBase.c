@@ -637,7 +637,7 @@ void dds3ReleaseSlot1Data(void *object) {
 }
 
 /* Return the data slot's retained curve work; the data slot must exist. */
-Dds3PathCurveWork *dds3GetSlot1Data(void *object) {
+Dds3PathCurveWork *dds3GetSlot1Data(EffWorldNode *object) {
     return dds3GetObjectResourceHandle(dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT));
 }
 
