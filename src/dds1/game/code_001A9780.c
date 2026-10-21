@@ -9137,25 +9137,23 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
         targetId = ids[(s16)work->cursor.position.row * 3 + (s16)work->cursor.position.column];
         missing = 1;
         if (targetId != 0xFFFF) {
-            index = 0;
-            for (;;) {
+            for (index = 0;; index++) {
                 missing = 1;
-                if (index >= count) goto retryScan;
+                if (index >= count) {
+                    break;
+                }
                 unit = btlGetIndexListEntry(work->listA, index);
                 missing = unit->partyRecord.unitId != targetId;
                 if (missing == 0) {
                     break;
                 }
-                index++;
             }
-            {
+            if (index < count) {
                 s32 changed = oldId != targetId;
                 work->entry = index;
                 return changed;
             }
         }
-retryScan:
-        ;
     } while (missing == 1);
     return 0;
 }

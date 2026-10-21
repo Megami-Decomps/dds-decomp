@@ -82,6 +82,23 @@ zero-return hoist, producing `$v1` plus a plain `beq` in place of retail's
 `$v0` plus `beql`. Qualified ordinary/hooked compiler output and complete
 retail builds prove the separate-case form.
 
+### Direct owner-state stores in selector arms
+
+DDS2 `btlResolveActionTargetResults` (`001DDB60`) gives counter skills
+248 and 249 phase 2, and every other counter phase 1. Express these as
+direct `reaction->indexWork.phase` stores in the corresponding `switch`
+arms. A phase local followed by a common store is semantically equivalent
+but leaves five native words different: it holds the phase in `$3` while
+the range tests use `$2`. The direct field stores reproduce the native
+`$2` reuse and annulled lower-bound branch without explicit labels.
+
+The other structured exits retain their actual iteration/update contracts:
+`btlStepTargetGridSelection` checks whether the ID scan exhausted its count
+before publishing an entry; `fldAddCollisionPoly` advances the face and
+triangle cursors in the `for` iteration clause so rejection uses `continue`;
+`fldUpdateTargetGuideEffects` compares repeated animations only for IDs
+0 and 16..18, expressed as a grouped-case switch.
+
 ### A call that ends a block cannot be cross-jumped into its join
 
 `sched2` (25) appends `(use (const_int 0))` after a call insn that is the last

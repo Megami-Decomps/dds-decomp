@@ -6034,23 +6034,16 @@ void fldUpdateTargetGuideEffects(void) {
         mdlAddEntryFlagged(model, 0, fldTargetGuideState.guideMotionIndex);
     } else if (fldTargetGuideState.updateFlags & 2) {
         animation = fldTargetGuideState.guideMotionIndex;
-        changeAnimation = 1;
         /* Only zero and the 16..18 family suppress a repeated animation. */
-        if (animation == 0) {
-            goto compare_animation;
+        changeAnimation = 1;
+        switch (animation) {
+        case 0:
+        case 16:
+        case 17:
+        case 18:
+            changeAnimation = animation != (s32)model->current.h.motionIndex;
+            break;
         }
-        if (animation < 0) {
-            goto apply_animation;
-        }
-        if (animation >= 19) {
-            goto apply_animation;
-        }
-        if (animation < 16) {
-            goto apply_animation;
-        }
-compare_animation:
-        changeAnimation = animation != (s32)model->current.h.motionIndex;
-apply_animation:
         if (changeAnimation) {
             model->first->frameStep = 1.0f;
             mdlAddEntryFlaggedEx(model, 0, fldTargetGuideState.guideMotionIndex, 6.0f, 6.0f);

@@ -298,7 +298,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
         if (faceCount > 0) {
             face = firstFace;
             remaining = faceCount;
-            do {
+            for (; remaining != 0; remaining--, face++, trianglesRemaining--) {
                 u32 vertexIndex;
                 record = &((FldValueRecord *)fldValueRecords)[fldValueRecordCount];
                 record->count = trianglesRemaining > 0 ? 3 : 4;
@@ -349,20 +349,20 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                 absY = ffabsf(record->normal[1]);
                 absZ = ffabsf(record->normal[2]);
                 if (pass == 0) {
-                    if (!(absX < absY) || !(absZ < absY)) goto next_face;
-                    if (record->normal[1] > 0.0f) goto next_face;
-                    if (record->normal[1] > -0.98f) goto next_face;
+                    if (!(absX < absY) || !(absZ < absY)) continue;
+                    if (record->normal[1] > 0.0f) continue;
+                    if (record->normal[1] > -0.98f) continue;
                 } else if (pass == 1) {
-                    if (!(absX < absY) || !(absZ < absY)) goto next_face;
-                    if (record->normal[1] > 0.0f) goto next_face;
-                    if (record->normal[1] <= -0.98f) goto next_face;
+                    if (!(absX < absY) || !(absZ < absY)) continue;
+                    if (record->normal[1] > 0.0f) continue;
+                    if (record->normal[1] <= -0.98f) continue;
                 } else if (pass == 2) {
-                    if (!(absY <= absX) || !(absZ <= absX)) goto next_face;
+                    if (!(absY <= absX) || !(absZ <= absX)) continue;
                 } else if (pass == 3) {
-                    if (!(absX < absZ) || !(absY <= absZ)) goto next_face;
+                    if (!(absX < absZ) || !(absY <= absZ)) continue;
                 } else if (pass == 4) {
-                    if (!(absX <= absY) || !(absZ <= absY)) goto next_face;
-                    if (record->normal[1] <= 0.0f) goto next_face;
+                    if (!(absX <= absY) || !(absZ <= absY)) continue;
+                    if (record->normal[1] <= 0.0f) continue;
                 }
                 if (absY <= absX && absZ <= absX) {
                     record->mode = 0;
@@ -847,11 +847,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                 record->ownerIndex = ownerIndex;
                 record->unkCA = 0;
                 fldValueRecordCount++;
-next_face:
-                remaining--;
-                face++;
-                trianglesRemaining--;
-            } while (remaining != 0);
+            }
         }
     }
     D_00436188++;
