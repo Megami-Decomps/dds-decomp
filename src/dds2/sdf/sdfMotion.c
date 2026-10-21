@@ -77,7 +77,7 @@ Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
     s32 commandIndex;
     u16 commandCount;
 
-    motion = sdfAllocAndClearQuadwords(0x34);
+    motion = sdfAllocAndClearQuadwords(sizeof(Motion));
     motion->next = model->motionList;
     commandCount = table->commandCount;
     model->motionList = motion;
