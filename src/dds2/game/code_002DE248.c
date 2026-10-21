@@ -1576,7 +1576,7 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
 
 
 EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
-    EffKindAssetHolder *object = sdfAllocAndClearQuadwords(0xC);
+    EffKindAssetHolder *object = sdfAllocAndClearQuadwords(sizeof(*object));
     object->kind = kind;
     object->references = 1;
     switch (kind) {
