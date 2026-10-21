@@ -299,15 +299,15 @@ void evtReleaseEventPackResources(KwlnTask *task) {
         }
         if (packState->effect71 != 0) {
             effInitCh71Id();
-            sdfTexReleaseReferenceViaHandler((struct SdfTex *)packState->effect71);
+            sdfTexReleaseReferenceViaHandler(packState->effect71);
         }
         if (packState->effect76 != 0) {
             effInitCh76Id();
-            sdfTexReleaseReferenceViaHandler((struct SdfTex *)packState->effect76);
+            sdfTexReleaseReferenceViaHandler(packState->effect76);
         }
         if (packState->effect75 != 0) {
             effInitCh75Id();
-            sdfTexReleaseReferenceViaHandler((struct SdfTex *)packState->effect75);
+            sdfTexReleaseReferenceViaHandler(packState->effect75);
         }
         if (packState->pendingRequest != NULL) {
             filePollEntryCleanup(packState->pendingRequest);
@@ -316,10 +316,10 @@ void evtReleaseEventPackResources(KwlnTask *task) {
             sdfMemFreeDelayedDirect(packState->resourceAllocation);
         }
         if (packState->sceneAllocation1 != 0) {
-            sdfMemFreeDirect((struct SdfMemBlock *)(u32)(packState->sceneAllocation1));
+            sdfMemFreeDirect(packState->sceneAllocation1);
         }
         if (packState->sceneAllocation2 != 0) {
-            sdfMemFreeDirect((struct SdfMemBlock *)(u32)(packState->sceneAllocation2));
+            sdfMemFreeDirect(packState->sceneAllocation2);
         }
     }
     sdfChipFreeDirect(stateHandle);
