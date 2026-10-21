@@ -116,7 +116,7 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 
 EffModelOwner *effCreateModelOwner(void *input) {
     FileJobPayload *source = input;
-    EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
+    EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(*owner));
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
