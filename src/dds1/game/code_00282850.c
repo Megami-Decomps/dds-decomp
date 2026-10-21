@@ -2928,7 +2928,7 @@ INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2550);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2560);
 
-void func_002881F0(void) {
+void evtStageTestDrawCameraTransformDebug(void) {
     EffWorldNode *world = (EffWorldNode *)dds3GetWorldObject();
     EffWorldNode *camera;
     const char *caption;
@@ -2992,7 +2992,7 @@ void func_002881F0(void) {
 }
 
 u32 evtStageTestCameraUpdate(void) {
-    func_002881F0();
+    evtStageTestDrawCameraTransformDebug();
     return 0;
 }
 
