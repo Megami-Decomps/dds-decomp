@@ -8,7 +8,7 @@
 #include "btl_stage_task_cleanup.h"
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "file_request_api.h"
 #include "eff_resource_slots.h"
 #include "sdf_pac_packet.h"
@@ -561,7 +561,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             evtPrintDeveloperConsoleMessage(D_0042D298, fileGetResourceSize(load->file));
         }
         if (files[load->entry].kind == 2) {
-            node = load->archive->packet.queueHead;
+            node = ((FilePacRequest *)load->archive)->packet.queueHead;
             if (node != NULL) {
                 /* Indexed banks form the late cursor; see docs/idioms.md,
                  * "Local-map PAC slot induction". */

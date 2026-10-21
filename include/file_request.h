@@ -2,7 +2,6 @@
 #define FILE_REQUEST_H
 
 #include "common.h"
-#include "file_request_callback.h"
 #include "sdf_pac_state.h"
 
 struct SdfMemBlock;
@@ -17,28 +16,37 @@ struct SdfMemBlock;
  * - Callback (kind 0) and value-pair (kind 2) requests are allocated with the
  *   header alone (FILE_REQUEST_HEADER_BYTES).
  *
- * All request kinds use this owner; the packet tail is present only in PAC
- * allocations. The manager's common operations touch only the header. */
+ * The manager, its core and PAC clients each see a request through their own
+ * struct type (FileRequest, FileTransferJob, FilePacRequest), as retail's
+ * code distinguishes them. The types share these fields, and so their layout.
+ * Link is the type's own name; Callback is how it types the completion
+ * callback. */
+typedef void (*FileRequestCallback)(void *request, u32 arg);
+
+#define FILE_REQUEST_FIELDS(Link, Callback)                                  \
+    u8 kind;                              /* 0x00 */                         \
+    u8 state;                             /* 0x01 */                         \
+    u8 retryCount;                        /* 0x02 */                         \
+    u8 allocationMode;                    /* 0x03: a callback request's mode */ \
+    Link *next;                           /* 0x04 */                         \
+    char *name;                           /* 0x08: the duplicated request name */ \
+    void *deviceRequest;                  /* 0x0C */                         \
+    s32 transferBytes;                    /* 0x10: a value-pair request's byte count */ \
+    s32 totalBytes;                       /* 0x14 */                         \
+    Callback completionCallback;          /* 0x18 */                         \
+    void *completionArg;                  /* 0x1C */                         \
+    struct SdfMemBlock *allocationHandle; /* 0x20: descriptor passed to sdfMemLock */ \
+    u32 retainedAddress;                  /* 0x24: a value-pair request's source data */ \
+    u32 transferAddress;                  /* 0x28 */                         \
+    Link *completionNext;                 /* 0x2C */                         \
+    PacState packet;                      /* 0x30: PAC requests */           \
+    u16 readinessEnabled;                 /* 0x68: a gate on completion, not a state value */ \
+    u16 slot;                             /* 0x6A: the device-read slot */   \
+    Link *callbackNext;                   /* 0x6C: PAC completion callback queue link */
+
+/* A request as the file manager sees it. */
 typedef struct FileRequest {
-    u8 kind;                              /* 0x00 */
-    u8 state;                             /* 0x01 */
-    u8 retryCount;                        /* 0x02 */
-    u8 allocationMode;                    /* 0x03: callback request mode */
-    struct FileRequest *next;             /* 0x04 */
-    char *name;                           /* 0x08: duplicated request name */
-    void *deviceRequest;                  /* 0x0C */
-    s32 transferBytes;                    /* 0x10 */
-    s32 totalBytes;                       /* 0x14 */
-    FileRequestCallback completionCallback; /* 0x18 */
-    void *completionArg;                  /* 0x1C */
-    struct SdfMemBlock *allocationHandle; /* 0x20 */
-    u32 retainedAddress;                  /* 0x24: source buffer address */
-    u32 transferAddress;                  /* 0x28 */
-    struct FileRequest *completionNext;   /* 0x2C */
-    PacState packet;                      /* 0x30: PAC requests */
-    u16 readinessEnabled;                 /* 0x68: completion gate */
-    u16 slot;                             /* 0x6A: device-read slot */
-    struct FileRequest *callbackNext;     /* 0x6C: PAC completion queue */
+    FILE_REQUEST_FIELDS(struct FileRequest, void *)
 } FileRequest;
 
 #define FILE_REQUEST_HEADER_BYTES ((u32)&((FileRequest *)0)->packet)

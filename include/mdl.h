@@ -21,7 +21,6 @@ typedef struct MdlRecord {
     s32 nextOffset; /* 0x04: relative byte offset to next record */
     union {
         u32 word;               /* 0x08 */
-        s32 id;                 /* Kind 1/2/5 resource-record ID. */
         struct {
             u16 selectorA;
             u16 selectorB;
@@ -29,7 +28,6 @@ typedef struct MdlRecord {
     } payload;
     union {
         u32 word;               /* 0x0C */
-        s32 minimumTime;        /* Kind 5 deferred initialization threshold. */
         struct {
             u16 count;
             u16 partIndex;
@@ -37,12 +35,6 @@ typedef struct MdlRecord {
     } parameter;
     union {
         u32 word10; /* 0x10: kind-four stream parameter */
-        f32 anchorScale; /* Optional kind 1/2 extension when nextOffset >= 0x11. */
-        struct {
-            u8 playbackCadenceStep;
-            u8 loopMode;
-            u16 partIndex;
-        } object;
         struct {
             u16 slotCount; /* Kind 1/2 group records: following entity-slot packets. */
             u16 unk12;

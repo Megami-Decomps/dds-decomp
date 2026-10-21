@@ -32,7 +32,7 @@
 #include "common.h"
 #include "eff_emitter_type.h"
 #include "sdf_vu_rotation_axes.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "eff_resource_bank_slot.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
@@ -1225,14 +1225,14 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
     return work;
 }
 
-EffKindWork *effCreateKindWorkFromFile(FileJobPayload *work) {
-    void *source = fileResolvePrimaryBuffer(work);
+EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
+    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateKindWork(work->option, source);
-    u32 *secondary = fileResolveSecondaryBuffer(work);
+    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
     if (secondary != NULL) {
         if (D_0037E770[effect->kind].initialize != NULL) {
-            u32 kind = work->primary.selector;
+            u32 kind = work->slots[0].selector;
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
@@ -1319,14 +1319,14 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
     return work;
 }
 
-EffKindWork *effCreateKindWorkFromFileB(FileJobPayload *work) {
-    void *source = fileResolvePrimaryBuffer(work);
+EffKindWork *effCreateKindWorkFromFileB(FileJob *work) {
+    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateAlternateKindWork(work->option, source);
-    u32 *secondary = fileResolveSecondaryBuffer(work);
+    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
     if (secondary != NULL) {
         if (D_0037E7E8[effect->kind].initialize != NULL) {
-            u32 kind = work->primary.selector;
+            u32 kind = work->slots[0].selector;
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
@@ -1385,7 +1385,7 @@ void effSetAlternateKindScale(EffKindWork *work, float scale) {
     work->scale = scale;
 }
 
-u8 *effCreateBillboardWork(FileJobPayload *source) {
+u8 *effCreateBillboardWork(u8 *source) {
     u8 *work = (u8 *)sdfChipAllocDirect(0x68);
     memset(work, 0, 0x68);
     ((EffBillboardWork *)work)->frame = 0;
@@ -1396,10 +1396,10 @@ u8 *effCreateBillboardWork(FileJobPayload *source) {
     if (source == NULL) {
         return work;
     }
-    memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
-           source->primary.size);
+    memcpy(work + 0x2C, fileResolvePrimaryBuffer((FileJobPayload *)source),
+           ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer(source));
+        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer((FileJobPayload *)source));
     return work;
 }
 
@@ -4759,16 +4759,17 @@ EffectSurfaceNode *effCreateSurfaceNodeForGrid(FileKeyBlock *grid) {
 extern void effRebuildSurfaceHandles(EffectSurfaceNode *, u16, void *);
 void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource);
 
-EffectSurfaceNode *effResourceReferenceReplaceFromFile(FileJobPayload *work) {
-    u8 *source = fileResolvePrimaryBuffer(work);
+EffectSurfaceNode *effResourceReferenceReplaceFromFile(u8 *work) {
+    u8 *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     FileKeyBlock *params = (FileKeyBlock *)(source + 0x1C);
     EffectSurfaceNode *node = effCreateSurfaceNodeForGrid(params);
 
-    effRebuildSurfaceHandles(node, work->option, source);
-    effReplaceResourceRef(node, work->option, params);
+    effRebuildSurfaceHandles(node, ((FileJob *)work)->option, source);
+    effReplaceResourceRef(node, ((FileJob *)work)->option, params);
     return node;
 }
 
+extern EffectSurfaceNode *effResourceReferenceReplaceFromFile(u8 *);
 
 extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
 
@@ -4778,14 +4779,14 @@ void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId);
 void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId);
 void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId);
 
-EffectSurfaceNode *effInitializeSurfaceForKind(FileJobPayload *work) {
+EffectSurfaceNode *effInitializeSurfaceForKind(u8 *work) {
     EffectSurfaceNode *node = effResourceReferenceReplaceFromFile(work);
-    u32 *secondary = fileResolveSecondaryBuffer(work);
+    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
     if (secondary == NULL) {
         return node;
     }
-    switch (work->primary.selector) {
+    switch (((FileJob *)work)->slots[0].selector) {
     case 1:
         effReplaceSurfacePrimaryBillboard(node, (u32)secondary);
         break;
@@ -4806,7 +4807,7 @@ EffectSurfaceNode *effInitializeSurfaceForKind(FileJobPayload *work) {
         effReplaceSurfaceResourceHolder((s32)node, (u32)secondary);
         break;
     }
-    node->kind = work->primary.selector;
+    node->kind = ((FileJob *)work)->slots[0].selector;
     return node;
 }
 
@@ -5782,8 +5783,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
 
 /* Per-frame update of a five-point-group class: tint every active set and draw it under the class transform. */
 void effDrawTintedFivePointGroupRows(EffClassWork *work) {
-    EffBillPointConfig *config = (EffBillPointConfig *)work->payload;
-    EffBillTimedHeader *header = &config->timed;
+    EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
     EffPointSetRow *row = ((EffPointSetTable *)work->resource)->rows;
     s32 frame = work->frame;
     s32 time = header->time.duration;
@@ -5832,7 +5832,7 @@ void effDrawTintedFivePointGroupRows(EffClassWork *work) {
             blended[0] = packed;
             set->color = blended[0];
             set->type = header->alphaTrack.surfaceIndex;
-            set->flag = config->drawFlag;
+            set->flag = ((u8 *)header)[0x5C];
             effDrawFivePointGroups(set, mtx);
         }
     }
@@ -6585,8 +6585,8 @@ EffectStripNode *effCreateStripNodeFromGrid(FileKeyBlock *grid) {
 
 extern void effReplaceFileResourceRef(EffectStripNode *, u32, void *);
 
-EffectStripNode *effFileResourceReferenceReplace(FileJobPayload *work) {
-    u8 *source = fileResolvePrimaryBuffer(work);
+EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
+    u8 *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     FileKeyBlock *params = (FileKeyBlock *)(source + 0x20);
     EffectStripNode *node = effCreateStripNodeFromGrid(params);
 
@@ -9755,8 +9755,8 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     for (i = 0; i < 5; i++) {
         Dds3PathCurveWork *object = objects[i];
         if (object != 0) {
-            object->counter.direction = 0;
-            object->counter.time = 0.0f;
+            object->direction = 0;
+            object->time = 0.0f;
         }
     }
 }
@@ -10026,7 +10026,7 @@ s32 func_002B3698(EffActiveResource *owner) {
     dds3SetCameraFieldOfView(camera, D_003BC9A8);
     data->fovUpdatePending |= 1;
     dds3SetRotPoseSet(camera, &D_0037EEB0);
-    return sdfStepWrappingFloatCounter(&path->counter);
+    return sdfStepWrappingFloatCounter(path);
 }
 
 
@@ -12402,7 +12402,7 @@ typedef struct EffMappingRequest {
 /* Parameters passed to the mapping dispatcher from distinct object channels. */
 typedef struct EffMappingObject {
     u8 pad_00[0x34];
-    s32 value34;       // 0x34
+    union { u32 bits; s32 signedValue; } value34; // 0x34
     u32 value38;       // 0x38
     s32 value3C;
     u8 pad40[0xC];
@@ -12416,7 +12416,7 @@ typedef struct EffMappingObject {
     u8 pad_88[4];
     s32 value8C;       // 0x8C
     u8 pad_90[0x28];
-    u32 valueB8;       // 0xB8
+    union { u32 bits; s32 signedValue; } valueB8; // 0xB8
     u8 pad_BC[0x18];
     s32 valueD4;       // 0xD4
     s32 valueD8;       // 0xD8
@@ -12430,7 +12430,8 @@ s32 effMapObjectWithTemporaryMappingTable(s32 request) {
 
     effMappingState.rows = D_0038F7D8;
     effMappingState.count = 8;
-    result = effEditColorTrack(object + 0x2c, object + 0x50, ((EffMappingObject *)object)->valueB8);
+    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
+    result = effEditColorTrack(object + 0x2c, object + 0x50, *(s32 *)(object + 0xb8));
     effMappingState.rows = D_0038F658;
     effMappingState.count = 8;
     return result;
@@ -12454,12 +12455,12 @@ s32 effEditBfColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
 }
 
 /* HELPER's COLOR callback edits the shared default color/alpha data. */
 s32 effEditHlpColorTrack(void) {
-    return effEditColorTrack((s32)D_003DE148, (s32)D_003DE148 + 0x24, ((EffMappingObject *)D_003DE148)->value34);
+    return effEditColorTrack((s32)D_003DE148, (s32)D_003DE148 + 0x24, ((EffMappingObject *)D_003DE148)->value34.signedValue);
 }
 
 /* Edit T-BOARD color/alpha tracks using the alternate property-option table. */
@@ -12480,7 +12481,7 @@ s32 effEditRainColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Pass the E-FLARE request's color/alpha tracks and frame bound to the editor. */
@@ -12496,7 +12497,7 @@ s32 effEditSColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit R-NOMAL/R-CRCLE COLOR tracks, then restore the default option table. */
@@ -12506,7 +12507,8 @@ s32 effEditRColorTrack(s32 request) {
 
     effMappingState.rows = D_0038F718;
     effMappingState.count = 8;
-    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
+    result = effEditColorTrack(object, object + 0x24, *(s32 *)(object + 0x34));
     effMappingState.rows = D_0038F658;
     effMappingState.count = 8;
     return result;
@@ -12517,7 +12519,7 @@ s32 effEditRTrackColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* D-family COLOR callback; its DDS2 twin also serves O-family descriptors. */
@@ -12525,7 +12527,7 @@ s32 effEditDoColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 s32 effResolveMappingWithTemporaryTable(s32 request) {
@@ -12545,7 +12547,7 @@ s32 effEditNColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit COLOR in the N-family descriptors' nested POLYGON data. */
@@ -12561,7 +12563,7 @@ s32 effEditUCylinderColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit COLOR in U-CYLND's nested POLYGON data. */
@@ -12598,7 +12600,7 @@ s32 effEditCrackPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* COLOR callback for the FLASH polygon descriptor. */
@@ -12894,12 +12896,12 @@ s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void 
 
 /* Edit the requested P-family SCALE track; return the native editor status. */
 s32 effEditPScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
 /* Edit the requested P-family ROTATE track with its independent editor state. */
 s32 effEditPRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, D_0038FAD0, D_0038FA20);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038FAD0, D_0038FA20);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
@@ -12914,17 +12916,17 @@ s32 effEditKRotationTrack(BaObj *p) {
 
 /* SCALE property callback for native B-family descriptors. */
 s32 effEditBScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
 s32 effEditBRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
 s32 effEditBfAreaTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
@@ -13631,12 +13633,12 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     btlStageTaskCleanupCallback(list->request);
                 }
-                list->request = fileQueuePlainDispatchRequest((const char *)node->length);
+                list->request = (FilePacRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
-                    fileWaitForRequestReady(list->request);
+                    fileWaitForRequestReady((struct FileRequest *)list->request);
                 }
                 node->state = 1;
-            } else if (fileRequestIsReady(list->request) != 0) {
+            } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {
                 for (item = list->request->packet.queueHead; item != NULL; item = item->next) {
                     if (((SdfPacStreamPacketHeader *)item->packet)->command == 1) {
                         node = list->first;

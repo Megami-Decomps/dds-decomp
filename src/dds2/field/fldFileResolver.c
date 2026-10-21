@@ -375,7 +375,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "fld.h"
 #include "fld_waypoint.h"
 #include "file_request_api.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "fld_packed_resource_kind.h"
 #include "field_stage.h"
 #include "sdf_pac_work.h"
@@ -1049,6 +1049,7 @@ extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
+extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
@@ -1096,7 +1097,7 @@ void fldActivateRoomFlagObjects(void) {
                 dds3SetSlotKey(slot, path);
                 dds3ReplaceObjectResource(slot);
             }
-            sdfSetFloatCounterDirection(&dds3GetObjectResourceHandle(slot)->counter, 0);
+            sdfSetFloatCounterDirection((u32 *)dds3GetObjectResourceHandle(slot), 0);
             evtScaleSlotByClampedMultiplier(object, 1.0f);
             dds3InvokeMoverUpdate(slot);
         }
@@ -1256,7 +1257,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
 
 void fldFreeDisplayObjects(void) {
     if (fldAreaLoadRequest != 0) {
-        PacWork *work = fldAreaLoadRequest->packet.queueHead;
+        PacWork *work = ((FilePacRequest *)fldAreaLoadRequest)->packet.queueHead;
 
         if (work != 0) {
             do {
@@ -1417,7 +1418,7 @@ extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId);
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
-    FileRequest *request;
+    FilePacRequest *request;
     PacWork *work;
 
     if (fldAreaState.area < 200) {
@@ -1425,7 +1426,7 @@ void fldLoadAreaPackedResources(void) {
         strcpy(D_00444950, name);
         fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
         fileWaitForRequestReady(fldAreaPackedArchive);
-        request = fldAreaPackedArchive;
+        request = (FilePacRequest *)fldAreaPackedArchive;
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
@@ -1588,7 +1589,7 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
         }
         index = 0;
         D_00435FA4 = NULL;
-        work = D_00435FC8->packet.queueHead;
+        work = ((FilePacRequest *)D_00435FC8)->packet.queueHead;
         fldCachedRoomResourceAllocation = NULL;
         for (; work != NULL; work = work->next) {
             switch (index) {
@@ -1829,7 +1830,7 @@ void fldReleaseFieldResources(void) {
         fldAreaState.cachedArea = fldAreaState.area;
     }
     if (D_00435FC8 != 0) {
-        work = D_00435FC8->packet.queueHead;
+        work = ((FilePacRequest *)D_00435FC8)->packet.queueHead;
         i = 0;
         if (work != 0) {
             do {

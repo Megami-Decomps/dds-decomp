@@ -18,7 +18,7 @@
 #include "itf.h"
 #include "mnu_shooting.h"
 #include "kwln_task_lifecycle.h"
-#include "file_request.h"
+#include "file_pac.h"
 #include "file_request_api.h"
 #include "pcp_vu0.h"
 #include "eff_random.h"
@@ -435,8 +435,8 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             break;
 
         case 5: {
-            struct FileRequest *pacRequest =
-                work->packageDataRequest;
+            struct FilePacRequest *pacRequest =
+                (struct FilePacRequest *)work->packageDataRequest;
             PacWork *entry = pacRequest->packet.queueHead;
             if (entry != NULL) {
                 struct FileQueue **queueSlot = work->queueCopies;
@@ -458,8 +458,8 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         }
 
         case 4: {
-            struct FileRequest *pacRequest =
-                work->packageDataRequest;
+            struct FilePacRequest *pacRequest =
+                (struct FilePacRequest *)work->packageDataRequest;
             PacWork *entry = pacRequest->packet.queueHead;
             s32 entryIndex = 0;
 
@@ -503,8 +503,8 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         }
 
         case 3: {
-            struct FileRequest *pacRequest =
-                work->packageDataRequest;
+            struct FilePacRequest *pacRequest =
+                (struct FilePacRequest *)work->packageDataRequest;
             PacWork *entry = pacRequest->packet.queueHead;
 
             while (entry != NULL) {

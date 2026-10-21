@@ -2,7 +2,7 @@
 #include "common.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
-#include "sdf_float_counter.h"
+#include "evt_scaled_value.h"
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
@@ -88,9 +88,9 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
     Dds3PathKeyframes *curve;
     f32 *values;
 
-    if (user->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
+    if (user->flags & DDS3_PATH_SCALAR_CHANNEL) {
         curve = user->scalarKeys;
-        dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->counter.time);
+        dds3SamplePathKeyframeInterval(&index, &fraction, curve, user->time);
         values = curve->data.scalar;
         return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
     }
@@ -101,25 +101,25 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
 #define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
 
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter) {
+s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path) {
     s32 result = 1;
 
-    if (counter->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
+    if (path->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
         return 1;
     }
-    if (counter->direction == 0) {
-        if (counter->duration > counter->time) {
-            counter->time = counter->time + 1.0f;
-        } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
-            counter->time = 0.0f;
+    if (path->direction == 0) {
+        if (path->duration > path->time) {
+            path->time = path->time + 1.0f;
+        } else if (path->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
+            path->time = 0.0f;
         } else {
             result = 0;
         }
-    } else if (counter->direction == 1) {
-        if (counter->time > 0.0f) {
-            counter->time = counter->time - 1.0f;
-        } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
-            counter->time = counter->duration;
+    } else if (path->direction == 1) {
+        if (path->time > 0.0f) {
+            path->time = path->time - 1.0f;
+        } else if (path->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
+            path->time = path->duration;
         } else {
             result = 0;
         }
@@ -127,35 +127,35 @@ s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter) {
     return result;
 }
 
-void sdfSetFloatCounterDirection(SdfFloatCounter *counter, u32 direction) {
-    counter->direction = direction;
+void sdfSetFloatCounterDirection(u32 *destination, u32 direction) {
+    *destination = direction;
 }
 
-u32 sdfGetFloatCounterDirection(const SdfFloatCounter *counter) {
-    return counter->direction;
+u32 sdfGetFloatCounterDirection(u32 *source) {
+    return *source;
 }
 
-void evtScaleValueByMultiplier(SdfFloatCounter *value, float multiplier) {
-    value->time = multiplier * value->duration;
+void evtScaleValueByMultiplier(EvtScaledValue *value, float multiplier) {
+    value->scaled = multiplier * value->base;
 }
 
-float evtGetValueScaleFactor(const SdfFloatCounter *value) {
-    return value->time / value->duration;
+float evtGetValueScaleFactor(const EvtScaledValue *value) {
+    return value->scaled / value->base;
 }
 
-void sdfFreezeFloatCounter(SdfFloatCounter *value) {
+void sdfFreezeFloatCounter(EvtScaledValue *value) {
     value->flags = value->flags | SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
-void sdfUnfreezeFloatCounter(SdfFloatCounter *value) {
+void sdfUnfreezeFloatCounter(EvtScaledValue *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
-void sdfEnableFloatCounterWrap(SdfFloatCounter *value) {
+void sdfEnableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags | SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-void sdfDisableFloatCounterWrap(SdfFloatCounter *value) {
+void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 

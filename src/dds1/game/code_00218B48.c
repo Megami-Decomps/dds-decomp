@@ -26,6 +26,7 @@
 #include "mdl.h"
 #include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
+#include "mdl_resource_entry_records.h"
 #include "mdl_track_poly_record.h"
 #include "mdl_mark_params.h"
 #include "mdl_resource_table.h"
@@ -885,18 +886,18 @@ MdlPartEntry *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
 }
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlBindViewerPartRecords(MdlCtx *owner, MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
-    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->parameter.part.partIndex);
+void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
+    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
         SdfModel *model = owner->inner;
-        s32 recordId = partRecord->payload.id;
-        s32 remainingRecords = partRecord->parameter.part.count;
+        s32 recordId = partRecord->firstId;
+        s32 remainingRecords = partRecord->count;
         f32 optionalAnchorScale = 0.0f;
 
         /* Retain the native 17-byte size threshold for the optional anchor scale. */
-        if ((u32)partRecord->nextOffset >= MDL_PART_VALUE_SIZE_THRESHOLD) {
-            optionalAnchorScale = partRecord->tail.anchorScale;
+        if (partRecord->size >= MDL_PART_VALUE_SIZE_THRESHOLD) {
+            optionalAnchorScale = partRecord->anchorScale;
         }
         do {
             SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
@@ -945,13 +946,13 @@ void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
 
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-void mdlClaimViewerObjectPart(MdlCtx *owner, MdlRecord *entryRecord, s32 motionSlotIndex) {
-    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->tail.object.partIndex);
+void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 motionSlotIndex) {
+    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
         MdlObj *object = mdlPartObjectFromStorage(partSlot->object).model;
         if (object->inUse == 0) {
-            SdfTex *texture = sdfFindTextureByResourceKey(entryRecord->payload.id);
+            SdfTex *texture = sdfFindTextureByResourceKey(entryRecord->dataId);
             if (texture != 0) {
                 MdlResourceItem *resourceItem;
                 u8 *attributes;
@@ -962,10 +963,10 @@ void mdlClaimViewerObjectPart(MdlCtx *owner, MdlRecord *entryRecord, s32 motionS
                 attributes = resourceItem->payload.object.attributes;
                 resourceItem->payload.object.texture = texture;
                 resourceItem->payload.object.owner = owner;
-                resourceItem->payload.object.minimumTime = entryRecord->parameter.minimumTime;
+                resourceItem->payload.object.minimumTime = entryRecord->minimumTime;
                 attributes[1] = 1;
-                attributes[2] = entryRecord->tail.object.loopMode;
-                attributes[3] = entryRecord->tail.object.playbackCadenceStep;
+                attributes[2] = entryRecord->loopMode;
+                attributes[3] = entryRecord->playbackCadenceStep;
             }
         }
     }
@@ -989,10 +990,10 @@ void mdlCondInitEntry(MdlResourceItem *item) {
 void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 motionSlotIndex) {
     switch (record->kind) {
     case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
-        mdlBindViewerPartRecords(owner, record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
+        mdlBindViewerPartRecords(owner, (MdlPartRec *)record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
         return;
     case MDL_VIEWER_RECORD_KIND_EFFECT_PART:
-        mdlBindViewerPartRecords(owner, record, motionSlotIndex, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
+        mdlBindViewerPartRecords(owner, (MdlPartRec *)record, motionSlotIndex, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
         return;
     case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
         mdlCreateViewerEffectPart(owner, (MdlTrackPolyRecordView *)record, motionSlotIndex);
@@ -1001,7 +1002,7 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 motionSlotIn
         mdlLoadViewerStreamRecord(owner, record);
         return;
     case MDL_VIEWER_RECORD_KIND_OBJECT_PART:
-        mdlClaimViewerObjectPart(owner, record, motionSlotIndex);
+        mdlClaimViewerObjectPart(owner, (MdlEntryRec *)record, motionSlotIndex);
         break;
     }
 }

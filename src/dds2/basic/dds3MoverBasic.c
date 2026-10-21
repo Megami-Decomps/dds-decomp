@@ -29,7 +29,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *moverNode)
     f32 fieldOfView;
 
     if (slotResource->path != NULL) {
-        if (slotResource->path->counter.flags & DDS3_PATH_POSITION_CHANNEL) {
+        if (slotResource->path->flags & DDS3_PATH_POSITION_CHANNEL) {
             dds3InterpolatePathVectorVU(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
             dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
@@ -37,12 +37,12 @@ s32 dds3UpdateMoverTransform(EffWorldNode *moverNode)
                 PCP_COPY_VECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
             }
         }
-        if (slotResource->path->counter.flags & DDS3_PATH_ROTATION_CHANNEL) {
+        if (slotResource->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
             dds3InterpolatePathQuaternionVU(slotResource->path);
             VU0_STORE_VF(vf10, pathVector);
             dds3SetRotPoseSet(targetObject, (u128 *)pathVector);
         }
-        if (slotResource->path->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
+        if (slotResource->path->flags & DDS3_PATH_SCALAR_CHANNEL) {
             if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
                 fieldOfView = sdfSampleActiveLinearCurve(slotResource->path);
                 cameraData = targetObject->data;
@@ -50,14 +50,14 @@ s32 dds3UpdateMoverTransform(EffWorldNode *moverNode)
                 cameraData->fovUpdatePending |= DDS3_MOVER_FOV_UPDATE_BIT;
             }
         }
-        if (slotResource->path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
+        if (slotResource->path->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
             if (((u8 *)&targetObject->kindTag)[3] == DDS3_MOVER_WORLD_TRANSFORM_KIND) {
                 dds3InterpolatePathOutput(slotResource->path, &transformParams);
                 dds3LoadWorldTransformParams(targetObject, &transformParams);
             }
         }
         /* Advance even when no applicable channel was enabled for this target. */
-        sdfStepWrappingFloatCounter(&slotResource->path->counter);
+        sdfStepWrappingFloatCounter(slotResource->path);
     } else {
         updateCallback = slotResource->update;
         /* This unidentified word is cleared even when no callback exists. */

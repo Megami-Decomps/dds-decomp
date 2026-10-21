@@ -1,9 +1,10 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "itf.h"
+#include "snd_pad_step.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "sdf_pac_reloc.h"
+#include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
@@ -49,7 +50,7 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 u8 *itfMesGetTableItem(ItfMesTable *table, s32 itemIndex);
 u8 *itfMesGetNextEntrySelectedItem(ItfMesState *mes);
 
-void itfMesRelocate(ItfMesSub *resource);
+void itfMesRelocate(ItfMesRelocHeader *resource);
 
 void itfMesDestroyWindow(s32 window);
 
@@ -845,7 +846,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     u8 *temporaryFontEntry;
 
     mes->sub = sub;
-    itfMesRelocate(sub);
+    itfMesRelocate((ItfMesRelocHeader *)sub);
     entry = itfMesGetNextEntry(sub);
     temporaryFontEntry = 0;
     if (sub->magic == ITF_MES_MAGIC_MSG1) {
@@ -1064,7 +1065,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
             }
             break;
         case 2:
-            sndStepIndexByPad(panel);
+            sndStepIndexByPad((SndPadStepper *)panel);
             if (D_00324510[0x33] < 0) {
                 D_00357D80.mode = 0;
             }
@@ -1143,17 +1144,17 @@ void itfMesDestroyWindow(s32 window) {
 }
 
 /* Relocate packed payload words once, then set the resource's relocated marker. */
-/* Semantic reference: Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c). */
-void itfMesRelocate(ItfMesSub *resource) {
+/* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
+void itfMesRelocate(ItfMesRelocHeader *resource) {
     if (resource->relocated == 0) {
-        sdfRelocatePackedResourceWords((s32 *)resource->entries, (s32)resource->entries,
+        sdfRelocatePackedResourceWords((s32 *)resource->payload, (s32)resource->payload,
                       (u8 *)resource + resource->fixupTableOffset, resource->fixupTableBytes);
         resource->relocated = 1;
     }
 }
 
 /* Recognize MSG0/MSG1 magic only; this is not complete format validation. */
-u32 itfMesIsMsgData(ItfMesSub *resource) {
+u32 itfMesIsMsgData(ItfMesRelocHeader *resource) {
     u32 isMessageResource;
 
     isMessageResource = 0;

@@ -1,6 +1,6 @@
 #include "common.h"
 #include "itf_debug_panel_work.h"
-#include "itf.h"
+#include "snd_pad_step.h"
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
 #include "itf_mes_window.h"
@@ -8,6 +8,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
+#include "itf.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"
 #include "pcp_vu0.h"
@@ -907,8 +908,8 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
     }
 }
 
-/* Step the panel fade limit by pad input: one per press, ten with the fast modifier held. */
-void sndStepIndexByPad(ItfMesBlkA4 *panel) {
+/* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
+void sndStepIndexByPad(SndPadStepper *stepper) {
     s32 step;
 
     if (D_00324510.coarseDown & 2) {
@@ -925,11 +926,11 @@ void sndStepIndexByPad(ItfMesBlkA4 *panel) {
         step *= 10;
     }
     if (step != 0) {
-        s32 alpha = (panel->fadeLimit + step) & 0xFF;
+        s32 index = (stepper->index + step) & 0xFF;
 
-        panel->fadeLimit = alpha;
-        if (panel->sprite != NULL) {
-            panel->sprite->alpha = alpha;
+        stepper->index = index;
+        if (stepper->target != NULL) {
+            stepper->target->alpha = index;
         }
     }
 }
