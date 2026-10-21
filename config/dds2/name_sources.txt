@@ -9863,3 +9863,12 @@
 0x00120528	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldDrawConvertedTextGlyph
 0x001A7C08	itfMesDrawWindowBackground	inferred	confidence=high; builds the mode-dependent message-window background from window texture rectangle tables, queues panel and border quads, and appends the packets to the interface display list.
 0x0024B078	evtViewerReturnZero	inferred	Unconditionally returns zero; paired with the same event-viewer helper in DDS1 at 0x00230470.
+0x001BAB90	btlDrawAnalysisPanelVitalBars	inferred	Draws the analysis panel HP/MP bar frames and cropped fill from the selected unit's current and maximum values; paired DDS1 0x001AFF78 and analysis-panel caller.
+0x001C3EC0	btlUpdateActorPanelCursorState	inferred	Advances pending cursor selection, settle offsets, pulse phase and cursor echoes; paired DDS1 0x001B8CB8 and actor-panel update caller.
+0x001C6648	btlUpdateActorVitalEffectState	inferred	Advances and clears the actor panel HP/MP change-effect states, offsets, timers and highlight levels; paired DDS1 0x001BB440 and actor-panel update caller.
+0x002E9B20	effAppendSurfaceGridVectors	inferred	Paired DDS1 0x002A7568; appends three vectors to the surface-grid ring, mirrors the ring head at capacity, and advances retained-vector count.
+0x002E9BC8	effInterpolateSurfaceGridVectors	inferred	Paired DDS1 0x002A7610; interpolates three surface-grid vectors per column with Catmull-Rom or linear interpolation and appends each result.
+0x002EE670	effDrawEffectStrip	inferred	Paired DDS1 0x002AB290; builds camera-facing strip quads from the effect strip point and color data and submits them for rendering.
+0x002F1888	effDrawRibbon	inferred	Paired DDS1 0x002AE498; builds and submits the ribbon work strip geometry and texture packets, returning when it has no segments or its color is transparent.
+0x0015A4B0	effDrawBillboardInstance	inferred	Builds and appends the billboard instance's transformed textured child-quad draw packets; twin 0x001528C0.
+0x0015EE70	effInitRadialEmitterPacket	inferred	Seeds packet position, radial velocity, delay, scale and spin before subeffect initialization; twin 0x00157280.

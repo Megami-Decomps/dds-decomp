@@ -2177,7 +2177,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
     return 0;
 }
 
-extern void frFontDrawGlyphChain(void *, s32, s32);
+#include "fr_font_draw_glyph.h"
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {

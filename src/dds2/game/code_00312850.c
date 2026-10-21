@@ -49,10 +49,6 @@ extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32 scale, f32 *vector);
 
-struct FrFontGlyph;
-
-extern void frFontDrawGlyphChain(u64, s32, s32);
-
 extern u64 itfCreateTightFont3TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 itfCreateFont2TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);

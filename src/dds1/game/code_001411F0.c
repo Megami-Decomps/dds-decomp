@@ -49,6 +49,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
+#include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
@@ -184,7 +185,6 @@ extern s32 D_0032E4C4[];
 
 extern u8 D_0034D8F0[];
 
-extern s32 evtCreateMessageWindowIfMissing(s32 unused);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -2725,8 +2725,6 @@ extern s32 fldEffectTextureNodes[];
 extern s32 D_0034C8A0[];
 
 
-extern s32 effCreateNodeFromParameter();
-
 extern char *D_003A06B0[4]; /* {"/fld/f/bin/KUT_3Z.EPL", "ASI_2MZ", "ASI_2HZ", "MAN_2Z"} */
 
 void fldLoadFieldEffectTextureSlots(void) {
@@ -2736,7 +2734,7 @@ void fldLoadFieldEffectTextureSlots(void) {
     memcpy(names, D_003A06B0, sizeof(names));
     for (i = 0; i < 4; i++) {
         fldEffectTextureLoadHandles[i] = (s32)sdfReadNamedResource(names[i], (u32 *)&fldEffectTextureData[i], 0);
-        fldEffectTextureNodes[i] = effCreateNodeFromParameter(fldEffectTextureData[i]);
+        fldEffectTextureNodes[i] = (s32)effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_0034C8A0[i] = 0;
     }
 }
@@ -2803,7 +2801,7 @@ extern s32 D_003BAF88;
 void mnuInitializeResourceEntries(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
-        mnuPositionedResourceNodes[i] = effCreateNodeFromParameter(D_003BAF88);
+        mnuPositionedResourceNodes[i] = (s32)effCreateNodeFromParameter(D_003BAF88);
         mnuPositionedResourceActive[i] = 0;
     }
 }
@@ -3931,8 +3929,6 @@ void fldRequestMiniTitleDismiss(void) {
 }
 
 
-extern s32 effCreateNodeFromParameter();
-
 void fldLoadWeatherEffects(void) {
     s32 handle;
     s32 resourceAddress;
@@ -3941,10 +3937,10 @@ void fldLoadWeatherEffects(void) {
     fldWeatherLimitTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
     fldDamEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
-    fldDamEffectNode = effCreateNodeFromParameter(fldDamEffectData);
+    fldDamEffectNode = (u32)effCreateNodeFromParameter(fldDamEffectData);
     fldDamEffectPositioned = 0;
     fldYukEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
-    fldYukEffectNode = effCreateNodeFromParameter(fldYukEffectData);
+    fldYukEffectNode = (u32)effCreateNodeFromParameter(fldYukEffectData);
     fldYukEffectPositioned = 0;
 }
 
@@ -4369,7 +4365,7 @@ void func_0014C468(void) {
         return;
     }
     if (mdlFlagTest(0x819) != 0) {
-        evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+        evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
         dspStartEntry(6);
         D_0032E4B4[0] = 1;
         fldSparkControlState.dialogPhase = 12;
@@ -4378,7 +4374,7 @@ void func_0014C468(void) {
         fldResetPlayerSceneObjectState();
         return;
     }
-    evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
     if (mdlFlagTest(0x81A) != 0) {
         dspStartEntry(1);
     } else {
@@ -4495,7 +4491,7 @@ void fldUpdateSparkMessageSequence(void) {
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 4;
                 fldSparkControlState.dialogTimer = 0;
-                evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+                evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
                 dspStartEntry(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
                 evtSetMessageWindowOptionWhenOpen(0);
@@ -4673,7 +4669,7 @@ void fldUpdateSparkEncounterScene(void) {
             fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
             fldSparkControlState.phase = 3;
-            evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+            evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
             dspStartEntry(4);
             fldResetPlayerSceneObjectState();
             fldClearObjectEntryHandles();
@@ -4776,7 +4772,7 @@ void fldResetEventSceneState(void) {
 }
 
 void fldStartDeferredFieldExit(void) {
-    evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)D_0034D8F0);
     dspStartEntry(5);
     fldResetPlayerSceneObjectState();
     D_0032E4C4[0] = 2;

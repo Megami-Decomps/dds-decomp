@@ -1155,8 +1155,6 @@ extern void mnuResetResourceAnimation(void);
 extern void mnuHandleMantraGridInput(MenuSceneWork *);
 extern void mnuReinitializeSceneGrid(s32);
 
-extern s32 evtCreateMessageWindowIfMissing(s32 sub);
-
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF810);
 
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF830);
@@ -1207,7 +1205,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         break;
     case 10:
         dspCloseChannel();
-        evtCreateMessageWindowIfMissing(metadata->entryMessageWindowResource);
+        evtCreateMessageWindowIfMissing((struct ItfMesSub *)metadata->entryMessageWindowResource);
         if (mnuDisplayNextPendingMantra((s32)work)) {
             dspCloseChannel();
             work->phaseFrame = 0;
@@ -1269,7 +1267,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         if (evtGetMessageWindowControlState() == 0) {
             if (work->entryMessageInProgress == 0) {
                 dspCloseChannel();
-                evtCreateMessageWindowIfMissing(metadata->entryMessageWindowResource);
+                evtCreateMessageWindowIfMissing((struct ItfMesSub *)metadata->entryMessageWindowResource);
                 dspStartEntry(0);
                 work->entryMessageInProgress = 1;
             } else {
@@ -1634,7 +1632,7 @@ s32 mnuBeginMantraProfileSelection(void) {
     scene->state = MENU_SCENE_STATE_SELECTING;
     scene->pendingProfileId = entry->sceneId;
     dspCloseChannel();
-    evtCreateMessageWindowIfMissing(scene->messageWindowResource);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), ((MnuProfileProgress *)mnuGetSelectedNodeValue())->partyRecord, 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
     mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), scene->attachedEffect);

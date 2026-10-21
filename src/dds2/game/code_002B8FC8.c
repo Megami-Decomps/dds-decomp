@@ -295,7 +295,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
-extern void frFontDrawGlyphChain(s32, s32, s32);
+#include "fr_font_draw_glyph.h"
 
 
 
@@ -851,7 +851,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
             }
         }
         if (glyph != NULL) {
-            frFontDrawGlyphChain((s32)glyph, 1, drawArg);
+            frFontDrawGlyphChain(glyph, 1, drawArg);
             frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {

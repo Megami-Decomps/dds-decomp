@@ -5187,7 +5187,7 @@ void effCopyRingFrameVectors(EffSurfaceGridNode *node, u128 *destination, s32 fr
 /* data holds two vector addresses: the ring head, then the input frame.
  * ring_mirror_pointer_epochs_probe (hooked==unhooked): GCSE preserves the
  * head-to-mirror copy; separate append/mirror lifetimes keep native allocation. */
-void func_002A7568(EffSurfaceGridNode *work, const f32 (*source)[4]) {
+void effAppendSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*source)[4]) {
     s32 index = work->field_18;
     const u128 *data = work->buffer;
     u128 *destination = (u128 *)data + index;
@@ -5215,7 +5215,7 @@ void func_002A7568(EffSurfaceGridNode *work, const f32 (*source)[4]) {
 extern void vuCatmullRomPoint(f32 (*)[4], f32);
 
 /* vu0 routine: interpolate three-vector ring frames with SDK spline and lerp operations. */
-void func_002A7610(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
+void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
     f32 frames[4][3][4];
     f32 controlVectors[4][4];
     f32 output[3][4];
@@ -5227,7 +5227,7 @@ void func_002A7610(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
     f32 t;
 
     if (count == 1 || retainedVectors == 0) {
-        func_002A7568(work, vectors);
+        effAppendSurfaceGridVectors(work, vectors);
         return;
     }
     if (retainedVectors >= count * 6) {
@@ -5249,7 +5249,7 @@ void func_002A7610(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
                 vuCatmullRomPoint(controlVectors, t);
                 VU0_STORE_VF(vf10, output[j]);
             }
-            func_002A7568(work, output);
+            effAppendSurfaceGridVectors(work, output);
         }
     } else {
         effCopyRingFrameVectors(work, (u128 *)controlVectors, 1);
@@ -5263,7 +5263,7 @@ void func_002A7610(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
                 VU0_LERP_VF10(t);
                 VU0_STORE_VF(vf10, output[j]);
             }
-            func_002A7568(work, output);
+            effAppendSurfaceGridVectors(work, output);
         }
     }
 }
@@ -6639,7 +6639,7 @@ void effAcquireStripRecord(EffectStripNode *node) {
 }
 
 extern f32 sdfViewUpVector[4];
-void func_002AB290(EffectStripNode *node) {
+void effDrawEffectStrip(EffectStripNode *node) {
     Matrix4 matrix;
     f32 nodeTint[4];
     f32 tint[4];
@@ -6843,7 +6843,7 @@ void func_002AB290(EffectStripNode *node) {
 /* Advance the active strip record, rebuild its geometry, and submit its tracks. */
 void effUpdateAndDrawStripRecord(EffectStripNode *node) {
     effAcquireStripRecord(node);
-    func_002AB290(node);
+    effDrawEffectStrip(node);
 }
 
 void effSetStripRecordVector(EffectStripNode *node, const u128 *value) {
@@ -7000,7 +7000,7 @@ void effReleaseRingFadeTable(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
 
-extern void func_002AE498(EffRibbonWork *, Matrix4 *);
+extern void effDrawRibbon(EffRibbonWork *, Matrix4 *);
 
 void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     EffBillVortexConfig *config = (EffBillVortexConfig *)((BillCellDrawWork *)work)->config;
@@ -7035,7 +7035,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498(out, (Matrix4 *)mtx);
+    effDrawRibbon(out, (Matrix4 *)mtx);
 }
 
 void effResetBillboardFrameInstanceCounters(u8 *work) {
@@ -7421,7 +7421,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498(out, (Matrix4 *)mtx);
+    effDrawRibbon(out, (Matrix4 *)mtx);
 }
 
 void effResetParticleBillFrameCounters(u8 *work) {
@@ -7758,7 +7758,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498(out, (Matrix4 *)mtx);
+    effDrawRibbon(out, (Matrix4 *)mtx);
 }
 
 EffClassWork *effAllocateBlock(u16 kind, void *source) {
@@ -7942,7 +7942,7 @@ static inline u32 packNormalizedColor(void) {
     EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
-void func_002AE498(EffRibbonWork *work, Matrix4 *matrix) {
+void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;

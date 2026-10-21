@@ -363,7 +363,6 @@ u64 mtrMantraSelectDraw(void) {
 }
 
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
-extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern void mnuSetupStaffMenuProfilePage(DatPartyRecord *, MenuProgressHost *);
 extern void mnuEnsureProfilePanelEffect(DatPartyRecord *, MenuProgressHost *);
 extern char D_00426208[];

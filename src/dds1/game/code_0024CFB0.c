@@ -100,13 +100,12 @@ extern u8 *D_003BAA84;
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
-extern s32 evtCreateMessageWindowIfMissing(s32 sub);
 
 /* Close the current display channel before ensuring a replacement window.
  * DDS1 retains the legacy argument taken from the context's resource pair. */
 void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
     dspCloseChannel();
-    evtCreateMessageWindowIfMissing(*(u32 *)((u8 *)context + 0x60));
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)*(u32 *)((u8 *)context + 0x60));
 }
 
 /* Start the first eligible special, scene, or active-party flag event.
@@ -482,7 +481,7 @@ struct ItfMesSub;
 extern s32 itfMesCreateWindow(struct ItfMesSub *sub);
 
 /* Create the singleton message window only when its handle is negative. */
-s32 evtCreateMessageWindowIfMissing(s32 sub) {
+s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *sub) {
     if (dspWindowHandle < 0) {
         dspWindowHandle = itfMesCreateWindow(sub);
         itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
