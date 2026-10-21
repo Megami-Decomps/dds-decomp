@@ -10314,14 +10314,8 @@ void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
     sdfMemFreeDirect(payload->allocation);
 }
 
-typedef struct EffCameraPathParameters {
-    u32 startFrame;
-    u8 actorSelection;
-    u8 count;
-    u8 directionMode;
-    u8 pad07;
-    u32 defeatSelection;
-} EffCameraPathParameters;
+#include "eff_camera_path_parameters.h"
+
 extern void btlSetRuntimeFlag2000(void);
 extern u32 btlIsRuntimeFlag2000Clear(void);
 extern void btlClearAllUnitDefeatCandidates(void);
