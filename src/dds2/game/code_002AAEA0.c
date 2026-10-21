@@ -103,7 +103,6 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     return 0;
 }
 
-extern void mnuDrawCampScreenDefault(KwlnTask *);
 extern void mnuDrawCampGridFrameAndLabel(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 extern char mnuCampCommandHelpTextBank[];
 extern char mnuCampFieldSkillHelpConditionFlags[];

@@ -26,7 +26,6 @@
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
 
-extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 mnuCampItemCommandHelpTextBank[];

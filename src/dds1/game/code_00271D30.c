@@ -342,7 +342,7 @@ void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     }
 }
 
-void mnuDrawCampScreenDefault(u32 task) {
+void mnuDrawCampScreenDefault(KwlnTask *task) {
     mnuDrawStaffCampScreen(0, task);
 }
 

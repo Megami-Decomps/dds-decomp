@@ -125,7 +125,6 @@ extern char mnuStaffCampPagePopupEntry[];
 extern void mnuDrawWindowDecorations(s32, s32, s32, s32, s32);
 
 
-extern void mnuDrawCampScreenDefault();
 
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 

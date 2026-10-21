@@ -41,7 +41,6 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 typedef struct MenuListNode MenuListNode;
 
 
-extern void mnuDrawCampScreenDefault(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 

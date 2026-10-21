@@ -13,7 +13,6 @@
 
 
 extern void mnuCampMenuHandleInput(s32);
-extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);

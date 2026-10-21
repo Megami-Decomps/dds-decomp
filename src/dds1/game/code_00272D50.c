@@ -365,7 +365,6 @@ s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
     return 0;
 }
 
-extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
