@@ -12,7 +12,7 @@ extern f32 sdfVec3Normalize(f32 *);
 
 extern void (*sdfTickCallback)(void);
 
-extern f32 sdfVec3DotNormalized(void *, void *);
+extern f32 sdfVec3DotNormalized(const SdfVec4 *, const SdfVec4 *);
 
 
 
@@ -595,9 +595,9 @@ f32 sdfVectorLength(const f32 *vector) {
 }
 
 /* Dot product of two normalized 3D directions (w is ignored). */
-f32 sdfVec3DotNormalized(void *first, void *second) {
-    SdfVec4 firstNormalized = *(SdfVec4 *)first;
-    SdfVec4 secondNormalized = *(SdfVec4 *)second;
+f32 sdfVec3DotNormalized(const SdfVec4 *first, const SdfVec4 *second) {
+    SdfVec4 firstNormalized = *first;
+    SdfVec4 secondNormalized = *second;
 
     sdfVec3Normalize(&firstNormalized.x);
     sdfVec3Normalize(&secondNormalized.x);
