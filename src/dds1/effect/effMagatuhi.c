@@ -39,6 +39,16 @@ typedef struct {
 } EffMagatuhiCallback;
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
+/* XYZ is consumed as a position vector; preserve the untouched fourth word. */
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 opaqueFourthWord[4];
+} EffMagatuhiPosition;
+
+typedef char EffMagatuhiPositionSizeCheck[(sizeof(EffMagatuhiPosition) == 0x10) ? 1 : -1];
+
 /* Four control points and their jitter scales; copy xyz but preserve each w. */
 typedef struct {
     f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -51,10 +61,8 @@ typedef struct {
 
 /* Parameter head of the first family: particles of 0x30 bytes precede the work. */
 typedef struct {
-    f32 unk00, unk04, unk08;
-    u8 pad0C[4];
-    f32 unk10, unk14, unk18;
-    u8 pad1C[4];
+    EffMagatuhiPosition origin;
+    EffMagatuhiPosition target;
     u8 respawn;            /* 0x20 */
     u8 pad21[3];
     s32 lifetimeFrames;    /* 0x24 */
@@ -75,6 +83,10 @@ typedef struct {
     u32 particleCount;     /* 0x60 */
     u8 pad64[0x118];
 } EffMagatuhiHeadFirst; /* 0x17C */
+
+typedef char EffMagatuhiHeadFirstSizeCheck[(sizeof(EffMagatuhiHeadFirst) == 0x17C) ? 1 : -1];
+typedef char EffMagatuhiHeadFirstTargetOffsetCheck[
+    ((u32)&((EffMagatuhiHeadFirst *)0)->target == 0x10) ? 1 : -1];
 
 /* Shared 0x30-byte state: base position, planar drift, and accumulated lift. */
 typedef struct {
@@ -122,12 +134,14 @@ typedef struct {
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
 typedef struct {
-    f32 unk00, unk04, unk08;
-    u8 pad0C[4];
-    f32 unk10, unk14, unk18;
-    u8 pad1C[4];
+    EffMagatuhiPosition origin;
+    EffMagatuhiPosition target;
     f32 initialRadius, captureDistance;
 } EffMagatuhiFloatParams; /* 0x28 */
+
+typedef char EffMagatuhiFloatParamsSizeCheck[(sizeof(EffMagatuhiFloatParams) == 0x28) ? 1 : -1];
+typedef char EffMagatuhiFloatParamsTargetOffsetCheck[
+    ((u32)&((EffMagatuhiFloatParams *)0)->target == 0x10) ? 1 : -1];
 
 
 /* Release the allocation retained by the render/history owner. */
@@ -507,12 +521,12 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
     fadeIn = work->head.fadeInFrames;
     fadeOut = work->head.fadeOutFrames;
     slot = effMathGetSlotAt(mathResource, 0);
-    PCP_COPY_VECTOR(origin, &work->head.unk00);
+    PCP_COPY_VECTOR(origin, &work->head.origin);
     captureDistance = work->head.captureDistance;
     pathJitter = work->head.pathJitter;
     pathStep = work->head.pathStep;
     pathAcceleration = work->head.pathAcceleration;
-    PCP_COPY_VECTOR(target, &work->head.unk10);
+    PCP_COPY_VECTOR(target, &work->head.target);
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
         if (age == 0) {
@@ -590,13 +604,13 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
 void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams *src) {
     EffMagatuhiWideFirst *dst = effGetHandlerArg(work->effect);
 
-    dst->head.unk00 = src->unk00;
-    dst->head.unk04 = src->unk04;
-    dst->head.unk08 = src->unk08;
+    dst->head.origin.x = src->origin.x;
+    dst->head.origin.y = src->origin.y;
+    dst->head.origin.z = src->origin.z;
     dst->head.initialRadius = src->initialRadius;
-    dst->head.unk10 = src->unk10;
-    dst->head.unk14 = src->unk14;
-    dst->head.unk18 = src->unk18;
+    dst->head.target.x = src->target.x;
+    dst->head.target.y = src->target.y;
+    dst->head.target.z = src->target.z;
     dst->head.captureDistance = src->captureDistance;
 }
 
