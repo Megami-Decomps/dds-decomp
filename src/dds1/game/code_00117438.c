@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_channel.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
 #include "sdf_float_counter.h"
@@ -410,15 +411,6 @@ u8 scrIsCurrentWorkTask(struct ScrData *expectedValue) {
 }
 
 #include "sdf_debug_api.h"
-
-/* Channel table row: a file name, then {destination slot, unused} pairs ending with a null slot. */
-typedef struct SdfChannel {
-    const char *path;
-    struct {
-        void **slot;
-        u32 unused;
-    } entries[20];
-} SdfChannel;
 
 const char D_0039F930[] = "sys:[%s]\n";
 

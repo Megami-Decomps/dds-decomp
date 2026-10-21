@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_channel.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
 #include "sdf_float_counter.h"
@@ -46,16 +47,6 @@ extern void sdfRestoreResetSnapshot(void);
 s32 sdfBumpTickCounters(KwlnTask *task);
 
 void evtResetWorldAndProfileRuntime(void);
-
-typedef struct SdfChannel {
-    const char *path;
-    struct {
-        void **slot;
-        u32 unused;
-    } entries[20];
-} SdfChannel;
-
-typedef char SdfChannel_size_must_be_0xA4[(sizeof(SdfChannel) == 0xA4) ? 1 : -1];
 
 extern SdfChannel D_00385A90[8];
 extern void sdfReloadChannelSegments(SdfChannel *channel);
