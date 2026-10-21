@@ -344,7 +344,7 @@ extern s8 D_003BD3C8;
 
 extern char D_003BD3D0[];
 
-extern s32 func_0030C8E0(const char *, ...);
+extern s32 scePrintf(const char *, ...);
 
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
@@ -377,7 +377,7 @@ void sdfDevPrintText(const char *text) {
             sceSifMCallRpc(&sdfDevRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
-        func_0030C8E0(D_003BD3D0, text);
+        scePrintf(D_003BD3D0, text);
     }
 }
 

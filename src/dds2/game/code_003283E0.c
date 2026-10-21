@@ -6,7 +6,7 @@
 
 extern SdfHandlerNode *sdfHandlerNodeListHead;
 
-extern s32 func_00366780(s32);
+extern s32 DisableIntc(s32);
 
 extern void (*sdfTickCallback)(void);
 
@@ -58,8 +58,8 @@ void sdfPanicHaltPrintf(const char *format, ...) {
 }
 
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
-extern s32 func_00365990(s32, s32, s32, s32);
-extern s32 func_003659C0(s32, s32, s32, s32);
+extern s32 AddIntcHandler2(s32, s32, s32, s32);
+extern s32 AddDmacHandler2(s32, s32, s32, s32);
 
 SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
     SdfHandlerNode *node;
@@ -67,10 +67,10 @@ SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 n
 
     switch (kind) {
     case 0:
-        id = func_00365990(channel, handler, arg, next);
+        id = AddIntcHandler2(channel, handler, arg, next);
         break;
     case 1:
-        id = func_003659C0(channel, handler, arg, next);
+        id = AddDmacHandler2(channel, handler, arg, next);
         break;
     case 2:
         id = AddSbusIntcHandler(channel, handler);
@@ -97,7 +97,7 @@ void sdfRemoveHandler(SdfHandlerNode *target) {
             *link = node->next;
             switch (node->handlerKind) {
             case 0:
-                func_00366780(node->channel);
+                DisableIntc(node->channel);
                 RemoveIntcHandler(node->channel, node->handlerId);
                 break;
             case 1:

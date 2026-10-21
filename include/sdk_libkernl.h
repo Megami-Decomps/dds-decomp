@@ -153,11 +153,11 @@ s32 sceWrite(s32 fd, const void *data, s32 size);
 #ifndef SDK_SKIP_sdfDevSeekFile
 s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 #endif
-#ifndef SDK_SKIP_sdfDisableDmacChannel
-s32 sdfDisableDmacChannel(s32 channel);
+#ifndef SDK_SKIP_DisableDmac
+s32 DisableDmac(s32 channel);
 #endif
-#ifndef SDK_SKIP_sdfEnableDmacChannel
-s32 sdfEnableDmacChannel(s32 channel);
+#ifndef SDK_SKIP_EnableDmac
+s32 EnableDmac(s32 channel);
 #endif
 #ifndef SDK_SKIP_sdfPfsSendPathRequest
 s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
