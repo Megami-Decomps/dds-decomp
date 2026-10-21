@@ -43,11 +43,11 @@ enum {
 
 
 s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block);
-extern u8 D_004389E0;
+extern u8 sdfDeferredGsImageCapturePending;
 
-extern u8 *D_004389E4;
+extern u8 *sdfDeferredGsImageCaptureDestination;
 
-extern void (*D_004389E8)(u8 *);
+extern void (*sdfDeferredGsImageCaptureCallback)(u8 *);
 
 
 extern SdfPendingRequest sdfTextureUpdateQueue;
@@ -79,9 +79,9 @@ extern vu8 sdfCurrentBufferIndex;
 
 
 void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(u8 *)) {
-    D_004389E4 = destination;
-    D_004389E8 = onComplete;
-    D_004389E0 = 1;
+    sdfDeferredGsImageCaptureDestination = destination;
+    sdfDeferredGsImageCaptureCallback = onComplete;
+    sdfDeferredGsImageCapturePending = 1;
 }
 
 extern sceGsStoreImage sdfGsCaptureStoreImage;
@@ -103,7 +103,7 @@ void sdfCaptureDeferredGsImage(void) {
     u8 *source;
     u8 *destination;
 
-    if (D_004389E0) {
+    if (sdfDeferredGsImageCapturePending) {
         width = D_0040B290.width;
         height = D_0040B290.height;
         format = D_0040B290.bufferFormat;
@@ -122,7 +122,7 @@ void sdfCaptureDeferredGsImage(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = D_004389E4;
+        destination = sdfDeferredGsImageCaptureDestination;
         source = pixels;
         rows = height;
         do {
@@ -136,7 +136,7 @@ void sdfCaptureDeferredGsImage(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = D_004389E4 + rowBytes;
+        destination = sdfDeferredGsImageCaptureDestination + rowBytes;
         source = pixels;
         rows = height;
         do {
@@ -145,9 +145,9 @@ void sdfCaptureDeferredGsImage(void) {
             source += rowBytes;
         } while (--rows != 0);
         sdfMemFreeDirect(allocation);
-        D_004389E0 = 0;
-        if (D_004389E8) {
-            D_004389E8(D_004389E4);
+        sdfDeferredGsImageCapturePending = 0;
+        if (sdfDeferredGsImageCaptureCallback) {
+            sdfDeferredGsImageCaptureCallback(sdfDeferredGsImageCaptureDestination);
         }
     }
 }
@@ -1138,13 +1138,13 @@ SdfTexResource *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
     return head;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E0);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDeferredGsImageCapturePending);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E1);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E4);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDeferredGsImageCaptureDestination);
 
-INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389E8);
+INCLUDE_SDATA(const s32, "game/code_00329F60", sdfDeferredGsImageCaptureCallback);
 
 INCLUDE_SDATA(const s32, "game/code_00329F60", D_004389EC);
 
