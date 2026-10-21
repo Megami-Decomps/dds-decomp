@@ -8816,7 +8816,7 @@ extern s32 btlGetTrackedTaskHandle(s32);
 
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 
-extern SceneAiWork *btlCreateTargetSelectionWork(s32);
+extern SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source);
 
 extern SceneAiWork *btlGetTargetSelectionWork(void);
 
@@ -10786,7 +10786,7 @@ extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexLis
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
-SceneAiWork *btlCreateTargetSelectionWork(s32 source) {
+SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
     SceneAiWork *work;
     BattleSceneObject *object;
     BattleActorPanelWork *other;
@@ -10808,12 +10808,12 @@ SceneAiWork *btlCreateTargetSelectionWork(s32 source) {
         btlGetIndexListCount(work->listA);
         work->result = 0;
     } else if (source != 0) {
-        work->result = btlSelectCommandTargetPolicy((ActionStateLink *)source, work->listA, 0);
+        work->result = btlSelectCommandTargetPolicy(source, work->listA, 0);
     }
     work->entry = 0;
     switch (work->result) {
     case 0:
-        id = btlFindEligibleTargetForMultiActorCommand(source, work->listA);
+        id = btlFindEligibleTargetForMultiActorCommand((s32)source, work->listA);
         work->entry = id;
         btlAppendIndexListEntry(work->listB, btlGetIndexListEntry(work->listA, id));
         break;
@@ -10854,7 +10854,7 @@ BtlIndexList *btlGetSelectedTargetList(void) {
     return btlGetTargetSelectionWork()->listB;
 }
 
-void btlCreateTargetSelectionTask(s32 sourceTask) {
+void btlCreateTargetSelectionTask(ActionStateLink *sourceTask) {
     BtlState *scene;
     KwlnTask *task;
     dds3SearchProcessName(D_004367B8);

@@ -528,7 +528,7 @@ extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
 
 extern void btlDebugPrintf(s32 tag, ...);
 
-extern void btlCreateTargetSelectionTask(s32 sourceTask);
+extern void btlCreateTargetSelectionTask(ActionStateLink *sourceTask);
 
 extern void fldUpdateSceneGroupTask(ActionStateLink *task);
 
@@ -1092,7 +1092,7 @@ void btlCommandResultEffectSelect(u8 *task) {
         }
         break;
     }
-    btlCreateTargetSelectionTask((s32)task);
+    btlCreateTargetSelectionTask((ActionStateLink *)task);
 }
 
 extern u32 btlGetTargetSelectionState(void);
