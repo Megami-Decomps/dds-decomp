@@ -24,6 +24,7 @@
 #include "eff_random.h"
 #include "mdl_flag_api.h"
 #include "btl.h"
+#include "mnu_party_menu_data.h"
 
 struct StaffMenuRuntime;
 
@@ -246,24 +247,6 @@ typedef struct MenuListNode MenuListNode;
 
 
 
-
-/* One allocated party-selection work area: original/current/backup entries,
- * saved panel payloads, and fade state all belong to this same allocation. */
-typedef struct PartyMenuData {
-    struct SdfMemBlock *allocation;
-    u8 pad04[4];
-    MenuWindowContainer *primaryWindow; /* 0x08 */
-    DatPartyRecord original[5];         /* 0x0C */
-    DatPartyRecord current[5];          /* 0x8E0 */
-    s32 activeCount;                    /* 0x11B4 */
-    DatPartyRecord backup[5];           /* 0x11B8 */
-    s32 selection;                      /* 0x1A8C */
-    u8 panelSnapshots[5][0xA0]; /* 0x1A90: copied panel subrecords */
-    s32 fadeA;                 /* 0x1DB0 */
-    s32 fadeB;                 /* 0x1DB4 */
-    u8 pad1DB8[0x20];
-    s32 freezePanel; /* 0x1DD8: set on transition; skips the panel update */
-} PartyMenuData; /* 0x1DDC: native party-selection allocation */
 
 /* Byte-offset copies keep their field displacement tied to the owner layout. */
 #define PARTY_BACKUP_OFFSET ((s32)&((PartyMenuData *)0)->backup)
