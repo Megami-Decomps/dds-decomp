@@ -1838,7 +1838,7 @@ s32 fldCmdMarkBitmapRegion(void) {
 
 extern s32 D_003898A4[];
 
-s32 func_00157258(void) {
+s32 fldCmdSetStateFlag(void) {
     D_003898A4[0] = 1;
     return 1;
 }

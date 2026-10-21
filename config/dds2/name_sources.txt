@@ -9874,3 +9874,4 @@
 0x0015A4B0	effDrawBillboardInstance	inferred	Builds and appends the billboard instance's transformed textured child-quad draw packets; twin 0x001528C0.
 0x0015EE70	effInitRadialEmitterPacket	inferred	Seeds packet position, radial velocity, delay, scale and spin before subeffect initialization; twin 0x00157280.
 0x0023DA70	evtUpdateUnitMotion	inferred	Advances the event unit motion state and per-slot animations, applies movement/wobble updates, refreshes endpoint work, and returns whether the unit moved; called each frame by effUpdateFollowModelTransform. Paired with DDS1 0x00222ED8.
+0x00157258	fldCmdSetStateFlag	inferred	confidence=medium; field-script dispatch-table callback stores 1 to its singleton state word and returns success; the state word has no other reconstructed users. Paired DDS1 0x0014F780 has the same body and corresponding dispatch-table slot. Name records the proven operation without guessing the flag's meaning.
