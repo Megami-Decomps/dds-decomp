@@ -731,7 +731,7 @@ extern void sndQueueNoPayloadCommand1A0(void);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void mnuStartMoviePlaybackByResourceIndex(s32 value);
 extern s32 fldTitleIsActive(void);
-extern void fldSetTitleDrawMode(s32 enabled);
+extern void fldSetTitleDrawMode(u32 enabled);
 extern void fldBeginTitleAnimation(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
@@ -2324,7 +2324,7 @@ extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);
 extern s32 fldTitleIsActive(void);
-extern void fldSetTitleDrawMode(s32 active);
+extern void fldSetTitleDrawMode(u32 active);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
 void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
@@ -4383,7 +4383,6 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 }
 
 extern f32 D_0037F590[];
-extern void fldSetTitleDrawMode();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();
