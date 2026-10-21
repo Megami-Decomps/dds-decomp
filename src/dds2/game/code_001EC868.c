@@ -9020,7 +9020,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
 #include "btl_sound_handle_node.h"
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
-    SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
+    SoundHandleNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     BattleSoundArchiveEntry *entry = &D_003BDE18[index];
     node->actor = actor;
     node->queue = fileCloneQueueEntries((struct FileQueue *)entry->archiveData);
