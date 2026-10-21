@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x002F3258	effBuildQuantizedTexturedStrip	inferred	Writes quantized textured-strip positions, UVs and per-vertex color/alpha from EffBillQuantizedConfig; paired DDS1 implementation at 0x002AFE68.
 0x001FA480	btlApplyTimedCameraInstruction	inferred	Applies the selected timed camera instruction to cursor camera tracks when its frame window is active; paired DDS1 implementation at 0x001E9DE0.
 0x001F5320	btlInitializeCameraCursorFromPreset	inferred	Selects the bank-specific path preset and initializes cursor endpoints, distance and operation kind from its operation; callers pass preset table indices for skill and scripted camera paths. Paired DDS1 implementation at 0x001E6668.
 0x00201828	btlSetCommandEffectLinkFlags	inferred	Clears actor, companion, and target effect-link flags, then sets their command, reflection, inactivity, and entry-derived bits before command dispatch; paired DDS1 implementation at 0x001F0CA0.

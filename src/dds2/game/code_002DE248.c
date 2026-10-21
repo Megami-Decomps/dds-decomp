@@ -8734,7 +8734,7 @@ u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
     return buffer;
 }
 
-void func_002F3258(u32 *buffer, EffBillQuantizedConfig *config) {
+void effBuildQuantizedTexturedStrip(u32 *buffer, EffBillQuantizedConfig *config) {
     f32 radii[4];
     f32 heights[4];
     s32 segment;
@@ -8848,12 +8848,12 @@ void func_002F3258(u32 *buffer, EffBillQuantizedConfig *config) {
     }
 }
 
-extern void func_002F3258(u32 *, EffBillQuantizedConfig *);
+extern void effBuildQuantizedTexturedStrip(u32 *, EffBillQuantizedConfig *);
 
 u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *src) {
     u32 *buf = effAllocateQuantizedBuffer(src);
     buf[1] = (u32)effCreateTexturedStripWithSharedTexture(buf[0], src->samples.quantizedSamples);
-    func_002F3258(buf, src);
+    effBuildQuantizedTexturedStrip(buf, src);
     return buf;
 }
 
@@ -8862,7 +8862,7 @@ u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
     EffFrameState *src = (EffFrameState *)((EffClassWork *)p)->resource;
     u32 *buf = effAllocateQuantizedBuffer(config);
     buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(src->asset);
-    func_002F3258(buf, config);
+    effBuildQuantizedTexturedStrip(buf, config);
     return buf;
 }
 
