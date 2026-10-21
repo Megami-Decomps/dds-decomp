@@ -10,11 +10,11 @@ s32 dds3ExchangeAreaSlot(void *areaObject) {
 
 /* A missing callback returns one; otherwise propagate its return unchanged. */
 s32 dds3InvokeAreaCallback(Dds3AreaObjectView *areaObject) {
-    s32 (*callback)(void);
+    s32 (*callback)(Dds3AreaObjectView *);
 
     callback = areaObject->callbackRecord->callback;
     if (callback == NULL) {
         return 1;
     }
-    return callback();
+    return callback(areaObject);
 }
