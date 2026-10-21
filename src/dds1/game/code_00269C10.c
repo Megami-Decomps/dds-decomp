@@ -86,9 +86,9 @@ s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words);
 void sndUploadStreamToBothIopBuffers(u32 wordCount) {
     sndCopyWordsToIopSynchronously((const void *)D_003BC5B8, D_003BC5B0[0], wordCount);
     sndCopyWordsToIopSynchronously((const void *)D_003BC5B8, D_003BC5B0[1], wordCount);
-    sndDispatchIopAudioCommand(1, 0x8010, 0xf80, 0);
-    sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0);
-    sndDispatchIopAudioCommand(1, 0x80e0, 0, 2, 0, 0);
+    sceSdRemote(1, 0x8010, 0xf80, 0);
+    sceSdRemote(1, 0x8010, 0x1080, 0);
+    sceSdRemote(1, 0x80e0, 0, 2, 0, 0);
 }
 
 /* Copy the second source, add the first, and clamp to [-32767, 32767].

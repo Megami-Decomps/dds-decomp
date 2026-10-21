@@ -11,7 +11,7 @@
 s32 sceSdRemoteInit(void);
 #endif
 #ifndef SDK_SKIP_sndDispatchIopAudioCommand
-s32 sndDispatchIopAudioCommand(s32 command, ...);
+s32 sceSdRemote(s32 command, ...);
 #endif
 
 #ifdef VERSION_DDS2

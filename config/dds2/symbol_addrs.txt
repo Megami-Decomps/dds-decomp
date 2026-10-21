@@ -7314,6 +7314,7 @@ fwrite = 0x0035A648; // type:func
 free = 0x0035A880; // type:func
 printf = 0x0035B6E0; // type:func
 vsprintf = 0x00360E78; // type:func
+sceSdRemote = 0x0034E820; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 dds3StartProcess = 0x00101458; // type:func  // dds1 0x00101570
 dds3KillProcessName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -11639,7 +11640,6 @@ sceIpuSync = 0x0034E3D8; // type:func
 sceIpuInit = 0x0034E4A8; // type:func
 sceSdTransToIOP = 0x0034E788; // type:func
 func_0034E810 = 0x0034E810; // type:func
-sndDispatchIopAudioCommand = 0x0034E820; // type:func
 func_0034EA20 = 0x0034EA20; // type:func
 func_0034EAF8 = 0x0034EAF8; // type:func
 func_0034EB60 = 0x0034EB60; // type:func
