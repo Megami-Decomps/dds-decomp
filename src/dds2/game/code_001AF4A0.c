@@ -89,7 +89,7 @@ extern SdfTex *sndTestMessageTexture;
 
 extern u64 D_004366E8;
 
-extern s32 btlRuntime;
+extern BtlState *btlRuntime;
 
 extern u8 *D_00435DE0;
 

@@ -80,7 +80,7 @@ extern SdfTex *sndTestMessageTexture;
 
 extern u64 D_004366E8;
 
-extern s32 btlRuntime;
+extern BtlState *btlRuntime;
 
 extern u8 *D_00435DE0;
 
@@ -786,7 +786,7 @@ extern void btlUpdateBattleCameraFrame(void);
 extern s32 btlExitWhenAudioAndTasksIdle(void);
 
 s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
-    if (btlRuntime == 0) {
+    if (btlRuntime == NULL) {
         return 0;
     }
     if (((BattleController *)btlRuntime)->flags & 1) {
@@ -947,7 +947,7 @@ void btlInitializeBattleRuntime(void) {
     allocation = sdfMemAllocDirect(0xFD4);
     D_004366E0 = allocation;
     runtime = (u8 *)sdfMemLock(allocation);
-    btlRuntime = (s32)runtime;
+    btlRuntime = (BtlState *)runtime;
     memset(runtime, 0, 0xFD4);
 
     ((BattleInitState *)btlRuntime)->tick = 0;
@@ -1044,7 +1044,7 @@ extern void sndFreeBattleSoundEntries(void);
 s32 btlExitWhenAudioAndTasksIdle(void) {
     BattleInitState *state;
 
-    if (btlRuntime == 0) {
+    if (btlRuntime == NULL) {
         btlBossDebugPrintf(D_00414F48);
         return 0;
     }
@@ -1093,7 +1093,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
 
     sdfMemFreeDirect(D_004366E0);
     D_004366E0 = 0;
-    btlRuntime = 0;
+    btlRuntime = NULL;
     btlBossDebugPrintf(D_00414FB0);
     return 0;
 }
@@ -1211,7 +1211,7 @@ void btlLoadInputIconsAndSystemSounds(void) {
 }
 
 u8 btlIsRuntimeAllocated(void) {
-    return btlRuntime != 0;
+    return btlRuntime != NULL;
 }
 
 s32 btlIsCurrentActorFullyMarked(void) {
@@ -1226,7 +1226,7 @@ s32 btlHasPendingRuntimeActivity(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    state = btlRuntime;
+    state = (s32)btlRuntime;
     if (*(s32 *)(state + 0x248) != 0) {
         return 1;
     }
@@ -1237,7 +1237,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 }
 
 void btlResetActorEntryState(void) {
-    s32 context = btlRuntime;
+    s32 context = (s32)btlRuntime;
     DatPartyRecord *party = datGameState->party;
     u32 i;
     *(s32 *)(context + 0x2E8) = 0;
@@ -1249,7 +1249,7 @@ void btlResetActorEntryState(void) {
     for (i = 0; i < 5; i++) {
         party[i].huntExp = 0;
     }
-    memset((void *)(btlRuntime + 0x2DC), 0, 12);
+    memset((u8 *)btlRuntime + 0x2DC, 0, 12);
 }
 
 s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
@@ -1308,7 +1308,7 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
 }
 
 void *btlGetRuntime(void) {
-    return (void *)(u32)btlRuntime;
+    return btlRuntime;
 }
 
 /* Read current HP from a unit-entry address. */
