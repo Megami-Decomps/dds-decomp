@@ -319,7 +319,7 @@ s32 mnuAdvanceStaffValuePopup(s32 callback);
 s32 mnuFinishStaffValuePopup(s32 callback);
 
 /* Initialize the menu display using a value from the resource chain. */
-u32 mnuEnterSelectedResourceLabel(void);
+u32 mnuEnterSelectedResourceLabel(KwlnTask *task);
 
 u32 mnuPartySlotAssignmentLeaveNoOp(void);
 
@@ -335,7 +335,7 @@ s32 mnuStartPanelExit(s32 callback);
  * then recalculate the party record's maximum HP and MP. */
 void mnuClearPartySelectionValues(DatPartyRecord *entry, s32 selection);
 
-u32 mnuEnterSlotLabel(void);
+u32 mnuEnterSlotLabel(KwlnTask *task);
 
 u32 mnuPartySlotClearLeaveNoOp(void);
 
@@ -383,7 +383,7 @@ void mnuRefreshPartyPanelSlots(s32 context);
 
 
 
-u32 mnuReleasePartySelectionResources(void);
+u32 mnuReleasePartySelectionResources(KwlnTask *task);
 
 void mnuPreparePartyPanelTransition(s32 menu);
 
@@ -411,15 +411,15 @@ void mnuReleaseMenuWindowHandles(s32 context);
 
 u32 mnuCreateSelectState(u32 unused, s32 staffView);
 
-s32 mnuStaffCloseSelectionState(void);
+s32 mnuStaffCloseSelectionState(KwlnTask *task);
 
 u32 mnuOpenStaffSelectionEntry(u32 context);
 
-s32 mnuFinishStaffSelectionEntry(void);
+s32 mnuFinishStaffSelectionEntry(KwlnTask *task);
 
 u32 mnuOpenPartySelectionEntry(u32 context);
 
-s32 mnuFinishPartySelectionEntry(void);
+s32 mnuFinishPartySelectionEntry(KwlnTask *task);
 
 /* Update the popup first; accept confirm/cancel only while its state is zero.
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
@@ -479,7 +479,7 @@ u32 mnuDestroySelectedPartyWindow(u32 callback);
 
 /* Seek the first node with a nonzero sort key and no unavailable flag.
  * Leave the cursor unchanged if no such node exists. */
-void mnuSeekFirstAvailableStaffListNode(void);
+void mnuSeekFirstAvailableStaffListNode(KwlnTask *task);
 
 MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback);
 
@@ -493,7 +493,7 @@ void mnuNoOpItemSelectionTeardown(s32 context);
 
 u32 *mnuBuildOwnedSkillBits(void);
 
-void mnuReleaseSkillCodeBitset(void);
+void mnuReleaseSkillCodeBitset(u32 *bits);
 
 s32 mnuIsSkillCodeInBitset(s32 skillCode, u32 *bits);
 
@@ -519,7 +519,7 @@ void mnuHighlightSelectedListNode();
 
 
 
-u32 mnuClearSkillSelectionImageState(void);
+u32 mnuClearSkillSelectionImageState(KwlnTask *task);
 
 /* Narrow the ID to its native 16-bit skill code before duplicate detection.
  * Insert only missing skills, then recompute maxima and clear the script flag. */
