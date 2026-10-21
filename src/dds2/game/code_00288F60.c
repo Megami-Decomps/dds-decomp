@@ -3,8 +3,8 @@
 #include "dat_state.h"
 #include "mnu.h"
 
-extern void mnuCloseCurrentProfilePanel(s32 effect);
-extern void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *effect);
+extern void mnuCloseCurrentProfilePanel(MenuProgressHost *host);
+extern void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *host);
 
 typedef struct MenuRenderListNode {
     u8 pad00[0x70];
@@ -20,7 +20,7 @@ typedef struct MenuRenderState {
     u8 pad00[4];
     MenuRenderListContext *context; /* 0x04 */
     u8 pad08[0x40];
-    s32 effect; /* 0x48 */
+    MenuProgressHost *effect; /* 0x48 */
     u8 pad4C[8];
     u8 snapshot[0x1C4]; /* 0x54 */
 } MenuRenderState;
@@ -31,5 +31,5 @@ typedef struct MenuRenderState {
 void mnuRebuildProfilePanelFromRenderSnapshot(MenuRenderState *state) {
     mnuCloseCurrentProfilePanel(state->effect);
     memcpy(state->snapshot, state->context->node->items, 0x1C4);
-    mnuEnsureProfilePanelEffect((DatPartyRecord *)state->snapshot, (MenuProgressHost *)(u32)state->effect);
+    mnuEnsureProfilePanelEffect((DatPartyRecord *)state->snapshot, state->effect);
 }
