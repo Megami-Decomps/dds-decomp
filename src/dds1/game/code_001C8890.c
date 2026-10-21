@@ -64,7 +64,7 @@ extern void btlRemovePartyActorAndShiftEntries(BtlUnit *unit);
 extern void btlResetActiveUnitList(void);
 extern void * btlScheduleRefreshTask(u8 *owner);
 extern s32 btlSetEligibleActorPanelTransitionState(void);
-extern void func_001F0CA0(BtlTask *task, BattleIndexWork *work);
+extern void btlSetCommandEffectLinkFlags(BtlTask *task, BattleIndexWork *work);
 extern void func_001FF0C8(BtlTask *task, u32 mode);
 extern s32 sndHasActiveActor(void);
 /* Original-style implicit int, kept: matched code depends on it: btlCreateCommandSoundUpdateTask. */
@@ -909,7 +909,7 @@ void btlDispatchEffectCommandWhenActorReady(u8 *command) {
     if (*(u16 *)(command + 0x50) == 2) {
         btlStartTask(btlCreateEffObjB((BtlUnit *)actor, *(u32 *)(command + 0x54)));
     }
-    func_001F0CA0(command, command + 0x20);
+    btlSetCommandEffectLinkFlags(command, command + 0x20);
     btlDispatchCommandViaHookOrDefault(command, command + 0x20);
 }
 

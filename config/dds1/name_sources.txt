@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x001F0CA0	btlSetCommandEffectLinkFlags	inferred	Clears actor, companion, and target effect-link flags, then sets their command, reflection, inactivity, and entry-derived bits before command dispatch; paired DDS2 implementation at 0x00201828.
 0x0011ECC8	fldDrawEffectObjectShadow	inferred	Builds shadow triangles from the effect model silhouette, extrudes boundary edges along the selected ground/view direction, and submits projected shadow geometry. Called by dds3UpdateEffectObjectFollowParameters only when the shadow/update flags and transition owner permit it; paired DDS2 implementation at 0x00120B88.
 0x001A95B0	btlAverageActorAttribute	inferred	Native wrapper averages a requested actor attribute for a party-record flags mask by tail-jumping btlSumOrAverageActorAttribute with skip-down zero; not a division runtime helper.
 0x0011E810	fldConfigureCameraMoveTracking	inferred	Resolves both supplied table selectors to tracking endpoints, records sentinel/quotient/remainder state for each endpoint, notes identical selectors, and sets the camera move mode when both endpoints form a valid range.

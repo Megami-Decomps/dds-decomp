@@ -7844,7 +7844,7 @@ s32 sndLookupResourceType(s32 actor, s32 resourceIndex) {
     return ((BtlActionTableEntry *)datActionAnimationRecords)[resourceIndex].resourceType;
 }
 
-void func_00201828(ActionStateLink *task, BattleIndexWork *work) {
+void btlSetCommandEffectLinkFlags(ActionStateLink *task, BattleIndexWork *work) {
     u32 targetCount = btlGetIndexListCount(work->indices);
     BtlOperandGroup *group = work->groups;
     BtlUnit *target;
