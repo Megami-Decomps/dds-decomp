@@ -546,7 +546,7 @@ void effDestroyResourceOwner(void *work) {
 }
 
 
-extern void effCopyResourceOwner(void *, void *);
+extern void effCopyResourceOwner(EffResourceOwner *, EffResourceOwner *);
 
 void *effDuplicateModelOwner(void *source, u16 unusedType) {
     EffResourceOwner *src = source;
@@ -560,9 +560,7 @@ void *effDuplicateModelOwner(void *source, u16 unusedType) {
 
 
 
-void effCopyResourceOwner(void *destination, void *source) {
-    EffResourceOwner *dst = destination;
-    EffResourceOwner *src = source;
+void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     u32 i;
 
     if (dst->model != 0) {
