@@ -3820,7 +3820,7 @@ extern u32 D_0037E9A0[20];
 extern u32 D_0037E9F0[12];
 extern u32 D_0037EA20[20];
 extern u32 D_0037EA70[16];
-extern SdfTex *func_0029C048(void *, RefObj *);
+extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
 struct SdfAsset;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
@@ -3857,18 +3857,18 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
             switch (track->kind) {
             case 3:
                 reference = D_003BC978[0];
-                texture = func_0029C048(surface, reference);
+                texture = sdfGetOrCreateTextureForReference(surface, reference);
                 break;
             case 4:
                 reference = D_003BC978[1];
-                texture = func_0029C048(surface, reference);
+                texture = sdfGetOrCreateTextureForReference(surface, reference);
                 break;
             default:
                 texture = NULL;
                 break;
             }
         } else {
-            texture = func_0029C048(surface, reference);
+            texture = sdfGetOrCreateTextureForReference(surface, reference);
         }
         sdfSetAssetPrimaryTextureAddress(track->handle, texture);
     }
@@ -7957,9 +7957,9 @@ void effDrawRibbon(EffRibbonWork *work, Matrix4 *matrix) {
     }
     sdfConsAppendVuPacket(list, 0);
     if (work->resource == NULL) {
-        texture = func_0029C048(surface, (RefObj *)D_003BC990);
+        texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)D_003BC990);
     } else {
-        texture = func_0029C048(surface, work->resource);
+        texture = sdfGetOrCreateTextureForReference(surface, work->resource);
     }
     sdfSetAssetPrimaryTextureAddress(work->handle, texture);
     sdfConsAppendAssetPacket(list, work->handle, 0);
@@ -8759,7 +8759,7 @@ void func_002B0B70(u8 *owner, void *matrix) {
         VU0_LOAD_MATRIX(matrix);
     }
     sdfConsAppendVuPacket(list, 0);
-    texture = func_0029C048(surface, (RefObj *)effSharedScalyStripResource);
+    texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
     sdfSetAssetPrimaryTextureAddress((SdfAsset *)work->handle, texture);
     sdfSetAssetSecondaryTextureAddress((SdfAsset *)work->handle, texture);
     sdfSetAssetSecondaryMode((SdfAsset *)work->handle, mode);

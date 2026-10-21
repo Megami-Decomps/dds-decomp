@@ -1503,7 +1503,7 @@ Spimdisasm's `Handwritten function` flag alone is not enough: the `plzcw` +
 `addi $r,$0,0x1F` log2 idiom also appears inside otherwise ordinary compiled
 functions (prologue, scheduling, `movz`/`movn`, `jalr` callbacks).
 
-Functions of that shape (DDS1 `func_0029C048`, `func_002ECA80`, `func_002ECCF8`,
+Functions of that shape (DDS1 `sdfGetOrCreateTextureForReference`, `func_002ECA80`, `func_002ECCF8`,
 `sdfBuildTextureStatePacket`; DDS2 `func_002A7B28`, `sdfGetOrCreateTextureForReference`,
 `func_00345928`, `func_00345BA0`, `sdfBuildTextureStatePacket`) are C decompilation
 targets, not handwritten assembly segments. Their only non-gcc words are the two

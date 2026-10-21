@@ -1328,7 +1328,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 
 extern s32 btlIndexedIconUvOrigins[16];
 struct RefObj;
-extern SdfTex *func_0029C048(void *, struct RefObj *);
+extern SdfTex *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 
 /* Draw an indexed 64-pixel glyph with independent corner colors. */
@@ -1345,7 +1345,7 @@ void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
 
     buttonIndex &= 0xFFFF;
     battle = (BtlState *)btlGetRuntime();
-    texture = func_0029C048(surface, battle->buttonTextureHandle);
+    texture = sdfGetOrCreateTextureForReference(surface, battle->buttonTextureHandle);
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     sdfConsCreateDrawPacket(packet, texture, 0);
@@ -1417,7 +1417,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
         case 0x4000: uv = D_0035FAA0; break;
         default: uv = 0; break;
         }
-        texture = func_0029C048(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
+        texture = sdfGetOrCreateTextureForReference(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
         packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         sdfConsCreateDrawPacket(packet, texture, 0);
