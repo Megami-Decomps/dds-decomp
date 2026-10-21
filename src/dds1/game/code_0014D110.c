@@ -1225,13 +1225,13 @@ u32 fldCmdGetRowValue(void) {
     return 1;
 }
 
-extern void func_0013FA40(s32 index);
+extern void fldDispatchSceneRoomSelection(s32 index);
 
 u32 fldCmdApplySceneRoomSelection(void) {
     s32 sceneRoomSelection;
 
     sceneRoomSelection = scrReadIntParameter(0);
-    func_0013FA40(sceneRoomSelection);
+    fldDispatchSceneRoomSelection(sceneRoomSelection);
     return 1;
 }
 
