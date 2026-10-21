@@ -20,6 +20,9 @@
 #include "mnu_movie_resource.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_packet_list.h"
+#include "ee_mmi.h"
 /* Declared before first use (were implicit int). */
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void frFontUploadClearedTexture(void);
@@ -1709,7 +1712,74 @@ s32 movieIndex;
     mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", mnuSubmitMovieDrawPacket);
+/* DMA/VIF/GIF header then nine A+D register writes for the sprite.
+ * registerId 3 is UV; the texture value's 0x200000 is PSM PSMCT16. */
+typedef struct MnuMovieDrawPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite sampling;
+    SdfGsRegisterWrite texture;
+    SdfGsRegisterWrite clamp;
+    SdfGsRegisterWrite textureAlpha;
+    SdfGsRegisterWrite color;
+    SdfGsRegisterWrite sourceOrigin;
+    SdfGsRegisterWrite vertexOrigin;
+    SdfGsRegisterWrite sourceExtent;
+    SdfGsRegisterWrite vertexExtent;
+} MnuMovieDrawPacket;
+
+void mnuSubmitMovieDrawPacket(MovObj *movie, SdfPoolNode *pool) {
+    MnuMovieDrawPacket *packet;
+    SdfListHead *list;
+    u16 width;
+    u16 height;
+    s32 widthLog2;
+    s32 heightLog2;
+    u32 bufferWidth;
+    u32 basePointer;
+
+    packet = (MnuMovieDrawPacket *)sdfAllocPacketAligned(sizeof(MnuMovieDrawPacket));
+    height = movie->soundNode.height;
+    width = movie->soundNode.width;
+    packet->header.dmaTag = 0x100000A;
+    packet->header.vifCommands = 0x5000000A00000000ULL;
+    packet->header.gifTag = 0x108B400000008009ULL;
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    packet->sampling.value = 0x21;
+    packet->sampling.registerId = SDF_GS_TEX1_1;
+    heightLog2 = height - 1;
+    widthLog2 = width - 1;
+    bufferWidth = width >> 6;
+    EE_MMI_BIT_LENGTH(heightLog2);
+    EE_MMI_BIT_LENGTH(widthLog2);
+    basePointer = (u32)movie->soundNode.resourceWord >> 6;
+    if (bufferWidth == 0) {
+        bufferWidth = 1;
+    }
+    packet->texture.value = ((u64)1 << 34) | ((u64)heightLog2 << 30) |
+        (widthLog2 << 26) | (movie->soundNode.audioMode != 0 ? 0x200000 : 0) |
+        ((u64)bufferWidth << 14) | (u64)basePointer;
+    packet->texture.registerId = SDF_GS_TEX0_1;
+    packet->clamp.value = 5;
+    packet->clamp.registerId = SDF_GS_CLAMP_1;
+    packet->textureAlpha.value = 0x4000000080ULL;
+    packet->textureAlpha.registerId = SDF_GS_TEXA;
+    packet->color.value = (s32)0x80808080;
+    packet->color.registerId = SDF_GS_RGBAQ;
+    packet->sourceOrigin.value = 0;
+    packet->sourceOrigin.registerId = 3;
+    packet->vertexOrigin.value = ((u64)movie->unk08 << 32) |
+        (u32)(movie->unk06 << 16) | (u32)movie->unk04;
+    packet->vertexOrigin.registerId = SDF_GS_XYZ2;
+    packet->sourceExtent.value = (height << 20) | (width << 4);
+    packet->sourceExtent.registerId = 3;
+    packet->vertexExtent.value = ((u64)movie->unk08 << 32) |
+        (u32)((movie->unk06 + movie->unk0E) << 16) |
+        (u32)(movie->unk04 + movie->unk0C);
+    packet->vertexExtent.registerId = SDF_GS_XYZ2;
+    list = sdfPrimAllocDrawTag(0);
+    sdfAppendPacket(list, (u32)packet);
+    pool->append(pool, list);
+}
 
 extern char D_0042A348[];
 
