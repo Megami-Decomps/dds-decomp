@@ -2036,9 +2036,12 @@ interface is therefore a separate boundary, not a draw-only owner array.
 Do not force `sdfSubmitDrawPacketGroups` through draw append/prepend types.
 
 The paired flag-list geometry packet provider `sdfDrawCachedMatrixLinePairsVU`
-still has legacy caller/provider declarations. Recover its renderer
-return and argument-forwarding ABI independently; canonical draw owners
-do not establish that wrapper ABI.
+uses the shared typed contract in `sdf_line_pair_packet_api.h`: it returns the
+`SdfPacket *` produced by the clipped-line-pair renderer and forwards the
+vertex, color, count, and primitive-flag arguments. Both providers and their
+callers use this contract. Keep pointer-to-word conversions at consumers that
+append or store the packet address through a native `u32` boundary; those casts
+do not make the renderer's return type ambiguous.
 
 `sdfPrimAllocDrawTag` and its optional allocation callback return native
 `s32` allocation words. Decode each newly allocated list once into
