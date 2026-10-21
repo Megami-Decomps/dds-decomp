@@ -1256,15 +1256,15 @@ u32 sdfBuildWideVertexVifPacket(u128 *positions, void *byteAttributes, void *hal
 
 extern u8 sdfPadActuatorAlignment[];
 
-extern s32 func_0034B128(s32 port, s32 slot);
+extern s32 scePadGetState(s32 port, s32 slot);
 
-extern s32 func_0034B0A8(s32 port, s32 slot, void *data);
+extern s32 scePadRead(s32 port, s32 slot, void *data);
 
-extern s32 func_0034B240(s32 port, s32 slot);
+extern s32 scePadGetReqState(s32 port, s32 slot);
 
-extern s32 func_0034B2C8(s32 port, s32 slot, s32 actNo, s32 term);
+extern s32 scePadInfoAct(s32 port, s32 slot, s32 actNo, s32 term);
 
-extern s32 func_0034B6F8(s32 port, s32 slot, void *actData);
+extern s32 scePadSetActDirect(s32 port, s32 slot, void *actData);
 
 
 
@@ -1284,7 +1284,7 @@ void sdfPadUpdatePort(SdfPadEntry *entry) {
     s32 smallMotor;
     s32 largeMotor;
     reply[0] = -1;
-    padState = func_0034B128(port, slot);
+    padState = scePadGetState(port, slot);
     switch (entry->state) {
     case 0:
         if (padState == 2 || padState == 6) {
@@ -1335,7 +1335,7 @@ void sdfPadUpdatePort(SdfPadEntry *entry) {
     case 2:
         break;
     case 3:
-        if (func_0034B2C8(port, slot, -1, 0) != 0) {
+        if (scePadInfoAct(port, slot, -1, 0) != 0) {
             if (scePadSetActAlign(port, slot, sdfPadActuatorAlignment) != 0) {
                 entry->state = 4;
             }
@@ -1344,7 +1344,7 @@ void sdfPadUpdatePort(SdfPadEntry *entry) {
         }
         break;
     case 4:
-        alignmentStatus = func_0034B240(port, slot);
+        alignmentStatus = scePadGetReqState(port, slot);
         if (alignmentStatus != 0) {
             if (alignmentStatus == 1) {
                 entry->state = 3;
@@ -1359,7 +1359,7 @@ void sdfPadUpdatePort(SdfPadEntry *entry) {
         } else if (entry->mode != entry->requestedMode) {
             entry->state = 0;
         } else {
-            func_0034B0A8(port, slot, reply);
+            scePadRead(port, slot, reply);
             smallMotor = entry->smallMotor;
             largeMotor = entry->largeMotor;
             if (smallMotor != entry->lastSmallMotor || largeMotor != entry->lastLargeMotor) {
@@ -1367,7 +1367,7 @@ void sdfPadUpdatePort(SdfPadEntry *entry) {
                 entry->lastLargeMotor = largeMotor;
                 actuatorData[0] = smallMotor;
                 actuatorData[1] = largeMotor;
-                func_0034B6F8(port, slot, actuatorData);
+                scePadSetActDirect(port, slot, actuatorData);
             }
         }
         break;
@@ -1510,14 +1510,14 @@ extern u8 sdfPadPortBuffers[];
 
 extern u8 D_00438A8C;
 
-extern s32 func_0034AAF8(s32);
+extern s32 scePadInit(s32);
 
 
 /* Open both configured port/slot pairs and reset the public input arrays. */
 void sdfPadInit(void) {
     s32 padIndex;
 
-    func_0034AAF8(0);
+    scePadInit(0);
     for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
         s32 port = D_00438A88[padIndex * 2];
         s32 slot = D_00438A88[padIndex * 2 + 1];
