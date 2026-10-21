@@ -334,7 +334,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
 }
 
 extern void effObjApplyTransformParameters(SdfPoolNode **, EffWorldNode *);
-extern void func_0011ECC8(EffWorldNode *);
+extern void fldDrawEffectObjectShadow(EffWorldNode *);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern SdfPoolNode *D_00325788[13][4];
 
@@ -352,7 +352,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     }
     target = effObjGetTransitionWork(obj);
     if (dds3ObjectBaseCheckFlag(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
-        func_0011ECC8(obj);
+        fldDrawEffectObjectShadow(obj);
     }
     if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
         effObjApplyTransformParameters(D_00325788[0], obj);

@@ -876,7 +876,7 @@ static inline void fldAppendToDisplaySurface(SdfListHead *list) {
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 
-void func_0011ECC8(EffWorldNode *object) {
+void fldDrawEffectObjectShadow(EffWorldNode *object) {
     f32 anchorPosition[4];
     f32 edgeStart[4];
     f32 edgeEnd[4];
