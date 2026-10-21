@@ -11128,7 +11128,7 @@ void effApplyModelTransform(u8 *work) {
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
-    EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfAllocAndClearQuadwords(0xC);
+    EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfAllocAndClearQuadwords(sizeof(*work));
     SdfAsset *asset;
     work->state = 0;
     asset = sdfCreateAssetWithDrawEntries();
