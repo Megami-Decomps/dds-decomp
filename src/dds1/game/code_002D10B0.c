@@ -48,9 +48,9 @@ extern s8 sdfBufferSlotIndices[2];
 extern volatile s8 sdfBusyBufferIndex;
 extern SdfPendingRequest sdfTextureUpdateQueue;
 extern SdfTextureQueue sdfTextureQueueWork;
-extern u8 D_003BD2F0;
-extern u8 *D_003BD2F4;
-extern void (*D_003BD2F8)(u8 *);
+extern u8 sdfDeferredGsImageCapturePending;
+extern u8 *sdfDeferredGsImageCaptureDestination;
+extern void (*sdfDeferredGsImageCaptureCallback)(u8 *);
 
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
@@ -59,9 +59,9 @@ void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
 
 void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(u8 *)) {
-    D_003BD2F4 = destination;
-    D_003BD2F8 = onComplete;
-    D_003BD2F0 = 1;
+    sdfDeferredGsImageCaptureDestination = destination;
+    sdfDeferredGsImageCaptureCallback = onComplete;
+    sdfDeferredGsImageCapturePending = 1;
 }
 
 extern sceGsStoreImage sdfGsCaptureStoreImage;
@@ -83,7 +83,7 @@ void sdfCaptureDeferredGsImage(void) {
     u8 *source;
     u8 *destination;
 
-    if (D_003BD2F0) {
+    if (sdfDeferredGsImageCapturePending) {
         width = D_003980E0.width;
         height = D_003980E0.height;
         format = D_003980E0.bufferFormat;
@@ -102,7 +102,7 @@ void sdfCaptureDeferredGsImage(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = D_003BD2F4;
+        destination = sdfDeferredGsImageCaptureDestination;
         source = pixels;
         rows = height;
         do {
@@ -116,7 +116,7 @@ void sdfCaptureDeferredGsImage(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = D_003BD2F4 + rowBytes;
+        destination = sdfDeferredGsImageCaptureDestination + rowBytes;
         source = pixels;
         rows = height;
         do {
@@ -125,9 +125,9 @@ void sdfCaptureDeferredGsImage(void) {
             source += rowBytes;
         } while (--rows != 0);
         sdfMemFreeDirect(allocation);
-        D_003BD2F0 = 0;
-        if (D_003BD2F8) {
-            D_003BD2F8(D_003BD2F4);
+        sdfDeferredGsImageCapturePending = 0;
+        if (sdfDeferredGsImageCaptureCallback) {
+            sdfDeferredGsImageCaptureCallback(sdfDeferredGsImageCaptureDestination);
         }
     }
 }
@@ -1111,13 +1111,13 @@ SdfTexResource *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
     return head;
 }
 
-INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F0);
+INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfDeferredGsImageCapturePending);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F1);
 
-INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F4);
+INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfDeferredGsImageCaptureDestination);
 
-INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2F8);
+INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfDeferredGsImageCaptureCallback);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD2FC);
 
