@@ -1520,10 +1520,10 @@ and packet construction remain ordinary C.
 | Segment | DDS1 | DDS2 | Contents |
 |---|---|---|---|
 | `hand/crt0` | `func_00100000` .. `func_001001D0` (4) | `func_00100000` .. `func_001001D0` (4) | program entry `_start` (register/FPU clear, `.bss` clear, `SetupThread`/`SetupHeap` syscalls, `Exit`), the `Exit(0)` stub and the syscall 0x23 stub |
-| `hand/vu/sdfVuScratchpadVertexUnpack` | `func_002E06F0` | `func_003395A0` | DMA/VIF-polled unpack of scratchpad vertex records through VU0 `vlqi` loads |
-| `hand/vu/sdfVuNodeVertexLighting` | `func_002E03C0` | `func_00339270` | node vertex lighting loop, then `sdfVuBlendNodeVectors` and a `j sdfBuildChunkedVuNodeTransfer` tail |
-| `hand/vu/sdfVuVertexAlphaClamp` | `func_002DE980` | `func_00337830` | per-vertex alpha clamp loop plus a linked-list copy |
-| `hand/vu/sdfVuVertexKernels` | `func_002DE118` .. `func_002DE868` (15) | `func_00336FC8` .. `func_00337718` (15) | VU0 macro-mode loops over 0x60-byte vertex records (transform, offset, scale, normalise, clip flags) |
+| `hand/vu/sdfVuScratchpadVertexUnpack` | `sdfVuScratchpadVertexUnpack` | `sdfVuScratchpadVertexUnpack` | DMA/VIF-polled unpack of scratchpad vertex records through VU0 `vlqi` loads |
+| `hand/vu/sdfVuNodeVertexLighting` | `sdfVuNodeVertexLighting` | `sdfVuNodeVertexLighting` | node vertex lighting loop, then `sdfVuBlendNodeVectors` and a `j sdfBuildChunkedVuNodeTransfer` tail |
+| `hand/vu/sdfVuVertexAlphaClamp` | `sdfVuVertexAlphaClamp` | `sdfVuVertexAlphaClamp` | per-vertex alpha clamp loop plus a linked-list copy |
+| `hand/vu/sdfVuVertexKernels` | `sdfVuSkinVertices` .. `sdfVuTransformTextureCoordinates` (15) | `sdfVuSkinVertices` .. `sdfVuTransformTextureCoordinates` (15) | VU0 macro-mode loops over 0x60-byte vertex records (transform, offset, scale, normalise, clip flags) |
 | `hand/mem/sdfMemClearBlocks` | `func_002E73F0` | `func_00340298` | 128-byte `sq` block clear entered by a computed `jr` (Duff's device), `memset` fallback |
 
 ### Macro list

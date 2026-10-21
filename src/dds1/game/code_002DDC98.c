@@ -23,9 +23,9 @@
 #include "sdf_vu_blend_node.h"
 #include "sdf_vu_work.h"
 
-extern u32 D_003BDA28;
+extern u32 sdfVuSelectedTransformMatrix;
 
-extern u8 D_003F98A0[];
+extern u8 sdfVuObjectBasisCache[];
 
 extern u16 D_003BDA24;
 
@@ -157,8 +157,8 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *parameterWords, u32 select
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
 void sdfVuRotateObjectBasis(void *vectors) {
-    void *m = (void *)D_003BDA28;
-    VU0_ROTATE_BASIS_AND_CACHE(vectors, m, D_003F98A0);
+    void *m = (void *)sdfVuSelectedTransformMatrix;
+    VU0_ROTATE_BASIS_AND_CACHE(vectors, m, sdfVuObjectBasisCache);
 }
 
 /* vu0 routine: modulate and clamp packed colors against the reference rows. */
@@ -178,7 +178,7 @@ void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference, 
 }
 
 void sdfVuTransformWorkAtOffset(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
-    sdfVuBuildPackedColorTransform(out, D_003BDA28, packedColor,
+    sdfVuBuildPackedColorTransform(out, sdfVuSelectedTransformMatrix, packedColor,
                   work->unk08, work->unk04,
                   work->unk1C,
                   work->x + deltaX,

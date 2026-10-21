@@ -31,7 +31,7 @@
 
 #define SDF_VU_COLORED_BATCH_LIMIT 0x18
 
-extern u32 D_00439188;
+extern u32 sdfVuSelectedTransformMatrix;
 
 
 
@@ -781,7 +781,7 @@ void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
     u32 secondaryColor;
     u32 primaryStateWordSecond;
 
-    func_00337718((void *)work->ringSrc, work->param1, work->secondCoordinates,
+    sdfVuTransformTextureCoordinates((void *)work->ringSrc, work->param1, work->secondCoordinates,
                   (u8 *)work->asset + 0x80);
     sdfVuBlendNodeXY(work->blend);
     asset = work->asset;
@@ -795,10 +795,10 @@ void sdfVuUpdateSelectedNodeGeometry(VuWork *work) {
             if (primaryStateWordSecond != secondaryColor) {
                 u128 parameters[3];
 
-                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, D_00439188, work->packedColor,
+                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, sdfVuSelectedTransformMatrix, work->packedColor,
                               secondaryColor, asset->unk04, asset->unk1C,
                               asset->x + work->offsetX, asset->y + work->offsetY);
-                func_00337830(work, parameters);
+                sdfVuVertexAlphaClamp(work, parameters);
             }
             break;
         case 3:

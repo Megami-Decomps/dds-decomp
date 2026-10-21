@@ -74,14 +74,14 @@ void sdfVuApplySelectedWorkFlags(VuWork *work) {
         selectedFlags = work->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {
-        func_00339270((u32)work);
+        sdfVuNodeVertexLighting((u32)work);
         return;
     }
 }
 
 extern void sdfVuBuildRingTriangleRefs(VuWork *);
 
-extern void func_00337688(u32, s32);
+extern void sdfVuLightNegatedNormals(u32, s32);
 
 extern void sdfVuBuildIndexedTriangleRefs(VuWork *);
 
@@ -104,7 +104,7 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
-        func_00337688(work->ringSrc, work->param1);
+        sdfVuLightNegatedNormals(work->ringSrc, work->param1);
         sdfVuBuildIndexedTriangleRefs(work);
         sdfVuApplySelectedWorkFlags(work);
     } else {

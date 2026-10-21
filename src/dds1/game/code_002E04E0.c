@@ -42,7 +42,7 @@ void sdfVuApplySelectedWorkFlags(VuWork *work) {
         selectedFlags = work->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {
-        func_002E03C0((u32)work);
+        sdfVuNodeVertexLighting((u32)work);
         return;
     }
 }
@@ -51,7 +51,7 @@ extern void sdfVuBuildVisibleTriangleList(VuWork *work);
 
 extern void func_002DF710(VuWork *work);
 
-extern void func_002DE7D8(u32 base, s32 count);
+extern void sdfVuLightNegatedNormals(u32 base, s32 count);
 
 /* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
 void sdfVuBeginPacketFromWork(VuWork *work) {
@@ -73,7 +73,7 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
-        func_002DE7D8(work->dmaBase, work->param1);
+        sdfVuLightNegatedNormals(work->dmaBase, work->param1);
         func_002DF710(work);
         sdfVuApplySelectedWorkFlags(work);
     } else {

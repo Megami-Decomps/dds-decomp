@@ -117,7 +117,7 @@ extern void sdfTransposeVuMatrix(void);
 
 #define SDF_CAMERA_HALF_HEIGHT_FLAG 1
 
-extern u32 D_00439188;
+extern u32 sdfVuSelectedTransformMatrix;
 
 extern u32 D_0043918C;
 
@@ -173,7 +173,7 @@ extern SdfTex *D_00438A6C;
 
 extern SdfTex *D_00438A70;
 
-extern u64 D_00438A78;
+extern u64 sdfPowerLookupTextureState;
 
 extern SdfTex *D_00438A80;
 
@@ -199,7 +199,7 @@ void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source) {
 }
 
 void sdfVuSelectTransformMatrix(u32 matrixAddress) {
-    D_00439188 = matrixAddress;
+    sdfVuSelectedTransformMatrix = matrixAddress;
 }
 
 extern u8 D_00476240[];
@@ -217,7 +217,7 @@ void sdfVuSetGlobalScale(f32 scale) {
 }
 
 void sdfVuClearTransformCache(void) {
-    D_00439188 = 0;
+    sdfVuSelectedTransformMatrix = 0;
     D_0043918C = 0;
 }
 
@@ -604,7 +604,7 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
     sdfConsCreatePowerLookupTexture();
     textureWord = sdfTexGetPrimaryTextureState(D_00438A70);
     D_0037F1B8[0] = textureWord;
-    D_00438A78 = textureWord;
+    sdfPowerLookupTextureState = textureWord;
     D_0037F1B8[1] = textureWord >> 32;
     D_00438A6C = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_00372C00);
     textureWord = sdfTexGetPrimaryTextureState(D_00438A6C);
@@ -1681,7 +1681,7 @@ INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A6C);
 
 INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A70);
 
-INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A78);
+INCLUDE_SDATA(const s32, "game/code_003396D0", sdfPowerLookupTextureState);
 
 INCLUDE_SDATA(const s32, "game/code_003396D0", D_00438A80);
 

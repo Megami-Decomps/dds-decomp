@@ -6351,7 +6351,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 func_00352DB0(f32);
+extern f32 atanf(f32);
 
 /* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
 void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
@@ -6571,7 +6571,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                     VU0_STORE_VF(vf10, previous);
                     VU0_SUB(vf10, vf10, vf11);
                     VU0_LENGTH_VF10(distance);
-                    tangentScale = func_00352DB0((slope - oldSlope) * 0.5f);
+                    tangentScale = atanf((slope - oldSlope) * 0.5f);
                     oldSlope = slope;
                     waveHeight = newHeight;
                     VU0_LOAD_VF(vf12, rotated);

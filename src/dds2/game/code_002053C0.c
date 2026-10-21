@@ -414,7 +414,7 @@ extern f32 D_003BE080[4];
 
 extern f32 D_003BE090[4];
 
-extern f32 func_00352DB0(f32);
+extern f32 atanf(f32);
 
 /* Arrange filtered active actors in the native spacing/angle slots; return one. */
 s32 btlArrangeFormationSlots(s32 filter) {
@@ -482,12 +482,12 @@ s32 btlArrangeFormationSlots(s32 filter) {
     } else {
         spacing = 0;
     }
-    spacingAngle = func_00352DB0(spacing / radius);
+    spacingAngle = atanf(spacing / radius);
     totalArcAngle = -spacingAngle;
     for (i = 0; i < count; i++) {
         unit = actors[i];
         distance = unit->bodyRadius * unit->scale;
-        halfAngle = func_00352DB0(distance / radius);
+        halfAngle = atanf(distance / radius);
         totalArcAngle += halfAngle + halfAngle;
         totalArcAngle += spacingAngle;
     }
@@ -505,7 +505,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
     }
     for (i = count - 1; i != (u32)-1; i--) {
         unit = actors[i];
-        halfAngle = func_00352DB0(unit->bodyRadius * unit->scale / radius);
+        halfAngle = atanf(unit->bodyRadius * unit->scale / radius);
         angle += halfAngle;
         position[0] = sdfSinPoly(angle) * radius;
         position[1] = 0.0f;
