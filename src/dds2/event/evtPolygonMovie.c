@@ -932,14 +932,14 @@ void evtSetContextFlag(KwlnTask *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)dds3GetProcessData(task);
-    context->flags = context->flags | EVT_PICTURE_FLAG_DRAW_ENABLED;
+    context->drawEnabled = context->drawEnabled | EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
 void evtClearContextFlag(KwlnTask *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)dds3GetProcessData(task);
-    context->flags = context->flags & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
+    context->drawEnabled = context->drawEnabled & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
 void evtDestroyTaskHierarchy(u32 taskHandle) {
@@ -949,7 +949,7 @@ void evtDestroyTaskHierarchy(u32 taskHandle) {
 /* Allocate the picture task's flag and texture state. */
 EvtPictureWork *evtAllocateContext(void) {
     EvtPictureWork *context = sdfChipAllocDirect(8);
-    context->flags = 0;
+    context->drawEnabled = 0;
     context->texture = NULL;
     return context;
 }
