@@ -311,11 +311,11 @@ typedef struct MovObj {
     u8 state;
     u8 stopRequested;
     u8 isPac;
-    u16 unk04;
-    u16 unk06;
+    s16 unk04;
+    s16 unk06;
     u32 unk08;
-    u16 unk0C;
-    u16 unk0E;
+    s16 unk0C;
+    s16 unk0E;
     struct DevState *deviceState;
     s32 totalBytes;
     s32 remainingBytes;

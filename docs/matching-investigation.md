@@ -466,6 +466,15 @@ both retail builds exact. Shared headers require every actual dependent, not
 just the new target. Moved/replaced development units also need their
 development links. Review data ownership, public diff and contributor credit.
 
+A shared-header edit needs both builds even when it cannot change behaviour.
+`tools/cc.sh` notes that cc1's output depends on the file name lengths it is
+given, because they shift its heap and CSE hashes heap addresses; header
+*content* shifts that heap the same way. Adding one enumerator to
+`sdf_gs_packet.h` for readability moved 148 bytes inside DDS1
+`itfGridApplySqrtBoundsAndColorScale`, a function with no relation to the
+enum or to the unit being worked on. Reasoning about a header change being
+byte-neutral is not enough; build both games.
+
 Refresh main and claims immediately before integration. Reuse evidence for
 unchanged source/dependency/configuration inputs; refresh checks affected by
 actual changes. Administrative work or documentation edits do not invalidate
