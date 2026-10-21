@@ -724,7 +724,7 @@ static inline void fldInitializeActionTransform(FldActionTransformFields *transf
 
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 
-void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
+void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     FldActionTransformFields *transform;
     EffWorldNode *object;
     EffWorldNode *child;
@@ -764,8 +764,8 @@ extern char D_0038BC30[];
 
 extern char D_0038BC40[];
 
-void func_0013EEA0(s32 kind, s32 roomValue,
-                   f32 x, f32 y, f32 z, f32 radius) {
+void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
+                                f32 x, f32 y, f32 z, f32 radius) {
     s32 index = D_004361C4;
     FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
