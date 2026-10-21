@@ -5303,8 +5303,6 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
     s32 remaining;
     EffPacketParams *draw;
     u32 *colors;
-    u32 edgeColor;
-    u32 centerColor;
     SdfListHead *list;
 
     if ((color & 0xFF000000) == 0) {

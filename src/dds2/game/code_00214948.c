@@ -3375,7 +3375,6 @@ void func_0021B828(ActionStateLink *task) {
     BtlIndexList *targets;
     BtlUnit *unit;
     BtlOperandGroup *group;
-    BtlOperandEntry *entry;
     u32 guardCount;
     u32 skillId;
     u32 targetCount;

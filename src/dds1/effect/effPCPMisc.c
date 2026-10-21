@@ -3277,7 +3277,6 @@ EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *src) {
 EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     EffPCPRotateWork *work;
     EffPCPBlockSetParams *sub;
-    u32 *p;
     u32 i;
 
     work = sdfChipAllocDirect(sizeof(EffPCPRotateWork));
