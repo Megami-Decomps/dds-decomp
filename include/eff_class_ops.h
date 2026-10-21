@@ -3,14 +3,16 @@
 
 #include "common.h"
 
+struct EffClassWork;
+
 /* DDS1 0029C530 / DDS2 002DE248 use this callback table for native classes.
  * The two units dispatch each slot directly and read payloadSize for sizing. */
 typedef struct EffClassOps {
-    void (*initialize)();
+    void (*initialize)(struct EffClassWork *work);
     void *(*createResource)();
     void (*destroyResource)();
     void (*update)();
-    void (*draw)();
+    void (*draw)(struct EffClassWork *work);
     u32 payloadSize;
 } EffClassOps;
 
