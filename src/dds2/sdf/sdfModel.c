@@ -515,21 +515,6 @@ extern f32 D_00438A48, D_00438A4C;
 extern f32 D_0040B620[16];
 extern void sdfVuSetGlobalScale(f32);
 extern u32 sdfModelBuildKind3CommandPacket(SdfDrawNode *, void *, s32, s32, f32, f32, s32, s32);
-typedef struct {
-    SdfModelPacket address;
-    u64 firstHeader;
-    u64 secondHeader;
-    u32 lightingCommand;
-    s32 color;
-    u32 command;
-    u32 modelScalar;
-    f32 firstScalar;
-    f32 secondScalar;
-    u32 finalCommand;
-    u32 finalAddress;
-} SdfModelLightingCallPacket;
-typedef char SdfModelLightingCallPacket_size[(sizeof(SdfModelLightingCallPacket) == 0x40) ? 1 : -1];
-
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
     s32 frame;
