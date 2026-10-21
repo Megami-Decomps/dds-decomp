@@ -10,6 +10,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "kwln.h"
@@ -225,8 +226,6 @@ void btlActionSeqStateSelect(u8 *task) {
         }
     }
 }
-
-extern s32 effOffsetIfOwnerFlagClear();
 
 void btlUnitTurnEndStateSelect(u8 *task) {
     BtlUnit *unit = *(BtlUnit **)(task + 0x18);

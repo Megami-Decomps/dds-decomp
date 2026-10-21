@@ -10,6 +10,7 @@
 #include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
@@ -604,8 +605,6 @@ void btlActionSeqStateSelect(ActionStateLink *task) {
         }
     }
 }
-
-extern s32 effOffsetIfOwnerFlagClear();
 
 void btlUnitTurnEndStateSelect(u8 *task) {
     u8 *unit = (u8 *)((ActionStateLink *)task)->unit;

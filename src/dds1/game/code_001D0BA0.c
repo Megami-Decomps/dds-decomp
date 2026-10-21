@@ -19,6 +19,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "kwln.h"
@@ -243,8 +244,6 @@ typedef struct BtlFadeArgs {
     u32 count;
     u32 color;
 } BtlFadeArgs;
-
-extern s32 effOffsetIfOwnerFlagClear();
 
 extern s32 btlCountTasksByKind(u16 kind);
 
