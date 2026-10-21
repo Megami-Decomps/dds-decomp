@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_column_packet_api.h"
 #include "kwln_draw_buffer.h"
@@ -55,16 +56,10 @@ void dds3ClearScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
 typedef struct SdfThreadNode SdfThreadNode;
 
 extern void func_002FC0A8(void);
-extern void sceSifInitRpc(s32);
-extern s32 sceSifInitIopHeap(void);
 extern void sdfInitDeviceSemaphores(void);
-extern s32 sceSifRebootIop(const char *iopImagePath);
 extern s32 func_00312AC0(void);
-extern void sceSifLoadFileReset(void);
-extern void sceFsReset(void);
 extern void func_002F3CB8(s32);
 extern void func_002F4190(u32);
-extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
 extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
 extern void sdfDevSetCurrentDirectory(const char *path);

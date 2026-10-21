@@ -1,3 +1,4 @@
+#include "dat_state.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_background_fade_api.h"
@@ -30,7 +31,6 @@ s32 kwlnDrawSetE08Fifth(s32 blendControl);
 void sdfSetViewFieldOfView(f32 fieldOfView);
 s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
-extern ScrComGlobals *datGameState;
 extern s8 sdfPadButtonStates[];
 extern char D_0039F4D8[];
 extern char D_0039F4E8[];
@@ -924,19 +924,19 @@ s32 scrCommandResetFieldEffects(void)
 
 s32 scrCommandClearProcessControlFlag(void)
 {
-    datGameState->processControlFlag = 0;
+    datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 0;
     return 1;
 }
 
 s32 scrCommandSetProcessControlFlag(void)
 {
-    datGameState->processControlFlag = 1;
+    datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 1;
     return 1;
 }
 
 s32 scrCommandIsProcessControlFlagClear(void)
 {
-    return datGameState->processControlFlag == 0;
+    return datGameState->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] == 0;
 }
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);

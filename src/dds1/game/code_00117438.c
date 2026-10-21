@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
@@ -167,7 +168,6 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
 
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
  * and register the "GBWK" tick task that owns it. */
@@ -248,7 +248,6 @@ extern u32 D_003BD7A0;
 extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Preserve carried flags and progress before the full runtime reset. */
 void sdfSaveResetSnapshot(void) {

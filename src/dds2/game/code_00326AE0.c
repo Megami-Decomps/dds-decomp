@@ -1,3 +1,5 @@
+#include "sdk_ps2.h"
+#include "sdf_sprite_record.h"
 #include "common.h"
 #include "sdf_kernel_thread_param.h"
 #include "sdf_thread_workspace_api.h"
@@ -6,32 +8,19 @@
 #include "mnu_callback_list.h"
 #include "sdf_resource.h"
 
-typedef struct SdfVec4 {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} SdfVec4;
-
 extern f32 sdfVec3Normalize(f32 *);
 
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
-extern s32 CreateSema(void *);
 
 extern void (*sdfTickCallback)(void);
 
 extern f32 sdfVec3DotNormalized(void *, void *);
 
-extern f32 acosf(f32);
 
-extern f64 cos(f64);
 
-extern f64 sin(f64);
 
-extern f64 sqrt(f64);
 
-extern void *memcpy(void *, const void *, u32);
 
 f32 sdfVec3AngleBetween(void *a, void *b) {
     return acosf(sdfVec3DotNormalized(a, b));
@@ -140,7 +129,6 @@ void sdfMat4Transpose(SdfMat4 *dst, SdfMat4 *src) {
     dst->m[15] = t.m[15];
 }
 
-extern void *memcpy(void *, const void *, u32);
 
 f32 *sdfVectorTransformByMatrix(f32 *vec, f32 *mat) {
     f32 out[4];
@@ -270,9 +258,7 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 }
 
 extern void *_gp;
-extern s32 CreateThread(SdfKernelThreadParam *);
 
-extern void *memset(void *, int, unsigned int);
 
 /* Create a kernel thread from a zeroed descriptor that uses the caller's
  * workspace as its stack and the program's GP. */

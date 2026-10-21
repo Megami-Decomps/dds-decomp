@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "fld_map_selection.h"
 #include "sdf_vu_matrix.h"
@@ -26,7 +27,6 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern s32 D_003BD984;
 
@@ -328,7 +328,6 @@ void fldDrawLocalMapTransition(s32 opening) {
     fldDrawLocalMapFrame(slide, alpha1, alpha2, alpha3);
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 extern void evtSetDrawSurfaceIndex(u32);
 typedef struct {
     s16 row[6][5];
@@ -557,7 +556,6 @@ void fldDrawCounterMapMarker(void) {
 
 
 
-extern void *memset(void *, int, unsigned int);
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {

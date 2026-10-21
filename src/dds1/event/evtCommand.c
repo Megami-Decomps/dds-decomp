@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "dds3_admin_control_api.h"
 #include "common.h"
@@ -144,7 +145,6 @@ extern u32 evtPendingEventSelection;
 
 extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
-extern void *memset(void *dst, s32 value, u32 size);
 
 
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);

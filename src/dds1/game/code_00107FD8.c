@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_sel_state.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
@@ -56,7 +57,6 @@ extern void fldStopSceneTasks(void);
 extern void itfInitializeAdminInterfaceNoop(void);
 extern void itfShutdownAdminInterfaceNoop(void);
 extern void itfStartFontTestScene(void);
-extern void * memset(void *, s32, u32);
 extern void mnuCampDestroyPanelTasks(void);
 extern void mnuConfigTasksDestroy(void);
 extern void mnuCreateCampTasks(void);
@@ -1601,7 +1601,6 @@ void evtDestroyFontResourceChain(void) {
     }
 }
 
-extern s32 sdfVFormatString();
 /* printf into the dev console node when one exists. */
 INCLUDE_SDATA(const s32, "game/code_00107FD8", evtSelectionStateActive);
 
@@ -1748,9 +1747,7 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     }
 }
 
-extern s32 DIntr(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
-extern void EIntr(void);
 
 void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     SdfHeapOverlayBlock *snapshot;
@@ -1810,7 +1807,6 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 
 extern void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y);
-extern void sprintf(char *, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
 

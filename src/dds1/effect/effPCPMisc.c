@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_projection.h"
 #include "sdf_model_packet_callback.h"
 #include "common.h"
@@ -2888,7 +2889,6 @@ void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 val) {
 }
 
 
-extern void *memset(void *, int, unsigned int);
 
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
 EffPCPBlockSetWork *effPcpCreateBlockSetWork(const EffPCPBlockSetParams *params, void **blocks) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "evt_message_window_api.h"
 #include "dsp_active_api.h"
@@ -347,7 +348,6 @@ u32 mnuPrimaryRewardPanelLeaveNoOp(void) {
     return 1;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     struct ActiveItemSlots {
@@ -383,7 +383,6 @@ u32 mnuKindIsSelectable(u32 kind) {
 }
 
 extern char D_004379B0[];
-extern s32 sprintf(char *, const char *, ...);
 extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 
 

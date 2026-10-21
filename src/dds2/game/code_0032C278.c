@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "ee_mmi.h"
 #include "sdf_scene_packet.h"
 #include "sdf_gs_gouraud_textured.h"
@@ -19,9 +20,6 @@
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
-/* Declared before first use (were implicit int). */
-extern s32 SignalSema(s32);
-extern s32 WaitSema(s32);
 extern s32 sdfFormatBitsPerPixelB(u32 format);
 /* Polled in a spin-wait below; its writer is outside this C unit. */
 extern volatile u8 D_00438A1D;
@@ -41,7 +39,6 @@ extern struct SdfMemBlock *sdfDoubleBufferAllocation;
 #include "sdf_dev_slot_api.h"
 #include "sdf_dma_tag.h"
 
-extern s32 EIntr(void);
 extern u16 D_00438A24;
 extern s32 D_00438A30;
 extern s8 D_00439165;
@@ -97,7 +94,6 @@ extern s32 sdfCreateSemaphore(u32, u32, u32);
 
 extern s32 sdfGraphHasPendingWork(void);
 
-extern s32 DIntr(void);
 
 extern s32 sdfPacketBufferSize;
 

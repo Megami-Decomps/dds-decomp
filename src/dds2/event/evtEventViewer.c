@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
@@ -48,10 +49,7 @@ extern s32 evtCreateSkyTask(void);
 extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
 extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
-extern s32 strcmp(const char *a, const char *b);
-extern char *strcpy(char *dst, const char *src);
 #include "dds3_world_primary.h"
-extern void *memset(void *dst, s32 value, u32 size);
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
 
@@ -663,7 +661,6 @@ extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
-extern void *memcpy(void *destination, const void *source, u32 size);
 
 
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
@@ -951,7 +948,6 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
-extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
@@ -1052,7 +1048,6 @@ extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
-extern void *memcpy(void *destination, const void *source, u32 size);
 
 
 #include "sdf_debug_api.h"
@@ -4463,7 +4458,6 @@ void evtEventViewerInitCampFontResource(EvtRuntime *viewer) {
 }
 
 extern u32 D_00435CBC;
-extern void *memset(void *dst, s32 value, u32 size);
 void evtViewerCreateTaskWithSky(void) {
     EvtRuntime *viewer;
     SdfMemBlock *viewerHandle;

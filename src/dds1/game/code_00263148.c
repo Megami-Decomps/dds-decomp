@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "evt_message_window_api.h"
 #include "dsp_active_api.h"
@@ -197,7 +198,6 @@ typedef struct ActiveItemSlots {
     s32 count;
 } ActiveItemSlots;
 
-extern void *memset(void *, int, unsigned int);
 
 void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     ActiveItemSlots active;
@@ -224,7 +224,6 @@ void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
 }
 
 extern char D_003BC550[];
-extern s32 sprintf(char *, const char *, ...);
 extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 
 /* Cap the available extent by the remaining capacity of five components. */

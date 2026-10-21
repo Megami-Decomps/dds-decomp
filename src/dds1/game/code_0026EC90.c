@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "mnu_title_stream.h"
 #include "fr_font_measure.h"
@@ -252,7 +253,6 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
 }
 
 extern char D_003BC628[];
-extern void sprintf(char *, const char *, ...);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);

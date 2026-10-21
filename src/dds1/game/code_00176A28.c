@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "bill_object_api.h"
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
@@ -17,7 +18,6 @@
 
 
 extern EffResourceRenderState effResourceDrawParams;
-extern void *memset(void *, s32, u32);
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
 extern f32 effResourceDefaultTrianglePoints[][4];

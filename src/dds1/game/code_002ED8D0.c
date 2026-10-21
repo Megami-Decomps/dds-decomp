@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -31,13 +32,10 @@ typedef struct PacAlloc {
 
 extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
-extern char *strrchr(const char *text, s32 delimiter);
-extern s32 strcasecmp(const char *text, const char *suffix);
 extern s32 sdfMoviePacRingSemaphore;
 extern s32 D_003BDABC;
 extern u8 D_003BD638[];
 
-extern void *memset(void *, int, unsigned int);
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
 void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {

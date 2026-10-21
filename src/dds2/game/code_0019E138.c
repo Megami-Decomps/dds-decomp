@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "itf_bit_range.h"
 #include "dds3_admin_control_api.h"
@@ -94,7 +95,6 @@ extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 
-extern u32 strlen(const char *str);
 
 
 
@@ -1068,7 +1068,6 @@ s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourc
     return produced;
 }
 
-extern void *memcpy(void *, const void *, u32);
 
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */

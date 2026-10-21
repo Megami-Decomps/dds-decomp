@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memcpy
+#include "sdk_ps2.h"
 #include "common.h"
 #include "par_release_record.h"
 #include "par_vertex_colors.h"
@@ -24,8 +27,6 @@
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 
 
 

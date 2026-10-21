@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
@@ -95,10 +96,7 @@ extern char D_003BC3A0[]; /* "camp" */
 
 extern char D_003AF418[]; /* "camp_draw" */
 
-extern char D_003AF428[]; /* "camp_update" */
-
-extern void *memset(void *dst, s32 c, u32 n);
-extern f32 mnuShopSavedLastTransformVector[];
+extern char D_003AF428[]; extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
@@ -453,7 +451,6 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
 }
 
 
-extern s32 strcmp(const char *a, const char *b);
 
 #include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
@@ -2772,7 +2769,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void sprintf(char *, const char *, ...);
 extern char D_003BC3B8[];
 extern void evtCopyEntryStringToActiveWindow(s32 window, char *text);
 

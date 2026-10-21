@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
@@ -6,9 +7,6 @@
 extern SdfHandlerNode *sdfHandlerNodeListHead;
 
 extern s32 func_00366780(s32);
-extern s32 RemoveIntcHandler(s32, s32);
-extern s32 RemoveDmacHandler(s32, s32);
-extern s32 RemoveSbusIntcHandler(s32);
 
 extern void (*sdfTickCallback)(void);
 
@@ -62,7 +60,6 @@ void sdfPanicHaltPrintf(const char *format, ...) {
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 extern s32 func_00365990(s32, s32, s32, s32);
 extern s32 func_003659C0(s32, s32, s32, s32);
-extern s32 AddSbusIntcHandler(s32, s32);
 
 SdfHandlerNode *sdfAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
     SdfHandlerNode *node;

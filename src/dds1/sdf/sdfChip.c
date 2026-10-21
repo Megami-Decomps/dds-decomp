@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -14,8 +15,6 @@ SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned
 
 SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
 
-s32 DIntr(void);
-s32 EIntr(void);
 void sdfSelectNextChipPage(SdfChipClass *sizeClass);
 
 void *sdfAllocAndClearQuadwords(s32 size) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -27,7 +28,6 @@ extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTex
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
-extern f32 acosf(f32);
 
 
 
@@ -45,7 +45,6 @@ extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *left, f32 *right);
 
-extern f32 sinf(f32);
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
@@ -170,7 +169,6 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
     sdfQuaternionNormalize(out);
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
 void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
@@ -271,7 +269,6 @@ void sdfQuatSquadControl(f32 *out, f32 *from, f32 *rotation, f32 *to) {
     sdfQuatMultiply(out, rotation, middle);
 }
 
-extern void *memset(void *, int, unsigned int);
 
 void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     f32 matrix[16];
@@ -809,9 +806,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
     }
 }
 
-extern s32 sprintf(char *buffer, const char *fmt, ...);
 
-extern unsigned int strlen(const char *);
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {

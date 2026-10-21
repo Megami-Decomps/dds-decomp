@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dds3_world_counter.h"
 /* Transport definitions stay in the predecessor; see docs/idioms.md,
  * "Title-audio controller transport boundary". */
@@ -64,7 +65,6 @@ extern s32 D_003BC5C8;
 extern u8 D_003D9178[];
 
 
-extern s32 sprintf(char *dst, const char *fmt, ...);
 
 #include "sdf_debug_api.h"
 
@@ -74,7 +74,6 @@ extern u32 D_003BC5B8;
 
 extern void mnuInitializeTitleAudioStreams(void);
 
-extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 s32 sndCopyWordsToIopSynchronously(const void *source, u32 iopAddress, u32 wordCount);
 
@@ -131,7 +130,6 @@ extern TitleAudioStreamState mnuTitleSoundBufferState;
 void mnuResetTitleStream(void);
 void mnuReleaseSoundBuffer(void);
 
-extern void *memcpy(void *, const void *, unsigned int);
 extern void mnuConfigureTitleAudioStream(s32 transferSize);
 
 void mnuUpdateTitleAudioStreams(void) {
@@ -237,8 +235,6 @@ void mnuUpdateTitleAudioStreams(void) {
 }
 
 
-extern int SignalSema(int);
-extern int WaitSema(int);
 extern void sdfSleepThreadCount(s32 requestedSleepCount);
 
 void mnuRunTitleStreamThread(void) {
@@ -270,7 +266,6 @@ extern u32 mnuTitleSoundBufferDecoderState[];
 extern u8 mnuTitleStreamDecodedSamples[];
 extern u8 mnuTitleSoundBufferDecodedSamples[];
 
-extern void *memset(void *, int, unsigned int);
 
 void mnuInitializeTitleAudioStreams(void) {
     memset(mnuTitleAudioSilenceBuffer, 0, 0x1000);

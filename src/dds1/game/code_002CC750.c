@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memset
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "dsp_name.h"
 #include "sdf_packet_list.h"
@@ -109,11 +112,7 @@ typedef struct Entry24B {
 typedef struct Entry24W {
     u32 v0;            // 0x00
     u8 pad_0x04[0x14]; // 0x04
-} Entry24W; // 0x18
-
-
-extern s32 CreateSema(void *);
-
+} Entry24W; 
 extern Entry24B D_00393220[];
 
 extern Entry24W D_00393234[];
@@ -416,9 +415,6 @@ void ptyRecomputeMaxHpMp(DatPartyRecord *unit) {
 }
 
 extern DspMantraName *D_003BAA78;
-extern u32 strlen(const char *text);
-extern char *strcpy(char *destination, const char *source);
-extern void *memcpy(void *destination, const void *source, u32 size);
 
 void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
     u8 *name = D_003BAA78[scriptId].encodedText;
@@ -1528,7 +1524,6 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 }
 
 extern void *_gp;
-extern s32 CreateThread(SdfKernelThreadParam *);
 
 /* Create a kernel thread from a zeroed descriptor that uses the caller's
  * workspace as its stack and the program's GP. */

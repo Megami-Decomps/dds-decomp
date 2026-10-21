@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "evt_stage_test_api.h"
 #include "mnu_input.h"
@@ -56,7 +57,6 @@ extern s32 fldGetSceneCommandState(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
-extern void * memset(void *, s32, u32);
 extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
 extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
 extern void sndDestroyFileQueueWrapper(u32 handle);
@@ -653,7 +653,6 @@ extern void mnuDrawPartyProfileAndExpOverlay(s32, s32, s32, MenuPageSlot *, s32,
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
-extern s32 sprintf(char *, const char *, ...);
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
@@ -797,7 +796,6 @@ extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 typedef struct FrFontGlyph FrFontGlyph;
-extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
@@ -1577,7 +1575,6 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
 
 typedef struct FrFontGlyph FrFontGlyph;
 extern char D_00437C88[];
-extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
@@ -3079,7 +3076,6 @@ s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
 
 extern const u16 D_0042B518[];
 
-extern void qsort(void *, unsigned int, unsigned int, int (*)(const void *, const void *));
 
 s32 func_002C6008(PartyPanel *partyPanel, MenuPageWindow *page,
                   DatPartyRecord *caster, s32 commit) {
@@ -3302,7 +3298,6 @@ extern u8 sdfViewUpVector[];
 extern u8 D_0037F590[];
 extern u8 sdfViewMatrix[];
 extern u8 D_003820F0[];
-extern void *memcpy(void *dest, const void *src, u32 size);
 extern u8 D_0042B528[];
 extern u8 D_0042B538[];
 extern u8 D_0042B548[];

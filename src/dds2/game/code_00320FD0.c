@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
@@ -14,9 +15,7 @@ extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
 
 extern void mnuFreeOptionalBlock(u32);
 
-extern void *memcpy(void *, const void *, u32);
 
-extern void *memset(void *, s32, u32);
 
 /* Cadence phase and accumulated progress at mnuStepCounterState (8 bytes). */
 
@@ -24,7 +23,6 @@ extern MenuProgressState mnuStepCounterState;
 
 extern u16 mnuStepCounterThreshold[];
 
-extern void sdfFreeHeapMemory(SdfListNode *);
 
 /* Remove the matching ID entry and invoke its list listener. */
 SdfListNode *mnuRemoveResourceNodeById(MnuCallbackList *list, u32 id) {

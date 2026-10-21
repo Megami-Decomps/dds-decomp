@@ -1091,6 +1091,17 @@ type is accepted), so a small constant clear of an aligned pointer is inlined
 
 A `void *` or `char *` destination is never inlined, whatever the declaration.
 
+The SDK entry points the game calls (libkernl, libc, libm, libcdvd, libdma, libgraph, libipu,
+libpad, libmc, libsdr) have one prototype each in `include/sdk_ps2.h` and its `sdk_lib*.h`
+parts, written for this project. A unit whose retail code needs a different declaration of
+one of them (the `memset`/`memcpy` forms above, a declaration placed after the first use,
+`__attribute__((malloc))`) defines `SDK_SKIP_<name>` before including `sdk_ps2.h` and keeps
+its own declaration. DIntr is declared K&R (`s32 DIntr();`) because two callers pass an
+argument the native routine ignores.
+DDS1 `code_002BC8F0` and DDS2 `code_00214948` stay on their own declarations and do not
+include `sdk_ps2.h`: the extra declarations move the stale alias class of address-taken
+locals (`sdfDrawTexturedQuad`, `btlSelectLowestRankTarget`) and break those matched functions.
+
 ## Struct assignment vs `memcpy`
 
 `*dst = *src` on a struct of `u32 word[N]` reproduces retail's `ldl/ldr`

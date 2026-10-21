@@ -1,3 +1,5 @@
+#include "sdk_ps2.h"
+#include "btl_enc_bg_entry.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
 #include "snd_pad_step.h"
@@ -93,9 +95,6 @@ extern void itfMesDestroyActiveWindowsAndReleaseTexture(KwlnTask *task);
 
 extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
-extern u32 strlen(const char *);
-extern void *memset(void *, s32, u32);
-extern void *memcpy(void *, const void *, u32);
 void itfMesReplaceTextSlotData();
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
@@ -738,7 +737,6 @@ extern char D_003A41A8[][0x20];
 extern char D_003A47E8[][0x20];
 extern char *D_00386048[];
 extern char D_004365F0[];
-extern void sprintf(char *dst, const char *format, ...);
 extern void itfConvertText(char *dst, const char *src);
 extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const char *sourceText);
@@ -1558,14 +1556,6 @@ typedef union UiQuadColor {
 typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 
 extern const UiQuadColor D_00414D50;
-
-typedef struct EncBgEntry {
-    s32 unk00;
-    s16 unk04;
-    s16 unk06;
-    s16 unk08;
-    s16 unk0A;
-} EncBgEntry;
 
 extern ItfMesGlobals itfMesWork;
 

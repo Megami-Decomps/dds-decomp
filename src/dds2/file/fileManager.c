@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_chip.h"
 #include "file.h"
 #include "file_pac.h"
@@ -39,8 +40,6 @@ s32 filePollEntryCleanup(struct FileRequest *request) {
 }
 
 extern char *sdfStrDup(const char *text);
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 
 /* Duplicate the request name, narrow kind to a byte and append under the
  * semaphore. Start processing only after an empty-to-nonempty transition.

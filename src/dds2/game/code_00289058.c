@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -11,8 +12,6 @@
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 extern s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 

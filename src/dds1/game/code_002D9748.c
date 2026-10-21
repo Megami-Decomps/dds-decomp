@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
@@ -97,7 +98,6 @@ extern void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *, s32, f32);
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;
@@ -202,8 +202,6 @@ SdfChunkHeader *sdfChunkFindByTag(const SdfModel *model, s32 tag) {
     return sdfChunkFindById(model->chunkTable, tag);
 }
 
-extern int memcmp(const void *, const void *, unsigned int);
-extern unsigned int strlen(const char *);
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
 s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {

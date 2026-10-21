@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mdl.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
@@ -186,7 +187,6 @@ void evtResetObjectPendingValue(EffWorldNode *obj) {
     data->pendingTargetKey = 0;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     EffectObjectData *data;

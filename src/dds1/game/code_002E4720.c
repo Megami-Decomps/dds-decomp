@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "common.h"
 #include "sdf_console_packet.h"
@@ -21,8 +22,6 @@
 /* Declared before first use (were implicit int). */
 extern void func_002F3CB8(s32);
 extern s32 sdfFileCmdFileSize(DevState *state);
-extern char * strchr(const char *, s32);
-extern char * strcpy(char *, const char *);
 /* Original-style implicit int, kept: matched code depends on it: sdfFileCmdSeek. */
 
 #define SDF_DEV_WORKER_COUNT 4
@@ -122,11 +121,8 @@ extern u8 sdfPfsPathPrefix[];
 
 extern char *sdfDevAllocateNormalizedPath(char *path);
 
-extern s32 SignalSema(s32 sema);
 
-extern s32 WaitSema(s32 sema);
 
-extern s32 ChangeThreadPriority(s32 tid, s32 prio);
 
 extern void sdfFileCmdUnlink(DevState *state);
 
@@ -135,21 +131,16 @@ extern void sdfFileCmdEnding(DevState *state);
 extern DevState *sdfFileCmdReadOpen(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
-extern s32 sceClose(s32 fd);
 
-extern s32 DIntr(DevState *arg0);
 
 extern void func_003110C8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
-extern void EIntr(void);
 
-extern void sceCdPowerOff(void *arg0);
 
 extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 
-extern u32 strlen(const char *s);
 
 extern void func_002F4190(u32 arg0);
 
@@ -159,13 +150,9 @@ extern u8 D_003BD460[];
 
 extern u8 D_003BD468[];
 
-extern s32 GetThreadId(void);
 
-extern void sceSifSetRpcQueue(void *, s32);
 
-extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 
-extern void sceSifRpcLoop(void *);
 
 extern u8 sdfDevRpcBuffer[];
 
@@ -179,7 +166,6 @@ extern void func_002F3F98(s32);
 
 extern s32 func_002F4258(void);
 
-extern s32 sceCdSearchFile(void *, s32);
 
 extern u16 sdfDefaultDevRequestOptions;
 
@@ -206,7 +192,6 @@ extern s32 sdfDiscReadPosition;
 
 extern s32 func_002F4588(s32 arg, u8 *options);
 
-extern s32 sceCdStatus(void);
 
 extern s32 func_002F4658(s32 size, s32 buffer, s32 arg2, s32 *status);
 
@@ -229,7 +214,6 @@ extern void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *forma
 
 extern void sdfDevConsInit(void);
 
-extern s32 sdfVFormatString(char *destination, const char *format, void *args);
 
 struct SdfTex;
 
@@ -362,7 +346,6 @@ extern char D_003BD3D0[];
 
 extern s32 func_0030C8E0(const char *, ...);
 
-extern s32 _StartThread(s32, s32);
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
 void sdfStartDevRpcServerAndBindClient(void) {
@@ -525,8 +508,6 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
 }
 
 extern SdfDiscFileRecord D_003F9FC0;
-extern s32 sceOpen();
-extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
@@ -587,7 +568,6 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
     return &D_003F9FC0;
 }
 
-extern s32 memcmp(const void *, const void *, u32);
 
 extern u32 D_003BDA40;
 
@@ -786,17 +766,13 @@ s32 sdfDevGetFileSize(void) {
     return sdfOpenDiscFileRecord->size;
 }
 
-extern s32 sceOpen();
 
-extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 extern s32 func_002FF538(s32);
 
 extern s32 func_0030EF30(s32 fileHandle, s32 buffer, s32 byteCount);
 
-extern s32 sceWrite(s32 fileHandle, s32 buffer, s32 byteCount);
 
-extern void FlushCache(s32);
 
 extern char D_003B4578[];
 
@@ -822,7 +798,6 @@ extern u32 D_003BDA3C;
 
 extern u32 D_003BDA40;
 
-extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_002F4558(s32, s32, s32);
 
@@ -883,7 +858,6 @@ typedef struct Bytes7 {
 
 extern Bytes7 D_003BD400[];
 
-extern char *strcat(char *, char *);
 
 char *sdfDevBuildPath(char *dst, char *src) {
     if (*src == 0x2F) {
@@ -914,11 +888,7 @@ u32 sdfDevDetectPfsPathDisabled(char *path) {
     return 0;
 }
 
-extern char D_003BD410[]; /* cdrom */
-
-extern char *strchr(const char *, s32);
-
-extern s32 strncmp(const char *, const char *, u32);
+extern char D_003BD410[]; 
 
 /* Return an allocated device path, normalizing disc-path case and separators. */
 char *sdfDevAllocateNormalizedPath(char *path) {
@@ -1611,7 +1581,6 @@ char *sdfFileCmdMakeRealFileName(char *path, s32 worker) {
     return result;
 }
 
-extern s32 memcmp(const void *, const void *, u32);
 
 extern char D_003BD450[]; /* /movie/ */
 
@@ -1900,7 +1869,6 @@ void sdfPowerOffLoop(s32 semaphore) {
     }
 }
 
-extern s32 iSignalSema(s32);
 
 void sdfPowerOffInterruptCallback(void *semaphore) {
     iSignalSema((s32)semaphore);
@@ -1926,7 +1894,6 @@ extern SdfPowerOffCallback func_002F33C8(SdfPowerOffCallback, void *);
 
 extern s32 func_0030E620(void);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern s32 func_00310C00(const char *, const char *, s32, const void *, s32);
 

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_active_api.h"
@@ -249,7 +250,6 @@ s32 mnuGetScrollingStripCountForLayout(s32 layout) {
     return layout == 1 ? 4 : 6;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
                                 EffectSlotSet *resource, s32 firstFrame,

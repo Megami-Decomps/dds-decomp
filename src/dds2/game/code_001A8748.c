@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -188,7 +189,6 @@ extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 extern SdfPoolNode D_00380708;
 
-extern void *memset(void *destination, s32 value, u32 bytes);
 
 extern s32 D_00435CBC;
 

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_chip.h"
@@ -6,7 +7,6 @@
 #include "dds3_admin_dispatch.h"
 
 extern char dds3AdminTaskName[];
-extern void *memcpy(void *, void *, s32);
 
 /* Return the named administration task's user state; the task must exist. */
 AdminWork *dds3GetAdminTaskWork(void) {

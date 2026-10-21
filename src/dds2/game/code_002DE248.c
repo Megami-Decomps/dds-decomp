@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_block128.h"
 #include "sdf_model_packet_callback.h"
 #include "eff_editor_menu.h"
@@ -108,10 +109,8 @@ extern void fileReadVectorPtr20(u8 *obj, void *dst);
 extern void fileSetRecordSecondVector(u8 *obj, void *src);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
-extern void * memset(void *, s32, u32);
 extern void mnuRecordSetVector(u8 *obj, void *src);
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId);
-extern char * strcpy(char *, const char *);
 extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
 extern u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat);
 
@@ -1193,7 +1192,6 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     effBlurDrawFramebufferQuad(out);
 }
 
-extern f32 atan2f(f32, f32);
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewMatrix[4][4];
@@ -5897,7 +5895,6 @@ void effFreeIndexedEntries(EffClassWork *work) {
 
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 asinf(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
 void effUpdateRadialWavePointRows(EffClassWork *work) {
@@ -6159,7 +6156,6 @@ void effResetRadialClassResourceFrames(EffClassWork *work) {
 }
 
 extern EffClassWork *effCreateClassResourceWork(u16, void *);
-extern void *memcpy(void *dst, const void *src, u32 size);
 
 EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config) {
     u32 count = config->timed.count;
@@ -6389,7 +6385,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 asinf(f32);
 extern f32 func_00352DB0(f32);
 
 /* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
@@ -13034,7 +13029,6 @@ extern const char D_004386D0[];
 
 extern char D_004386D8[];
 
-extern s32 sprintf(char *, char *, ...);
 
 
 
@@ -14278,8 +14272,6 @@ void effCopyCameraSnapshotSelection(void) {
 
 #include "sdf_vu_matrix.h"
 extern u8 D_0043875B;
-extern f32 acosf(f32);
-extern f32 atan2f(f32, f32);
 s32 func_002FF360(void) {
     f32 center[4];
     f32 point[4];

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
@@ -11,12 +12,8 @@
 #include "brs_result_counter.h"
 #include "sdf.h"
 #include "snd_track_playback_api.h"
-/* Declared before first use (were implicit int). */
-extern void FlushCache(s32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern s32 sceSifDmaStat(s32);
-extern s32 sceSifSetDma(void *, s32);
 #include "sdf_debug_api.h"
 extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
 extern void sdfSoundStopNamedPlayback(void);
@@ -32,7 +29,6 @@ extern BurstTable D_00428420;
 
 struct EffectSlotSet;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
-extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];
 
 
@@ -314,7 +310,6 @@ typedef struct BrsProgressBarCoordinates {
     u8 pad0B;
 } BrsProgressBarCoordinates;
 
-extern s32 sprintf(char *dst, const char *fmt, ...);
 extern const char D_004379F0[];
 extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
@@ -770,21 +765,13 @@ typedef struct { u64 v; } __attribute__((packed)) u64p;
 
 extern u8 D_00437A00[];
 
-extern char *strcat(char *, char *);
 
 extern u8 D_00437A08[];
 
-extern s32 WaitSema(u32);
 
-extern s32 SignalSema(u32);
 
-extern s32 sceSifInitIopHeap(void);
-extern s32 sceSifAllocIopHeap(s32 size);
-extern void Exit(s32 status);
 extern s32 sndStreamTransferIopHeapAddress;
 
-/* libc sprintf returns the signed vfprintf character count. */
-extern s32 sprintf(char *dst, const char *fmt, ...);
 extern u32 D_00437A20[2];
 
 extern u32 D_00437A28;
@@ -1336,7 +1323,6 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously((const void *)D_00437A28, D_00437A20[1], wordCount);
 }
 
-extern s32 sndDispatchIopAudioCommand(s32, ...);
 
 /* Send the per-core parameter commands for both sound cores, then the IOP
  * stream buffer with the transfer size. */
@@ -1353,7 +1339,6 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }
 
-extern int sceSdRemoteInit(void);
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();
@@ -1361,7 +1346,6 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     D_00437A2C = 0;
 }
 
-extern s32 sndDispatchIopAudioCommand(s32, ...);
 extern u64 D_00438FD0;
 
 s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {

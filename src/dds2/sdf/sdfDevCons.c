@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
 #include "sdf.h"
@@ -13,13 +14,10 @@
 #define SDF_DMA_CHCR_TTE 0x40
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
-extern void *memmove(void *dst, const void *src, u32 n);
 
-extern void *memset(void *dst, s32 c, u32 n);
 
 void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute);
 
-s32 sdfVFormatString(char *destination, const char *format, void *args);
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
 void sdfDevConsAdvanceRow(DevConsState *console) {
@@ -152,10 +150,6 @@ void sdfDevConsFinalizeGlyphTag(ConsBuf *buffers) {
         tag[1] = 0x53531;
     }
 }
-s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
-void sceDmaSendN(void *ch, void *addr, s32 size);
-s32 sceGsSyncPath(s32 mode, s32 timeout);
-void *sceDmaGetChan(s32 id);
 
 /* Finalize the current GIF tag and submit completed packets, then rotate buffers.
  * Keep the eight-byte pending-data test distinct from the quadword DMA count.

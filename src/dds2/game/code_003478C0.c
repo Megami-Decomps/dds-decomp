@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
@@ -46,16 +47,12 @@ extern DevState *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(DevState *, s32, s32, s32, s32),
                                           s32 callbackContext);
 extern s32 sdfFileCmdFileSize();
-extern s32 WaitSema(s32);
 extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
 
 
-extern void _StartThread();
 
-extern s32 GetThreadId(void);
 
-extern void SleepThread(void);
 
 extern s32 D_00439224;
 
@@ -121,8 +118,6 @@ enum {
 extern s32 D_00439220;
 extern const u8 *D_0047BC80[16];
 
-extern void *memcpy(void *, const void *, unsigned int);
-extern void *memset(void *, int, unsigned int);
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
@@ -435,10 +430,6 @@ void sdfStreamSendChunk(void) {
     sdfFileCmdRead(D_0047BCC0.deviceState, D_0047BE40, chunkBytes);
 }
 
-extern void FlushCache(s32);
-extern s32 SignalSema(s32);
-extern s32 sceSifSetDma(void *, s32);
-extern s32 sceSifDmaStat(s32);
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
@@ -545,11 +536,6 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
 
 
 extern s32 sdfCreateSemaphore(s32, s32, s32);
-extern void sceSifSetRpcQueue(void *, s32);
-extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
-extern void sceSifRpcLoop(void *);
-extern s32 sceGetstat(const char *, SceIoStat *);
-extern s32 WakeupThread(s32);
 extern u8 sdfPfsDebugMode;
 extern u8 D_0047BD00[];
 /* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
@@ -585,10 +571,6 @@ void sdfStartAndSuspendWorkerThread(void) {
 }
 
 extern char *D_0040BE00[];
-extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern char *strcpy(char *, const char *);
-extern char *strcat(char *, const char *);
-extern void sdfInitializeMemoryCardRpcClient(void);
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
 void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {

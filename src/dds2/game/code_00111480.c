@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
@@ -64,7 +65,6 @@ EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void) {
     return node;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 s32 dds3AllocateClearedObjectWork(EffWorldNode *obj) {
     obj->data = sdfChipAllocDirect(0x10);

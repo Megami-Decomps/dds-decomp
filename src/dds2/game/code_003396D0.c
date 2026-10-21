@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "eeregs.h"
 #include "common.h"
@@ -32,8 +33,6 @@
 #include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dev_console_node.h"
 #include "btl.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 extern void sdfTransposeVuMatrix(void);
 
 #define SDF_PAD_ENTRY_COUNT 2
@@ -151,11 +150,8 @@ extern s32 D_00438A40;
 
 extern s32 D_00439180;
 
-extern void *sceDmaGetChan(s32);
 
-extern void sceDmaSendN(void *, void *, s32);
 
-extern s32 sceDmaSync(void *, s32, s32);
 
 #include "sdf_packet_alloc.h"
 
@@ -366,7 +362,6 @@ extern f32 D_00438A5C;
 
 extern f32 D_00438A60;
 
-extern f32 tanf(f32);
 
 /* Compose camera projection and screen parameters without reassociating floats. */
 void sdfCameraBuildProjection(SdfCamera *camera) {
@@ -1271,9 +1266,7 @@ extern s32 func_0034B2C8(s32 port, s32 slot, s32 actNo, s32 term);
 
 extern s32 func_0034B6F8(s32 port, s32 slot, void *actData);
 
-extern s32 scePadSetMainMode(s32 port, s32 slot, s32 offs, s32 lock);
 
-extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
 
 /* Drive mode/actuator setup and normalize this pad's latest reply.
  * Motor requests are sent only when their cached values change. */
@@ -1519,7 +1512,6 @@ extern u8 D_00438A8C;
 
 extern s32 func_0034AAF8(s32);
 
-extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
 /* Open both configured port/slot pairs and reset the public input arrays. */
 void sdfPadInit(void) {

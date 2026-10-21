@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -6,7 +7,6 @@
 
 extern s16 D_003D6670[];
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
     EffMagatuhiOwner *effect;

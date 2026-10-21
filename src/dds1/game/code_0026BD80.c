@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -432,7 +433,6 @@ void mnuUpdateMovieMenuCameraOrbit(f32 *position, f32 *rotation) {
     sdfQuaternionNormalize(rotation);
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
     f32 delta[4];

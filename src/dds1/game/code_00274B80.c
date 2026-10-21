@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "camp_menu_context.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
@@ -28,7 +29,6 @@
 #include "mnu_staff.h"
 /* Declared before first use (were implicit int). */
 extern void itfSetTextDrawLimit(s32 limit);
-extern void * memset(void *, s32, u32);
 extern void mnuDrawCampScreenDefault(u32 task);
 extern void mnuResetWorkFloats(void);
 /* Original-style implicit int, kept: matched code depends on it: mnuSetStaffDisplayMode. */
@@ -46,7 +46,6 @@ extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
-extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);

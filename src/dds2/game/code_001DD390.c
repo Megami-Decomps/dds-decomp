@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dds3_path.h"
 #include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
@@ -137,7 +138,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern u32 btlApplyDeferredUnitStatus(void *);
 
@@ -5188,7 +5188,6 @@ void btlResetUnitLinks(BtlUnit *unit) {
     unit->link = sndAllocLink(unit);
 }
 
-extern void *memset(void *, s32, u32);
 
 BtlUnit *btlCreateUnit(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(0x368);

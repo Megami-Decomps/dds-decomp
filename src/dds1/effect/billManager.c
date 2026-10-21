@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
@@ -21,7 +22,6 @@ extern BillDispatch D_0034E060[];
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *resourceData);
 
-extern void *memcpy(void *dst, const void *src, u32 size);
 #include "sdf_packet_alloc.h"
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);

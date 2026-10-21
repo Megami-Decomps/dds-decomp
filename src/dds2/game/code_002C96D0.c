@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memset
+#include "sdk_ps2.h"
 #include "eff_surface_node.h"
 #include "common.h"
 #include "file_job_type.h"
@@ -61,8 +64,6 @@ extern void frEnableMode(s32 mask);
 extern u8 frDisableMode(u8 mask);
 extern void frSetFontDrawOT(u32 renderFlags);
 extern void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
-extern char * strcpy(char *, const char *);
-extern u32 strlen(const char *);
 struct EffectSlotSet;
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -213,7 +214,6 @@ extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
-extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
@@ -274,20 +274,7 @@ extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
  * fallback selector at +0x0C: nonzero calls the entry handler directly,
  * zero falls back through D_003536A0.
  */
-typedef struct EffDispatchEntry {
-    void *(*func)(void *); /* 0x00 handler, may be NULL */
-    u8 pad04[0x08];        /* 0x04 */
-    u32 unk0C;             /* 0x0C fallback selector (create table only) */
-    u8 pad10[0x18];        /* 0x10 */
-} EffDispatchEntry; /* 0x28 */
-
 /* 8-byte parameter work (family1): kind id plus one data pointer. */
-typedef struct EffParamWork {
-    u16 id;       /* 0x00 effect kind */
-    u8 pad02[2];  /* 0x02 */
-    void *data;   /* 0x04 parameter block */
-} EffParamWork; /* 0x08 */
-
 typedef struct EffDispatchExtra {
     void (*func)(void *, f32 vector[4]); /* 0x00 vector handler, may be NULL */
     u8 pad04[0x24];
@@ -488,12 +475,9 @@ extern char D_00437E20[];
 
 extern char *sdfDevGetPathBuffer(void);
 
-extern s32 sceOpen(const char *path, s32 flags, ...);
 
 
-extern s32 sceClose(s32 fd);
 
-extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {
@@ -4582,8 +4566,6 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
-extern f32 acosf(f32);
-extern f32 atan2f(f32, f32);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
 void vuBuildLookAtBasis(void)
@@ -5445,7 +5427,6 @@ void fileJobCopyHeader(FileJob *dst, const FileJob *src) {
 }
 
 extern char fileQueueImagePaddingBytes[];
-extern s32 sceWrite(s32 fd, void *data, s32 size);
 extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
 /* Export a queue: the queue header, one relocated record per job, then each

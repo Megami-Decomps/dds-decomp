@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
@@ -12,7 +13,6 @@ extern u32 D_0038BB50[];
 
 extern u32 D_0038BB60[];
 
-extern void *memset(void *s, s32 c, u32 n);
 
 extern s32 D_00436170;
 

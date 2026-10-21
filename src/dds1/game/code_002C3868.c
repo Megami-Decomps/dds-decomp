@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
@@ -17,7 +18,6 @@
 /* Declared before first use (were implicit int). */
 extern s32 abs(s32);
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
-extern s32 sprintf(char *, const char *, ...);
 
 extern void sdfCounterTickCountdown(void);
 
@@ -299,7 +299,6 @@ s32 fldAdvanceLocalMapCameraTransition(void) {
 }
 
 extern s32 mnuCreateListState(s32, s32, s32);
-extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);

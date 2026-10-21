@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
@@ -34,7 +35,6 @@ extern s32 D_004390A8;
 
 
 
-extern void *memset(void *, s32, u32);
 
 
 extern s32 D_0043909C;

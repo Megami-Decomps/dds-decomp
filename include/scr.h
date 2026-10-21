@@ -98,35 +98,14 @@ KwlnTask *scrCreateTaskFromContextParameters(u32 priority, void *header,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex);
 
 
-/* Integer/float VM registers (0x840); DDS1/2 script/scrTraceCode.c. */
-typedef struct ScrVM {
-    u8 unk00[0x40];
-    s32 ints[256];
-    f32 floats[256];
-} ScrVM;
-
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {
     u32 (*func)(void);
     s32 paramCount;
 } ScrCommand;
 
-/* Shared script integer/float globals (0x840); DDS1/2 script/scrScriptProcess.c. */
-typedef struct {
-    u8 pad0[0x40];
-    s32 integers[256];
-    s32 floatBits[256];
-} ScrProcGlobals;
-
-
-/* Common-command global state (0x38C); DDS1/2 script/scrCommonCommand.c. */
-typedef struct {
-    u8 pad[0x388];
-    s32 processControlFlag; /* 0x388: set/clear by process-control script commands. */
-} ScrComGlobals;
-typedef char ScrComGlobals_size_must_be_0x38C[(sizeof(ScrComGlobals) == 0x38C) ? 1 : -1];
-typedef char ScrComGlobals_processControlFlag_at_0x388[
-    ((u32)&((ScrComGlobals *)0)->processControlFlag == 0x388) ? 1 : -1];
+/* Script integer register 210 (DatGameState +0x388): set/clear by the process-control script commands. */
+#define SCR_PROCESS_CONTROL_FLAG_REGISTER 210
 
 /* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "file_pac.h"
 #include "sdf_gs_alpha_register_api.h"
 #include "prf_requirement.h"
@@ -16,10 +17,7 @@
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
-extern void * memset(void *, s32, u32);
 extern void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination);
-extern s32 sprintf(char *, const char *, ...);
-extern u32 strlen(const char *);
 /* Original-style implicit int, kept: matched code depends on it: mnuUpdateAndDrawMantraBackgroundBursts. */
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
@@ -4403,7 +4401,6 @@ void mnuResetMantraPulsePhase(s32 unused, u8 *object) {
 void mnuNoOpMantraPulseRelease(void) {
 }
 
-extern void *memcpy(void *, const void *, u32);
 extern const s16 D_004378D8[];
 extern const f32 D_00425A98[];
 
@@ -6616,7 +6613,6 @@ void mnuInitMantraFourIconPanelTransition(u32 unused, s32 view) {
 void mnuReleaseMantraFourIconPanelTransition(void) {
 }
 
-extern void *memcpy(void *, const void *, u32);
 extern u8 D_00437900[];
 
 s32 mnuDrawMantraPanelFourIconEffect(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *unused,

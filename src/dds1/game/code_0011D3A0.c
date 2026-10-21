@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "fld_npc_motion.h"
 #include "sdf_packet_list.h"
@@ -28,7 +29,6 @@
 #include "kwln_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern s32 fldFindTableEntry(s32 index);
-extern void * memset(void *, s32, u32);
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -632,7 +632,6 @@ void fldTestDrawDestroy(void) {
 
 extern void frSetFontDrawOT(u32);
 extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 first, const u8 *second);
-extern char *strcat(char *, const char *);
 extern char D_0032C840[13][4];
 
 static inline char *fldNumberGlyphText(s32 index) {
@@ -874,8 +873,6 @@ static inline void fldAppendToDisplaySurface(SdfListHead *list) {
 
     surface->append(surface, list);
 }
-
-extern void *memcpy(void *, const void *, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 

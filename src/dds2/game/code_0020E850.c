@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
@@ -119,7 +120,6 @@ extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
-extern s32 sprintf(char *, const char *, ...);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern u8 *D_00435E64;
 extern u8 btlActionPassLabel[];

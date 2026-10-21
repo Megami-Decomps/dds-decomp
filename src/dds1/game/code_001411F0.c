@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_projected_sprite.h"
 #include "sdf_model_packet_callback.h"
 #include "dsp_entry_api.h"
@@ -62,7 +63,6 @@
 #include "evt_unit.h"
 /* Declared before first use (were implicit int). */
 extern void dds3WorkClear(void);
-extern void * memset(void *, s32, u32);
 extern void sdfDrawSync(void);
 extern void sndSendSingleWordControlPacket(u32 controlWord);
 
@@ -887,7 +887,6 @@ extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
 
 extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 
-extern s32 strlen(const char *);
 
 extern char D_0033F06C[][0x1C], D_0034286C[][0x1C], D_0034606C[][0x1C];
 
@@ -918,7 +917,6 @@ void fldCacheMapLabelLengths(s32 mapId) {
     D_003BD7D0 = strlen(D_0033EC90[i]);
 }
 
-extern s32 sprintf(char *, const char *, ...);
 
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
@@ -3433,7 +3431,6 @@ void fldFireRoomEffects(void) {
 extern u8 D_003D44A0[0x200];
 
 
-extern s32 sprintf(char *, const char *, ...);
 
 
 
@@ -3456,7 +3453,6 @@ void fldSetNpcPalette(const FldNpcPalette *src) {
     memcpy(D_003D44A0, src, 0x200);
 }
 
-extern int strcmp(const char *, const char *);
 
 s32 fldFindEffectByName(const char *name) {
     s32 i;

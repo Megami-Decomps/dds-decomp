@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -218,8 +219,6 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
         }
     }
 }
-
-extern void *memset(void *, int, unsigned int);
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 

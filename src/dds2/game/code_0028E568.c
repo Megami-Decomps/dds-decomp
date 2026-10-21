@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_mantra.h"
 #include "mdl_flag_api.h"
 
@@ -5,8 +6,6 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "prf_profile_cap.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
@@ -120,7 +119,6 @@ void mnuUpdateMantraNodeState(MnuStatusResource *menu, u16 nodeId) {
     mnuStorePanelEntry(0x2000A, 5);
 }
 
-extern void *memcpy(void *, const void *, u32);
 extern const u16 D_00427218[4][8];
 extern const u16 D_00427258[4][2];
 extern const char D_00427268[];
@@ -247,7 +245,6 @@ void mnuBuildMantraSourceList(MnuStatusResource *status) {
     mnuMantraPublishedSourceRecords = (MenuMantraRecord *)((u8 *)status + 0x824);
 }
 
-extern void *memcpy(void *, const void *, u32);
 extern const u16 mnuMantraMemberFlagBasePairs[14][2];
 extern const u16 mnuMantraNode97To100FlagPairs[4][2];
 extern const u16 mnuMantraNode113To120FlagPairs[8][2];

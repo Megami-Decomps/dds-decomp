@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "fld_map_selection.h"
 #include "snd_sequence_volume_pan.h"
@@ -23,7 +24,6 @@
 #include "fld_map_resource.h"
 #include "mdl_flag_api.h"
 
-extern s32 sprintf(char *, const char *, ...);
 extern EffWorldNode *fldLocalMapCameraObject;
 
 typedef struct {
@@ -81,7 +81,6 @@ extern SdfCameraVector D_00400A50[];
 extern u32 sdfGetInitialMapCameraTransitionState(void);
 
 extern struct MenuList *mnuCreateListState(u32, u32, s32);
-extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);

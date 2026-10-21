@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -36,7 +37,6 @@ void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet)
 void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
-extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */

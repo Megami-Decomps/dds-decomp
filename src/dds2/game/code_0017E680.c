@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "bill_object_api.h"
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
@@ -28,7 +29,6 @@ extern u32 effResourceDefaultTriangleColors[];
 
 extern SdfPoolNode *effResourceDrawSurfaces[];
 
-extern void *memset(void *, int, unsigned int);
 
 /* Create an effect resource work with count entries, its entry list inline at +0x74. */
 EffResourceWork *effCreateResourceEntryWork(u32 count) {

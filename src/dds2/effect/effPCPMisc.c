@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_model_packet_callback.h"
 #include "sdf_vu_rotation_axes.h"
@@ -186,15 +187,6 @@ extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 
 
 /* Boss effect work: settable param plus two handles released on free. */
-typedef struct {
-    u8 pad00[0x10];
-    u128 parameterVector; /* 0x10 */
-    u8 pad20[4];
-    u32 unk24;      /* 0x24 settable param */
-    u32 resource28;  /* 0x28 released by func_001629F0 */
-    u32 resource2C;  /* 0x2C released by func_001629F0 */
-} EffPCPBossWork;
-
 extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 slotIndex);
 
 
@@ -2962,7 +2954,6 @@ void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 value) {
 }
 
 
-extern void *memset(void *, int, unsigned int);
 
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
 EffPCPBlockSetWork *effPcpCreateBlockSetWork(const EffPCPBlockSetParams *params, void **blocks) {

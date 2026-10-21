@@ -1,10 +1,10 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf.h"
 #include "ee_mmi.h"
 #include "sdf_graph_display.h"
 
 extern s32 sdfGraphicsTransferThreadId;
-extern s32 iWakeupThread(s32 threadId);
 
 #define SDF_GRAPH_AUXILIARY_BUFFER 2
 #define SDF_GRAPH_CPU_ADDRESS_MASK 0x0FFFFFFF
@@ -52,8 +52,6 @@ void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
 }
 
 extern SdfDisplayEnvView D_004681D0;
-extern void sceGsSetDefDispEnv(void *, s32, s32, s32, s32, s32);
-extern void sceGsPutDispEnv(void *);
 
 /* Select the indexed image buffer for display; the index and pointer are unchecked. */
 void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
@@ -69,7 +67,6 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
 
 extern SdfGraphModeDefaults D_0040B260[];
 extern u8 D_004389D9;
-extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 
 /* Reset the GS with the interlace setting of the current display mode. */
 void sdfGraphResetDeviceForCurrentMode(void) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "common.h"
 #include "sdf_vu_matrix.h"
@@ -93,8 +94,6 @@ enum {
 extern s32 D_003BDAC0;
 extern const u8 *D_003FF300[16];
 
-extern void *memcpy(void *, const void *, unsigned int);
-extern void *memset(void *, int, unsigned int);
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
@@ -406,7 +405,6 @@ extern DevState *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(DevState *, s32, s32, s32, s32),
                                           s32 callbackContext);
 extern s32 sdfFileCmdFileSize();
-extern s32 WaitSema(s32);
 extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
@@ -419,10 +417,6 @@ void sdfStreamSendChunk(void) {
     sdfFileCmdRead(D_003FF340.deviceState, D_003FF4C0, chunkBytes);
 }
 
-extern void FlushCache(s32);
-extern s32 SignalSema(s32);
-extern s32 sceSifSetDma(void *, s32);
-extern s32 sceSifDmaStat(s32);
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
@@ -529,12 +523,6 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
 
 
 extern s32 sdfCreateSemaphore(s32, s32, s32);
-extern s32 GetThreadId(void);
-extern void sceSifSetRpcQueue(void *, s32);
-extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
-extern void sceSifRpcLoop(void *);
-extern s32 sceGetstat(const char *, SceIoStat *);
-extern s32 WakeupThread(s32);
 extern s32 D_003BDAC4;
 extern u8 D_003FF380[];
 extern u8 sdfPfsDebugMode;
@@ -561,8 +549,6 @@ void sdfRunStreamIopRpcServer(void) {
     sceSifRpcLoop(queue);
 }
 
-extern void _StartThread();
-extern void SleepThread(void);
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
@@ -574,9 +560,6 @@ void sdfStartAndSuspendWorkerThread(void) {
 }
 
 extern char *D_00398C80[];
-extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern char *strcpy(char *, const char *);
-extern char *strcat(char *, const char *);
 extern void func_002F5E30(void);
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_selection_trail_work.h"
@@ -14,8 +15,6 @@ extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceTe
 extern s32 fldGetSceneObjectState(void);
 extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
-extern void * memset(void *, s32, u32);
-extern u32 strlen(const char *s);
 /* Original-style implicit int, kept: matched code depends on it: btlCountEligibleLinkedActors. */
 
 extern void itfSetTextDrawLimit(s32 limit);
@@ -2410,7 +2409,6 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
 extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern char D_003BB3F8[];
-extern s32 sprintf(char *, const char *, ...);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
@@ -2637,7 +2635,6 @@ static inline void btlSubmitSharedTextGlyph(struct FrFontGlyph *glyph) {
 extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
 extern const char D_003BB400[], D_003BB408[], D_003BB410[];
 extern u8 btlAnalysisTextScratch[];
-extern s32 sprintf(char *, const char *, ...);
 extern DatBattleSceneRecord *datBattleSceneRecords;
 extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
@@ -5526,7 +5523,6 @@ extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
 extern void func_001AC080(s32, s32, u32, const char *, s32);
 extern const char D_003BB400[];
-extern s32 sprintf(char *, const char *, ...);
 
 s32 func_001B6CF8(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -5957,7 +5953,6 @@ void btlDrawReservePanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s
 extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
-extern s32 sprintf(char *, const char *, ...);
 extern void btlDrawReservePanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
 extern void func_001AC080(s32, s32, u32, const char *, s32);
 extern const BattlePanelColors D_003A2CC0;
@@ -8443,7 +8438,6 @@ extern const BattlePanelColors D_003A2E90;
 
 extern char D_003BB478[];
 
-extern s32 sprintf(char *, const char *, ...);
 
 void btlDrawItemCommandRows(BattleSceneObject *object) {
     char text[16];

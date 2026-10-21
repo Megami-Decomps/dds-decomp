@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memset
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "prf_requirement.h"
 #include "prf_requirement_fallback.h"
@@ -174,11 +177,9 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
 
 
-extern s32 sdfOpenFileStream(const char *, const char *);
 
 extern void func_00359AC0(s32, const char *, s32, s32);
 
-extern void sdfCloseFileStream(s32);
 
 extern char sdfDebugLogAppendMode[];
 
@@ -444,9 +445,6 @@ void ptyRecomputeMaxHpMp(DatPartyRecord *unit) {
     ptyRecomputeMaxVitals(unit, 0);
 }
 
-extern u32 strlen(const char *text);
-extern char *strcpy(char *destination, const char *source);
-extern void *memcpy(void *destination, const void *source, u32 size);
 
 void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
     u8 *name = D_00435E50[scriptId].encodedText;

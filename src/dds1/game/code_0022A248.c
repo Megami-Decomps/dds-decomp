@@ -1,3 +1,5 @@
+#include "sdk_ps2.h"
+#include "mnu_camp_display.h"
 #include "common.h"
 #include "mdl_flag_api.h"
 #include "kwln.h"
@@ -14,8 +16,6 @@
 #include "eff_event_work_api.h"
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 extern void scrDestroyAllNamedProcesses(void);
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -168,7 +168,6 @@ void *evtGetTestTaskUpdateCallback(void) {
 }
 
 #include "sdf_packet_alloc.h"
-extern s32 sprintf(char *, const char *, ...);
 extern s32 sdfPathExists(char *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern SdfPoolNode D_00325708;
@@ -352,15 +351,6 @@ void evtReorderListNodes(EvtRuntimeGroup *list) {
         }
     }
 }
-
-typedef struct CampDisplayDefaults {
-    s32 x, y;
-    u8 color[4];
-    f32 scaleY, scaleX;
-    s32 enabled, variant;
-} CampDisplayDefaults;
-
-
 
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,

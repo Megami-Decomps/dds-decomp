@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_composite_gs_descriptor.h"
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
@@ -82,9 +83,7 @@ void effInitializeEmitterHead(EffEmitterHead *effect);
 
 void effSetTemplateTagPeriod(EffTemplatePacketList *effect);
 
-extern void *memset(void *s, s32 c, u32 n);
 
-extern void *memcpy(void *dest, const void *src, u32 n);
 
 
 extern EffectConfig D_003AA884[];

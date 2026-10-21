@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "fr_font_text_slots.h"
 #include "sdf.h"
@@ -7,7 +8,6 @@
 #include "kwln.h"
 /* Declared before first use (were implicit int). */
 extern void frFontLoadDefaultFonts(void);
-extern void * memset(void *, s32, u32);
 extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
 
 #define FR_FONT_BYTE_MASK 0xFF
@@ -112,14 +112,7 @@ void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *gl
                  &glyph->cachedItem->list->uv, &frFontWork.atlas, drawFlags);
 }
 
-extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
-extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
-extern void sceGsExecLoadImage(void *, s32);
-extern s32 sceGsSyncPath(s32, s32);
-extern void FlushCache(s32);
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
-
+extern volatile s32 sdfGsImageUploadSemaphore; 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
 void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image) {
     u8 loadImage[0x60];

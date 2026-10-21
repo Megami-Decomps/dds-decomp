@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_random.h"
 #include "common.h"
 #include "btl_boss_data_api.h"
@@ -441,7 +442,6 @@ extern void btlAllocatePanelTaskWork(void);
 
 extern void btlInitializeRuntimeNoOp(void);
 
-extern void *memset(void *, int, unsigned int);
 
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {

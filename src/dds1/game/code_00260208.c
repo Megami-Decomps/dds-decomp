@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "brs_icon_record.h"
 #include "common.h"
 #include "evt_stage_test_api.h"
@@ -683,7 +684,6 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(DatPartyRecord *unit) {
@@ -904,7 +904,6 @@ extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 extern char D_0036C858[];
 extern char D_003AFAA8[];
 
-extern void *memset(void *, int, unsigned int);
 
 BrsSkillPackageWork *brsCreateTaskContext(void) {
     BrsRewardSummary *rewards;

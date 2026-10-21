@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_variant_sprite_placement.h"
 #include "common.h"
 #include "eff_random.h"
@@ -106,7 +107,6 @@ extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
 extern TaskWork *mnuSceneResourceContext;
-extern void *memset(void *, s32, u32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);

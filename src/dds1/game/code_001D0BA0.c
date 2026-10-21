@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dds3_path.h"
 #include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
@@ -62,7 +63,6 @@
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
-extern s32 sprintf(char *dst, const char *format, ...);
 
 extern s32 fileTestSavedSlotFlags(u32);
 
@@ -5030,7 +5030,6 @@ void btlResetUnitLinks(BtlUnit *actor) {
     actor->link = sndAllocLink(actor);
 }
 
-extern void *memset(void *, int, unsigned int);
 
 BtlUnit *btlCreateUnit(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(0x348);

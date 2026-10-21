@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
@@ -111,7 +112,6 @@ extern SdfTex *kwlnHeldTextureReference;
 
 extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
 
-extern s32 strcmp(const char *a, const char *b);
 
 extern s32 D_003C99B8[];
 
@@ -163,7 +163,6 @@ extern u8 mnuCampListedItemSolarWeightsView[];
 
 
 
-extern void *memset(void *dst, s32 c, u32 n);
 
 
 
@@ -2549,7 +2548,6 @@ extern u8 *D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 sprintf(char *, const char *, ...);
 extern void evtClearActiveFlag();
 extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
@@ -4159,7 +4157,6 @@ extern void dspAdvanceMessageWindowControl();
 extern s32 mnuCampResolveProgressTierValue();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
-extern s32 sprintf(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
 struct KwlnTask;
 

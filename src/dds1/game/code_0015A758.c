@@ -1,3 +1,6 @@
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+#define SDK_SKIP_memcpy
+#include "sdk_ps2.h"
 #include "common.h"
 #include "par_release_record.h"
 #include "par_vertex_colors.h"
@@ -49,7 +52,6 @@ extern ParDispatch parKindConstructorEntries[];
 
 extern void (*D_0034E5E0[])(void *, void *, void *);
 
-extern void *memset(void *dst, s32 c, u32 n);
 extern void *memcpy(void *dst, void *src, u32 n);
 extern void polyInitializeBasicRingCells(void *);
 

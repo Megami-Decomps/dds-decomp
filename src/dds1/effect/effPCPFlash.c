@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_param.h"
 #include "sdf_trig.h"
@@ -224,7 +225,6 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     effDrawTriangleRecordPool(handle);
 }
 
-extern void *memcpy(void *dst, const void *src, u32 n);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
 PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakParams *src) {

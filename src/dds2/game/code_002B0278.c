@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_gs_register_submit_api.h"
 #include "dsp_message_window_api.h"
 #include "evt_message_window_api.h"
@@ -106,7 +107,6 @@ extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern s32 mnuGetRangeEntryFlatValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
-extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437BF8[];
@@ -354,12 +354,10 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 
 
 
-extern void *memset(void *, s32, u32);
 
 typedef struct MenuListDefaults {
     s32 indices[3];
@@ -751,8 +749,6 @@ void mnuCopyPartyEntries(context)
     menuWork->selection = 0;
 }
 
-/* Move a current party entry into the selected backup slot and refresh its panel. */
-extern void *memcpy(void *, const void *, u32);
 extern void mnuPopulatePartyPanelSlot(u8 *entry, s32 unused, u32 index, PartyPanel *panel);
 void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;

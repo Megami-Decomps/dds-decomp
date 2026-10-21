@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dsp_channel.h"
 #include "mnu_input.h"
@@ -49,7 +50,6 @@ extern s8 mnuCampTaskState;
 extern s8 D_00437B73;
 
 
-extern void *memset(void *, s32, u32);
 
 extern s32 mnuHandleCampFieldSkillInput(KwlnTask *);
 
@@ -103,7 +103,6 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, struct EffectSlotSet *, u8 *, s32);
 
 
-extern s32 sprintf(char *, const char *, ...);
 
 
 extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, s32);

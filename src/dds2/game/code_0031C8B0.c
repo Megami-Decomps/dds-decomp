@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff.h"
 #include "common.h"
 #include "sdf_resource.h"
@@ -7,7 +8,6 @@
 #include "sdf_motion.h"
 #include "eff_random.h"
 
-extern f32 tanf(f32);
 
 extern f32 D_0037F5EC[];
 

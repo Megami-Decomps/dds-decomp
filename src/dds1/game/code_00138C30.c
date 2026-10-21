@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
@@ -105,7 +106,6 @@
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
-extern char * strcpy(char *, const char *);
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void datAddCurrencyClamped(s32 delta);
@@ -115,13 +115,10 @@ extern void evtSubmitEventRequestImmediate(s32 eventId);
 
 struct EffWorldNode;
 
-extern s32 strcmp(const char *left, const char *right);
 
 extern char D_003BAC40[];
 
-extern void *memset(void *, int, unsigned int);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern FldInfTable D_00332E30;
 
@@ -271,7 +268,6 @@ extern u32 D_003C92E0[];
 
 extern s16 D_003C9518[];
 
-extern s32 strcmp(const char *a, const char *b);
 
 extern f32 D_003BAD20;
 
@@ -289,7 +285,6 @@ extern u32 D_003BACFC;
 
 extern u32 D_003308B0[];
 
-extern void *memset(void *s, s32 c, u32 n);
 
 extern s32 fldUpdateTitleBannerTask(KwlnTask *task);
 
@@ -351,9 +346,7 @@ extern struct DevRequest *D_003BAC14;
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
 
-extern s32 sprintf(char *, const char *, ...);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern s32 D_003BAC80;
 
@@ -431,9 +424,7 @@ extern struct SdfMemBlock *fldCachedRoomF2ResourceAllocation;
 
 extern struct SdfMemBlock *fldCachedRoomKF2ResourceAllocation;
 
-extern s32 sprintf(char *, const char *, ...);
 
-extern s32 sprintf(char *, const char *, ...);
 
 void fldDrawFloorQuad(s32 x, s32 y, const char *format);
 
@@ -1167,7 +1158,6 @@ extern s32 D_003BAE38;
 
 extern const char D_00332DF0[];
 
-extern s32 strcmp(const char *, const char *);
 
 const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
     s32 packOrSetIndex;
@@ -1486,7 +1476,6 @@ s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
     return value;
 }
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 

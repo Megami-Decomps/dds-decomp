@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -20,9 +21,7 @@ SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {
     return nextBlock;
 }
 
-extern s32 DIntr(void);
 
-extern void EIntr(void);
 
 /* Derive the byte count from adjacent addresses while preserving the interrupt state. */
 s32 sdfMemoryGetBlockSize(const SdfMemBlock *block) {

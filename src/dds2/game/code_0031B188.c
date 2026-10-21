@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_mat4.h"
 #include "snd_sequence_volume_pan.h"
@@ -30,7 +31,6 @@ typedef struct SoundSlotPool {
 
 
 extern f32 sdfViewTargetVector[4];
-extern void *memset(void *, s32, u32);
 extern void sdfMat4RotateX(SdfMat4 *, f32);
 extern void sdfMat4RotateY(SdfMat4 *, f32);
 extern void sdfMat4RotateZ(SdfMat4 *, f32);

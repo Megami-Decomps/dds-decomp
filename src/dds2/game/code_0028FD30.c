@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_name.h"
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
@@ -183,8 +184,6 @@ extern const MantraAcquisitionDialogues D_004275E8;
 extern const char D_00437940[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void prfSummarizeNonzeroEntryAttributes(s32, s32 *);
-extern void *memset(void *, s32, u32);
-extern s32 sprintf(char *, const char *, ...);
 extern void ptyAdjustAllActiveRosterStats(s32, s32);
 
 s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *object) {
@@ -434,7 +433,6 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern s32 mdlFlagTest(s32);
 
-extern void *memcpy(void *, const void *, u32);
 extern const s16 mnuMantraBridgeDestinationIds[4][3];
 extern const u16 mnuMantraBridgeNodesForDirections0And5[3][5];
 extern const u16 mnuMantraBridgeNodesForDirections2And3[3][5];
@@ -601,7 +599,6 @@ typedef struct MantraModelFlag {
     u8 pad05[3];
 } MantraModelFlag;
 
-extern void *memset(void *, s32, u32);
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 
@@ -1955,7 +1952,6 @@ void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
     }
 }
 
-extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */
 void mnuInitPanelSoundEntries(void) {
     struct SdfMemBlock *allocation;

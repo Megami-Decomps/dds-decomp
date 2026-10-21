@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
@@ -14,7 +15,6 @@ extern s32 fileActiveCardDetectionRequestIndex;
 
 s32 func_0034F7B8(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
 
-s32 sceMcSync(s32 mode, void *command, s32 *result);
 
 /* This unit builds with -fno-optimize-sibling-calls (config/dds2/cflags.txt), so
  * the card-info query stays jal + epilogue. */

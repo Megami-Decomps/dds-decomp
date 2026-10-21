@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -74,7 +75,6 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
 }
 
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {

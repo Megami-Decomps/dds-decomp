@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "kwln.h"
 #include "mnu_list.h"
 #include "kwln_task_state.h"
@@ -50,8 +51,6 @@ typedef struct EvtLoadedRecordHeader {
 
 extern void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size);
 
-extern void *memcpy(void *, const void *, unsigned int);
-extern void *memset(void *, int, unsigned int);
 
 /* Copy a loaded resource's records into a new block behind the handle header
  * and relocate them in place; the relocation list lives in a temporary block. */

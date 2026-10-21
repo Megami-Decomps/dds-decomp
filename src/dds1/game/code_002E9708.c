@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
 #include "snd_command_packet.h"
@@ -20,12 +21,6 @@
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
 #include "snd_midi_state_views.h"
-/* Declared before first use (were implicit int). */
-extern void EIntr(void);
-extern s32 SleepThread(void);
-extern s32 WaitSema(s32);
-extern void * memset(void *, s32, u32);
-extern char * strcpy(char *, const char *);
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -72,13 +67,7 @@ extern u32 sdfSoundCommandStatus;
 extern u32 sdfSoundCommandBusy;
 extern char D_00398948[];
 extern s32 sdfSoundRpcSemaphore;
-extern s32 SignalSema(s32);
-extern void FlushCache(s32);
 extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-extern s32 GetThreadId(void);
-extern void sceSifSetRpcQueue(void *, s32);
-extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
-extern void sceSifRpcLoop(void *);
 extern u32 D_003FEAC0[16];
 
 extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
@@ -89,7 +78,6 @@ extern char D_003B48E0[];
 extern char D_003B4900[];
 extern char *D_00398968[];
 
-extern s32 DIntr(void);
 extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
@@ -106,13 +94,10 @@ extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_003BDAA8;
 extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
-extern s32 iWakeupThread(s32 threadId);
-extern s32 sceIpuSync(s32, s32);
 extern void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void sdfRemoveHandler(void *);
-extern s32 sdfDisableDmacChannel(s32);
 
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32 capacity);
 
@@ -1519,7 +1504,6 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     }
 }
 
-extern void *memcpy(void *dst, const void *src, u32 n);
 
 /* Fill at most seven of eight 8-KiB slots. A short non-EOF query waits for more
  * data; EOF permits a partial final read. Copy the final slot's trailing bytes
@@ -1647,7 +1631,6 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
     }
 }
 
-extern void sceIpuStopDMA(void *);
 
 
 /* Sleep for IPU completion, advance cycle state and requeue non-drained nodes;
@@ -1852,11 +1835,8 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *f
     sdfSoundAppendNode(node);
 }
 
-extern void sceIpuInit(void);
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
-extern void sdfEnableDmacChannel(s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern void _StartThread();
 extern u8 sdfIpuStreamThreadStack[];
 extern void sdfIpuDmaCompletionWorker();
 void sdfSoundInitIpuStream(void) {

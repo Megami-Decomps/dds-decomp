@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
@@ -30,14 +31,12 @@
 /* Declared before first use (were implicit int). */
 extern void datAddCurrencyClamped(s32 delta);
 extern s32 evtIsActiveFlagSet(s32 flagIndex);
-extern void * memset(void *, s32, u32);
 extern void mnuClearEntries(MenuPageWindow *menu);
 extern void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *menu);
 extern void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots);
 extern void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
 extern void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
-extern u32 strlen(const char *);
 /* Original-style implicit int, kept: matched code depends on it: fileSetPreviewLocation, mnuSelectLastListNode. */
 
 #define MNU_PARTY_SLOT_COUNT 5
@@ -137,7 +136,6 @@ extern void mnuSnapshotCampTextureHandles(u32 *);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
-extern s32 sprintf(char *, const char *, ...);
 typedef struct FrFontGlyph FrFontGlyph;
 extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];

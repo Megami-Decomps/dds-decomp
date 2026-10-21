@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "snd_ring.h"
 #include "common.h"
 #include "eff_random.h"
@@ -8,7 +9,6 @@
 
 extern s8 sndSynchronousCommandMode;
 extern u16 D_00398910[];
-extern void *sceSifAllocIopHeap(s32 size);
 
 extern EffRandState D_00398938;
 
@@ -56,7 +56,6 @@ void sdfRandomizeByTime(EffRandState *state) {
     sdfRandomize(state, secondsSinceEpoch * 0x3C + now.sec);
 }
 
-extern s32 sceCdReadClock(SdfCdClock *);
 extern s32 sdfBcdStrToInt(s32);
 extern u8 D_003BD480;
 ClockTime D_003BD488 = {0};
@@ -96,7 +95,6 @@ extern SndRingPacket sndCommandRing[32];
 /* Shared with the producer and its worker-thread wakeups. */
 extern vu16 sndCommandReadIndex;
 extern vu16 sndCommandWriteIndex;
-extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 
 /* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
 s32 sndTryDispatchQueuedCommand(void) {
@@ -116,7 +114,6 @@ s32 sndTryDispatchQueuedCommand(void) {
 }
 
 
-extern int SleepThread(void);
 
 void sdfServiceUnblockedWorkerThread(void) {
     for (;;) {
@@ -134,9 +131,6 @@ extern u8 sndRpcServerThreadStack[];
 extern void *_gp;
 extern s32 sndCommandThreadId;
 extern s32 D_003BD4A4;
-extern s32 sceSifGetSreg(s32);
-extern s32 CreateThread(SdfKernelThreadParam *);
-extern s32 _StartThread(s32, s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void sdfSoundStartRpcServer(void);
 

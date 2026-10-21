@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_vu_rotation_axes.h"
 #include "ee_mmi.h"
@@ -20,8 +21,6 @@ void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
     VU0_LOAD_MATRIX(&matrix);
 }
 
-extern f32 cosf(f32 angle);
-extern f32 sinf(f32 angle);
 
 /* Rotation loaders build the matrix in a volatile scratch array: it is read
  * only by the lqc2 asm through its address, and retail stores its four

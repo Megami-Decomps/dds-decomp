@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_packet_params.h"
 #include "common.h"
 #include "sdf_vu_rotation_axes.h"
@@ -1012,7 +1013,6 @@ void func_00172C60(void)
 {
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
 
 
 extern EffPacketParams effScatterPoolDrawParams[];
@@ -1171,7 +1171,6 @@ extern PcpScatterDraw *effScatterCreateDrawObject(
     u32 particleCount, u32 segmentsPerParticle);
 extern void effCreateScatterResource(PcpScatterDraw *object, u32 resource);
 
-extern void *memcpy(void *, const void *, u32);
 
 /* Return ring work with trailing particles and randomized negative initial ages.
  * The delay clamp changes only the local modulus, not the copied parameter head. */

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -16,8 +17,6 @@
 #include "kwln_fade.h"
 #include "btl.h"
 #include "mnu.h"
-/* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
 /* Original-style implicit int, kept: matched code depends on it: mnuDrawMantraPhaseOpacity. */
 
 #define MTR_RECORD_COUNT 32
@@ -449,7 +448,6 @@ extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 sprintf(char *, const char *, ...);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
@@ -686,7 +684,6 @@ s32 mtrMantraEquipDraw(void) {
 }
 
 extern char mnuMantraUnitLevelTextFormat[];
-extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
 
 void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,

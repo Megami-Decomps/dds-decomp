@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
@@ -157,10 +158,7 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void evtEventViewerReleasePendingNode(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
-void *memset(void *dst, s32 value, u32 size);
 EffWorldNode *dds3GetWorldObject(void);
-s32 strcmp(const char *a, const char *b);
-char *strcpy(char *dst, const char *src);
 
 EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer)
 {
@@ -758,7 +756,6 @@ extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
-extern void *memcpy(void *destination, const void *source, u32 size);
 
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
@@ -1091,7 +1088,6 @@ extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
-extern void *memcpy(void *destination, const void *source, u32 size);
 
 extern void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 extern void evtEventViewerFreeBuffer(EvtRuntimeChild *key);
@@ -3905,7 +3901,6 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
 extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
-extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 
 /* Apply one of three viewer selection modes to the selected slots. */
@@ -4240,7 +4235,6 @@ void evtEventViewerInitCampFontResource(EvtRuntime *viewer) {
 }
 
 extern u32 D_003BA8EC;
-extern void *memset(void *dst, s32 value, u32 size);
 extern s32 evtCreateSkyTask(void);
 
 void evtViewerCreateTaskWithSky(void) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
@@ -31,7 +32,6 @@ extern u32 D_003BD970;
 
 extern s32 D_003BD974;
 
-extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern char D_003BD250[];
 extern void sndReleaseTrackHandle(u32);

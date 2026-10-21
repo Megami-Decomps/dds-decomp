@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "scr_work_task_api.h"
 #include "dat_save_words.h"
@@ -189,7 +190,6 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
@@ -269,7 +269,6 @@ extern u32 D_00438EAC;
 extern void ptySaveActivePartyTemplates(void);
 extern SdfMemBlock *mtrMantraEventBitPush(void);
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
  * mantra bitmaps, profile records, party templates, high item counts and blocked-item flags. */

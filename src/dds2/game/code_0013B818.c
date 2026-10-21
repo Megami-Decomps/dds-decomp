@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "fld_area_work.h"
 #include "common.h"
 #include "fld_stop_entry.h"
@@ -41,7 +42,6 @@
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
-extern char * strcpy(char *, const char *);
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
  * An early void declaration moves fldUpdateTitleBannerTask's position update
  * at +0x11C/+0x124/+0x12C from retail $3 to $2. */
@@ -81,7 +81,6 @@ static inline f32 fldNormalizeProbeVector(void) {
     return length;
 }
 
-extern int strcmp(const char *, const char *);
 
 extern void evtSetDrawSurfaceIndex();
 
@@ -99,7 +98,6 @@ extern u32 fldValueRecordResource;
 
 extern s32 D_004361F8;
 
-extern void *memset(void *s, s32 c, u32 n);
 
 extern u32 D_0038BD50[];
 
@@ -205,7 +203,6 @@ extern u8 D_00391F84[];
 
 extern s32 D_004361FC;
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
@@ -874,7 +871,6 @@ extern s32 D_004361C8;
 
 extern const char D_0038E290[];
 
-extern s32 strcmp(const char *, const char *);
 
 const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
     s32 packOrSetIndex;

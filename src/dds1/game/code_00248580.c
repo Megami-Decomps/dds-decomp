@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_terminal_work.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
@@ -31,7 +32,6 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void datAddCurrencyClamped(s32 delta);
-extern u32 strlen(const char *s);
 /* Original-style implicit int, kept: matched code depends on it: fileSetPreviewLocation. */
 
 #define MNU_PARTY_SLOT_COUNT 5
@@ -96,7 +96,6 @@ extern void mnuDrawThresholdNodeWithSelectedAccents(s32, s32, s32, struct MenuLi
 extern u8 D_003BC3F8[];
 
 
-extern s32 sprintf(char *, const char *, ...);
 
 
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
@@ -641,7 +640,6 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 
 
 
-extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);

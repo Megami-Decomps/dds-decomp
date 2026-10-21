@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_random.h"
 #include "ui_color.h"
@@ -178,7 +179,6 @@ s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
     return 0;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;

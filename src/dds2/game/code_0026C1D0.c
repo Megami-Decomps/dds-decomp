@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
@@ -543,7 +544,6 @@ typedef struct {
     struct MenuList *list;
 } EvtPanelRecord;
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * DDS2 copies its two colors from the data table rather than using DDS1 literals. */

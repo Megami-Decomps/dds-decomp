@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "eff_resource_browser.h"
 #include "sdf_sif_command.h"
 #include "common.h"
@@ -52,20 +53,16 @@ extern u32 effDataDirectoryIndex;
 
 extern char D_00436448[];
 
-extern s32 sprintf(char *destination, const char *format, ...);
 
-extern s32 sceDopen(void *path);
 
 
 extern char D_00436450[];
 
 extern EffHandler D_003B2068[];
 
-extern s32 sceDclose(s32 directory);
 
 extern char *D_003B20D8[];
 
-extern s32 sceDread(s32 directory, EffDirEnt *entry);
 
 extern u8 sdfViewMatrix[];
 
@@ -321,8 +318,6 @@ void effRunIfEnabled(s32 directory) {
     }
 }
 
-extern char *strcpy(char *, const char *);
-extern unsigned int strlen(const char *);
 
 /* Debug mode delegates to the native iterator. Built-in mode copies the next name,
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */

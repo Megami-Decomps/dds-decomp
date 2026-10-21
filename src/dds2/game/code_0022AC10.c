@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
@@ -172,7 +173,6 @@ extern s32 kwlnFadeIsBackgroundOverlayActive();
 
 extern void btlReleaseOwnedData(void);
 
-extern void *memset(void *, s32, u32);
 
 extern SdfPoolNode D_00380608;
 
@@ -248,7 +248,6 @@ typedef struct BattleScriptTaskData {
     u32 frames;
 } BattleScriptTaskData;
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern char D_0041B7E0[];
 
@@ -1548,7 +1547,6 @@ void btlInitLightParams(void) {
 }
 
 extern EffRandState effSharedRandomState[];
-extern f32 cosf(f32);
 void func_0022D040(void) {
     s32 row;
     s32 column;
@@ -1600,8 +1598,6 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
-extern f32 tanf(f32);
-extern f32 sinf(f32);
 extern SdfAsset *D_00436D10;
 extern EffPacketParams btlCapturedScreenTileDrawParams;
 extern u32 btlCapturedScreenTilePacketParameters[];
@@ -2895,13 +2891,9 @@ extern u8 sdfPfsDebugMode;
 
 extern char *sdfDevGetPathBuffer(void);
 
-extern s32 sceOpen(const char *, s32, ...);
 
-extern s32 sceWrite(s32, s32, s32);
 
-extern s32 sceClose(s32);
 
-extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
 void btlWriteActorModelTableFile(void) {

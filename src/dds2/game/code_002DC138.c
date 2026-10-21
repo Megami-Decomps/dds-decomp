@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "eff_object_node.h"
 #include "eff_model_owner.h"
@@ -113,7 +114,6 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 }
 
 
-extern void *memcpy(void *, const void *, u32);
 EffModelOwner *effCreateModelOwner(void *input) {
     FileJobPayload *source = input;
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
@@ -474,7 +474,6 @@ typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer
 typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 
 extern void *effCreateResourceOwner(void *);
-extern void *memset(void *, s32, u32);
 
 /* Decode the type-6 configuration, load its model and clone per-position queues. */
 void *effCreateResourceOwner(void *input) {

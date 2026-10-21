@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
@@ -153,7 +154,6 @@ void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
     actor->selectedEntryIndex = -1;
 }
 
-extern void *memset(void *, int, unsigned int);
 
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
 void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {

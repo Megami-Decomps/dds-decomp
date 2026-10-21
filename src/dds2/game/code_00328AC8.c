@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "ee_mmi.h"
@@ -25,10 +26,6 @@ void sdfUnlinkAndDeleteCurrentThread(void) {
 
 extern s32 sdfThreadWakeWorkerId;
 extern u8 D_00438B70;
-extern s32 GetThreadId(void);
-extern s32 ChangeThreadPriority(s32, s32);
-extern s32 iWakeupThread(s32);
-extern s32 SleepThread(void);
 
 /* Wake the worker only for its registered event; the byte counter never underflows. */
 s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
@@ -42,10 +39,6 @@ s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
 }
 
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
-extern void EnableIntc(s32);
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
-extern s32 WakeupThread(s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void sdfWakeQueuedThreadWaiters(void) {
@@ -68,7 +61,6 @@ extern void func_00366A78(void);
 extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern char D_0045E8A0[];
-extern s32 _StartThread(s32, s32);
 
 /* Initialize the tracked-thread list and its semaphore before starting the wake worker. */
 s32 sdfStartQueuedThreadWakeWorker(void) {
@@ -146,8 +138,6 @@ SdfChipCell *sdfAllocFromNewChipPage(SdfChipClass *sizeClass) {
     return sdfAllocFreshChipCell(sizeClass, page);
 }
 
-extern s32 DIntr(void);
-extern void EIntr(void);
 
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
 void *sdfChipAllocDirect(s32 size) {

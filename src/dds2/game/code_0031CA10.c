@@ -1,9 +1,9 @@
+#include "sdk_ps2.h"
 #include "eff.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu_shooting.h"
 
-extern void *memset(void *, s32, u32);
 void itfDeactivateModelInstance(ModelInstance *item);
 void itfDrawModelInstanceImage(ModelInstance *item);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);

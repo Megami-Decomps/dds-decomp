@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_runtime_state.h"
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
@@ -133,7 +134,6 @@ extern s8 D_003D7588[];
 
 extern BattleRuntimeState btlRuntimeState;
 
-extern s32 sprintf(char *, const char *, ...);
 extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
@@ -1421,9 +1421,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 
-extern f32 cosf(f32);
 
-extern f32 sinf(f32);
 
 void btlInitVisibilityGrid(void) {
     f32 angle = 3.1415927f / 6.0f; /* 30 degrees */
@@ -1897,7 +1895,6 @@ s32 btlUpdateRuntimeFadeState(void) {
     return 1;
 }
 
-extern void *memset(void *, s32, u32);
 
 void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &btlRuntimeState;
@@ -2734,13 +2731,9 @@ extern u8 sdfPfsDebugMode;
 
 extern char *sdfDevGetPathBuffer(void);
 
-extern s32 sceOpen(const char *, s32, ...);
 
-extern s32 sceWrite(s32, const void *, s32);
 
-extern s32 sceClose(s32);
 
-extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
 void btlWriteActorModelTableFile(void) {

@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_boss_data_api.h"
@@ -1439,7 +1440,6 @@ s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
 
 typedef struct ActionUnit ActionUnit;
 extern const char D_0041B4F8[];
-extern void *memset(void *, s32, u32);
 extern u32 btlAcceptLinkedActorCommand(BtlUnit *unit, u32 command);
 extern s32 btlAccumulateBossRatioScale(ActionStateLink *task);
 extern s32 btlActionResourceTypeToMotionId(BtlUnit *unit, s32 action);

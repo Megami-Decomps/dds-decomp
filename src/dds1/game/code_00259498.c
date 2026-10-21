@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "mnu_variant_sprite_placement.h"
 #include "mnu.h"
 #include "snd_sequence_volume_pan.h"
@@ -15,13 +16,6 @@
 #include "mnu_scene_work.h"
 #include "sdf_chip.h"
 
-/* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
-
-
-
-
-extern void *memset(void *, s32, u32);
-extern void *memcpy(void *, const void *, u32);
 
 
 extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
@@ -387,7 +381,6 @@ extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
 extern struct EffectSlotSet *mnuMantraSpriteSlots[];
 extern char D_003BC4C8[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
-extern s32 sprintf(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Interpolate currency changes over twenty draws, with the native ticking sound. */

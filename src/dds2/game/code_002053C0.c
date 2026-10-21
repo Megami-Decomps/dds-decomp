@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
@@ -58,7 +59,6 @@ extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
-extern s32 sprintf(char *, const char *, ...);
 
 extern char D_00436AE8[];
 

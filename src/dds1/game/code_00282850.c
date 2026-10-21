@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "brs_level_progress_api.h"
 #include "mnu_input.h"
@@ -50,7 +51,6 @@ extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
 extern void evtDestroySecondaryWorldNode(void);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
-extern void * memset(void *, s32, u32);
 extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
 extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
@@ -62,7 +62,6 @@ extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC7A0[];
 
 #define MNU_PANEL_ITEM_COUNT 5
@@ -2427,7 +2426,6 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
     rotation[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[2];
 }
 
-extern void *memcpy(void *dest, const void *src, u32 size);
 extern u8 D_003B2520[];
 extern u8 D_003B2530[];
 extern u8 D_003B2540[];

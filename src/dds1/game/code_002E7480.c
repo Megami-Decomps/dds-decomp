@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "common.h"
 #include "sdf_trig.h"
@@ -51,7 +52,6 @@ extern f32 sdfNormalizedAsinSamples[];
 
 extern void sdfResizeResourceAllocation(struct SdfMemBlock *allocation, s32 size);
 
-extern u32 strlen(const char *s);
 
 extern u32 sdfDiscType;
 
@@ -124,7 +124,6 @@ loop:
     return dst;
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
 
 char *sdfStrDup(const char *text) {
     u32 length;

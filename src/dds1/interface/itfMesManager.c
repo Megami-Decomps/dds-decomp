@@ -1,3 +1,4 @@
+#include "sdk_ps2.h"
 #include "common.h"
 #include "snd_pad_step.h"
 #include "sdf_packet_list.h"
@@ -83,9 +84,6 @@ extern void itfMesDestroyActiveWindowsAndReleaseTexture(void);
 
 extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
-extern u32 strlen(const char *text);
-extern void *memset(void *destination, s32 value, u32 size);
-extern void *memcpy(void *destination, const void *source, u32 size);
 void itfMesReplaceTextSlotData();
 
 extern s32 frFontMeasureGlyphStripWidth();
@@ -741,7 +739,6 @@ extern char D_00347C68[][0x20];
 extern char D_003482A8[][0x20];
 extern s32 D_0032ACA8[128];
 extern char D_003BB1F0[];
-extern void sprintf(char *dst, const char *format, ...);
 extern void itfConvertText(char *dst, const char *src);
 extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const char *sourceText);
