@@ -119,7 +119,7 @@ extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437C38[];
 
-void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteArg) {
+void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, EffectSlotSet *sprite, s32 spriteArg) {
     char text[0x10];
     s32 current;
     s32 required;
@@ -136,7 +136,7 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
         frSetFontColorNo((FrFontGlyph *)glyph, 4);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frDestroyFontRequestAfter((FrFontGlyph *)glyph);
-        effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, (EffectSlotSet *)sprite, spriteArg, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
         sprintf(text, D_00437C38, required);
         color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
         glyph = itfCreateFont2TextGlyph(thresholdX, y, 0, color, text, 0);

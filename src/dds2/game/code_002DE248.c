@@ -4986,7 +4986,7 @@ EffectSurfaceNode *effCreateSurfaceNode(u32 count) {
 }
 
 s32 effCreateSurfaceNodeForGrid(s32 source) {
-    return effCreateSurfaceNode(effSlotCount((u8 *)source, 100));
+    return (s32)effCreateSurfaceNode(effSlotCount((u8 *)source, 100));
 }
 
 extern void effRebuildSurfaceHandles(s32, s32, s32);
@@ -5117,7 +5117,7 @@ u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
 
     effRebuildSurfaceHandles(object, ((EffectSurfaceNode *)work)->record->type, (s32)work + 0x10);
     effReplaceResourceRef(object, ((EffectSurfaceNode *)work)->record->type, arg);
-    effCloneSurfaceGridResources(object, work);
+    effCloneSurfaceGridResources((EffectSurfaceNode *)object, work);
     return object;
 }
 
@@ -10865,11 +10865,11 @@ u32 *effCreateSurfaceGridWorkFromRequest(u8 *request) {
     return work;
 }
 
-void effReleaseOwnedSurfaceNodeWork(u32 handle) {
-    if (*(s32 *)handle != 0) {
-        effDestroySurfaceNode(*(EffectSurfaceNode **)handle);
+void effReleaseOwnedSurfaceNodeWork(u32 *handle) {
+    if (*handle != 0) {
+        effDestroySurfaceNode((EffectSurfaceNode *)*handle);
     }
-    sdfChipFreeDirect((void *)handle);
+    sdfChipFreeDirect(handle);
 }
 
 /* Resolve and apply the surface's endpoint requests, then acquire its retained record. */
