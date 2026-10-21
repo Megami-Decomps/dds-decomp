@@ -116,7 +116,7 @@ extern const BtlCameraTimedInstruction *D_0035D9F0[];
 
 extern const BtlCameraTimedInstruction *D_0035DA08[];
 
-extern void func_001E9DE0(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *);
+extern void btlApplyTimedCameraInstruction(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *);
 
 extern s32 btlUpdateCameraCursorPose(BtlLinkedCommand *, BtlCamState *);
 
@@ -3660,7 +3660,7 @@ extern const BtlCameraTimedInstruction *D_0035DAD0[];
 
 void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->task->unit->status.flags & 0x400)) {
-        func_001E9DE0(action, state, D_0035DA28[CURSOR->scriptSetIndex]);
+        btlApplyTimedCameraInstruction(action, state, D_0035DA28[CURSOR->scriptSetIndex]);
         btlUpdateCameraCursorPose(action, state);
         btlConstrainCameraEndpointHeight(action, state, 0, 0);
         CURSOR->frame++;
@@ -3708,7 +3708,7 @@ extern const BtlCameraTimedInstruction *D_0035DA40[];
 /* Evaluate the skill camera script, apply its pose, then advance the cursor. */
 void btlAdvanceSkillCameraCursor(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->task->unit->status.flags & 0x400)) {
-        func_001E9DE0(action, state, D_0035DA40[CURSOR->scriptIndex]);
+        btlApplyTimedCameraInstruction(action, state, D_0035DA40[CURSOR->scriptIndex]);
         btlUpdateCameraCursorPose(action, state);
         btlConstrainCameraEndpointHeight(action, state, 0, 0);
         CURSOR->frame++;
@@ -3721,7 +3721,7 @@ void btlAdvanceSkillCameraCursor(BtlLinkedCommand *action, BtlCamState *state) {
         case 0x1BB:
         case 0x1BF:
         case 0x1C3:
-            func_001E9DE0(action, state, D_0035DA40[CURSOR->scriptIndex]);
+            btlApplyTimedCameraInstruction(action, state, D_0035DA40[CURSOR->scriptIndex]);
             btlUpdateCameraCursorPose(action, state);
             btlConstrainCameraEndpointHeight(action, state, 0, 0);
             CURSOR->frame++;
@@ -3776,9 +3776,9 @@ void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *stat
 
 void btlAdvanceCommandCursor(BtlLinkedCommand *action, BtlCamState *state) {
     if (CURSOR->mode == 0) {
-        func_001E9DE0(action, state, D_0035D9F0[CURSOR->index]);
+        btlApplyTimedCameraInstruction(action, state, D_0035D9F0[CURSOR->index]);
     } else {
-        func_001E9DE0(action, state, D_0035DA08[CURSOR->index]);
+        btlApplyTimedCameraInstruction(action, state, D_0035DA08[CURSOR->index]);
     }
     btlUpdateCameraCursorPose(action, state);
     CURSOR->frame++;
@@ -5506,7 +5506,7 @@ typedef char CameraCursorIndexOffset[((u32)&((BtlCameraCursorView *)0)->paramete
 
 
 
-void func_001E9DE0(BtlLinkedCommand *action, BtlCamState *pose,
+void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                    const BtlCameraTimedInstruction *instruction) {
     s32 done = 0;
     s32 kind;
@@ -7594,7 +7594,7 @@ void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *action, BtlCamState *stat
 
     if (cursor->useTimedScript == 1) {
         if (!(action->task->unit->status.flags & 0x400)) {
-            func_001E9DE0(action, state, D_0035DAE0[cursor->scriptIndex]);
+            btlApplyTimedCameraInstruction(action, state, D_0035DAE0[cursor->scriptIndex]);
             btlUpdateCameraCursorPose(action, state);
             btlConstrainCameraEndpointHeight(action, state, 0, 1);
             cursor->frame++;
@@ -7618,7 +7618,7 @@ void btlAdvanceCommandCursorOrAction(BtlLinkedCommand *action, BtlCamState *stat
         if (action->task->unit->status.flags & 0x400) {
             return;
         }
-        func_001E9DE0(action, state, D_0035DAF0[CURSOR->scriptIndex]);
+        btlApplyTimedCameraInstruction(action, state, D_0035DAF0[CURSOR->scriptIndex]);
         btlUpdateCameraCursorPose(action, state);
         btlConstrainCameraEndpointHeight(action, state, 0, 1);
         CURSOR->frame++;
@@ -7669,7 +7669,7 @@ void btlAdvanceTimedCameraOrApproach(BtlLinkedCommand *action, BtlCamState *stat
         if (action->task->unit->status.flags & 0x400) {
             return;
         }
-        func_001E9DE0(action, state, D_0035DAF8[CURSOR->scriptIndex]);
+        btlApplyTimedCameraInstruction(action, state, D_0035DAF8[CURSOR->scriptIndex]);
         btlUpdateCameraCursorPose(action, state);
         btlConstrainCameraEndpointHeight(action, state, 0, 1);
         CURSOR->frame++;
@@ -7699,7 +7699,7 @@ void btlInitCommandCursorForFirstActor(BtlLinkedCommand *action, BtlCamState *st
 
 void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->task->unit->status.flags & 0x400)) {
-        func_001E9DE0(action, state, D_0035DAD0[CURSOR->scriptIndex]);
+        btlApplyTimedCameraInstruction(action, state, D_0035DAD0[CURSOR->scriptIndex]);
         btlUpdateCameraCursorPose(action, state);
         btlConstrainCameraEndpointHeight(action, state, 0, 1);
         CURSOR->frame++;
