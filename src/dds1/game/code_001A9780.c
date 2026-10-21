@@ -8111,7 +8111,7 @@ extern void btlDrawRetreatCommandLabel(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
-extern void func_001BDF60(BattleSceneObject *, u16, u16, u16);
+extern void btlDrawActorCommandRows(BattleSceneObject *, u16, u16, u16);
 
 void func_001BE590(BattleSceneObject *object);
 
@@ -8120,7 +8120,7 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object);
 void btlDrawCommandClassRows(s32 sceneContext) {
     switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
-        func_001BDF60((BattleSceneObject *)sceneContext, 0, 2, 3);
+        btlDrawActorCommandRows((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
         btlDrawLinkageSkillOptions((BattleSceneObject *)sceneContext);
@@ -8140,7 +8140,7 @@ extern char *const D_003A2E60[3];
 extern const char D_003BB438[];
 extern const BattlePanelColors D_003A2E50;
 
-void func_001BDF60(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
+void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
     char text[16];
     BattlePanelColors colors = D_003A2E50;
     char *labels[3];
