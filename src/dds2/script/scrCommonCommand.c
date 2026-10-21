@@ -29,9 +29,9 @@ extern char D_00412658[];
 extern s8 sdfPadButtonStates[];
 
 
-s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
+void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
 
-s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
+void kwlnSetBackgroundColorTarget(s32 blendFrames, f32 *color);
 
 void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color);
 
@@ -326,7 +326,7 @@ s32 scrCmdStoreDirectionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_CLEAR_W(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    kwlnSetLightColorTarget(scrReadIntParameter(0), 0, &v);
+    kwlnSetLightColorTarget(scrReadIntParameter(0), 0, &v.x);
     return 1;
 }
 
@@ -337,7 +337,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
 
 const char scrSceneLightDirectionZeroWarning[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
-extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
+extern void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
 
 s32 scrCommandSetSceneLightDirection(void) {
     ScrVecW direction;
@@ -352,7 +352,7 @@ s32 scrCommandSetSceneLightDirection(void) {
         evtPrintDeveloperConsoleMessage(scrSceneLightDirectionZeroWarning);
         return 1;
     }
-    kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction);
+    kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction.x);
     return 1;
 }
 
@@ -370,7 +370,7 @@ s32 scrCmdStorePositionVector(void)
     VU0_SET_AXIS_GPR(z, z);
     VU0_SET_W_ONE(vf10);
     VU0_STORE_VF_TO(vf10, v);
-    kwlnSetBackgroundColorTarget(scrReadIntParameter(0), &v);
+    kwlnSetBackgroundColorTarget(scrReadIntParameter(0), &v.x);
     return 1;
 }
 
