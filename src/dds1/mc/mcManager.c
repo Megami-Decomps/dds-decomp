@@ -10,6 +10,12 @@
 #define MC_SDK_SPECIAL_ERROR (-4)
 #define MC_SDK_EXTENDED_ERROR_LIMIT (-10)
 
+/* The SDK's queued requests on an open file: its descriptor, and for a
+ * transfer the EE buffer and its size. */
+s32 mcQueueCloseRequest(s32 fileDescriptor);
+s32 mcQueueReadRequest(s32 fileDescriptor, u32 bufferAddress, s32 size);
+s32 mcQueueWriteRequest(s32 fileDescriptor, u32 dataAddress, u32 dataSize);
+
 
 /* Return 1 only for completed status zero, -1 for other completed statuses.
  * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
@@ -148,9 +154,9 @@ McPollResult mcPollCommandStatusWithResult(s32 *commandResultOut) {
     return MC_POLL_PENDING;
 }
 
-/* Forward the existing no-explicit-argument SDK close call; do not poll it. */
-void mcCloseOpenFile(void) {
-    mcQueueCloseRequest();
+/* Queue the SDK's close of an open file; do not poll it. */
+void mcCloseOpenFile(s32 fileDescriptor) {
+    mcQueueCloseRequest(fileDescriptor);
 }
 
 /* Despite its name, poll once rather than waiting; success requires status
@@ -168,9 +174,9 @@ McPollResult mcPollZeroCommandResult(void) {
     return MC_POLL_PENDING;
 }
 
-/* Forward the existing no-explicit-argument SDK read call; do not poll it. */
-void mcReadOpenFile(void) {
-    mcQueueReadRequest();
+/* Queue the SDK's read of an open file into an EE buffer; do not poll it. */
+void mcReadOpenFile(s32 fileDescriptor, u32 bufferAddress, s32 size) {
+    mcQueueReadRequest(fileDescriptor, bufferAddress, size);
 }
 
 /* Any completed nonnegative status succeeds, but the SDK status is not
@@ -192,10 +198,10 @@ McPollResult mcPollCompletionStatus(void) {
     return MC_POLL_PENDING;
 }
 
-/* Begin the SDK write through the existing unprototyped call. Keep its
- * argument form unchanged; this entry does not report completion. */
+/* Queue the SDK's write of an EE buffer to an open file; this entry does
+ * not report completion. */
 void mcBeginWrite(s32 fileDescriptor, u32 dataAddress, u32 dataSize) {
-    mcQueueWriteRequest();
+    mcQueueWriteRequest(fileDescriptor, dataAddress, dataSize);
 }
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes

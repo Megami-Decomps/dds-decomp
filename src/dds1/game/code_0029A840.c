@@ -12,6 +12,7 @@
 #include "file.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_projection.h"
 #include "mdl.h"
 #include "sdf.h"
 #include "sdf_texture_submit.h"

@@ -21,7 +21,7 @@ extern const char D_003BC6D0[];
 extern char D_003BC6D8[];
 
 
-extern s64 fileConsumeConfigTaskReady(void);
+extern s32 fileConsumeConfigTaskReady(void);
 
 extern u8 mnuCampCommandReturnPopupEntry[];
 

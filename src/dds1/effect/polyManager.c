@@ -25,7 +25,7 @@ enum {
 void polyUpdateBasicRingCells(PolyNode *node);
 void polyBuildBasicRadialFan(PolyNode *node, s32 cellIndex);
 void polyStripPushPairsApart(PolyNode *node, s32 cellIndex);
-extern void memcpy();
+extern void memcpy(void *dst, const void *src, s32 size);
 extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 void polyInitializeBandRecordAges(PolyBand *band);
 void polyInitializeArcRecordAges(PolyArc *arc);

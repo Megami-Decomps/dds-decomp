@@ -242,10 +242,10 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
 
     if (alternate == 0) {
         glyph = frFontBuildColoredGlyphWithSharedFlags(
-            (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 1, 1, 10, color, source, 0);
+            (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 1, 1, (u64)10, color, source, 0);
     } else {
         glyph = frFontBuildColoredGlyphWithSharedFlags(
-            (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, 8, color, source, 0);
+            (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, (u64)8, color, source, 0);
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);

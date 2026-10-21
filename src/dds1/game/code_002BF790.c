@@ -679,7 +679,7 @@ void itfDrawColoredTriangle(); /* no prototype: called here with a sixth argumen
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
-    itfDrawColoredTriangle(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
+    itfDrawColoredTriangle(xCoordinates, yCoordinates, z, (const u32 *)vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
 void itfDrawColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
