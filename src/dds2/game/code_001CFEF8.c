@@ -1369,7 +1369,7 @@ extern void itfMesClearFlags();
 
 extern void brsTaskAllowUpdate();
 
-extern void btlClearPartyRecordStatusBits();
+extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 

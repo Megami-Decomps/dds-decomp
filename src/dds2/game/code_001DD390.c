@@ -225,7 +225,7 @@ extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlUnit *);
 
 
-extern void btlClearPartyRecordStatusBits(void *, s32);
+extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *, u32, s16);
 
