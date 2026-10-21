@@ -7902,7 +7902,7 @@ extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 #include "btl_command_affinity_api.h"
 extern void btlCreateReserveActorPanelTask(void);
 extern s32 btlIsSupportedCommandKind(BattleIndexWork *);
-extern s32 func_001BF040(BtlUnit *, BattleRosterPair *);
+extern s32 btlCheckScenePairResult(BtlUnit *, BattleRosterPair *);
 extern s16 D_003BB494;
 extern s16 D_003BB496;
 extern s16 D_003BB498;
@@ -7968,7 +7968,7 @@ s32 func_001BD750(BattleSceneObject *object) {
                 sndSetStationedSeVolume(8);
                 return 1;
             }
-            if (func_001BF040(object->owner->unit, &D_00359160.entries[entry]) != 0) {
+            if (btlCheckScenePairResult(object->owner->unit, &D_00359160.entries[entry]) != 0) {
                 sndSetStationedSeVolume(10);
                 break;
             }
@@ -8463,7 +8463,7 @@ void func_001BEB58(BattleSceneObject *object) {
     list = btlGetActorLinkageSkillList(object, &count);
 
     for (; i < rowCount && row < total; i++, row++) {
-        blocked = func_001BF040(object->owner->unit, &list->entries[row]);
+        blocked = btlCheckScenePairResult(object->owner->unit, &list->entries[row]);
         if (blocked == 0) {
             glyphColor = selected == row ? 0x89FEFF80 : 0xA09DC380;
         } else {
@@ -8519,7 +8519,7 @@ void func_001BEB58(BattleSceneObject *object) {
 
 /* First non-zero command failure reason: the actor itself, then each linked
  * partner in turn. All three checks run before the first result is tested. */
-s32 func_001BF040(BtlUnit *actor, BattleRosterPair *pair) {
+s32 btlCheckScenePairResult(BtlUnit *actor, BattleRosterPair *pair) {
     s32 result;
     s32 first = 0;
     s32 second = 0;
