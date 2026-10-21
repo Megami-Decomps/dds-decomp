@@ -581,7 +581,7 @@ void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
         strcat(path, moduleNames[moduleIndex]);
         sceSifLoadModule(path, 0, 0);
     }
-    sdfInitializeMemoryCardRpcClient();
+    sceMcInit();
 }
 
 /* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */
