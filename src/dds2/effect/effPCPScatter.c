@@ -1020,7 +1020,7 @@ void effScatterSetRibbonColor(PcpScatterRibbonWork *work, u32 color) {
     work->color = color;
 }
 
-void func_0017A8B8(void) {
+void effScatterNoop(void) {
 }
 
 /* Return the trailing control block after zeroing two record arrays.
