@@ -15736,17 +15736,32 @@ Keep the real API contract at each boundary. DDS2 `btlSetUnitRotation`
 still takes `s128 *` and reads the input only with `VU0_LOAD_VF`. Keep an
 opaque rotation output in its real `s128` buffer, separate from float
 position inputs, rather than adding a cast back from a float array.
-A one-qword `s128 result[1]` is genuine opaque VU register-image storage
+A one-qword `s128 result[1]` is opaque VU register-image storage
 for this API, not a numeric scalar view. No rotation prototype change is
 needed for that split.
 
-These retypes are optional hygiene for a proven register image:
-`VU0_STORE_VF` has a global memory clobber, and retail camera code shows
-`SQC2` followed by `LWC1` from the same image. Such float reads do not by
-themselves make the buffer forbidden. This exception requires the
-exercised global-barrier register-image contract; it is not general
-permission for alias casts. `PCP_COPY_VECTOR_F32` has its separate bounded
-float-memory contract and negative control.
+The assembler transfer and the compiler memory interface are separate
+contracts. For float buffers accessed by C, `VU0_STORE_VF` declares a
+global memory clobber; `VU0_STORE_VF_PTR` declares the actual sixteen-byte
+output. `VU0_LOAD_VF_PTR` similarly declares a full-vector memory input.
+The approach tasks use that input for the reload following
+`toPos[1] = fromPos[1]`, so the C store is visible to the load.
+
+Some audited float outputs still use `VU0_STORE_VF_UNCLOBBERED`, including
+the second position outputs in facing/approach and the aiming/camera
+buffers. Declaring those outputs with either approved store macro changes
+register allocation, scheduling, or frame layout under the native flags.
+The unchanged stores remain raw-asm-contract backlog items, not proof of
+a complete C memory contract. This does not authorize alias casts or new
+unmodeled float accesses.
+
+Retail `effInitializeParticleDirection` reads a VU register image as
+floats: `asm/dds2/matchings/game/code_002DE248/effInitializeParticleDirection.s`
+has `sqc2 $vf10,0x0($29)` at `0x002FA44C`, followed by
+`lwc1 $f2,0x0($29)` at `0x002FA450`. That proves the float interpretation,
+not which compiler memory operands the original used.
+`PCP_COPY_VECTOR_F32` has its separate bounded float-memory contract
+(`include/pcp_vu0.h:21-31`).
 
 The same principle favors a real `MenuEffectPair[5][2]` saved-panel array
 when its rows are the actual two-record snapshots. Their row extent
@@ -15757,7 +15772,6 @@ directly when their existing parameter is `const void *`.
 None of this permits one function to alternate between a flat word
 array and a record view of its own known local payload. Those cases need
 one canonical representation and field accesses, not a new alias.
-
 
 The motion-key wrappers use the existing `SdfMotionKeyInterval` for their
 sample output and pass `sample.firstKey` to the scalar-copy consumer.

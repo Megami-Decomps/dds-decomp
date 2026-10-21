@@ -3243,7 +3243,7 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target) {
     s128 hit;
     if (unit->status.flags & 0x80000) {
         btlUnitGetBodyPosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, from);
+        VU0_STORE_VF(vf10, from);
         btlUnitGetBodyPosVU(target);
         VU0_STORE_VF_UNCLOBBERED(vf10, to);
         if (btlAimHorizontalDirectionVU(from, to) != 0) {
@@ -3261,7 +3261,7 @@ void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale) {
     s128 hit;
     if (unit->status.flags & 0x80000) {
         btlUnitGetBodyPosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, from);
+        VU0_STORE_VF(vf10, from);
         btlUnitGetBodyPosVU(target);
         VU0_STORE_VF_UNCLOBBERED(vf10, to);
         btlAimHorizontalDirectionClampedVU(from, to, scale);
@@ -3697,12 +3697,12 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF_UNCLOBBERED(vf10, fromPos);
+    VU0_STORE_VF(vf10, fromPos);
     btlUnitGetMuzzlePosVU(target);
     VU0_STORE_VF_UNCLOBBERED(vf10, toPos);
     toPos[1] = fromPos[1];
     VU0_LOAD_VF(vf10, fromPos);
-    VU0_LOAD_VF(vf11, toPos);
+    VU0_LOAD_VF_PTR(vf11, toPos);
     VU0_MOVE_VF(vf12, vf10);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
@@ -4989,7 +4989,7 @@ u32 btlRotateUnitTowardOtherBody(BtlFaceBodyTaskArgs *taskArgs) {
     f32 from[4] __attribute__((aligned(16)));
     f32 to[4] __attribute__((aligned(16)));
     btlUnitGetBodyPosVU(taskArgs->actor);
-    VU0_STORE_VF_UNCLOBBERED(vf10, from);
+    VU0_STORE_VF(vf10, from);
     btlUnitGetBodyPosVU(taskArgs->target);
     VU0_STORE_VF_UNCLOBBERED(vf10, to);
     if (btlAimHorizontalDirectionVU(from, to) != 0) {

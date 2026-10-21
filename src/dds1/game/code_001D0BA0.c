@@ -3609,12 +3609,12 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
-    VU0_STORE_VF_UNCLOBBERED(vf10, fromPos);
+    VU0_STORE_VF(vf10, fromPos);
     btlUnitGetMuzzlePosVU(target);
     VU0_STORE_VF_UNCLOBBERED(vf10, toPos);
     toPos[1] = fromPos[1];
     VU0_LOAD_VF(vf10, fromPos);
-    VU0_LOAD_VF(vf11, toPos);
+    VU0_LOAD_VF_PTR(vf11, toPos);
     VU0_MOVE_VF(vf12, vf10);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();

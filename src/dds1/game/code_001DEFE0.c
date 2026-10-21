@@ -1749,7 +1749,8 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
 }
 
 void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
-    f32 vec[3][4] __attribute__((aligned(16)));
+    f32 vec[2][4] __attribute__((aligned(16)));
+    s128 rot;
     BtlUnit *unit = command->task->unit;
     u32 mask = 0;
     u32 i;
@@ -1765,8 +1766,8 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
         btlUnitGetBodyPosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
         if (btlAimHorizontalDirectionVU(vec[1], vec[0]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, vec[2]);
-            btlSetUnitRotation(unit, vec[2]);
+            VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
+            btlSetUnitRotation(unit, &rot);
         }
     }
 }
@@ -11172,7 +11173,8 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
     BtlUnit *front = 0;
     BtlUnit *back = 0;
     BtlUnit *target;
-    f32 vec[3][4] __attribute__((aligned(16)));
+    f32 vec[2][4] __attribute__((aligned(16)));
+    s128 rot;
     s32 count;
 
     if (link->unit->status.flags & 0x1000) {
@@ -11204,8 +11206,8 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
         btlMeasureMaskedUnitBounds(target->status.flags & 0x600, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
         if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, vec[2]);
-            btlSetUnitRotation(front, vec[2]);
+            VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
+            btlSetUnitRotation(front, &rot);
         }
     }
     btlUnitFaceTarget(back, front);
