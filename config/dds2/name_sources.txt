@@ -9918,3 +9918,6 @@
 0x00369F78	sceLseek	inferred	FILEIO sceLseek: between sceClose and sceRead, sends the descriptor, offset and whence to the IOP's FILEIO server. DDS1 twin 0x0030ECF8.
 0x0036A1B0	sceRead	inferred	FILEIO sceRead: between sceLseek and sceWrite, reads through the FILEIO server into the caller's buffer. DDS1 twin 0x0030EF30.
 0x003698D8	sceFsInit	inferred	FILEIO sceFsInit: precedes sceFsReset and sceOpen, binds the FILEIO RPC. DDS1 twin 0x0030E620.
+0x0034EC40	sceMcInit	inferred	libmc sceMcInit: identical to DDS1's 0x002F5E30 with relocations masked; binds the memory card RPC.
+0x0034F7B8	sceMcGetInfo	inferred	libmc sceMcGetInfo: after sceMcSync, before sceMcGetDir, in the same order as DDS1's 0x002F6990.
+0x0034FCE0	sceMcFormat	inferred	libmc sceMcFormat: after sceMcChdir, before sceMcDelete, in the same order as DDS1's 0x002F6E90.

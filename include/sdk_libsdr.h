@@ -16,7 +16,7 @@ s32 sceSdRemote(s32 command, ...);
 
 #ifdef VERSION_DDS2
 #ifndef SDK_SKIP_sdfInitializeMemoryCardRpcClient
-void sdfInitializeMemoryCardRpcClient(void);
+void sceMcInit(void);
 #endif
 #endif
 
