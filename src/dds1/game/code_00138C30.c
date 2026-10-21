@@ -1014,7 +1014,7 @@ extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 
 extern char D_00330780[];
 
-void func_0013BF48(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
+void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     s32 index = D_003BAE34;
     FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
@@ -1064,8 +1064,8 @@ extern char D_00330790[];
 
 extern char D_003307A0[];
 
-void func_0013C2B8(s32 kind, s32 roomValue,
-                   f32 x, f32 y, f32 z, f32 radius) {
+void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
+                                f32 x, f32 y, f32 z, f32 radius) {
     s32 index = D_003BAE34;
     FldActionTransform *transform;
     s32 worldKey = dds3AdvanceWorldCounter();
