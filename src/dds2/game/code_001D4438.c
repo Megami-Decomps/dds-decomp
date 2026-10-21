@@ -235,7 +235,7 @@ extern void btlSetActorPanelYForMode(s32);
 
 extern void itfMesClearFlags();
 extern void brsTaskAllowUpdate();
-extern void btlClearPartyRecordStatusBits();
+extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
@@ -2985,7 +2985,7 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
         }
     }
     if (actor->status.flags & 0x200) {
-        btlClearPartyRecordStatusBits(&actor->partyRecord.flags, 8);
+        btlClearPartyRecordStatusBits(&actor->partyRecord, 8);
         btlSyncPlayerWork(actor);
     }
     if (!(actor->status.stateFlags & 0x40000)) {
@@ -3025,7 +3025,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     }
     if (btlPollActorResourceCleanup(task->unit) != 0) {
         if (unit->status.flags & 0x200) {
-            btlClearPartyRecordStatusBits(&unit->partyRecord.flags, 8);
+            btlClearPartyRecordStatusBits(&unit->partyRecord, 8);
             btlMoveActorOutOfActiveParty(unit);
         }
         fldUpdateSceneGroupTask(task);
