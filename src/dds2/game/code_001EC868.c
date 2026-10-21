@@ -8594,7 +8594,7 @@ s32 sndHasActiveActor(void) {
 
 /* Allocate a cleared resource node and prepend it to the runtime's resource list. */
 SoundResourceNode *sndAllocResourceNode(void) {
-    SoundResourceNode *node = sdfAllocAndClearQuadwords(0x20);
+    SoundResourceNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     BtlState *work;
     node->referenceCount = 0;
     node->activeCount = 0;

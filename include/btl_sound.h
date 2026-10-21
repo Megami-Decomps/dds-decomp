@@ -147,6 +147,25 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
+typedef char SoundResourceNode_size_must_be_0x20[
+    (sizeof(SoundResourceNode) == 0x20) ? 1 : -1];
+typedef char SoundResourceNode_flags_offset_must_be_0[
+    ((u32)&((SoundResourceNode *)0)->flags == 0) ? 1 : -1];
+typedef char SoundResourceNode_referenceCount_offset_must_be_4[
+    ((u32)&((SoundResourceNode *)0)->referenceCount == 4) ? 1 : -1];
+typedef char SoundResourceNode_activeCount_offset_must_be_8[
+    ((u32)&((SoundResourceNode *)0)->activeCount == 8) ? 1 : -1];
+typedef char SoundResourceNode_fadeCountdown_offset_must_be_0x0C[
+    ((u32)&((SoundResourceNode *)0)->fadeCountdown == 0x0C) ? 1 : -1];
+typedef char SoundResourceNode_resourceHandle_offset_must_be_0x10[
+    ((u32)&((SoundResourceNode *)0)->resourceHandle == 0x10) ? 1 : -1];
+typedef char SoundResourceNode_sourceHandle_offset_must_be_0x14[
+    ((u32)&((SoundResourceNode *)0)->sourceHandle == 0x14) ? 1 : -1];
+typedef char SoundResourceNode_previous_offset_must_be_0x18[
+    ((u32)&((SoundResourceNode *)0)->previous == 0x18) ? 1 : -1];
+typedef char SoundResourceNode_next_offset_must_be_0x1C[
+    ((u32)&((SoundResourceNode *)0)->next == 0x1C) ? 1 : -1];
+
 /* Per-unit command-effect link, allocated at exactly 0x10 bytes. */
 typedef struct SoundLink {
     struct BtlUnit *owner; /* 0x00 */
