@@ -271,32 +271,6 @@ typedef struct BtlStateHandler {
 
 extern BtlStateHandler D_003B69D8[];
 
-typedef struct BtlFx {
-    u8 pad0[0x50];
-    f32 f50;
-    u8 pad54[4];
-    f32 f58;
-    u8 pad5C[0x24];
-    f32 f80;
-    u8 pad84[4];
-    f32 f88;
-    u8 pad8C[4];
-    union {
-        s128 vec90;
-        struct {
-            f32 f90;
-            f32 f94;
-            f32 f98;
-            f32 f9C;
-        };
-    };
-    s128 vecA0;
-    f32 fB0;
-    f32 fB4;
-    f32 fB8;
-    f32 fBC;
-    f32 fC0;
-} BtlFx;
 
 typedef struct BtlFxSrcB {
     s128 vec0;
@@ -570,7 +544,7 @@ extern s32 sndGetEffectNodeParameter(SoundResourceNode *, u16);
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
-extern void btlInitUnitFxDefaults(BtlFx *);
+extern void btlInitUnitFxDefaults(BtlUnit *);
 
 extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
@@ -3871,7 +3845,7 @@ void btlCommandTaskReleaseActor(ActionStateLink *task) {
                 fx->baseColor = 0x80808080;
                 fx->overlayColor = 0x80808080;
                 fx->status.flags = fx->status.flags & 0x700;
-                btlInitUnitFxDefaults((BtlFx *)fx);
+                btlInitUnitFxDefaults(fx);
             }
             {
                 BtlUnit *model = task->unit;
