@@ -407,7 +407,7 @@ extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity,
 
 extern u8 *datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
-extern s32 D_003BAAB8;
+extern s32 btlConditionalEncounterCachedInterval;
 extern DatPartyRecord *D_003BAA04;
 
 extern PtyRosterValueRecord ptyRosterMenuValues[];
@@ -1924,19 +1924,19 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
     if (total == 0) {
         return 0;
     }
-    if (D_003BAAB8 > 0) {
-        return D_003BAAB8;
+    if (btlConditionalEncounterCachedInterval > 0) {
+        return btlConditionalEncounterCachedInterval;
     }
     interval = datBattleAdjustmentRecords[encounterIndex].groups[variant].interval;
     if (interval <= 0) {
         return 0;
     }
-    D_003BAAB8 = sdfGetRandInt(0, interval * 2 - 32) + 16;
-    return D_003BAAB8;
+    btlConditionalEncounterCachedInterval = sdfGetRandInt(0, interval * 2 - 32) + 16;
+    return btlConditionalEncounterCachedInterval;
 }
 
-extern s32 D_003BAABC;
-extern s32 D_003BAAC0;
+extern s32 btlSelectedConditionalEncounterIndex;
+extern s32 btlSelectedConditionalEncounterResult;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
@@ -1993,9 +1993,9 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
                 scene = datBattleAdjustmentRecords[encounterIndex].groups[group].entries[i].sceneIndex;
                 if ((datGameState->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
                     packed = (group << 24) | (i << 16) | scene;
-                    D_003BAABC = encounterIndex;
-                    D_003BAAB8 = 0;
-                    D_003BAAC0 = packed;
+                    btlSelectedConditionalEncounterIndex = encounterIndex;
+                    btlConditionalEncounterCachedInterval = 0;
+                    btlSelectedConditionalEncounterResult = packed;
                     return packed;
                 }
                 dds3WorkClear();
@@ -2010,7 +2010,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
 void dds3WorkClear(void) {
     datGameState->conditionalEncounterStepRemainder = 0;
     datGameState->conditionalEncounterGauge = 0;
-    D_003BAAB8 = 0;
+    btlConditionalEncounterCachedInterval = 0;
 }
 
 void func_0011CE30(void) {
@@ -2120,9 +2120,11 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAAC);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", evtWorkScriptTask);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAB8);
+INCLUDE_SDATA(const s32, "newdata/datCalc", btlConditionalEncounterCachedInterval);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAABC);
+INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterIndex);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAC0);
+INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterResult);
+
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAC4);
 
