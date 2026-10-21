@@ -9914,3 +9914,4 @@
 0x0035A880	free	inferred	newlib free: follows malloc in mallocr, passes its pointer to _free_r with the reentrancy state. DDS1 twin 0x002FF590.
 0x00359B18	fread	inferred	newlib fread: copies buffered bytes with memcpy and refills through __srefill. DDS1 twin 0x00307308.
 0x0035A648	fwrite	inferred	newlib fwrite: builds one iovec of size times count and writes it through the stream's vector write.
+0x0034E820	sceSdRemote	inferred	libsdr sceSdRemote: the variadic EE-side remote call of libsd commands over the sdr RPC, after sceSdTransToIOP. DDS1 twin 0x002F5990.

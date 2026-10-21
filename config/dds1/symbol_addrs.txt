@@ -7648,7 +7648,6 @@ btlSetEligibleActorPanelTransitionState = 0x001ACC20; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00121DE0; // type:func
 sdfFileCdImageCmdThread = 0x002E6538; // type:func
 btlSelectSerialEncounter = 0x001A9780; // type:func
-sndDispatchIopAudioCommand = 0x002F5990; // type:func
 sceSifGetSreg = 0x0030C970; // type:func
 effDrawBillboardInstance = 0x001528C0; // type:func
 effInitRadialEmitterPacket = 0x00157280; // type:func
@@ -7656,6 +7655,7 @@ free = 0x002FF590; // type:func
 printf = 0x003003F0; // type:func
 vsprintf = 0x00305B08; // type:func
 fread = 0x00307308; // type:func
+sceSdRemote = 0x002F5990; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8

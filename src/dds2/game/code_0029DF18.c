@@ -1330,13 +1330,13 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
     volatile s32 core;
 
     for (core = 0; core < 2; core++) {
-        sndDispatchIopAudioCommand(1, 0x8010, core | 0x980, 0x3FFF);
-        sndDispatchIopAudioCommand(1, 0x8010, core | 0xA80, 0x3FFF);
-        sndDispatchIopAudioCommand(1, 0x8010, core | 0x800, sndDispatchIopAudioCommand(1, 0x8020, core | 0x800) & ~0x30);
+        sceSdRemote(1, 0x8010, core | 0x980, 0x3FFF);
+        sceSdRemote(1, 0x8010, core | 0xA80, 0x3FFF);
+        sceSdRemote(1, 0x8010, core | 0x800, sceSdRemote(1, 0x8020, core | 0x800) & ~0x30);
     }
-    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, sndStreamTransferIopHeapAddress, transferSize << 3);
-    sndDispatchIopAudioCommand(1, 0x8010, 0xF80, 0x7FFF);
-    sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
+    sceSdRemote(1, 0x80E0, 0, 0x10, sndStreamTransferIopHeapAddress, transferSize << 3);
+    sceSdRemote(1, 0x8010, 0xF80, 0x7FFF);
+    sceSdRemote(1, 0x8010, 0x1080, 0x7FFF);
 }
 
 
@@ -1349,7 +1349,7 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
 extern u64 D_00438FD0;
 
 s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {
-    u64 status = sndDispatchIopAudioCommand(1, 0x8100, 0);
+    u64 status = sceSdRemote(1, 0x8100, 0);
 
     if ((D_00438FD0 & 0x1000000) == (status & 0x1000000)) {
         return 0;
