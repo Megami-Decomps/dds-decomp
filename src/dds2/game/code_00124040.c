@@ -16,6 +16,7 @@
 #include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
+#include "dds3_slot1_handler_api.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "mdl.h"
@@ -370,8 +371,6 @@ extern void fldReleaseMenuSlotsAfterWait(void);
 void fldSetSceneControlFlags(u32 mask);
 
 s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
-
-extern u8 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 extern void fldUpdateCameraTarget(void);
 
@@ -1361,7 +1360,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldSetSceneControlFlags(0x40);
-        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
+        dds3SetSlot1HandlerCallback((EffWorldNode *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldAreaState.cameraTargetGraceTicks = 4;
     if (fldAreaState.sceneMode < 4) {
@@ -1382,7 +1381,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
         fldClearSceneControlFlags(0x40);
-        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, 0);
+        dds3SetSlot1HandlerCallback((EffWorldNode *)fldPlayerObject, 0);
     }
     D_00389858[0] = 4;
 }
