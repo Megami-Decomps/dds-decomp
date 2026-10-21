@@ -156,7 +156,7 @@ extern u8 sdfDevModuleLoaded;
 
 extern u8 D_00438B68;
 
-extern s32 func_0036D880(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
+extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
 #include "sdf_debug_api.h"
 
@@ -1911,15 +1911,15 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     if (D_00438B68 == 0) {
         return;
     }
-    result = func_0036D880("cdrom0:\\IRX\\ATAD.IRX;1", 0, NULL, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\ATAD.IRX;1", 0, NULL, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
-    result = func_0036D880("cdrom0:\\IRX\\HDD.IRX;1", 0xC, sdfDevHddModuleArguments, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, sdfDevHddModuleArguments, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
-    result = func_0036D880("cdrom0:\\IRX\\PFS.IRX;1", 0x12, sdfDevPfsModuleArguments, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, sdfDevPfsModuleArguments, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
@@ -1937,7 +1937,7 @@ void sdfLoadDevModule(void) {
     s32 resident;
     if (sdfDevModuleLoaded == 0) {
         D_00438B68 = 0;
-        if (func_0036D880("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
+        if (sceSifLoadStartModule("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
             sdfDebugPrintf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
             return;
         }
