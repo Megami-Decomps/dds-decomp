@@ -118,7 +118,7 @@ s32 fldCmdMarkBitmapRegion(void) {
     return 1;
 }
 
-s32 func_0014F780(void) {
+s32 fldCmdSetStateFlag(void) {
     D_0032E4E4[0] = 1;
     return 1;
 }

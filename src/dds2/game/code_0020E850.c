@@ -1,7 +1,9 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
 #include "dds3obj.h"
@@ -10,6 +12,7 @@
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl.h"
+#include "btl_analysis_panel_wait_args.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -83,11 +86,6 @@ extern void btlSelectTargetsByMode(s32, s32);
 extern s8 D_0037F510[];
 
 extern u32 btlRequestAnalysisPanelClose(void);
-
-typedef struct BtlWaitTask {
-    s32 value;
-    u32 ticks;
-} BtlWaitTask;
 
 extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 
@@ -273,7 +271,6 @@ s32 btlAiCheckStatusRollEligibility(ActionStateLink *task) {
     return (u32)btlRollAiBucket() < 0x46;
 }
 
-extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
@@ -290,7 +287,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     s32 x;
     s32 y;
 
-    if (btlSetActorEffectParameter((u8 *)unit, 2) != 0) {
+    if (btlSetActorEffectParameter(unit, 2) != 0) {
         if (unit->status.stateFlags & 0x80) {
             return;
         }
@@ -309,7 +306,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
-        if (btlSetActorEffectParameter((u8 *)unit, 1) != 0) {
+        if (btlSetActorEffectParameter(unit, 1) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
             visible = btlProjectForwardPositionToPackedScreen(screen);
             x = screen[0] >> 4;
@@ -435,8 +432,6 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
         } while (digitCount != 0);
     }
 }
-
-extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 /* Select the owner's effect variant for its current condition and task action. */
 s32 btlGetStatusActionEffectId(ActionStateLink *task) {
@@ -1166,12 +1161,12 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
 s32 btlWaitEffectTask(void *arguments) {
-    BtlWaitTask *task = arguments;
-    if (task->ticks == 0) {
+    BtlAnalysisPanelWaitArgs *task = arguments;
+    if (task->elapsedTicks == 0) {
         btlCreateAnalysisPanelTask(task->value, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
-    if (task->ticks >= 0x11) {
+    if (task->elapsedTicks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
@@ -1180,7 +1175,7 @@ s32 btlWaitEffectTask(void *arguments) {
             }
         }
     } else {
-        task->ticks += 1;
+        task->elapsedTicks += 1;
     }
     return 0;
 }

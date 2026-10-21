@@ -8,6 +8,7 @@
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
+#include "btl_raise_party_record_status_value.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"

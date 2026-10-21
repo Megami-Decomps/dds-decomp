@@ -2687,7 +2687,8 @@
 0x0019B320	itfPanelGetPairSecond	inferred	reads second s16 of pair at record +0x52
 0x0019B340	itfMesScriptSetPanelValue	inferred	selects window and passes script argument to func_0019C060
 0x0019B390	itfMesScriptSetWindowValue	inferred	selects window and passes script argument to func_0019C080
-0x0019B3E0	itfMesScriptActivatePanel	inferred	sets the 0x200000 flag and signals func_0014DAF0
+0x0019B3E0	itfMesScriptActivatePanel	inferred	sets the 0x200000 flag and calls fldNoopWithMode; that hook has an empty body in both titles.
+0x0014DAF0	fldNoopWithMode	inferred	confidence=high; empty body in DDS1 and paired DDS2 0x00154F18, with no observable effect; callers pass mode values 0–3 from field-transition and message-window flows. Name describes only the confirmed no-op behavior, not the caller's intended phase semantics.
 0x0019B428	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x0019B4A0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
 0x0019B530	itfMesNoOpCommand4	inferred	Script dispatch table slot 4: performs no state change and returns 1, so the wait dispatcher continues without yielding.
@@ -5390,6 +5391,7 @@
 0x00288B88	fileGetResourceHandle	inferred	Returns the file work's resource handle, released by callers through func_002D0918.
 0x00288B90	fileGetLoadedDataAddress	inferred	confidence=high; src/dds1/file/fileManager.c:func_00288B90; Returns the file-work data address consumed by ready-file parsers, including the viewer configuration loader. [names_qp9.tsv]
 0x00288B98	fileGetResourceSize	inferred	Returns the file work's loaded resource size used by sound buffer transfer.
+0x00288BA0	fileGetRemainingTransferBytes	inferred	Returns FileRequest.transferBytes, initialized from sourceByteCount and decremented as chunks are consumed by fileManager's transfer handlers; paired with DDS2 0x002C8120.
 0x00288BA8	fileIsRequestReadyInCurrentMode	inferred	Returns whether request reached ready state; one mode additionally requires a nonzero field. [names_reviewed6.tsv]
 0x00288C08	fileWaitReady	inferred	spins until func_00288BA8 reports ready, pumping system tasks each pass
 0x00288C50	fileWaitForRequestReady	inferred	src/dds1/file/fileManager.c; forwards FileRequest unchanged to fileWaitReady, which pumps updates until request readiness; paired 002C81D0.
@@ -9834,3 +9836,6 @@
 0x002AE498	effDrawRibbon	inferred	Builds and submits the ribbon work strip geometry and texture packets, returning when it has no segments or its color is transparent.
 0x001528C0	effDrawBillboardInstance	inferred	Builds and appends the billboard instance's transformed textured child-quad draw packets; twin 0x0015A4B0.
 0x00157280	effInitRadialEmitterPacket	inferred	Seeds packet position, radial velocity, delay, scale and spin before subeffect initialization; twin 0x0015EE70.
+0x00222ED8	evtUpdateUnitMotion	inferred	Advances the event unit motion state and per-slot animations, applies movement/wobble updates, refreshes endpoint work, and returns whether the unit moved; called each frame by effUpdateFollowModelTransform. Paired with DDS2 0x0023DA70.
+0x0014F780	fldCmdSetStateFlag	inferred	confidence=medium; field-script dispatch-table callback stores 1 to its singleton state word and returns success; the state word has no other reconstructed users. Paired DDS2 0x00157258 has the same body and corresponding dispatch-table slot. Name records the proven operation without guessing the flag's meaning.
+0x00172C60	effScatterNoop	inferred	confidence=high; empty function body in the effect-scatter source unit, paired DDS2 0x0017A8B8 with the same empty body. Name describes only the observable no-op behavior; callers and intended hook role are not established.

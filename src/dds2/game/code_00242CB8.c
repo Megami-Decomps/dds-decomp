@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -25,7 +26,6 @@ extern f32 evtSolarOverlayAlpha;
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 scrGetCommandTimer(void);
 
 
 
@@ -311,7 +311,7 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
         kwlnDrawControlFlags |= 0x2000000;
         return 1;
     }
-    if (scrGetCommandTimer() < scrReadIntParameter(0)) {
+    if ((s32)scrGetCommandTimer() < scrReadIntParameter(0)) {
         kwlnDrawControlFlags |= 0x2000000;
         return 0;
     }

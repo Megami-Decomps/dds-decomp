@@ -4,6 +4,7 @@
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
+#include "btl_raise_party_record_status_value.h"
 #include "kwln_task_add_child.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"

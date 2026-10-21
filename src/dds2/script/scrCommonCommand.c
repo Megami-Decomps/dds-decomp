@@ -7,6 +7,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "kwln_task_lifecycle.h"
@@ -50,7 +51,6 @@ extern char D_004126B0[];
 
 
 extern s32 scrReadIntParameter(s32 parameterIndex);
-extern u32 scrGetCommandTimer(void);
 
 s32 scrCommandStoreRandomCondition(void)
 {

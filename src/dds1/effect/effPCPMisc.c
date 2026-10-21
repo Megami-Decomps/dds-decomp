@@ -43,6 +43,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_rotate_block_inputs.h"
 #include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
 #include "eff_pcp_rotate_work.h"
@@ -52,6 +53,7 @@
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
+#include "eff_pcp_compact_work.h"
 #include "eff_pcp_twin.h"
 #include "eff_pcp_spin.h"
 #include "eff_pcp_span.h"
@@ -91,32 +93,6 @@ typedef struct {
 } EffPCPCompactScaleParams;
 
 /* Scatter and scale callbacks share this work; their factory selects the resource view. */
-typedef struct {
-    f32 position[4];
-    u8 flags;
-    u8 pad11[3];
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    u32 color;
-    u32 baseColor;
-    s32 startExtent;
-    s32 endExtent;
-    s32 frame;
-    union {
-        EffBlurScatterWork *scatter;
-        EffBlurScaleWork *scale;
-    } resource;
-} EffPCPCompactWork;
-
-
-
-
-
-
-
-
-
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
@@ -2908,34 +2884,24 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(const EffPCPBlockSetParams *params,
 }
 
 
-typedef struct {
-    void *block1;
-    void *group[5];
-    void *block7;
-    void *block8;
-    void *block9;
-    void *tail[5];
-    void *block15;
-} EffPCPBlockSet;
-
 EffPCPBlockSetWork *effPcpBuildBlockSet(void *parameterTable) {
-    EffPCPBlockSet set;
+    EffPCPBlockSetInputs set;
     EffPCPBlockSetParams *first;
     u32 i;
 
     first = effParamTableGetBlock(parameterTable, 0);
-    set.block1 = effParamTableGetBlock(parameterTable, 1);
+    set.named.block1 = effParamTableGetBlock(parameterTable, 1);
     for (i = 0; i < 5; i++) {
-        set.group[i] = effParamTableGetBlock(parameterTable, 2 + i);
+        set.named.group[i] = effParamTableGetBlock(parameterTable, 2 + i);
     }
-    set.block7 = effParamTableGetBlock(parameterTable, 7);
-    set.block8 = effParamTableGetBlock(parameterTable, 8);
-    set.block9 = effParamTableGetBlock(parameterTable, 9);
+    set.named.block7 = effParamTableGetBlock(parameterTable, 7);
+    set.named.block8 = effParamTableGetBlock(parameterTable, 8);
+    set.named.block9 = effParamTableGetBlock(parameterTable, 9);
     for (i = 0; i < 5; i++) {
-        set.tail[i] = effParamTableGetBlock(parameterTable, 10 + i);
+        set.named.tail[i] = effParamTableGetBlock(parameterTable, 10 + i);
     }
-    set.block15 = effParamTableGetBlock(parameterTable, 15);
-    return effPcpCreateBlockSetWork(first, &set);
+    set.named.block15 = effParamTableGetBlock(parameterTable, 15);
+    return effPcpCreateBlockSetWork(first, set.blocks);
 }
 
 /* Duplicate the block-set handles and allocate its three optional instance lists. */
@@ -3246,7 +3212,7 @@ EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *src) {
 }
 
 
-EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
+EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, EffPCPRotateBlockInputs *blocks) {
     EffPCPRotateWork *work;
     EffPCPBlockSetParams *sub;
     u32 i;
@@ -3256,28 +3222,19 @@ EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     sub = src->group;
     work->frame = 0;
     for (i = 0; i < 3; i++) {
-        blocks[3] = blocks[i];
-        work->blockSets[i] = effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
+        blocks->selectedHead = blocks->head[i];
+        work->blockSets[i] = effPcpCreateBlockSetWork(sub, &blocks->selectedHead);
         sub++;
     }
     return work;
 }
-
-typedef struct EffPCPBlockSetInputs {
-    void *head[3];
-    void *selectedHead; /* Replaced by the current head before each child build. */
-    void *group[5];
-    void *mid[3];
-    void *tail[5];
-    void *last;
-} EffPCPBlockSetInputs;
 
 /* Gathers 17 parameter blocks from the effect table (the first goes to the
  * rotate effect as its source, the rest into an on-stack block set). */
 void effPcpRotateCreateFromTable(args)
     void *args;
 {
-    EffPCPBlockSetInputs set;
+    EffPCPRotateBlockInputs set;
     void **group;
     void *first;
     s32 idx;
@@ -4437,7 +4394,7 @@ void effPcpCopyLinkedBeamMatrix(EffPCPBeamLargeWork *work, void *src) {
     VU0_STORE_MATRIX(work->node->localMatrix);
 }
 
-EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResources) {
+EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, void **sourceResources) {
     u32 entryCount = header->count;
     struct SdfMemBlock *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
     EffPCPGroupSet *groupSet = (void *)sdfMemLock(workResource);
@@ -4455,7 +4412,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
     groupSet->duplicates = 0;
     if (sourceResources != NULL) {
         u32 allocationBytes = entryCount * 16;
-        u32 *sourceResourceCursor = sourceResources;
+        void **sourceResourceCursor = sourceResources;
         u32 groupByteOffset;
         u32 groupByteWidth;
         u8 *activeGroupFlags;
@@ -4474,9 +4431,9 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
                 EffParamWork *firstCreatedHandle;
 
                 if (index < 2) {
-                    *destinationHandles = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, (void *)*sourceResourceCursor);
+                    *destinationHandles = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, *sourceResourceCursor);
                 } else {
-                    *destinationHandles = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, (void *)*sourceResourceCursor);
+                    *destinationHandles = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, *sourceResourceCursor);
                 }
                 firstCreatedHandle = *destinationHandles;
                 for (duplicateIndex = 1; duplicateIndex < entryCount; duplicateIndex++) {

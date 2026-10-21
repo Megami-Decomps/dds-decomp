@@ -12,6 +12,7 @@
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "btl.h"
+#include "scr_integer_return_value_api.h"
 /* Declared before first use (were implicit int). */
 extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
@@ -462,7 +463,6 @@ extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry);
 
 
-extern void scrSetIntegerReturnValue();
 
 
 extern s32 scrReadIntParameter(s32 idx);

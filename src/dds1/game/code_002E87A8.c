@@ -10,22 +10,6 @@
 #include "sdf_alarm.h"
 #include "mnu_sound_resource_path_api.h"
 #include "snd_midi_state_views.h"
-typedef struct SndMergedWork {
-    s32 header;
-    s32 bufferCount;
-    u32 iopBufferAddress;
-    u32 iopBufferBytes;
-    SndChannel channels[SND_WORK_CHANNEL_COUNT];
-    SndIopBuffer buffers[SND_WORK_IOP_BUFFER_COUNT];
-    SndTrackSlot slots[SND_WORK_TRACK_SLOT_COUNT];
-    void *eeWorkAddress;
-    u32 eeWorkByteCount;
-    u32 opaque200;
-    u32 opaque204;
-    u32 opaque208;
-    u32 opaque20C;
-} SndMergedWork;
-
 #define SND_COMMAND_RING_ENTRY_COUNT 32
 #define SND_COMMAND_RING_INDEX_MASK (SND_COMMAND_RING_ENTRY_COUNT - 1)
 #define SND_COMMAND_HEADER_BYTES 0x14
@@ -43,7 +27,7 @@ typedef struct SndMergedWork {
 void sndEnsureMidiBankResident(s32 trackId);
 
 /* Sound command work block: header, 16 channels/buffers, 13 track slots (see code_002E9140). */
-extern SndMergedWork sndMidiTrackState;
+extern SndWork sndMidiTrackState;
 extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 sndSynchronousCommandMode;
 extern s32 D_003BDA8C;
@@ -412,7 +396,7 @@ void sndUpdateScaledListenerState(f32 firstPointX, f32 firstPointY, f32 firstPoi
 /* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
    current track, else 0. */
 s32 sndFindPackedTrackLoadStatus(s32 packed) {
-    SndMergedWork *work = &sndMidiTrackState;
+    SndWork *work = &sndMidiTrackState;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
     s32 slotIndex;

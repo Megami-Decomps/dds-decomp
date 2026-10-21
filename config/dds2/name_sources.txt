@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x00154F18	fldNoopWithMode	inferred	confidence=high; empty body in DDS2 and paired DDS1 0x0014DAF0, with no observable effect; callers pass mode values 0–3 from field-transition and message-window flows. Name describes only the confirmed no-op behavior, not the caller's intended phase semantics.
 0x001B3B10	btlAverageActorAttribute	inferred	Native wrapper averages a requested actor attribute for a party-record flags mask by tail-jumping btlSumOrAverageActorAttribute with skip-down zero; not a division runtime helper.
 0x0024C650	evtViewerStoreMenuValueInPendingKey	inferred	Stores the edited menu value into the selected pending timeline key field; counterpart of DDS1 00231950.
 0x001206D0	fldConfigureCameraMoveTracking	inferred	DDS2 twin of DDS1 0x0011E810: resolves two table selectors into tracking endpoints and configures the camera move mode for a valid ordered range.
@@ -5153,6 +5154,7 @@
 0x002C80E8	fileQueueAlternateCallbackRequest	inferred	confidence=high; matched-C; src/dds2/file/fileManager.c:215:func_002C80E8; Queues a callback request with alternate mode one and no explicit dispatch/callback addresses.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002C8108	fileGetResourceHandle	inferred	Byte-identical DDS1 counterpart: Returns the file work's resource handle, released by callers through the file resource release routine.
 0x002C8118	fileGetResourceSize	inferred	Byte-identical DDS1 counterpart: Returns the file work's loaded resource size used by sound buffer transfer.
+0x002C8120	fileGetRemainingTransferBytes	inferred	Returns FileRequest.transferBytes, initialized from sourceByteCount and decremented as chunks are consumed by fileManager's transfer handlers; paired with DDS1 0x00288BA0.
 0x002C8128	fileIsRequestReadyInCurrentMode	inferred	Returns whether request reached ready state; one mode additionally requires a nonzero field. [names_reviewed6.tsv]
 0x002C8168	fileRequestIsReady	inferred	Returns true only when the file request has a nonzero marker at offset 0x68 and its status byte is 6; field area-loading callers use it as their readiness test.
 0x002C81D0	fileWaitForRequestReady	inferred	src/dds2/file/fileManager.c; forwards FileRequest unchanged to fileWaitReady, which pumps updates until request readiness; paired 00288C50.
@@ -9872,3 +9874,6 @@
 0x002F1888	effDrawRibbon	inferred	Paired DDS1 0x002AE498; builds and submits the ribbon work strip geometry and texture packets, returning when it has no segments or its color is transparent.
 0x0015A4B0	effDrawBillboardInstance	inferred	Builds and appends the billboard instance's transformed textured child-quad draw packets; twin 0x001528C0.
 0x0015EE70	effInitRadialEmitterPacket	inferred	Seeds packet position, radial velocity, delay, scale and spin before subeffect initialization; twin 0x00157280.
+0x0023DA70	evtUpdateUnitMotion	inferred	Advances the event unit motion state and per-slot animations, applies movement/wobble updates, refreshes endpoint work, and returns whether the unit moved; called each frame by effUpdateFollowModelTransform. Paired with DDS1 0x00222ED8.
+0x00157258	fldCmdSetStateFlag	inferred	confidence=medium; field-script dispatch-table callback stores 1 to its singleton state word and returns success; the state word has no other reconstructed users. Paired DDS1 0x0014F780 has the same body and corresponding dispatch-table slot. Name records the proven operation without guessing the flag's meaning.
+0x0017A8B8	effScatterNoop	inferred	confidence=high; empty function body in the effect-scatter source unit, paired DDS1 0x00172C60 with the same empty body. Name describes only the observable no-op behavior; callers and intended hook role are not established.

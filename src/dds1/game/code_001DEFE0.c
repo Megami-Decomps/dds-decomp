@@ -7,6 +7,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_rain_effect_api.h"
@@ -205,7 +206,6 @@ extern char D_003BB6B0[];
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
-extern s32 btlSetActorEffectParameter();
 
 
 extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
@@ -700,7 +700,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
 void btlAimEffectPoseAtUnit(BtlLinkedCommand *actor) {
     BtlUnit *object = actor->task->unit;
     if ((object->status.flags & 2) != 0) {
-        if (btlSetActorEffectParameter((u8 *)object, 1) == 0) {
+        if (btlSetActorEffectParameter(object, 1) == 0) {
             btlUnitGetMuzzlePosVU(object);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, actor->backCamera.position);

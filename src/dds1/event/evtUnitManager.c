@@ -1296,7 +1296,7 @@ extern s32 evtUnitStepScaledValue(EvtUnit *);
 extern s32 evtApplyUnitDirectionOffset(EvtUnit *);
 extern s32 evtUnitApplyPathVectors(EvtUnit *);
 extern void evtRefreshUnitEndpointWork(EvtUnit *);
-s32 func_00222ED8(ObjectTransform *unused, EffWorldNode *object) {
+s32 evtUpdateUnitMotion(ObjectTransform *unused, EffWorldNode *object) {
     f32 delta[4];
     s32 moving = 0;
     s32 wobble = 0;

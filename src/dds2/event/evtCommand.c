@@ -20,6 +20,7 @@
 #include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
+#include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
@@ -34,8 +35,6 @@ enum {
     EVT_WORLD_OBJECT_KIND_LIMIT = 10,
     EVT_CAMP_TASK_READY_VALUE = 2
 };
-
-extern s32 scrGetCommandTimer(void);
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
