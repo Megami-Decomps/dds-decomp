@@ -8732,7 +8732,7 @@ s32 btlUpdateCommandUiTransition(void) {
 
 extern BtlResBlock *btlResourceBlock;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
-extern void func_001CE418(EffectSlotSet *, s32, s32 *, s32 *, f32);
+extern void btlScaleEffectSlotGeometryAndGetCenterOffset(EffectSlotSet *, s32, s32 *, s32 *, f32);
 
 extern SceneSlotFadeWork *D_00438F54;
 extern ActorSlotOrder *D_00438F58[2];
@@ -10362,7 +10362,7 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
                 }
             }
             btlResourceBlock->resC->workEntries[panelRows[i * 3 + 2]].geometry.angleDegrees = work->panelAngleDegrees[i];
-            func_001CE418(btlResourceBlock->resC, panelRows[i * 3 + 2], &ax, &ay, work->panelScale[i]);
+            btlScaleEffectSlotGeometryAndGetCenterOffset(btlResourceBlock->resC, panelRows[i * 3 + 2], &ax, &ay, work->panelScale[i]);
             effDrawSpriteWithCornerColors((origin[0] + ax + panelRows[i * 3]) << 4,
                          (origin[1] + ay + panelRows[i * 3 + 1]) << 3, -1, colors, 0,
                          btlResourceBlock->resC, panelRows[i * 3 + 2], 0x53);
@@ -10373,7 +10373,7 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
             for (j = 0; j < 4; j++) {
                 colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, rowSlots[i * 3 + 2], j, work->rowFade[i]);
             }
-            func_001CE418(btlResourceBlock->resC, rowSlots[i * 3 + 2], &ax, &ay, work->rowScale[i]);
+            btlScaleEffectSlotGeometryAndGetCenterOffset(btlResourceBlock->resC, rowSlots[i * 3 + 2], &ax, &ay, work->rowScale[i]);
             effDrawSpriteWithCornerColors((origin[0] + work->rowPosition[i][0]) << 4,
                          (origin[1] + work->rowPosition[i][1]) << 3, -1, colors, 0,
                          btlResourceBlock->resC, rowSlots[i * 3 + 2], 0x53);
@@ -10387,7 +10387,7 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
                                                                  work->rowFade[i] - ((6 - n) << 4));
                         }
                         btlGetTargetRowAnimationOffset(&ax, &ay, i, work->rowStep[i] - n);
-                        func_001CE418(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
+                        btlScaleEffectSlotGeometryAndGetCenterOffset(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
                         effDrawSpriteWithCornerColors((origin[0] + ax + bx) << 4,
                                      (origin[1] + ay + by) << 3, -1, colors, 0,
                                      btlResourceBlock->resC, echoSlots[i], 0x53);
@@ -10401,7 +10401,7 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
                                                                  work->rowFade[i] - ((6 - n) << 4));
                         }
                         btlGetTargetRowAnimationOffset(&ax, &ay, i, 5 - n);
-                        func_001CE418(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
+                        btlScaleEffectSlotGeometryAndGetCenterOffset(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
                         effDrawSpriteWithCornerColors((origin[0] + ax) << 4,
                                      (origin[1] + ay) << 3, -1, colors, 0,
                                      btlResourceBlock->resC, echoSlots[i], 0x53);
@@ -10413,7 +10413,7 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
                         colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, echoSlots[i], j, work->rowFade[i] + 0x40);
                     }
                     btlGetTargetRowAnimationOffset(&ax, &ay, i, 5);
-                    func_001CE418(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
+                    btlScaleEffectSlotGeometryAndGetCenterOffset(btlResourceBlock->resC, echoSlots[i], &bx, &by, work->rowScale[i]);
                     effDrawSpriteWithCornerColors((origin[0] + ax) << 4,
                                  (origin[1] + ay) << 3, -1, colors, 0,
                                  btlResourceBlock->resC, echoSlots[i], 0x53);
@@ -11063,7 +11063,7 @@ void btlDrawActorSlotOrder(void) {
 
             btlResourceBlock->resC->workEntries[coordinates[index][2]]
                 .geometry.angleDegrees = D_00438F58[bank]->rotationAngleDegrees[index];
-            func_001CE418(btlResourceBlock->resC, coordinates[index][2],
+            btlScaleEffectSlotGeometryAndGetCenterOffset(btlResourceBlock->resC, coordinates[index][2],
                           &xOffset, &yOffset,
                           (f32)D_00438F58[bank]->drawOffsetScalePercent[index]);
             effDrawSpriteWithCornerColors((coordinates[index][0] + xOffset) << 4,
@@ -11145,7 +11145,7 @@ void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x,
         s32 drawX;
         s32 drawY;
 
-        func_001CE418(work, entry, &owner->drawOffsets[row][variant][0],
+    btlScaleEffectSlotGeometryAndGetCenterOffset(work, entry, &owner->drawOffsets[row][variant][0],
                       &owner->drawOffsets[row][variant][1], scale);
         scaled = *selectedBank;
         drawX = scaled->drawOffsets[row][variant][0];
@@ -11229,7 +11229,7 @@ void btlScaleEffectSlotSourceBounds(EffectSlotSet *work, s32 index) {
     work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
 }
 
-void func_001CE418(EffectSlotSet *work, s32 entry, s32 *offsetX, s32 *offsetY, f32 percent) {
+void btlScaleEffectSlotGeometryAndGetCenterOffset(EffectSlotSet *work, s32 entry, s32 *offsetX, s32 *offsetY, f32 percent) {
     f32 scale = percent / 100.0f;
     s32 width = work->workEntries[entry].geometry.bounds[2];
     s32 height = work->workEntries[entry].geometry.bounds[3];
