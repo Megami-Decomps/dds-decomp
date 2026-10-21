@@ -18,7 +18,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
 extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
-extern void memset();
+extern void memset(void *dst, s32 value, s32 size);
 
 #include "fpu.h"
 #include "pcp_vu0.h"
