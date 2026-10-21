@@ -120,7 +120,9 @@ EffModelOwner *effCreateModelOwner(void *input) {
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
-        *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
+        u32 scaleBits;
+        scaleBits = *(u32 *)fileResolvePrimaryBuffer(source);
+        memcpy(&owner->scale, &scaleBits, sizeof(owner->scale));
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, source->secondary.size);

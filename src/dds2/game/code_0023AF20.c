@@ -1,5 +1,5 @@
 #include "common.h"
-#include "evt_scaled_value.h"
+#include "sdf_float_counter.h"
 #include "eff_node.h"
 #include "dds3obj.h"
 #include "dds3_object_mode.h"
@@ -10,7 +10,6 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 
-extern u32 sdfGetFloatCounterDirection(u32 *handle);
 
 s32 evtCheckWorldObjectResourceScale(void *obj) {
     f32 target = 1.0f;
@@ -29,22 +28,20 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
     if (handle == NULL) {
         return -1;
     }
-    kind = sdfGetFloatCounterDirection((u32 *)&handle->direction);
+    kind = sdfGetFloatCounterDirection(&handle->counter);
     if (kind != 0) {
         if (kind != 1) {
             return -1;
         }
         target = 0.0f;
     }
-    if (evtGetValueScaleFactor((struct EvtScaledValue *)handle) == target) {
+    if (evtGetValueScaleFactor(&handle->counter) == target) {
         return 0;
     }
     return 1;
 }
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *obj);
-extern void sdfEnableFloatCounterWrap(struct EvtScaledValue *data);
-extern void sdfDisableFloatCounterWrap(struct EvtScaledValue *data);
 
 void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
     Dds3PathCurveWork *data = dds3GetSlot1Data(obj);
@@ -53,9 +50,9 @@ void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
         return;
     }
     if (flag != 0) {
-        sdfEnableFloatCounterWrap((struct EvtScaledValue *)data);
+        sdfEnableFloatCounterWrap(&data->counter);
     } else {
-        sdfDisableFloatCounterWrap((struct EvtScaledValue *)data);
+        sdfDisableFloatCounterWrap(&data->counter);
     }
 }
 
@@ -160,7 +157,7 @@ s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit) {
         }
         break;
     case 3:
-        value = evtGetValueScaleFactor((void *)unit->pathHandle);
+        value = evtGetValueScaleFactor(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
@@ -185,7 +182,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
     case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
     case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
-        t = evtGetValueScaleFactor((void *)unit->pathHandle);
+        t = evtGetValueScaleFactor(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
@@ -202,7 +199,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
         if (1.0f < t) {
             t = 1.0f;
         }
-        evtScaleValueByMultiplier((EvtScaledValue *)unit->pathHandle, t);
+        evtScaleValueByMultiplier(&((Dds3PathCurveWork *)unit->pathHandle)->counter, t);
         dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
