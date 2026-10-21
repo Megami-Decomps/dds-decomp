@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 
@@ -58,7 +59,6 @@ void sdfWakeQueuedThreadWaiters(void) {
 }
 
 extern void InitThread(void);
-extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern char D_0045E8A0[];
 

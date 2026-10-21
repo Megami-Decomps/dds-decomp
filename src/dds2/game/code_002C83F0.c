@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_semaphore_api.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "file.h"
@@ -18,10 +19,6 @@ extern s32 D_00437CC0;
 extern char fileManagerTaskName[];
 
 extern s32 (*fileIdleUpdateCallback)(void);
-
-
-s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-
 extern s32 sdfFileCmdFileSize(DevState *);
 
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);

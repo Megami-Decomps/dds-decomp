@@ -26,6 +26,7 @@ extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern struct SdfMemBlock *sdfDoubleBufferAllocation;
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
 #include "sdf_pending.h"
@@ -89,9 +90,6 @@ extern vu8 sdfCurrentBufferIndex;
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
 
 extern s32 sdfPendingQueueSemaphore;
-
-extern s32 sdfCreateSemaphore(u32, u32, u32);
-
 extern s32 sdfGraphHasPendingWork(void);
 
 

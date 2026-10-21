@@ -4,6 +4,7 @@
  * "Title-audio controller transport boundary". */
 
 #include "common.h"
+#include "sdf_semaphore_api.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
@@ -251,9 +252,6 @@ extern u32 mnuTitleStreamSemaphore;
 extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
-
-extern s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum);
-
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
     sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,

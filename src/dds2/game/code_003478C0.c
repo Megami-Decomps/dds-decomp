@@ -6,6 +6,7 @@
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "ee_mmi.h"
@@ -533,9 +534,6 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     }
     return D_0047BE00;
 }
-
-
-extern s32 sdfCreateSemaphore(s32, s32, s32);
 extern u8 sdfPfsDebugMode;
 extern u8 D_0047BD00[];
 /* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */

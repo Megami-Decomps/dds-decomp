@@ -19,6 +19,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
 #include "sdf_pending.h"
@@ -101,7 +102,6 @@ extern s32 sdfPacketBufferEnd;
 extern s32 sdfGraphHasPendingWork(void);
 
 extern s32 sdfPendingQueueSemaphore;
-extern s32 sdfCreateSemaphore(u32, u32, u32);
 extern SdfPendingRequest sdfTextureReleaseQueue;
 extern SdfPendingRequest sdfObjectListReleaseQueue;
 extern volatile s8 sdfPacketSlotIndex;

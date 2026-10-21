@@ -23,6 +23,7 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
 #include "sdf_pac_packet.h"
@@ -54,9 +55,6 @@
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-
-extern s32 sdfCreateSemaphore(s32, s32, s32);
-
 extern u32 mdlGroupJobSemaphore;
 
 extern BattleGroupNode *btlGroupNodeHeads[];

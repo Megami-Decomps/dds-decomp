@@ -11,6 +11,7 @@
 #include "sdf_resource.h"
 #include "sdf_vu_matrix.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "eff_curve.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"

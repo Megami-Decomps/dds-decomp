@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_sprite_record.h"
 #include "common.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_kernel_thread_param.h"
 #include "sdf_thread_workspace_api.h"
 #include "sdf_mat4.h"

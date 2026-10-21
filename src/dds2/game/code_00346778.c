@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "file_pac.h"
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
@@ -31,7 +32,6 @@ typedef struct PacAlloc {
 } PacAlloc;
 
 extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
-extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern s32 sdfMoviePacRingSemaphore;
 extern s32 D_0043921C;
 extern u8 D_00438D28[];

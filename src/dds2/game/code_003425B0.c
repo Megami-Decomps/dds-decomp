@@ -7,6 +7,7 @@
 #include "sdf_packed_resource.h"
 #include "sdf_pac_reloc.h"
 #include "sdf.h"
+#include "sdf_semaphore_api.h"
 #include "sdf_movie_stream.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
@@ -93,13 +94,6 @@ extern char *D_0040BB18[];
 extern char D_0040BAF8[];
 
 extern s32 sdfSoundRpcSemaphore;
-
-extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
-
-
-
-
-
 extern u32 D_0047B440[16];
 
 
