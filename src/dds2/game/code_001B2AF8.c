@@ -10058,7 +10058,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
     if (dds3SearchProcessName(btlCommandPanelTaskNameRef) == 0) {
         D_004367C0 = 0;
         scene = (BtlState *)btlGetRuntime();
-        object = sdfAllocAndClearQuadwords(0x30);
+        object = sdfAllocAndClearQuadwords(sizeof(*object));
         fldInitializeSceneObject(object, task);
         handle = dds3StartProcess(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateBattleSceneCommands, btlReleaseCommandPanelTask,
                                 (u32)object);
