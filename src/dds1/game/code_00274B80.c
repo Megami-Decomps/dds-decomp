@@ -126,7 +126,7 @@ typedef struct PartyMenuData {
     s32 activeCount; /* 0x1074 */
     DatPartyRecord backup[5];
     s32 selection; /* 0x18AC */
-    u8 panelSnapshots[5][0xA8]; /* 0x18B0: copied panel subrecords */
+    MenuEffectPair panelSnapshots[5][2]; /* 0x18B0: copied panel subrecords */
     s32 fadeA;                 /* 0x1BF8 */
     s32 fadeB;                 /* 0x1BFC */
     s32 selectionKey;          /* 0x1C00: saved menu-list key */
@@ -710,8 +710,8 @@ void mnuDrawPartySelectionPreview(s32 contextAddress) {
     sets = (EffectSlotSet **)((u8 *)context + 0xF0);
 
     mnuDrawPartyVitalsAndProfile(sets,
-                  (MenuEffectPair *)&menu->panelSnapshots[selectionKey][0],
-                  (MenuEffectPair *)&menu->panelSnapshots[selectionKey][0x54],
+                  &menu->panelSnapshots[selectionKey][0],
+                  &menu->panelSnapshots[selectionKey][1],
                   record, marker,
                   (u32)menu->fadeA, (u32)menu->fadeB, found);
 

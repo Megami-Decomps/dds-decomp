@@ -1848,7 +1848,8 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
 }
 
 void btlActionAimUserAtTargets(BtlLinkedCommand *action, BtlCamState *pose, BtlCamState *out) {
-    s128 vec[3];
+    f32 vec[2][4] __attribute__((aligned(16)));
+    s128 rot;
     BtlUnit *unit = action->link->unit;
     u32 mask = 0;
     u32 i;
@@ -1860,12 +1861,12 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *action, BtlCamState *pose, BtlC
     }
     if (unit->status.flags & 0x80000) {
         btlMeasureFilteredUnitGroupBounds(mask, 0, 0);
-        VU0_STORE_VF(vf10, &vec[0]);
+        VU0_STORE_VF(vf10, vec[0]);
         btlUnitGetBodyPosVU(unit);
-        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU((f32 *)&vec[1], (f32 *)&vec[0]) != 0) {
-            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
-            btlSetUnitRotation(unit, &vec[2]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, vec[1]);
+        if (btlAimHorizontalDirectionVU(vec[1], vec[0]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, &rot);
+            btlSetUnitRotation(unit, &rot);
         }
     }
 }
@@ -6776,7 +6777,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
         }
 
         VU0_STORE_VF(vf10, &vectors[0]);
-        projection = btlProjectOnPlaneVU((f32 *)&vectors[1], (f32 *)&vectors[2], (f32 *)&vectors[0]);
+        projection = btlProjectOnPlaneVU(vectors[1].component, vectors[2].component, vectors[0].component);
         VU0_STORE_VF(vf10, &vectors[0]);
         upperX = (vectors[0].component[0] + projection) + radius;
         lowerX = (vectors[0].component[0] - projection) - radius;

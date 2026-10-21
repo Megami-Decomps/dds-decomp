@@ -7443,9 +7443,9 @@ u32 *effCreateRingFadeTable(EffBillVortexConfig *p, u32 resource) {
 
 u32 *effAssetPointerSet(u8 *p) {
     EffBillVortexConfig *dst = ((EffClassWork *)p)->payload;
-    u32 *src = (u32 *)((EffClassWork *)p)->resource;
+    EffFrameState *src = (EffFrameState *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateRingFadeEntries(dst);
-    buf[1] = (u32)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)src)->asset);
+    buf[1] = (u32)effCloneRibbonWithSharedResource((EffRibbonWork *)src->asset);
     effFillRingFadeGradient(buf, &dst->common);
     return buf;
 }
@@ -7601,9 +7601,9 @@ u32 *effCreateBillFadeTable(EffBillColumnConfig *p, u32 resource) {
 
 u32 *effCloneBillFadeTable(u8 *p) {
     EffBillColumnConfig *dst = ((EffClassWork *)p)->payload;
-    u32 *src = (u32 *)((EffClassWork *)p)->resource;
+    EffFrameState *src = (EffFrameState *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateBillFadeFrameEntries(dst);
-    buf[1] = (u32)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)src)->asset);
+    buf[1] = (u32)effCloneRibbonWithSharedResource((EffRibbonWork *)src->asset);
     effFillBillFadeGradient(buf, &dst->common);
     return buf;
 }
@@ -8003,9 +8003,9 @@ u32 *effCreateCompactRingFadeTable(EffBillSpiralConfig *p, u32 resource) {
 
 u32 *effCloneBillboardFrameAsset(u8 *p) {
     EffBillSpiralConfig *dst = ((EffClassWork *)p)->payload;
-    u32 *src = (u32 *)((EffClassWork *)p)->resource;
+    EffFrameState *src = (EffFrameState *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateCompactRingFadeEntries(dst);
-    buf[1] = (u32)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)src)->asset);
+    buf[1] = (u32)effCloneRibbonWithSharedResource((EffRibbonWork *)src->asset);
     effFillCompactRingFadeGradient(buf, &dst->common);
     return buf;
 }
@@ -8619,9 +8619,9 @@ u32 *effPrepareTextureAnimation(EffBillFlameConfig *src) {
 
 u32 *effPrepareOwnedTextureAnimation(u8 *p) {
     u8 *dst = ((EffClassWork *)p)->payload;
-    u32 *src = (u32 *)((EffClassWork *)p)->resource;
+    EffFrameState *src = (EffFrameState *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateAnimationBuffer(dst);
-    buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
+    buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(src->asset);
     effFillFadeColorRows(buf, dst);
     return buf;
 }
@@ -8918,9 +8918,9 @@ u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *src) {
 
 u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
     EffBillQuantizedConfig *config = (EffBillQuantizedConfig *)((EffClassWork *)p)->payload;
-    u32 *src = (u32 *)((EffClassWork *)p)->resource;
+    EffFrameState *src = (EffFrameState *)((EffClassWork *)p)->resource;
     u32 *buf = effAllocateQuantizedBuffer(config);
-    buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
+    buf[1] = (u32)effAllocateStripFromWorkAndRetainTexture(src->asset);
     func_002F3258(buf, config);
     return buf;
 }
@@ -12919,14 +12919,14 @@ void effMultiplyQuatWithFlag(u8 *work) {
 void effApplyBattleCameraToObject(work)
     void *work;
 {
-    u128 rotation[2];
+    f32 rotation[2][4] __attribute__((aligned(16)));
 
     effComputeBattleCameraPositionVU(D_0045C270);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[0]);
-    fileJobInvokePositionCallback(work, (f32 *)&rotation[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation[0]);
+    fileJobInvokePositionCallback(work, rotation[0]);
     effMultiplyQuatWithFlag(D_0045C270);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[1]);
-    fileJobInvokeRotationCallback(work, (f32 *)&rotation[1]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation[1]);
+    fileJobInvokeRotationCallback(work, rotation[1]);
     fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }
