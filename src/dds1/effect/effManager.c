@@ -5,6 +5,7 @@
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_node.h"
+#include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
