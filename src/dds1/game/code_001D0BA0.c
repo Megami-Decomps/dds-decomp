@@ -159,7 +159,7 @@ struct EvtUnit;
 
 extern void evtSetTransitionMotionScale(struct EvtUnit *, f32);
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 extern s32 btlTestActorStatusPredicate(BtlUnit *);
 

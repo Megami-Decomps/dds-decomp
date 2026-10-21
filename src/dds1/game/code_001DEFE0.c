@@ -215,7 +215,7 @@ s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
 struct EvtUnit;
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
@@ -552,7 +552,7 @@ void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from,
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
-        if (!btlIsCurrentValueBelowQuarterThreshold((void *)unit) || !(unit->status.flags & 0x200)) {
+        if (!btlIsCurrentValueBelowQuarterThreshold(unit) || !(unit->status.flags & 0x200)) {
             if (btlSampleActorModelPositionVU(unit, 1) == 0) {
                 btlUnitGetMuzzlePosVU(unit);
             }
