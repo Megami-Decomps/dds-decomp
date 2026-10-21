@@ -4925,6 +4925,22 @@ then convert that address word once. Express the allocation and first-entry
 address using the actual owner types; the three icon-list constructors consume
 the returned `MantraIconPool *` without integer-to-pointer casts.
 
+DDS2 `mnuClaimMantraIconEntry` (`002755B8`) likewise traverses those
+records as `MantraIconEntry *`: `active`, `state`, `shortLoop`, and
+`timer` account for its native word operations without a flat word cursor.
+
+## Canonical parameter and pool owners
+
+DDS1 `effRebuildSurfaceHandles` (`002A5F80`) copies an `EffSurfaceParams`
+and reads the dimensions and gradient through that owner's `opaque00`
+array. `effUpdateSlotTimerPair` (`002B41F0`) uses one complete tint payload:
+its last word at `0xC` is both the timing delay and the low-halfword default
+tint ID, represented by a union rather than a second padded overlay.
+
+DDS2 `dds3UpdateSoundSlots` (`0031B328`) reloads the global pool's `count`
+after the sequence callback. Keep that fresh global-owner read rather than
+reusing the pool captured before the callback or indexing a word view.
+
 ## Mantra asynchronous resource-loader ownership
 
 DDS2 `00287078` passes the stored `MtrResourceLoadState.fileEntry` directly

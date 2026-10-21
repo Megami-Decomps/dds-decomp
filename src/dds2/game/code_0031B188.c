@@ -146,7 +146,7 @@ void dds3UpdateSoundSlots(void) {
                 }
                 index++;
                 slot++;
-            } while (index < (s32)dds3SoundSlotPool[2]);
+            } while (index < ((SoundSlotPool *)dds3SoundSlotPool)->count);
         }
     }
 }
