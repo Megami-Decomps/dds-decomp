@@ -11,6 +11,7 @@
 #include "eff_object_dispatch_api.h"
 #include "eff.h"
 #include "eff_node.h"
+#include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
@@ -39,9 +40,6 @@
 
 struct EffNode;
 #include "eff_object.h"
-
-extern struct EffNode *effCreateNodeFromParameter(u32 parameter);
-
 
 struct EffNode;
 extern BillObj *billCreateFromResource(s32 kind, const char *path);

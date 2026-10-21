@@ -12,6 +12,7 @@
 #include "dds3obj.h"
 #include "eff.h"
 #include "eff_node.h"
+#include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
@@ -60,9 +61,6 @@ extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
 EffectDependencyState *effObjGetReadyData(EffWorldNode *obj);
 extern void effObjForwardOwnerBillEntry(EffWorldNode *obj);
-
-extern void *effCreateNodeFromParameter(u32 parameter);
-
 
 struct EffNode;
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);

@@ -6,6 +6,7 @@
 #include "eff.h"
 #include "eff_node_descriptor.h"
 #include "eff_node.h"
+#include "eff_create_node_from_parameter.h"
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
 #include "eff_manager_task.h"
