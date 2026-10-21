@@ -284,7 +284,7 @@ INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5BD0);
 INCLUDE_ASM(const s32, "game/code_00202178", func_00202668);
 
 /* Select the lowest nonzero current HP, preferring earlier entries on a tie. */
-s32 func_00202F90(s32 actor, s32 action) {
+s32 btlSelectLowestNonzeroHpTarget(s32 actor, s32 action) {
     u32 matching;
     u32 count;
     BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);

@@ -39,7 +39,7 @@ extern s32 btlIsLowHpActionReady(BtlUnit *unit, s32 input);
 extern u32 btlRandomState;
 
 extern s32 func_00202668(BtlTask *, s32);
-extern void func_00202F90(s32, s32);
+extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
 extern s32 btlSelectLowestRankTarget(s32, s32);
@@ -1296,7 +1296,7 @@ void btlChooseCommandActionTargets(s32 context) {
 
 /* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
 void btlPickCommandLowestHpTarget(s32 context) {
-    func_00202F90(context, 0);
+    btlSelectLowestNonzeroHpTarget(context, 0);
 }
 
 /* Delegate minimum HP-percentage selection without changing native fallback modes. */
