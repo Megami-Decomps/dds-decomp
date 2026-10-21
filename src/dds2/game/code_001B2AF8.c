@@ -2,6 +2,7 @@
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_command_hint_work.h"
+#include "btl_guide_panel_work.h"
 #include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
@@ -2927,21 +2928,6 @@ u32 btlRequestAnalysisPanelClose(void) {
     }
     return 1;
 }
-
-/* Registered guide-panel task: fade, four corner colors, and message selection. */
-typedef struct BtlGuidePanelWork {
-    s8 state;
-    u8 pad01[7];
-    s16 fadeLevel;             /* 0x08 */
-    u8 pad0A[2];
-    BattlePanelColors colors;  /* 0x0C: TL, TR, BR, BL */
-    s32 unk1C;
-    s32 y;
-    s32 windowIndex;
-    s32 entryIndex;
-} BtlGuidePanelWork;
-
-typedef char BtlGuidePanelWorkSizeCheck[sizeof(BtlGuidePanelWork) == 0x2C ? 1 : -1];
 
 extern s32 btlUpdateGuidePanelTask(KwlnTask *task);
 
