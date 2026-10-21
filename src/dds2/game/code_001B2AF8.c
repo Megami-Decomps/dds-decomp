@@ -3511,8 +3511,8 @@ void btlDrawPanelIconGroup(s32 section, s32 delta) {
     }
 }
 
-extern void func_001B9C70(BtlLinkedCommand *, BtlAnalysisPanelWork *);
-extern void func_001BA1E8(BtlLinkedCommand *, BtlAnalysisPanelWork *);
+extern void btlUpdateAnalysisPanelWindowGeometry(BtlLinkedCommand *, BtlAnalysisPanelWork *);
+extern void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void btlDrawCompositePanelSprites(void *, s32, s32, u32);
 extern void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
@@ -3569,15 +3569,15 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
     }
     switch (work->state) {
     case 0:
-        func_001B9C70(&battle->cameraCommand, work);
-        func_001BA1E8(&battle->cameraCommand, work);
+        btlUpdateAnalysisPanelWindowGeometry(&battle->cameraCommand, work);
+        btlDrawAnalysisPanelSilhouette(&battle->cameraCommand, work);
         if (work->page == 7) {
             work->state = 1;
         }
         break;
     case 1:
-        func_001B9C70(&battle->cameraCommand, work);
-        func_001BA1E8(&battle->cameraCommand, work);
+        btlUpdateAnalysisPanelWindowGeometry(&battle->cameraCommand, work);
+        btlDrawAnalysisPanelSilhouette(&battle->cameraCommand, work);
         work->fade += 0x20;
         work->fade = work->fade > 0 ? (work->fade < 0x81 ? work->fade : 0x80) : 0;
         break;
@@ -3790,7 +3790,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F80);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F90);
 
-void func_001B9C70(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
+void btlUpdateAnalysisPanelWindowGeometry(BtlLinkedCommand *command, BtlAnalysisPanelWork *work) {
     BtlAnalysisPanelWork *panel = work;
     f32 center[4] __attribute__((aligned(16)));
     s32 horizontalExtent;
@@ -3962,7 +3962,7 @@ extern void evtSubmitViewParamPacket(f32, f32, f32, f32, f32, f32, u32, u32);
 
 /* Draw the analysis silhouette with a mirrored five-level color ramp.
  * Continues Deep Quasar, Iron Nebula, PiM, Cedar Spark and Luna. */
-void func_001BA1E8(BtlLinkedCommand *unused, BtlAnalysisPanelWork *work) {
+void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *unused, BtlAnalysisPanelWork *work) {
     u32 depths[5];
     /* Inferred bounds keep the independent literal-copy alias sets distinct. */
     s16 deltas[] = {0, 3, 3, 4, 4, 5, 5, 8};

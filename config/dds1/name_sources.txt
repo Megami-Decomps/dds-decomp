@@ -9868,3 +9868,5 @@
 0x001ED5C8	btlMeasureBattleSideBoundsWithSeed	inferred	Measures active battle-side bounds, optionally seeded by a line segment and extra sphere, and returns the framing radius. DDS2 twin 0x001FE068.
 0x001EDB20	btlMeasureFilteredActorBounds	inferred	Measures filtered active actor bounds using a side mask, optional included/excluded units, a position mode, and an optional line segment; writes optional height extrema and returns framing radius. DDS2 twin 0x001FE5C0.
 0x001EE160	btlMeasureSideFilteredActorBounds	inferred	Measures filtered active actor bounds with the same optional unit and line filters plus a side-retention policy; writes optional height extrema and returns framing radius. DDS2 twin 0x001FEC00.
+0x001AF058	btlUpdateAnalysisPanelWindowGeometry	inferred	Updates the analysis panel anchor and corners through its opening, inset, and expansion phases.
+0x001AF5D0	btlDrawAnalysisPanelSilhouette	inferred	Builds the analysis panel edge color ramp and submits its silhouette geometry.
