@@ -6865,6 +6865,7 @@ kwlnDistanceBlurErrorCount = 0x00435D04;
 kwlnRippleBlurErrorCount = 0x00435D08;
 evtSelectionStateActive = 0x00435D18;
 evtConsoleFontResourceChain = 0x00435D30;
+evtGeneralHeapPercentFormat = 0x00435D48;
 scrNamedProcessCount = 0x00435D60;
 scrNamedProcessHead = 0x00435D64;
 scrNamedProcessTail = 0x00435D68;
