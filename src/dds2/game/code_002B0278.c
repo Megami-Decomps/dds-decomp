@@ -3517,7 +3517,7 @@ void mnuEnableCampBadgeFade(u32 *flags) {
 }
 
 MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing) {
-    MenuList *node = (MenuList *)sdfAllocAndClearQuadwords(0x40);
+    MenuList *node = (MenuList *)sdfAllocAndClearQuadwords(sizeof(*node));
     node->id = owner;
     node->visibleCount = visibleCount;
     node->rowStep = rowSpacing * 8;
@@ -3566,7 +3566,7 @@ MenuListNode *mnuListAppendNode(list, value)
     MenuList *list;
     const void *value;
 {
-    MenuListNode *node = sdfAllocAndClearQuadwords(0x74);
+    MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     s32 index = list->count;
     MenuListNode *last;
 
