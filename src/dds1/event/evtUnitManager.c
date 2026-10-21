@@ -1137,7 +1137,7 @@ extern u8 D_003AC5B0[];
 extern u8 D_003AC600[];
 
 extern u32 sdfGetLodChunkValue(SdfModel *model);
-extern s32 scrGetWindow(void);
+extern u32 scrGetWindow(void);
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
 extern void *effObjCreateKindFromResource(s32 kind, void *resource);
 extern void effObjSetFlags(void *object, s32 flags);

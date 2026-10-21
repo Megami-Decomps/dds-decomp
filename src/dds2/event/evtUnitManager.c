@@ -1187,7 +1187,7 @@ extern void effObjReplaceActiveEventNode(void *effectObject, u32 entryId);
 extern char D_00421AF8[];
 
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
-extern s32 scrGetWindow(void);
+extern u32 scrGetWindow(void);
 
 
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
