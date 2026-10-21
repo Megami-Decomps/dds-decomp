@@ -1735,8 +1735,8 @@ void mnuReleaseScrollPanelAnimations(menu)
 }
 
 MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner) {
-    MenuScrollPanel *menu = (MenuScrollPanel *)sdfChipAllocDirect(0x48);
-    memset(menu, 0, 0x48);
+    MenuScrollPanel *menu = (MenuScrollPanel *)sdfChipAllocDirect(sizeof(*menu));
+    memset(menu, 0, sizeof(*menu));
     menu->firstSprite = 0;
     menu->secondSprite = 0;
     itfGridStorePosition(&menu->positions[0], owner, 0x40);
