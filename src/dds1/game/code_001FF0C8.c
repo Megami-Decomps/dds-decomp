@@ -107,7 +107,7 @@ extern s32 btlHasAdjacentActorRecordStatus(s32);
 extern u32 btlIsActorHighStateFlagClear(s32);
 extern s32 btlRunAiAction(BtlTask *, s32, u32);
 extern s32 btlSyncEligibleActorPanelHpMp(BtlTask *);
-void func_001FF0C8(BtlTask *task, u32 mode) {
+void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
     BtlAiScratchWork *work;
     BtlUnit *unit;
     s32 table;
