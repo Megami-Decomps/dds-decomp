@@ -154,7 +154,7 @@ s32 sceSync(const char *device, s32 flag);
 s32 sceWrite(s32 fd, const void *data, s32 size);
 #endif
 #ifndef SDK_SKIP_sdfDevSeekFile
-s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
+s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
 #endif
 #ifndef SDK_SKIP_DisableDmac
 s32 DisableDmac(s32 channel);
@@ -165,7 +165,7 @@ s32 EnableDmac(s32 channel);
 
 #ifdef VERSION_DDS2
 #ifndef SDK_SKIP_sdfDevReadFileBytes
-s32 sdfDevReadFileBytes(s32 fileHandle, s32 buffer, s32 byteCount);
+s32 sceRead(s32 fileHandle, s32 buffer, s32 byteCount);
 #endif
 #endif
 

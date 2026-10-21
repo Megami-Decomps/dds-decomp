@@ -9878,3 +9878,4 @@
 0x002FF590	free	inferred	newlib free: follows malloc in mallocr, passes its pointer to _free_r with the reentrancy state. DDS2 twin 0x0035A880.
 0x00307308	fread	inferred	newlib fread: copies buffered bytes with memcpy and refills through __srefill. DDS2 twin 0x00359B18.
 0x002F5990	sceSdRemote	inferred	libsdr sceSdRemote: the variadic EE-side remote call of libsd commands over the sdr RPC, after sceSdRemoteInit and sceSdTransToIOP. DDS2 twin 0x0034E820.
+0x0030ECF8	sceLseek	inferred	FILEIO sceLseek: between sceClose and sceRead, sends the descriptor, offset and whence to the IOP's FILEIO server. DDS2 twin 0x00369F78.
