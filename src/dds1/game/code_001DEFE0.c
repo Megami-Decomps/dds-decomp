@@ -8599,7 +8599,7 @@ s32 sndLookupResourceType(s32 sound, s32 index) {
     return *(u8 *)(datActionAnimationRecords + index * 0x20 + 3);
 }
 
-void func_001F0CA0(BtlTask *task, BattleIndexWork *work) {
+void btlSetCommandEffectLinkFlags(BtlTask *task, BattleIndexWork *work) {
     u32 targetCount = btlGetIndexListCount(work->indices);
     BtlOperandGroup *group = work->groups;
     BtlUnit *target;

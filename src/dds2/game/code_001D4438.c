@@ -1359,7 +1359,7 @@ void btlCommandPrintAndFetchOwner(ActionStateLink *task) {
     }
 }
 
-extern void func_00201828();
+extern void btlSetCommandEffectLinkFlags(ActionStateLink *task, BattleIndexWork *work);
 
 void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
     BattleIndexWork *commandData = &task->indexWork;
@@ -1370,7 +1370,7 @@ void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
         if (task->indexWork.stage == 2) {
             btlStartTask(btlCreateEffObjB(owner, task->indexWork.parameter));
         }
-        func_00201828(task, commandData);
+        btlSetCommandEffectLinkFlags(task, commandData);
         hook = *(void (**)(u8 *))(work + 0x634);
         if (hook != 0) {
             hook((u8 *)task);
