@@ -781,9 +781,12 @@ typedef struct StaffMenuRuntime {
     u8 pad04[0xC];
     s32 staffMode;
     s32 staffView;
-    u8 pad18[0xC];
+    s32 staffSelection;
+    s32 staffExit;
+    MenuPanelHandles *resourceList;
     s32 active;
-    u8 pad28[8];
+    s32 idleFrames;
+    s32 motionSelection;
 } StaffMenuRuntime;
 
 s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 staffView) {
@@ -810,10 +813,10 @@ s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 staffView) {
 
 s32 mnuStaffCloseSelectionState(KwlnTask *task) {
     s32 context = dds3GetProcessData(task);
-    void *menu = ((CampMenuContext *)context)->menu;
+    StaffMenuRuntime *menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    sdfMemFreeDirect((struct SdfMemBlock *)(u32)(*(s32 *)menu));
+    sdfMemFreeDirect(menu->allocation);
     return 1;
 }
 
@@ -839,7 +842,7 @@ s32 mnuFinishPartySelectionEntry(KwlnTask *task) {
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
 s32 mnuStaffPopupUpdate(KwlnTask *callback) {
     s32 context = dds3GetProcessData(callback);
-    u8 *menuWork = (u8 *)((CampMenuContext *)context)->menu;
+    StaffMenuRuntime *menuWork = ((CampMenuContext *)context)->menu;
     s32 *popupState = (s32 *)(context + 0x54);
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
     s32 stateWord;
@@ -852,9 +855,9 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
         panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
         mnuStepPartyPanelListFromInput(4, panelWork);
         if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
-            *(s32 *)(menuWork + 0x18) = ((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index;
+            menuWork->staffSelection = ((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index;
             mnuSetPopupEntry(popupState, mnuStaffPartyBrowsePopupEntry);
-            *(s32 *)(menuWork + 0x24) = 1;
+            menuWork->active = 1;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             mnuSetPopupEntryFlagged(popupState, mnuStaffFieldSkillDisplayPopupEntry);
@@ -875,21 +878,21 @@ extern void mnuDrawCampGridAndLabelDefault();
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     s32 context = dds3GetProcessData(callback);
     CampMenuContext *work = (CampMenuContext *)context;
-    StaffMenuWork *menu = (StaffMenuWork *)work->menu;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)work->menu;
 
     if (effHasFirstTextureHandle((EffectSlotSet *)(u32)work->resource) != 0) {
         mnuDrawStaffCampScreen(0, callback);
     } else {
         mnuDrawStaffCampScreen(1, callback);
     }
-    if (menu->staffImage == 0) {
+    if (menu->staffView == 0) {
         mnuCreateStaffImageSprite(0x12);
     } else {
         mnuCreateStaffImageSprite(0x11);
     }
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, work->panel, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(work->actor));
-    if (menu->selectedList != 0) {
+    if (menu->active != 0) {
         s32 *slot = &((MenuWindowContainer *)work->panel)->list->cursor->index;
 
         mnuDrawCampGridAndLabelDefault(1, *slot, mnuCampCommandHelpTextBank, context, 1, 0x53, slot);
@@ -952,7 +955,7 @@ void mnuConfigurePartyPanelPage(s32 windowAddress, s32 mode, s32 staffImage, s32
 s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     MenuPageWindow *page = &context->partyWindow;
-    StaffMenuWork *menu = (StaffMenuWork *)context->menu;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)context->menu;
     s32 index = context->partyWindow.lists[0]->cursor->index;
     DatPartyRecord *record = &datGameState->party[index];
     MenuProfilePanel *profilePanel;
@@ -983,7 +986,7 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
         menu->motionSelection = 10;
     }
     evtStageTestSelectEntry(record->unitId, menu->motionSelection, 0);
-    mnuConfigurePartyPanelPage((s32)page, 1, menu->staffImage, menu->staffMode);
+    mnuConfigurePartyPanelPage((s32)page, 1, menu->staffView, menu->staffMode);
     return 1;
 }
 
@@ -997,11 +1000,11 @@ extern void mnuReleaseResourceList(MenuPanelHandles *);
 /* Tear down the staff panel and all four optional scene-side resources. */
 s32 mnuStaffReleasePanelScene(KwlnTask *task) {
     s32 context = dds3GetProcessData(task);
-    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)((CampMenuContext *)context)->menu;
     MenuPageWindow *entryList = &((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
 
-    mnuConfigurePartyPanelPage((s32)entryList, 0, menu->staffImage, menu->staffMode);
+    mnuConfigurePartyPanelPage((s32)entryList, 0, menu->staffView, menu->staffMode);
     btlStopStage();
     mnuClearEntries(entryList);
     mnuReleasePartyIconBundles(entryList);
@@ -1038,7 +1041,7 @@ void mnuResetSelectedPanelOpacity(s32 context) {
  * The opaque request argument is forwarded unchanged. Return one if switched. */
 s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
     s32 context = dds3GetProcessData(requestArgument);
-    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)((CampMenuContext *)context)->menu;
     s32 pageChanged = 0;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_PAGE_INPUT_MASK);
 
@@ -1056,7 +1059,7 @@ s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
     if (pageChanged != 0) {
         mnuInitializeStaffPartyScene((KwlnTask *)requestArgument);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
-        menuWork->activeMark = 0;
+        menuWork->idleFrames = 0;
         if (menuWork->staffMode == 1) {
             mnuResetSelectedPanelOpacity(context);
         }
@@ -1072,12 +1075,12 @@ extern u8 mnuStaffCampPagePopupEntry[];
  * stateWord holds the update result first, then the stored popup state. */
 s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
     s32 context = dds3GetProcessData(callback);
-    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)((CampMenuContext *)context)->menu;
     s32 *popupState;
     u32 inputFlags;
     s32 stateWord;
 
-    if (menuWork->staffImage == 0) {
+    if (menuWork->staffView == 0) {
         inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_VIEW_INPUT_MASK);
     } else {
         inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_INPUT_CANCEL);
@@ -1099,18 +1102,18 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
-                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffImage, 1);
+                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
             } else {
                 menuWork->staffMode = 0;
-                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffImage, 0);
+                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
             }
-            menuWork->activeMark = 0;
+            menuWork->idleFrames = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             if (evtStageTestPollModelRequest() != 1) {
                 btlStopStage();
                 menuWork->staffExit = 1;
-                menuWork->selectedList = 1;
+                menuWork->active = 1;
                 mnuSetPopupEntryFlagged(popupState, mnuStaffCampPagePopupEntry);
             } else {
                 inputFlags = MNU_STAFF_INPUT_REJECTED;
@@ -1221,7 +1224,7 @@ extern struct SdfPoolNode *D_00325788[13][4];
 s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     DatGameState *gameState = datGameState;
-    StaffMenuWork *menu = (StaffMenuWork *)context->menu;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)context->menu;
     MenuPageWindow *page = &context->partyWindow;
     StaffSlots *slots = (StaffSlots *)&context->unk60;
     s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
@@ -1245,14 +1248,14 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
         mnuDrawProfilePanelAndSprite(partyEntry, (s32)page,
                                      context->effect, (s32)context->extraResource,
                                      (s32)slots, 0x53);
-        if (menu->staffImage == 0) {
+        if (menu->staffView == 0) {
             mnuDrawStaffGridLabelsForKind(6, (struct EffectSlotSet *)(u32)(context->actor));
         } else {
             mnuDrawStaffGridLabelsForKind(4, (struct EffectSlotSet *)(u32)(context->actor));
         }
     }
 
-    if (menu->staffImage == 0) {
+    if (menu->staffView == 0) {
         mnuDrawIconPanelFullFade(0, 0, 0, menu->resourceList, 0x53);
         mnuUpdateWindowPanelHandleStates(menu->resourceList);
     }
@@ -1262,36 +1265,30 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
 
 extern s32 evtStageTestHasPendingMotion();
 
-typedef struct MenuIdleVoiceState {
-    u8 pad00[0x28];
-    s32 idleTicks;
-    s32 voiceState; /* -1 permits a new random voice */
-} MenuIdleVoiceState;
-
 #define MENU_IDLE_VOICE_TICKS 0x12D
 
 /* Pick another idle voice after MENU_IDLE_VOICE_TICKS eligible ticks. */
-void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer) {
+void mnuIdleVoiceTimer(StaffMenuRuntime *menu) {
     u32 voiceCount;
 
-    if (voiceTimer->voiceState == -1 && evtStageTestPollModelRequest() != 1) {
+    if (menu->motionSelection == -1 && evtStageTestPollModelRequest() != 1) {
         if (evtStageTestHasPendingMotion() == 0) {
-            voiceTimer->idleTicks = voiceTimer->idleTicks + 1;
+            menu->idleFrames = menu->idleFrames + 1;
         }
-        if (voiceTimer->idleTicks >= MENU_IDLE_VOICE_TICKS) {
+        if (menu->idleFrames >= MENU_IDLE_VOICE_TICKS) {
             voiceCount = evtStageTestCountFlags(0);
             evtStageTestQueueMotion(0, sdfGetRand(0) % voiceCount);
-            voiceTimer->idleTicks = 0;
+            menu->idleFrames = 0;
         }
     }
 }
 
 s32 mnuStaffIdlePartyUpdate(KwlnTask *callback) {
     s32 context = dds3GetProcessData(callback);
-    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)((CampMenuContext *)context)->menu;
 
     if (menu->staffMode == 0) {
-        mnuIdleVoiceTimer((MenuIdleVoiceState *)menu);
+        mnuIdleVoiceTimer(menu);
     }
     return menuRunPanel((void *)context, 2, (void *)callback);
 }

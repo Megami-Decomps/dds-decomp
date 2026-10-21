@@ -531,19 +531,19 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     return work;
 }
 
-void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w) {
+void mnuInitializeNodeTransforms(MnuNodeList *group, f32 x, f32 y, f32 z, f32 w) {
     u16 index = 0;
-    u8 *node = (u8 *)group[0];
-    if ((s32)group[1] > 0) {
+    MnuModelNode *node = group->nodes;
+    if (group->count > 0) {
         do {
-            memset(node, 0, 0x50);
-            ((MnuModelNode *)node)->tertiary[0] = x;
+            memset(node, 0, sizeof(*node));
+            node->tertiary[0] = x;
             index++;
-            ((MnuModelNode *)node)->tertiary[1] = y;
-            ((MnuModelNode *)node)->tertiary[2] = z;
-            ((MnuModelNode *)node)->tertiary[3] = w;
-            node += 0x50;
-        } while (index < (s32)group[1]);
+            node->tertiary[1] = y;
+            node->tertiary[2] = z;
+            node->tertiary[3] = w;
+            node++;
+        } while (index < group->count);
     }
 }
 
@@ -584,26 +584,25 @@ void mnuPopulateModelNodeList(MnuNodeList *list, s32 resourceGroup, s32 resource
 }
 
 /* Claims the first inactive node whose model pointer is already populated. */
-u8 *mnuAcquireUnusedModelNode(u32 *group) {
+MnuModelNode *mnuAcquireUnusedModelNode(MnuNodeList *group) {
     s32 index = 0;
-    u8 *node = (u8 *)group[0];
-    if ((s32)group[1] > 0) {
+    MnuModelNode *node = group->nodes;
+    if (group->count > 0) {
         do {
-            MnuModelNode *entry = (MnuModelNode *)node;
-            if ((entry->flags & 1) == 0) {
-                MdlCtx *model = entry->model;
+            if ((node->flags & 1) == 0) {
+                MdlCtx *model = node->model;
                 if (model != 0) {
                     model->flags &= ~MDL_SKIP_TRANSFORMS;
-                    entry->value48 = 0;
-                    entry->value4A = 0;
-                    entry->flags = 1;
+                    node->value48 = 0;
+                    node->value4A = 0;
+                    node->flags = 1;
                     return node;
                 }
                 return 0;
             }
-            node += 0x50;
+            node++;
             index++;
-        } while (index < (s32)group[1]);
+        } while (index < group->count);
     }
     return 0;
 }
