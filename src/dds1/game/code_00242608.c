@@ -82,7 +82,7 @@ extern void fldDrawCameraColorLayerPass(void);
 extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 extern s32 mnuCampGetShopPriceStage();
 extern struct EffectSlotSet *D_003BC520;
-extern void mnuUnpackNibbleFields();
+extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 
 extern u8 D_00368C40[];
 
@@ -2133,7 +2133,7 @@ void evtInstallStateTable(ShopScene *state) {
     }
 }
 
-extern s32 mnuShopHasExtraOption();
+extern s32 mnuShopHasExtraOption(ShopScene *scene);
 extern void mnuShopInitializeOptionList(ShopScene *);
 /* Prepare the active menu state and copy the selection into its window. */
 s32 evtInitializeActiveMenuState(KwlnTask *task) {
