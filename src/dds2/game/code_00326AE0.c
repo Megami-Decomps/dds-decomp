@@ -16,14 +16,14 @@ extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, 
 
 extern void (*sdfTickCallback)(void);
 
-extern f32 sdfVec3DotNormalized(void *, void *);
+extern f32 sdfVec3DotNormalized(const SdfVec4 *, const SdfVec4 *);
 
 
 
 
 
 
-f32 sdfVec3AngleBetween(void *a, void *b) {
+f32 sdfVec3AngleBetween(const SdfVec4 *a, const SdfVec4 *b) {
     return acosf(sdfVec3DotNormalized(a, b));
 }
 
