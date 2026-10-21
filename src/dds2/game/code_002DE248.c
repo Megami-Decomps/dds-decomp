@@ -106,10 +106,10 @@ extern void evtDestroySelectionState(void);
 extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue);
 extern void fileReadRecordSecondVector(u8 *obj, void *dst);
 extern void fileReadVectorPtr20(u8 *obj, void *dst);
-extern void fileSetRecordSecondVector(u8 *obj, void *src);
+extern void fileSetRecordSecondVector(void *record, const void *src);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
-extern void mnuRecordSetVector(u8 *obj, void *src);
+extern void mnuRecordSetVector(void *record, const void *src);
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId);
 extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
 extern u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat);
@@ -5356,11 +5356,11 @@ void effUpdateSurfaceRecordAndDraw(u32 node) {
 }
 
 void effMenuRecordVectorSet(void *node, f32 vector[4]) {
-    mnuRecordSetVector((u8 *)((EffectSurfaceNode *)node)->record, vector);
+    mnuRecordSetVector(((EffectSurfaceNode *)node)->record, vector);
 }
 
 void effSetSurfaceRecordSecondaryVector(void *node, f32 vector[4]) {
-    fileSetRecordSecondVector((u8 *)((EffectSurfaceNode *)node)->record, vector);
+    fileSetRecordSecondVector(((EffectSurfaceNode *)node)->record, vector);
 }
 
 void effSetSurfaceNodeColor(s32 node, u32 color) {
@@ -12472,12 +12472,12 @@ void effUpdateSlotRecordAndDraw(u32 node) {
 
 /* Set the retained record's first vector. */
 void effSetActiveSlotPrimaryRecordVector(void *node, f32 vector[4]) {
-    mnuRecordSetVector((u8 *)((EffectSlotNode80 *)node)->record, vector);
+    mnuRecordSetVector(((EffectSlotNode80 *)node)->record, vector);
 }
 
 /* Set the retained record's second vector. */
 void effSetActiveSlotSecondaryRecordVector(void *node, f32 vector[4]) {
-    fileSetRecordSecondVector((u8 *)((EffectSlotNode80 *)node)->record, vector);
+    fileSetRecordSecondVector(((EffectSlotNode80 *)node)->record, vector);
 }
 
 /* Set the active effect slot's packed color. */

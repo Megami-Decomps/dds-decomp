@@ -6078,10 +6078,8 @@ void fileClearLoadObjectReferences(EffectSurfaceNode *obj) {
     }
 }
 
-/* The vector callers leave their second argument inherited through the
-   unprototyped declarations and the K&R definitions below. */
-extern void mnuRecordSetVector();
-extern void fileSetRecordSecondVector();
+extern void mnuRecordSetVector(void *record, const void *src);
+extern void fileSetRecordSecondVector(void *record, const void *src);
 
 /* Original-style implicit int; callers ignore its result. */
 fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
@@ -8576,22 +8574,16 @@ void fileReadVectorPtr20(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20));
 }
 
-void mnuRecordSetVector(obj, src)
-u8 *obj;
-void *src;
-{
-    PCP_COPY_VECTOR(*(u8 **)(obj + 0x20), src);
+void mnuRecordSetVector(void *record, const void *src) {
+    PCP_COPY_VECTOR(*(u8 **)((u8 *)record + 0x20), src);
 }
 
 void fileReadRecordSecondVector(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20) + 0x10);
 }
 
-void fileSetRecordSecondVector(obj, src)
-u8 *obj;
-void *src;
-{
-    PCP_COPY_VECTOR(*(u8 **)(obj + 0x20) + 0x10, src);
+void fileSetRecordSecondVector(void *record, const void *src) {
+    PCP_COPY_VECTOR(*(u8 **)((u8 *)record + 0x20) + 0x10, src);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", effModelUpdateControlFlags);
