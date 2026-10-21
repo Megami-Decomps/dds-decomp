@@ -490,7 +490,9 @@ functions use trampolines and are a different case.
   two returns where one arm is a load, arithmetic, compare or negation
   (`if (id < 0xa0) return 0; return id < 0xbf;`, `mnuIsBulletItemId`); a
   ternary/assign-if whose arm is a signed `s8`/`s16` load; several statements
-  in the `if` body (`if (x) { f |= 2; f |= 4; }`); a nested ternary
+  in the `if` body writing the *same* destination (`if (x) { f |= 2; f |= 4; }`;
+  statements writing different objects leave one set alone in the arm and
+  convert early); a nested ternary
   `a ? a : (b ? b : c)`; an else-if clamp chain on an `s8`/`s16`. One-insn arms
   (`if (x) f |= 2;`, `return g ? h : 0;`) give no `xori`. If-conversion turns one
   nesting level per pass, so a three-level ladder of conditional returns
