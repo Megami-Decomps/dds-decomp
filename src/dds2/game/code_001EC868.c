@@ -7,6 +7,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
 #include "btl_actor_status_table_api.h"
@@ -312,9 +313,6 @@ extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
-
-extern s32 btlAimHorizontalDirectionClampedVU(f32 *, f32 *, f32);
-
 
 extern void effBattleUpdate(BattleEffect *);
 

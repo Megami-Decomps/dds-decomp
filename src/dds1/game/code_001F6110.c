@@ -7,6 +7,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_boss_debug_api.h"
 #include "btl_vec3.h"
 #include "btl_skill_max_api.h"

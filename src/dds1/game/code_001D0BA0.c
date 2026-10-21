@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
 #include "btl_actor_status_table_api.h"
@@ -3187,11 +3188,9 @@ void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target) {
     }
 }
 
-extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
-
 void btlUnitFaceTargetScaled(BtlUnit *object, BtlUnit *target, f32 scale) {
-    u8 first[16];
-    u8 second[16];
+    f32 first[4] __attribute__((aligned(16)));
+    f32 second[4] __attribute__((aligned(16)));
     u8 result[16];
     if (((u32)object->status.flags & 0x80000) != 0) {
         btlUnitGetBodyPosVU(object);
