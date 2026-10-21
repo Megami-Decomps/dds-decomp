@@ -3,19 +3,6 @@
 
 #include "common.h"
 
-/* Fixed relocation-header view; the resource's full trailing extent is external. */
-typedef struct ItfMesRelocHeader {
-    u8 unknown00[8];
-    u32 magic;
-    u8 unknown0C[4];
-    s32 fixupTableOffset;
-    s32 fixupTableBytes;
-    u8 unknown18[4];
-    u8 relocated;
-    u8 unknown1D[3];
-    u8 payload[1];
-} ItfMesRelocHeader;
-
 /* Message tables contain relocated encoded-text addresses. */
 typedef struct ItfMesTable {
     u8 unk0[0x18];
@@ -37,9 +24,12 @@ typedef char ItfMesEntry_table_offset_must_be_0x4[
 typedef struct ItfMesSub {
     u8 unk0[8];
     u32 magic;
-    u8 unkC[0xC];
+    u8 unkC[4];
+    s32 fixupTableOffset;
+    s32 fixupTableBytes;
     u32 entryCount;
-    u8 unk1C[4];
+    u8 relocated;
+    u8 unk1D[3];
     ItfMesEntry entries[1];
 } ItfMesSub;
 

@@ -186,7 +186,8 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 ke
 }
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
-void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) {
+void effCompleteTransientResourceJob(struct FileRequest *job, void *userData) {
+    u32 *outInstance = userData;
     struct SdfMemBlock *allocation;
     EffectSlotSet *instance;
 
@@ -198,7 +199,8 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
-void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
+void effCompleteRetainedResourceJob(struct FileRequest *job, void *userData) {
+    u32 *outInstance = userData;
     struct SdfMemBlock *allocation;
     EffectSlotSet *instance;
 
@@ -217,9 +219,9 @@ void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 
     sprintf(path, D_003BD198, base, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
-        fileCreateCallbackRequest(path, 0, (u32)effCompleteRetainedResourceJob, (u32)outInstance);
+        fileCreateCallbackRequest(path, 0, effCompleteRetainedResourceJob, outInstance);
     } else {
-        fileCreateCallbackRequest(path, 0, (u32)effCompleteTransientResourceJob, (u32)outInstance);
+        fileCreateCallbackRequest(path, 0, effCompleteTransientResourceJob, outInstance);
     }
 }
 
@@ -239,7 +241,8 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 
 /* Publish mapped records before releasing their source allocation and completing the file job. */
 void effCompleteMappedResourceJob(struct FileRequest *job,
-                                  EffMappedResource **outMappedResource) {
+                                  void *userData) {
+    EffMappedResource **outMappedResource = userData;
     struct SdfMemBlock *allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;
@@ -259,7 +262,7 @@ void effRequestMappedResource(const char *base, const char *name,
 
     sprintf(path, D_003BD198, base, name);
     *outMappedResource = 0;
-    fileCreateCallbackRequest(path, 0, (u32)effCompleteMappedResourceJob, (u32)outMappedResource);
+    fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, outMappedResource);
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */

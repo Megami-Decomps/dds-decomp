@@ -30,6 +30,8 @@ struct ItfMesTextSlots;
 void itfInitializeCursorResetState(struct ItfMesBlk40 *cursor);
 /* Release the window's three sprites and restore its default bounds/fade limit. */
 void itfResetWindowResourceBlock(struct ItfMesBlkA4 *block);
+/* Adjust the panel fade limit from pad input and mirror it to the sprite. */
+void sndStepIndexByPad(struct ItfMesBlkA4 *panel);
 /* Clear the 32 encoded-text address slots owned by a message window. */
 void itfClearDrawStateWords(struct ItfMesTextSlots *slots);
 

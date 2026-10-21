@@ -16,7 +16,7 @@
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -3063,7 +3063,7 @@ void btlCreateStageTestTask(void) {
  * the request itself, returning zero; return one while it is pending. Retain
  * the K&R definition. */
 s32 btlDestroyStageTask(request)
-    FilePacRequest *request;
+    FileRequest *request;
 {
     if (request->state == FILE_REQUEST_COMPLETE_STATE) {
         void *deviceRequest = request->deviceRequest;

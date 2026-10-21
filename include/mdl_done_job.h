@@ -1,7 +1,7 @@
 #ifndef MDL_DONE_JOB_H
 #define MDL_DONE_JOB_H
 
-#include "file_pac.h"
+#include "file_request.h"
 
 #define MDL_DONE_JOB_BYTES 0x14
 
@@ -10,7 +10,7 @@ typedef struct MdlDoneJob {
     u16 group;            /* 0x00 */
     u16 id;               /* 0x02 */
     u32 arg;              /* 0x04 */
-    FilePacRequest *owner; /* 0x08 */
+    FileRequest *owner; /* 0x08 */
     void (*done)(u32);    /* 0x0C */
     u32 doneArg;          /* 0x10 */
 } MdlDoneJob;

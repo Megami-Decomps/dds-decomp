@@ -51,7 +51,7 @@
 
 #include "sdf.h"
 #include "kwln_fade.h"
-#include "file_pac.h"
+#include "file_request.h"
 #include "sdf_pac_work.h"
 #include "btl_stage_task_cleanup.h"
 #include "file_request_api.h"
@@ -2658,15 +2658,15 @@ void fileInitCursorPulse(void);
  * requested mode (0 load, 1 slot select, 2 new-game save, else poll) and
  * start the file-menu task with every flow counter cleared. */
 void fileEnterMcPackScene(s32 mode) {
-    FilePacRequest *request;
+    FileRequest *request;
     PacWork *node;
     u32 index = 0;
     void *world;
     s32 enabled;
 
     fileSetMemoryCardOperationActive();
-    request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    fileWaitForRequestReady((struct FileRequest *)request);
+    request = fileQueuePlainDispatchRequest("/mc/mcpack.LB");
+    fileWaitForRequestReady(request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {

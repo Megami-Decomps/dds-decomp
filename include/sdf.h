@@ -642,19 +642,19 @@ typedef char SdfGsTextureStateValues_size_must_be_0x18[
 
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 typedef struct SdfAssetEntry {
-    u32 pad00;             /* 0x00 */
+    u32 vifColorUnpackCommand; /* 0x00: V4_8 UNPACK, five vectors */
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
     u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
     u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
     u32 unk14;             /* 0x14 */
-    u32 pad18;             /* 0x18 */
+    u32 vifStateUnpackCommand; /* 0x18: S_32 UNPACK, five words */
     f32 unk1C;             /* 0x1C */
     u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
     u32 secondaryMode;     /* 0x24: secondary packet mode copied from SdfAsset */
     f32 y;                 /* 0x28 */
     f32 x;                 /* 0x2C */
-    u8 pad30[8];           /* 0x30 */
+    u32 vifTextureCommands[2]; /* 0x30: NOP, then V2_32 UNPACK of twelve vectors */
     SdfGsTextureStateValues primaryTextureState; /* 0x38 */
     SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
     SdfDrawTransform transforms[2]; /* 0x68 */
