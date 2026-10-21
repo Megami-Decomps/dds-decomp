@@ -632,7 +632,7 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
 extern BattleStartVoiceRow btlStartVoiceRows[];
 extern s32 btlRollAiBucket(void);
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-extern u32 func_001A5C40(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
+extern u32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
 
 extern char D_003A1DD8[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_003A1DF8[]; /* "btl:start voice off[SERIAL]\n" */
@@ -689,7 +689,7 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                damage = func_001A5C40(unit, chosen, 0, 1, 1, 1, 0);
+                damage = btlCalculateHpAttackOrRestoreAmount(unit, chosen, 0, 1, 1, 1, 0);
                 if (category == 2) {
                     if (hp + hp * 10 / 100 < damage) {
                         category = 0;

@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 /*
- * Translation unit boundary recovered at func_001A5C40. btlGetActorEntryMultiplier
+ * Translation unit boundary recovered at btlCalculateHpAttackOrRestoreAmount. btlGetActorEntryMultiplier
  * and the other helpers declared below belong to the preceding unit
  * (code_001A1960); the retail calls to them keep their possibly-throwing
  * (non-nothrow) shape, so they must stay external here. A same-unit definition
@@ -110,7 +110,7 @@ extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 
 
 /* Clear the supplied party-record status mask. */
 
-s32 func_001A5C40(BtlUnit *attacker, BtlUnit *recipient, s32 command,
+s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
                    s32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
@@ -217,7 +217,7 @@ s32 func_001A5C40(BtlUnit *attacker, BtlUnit *recipient, s32 command,
     }
 }
 
-s32 func_001A6118(BtlUnit *attacker, BtlUnit *recipient, s32 command,
+s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
                    s32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;

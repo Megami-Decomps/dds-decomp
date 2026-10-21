@@ -533,9 +533,9 @@ extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 /* ASM-only definition; align the current pinned declaration in code_001A9780.c. */
-extern u32 func_001A5C40(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
+extern u32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
 
-extern s32 func_001A6118(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 
@@ -925,11 +925,11 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             s32 mpDelta;
             f32 multiplier;
 
-            hpAttack = (s32)func_001A5C40(source, recipient, command, maxHits, press, 1, (s32)calculationFlags);
-            hpRestore = (s32)func_001A5C40(source, recipient, command, maxHits, press, 0, (s32)calculationFlags);
+            hpAttack = (s32)btlCalculateHpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 1, (s32)calculationFlags);
+            hpRestore = (s32)btlCalculateHpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 0, (s32)calculationFlags);
             hpAttack = hpAttack * ratio;
-            mpAttack = func_001A6118(source, recipient, command, maxHits, press, 1, calculationFlags);
-            mpRestore = func_001A6118(source, recipient, command, maxHits, press, 0, calculationFlags);
+            mpAttack = btlCalculateMpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 1, calculationFlags);
+            mpRestore = btlCalculateMpAttackOrRestoreAmount(source, recipient, command, maxHits, press, 0, calculationFlags);
             group->entries[hitIndex].addedStatus = addedStatus;
             group->entries[hitIndex].deferredStatus = deferredStatus;
             group->entries[hitIndex].removedStatus = removedStatus;
