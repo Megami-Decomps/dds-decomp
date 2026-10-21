@@ -2327,7 +2327,7 @@ s32 fldFindTableEntry(s32 index) {
 extern s16 D_003931A4[];
 extern s16 D_003931A6[];
 
-void func_00142670(s32 index) {
+void fldDispatchSceneRoomSelection(s32 index) {
     FieldSequenceRecord sequence;
     s32 command;
     s32 sourceRoom;
