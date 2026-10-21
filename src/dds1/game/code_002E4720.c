@@ -133,7 +133,7 @@ extern DevState *sdfFileCmdReadOpen(const char *path,
 
 
 
-extern void func_003110C8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern void sceDevctl(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 
 
@@ -770,7 +770,7 @@ s32 sdfDevGetFileSize(void) {
 
 extern s32 malloc(s32);
 
-extern s32 func_0030EF30(s32 fileHandle, s32 buffer, s32 byteCount);
+extern s32 sceRead(s32 fileHandle, s32 buffer, s32 byteCount);
 
 
 
@@ -789,7 +789,7 @@ void sdfDevLoadWholeFile(const char *fileName) {
     sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
     bufferAddress = malloc(fileBytes);
     D_003BDA44 = bufferAddress;
-    func_0030EF30(fileHandle, bufferAddress, fileBytes);
+    sceRead(fileHandle, bufferAddress, fileBytes);
     sceClose(fileHandle);
     FlushCache(0);
 }
@@ -1267,7 +1267,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
-            result = func_0030EF30(state->resourceId, (s32)state->requestData,
+            result = sceRead(state->resourceId, (s32)state->requestData,
                            state->requestExtra);
             if (result < 0) {
                 sdfFileCmdError(state, result);
@@ -1345,7 +1345,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
                 }
                 state->requestData = buffer;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = func_0030EF30(state->resourceId, (s32)buffer, transferResult);
+                transferResult = sceRead(state->resourceId, (s32)buffer, transferResult);
                 if (transferResult < 0) {
                     sdfFileCmdError(state, transferResult);
                     continue;
@@ -1863,8 +1863,8 @@ void sdfPowerOffLoop(s32 semaphore) {
 
     for (;;) {
         WaitSema(semaphore);
-        func_003110C8(D_003BD460, 0x5003, 0, 0, 0, 0);
-        func_003110C8(D_003BD468, 0x4806, 0, 0, 0, 0);
+        sceDevctl(D_003BD460, 0x5003, 0, 0, 0, 0);
+        sceDevctl(D_003BD468, 0x4806, 0, 0, 0, 0);
         sceCdPowerOff(&status);
     }
 }
@@ -1892,10 +1892,10 @@ typedef void (*SdfPowerOffCallback)(void *);
 
 extern SdfPowerOffCallback sceCdPOffCallback(SdfPowerOffCallback, void *);
 
-extern s32 func_0030E620(void);
+extern s32 sceFsInit(void);
 
 
-extern s32 func_00310C00(const char *, const char *, s32, const void *, s32);
+extern s32 sceMount(const char *, const char *, s32, const void *, s32);
 
 /* Load the HDD/PFS dev modules and mount path before enabling PFS debug mode. */
 void sdfDevInitializeHddPfsDebugMode(char *path) {
@@ -1926,9 +1926,9 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     thread = sdfCreateThread((void *)sdfPowerOffLoop, D_003FA800, 0x800, 1);
     _StartThread(thread, semaphore);
     sceCdPOffCallback(sdfPowerOffInterruptCallback, (void *)semaphore);
-    func_0030E620();
+    sceFsInit();
     sprintf(buffer, "hdd0:%s,", path);
-    func_00310C00(D_003BD470, buffer, 0, 0, 0);
+    sceMount(D_003BD470, buffer, 0, 0, 0);
     sdfPfsDebugMode = 1;
 }
 

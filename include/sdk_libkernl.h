@@ -147,6 +147,9 @@ s32 sceSifSetDma(void *transfer, s32 count);
 #ifndef SDK_SKIP_sceSifSetRpcQueue
 void sceSifSetRpcQueue(void *queue, s32 threadId);
 #endif
+#ifndef SDK_SKIP_sceSync
+s32 sceSync(const char *device, s32 flag);
+#endif
 #ifndef SDK_SKIP_sceWrite
 s32 sceWrite(s32 fd, const void *data, s32 size);
 #endif
@@ -158,9 +161,6 @@ s32 DisableDmac(s32 channel);
 #endif
 #ifndef SDK_SKIP_EnableDmac
 s32 EnableDmac(s32 channel);
-#endif
-#ifndef SDK_SKIP_sdfPfsSendPathRequest
-s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 #endif
 
 #ifdef VERSION_DDS2

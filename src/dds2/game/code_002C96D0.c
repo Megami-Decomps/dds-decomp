@@ -4834,7 +4834,7 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     }
     fileJobWriteSerializedPayload(fd, job);
     sceClose(fd);
-    sdfPfsSendPathRequest(D_00437E20, 0);
+    sceSync(D_00437E20, 0);
 }
 
 FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
@@ -5515,7 +5515,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
     }
     sceClose(fd);
-    sdfPfsSendPathRequest(D_00437E20, 0);
+    sceSync(D_00437E20, 0);
 }
 
 /* Sixteen-byte preamble of a saved file queue. */
@@ -5620,7 +5620,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
     }
     sceClose(fd);
-    sdfPfsSendPathRequest(D_00437E20, 0);
+    sceSync(D_00437E20, 0);
 }
 
 FileQueue *fileQueueCreateFromCommandState(const char *entry) {
