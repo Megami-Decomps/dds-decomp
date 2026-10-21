@@ -248,7 +248,7 @@ void sdfServiceGraphicsBuffers(void) {
 
 extern s32 sdfCreateThread(void *, void *, s32, s32);
 
-extern u8 D_003BD2E8;
+extern u8 sdfCurrentDisplayModeIndex;
 extern u8 D_003BD2E9;
 extern SdfThreadNode sdfGraphicsBufferThread;
 extern u8 sdfGraphicsTransferThreadStack[0x8000];
@@ -263,7 +263,7 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
     SdfGraphObj *graph = &D_003980E0;
 
     sceGsResetPath();
-    D_003BD2E8 = 1;
+    sdfCurrentDisplayModeIndex = 1;
     sdfGrSetFrameSetMode(graph, 1, 1);
     sdfGraphRecreateBuffers(graph);
     D_003BD2E9 = 0;
