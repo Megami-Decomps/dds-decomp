@@ -5050,7 +5050,7 @@ void effConfigureSurfaceNodeByKind(EffectSurfaceNode *object, s32 kind, s32 *set
 }
 
 EffectSurfaceNode *effCreateSurfaceNodeFromFile(FileJobPayload *source) {
-    EffectSurfaceNode *object = effResourceReferenceReplaceFromFile(source);
+    EffectSurfaceNode *object = (EffectSurfaceNode *)effResourceReferenceReplaceFromFile(source);
     s32 *data = fileResolveSecondaryBuffer(source);
     if (data != NULL) {
         effConfigureSurfaceNodeByKind(object, source->primary.selector, data);
