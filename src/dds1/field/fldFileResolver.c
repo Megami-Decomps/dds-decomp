@@ -839,7 +839,7 @@ extern EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name);
 
 extern u32 fldPushDisplayValue(u32, EffWorldNode *);
 
-extern s32 func_00138ED0(FldFileResource *, EffWorldNode *);
+extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
 
 extern void func_00148FF0(s32, u32, f32 *, f32, f32, f32);
 
@@ -980,7 +980,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     break;
                 case 1:
                     spawnedObject = evtSpawnActionObj11(spawnResource->id, (EvtWorldSourceTransformPrefix *)transform, spawnResource->name);
-                    func_00138ED0(spawnResource, spawnedObject);
+                    fldRegisterRoomObject(spawnResource, spawnedObject);
                     break;
                 case 2:
                     if (D_0032E4B4[0] != 0) {

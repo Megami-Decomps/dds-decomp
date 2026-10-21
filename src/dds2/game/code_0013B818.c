@@ -41,7 +41,7 @@
 /* Declared before first use (were implicit int). */
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
-extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
+extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
  * An early void declaration moves fldUpdateTitleBannerTask's position update
  * at +0x11C/+0x124/+0x12C from retail $3 to $2. */
@@ -365,7 +365,7 @@ s32 fldPushDisplayValue(u32 value, EffWorldNode *unusedObject) {
     return index;
 }
 
-INCLUDE_ASM(const s32, "game/code_0013B818", func_0013BAB8);
+INCLUDE_ASM(const s32, "game/code_0013B818", fldRegisterRoomObject);
 
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
@@ -751,7 +751,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     D_0038BE50[index].childResource.id = dds3AdvanceWorldCounter();
     D_0038BE50[index].childResource.name = (const char *)D_0038BC00;
     child = evtSpawnActionObj11(D_0038BE50[index].childResource.id, (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform, D_0038BC10);
-    roomIndex = func_0013BAB8(&D_0038BE50[index].childResource, child);
+    roomIndex = fldRegisterRoomObject(&D_0038BE50[index].childResource, child);
     fldRoomRecords[roomIndex].roomId = roomId;
     fldRoomRecords[roomIndex].mode = 2;
     fldRoomRecords[roomIndex].entryIndex = -1;
@@ -806,7 +806,7 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     object = evtSpawnActionObj11(D_0038BE50[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform,
                                  D_0038BC10);
-    taskIndex = func_0013BAB8(&D_0038BE50[index].childResource, object);
+    taskIndex = fldRegisterRoomObject(&D_0038BE50[index].childResource, object);
     if (kind == 0) {
         fldRoomRecords[taskIndex].mode = 3;
         fldRoomRecords[taskIndex].unk120 = roomValue;

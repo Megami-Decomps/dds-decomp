@@ -340,7 +340,7 @@ extern EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name);
 
 extern u32 fldPushDisplayValue(u32, EffWorldNode *);
 
-extern s32 func_00138ED0(FldFileResource *, EffWorldNode *);
+extern s32 fldRegisterRoomObject(FldFileResource *, EffWorldNode *);
 
 extern struct DevRequest *D_003BAC14;
 
@@ -670,7 +670,7 @@ u32 fldPushDisplayValue(u32 value, EffWorldNode *object) {
     return index;
 }
 
-INCLUDE_ASM(const s32, "game/code_00138C30", func_00138ED0);
+INCLUDE_ASM(const s32, "game/code_00138C30", fldRegisterRoomObject);
 
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
@@ -1051,7 +1051,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
                                  D_00330770);
-    taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
+    taskIndex = fldRegisterRoomObject(&D_003309B0[index].childResource, object);
     fldRoomRecords[taskIndex].roomId = roomId;
     fldRoomRecords[taskIndex].mode = 2;
     D_003BAE34++;
@@ -1106,7 +1106,7 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
                                  D_00330770);
-    taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
+    taskIndex = fldRegisterRoomObject(&D_003309B0[index].childResource, object);
     if (kind == 0) {
         fldRoomRecords[taskIndex].mode = 3;
         fldRoomRecords[taskIndex].unk120 = roomValue;
