@@ -36,51 +36,6 @@
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-typedef struct BattleController {
-    u8 pad_000[0x1F4];
-    u32 flags;
-    u8 pad_1F8[0x2C];
-    BtlTask *taskHead; /* 0x224 */
-    BtlUnit *actors;
-    u8 pad_22C[0x20];
-    u16 variant;
-    u8 pad_24E[2];
-    s32 step;
-    u8 pad_254[6];
-    u16 spawnCount; /* 0x25A: enemies spawned so far */
-    u8 pad_25C[0x14];
-    s32 adjustmentRecordIndex;
-    s32 adjustmentGroupIndex;
-    s32 adjustmentEntryIndex;
-    s32 mode;
-    u8 pad_280[0x1C];
-    KwlnTask *taskParent;
-    u8 pad_2A0[8];
-    s32 sceneObjectTask;
-    s32 spriteObject;
-    s32 cleanupTask;
-    BattleItemDrop itemDrops[3];
-    s32 moneyEarned; /* 0x2C0 */
-    u8 pad2C4[4];
-    s32 experienceEarned; /* 0x2C8 */
-    s32 epEarned; /* 0x2CC */
-    u8 pad2D0[4];
-    BtlSceneSlot slots[8];
-    BtlTask *groupPrimary[20];
-    BtlTask *groupSecondary[45];
-    BtlTask *groupTertiary[15];
-    u8 pad_42C[0x20];
-    BtlSceneFadingRecord fadingRecords[8]; /* 0x44C */
-    u8 pad_48C[0x18];
-    EffectSlotSet *resA; /* 0x4A4 */
-    EffectSlotSet *resB;
-    EffectSlotSet *resC;
-    u8 pad_4B0[0x100];
-    s32 (*sceneCallback)();
-    u8 pad_5B4[0xD4];
-    u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x688 */
-} BattleController;
-
 typedef struct EntryPair {
     s16 first;
     s16 second;
@@ -1028,7 +983,7 @@ extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second);
 
 s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     s32 *requirementCursor;
     u32 requiredCount;
     u32 i;
@@ -1051,7 +1006,7 @@ s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPart
         return 0;
     }
     if ((datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
-        (datBattleSceneRecords[controller->mode].flags & 1) == 0) {
+        (datBattleSceneRecords[controller->battleMode].flags & 1) == 0) {
         output->commandId = command;
         result = btlFindCommandPartnersByAffinity(unit, command, &output->firstPartner, &output->secondPartner);
     } else {
@@ -1208,7 +1163,7 @@ s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
 
 /* Accumulate one item drop; new IDs are discarded if all three slots are occupied. */
 void btlAddItemDrop(u16 item) {
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
 
     if (item != 0) {
         s32 found = 0;
@@ -1248,7 +1203,7 @@ extern char D_003A1830[];
 extern char D_003A1848[];
 
 void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     DatEnemyRecord *record = &datEnemyRecords[enemy->partyRecord.unitId];
     s32 level = btlAverageLevelsForMaskExcludingStatus20(4);
     s32 enemyLevel = record->level;
@@ -1311,8 +1266,8 @@ s32 btlAllActiveUnitsReady(void) {
 
 /* Return the battle-parameter scale for the selected encounter's clamped adjustment. */
 f32 btlGetEncounterAdjustmentScale(void) {
-    BattleController *runtime = (BattleController *)btlGetRuntime();
-    s32 adjustment = datBattleAdjustmentRecords[runtime->adjustmentRecordIndex]
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    s32 adjustment = datBattleAdjustmentRecords[runtime->encounterPack]
                          .groups[runtime->adjustmentGroupIndex]
                          .entries[runtime->adjustmentEntryIndex]
                          .value;
@@ -1337,7 +1292,7 @@ u32 btlGetEscapeAttemptCount(void) {
 s32 btlChooseAvailableUnit(void) {
     s32 candidates[16];
     s32 count = 0;
-    BtlTask *node = ((BattleController *)btlGetRuntime())->taskHead;
+    BtlTask *node = ((BtlState *)btlGetRuntime())->tasks;
     for (; node != 0; node = node->next) {
         if ((node->flags & 8) != 0) {
             BtlUnit *actor = node->unit;
@@ -1360,7 +1315,7 @@ s32 btlChooseAvailableUnit(void) {
 }
 
 s32 btlCountAvailableUnits(void) {
-    BtlUnit *node = ((BattleController *)btlGetRuntime())->actors;
+    BtlUnit *node = ((BtlState *)btlGetRuntime())->units;
     s32 count = 0;
     for (; node != 0; node = node->next) {
         u32 flags = node->status.flags;
@@ -1377,7 +1332,7 @@ s32 btlCountAvailableUnits(void) {
 
 s32 btlCountAvailableParticipants(void) {
     s32 count = 0;
-    BtlUnit *node = ((BattleController *)btlGetRuntime())->actors;
+    BtlUnit *node = ((BtlState *)btlGetRuntime())->units;
     for (; node != 0; node = node->next) {
         u32 flags = node->status.flags;
         if ((flags & 1) != 0) {

@@ -73,7 +73,6 @@ extern ActorSlotOrder *D_003BD840[2];
 
 
 
-extern void evtCreateMessageWindowIfMissing(void *text);
 
 
 
@@ -2622,7 +2621,7 @@ void btlDrawPanelIconGroup(s32 section, s32 delta) {
 extern void func_001AF058(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001AF5D0(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void btlDrawCompositePanelSprites(void *, s32, s32, u32);
-extern void func_001AFF78(BtlAnalysisPanelWork *, s32, s32, s32, s32);
+extern void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
@@ -2733,7 +2732,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     }
                     sprintf(text, D_003BB408, actor->partyRecord.hp,
                                   actor->partyRecord.maxHp);
-                    func_001AFF78(work, 0, work->x, work->y, work->alpha);
+                    btlDrawAnalysisPanelVitalBars(work, 0, work->x, work->y, work->alpha);
                     glyph = (struct FrFontGlyph *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 17) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
@@ -2754,7 +2753,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     }
                     sprintf(text, D_003BB408, actor->partyRecord.mp,
                                   actor->partyRecord.maxMp);
-                    func_001AFF78(work, 1, work->x, work->y, work->alpha);
+                    btlDrawAnalysisPanelVitalBars(work, 1, work->x, work->y, work->alpha);
                     glyph = (struct FrFontGlyph *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 41) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
@@ -3186,7 +3185,7 @@ void func_001AF5D0(BtlLinkedCommand *unused, BtlAnalysisPanelWork *work) {
 extern const BattlePanelColors D_003A25C0;
 
 /* Draw the analysis panel's two-piece HP/MP bar and restore each cropped slot. */
-void func_001AFF78(BtlAnalysisPanelWork *work, s32 stat, s32 x, s32 y, s32 alpha) {
+void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *work, s32 stat, s32 x, s32 y, s32 alpha) {
     s32 frames[][2][3] = {
         {{119, 30, 0x30}, {170, 30, 0x31}},
         {{119, 54, 0x36}, {170, 54, 0x37}}
@@ -5515,9 +5514,9 @@ extern void btlTrackActorVitalChanges(BtlUnit *, BattleActorPanelWork *, s32, s8
 extern void btlUpdateActorPanelSecondaryPulse(BtlUnit *, BattleActorPanelWork *, s32);
 extern void btlUpdateActorVitalChangeEffects(BtlUnit *, BattleActorPanelWork *, s32);
 extern void btlWriteTriangleHighlightPulse(BtlUnit *, BattleActorPanelWork *, s32);
-extern void func_001B8CB8(s32, BattleActorPanelWork *, s32);
+extern void btlUpdateActorPanelCursorState(s32, BattleActorPanelWork *, s32);
 extern void func_001B9A50(BtlUnit *, BattleActorPanelWork *, s32);
-extern void func_001BB440(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlUpdateActorVitalEffectState(BtlUnit *, BattleActorPanelWork *, s32);
 extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
@@ -5548,7 +5547,7 @@ s32 func_001B6CF8(KwlnTask *task) {
     for (; unit != NULL && i < count; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit)) {
             slot = unit->lookupId;
-            func_001BB440(unit, work, slot);
+            btlUpdateActorVitalEffectState(unit, work, slot);
             work->activeEntries[slot].position[0] =
                 work->activeEntries[slot].basePosition[0] + work->activeEntries[slot].presentation.offset[0];
             work->activeEntries[slot].position[1] =
@@ -5578,7 +5577,7 @@ s32 func_001B6CF8(KwlnTask *task) {
             btlDrawActorPanelPulse(unit, work, slot);
             btlUpdateActorPanelSecondaryPulse(unit, work, slot);
             btlDrawActorPanelSecondaryPulse(unit, work, slot);
-            func_001B8CB8((s32)unit, work, slot);
+            btlUpdateActorPanelCursorState((s32)unit, work, slot);
             btlDrawActorPanelCursor(unit, work, slot);
             btlUpdateShrinkingMirroredSprites((s32)unit, work->activeEntries[slot].presentation.mirroredSprites, 4);
             btlDrawMirroredPanelSprites((s32)unit, work->activeEntries[slot].presentation.mirroredSprites, 4);
@@ -6328,7 +6327,7 @@ extern const BattleCursorIds D_003BB458[];
 extern const BattleCursorOffsets D_003A2CD0;
 extern const BattleCursorEchoOffsets D_003A2CE8;
 
-void func_001B8CB8(s32 unused, BattleActorPanelWork *work, s32 slot) {
+void btlUpdateActorPanelCursorState(s32 unused, BattleActorPanelWork *work, s32 slot) {
     BattleCursorIds ids = D_003BB458[0];
     BattleCursorOffsets settle = D_003A2CD0;
     BattleCursorEchoOffsets echo = D_003A2CE8;
@@ -7129,7 +7128,7 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
     }
 }
 
-void func_001BB440(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
+void btlUpdateActorVitalEffectState(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
     switch (work->activeEntries[slot].presentation.hpState) {
     case 0x11:
         work->activeEntries[slot].presentation.offset[0] = btlNextScaledRandom(8);

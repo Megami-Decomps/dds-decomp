@@ -483,7 +483,7 @@ extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)
 
 /* vu0 routine: native instance matrix composition before billboard geometry. */
 
-void func_0015A4B0(EffInstance *instance) {
+void effDrawBillboardInstance(EffInstance *instance) {
     EffPacketParams params;
     s32 modeValues[3];
     f32 matrix[4][4];
@@ -2604,7 +2604,7 @@ void effFreePacketRecordScaleTemplate(u32 effect) {
 }
 
 /* vu0 routine: seed radial placement, normalized velocity and activation age. */
-void func_0015EE70(EffTemplatePacketList *effect, s32 index) {
+void effInitRadialEmitterPacket(EffTemplatePacketList *effect, s32 index) {
     f32 direction[4];
     EffectBufferRecord *packet = effect->head.buffer->records;
     f32 radius;
@@ -2716,7 +2716,7 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
         f32 magnitude;
 
         if (age == EFF_PACKET_INITIAL_TAG) {
-            func_0015EE70(effect, index);
+            effInitRadialEmitterPacket(effect, index);
             age = packet->age;
         }
         if (age >= 0) {

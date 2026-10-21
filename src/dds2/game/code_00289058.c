@@ -638,7 +638,6 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
 }
 
 extern DspUnitName *D_00435E48;
-extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void mnuActivateMantraNode(MnuStatusResource *, u16);
 extern s32 mnuFindMantraSourceCandidate(MnuStatusResource *, MantraMenuSrc *);

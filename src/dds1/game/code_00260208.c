@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "brs_icon_record.h"
 #include "common.h"
+#include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
@@ -894,7 +895,6 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *work) {
 }
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
-extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtSetMessageWindowPageValue(s32);
 extern void btlSnapshotResultRewards(BrsRewardSummary *);
 extern s32 brsBuildRewardRows(BrsRewardBatch *, BrsRewardSummary *);

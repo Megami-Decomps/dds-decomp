@@ -91,7 +91,6 @@ extern EffectList *mnuAllocateValueRecord(u32);
 
 extern void mnuLoadBackdropAssetsAndTintSlots(void *);
 
-extern void evtCreateMessageWindowIfMissing(s32);
 
 extern char mnuCampMessagePack[];
 
@@ -113,14 +112,15 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     menu->resource = allocation;
     mnuClearPanelTransitionState(&menu->panel);
     /* Mode also selects the normal or alternate staff image table. */
-    if (dds3AdminReadPreviousSignedSample() != 0) {
-        menu->resourceQueue = mnuAllocateValueRecord(1);
-    } else {
+    /* Keep the zero case first to preserve the matched branch layout. */
+    if (dds3AdminReadPreviousSignedSample() == 0) {
         menu->resourceQueue = mnuAllocateValueRecord(0);
+    } else {
+        menu->resourceQueue = mnuAllocateValueRecord(1);
     }
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuLoadBackdropAssetsAndTintSlots(menu->background);
-    evtCreateMessageWindowIfMissing((s32)mnuCampMessagePack);
+    evtCreateMessageWindowIfMissing((struct ItfMesSub *)(s32)mnuCampMessagePack);
     mnuLoadStaffImageResources(menu);
     mnuAppendStaffResourceRequests(menu);
     mnuResetGradientFadeColor(menu->timer, 0x40);

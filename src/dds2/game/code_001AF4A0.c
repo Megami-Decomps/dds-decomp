@@ -110,39 +110,10 @@ extern EncBgRow *D_00435E14;
 
 extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
-typedef struct BattleController {
-    u8 pad_000[0x214];
-    s32 frame;
-    u32 flags;
-    u32 flags21C;
-    u8 pad_220[0x28];
-    ActionStateLink *taskHead; /* 0x248 */
-    BtlUnit *actors;
-    u8 pad_250[0x1E];
-    u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
-    u8 pad26F;
-    u16 variant; /* 0x270 */
-    u8 pad_272[0x22];
-    s32 adjustmentRecordIndex; /* 0x294 */
-    s32 adjustmentGroupIndex;  /* 0x298 */
-    s32 adjustmentEntryIndex;  /* 0x29C */
-    u8 pad_2A0[0x24];
-    KwlnTask *drawTask;
-    u8 pad2C8[0x14];
-    BattleItemDrop itemDrops[3];
-    s32 moneyEarned; /* 0x2E8 */
-    u32 rewardMacca; /* 0x2EC */
-    s32 experienceEarned; /* 0x2F0 */
-    s32 epEarned; /* 0x2F4 */
-    s32 totalAp; /* 0x2F8: defeat EP accumulated for the result screen. */
-    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
-    u8 pad2FE[0x3DE];
-    s32 (*commandRangeOverride)(BtlUnit *, s32);
-} BattleController;
-typedef char BattleControllerTotalApOffsetCheck[
-    ((u32)&((BattleController *)0)->totalAp == 0x2F8) ? 1 : -1];
-typedef char BattleControllerDrawTaskOffsetCheck[
-    ((u32)&((BattleController *)0)->drawTask == 0x2C4) ? 1 : -1];
+typedef char BtlStateTotalApDds2OffsetCheck[
+    ((u32)&((BtlState *)0)->unk2F8 == 0x2F8) ? 1 : -1];
+typedef char BtlStateCommandRangeOverrideDds2OffsetCheck[
+    ((u32)&((BtlState *)0)->commandRangeOverride == 0x6DC) ? 1 : -1];
 
 extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
 
@@ -773,7 +744,7 @@ f32 func_001B0B20(void) {
 
 
 u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     s32 result;
     s32 minimum;
     s32 maximum;

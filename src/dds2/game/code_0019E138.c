@@ -9,6 +9,7 @@
 #include "sdf_packet_header.h"
 #include "itf_gs_state_packet.h"
 #include "fr_font.h"
+#include "fr_font_measure.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_task_state.h"
@@ -803,7 +804,6 @@ extern s32 D_00436584;
 extern s32 D_00436588;
 extern u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 frFontCountGlyphBands(FrFontGlyph *text);
-extern s32 frFontMeasureLineWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
 /* Cycle a segment counter every 30 calls, but draw the full bank text stream.

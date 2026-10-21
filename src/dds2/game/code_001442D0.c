@@ -47,6 +47,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
+#include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "dds3obj.h"
 #include "dds3_world_selection.h"
@@ -355,7 +356,6 @@ extern s32 D_00389884[];
 
 extern u8 D_003A9EB0[];
 
-extern void evtCreateMessageWindowIfMissing(void *definition);
 
 
 extern void fldResetPlayerSceneObjectState(void);
@@ -3061,8 +3061,6 @@ interpolate:
 
 extern s32 D_003A8E60[];
 
-extern s32 effCreateNodeFromParameter();
-
 extern char *D_00413860[4];
 
 void fldLoadFieldEffectTextureSlots(void) {
@@ -3072,7 +3070,7 @@ void fldLoadFieldEffectTextureSlots(void) {
     memcpy(names, D_00413860, sizeof(names));
     for (i = 0; i < 4; i++) {
         fldEffectTextureLoadHandles[i] = sdfReadNamedResource(names[i], &fldEffectTextureData[i], 0);
-        fldEffectTextureNodes[i] = effCreateNodeFromParameter(fldEffectTextureData[i]);
+        fldEffectTextureNodes[i] = (s32)effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_003A8E60[i] = 0;
     }
 }
@@ -3159,7 +3157,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
 void mnuInitializeResourceEntries(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
-        mnuPositionedResourceNodes[i] = effCreateNodeFromParameter(D_0043633C);
+        mnuPositionedResourceNodes[i] = (s32)effCreateNodeFromParameter(D_0043633C);
         mnuPositionedResourceActive[i] = 0;
     }
 }
@@ -4267,10 +4265,10 @@ void fldLoadWeatherEffects(void) {
     D_004363B4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)handle);
     D_00436380 = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
-    fldDamEffectNode = effCreateNodeFromParameter(D_00436384);
+    fldDamEffectNode = (u32)effCreateNodeFromParameter(D_00436384);
     fldDamEffectPositioned = 0;
     D_00436390 = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
-    fldYukEffectNode = effCreateNodeFromParameter(D_00436394);
+    fldYukEffectNode = (u32)effCreateNodeFromParameter(D_00436394);
     fldYukEffectPositioned = 0;
 }
 
