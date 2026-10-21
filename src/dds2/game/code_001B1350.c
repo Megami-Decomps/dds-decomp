@@ -35,38 +35,6 @@ extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item);
 extern u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item);
 
-typedef struct BattleController {
-    u8 pad_000[0x214];
-    s32 frame;
-    u32 flags;
-    u32 flags21C;
-    u8 pad_220[0x28];
-    ActionStateLink *taskHead; /* 0x248 */
-    BtlUnit *actors;
-    u8 pad_250[0x1E];
-    u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
-    u8 pad26F;
-    u16 variant; /* 0x270 */
-    u8 pad_272[0x22];
-    s32 adjustmentRecordIndex; /* 0x294 */
-    s32 adjustmentGroupIndex;  /* 0x298 */
-    s32 adjustmentEntryIndex;  /* 0x29C */
-    u8 pad_2A0[0x24];
-    KwlnTask *drawTask;
-    u8 pad2C8[0x14];
-    BattleItemDrop itemDrops[3];
-    s32 moneyEarned; /* 0x2E8 */
-    u32 rewardMacca; /* 0x2EC */
-    s32 experienceEarned; /* 0x2F0 */
-    s32 epEarned; /* 0x2F4 */
-    s32 totalAp; /* 0x2F8: defeat EP accumulated for the result screen. */
-    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
-    u8 pad2FE[0x3DE];
-    s32 (*commandRangeOverride)(BtlUnit *, s32);
-} BattleController;
-typedef char BattleControllerTotalApOffsetCheck[
-    ((u32)&((BattleController *)0)->totalAp == 0x2F8) ? 1 : -1];
-
 extern s32 D_003B4F70[];
 
 extern DatEnemyRecord *datEnemyRecords;
@@ -551,7 +519,7 @@ s32 btlBothSidesActive(BtlUnit *unit) {
     }
     a = 0;
     b = 0;
-    for (actor = ((BattleController *)btlGetRuntime())->actors; actor != 0; actor = actor->nextActor) {
+    for (actor = ((BtlState *)btlGetRuntime())->units; actor != 0; actor = actor->nextActor) {
         if (actor->status.flags & 1) {
             if (!(actor->status.flags & 0xE0)) {
                 if (actor->status.flags & 0x200) {
@@ -713,7 +681,7 @@ s32 btlGetSelectedUnitProperty(BtlUnit *unit) {
 s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
     s32 i = 0;
     u32 sides = 0;
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     u32 count = btlGetIndexListCount(targets);
     s32 skipped;
     BtlUnit *actor;
@@ -728,7 +696,7 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
         }
     }
     count = 0;
-    for (actor = controller->actors; actor != NULL; actor = actor->nextActor) {
+    for (actor = controller->units; actor != NULL; actor = actor->nextActor) {
         if (actor->status.flags & 1) {
             if (actor->status.flags & 0xE0) {
                 continue;
