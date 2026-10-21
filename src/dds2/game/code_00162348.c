@@ -529,6 +529,8 @@ static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, SdfListHead *pack
     pool->append(pool, packet);
 }
 
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
+
 void parDrawPendingParticleRecords(void) {
     ParReleaseRecord *record;
     SdfListHead *packet;
@@ -583,7 +585,6 @@ void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
 
 /* Draw parameter block filled per strip by parDrawPendingCellSystems. */
 extern EffPacketParams parDrawControl;
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 void parControlInit(void) {
     memset(&parDrawControl, 0, 0x2C);
