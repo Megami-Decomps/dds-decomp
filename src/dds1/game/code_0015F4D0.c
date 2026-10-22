@@ -92,12 +92,12 @@ void billCopyDispatchWorkVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-/* vu0 routine: effect->matrix20 = matrix * effect->matrix70 via sdfComposeVuMatrixFromRegisters */
-void effComposeBillboardTransformMatrix(u8 *effect, void *matrix) {
+/* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via sdfComposeVuMatrixFromRegisters */
+void effComposeBillboardTransformMatrix(EffectDispatchState *effect, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    VU0_LOAD_MATRIX_B(effect + 0x70);
+    VU0_LOAD_MATRIX_B(effect->sourceMatrix);
     sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX(effect + 0x20);
+    VU0_STORE_MATRIX(effect->composedMatrix);
 }
 
 /* Set the packed color consumed by the dispatched polygon work. */
