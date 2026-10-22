@@ -14,7 +14,7 @@ typedef struct AdminWork {
     u8 pad0B;
     s8 signedHistory[8];          /* +0x0C */
     u8 unsignedHistory[8];        /* +0x14 */
-    void *requestData;            /* +0x1C */
+    void *ownedRequestData;        /* +0x1C: copied request payload, freed by the task. */
     u8 requestSizeLowByte;        /* +0x20 */
     u8 modeTransitionDelay;       /* +0x21 */
     u8 pad22[2];
@@ -26,7 +26,7 @@ typedef char AdminWork_requestedMode_at_0x09[((u32)&((AdminWork *)0)->requestedM
 typedef char AdminWork_historyIndex_at_0x0A[((u32)&((AdminWork *)0)->historyIndex == 0x0A) ? 1 : -1];
 typedef char AdminWork_history_at_0x0C[((u32)&((AdminWork *)0)->signedHistory == 0x0C) ? 1 : -1];
 typedef char AdminWork_unsignedHistory_at_0x14[((u32)&((AdminWork *)0)->unsignedHistory == 0x14) ? 1 : -1];
-typedef char AdminWork_requestData_at_0x1C[((u32)&((AdminWork *)0)->requestData == 0x1C) ? 1 : -1];
+typedef char AdminWork_ownedRequestData_at_0x1C[((u32)&((AdminWork *)0)->ownedRequestData == 0x1C) ? 1 : -1];
 typedef char AdminWork_requestSize_at_0x20[((u32)&((AdminWork *)0)->requestSizeLowByte == 0x20) ? 1 : -1];
 typedef char AdminWork_transitionDelay_at_0x21[((u32)&((AdminWork *)0)->modeTransitionDelay == 0x21) ? 1 : -1];
 

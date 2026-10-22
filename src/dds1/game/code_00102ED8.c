@@ -138,7 +138,7 @@ void dds3InitAdmini(void) {
             work->signedHistory[i] = -1;
             work->unsignedHistory[i] = 0;
         }
-        work->requestData = 0;
+        work->ownedRequestData = 0;
         work->requestSizeLowByte = 0;
         dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminiNeoShutdown, (u32)work);
     }
