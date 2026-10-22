@@ -27,7 +27,7 @@ void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
 void dds3SetAmbientColor(s32 blendFrames, f32 *color);
 void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl);
-s32 dds3SetFilter2Para(s32 blendControl);
+void dds3SetFilter2Para(u32 blendControl);
 void dds3SetMFilterPara(u32 blendControl);
 void dds3SetScreenFovy(f32 fieldOfView);
 s32 dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
@@ -748,7 +748,7 @@ s32 scrCommand_BLUR2_OFF(void)
 s32 scrCommand_FILTER2_PARA(void)
 {
     s32 blendMode;
-    s32 blendControl;
+    u32 blendControl;
     blendMode = scrGetIntPara(0);
     switch (blendMode)
     {

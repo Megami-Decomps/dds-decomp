@@ -38,7 +38,7 @@ void dds3SetFogColor(s32 blendFrames, f32 *color);
 s32 dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget);
 s32 dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
-s32 dds3SetFilter2Para(s32 blendControl);
+void dds3SetFilter2Para(u32 blendControl);
 
 extern char D_004126D0[];
 
@@ -764,7 +764,7 @@ s32 scrCommand_BLUR2_OFF(void)
 s32 scrCommand_FILTER2_PARA(void)
 {
     s32 blendMode;
-    s32 blendControl;
+    u32 blendControl;
     blendMode = scrGetIntPara(0);
     switch (blendMode)
     {
