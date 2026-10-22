@@ -2187,11 +2187,11 @@ void mnuDestroySkillMenuWindows(s32 context) {
 
 u32 mnuCreateItemState(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
-    u32 handle = (u32)sdfMemAllocDirect(0x3c);
-    u32 *state = (u32 *)sdfMemLock((struct sdfMemHandle_t *)handle);
-    *(u32 **)(context + 0xaa48) = state;
-    memset(state, 0, 0x3c);
-    state[0] = handle;
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(SkillMenuRuntime));
+    SkillMenuRuntime *state = (SkillMenuRuntime *)sdfMemLock(allocation);
+    *(SkillMenuRuntime **)(context + 0xaa48) = state;
+    memset(state, 0, sizeof(*state));
+    state->allocation = allocation;
     mnuSelectSkillSelectionVisuals(context);
     switch (((MenuContext *)context)->imageHandle->list->cursor->index) {
     case 0:
@@ -2213,12 +2213,12 @@ u32 mnuCreateItemState(dds3ProcessID_t *callback) {
 
 s32 mnuCloseItemSelectionState(dds3ProcessID_t *selection) {
     s32 context = dds3GetProcessData(selection);
-    s32 *menu = (s32 *)((MenuContext *)context)->party;
-    if (menu[9] != 0) {
+    SkillMenuRuntime *menu = (SkillMenuRuntime *)((MenuContext *)context)->party;
+    if (menu->selectedWindow != NULL) {
         mnuDestroySelectedPartyWindow(selection);
     }
     mnuNoOpItemSelectionTeardown(context);
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(menu[0]));
+    sdfMemFreeDirect(menu->allocation);
     return 1;
 }
 
