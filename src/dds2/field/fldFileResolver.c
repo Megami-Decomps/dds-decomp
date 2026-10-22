@@ -432,7 +432,7 @@ extern u32 fldPendingArea;
 
 extern u32 fldPendingFloor;
 
-extern u32 D_00435FC0;
+extern u32 fldRelocateOnRelease;
 
 extern u32 fldDisplayRow;
 
@@ -715,7 +715,7 @@ extern void fldProbeCameraSupportSurface(void);
 
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
-extern s32 D_00435FA0;
+extern s32 fldRoomEventPlacementCount;
 extern s16 D_00389874[];
 extern s32 fldParseRoomNumberFromName(char *);
 extern void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
@@ -814,7 +814,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 if (isAppended != 0) {
                     spawnResource->id |= 0x800000;
                 } else {
-                    D_00435FA0++;
+                    fldRoomEventPlacementCount++;
                 }
                 event = spawnResource->data;
                 spawnedObject = evtSpawnActionObjD(spawnResource->id, (void *)event->label, (s32)spawnResource->name);
@@ -843,13 +843,13 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     case 1:
                         func_0014D380(0, point->id, rotation, position[0], position[1], position[2]);
                         if (isAppended == 0) {
-                            D_00435FA0++;
+                            fldRoomEventPlacementCount++;
                         }
                         break;
                     case 2:
                         func_0014D380(1, point->id, rotation, position[0], position[1], position[2]);
                         if (isAppended == 0) {
-                            D_00435FA0++;
+                            fldRoomEventPlacementCount++;
                         }
                         break;
                     case 3:
@@ -874,7 +874,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     if (isAppended != 0) {
                         FldPlacementData *placement = spawnResource->data;
                         func_0014C2B8(id, rotation, position[0], position[1], position[2],
-                                      room, spawnResource->name, placement->event + D_00435FA0);
+                                      room, spawnResource->name, placement->event + fldRoomEventPlacementCount);
                     } else {
                         FldPlacementData *placement = spawnResource->data;
                         func_0014C2B8(id, rotation, position[0], position[1], position[2],
@@ -885,7 +885,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     func_0014C9B0(parameters[0], rotation, position[0], position[1], position[2]);
                     if (isAppended == 0) {
-                        D_00435FA0++;
+                        fldRoomEventPlacementCount++;
                     }
                     break;
                 case 7:
@@ -939,7 +939,7 @@ extern FldFileResource *D_00438EB8;
 extern u32 D_00438EBC;
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
-extern struct DevRequest *D_00435FA4;
+extern struct DevRequest *fldRoomSoundResources;
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, f32 *rotation);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
@@ -970,7 +970,7 @@ void fldCreateResourceScriptObjects(void) {
     for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
         scriptResource = resource->data;
         evtCreateScriptObjectWithResource(resource->id, &scriptResource->itemList,
-                                         scriptResource->motionTable, D_00435FA4, resource->name);
+                                         scriptResource->motionTable, fldRoomSoundResources, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
@@ -1480,14 +1480,14 @@ void fldReleaseAreaResourceCache(void) {
     D_00444950[0] = D_00436020[0];
 }
 
-extern u32 D_00435FC0;
+extern u32 fldRelocateOnRelease;
 extern s32 D_004361D0;
-extern FldTransferChunk *D_00435FA8;
-extern u32 D_00435FAC;
-extern FldTransferChunk *D_00435FB0;
-extern u32 D_00435FB4;
-extern FldTransferChunk *D_00435FB8;
-extern u32 D_00435FBC;
+extern FldTransferChunk *fldRoomF1Chunk;
+extern u32 fldRoomF1Data;
+extern FldTransferChunk *fldRoomF2Chunk;
+extern u32 fldRoomF2Data;
+extern FldTransferChunk *fldRoomKF2Chunk;
+extern u32 fldRoomKF2Data;
 extern struct FileRequest *D_00435FC8;
 extern struct SdfMemBlock *D_00435FDC;
 extern struct SdfMemBlock *fldCachedRoomResourceAllocation;
@@ -1537,8 +1537,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
     PacWork *work;
     s32 index;
 
-    D_00435FC0 = 0;
-    D_00435FA0 = 0;
+    fldRelocateOnRelease = 0;
+    fldRoomEventPlacementCount = 0;
     fldCachedRoomF1ResourceAllocation = NULL;
     fldCachedRoomF2ResourceAllocation = NULL;
     fldCachedRoomKF2ResourceAllocation = NULL;
@@ -1587,13 +1587,13 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fileWaitForRequestReady(request);
         }
         index = 0;
-        D_00435FA4 = NULL;
+        fldRoomSoundResources = NULL;
         work = ((FilePacRequest *)D_00435FC8)->packet.queueHead;
         fldCachedRoomResourceAllocation = NULL;
         for (; work != NULL; work = work->next) {
             switch (index) {
             case 0:
-                D_00435FA4 = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)work->dataCursor);
+                fldRoomSoundResources = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)work->dataCursor);
                 sdfMemFreeDelayedDirect((struct SdfMemBlock *)work->resourceHandle);
                 fldCachedRoomResourceAllocation = NULL;
                 break;
@@ -1601,8 +1601,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
                 fldCachedRoomF2ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                D_00435FB4 = (u32)roomData;
-                D_00435FB0 = chunk;
+                fldRoomF2Data = (u32)roomData;
+                fldRoomF2Chunk = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
                 fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
                 break;
@@ -1610,8 +1610,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
                 fldCachedRoomF1ResourceAllocation = NULL;
                 roomData = work->dataCursor;
                 chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                D_00435FAC = (u32)roomData;
-                D_00435FA8 = chunk;
+                fldRoomF1Data = (u32)roomData;
+                fldRoomF1Chunk = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
                 fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
                 break;
@@ -1623,9 +1623,9 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
         fldCachedRoomResourceAllocation = fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_00436028, resourceName);
-            D_00435FA4 = sndLoadNamedOffsetResourceList(path);
+            fldRoomSoundResources = sndLoadNamedOffsetResourceList(path);
         } else {
-            D_00435FA4 = sndBuildResourceHandleListFromOffsets(roomOffsets);
+            fldRoomSoundResources = sndBuildResourceHandleListFromOffsets(roomOffsets);
             sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);
             fldCachedRoomResourceAllocation = NULL;
         }
@@ -1637,8 +1637,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        D_00435FB4 = (u32)roomData;
-        D_00435FB0 = chunk;
+        fldRoomF2Data = (u32)roomData;
+        fldRoomF2Chunk = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
@@ -1650,8 +1650,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomKF2ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        D_00435FBC = (u32)roomData;
-        D_00435FB8 = chunk;
+        fldRoomKF2Data = (u32)roomData;
+        fldRoomKF2Chunk = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload(chunk));
     }
@@ -1662,8 +1662,8 @@ u32 fldLoadAreaRoomResources(const char *resourceName) {
             fldCachedRoomF1ResourceAllocation = sdfReadNamedResource(path, &roomData, 0);
         }
         chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-        D_00435FAC = (u32)roomData;
-        D_00435FA8 = chunk;
+        fldRoomF1Data = (u32)roomData;
+        fldRoomF1Chunk = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
         fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload(chunk));
     }
@@ -1714,21 +1714,21 @@ extern u32 D_00444930[];
 
 extern u32 D_00444940[];
 
-extern s32 D_00435FA0;
+extern s32 fldRoomEventPlacementCount;
 
-extern struct DevRequest *D_00435FA4;
+extern struct DevRequest *fldRoomSoundResources;
 
-extern FldTransferChunk *D_00435FA8;
+extern FldTransferChunk *fldRoomF1Chunk;
 
-extern u32 D_00435FAC;
+extern u32 fldRoomF1Data;
 
-extern FldTransferChunk *D_00435FB0;
+extern FldTransferChunk *fldRoomF2Chunk;
 
-extern u32 D_00435FB4;
+extern u32 fldRoomF2Data;
 
-extern FldTransferChunk *D_00435FB8;
+extern FldTransferChunk *fldRoomKF2Chunk;
 
-extern u32 D_00435FBC;
+extern u32 fldRoomKF2Data;
 
 extern struct FileRequest *D_00435FC8;
 
@@ -1781,8 +1781,8 @@ void fldReleaseFieldResources(void) {
         fldReleaseTextureSlots();
         fldReleaseIndexedResourceEffect();
     }
-    sdfResourceListRelease(D_00435FA4, 1);
-    D_00435FA4 = 0;
+    sdfResourceListRelease(fldRoomSoundResources, 1);
+    fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
         if (D_00444930[i] != 0) {
             sdfMemFreeDelayedDirect((struct SdfMemBlock *)D_00444930[i]);
@@ -1790,24 +1790,24 @@ void fldReleaseFieldResources(void) {
             D_00444940[i] = 0;
         }
     }
-    if (D_00435FC0 != 0) {
-        if (D_00435FA8 != 0) {
-            fldRelocateTransferChunkWords(D_00435FAC, D_00435FA8);
-            D_00435FA8 = 0;
-            D_00435FAC = 0;
+    if (fldRelocateOnRelease != 0) {
+        if (fldRoomF1Chunk != 0) {
+            fldRelocateTransferChunkWords(fldRoomF1Data, fldRoomF1Chunk);
+            fldRoomF1Chunk = 0;
+            fldRoomF1Data = 0;
         }
-        if (D_00435FB0 != 0) {
-            fldRelocateTransferChunkWords(D_00435FB4, D_00435FB0);
-            D_00435FB0 = 0;
-            D_00435FB4 = 0;
+        if (fldRoomF2Chunk != 0) {
+            fldRelocateTransferChunkWords(fldRoomF2Data, fldRoomF2Chunk);
+            fldRoomF2Chunk = 0;
+            fldRoomF2Data = 0;
         }
-        if (D_00435FB8 != 0) {
-            fldRelocateTransferChunkWords(D_00435FBC, D_00435FB8);
-            D_00435FB8 = 0;
-            D_00435FBC = 0;
+        if (fldRoomKF2Chunk != 0) {
+            fldRelocateTransferChunkWords(fldRoomKF2Data, fldRoomKF2Chunk);
+            fldRoomKF2Chunk = 0;
+            fldRoomKF2Data = 0;
         }
     }
-    D_00435FA0 = 0;
+    fldRoomEventPlacementCount = 0;
     D_00435FDC = NULL;
     if (fldCachedRoomResourceAllocation != NULL) {
         sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);
@@ -1958,7 +1958,7 @@ void fldDrawRoomModeAndObjectModeFlagGrid(void) {
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
 void fldSetRelocateOnRelease(u32 relocateOnRelease) {
-    D_00435FC0 = relocateOnRelease;
+    fldRelocateOnRelease = relocateOnRelease;
 }
 
 void fldInitDisplayObjects(void) {
@@ -5848,23 +5848,23 @@ void fldClearCameraObjectActiveFlag(void) {
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413388);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FA0);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomEventPlacementCount);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FA4);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomSoundResources);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FA8);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF1Chunk);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FAC);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF1Data);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FB0);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF2Chunk);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FB4);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF2Data);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FB8);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomKF2Chunk);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FBC);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomKF2Data);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FC0);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRelocateOnRelease);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldAreaPackedArchive);
 
