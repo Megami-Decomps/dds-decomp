@@ -10486,8 +10486,7 @@
 0x00435CD8	dds3ScreenBlurFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054E960, 7 agreeing references; was dds3ScreenBlurFlag
 0x00435CDA	dds3ScreenBlurAlpha	inferred	SMT3HD data name via SLUS_209.11 0x0054E962, 10 agreeing references; was dds3ScreenBlurAlpha
 0x00435CDC	dds3ScreenBlurScale	inferred	SMT3HD data name via SLUS_209.11 0x0054E964, 10 agreeing references; was dds3ScreenBlurScale
-0x00435CF0	fadergba	inferred	SMT3HD data name via SLUS_209.11 0x0054E978, 4 agreeing references; was fadergba
-0x00435CF3	dds3FadeState	inferred	SMT3HD data name via SLUS_209.11 0x0054E97B, 3 agreeing references; was D_00435CF3
+0x00435CF0	fadergba	inferred	SMT3HD data name via SLUS_209.11 0x0054E978, 4 agreeing references; was fadergba; sized 0x4: the fade colour's red, green, blue and alpha (KwlnFadeColor), HD's u8 fadergba[4] in dds3KernelDraw.c; its alpha byte was dds3FadeState, the SMT3 IDB's split of fadergba[3]
 0x00435CF8	kwlnBackgroundFadeColor	inferred	high confidence; src/dds2/game/code_00102DC8.c kwlnFadeBackgroundStartIn(): D_00435CF8[0] = 0; Instruction-aligned data counterpart of DDS1 D_003BA928 in the matched kwlnFadeBackgroundStartIn() twin. Four-component background overlay color, with its alpha initialized by the background-fade entry points. [names_reviewed26.tsv]
 0x00435CFC	kwlnBackgroundFadeMode	inferred	confidence=high; matched_users=src/dds2/game/code_00102DC8.c:kwlnFadeIsBackgroundOverlayActive, src/dds2/game/code_00102DC8.c:kwlnFadeSetMode; Fade-mode setter stores the mode; background-overlay visibility logic branches on it. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00435CFE	kwlnBackgroundFadeFirstRamp	inferred	The background fade's first band ramp, up to KWLN_BGFADE_FIRST_RAMP_MAX: the band's top moves up 8 units a step. DDS1 twin 0x003BA92E.
