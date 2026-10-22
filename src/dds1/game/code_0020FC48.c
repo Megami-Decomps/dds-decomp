@@ -1431,7 +1431,7 @@ void btlInitVisibilityGrid(void) {
     btlRuntimeState.gridWidth = 0x200 / (btlRuntimeState.cellWidth * 2) + 1;
     btlRuntimeState.gridHeight = 0x1C0 / (btlRuntimeState.cellHeight * 2) + 1;
     btlRuntimeState.ownedData = sdfChipAllocDirect(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
-    btlRuntimeState.unk_3C[0] = 0;
+    btlRuntimeState.fadeOrderCursor = 0;
     for (y = 0; y < btlRuntimeState.gridHeight; y++) {
         for (x = 0; x < btlRuntimeState.gridWidth; x++) {
             btlRuntimeState.ownedData[y * btlRuntimeState.gridWidth + x] = 0x80;
@@ -1709,7 +1709,7 @@ s32 btlUpdateFadeOut(void) {
                 column = x - (btlRuntimeState.gridWidth >> 1);
                 row = y - (btlRuntimeState.gridHeight >> 1) + 10;
                 column = (y & 1) ? column + 11 : column + 10;
-                if (order[row][column] == btlRuntimeState.unk_3C[0]) {
+                if (order[row][column] == btlRuntimeState.fadeOrderCursor) {
                     cell = &btlRuntimeState.ownedData[y * btlRuntimeState.gridWidth + x];
                     if (*cell != 0) {
                         *cell += 0xC0;
@@ -1722,7 +1722,7 @@ s32 btlUpdateFadeOut(void) {
         if (changed != 0) {
             break;
         }
-        btlRuntimeState.unk_3C[0]++;
+        btlRuntimeState.fadeOrderCursor++;
     }
     packets = dds3FontReqAllocDrawTag();
     btlDrawCapturedScreenTileOverlay(packets, btlRuntimeState.color14, btlRuntimeState.color1C,
@@ -4868,4 +4868,3 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA38);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA50);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA68);
-
