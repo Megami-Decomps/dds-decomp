@@ -24,6 +24,7 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "dat_state.h"
+#include "evt_world.h"
 #include "itf.h"
 
 #define MNU_MANTRA_DRAW_ITEM_BYTES 0x24
@@ -368,7 +369,65 @@ s32 mnuGetActiveMantraModelFlagState(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
+extern EvtLoadedRecord *mnuMantraNodePositionTable;
+extern s32 scrTestEntryFlagBit15(DatPartyRecord *, u8);
+extern s32 scrTestEntryFlag(DatPartyRecord *, u16, u32);
+extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
+extern s32 mnuCheckMantraNeighborRequirements(u16);
+
+void func_0026DC48(DatPartyRecord *party) {
+    s32 modelFlagState;
+    u32 selected;
+    MantraNodePos *node;
+    s32 index;
+    u16 flags;
+
+    modelFlagState = mnuGetActiveMantraModelFlagState();
+    selected = scrGetSelectedScriptEntryId(party);
+    node = (MantraNodePos *)mnuMantraNodePositionTable->records;
+    for (index = 0; index < (s32)mnuMantraNodePositionTable->recordCount; index++, node++) {
+        flags = 0;
+        if (node->panelIndex != 0) {
+            flags = 3;
+            if (node->modelFlagState <= modelFlagState) {
+                flags = (flags & 0xFFF0) | 2;
+                if (node->panelIndex == selected) {
+                    flags = (flags & 0xFFF0) | 1;
+                    flags |= 0x600;
+                }
+                if (scrTestEntryFlagBit15(party, (u8)node->panelIndex)) {
+                    flags |= 0x100;
+                    flags = (flags & 0xFFF0) | 1;
+                }
+                switch (node->kind) {
+                case 1: {
+                    s32 slot;
+                    for (slot = 0; slot < 6; slot++) {
+                        if (node->neighbors[slot] != NULL) {
+                            if (scrTestEntryFlagBit15(party, (u8)node->neighbors[slot]->panelIndex) ||
+                                scrTestEntryFlag(party, (u16)node->neighbors[slot]->panelIndex, 8)) {
+                                flags = (flags & 0xFFF0) | 1;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 2:
+                    if (mnuCheckMantraNeighborRequirements((u16)node->panelIndex)) {
+                        flags = (flags & 0xFFF0) | 1;
+                    }
+                    break;
+                case 3:
+                case 4:
+                    flags = (flags & 0xFFF0) | 3;
+                    break;
+                }
+            }
+        }
+        scrSetEntryLowFlags(party, (u16)node->panelIndex, flags);
+    }
+}
 
 extern char mnuMantraValueFormat[]; /* "%7d" */
 
