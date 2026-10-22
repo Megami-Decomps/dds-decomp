@@ -5246,11 +5246,11 @@ void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *t
 /* Commit the requested state, then refresh active enemy-ID 0x11B's motion (not mode 0x11B). */
 void btlApplyMarkedCommandStateMotion(void) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
-    u8 *state = scene->state;
+    BattleMarkedCommandState *state = (BattleMarkedCommandState *)scene->state;
     BtlUnit *unit;
 
-    if (state[1] != state[0]) {
-        state[1] = state[0];
+    if (state->current != state->requested) {
+        state->current = state->requested;
         unit = scene->units;
         if (unit != 0) {
             while (unit != 0) {
@@ -5315,14 +5315,14 @@ void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta) {
 }
 
 u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
-    u8 *state = ((BattleActionScene *)btlGetRuntime())->state;
+    BattleMarkedCommandState *state = (BattleMarkedCommandState *)((BattleActionScene *)btlGetRuntime())->state;
     if (action >= 0x103) {
         if (action >= 0x105) {
             if (action == 0x19C) {
-                state[2] = 1;
+                state->actionFlag = 1;
             }
         } else {
-            state[2] = 0;
+            state->actionFlag = 0;
         }
     }
     return 0;
@@ -5457,13 +5457,13 @@ s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
 /* Mode 0x314's applied state is byte 1; absent state or another mode returns zero. */
 u32 btlGetMarkedCommandCurrentState(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
-    u8 *data;
+    BattleMarkedCommandState *data;
     if (battle->mode != 0x314) {
         return 0;
     }
-    data = battle->state;
+    data = (BattleMarkedCommandState *)battle->state;
     if (data != 0) {
-        return data[1];
+        return data->current;
     }
     return 0;
 }
@@ -5471,13 +5471,13 @@ u32 btlGetMarkedCommandCurrentState(void) {
 /* Mode 0x314's requested state is byte 0; absent state or another mode returns zero. */
 u32 btlGetMarkedCommandRequestedState(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
-    u8 *data;
+    BattleMarkedCommandState *data;
     if (battle->mode != 0x314) {
         return 0;
     }
-    data = battle->state;
+    data = (BattleMarkedCommandState *)battle->state;
     if (data != 0) {
-        return *data;
+        return data->requested;
     }
     return 0;
 }
