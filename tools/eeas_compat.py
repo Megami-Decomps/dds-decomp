@@ -162,19 +162,19 @@ def convert(text: str, pool: Pool | None = None) -> str:
     return "\n".join(convert_line(line, pool) for line in text.split("\n"))
 
 
-@functools.cache
-def version_pool(version: str | None) -> Pool | None:
-    return Pool(version) if version else None
-
-
-def convert_file(src: Path, dst: Path) -> None:
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    version = next((p for p in src.resolve().parts if p in ("dds1", "dds2")), None)
-    pool = version_pool(version)
-    text = convert(src.read_text(), pool)
-    if pool:
-        text = realign_rodata(text, pool, unit_rodata_start(version, src))
-    dst.write_text(text)
+def convert_files(pairs: list[tuple[Path, Path]]) -> None:
+    """Convert each (source, destination), reusing one Pool per version."""
+    pools: dict[str | None, Pool | None] = {}
+    for src, dst in pairs:
+        version = next((p for p in src.resolve().parts if p in ("dds1", "dds2")), None)
+        if version not in pools:
+            pools[version] = Pool(version) if version else None
+        pool = pools[version]
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        text = convert(src.read_text(), pool)
+        if pool:
+            text = realign_rodata(text, pool, unit_rodata_start(version, src))
+        dst.write_text(text)
 
 
 def main() -> None:
@@ -185,12 +185,11 @@ def main() -> None:
         if len(args) < 3:
             raise SystemExit(__doc__)
         prefix = Path(args[1])
-        for name in args[2:]:
-            convert_file(Path(name), prefix / name)
+        convert_files([(Path(name), prefix / name) for name in args[2:]])
         return
     if len(args) != 2:
         raise SystemExit(__doc__)
-    convert_file(Path(args[0]), Path(args[1]))
+    convert_files([(Path(args[0]), Path(args[1]))])
 
 
 if __name__ == "__main__":
