@@ -3534,6 +3534,7 @@
 0x001B4A70	btlDrawTimedDialogTask	inferred	U2
 0x001B4C98	btlReleaseDialogTaskData	inferred	Cleans the task message window, frees its data and clears registration. [names_reviewed8.tsv]
 0x001B4CE8	btlCreateMessageWindow	inferred	allocates 0x40-byte window block D_003BB3DC with fixed colours and size 0xBB x 0x196
+0x001B4D58	btlDrawWindowHelpLine	inferred	draws one help line at a battle window's top-left: a skill's text (kind 0), an item's (kind 9), else that command-help message (datCommandHelpMessages)
 0x001B5370	btlReleaseRegisteredTaskBuffer	inferred	Frees retained battle task data, resets its pointer and clears its registration. [names_reviewed10.tsv]
 0x001B53A0	btlIsLinkageTutorialEligible	inferred	confidence=high; matched-C; Correction: prior audio-slot interpretation was incorrect. Tests three DDS3_GBWK->battleFlags words for zero before the LINKAGE notice callback starts tutorial DSP entry 1. DDS2 twin 0x001C0008 adds model-flag suppression. Namer1 batch 11.
 0x001B53E8	btlHasUnmarkedLinkageSkill	inferred	confidence=high; matched-C; Clears working notice flags, gathers eligible combination skills, and returns one if any skill's game-state battle flag is clear. Native provider 0x001A3740 enumerates 0x1AB-based LINKAGE records against party-member requirements and emits skill/member tuples. DDS2 twin 0x001C0080. Namer1 batch 10.
@@ -4456,6 +4457,7 @@
 0x001FFC18	btlPickWeightedAiSlot	inferred	twin of DDS2 func_00211D20: cumulative u8 slot weights over the per-species table D_003BAA24 until the roll from func_001FFCD8 [names_M42_BattleMid.tsv]
 0x001FFCD8	btlRollAiBucket	inferred	two 0..0xFFF rolls summed, folded to 0..99 via /41; rerolled when within 3 of the previous bucket (D_003BB878) [names_M89_Battle3.tsv]
 0x001FFDA0	btlRunAiAction	inferred	looks the action id up (func_001FFE30), stores result/actionSlot on the task and dispatches D_00360E38[packed >> 22] with the low 22 bits [names_M89_Battle3.tsv]
+0x001FFE30	btlResolveCommandSlotAndKind	inferred	turns a command id into the slot and result kind a battle task acts on: special ids to fixed slots, summon and entry ids, ordinary ids by their selector's kind; unavailable choices become slot 0, kind 1
 0x00200208	btlResetAiCounterAtLimit	inferred	calls limit-check then clears counter when reached [names_R_FuncNames8.tsv]
 0x00200238	btlIsGroup400CountAtMost	inferred	counts active group 400 units and compares to limit [names_R_FuncNames.tsv]
 0x00200298	btlIsGroup200EligibleCountAtMost	inferred	counts group 200 units excluding +12E bit 0x800 [names_R_FuncNames.tsv]
@@ -9531,6 +9533,7 @@
 0x00359EA0	btlWorldCameraStartOffset	inferred	confidence=high; matched btlInitializeWorldCamera adds this vector to BtlState.position before setting the previously active world camera position. Exact16B DDS2 twin at0x003B6D70. Preserve original f32[4] view and VU0 helpers. [PurA5 readability battle b3; native data and matched-C twin evidence; identifier-only]
 0x00359EB0	btlWorldCameraStartRotation	inferred	confidence=high; matched btlInitializeWorldCamera gives the previously active world camera this native quaternion through dds3SetRotPoseSet. Exact16B DDS2 twin at0x003B6D80. Preserve original f32[4] view and cast. [PurA5 readability battle b3; native data and matched-C twin evidence; identifier-only]
 0x00359EC0	btlCameraMotionResetFrameScales	inferred	confidence=high; matched btlResetCameraMotion scales model frame-count by party unitId using this table below8, otherwise0.7. DDS2 uses the corresponding table at0x003B6D90 below10. Preserve unsized f32[] views and game-specific extents/trailing zeros. [PurA5 readability battle b3; native data and matched-C twin evidence; identifier-only]
+0x0035F100	btlCameraCursor	inferred	the battle camera cursor (BtlCameraCursorView): btlBuildPresetCameraPose and the skill and random cursors write its endpoints, path and distance
 0x0035F638	btlStatusEffectStyles	inferred	the status-effect style rows (BtlStatusStyleEntry, 17 of 16 bytes): an effect id, a colour, a release colour and a model flag per status; func_001F2818 tints a unit from its status row
 0x0035F998	btlSceneStreamCycleEntries	inferred	Native 24-byte blob [4,8,9,10,11,0]; matched sndStartBattleSceneStream selection5 cycles the first five via counter%5; preserve unsized s32[] view, final zero, extent and owner; DDS1 only; identifier only.
 0x0035F9E0	btlHorizontalAimIdentityQuaternion	inferred	confidence=high; Matched btlAimHorizontalDirectionVU loads native (0,0,0,1) into vf10 for identical X/Z inputs and returns 0; otherwise it computes yaw and returns 1. Preserve the existing u128 declaration and approved VU helper; no vector retyping. DDS2 counterpart: 0x003BE0D0. [PurA5 readability battle b5; PurA-2 native/matched-C audit; identifier-only]
@@ -10043,6 +10046,9 @@
 0x003BBDAC	evtWindowMotionUnit	inferred	high confidence; src/dds1/game/code_00222AC0.c evtCommand_KUTISET(): D_003BBDAC = (u32)unit; Unit retained for the message-window callback that activates its selected motion slot. [names_reviewed26.tsv]
 0x003BBDB8	gMoonCnt	inferred	SMT3HD data name via SLUS_209.11 0x0054F75C, 1 agreeing references; was gMoonCnt
 0x003BBDC0	moonprocess_id	inferred	SMT3HD data name via SLUS_209.11 0x0054F76C, 1 agreeing references; was moonprocess_id
+0x003BBDF0	dpy	inferred	The scene display panel's scroll (evtSceneDispProcess): the text line shown at its top, each line drawn at (line - dpy) * 96 + 0x7900; stepping between kinds moves it by the kind's wrapped rows. The panel's reset clears it. Named the original name, from Nocturne HD's evtDebug.c, where the same panel keeps it. DDS2 twin 0x0043722C.
+0x003BBDF4	curbase	inferred	The scene display panel's selected kind (evtSceneDispProcess): an index into its table of world object kinds, stepped by up and down. Named the original name, from Nocturne HD's evtDebug.c, where the same panel keeps it. DDS2 twin 0x00437230.
+0x003BBDF8	curpoint	inferred	The scene display panel's selection within the selected kind (evtSceneDispProcess): 0 selects the kind's row, n its nth node; left and right step it by one, up and down by four, and cancel returns it to the row. Named the original name, from Nocturne HD's evtDebug.c, where the same panel keeps it. DDS2 twin 0x00437234.
 0x003BBF80	evtPictureTaskName	inferred	confidence=high; data D_003BBF80; matched-C-users=2; src/dds1/game/code_00235270.c:185:evtStartPictureProcess2; src/dds1/game/code_00235270.c:199:evtStartPictureProcess; Both converted/raw-value event context constructors create picture-update tasks with this name; data-twin=D_004373C0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00235270.sdata.s:10.; seed-placeholder=D_003BBF80; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BBF88	skyanime	inferred	SMT3HD data name via SLUS_209.11 0x0054F900, 6 agreeing references; was skyanime
 0x003BBF8C	fldbokasi	inferred	SMT3HD data name via SLUS_209.11 0x0054F904, 3 agreeing references; was fldbokasi
@@ -10457,3 +10463,12 @@
 0x003984B0	sdfCameraTm	inferred	The camera matrix sdf3DSetCamera is given, kept as it stores it first. Named the original name, from Nocturne HD's sdf3D.c, whose sdf3DSetCamera stores sdfCameraTm, sdf3DScreenTm, sdf3DEyeOffset and the screen parameters in this order
 0x003984F0	sdf3DEyeOffset	inferred	The eye offset sdf3DSetCamera stores after the screen matrix: the record's inverse origin transformed by it. Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
 0x003983D0	sdf3DScreenParam	inferred	The screen parameters sdf3DSetCamera copies whole (an SdfProjectionRecord, 0xA0 bytes). Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
+0x0035F590	btlCameraTerminalPoint	inferred	where the preset camera's terminal policy ends the path (btlBuildPresetCameraPose); btlApplyScriptCameraTrack keeps it btlCameraTerminalDistance from the camera
+0x0035F5A0	btlCameraTerminalDirection	inferred	the unit direction from btlCameraTerminalPoint to the camera
+0x0035F5B0	btlCameraTerminalEye	inferred	the camera's position when the terminal point was set
+0x003BB690	btlCameraTerminalDistance	inferred	the distance from btlCameraTerminalPoint to the camera
+0x003BD834	btlCommandSelectionHighlightWork	inferred	the command selection highlight's work (0x38 bytes, allocated): its pulsing alpha and phase, the selected entry, cursor and row
+0x003BAA9C	datItemMessages	inferred	/battle/MSG.TBL's items message bank (its segment 10)
+0x003BAA98	datSkillMessages	inferred	/battle/MSG.TBL's skills message bank (its segment 11)
+0x003BAAA4	datStatusHelpMessages	inferred	/battle/MSG.TBL's status-help message bank (its segment 12)
+0x003BAAA0	datCommandHelpMessages	inferred	/battle/MSG.TBL's command-help message bank (its last segment, 13); btlDrawWindowHelpLine draws its messages

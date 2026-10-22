@@ -405,7 +405,7 @@ typedef struct BattleInitState {
     u32 unk588;
 } BattleInitState;
 
-extern ItfMesSub *D_003BAAA4;
+extern ItfMesSub *datStatusHelpMessages;
 
 extern ItfMesSub D_0032A520;
 
@@ -475,7 +475,7 @@ void btlInitializeBattleRuntime(void) {
     sdfRandomize(effSharedRandomState, dds3GetKernelCount());
     btlResetActorEntryState();
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
-        itfMesMngInitialize(D_003BAAA4);
+        itfMesMngInitialize(datStatusHelpMessages);
     ((BattleInitState *)btlRuntime)->messageWindows[1] = itfMesMngInitialize(&D_0032A520);
     ((BattleInitState *)btlRuntime)->messageWindows[2] = itfMesMngInitialize(&D_0032A210);
     sndResetTransition();

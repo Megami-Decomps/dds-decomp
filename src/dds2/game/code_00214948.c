@@ -3024,7 +3024,7 @@ void btlReturnUnitToGroup(ActionStateLink *task) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021A978);
+INCLUDE_ASM(const s32, "game/code_00214948", btlPrepareVritraUnitMotion);
 
 void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value) {
     if (((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit != unit) {
@@ -6766,7 +6766,7 @@ s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00223350);
+INCLUDE_ASM(const s32, "game/code_00214948", btlSelectBrahmaActorCategoryCamera);
 
 /* Advance marked action timing; install the camera only on its trigger frame. */
 s32 btlAdvanceBrahmanTimedActionCamera(BtlLinkedCommand *unit) {

@@ -107,7 +107,7 @@ extern s16 D_00436AB8[];
 
 extern s16 D_00436AC0[];
 
-extern f32 D_00436AD0;
+extern f32 btlCameraTerminalDistance;
 
 extern const char D_00436AE0[];
 

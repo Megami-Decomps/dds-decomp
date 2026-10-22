@@ -904,7 +904,7 @@ typedef struct BattleInitState {
 
 extern sdfMemHandle_t *D_004366E0;
 
-extern ItfMesSub *D_00435E78;
+extern ItfMesSub *datStatusHelpMessages;
 
 extern ItfMesSub D_003858D8;
 
@@ -978,7 +978,7 @@ void btlInitializeBattleRuntime(void) {
     btlResetActorEntryState();
 
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
-        itfMesMngInitialize(D_00435E78);
+        itfMesMngInitialize(datStatusHelpMessages);
     ((BattleInitState *)btlRuntime)->messageWindows[1] =
         itfMesMngInitialize(&D_003858D8);
     ((BattleInitState *)btlRuntime)->messageWindows[2] =

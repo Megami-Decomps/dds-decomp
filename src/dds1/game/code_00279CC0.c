@@ -33,7 +33,7 @@ typedef struct MenuList MenuList;
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 
-extern u8 *D_003BAA98;
+extern u8 *datSkillMessages;
 
 extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
 extern _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
@@ -208,7 +208,7 @@ s32 mnuOpenSkillDetailPanel(dds3ProcessID_t *callback) {
     mnuDrawStaffCampScreen(1, callback);
     mnuCreateStaffImageSprite(0xB);
     if (label != 0xFFFF && label != 0) {
-        mnuDrawCampGridAndLabel(1, label, D_003BAA98, context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(1, label, datSkillMessages, context, 1, 1, 0x53);
     } else {
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }

@@ -124,8 +124,8 @@ u32 itfReadEncodedCode(FrFontCtx *args) {
 extern u32 D_003BB15C;
 
 extern FrFontSystem frFontWork;
-extern u8 *D_003BAA98;
-extern u8 *D_003BAA9C;
+extern u8 *datSkillMessages;
+extern u8 *datItemMessages;
 
 s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
@@ -808,10 +808,10 @@ _FRQ *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)D_003BAA98, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)datSkillMessages, flags);
         break;
     case 1:
-        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)D_003BAA9C, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)datItemMessages, flags);
         break;
     }
     itfSetTextDrawLimit(-1);

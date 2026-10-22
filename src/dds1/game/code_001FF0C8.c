@@ -96,7 +96,7 @@ extern u32 btlNextScaledRandom(u32);
 
 extern u32 btlPreviousAiCandidateBucket;
 
-extern s32 func_001FFE30(BtlTask *, s32, u16 *, s32 *);
+extern s32 btlResolveCommandSlotAndKind(BtlTask *, s32, u16 *, s32 *);
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
@@ -439,7 +439,7 @@ s32 btlRunAiAction(BtlTask *task, s32 id, u32 packed) {
     u32 op = packed >> 22;
     u32 payload = packed & 0x3fffff;
 
-    func_001FFE30(task, id & 0xffff, &lookup.slot, &lookup.result);
+    btlResolveCommandSlotAndKind(task, id & 0xffff, &lookup.slot, &lookup.result);
     task->indexWork.phase = lookup.result;
     task->indexWork.skillId = lookup.slot;
     task->unit->partyRecord.actionSlot = lookup.slot;
@@ -449,7 +449,7 @@ s32 btlRunAiAction(BtlTask *task, s32 id, u32 packed) {
 
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5988);
 
-INCLUDE_ASM(const s32, "game/code_001FF0C8", func_001FFE30);
+INCLUDE_ASM(const s32, "game/code_001FF0C8", btlResolveCommandSlotAndKind);
 
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 

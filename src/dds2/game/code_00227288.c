@@ -1628,14 +1628,14 @@ extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *, BtlOperandEn
 extern s32 btlUpdateBrahmanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlUnitWrapB(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlFindReadyScriptResource(void);
-extern void func_0021A978(BtlUnit *, s32, s32, s32, s32, f32);
+extern void btlPrepareVritraUnitMotion(BtlUnit *, s32, s32, s32, s32, f32);
 extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *, s32, s32);
 extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *);
 extern void btlScheduleCherunShadowSkillPresentation(ActionStateLink *, BtlUnit *, u64, u64);
 extern void btlSetSpecialEnemyGeometry(void);
-extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
+extern s32 btlSelectBrahmaActorCategoryCamera(BtlLinkedCommand *, s32, s32);
 extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
 extern s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *, s32, s32);
@@ -1798,7 +1798,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->hitChanceScale, 0x0, btlGetBossPresenceActionScale);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlResetSpecialActionActorPresentation);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRefreshVritraPresentationAfterUnitUpdate);
-        BTL_INSTALL_CALLBACK(battle->prepareMotionHook, 0x0, func_0021A978);
+        BTL_INSTALL_CALLBACK(battle->prepareMotionHook, 0x0, btlPrepareVritraUnitMotion);
         BTL_INSTALL_CALLBACK(battle->refreshMotionHook, 0x0, btlSetUnitResourceFloatByMode);
         BTL_INSTALL_CALLBACK(battle->setMotionRangeHook, 0x0, btlSetUnitResourceHalvesByMode);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlResolveBoundActionCode);
@@ -1957,7 +1957,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftTowardLinkedTarget);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectActionTransitionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlSetSpecialLinkedActionCamera);
-        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00223350);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectBrahmaActorCategoryCamera);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceBrahmanTimedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSelectActionCameraByTableFlags);
         BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlFinishBrahmanCameraByTableFlags);

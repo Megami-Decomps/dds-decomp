@@ -100,7 +100,7 @@ extern const char *D_004367C8;
 
 extern const char *D_004367C4;
 
-extern SceneKindTable *D_00438F4C;
+extern SceneKindTable *btlCommandSelectionHighlightWork;
 
 extern u32 btlCommandOptionAnimationWork;
 
@@ -4956,7 +4956,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
     s32 extent;
 
     memcpy(initialRows, D_004164C8, sizeof(initialRows));
-    D_00438F4C = sdfAllocAndClearQuadwords(0x38);
+    btlCommandSelectionHighlightWork = sdfAllocAndClearQuadwords(0x38);
     work = sdfAllocAndClearQuadwords(sizeof(BattleCommandLayoutWork));
     extent = 180;
     btlCommandOptionAnimationWork = (u32)work;
@@ -5028,7 +5028,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
 }
 
 void btlReleaseBattleScratchBlocks(void) {
-    sdfChipFreeDirect(D_00438F4C);
+    sdfChipFreeDirect(btlCommandSelectionHighlightWork);
     sdfChipFreeDirect((void *)btlCommandOptionAnimationWork);
 }
 
@@ -5061,24 +5061,24 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     case 1:
     case 7:
     case 9:
-        D_00438F4C->alpha += 16;
-        D_00438F4C->alpha = D_00438F4C->alpha <= 0 ? 0 : D_00438F4C->alpha <= 128 ? D_00438F4C->alpha : 128;
+        btlCommandSelectionHighlightWork->alpha += 16;
+        btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         entry = object->selections[kind].entry;
         cursor = object->selections[kind].cursor;
         row = entry - cursor;
-        D_00438F4C->phase = 0;
-        D_00438F4C->entry = entry;
-        D_00438F4C->cursor = cursor;
-        D_00438F4C->row = row;
+        btlCommandSelectionHighlightWork->phase = 0;
+        btlCommandSelectionHighlightWork->entry = entry;
+        btlCommandSelectionHighlightWork->cursor = cursor;
+        btlCommandSelectionHighlightWork->row = row;
         break;
     case 10:
-        D_00438F4C->alpha += 16;
-        D_00438F4C->alpha = D_00438F4C->alpha <= 0 ? 0 : D_00438F4C->alpha <= 128 ? D_00438F4C->alpha : 128;
+        btlCommandSelectionHighlightWork->alpha += 16;
+        btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         break;
     case 2:
     case 3:
-        D_00438F4C->phase = (D_00438F4C->phase + 16) % 360;
-        D_00438F4C->alpha = (s32)((sdfSin((f32)((D_00438F4C->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
+        btlCommandSelectionHighlightWork->phase = (btlCommandSelectionHighlightWork->phase + 16) % 360;
+        btlCommandSelectionHighlightWork->alpha = (s32)((sdfSin((f32)((btlCommandSelectionHighlightWork->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
         entry = object->selections[kind].entry;
         cursor = object->selections[kind].cursor;
         row = entry - cursor;
@@ -5086,11 +5086,11 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
         if (state == 2 && (optionCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
             if ((dds3PadButtonState.prev & 2) || (dds3PadButtonState.next & 2)) {
                 /* Retail compares cached entry with the relative row at 001B2FE4. */
-                if (D_00438F4C->cursor != cursor || D_00438F4C->entry != row || D_00438F4C->row != row) {
-                    D_00438F4C->alpha = 128;
-                    D_00438F4C->phase = 0;
-                    if (D_00438F4C->entry != entry && D_00438F4C->row != row) {
-                        btlCreateSelectionTrailTask(entry, D_00438F4C->row, row);
+                if (btlCommandSelectionHighlightWork->cursor != cursor || btlCommandSelectionHighlightWork->entry != row || btlCommandSelectionHighlightWork->row != row) {
+                    btlCommandSelectionHighlightWork->alpha = 128;
+                    btlCommandSelectionHighlightWork->phase = 0;
+                    if (btlCommandSelectionHighlightWork->entry != entry && btlCommandSelectionHighlightWork->row != row) {
+                        btlCreateSelectionTrailTask(entry, btlCommandSelectionHighlightWork->row, row);
                     }
                 }
                 if (kind == 4) {
@@ -5104,38 +5104,38 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
                 }
             }
         } else if (state != 2 || object->state != state) {
-            D_00438F4C->alpha = 128;
-            D_00438F4C->phase = 0;
+            btlCommandSelectionHighlightWork->alpha = 128;
+            btlCommandSelectionHighlightWork->phase = 0;
         }
-        D_00438F4C->entry = entry;
-        D_00438F4C->cursor = cursor;
-        D_00438F4C->row = row;
+        btlCommandSelectionHighlightWork->entry = entry;
+        btlCommandSelectionHighlightWork->cursor = cursor;
+        btlCommandSelectionHighlightWork->row = row;
         break;
     case 11:
-        D_00438F4C->alpha -= btlTrackedTaskHandles->status.bytes.fadeStep;
-        D_00438F4C->alpha = D_00438F4C->alpha <= 0 ? 0 : D_00438F4C->alpha <= 128 ? D_00438F4C->alpha : 128;
+        btlCommandSelectionHighlightWork->alpha -= btlTrackedTaskHandles->status.bytes.fadeStep;
+        btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         entry = object->selections[kind].entry;
         cursor = object->selections[kind].cursor;
         row = entry - cursor;
         break;
     case 6:
     case 8:
-        D_00438F4C->alpha -= 32;
-        D_00438F4C->alpha = D_00438F4C->alpha <= 0 ? 0 : D_00438F4C->alpha <= 128 ? D_00438F4C->alpha : 128;
+        btlCommandSelectionHighlightWork->alpha -= 32;
+        btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         entry = object->selections[kind].entry;
         cursor = object->selections[kind].cursor;
         row = entry - cursor;
         break;
     }
     func_001BDF20(object, kind);
-    color = ((u8)D_00438F4C->alpha) | 0x80808000;
+    color = ((u8)btlCommandSelectionHighlightWork->alpha) | 0x80808000;
     colors.values[0] = color;
     colors.values[1] = color;
     colors.values[2] = color;
     colors.values[3] = color;
     y = row * 23;
     effDrawSpriteWithCornerColors(0x90, (y + 0x14F) << 3, 0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
-    opacity = (u8)D_00438F4C->alpha;
+    opacity = (u8)btlCommandSelectionHighlightWork->alpha;
     shade = (opacity >> 2) << 24;
     eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
@@ -5497,7 +5497,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165B0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BF978);
+INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawWindowHelpLine);
 
 extern const BattlePanelColors D_00416620;
 extern s32 fldGetSceneObjectState(void);
@@ -5507,7 +5507,7 @@ extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
 extern void fldCollectAvailableRosterEntries(s32,s16 *);
 extern BattleRosterTable *btlGetActorLinkageSkillList(s32,u16 *);
 extern void btlReleaseRegisteredTaskBuffer(s32);
-extern void func_001BF978(s32,s32,u32,u32,u16,s16);
+extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_003B5B10[];
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165E0);
 
@@ -5580,7 +5580,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
                 selector = 3;
             }
             hintWindow = (BtlCommandHintWork *)D_004367F8;
-            func_001BF978(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
+            btlDrawWindowHelpLine(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
                           (s16)hintWindow->fade | 0x80808000, 0, selector);
         } else {
             BtlCommandHintWork *entryWindow;
@@ -5588,7 +5588,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
             u16 *entries = btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
             textId = entries[row - 1];
             entryWindow = (BtlCommandHintWork *)D_004367F8;
-            func_001BF978(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
+            btlDrawWindowHelpLine(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
                           (s16)entryWindow->fade | 0x80808000, textId, 0);
         }
         draw = 1;
@@ -5600,7 +5600,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         textId=entries->entries[row].skill;
         skillWindow = (BtlCommandHintWork *)D_004367F8;
         draw = 1;
-        func_001BF978(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
+        btlDrawWindowHelpLine(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
                       (s16)skillWindow->fade | 0x80808000, textId, 0);
         break;
     }
@@ -5611,7 +5611,7 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         textId=D_003B5B10[row*2];
         drawWindow=(BtlCommandHintWork *)D_004367F8;
         draw=1;
-        func_001BF978(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
+        btlDrawWindowHelpLine(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
         break;
     }
     case 3: {
@@ -5624,13 +5624,13 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
         }
         drawWindow=(BtlCommandHintWork *)D_004367F8;
         draw=1;
-        func_001BF978(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
+        btlDrawWindowHelpLine(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
         break;
     }
     case 6: {
         BtlCommandHintWork *backdropWindow = (BtlCommandHintWork *)D_004367F8;
         draw = 1;
-        func_001BF978(backdropWindow->x + 0x13, backdropWindow->y - 6, 0xFF0000,
+        btlDrawWindowHelpLine(backdropWindow->x + 0x13, backdropWindow->y - 6, 0xFF0000,
                       (s16)backdropWindow->fade | 0x80808000, 0, 8);
         break;
     }
@@ -8880,7 +8880,7 @@ u32 btlGetActorCommandClass(s32 address, s8 index) {
 }
 
 
-extern SceneKindTable *D_00438F4C;
+extern SceneKindTable *btlCommandSelectionHighlightWork;
 
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
@@ -8909,32 +8909,32 @@ u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
     switch (type) {
     case 0:
         btlGatherActorCommandsByKind(ctx, buffer.ids, 0, 2, 3);
-        D_00438F4C->value[0] = buffer.ids[0] + 1;
+        btlCommandSelectionHighlightWork->value[0] = buffer.ids[0] + 1;
         break;
     case 4:
         btlGetActorLinkageSkillList(ctx, &buffer.count);
-        D_00438F4C->value[4] = buffer.ids[0];
+        btlCommandSelectionHighlightWork->value[4] = buffer.ids[0];
         break;
     case 2:
         fldCollectAvailableRosterEntries(ctx, buffer.ids);
-        D_00438F4C->value[2] = buffer.ids[0];
+        btlCommandSelectionHighlightWork->value[2] = buffer.ids[0];
         break;
     case 3:
-        D_00438F4C->value[3] = 3;
+        btlCommandSelectionHighlightWork->value[3] = 3;
         break;
     case 6:
-        D_00438F4C->value[6] = 1;
+        btlCommandSelectionHighlightWork->value[6] = 1;
         break;
     default:
-        D_00438F4C->value[type] = 0;
+        btlCommandSelectionHighlightWork->value[type] = 0;
         break;
     }
     if (noClamp == 0) {
-        if (D_00438F4C->value[type] >= 4) {
+        if (btlCommandSelectionHighlightWork->value[type] >= 4) {
             return 4;
         }
     }
-    return D_00438F4C->value[type];
+    return btlCommandSelectionHighlightWork->value[type];
 }
 
 extern u16 D_003B6810[12];
@@ -9348,7 +9348,7 @@ extern void btlDrawLinkageSkillOptions(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
-extern void func_001C98E8(s32);
+extern void btlDrawStockCommandPanelRows(s32);
 
 extern void btlDrawRetreatCommandLabel(s32);
 
@@ -9364,7 +9364,7 @@ void btlDrawCommandClassRows(s32 sceneContext) {
         btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
         return;
     case 3:
-        func_001C98E8(sceneContext);
+        btlDrawStockCommandPanelRows(sceneContext);
         return;
     case 6:
         btlDrawRetreatCommandLabel(sceneContext);
@@ -9448,13 +9448,13 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     list = btlGatherActorCommandsByKind((s32)ctx, (s16 *)&count, kind, page, columns);
     switch (kind) {
     case 0:
-        D_00438F4C->value[0] = count + 1;
+        btlCommandSelectionHighlightWork->value[0] = count + 1;
         break;
     case 2:
-        D_00438F4C->value[5] = count + 1;
+        btlCommandSelectionHighlightWork->value[5] = count + 1;
         break;
     case 3:
-        D_00438F4C->value[7] = count;
+        btlCommandSelectionHighlightWork->value[7] = count;
         break;
     }
     if (hasUp == 0 && kind != 3) {
@@ -9509,7 +9509,7 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C98E8);
+INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawStockCommandPanelRows);
 
 typedef struct ItemRowColors {
     u32 values[4];
@@ -9719,7 +9719,7 @@ INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436830);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436838);
 
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436840);
+INCLUDE_SDATA(const s32, "game/code_001B2AF8", btlHelpLineDrawCount);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436848);
 

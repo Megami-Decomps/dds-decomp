@@ -173,13 +173,13 @@ extern void fldEnableSceneGroupAdvancement(void);
 extern s8 D_0037F531[];
 
 
-extern SceneKindTable *D_00438F4C;
+extern SceneKindTable *btlCommandSelectionHighlightWork;
 extern void btlGatherActorCommandsByKind();
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
 extern void btlDrawLinkageSkillOptions(s32);
 extern void btlDrawItemCommandRows(s32);
-extern void func_001C98E8(s32);
+extern void btlDrawStockCommandPanelRows(s32);
 extern void btlDrawRetreatCommandLabel(s32);
 
 
