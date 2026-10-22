@@ -2106,13 +2106,13 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA90);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA94);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA98);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datSkillMessages);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAA9C);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datItemMessages);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAA0);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datCommandHelpMessages);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAA4);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datStatusHelpMessages);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAA8);
 

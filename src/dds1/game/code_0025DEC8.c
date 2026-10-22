@@ -5,7 +5,7 @@
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 
-extern u8 *D_003BAA9C;
+extern u8 *datItemMessages;
 
 extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
@@ -16,7 +16,7 @@ void itfEmitSelectedGlyph(ShopScene *context, s32 unused, s32 layoutFlags,
 
     list = context->window->list;
     if (list->count != 0) {
-        glyph = itfDrawBankTextWithLayoutFlags(0x970, 0xb58, 1, list->cursor->camp.id, (FrFontTextBank *)D_003BAA9C,
+        glyph = itfDrawBankTextWithLayoutFlags(0x970, 0xb58, 1, list->cursor->camp.id, (FrFontTextBank *)datItemMessages,
                               layoutFlags);
         frSetFontColor(glyph, color);
         frFontDrawGlyphChain(glyph, 1, glyphAttribute);

@@ -369,7 +369,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 mnuCampItemCommandHelpTextBank[];
-extern u8 *D_003BAA9C;
+extern u8 *datItemMessages;
 
 s32 mnuStaffDrawImagePanelA(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
@@ -507,7 +507,7 @@ void mnuRefreshStaffWindowDescription(StaffDisplayContext *context, s32 windowIn
     s32 selectedLabel = node->sortKeySecondary;
 
     if (node->sortKeyPrimary != 0) {
-        mnuDrawCampGridAndLabel(1, selectedLabel, D_003BAA9C, (s32)context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(1, selectedLabel, datItemMessages, (s32)context, 1, 1, 0x53);
     } else {
         mnuDrawCampGridAndLabelDefault(1, emptyLabel, 0, (s32)context, 1, 0x53);
     }

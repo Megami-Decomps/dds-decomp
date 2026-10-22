@@ -480,7 +480,7 @@ INCLUDE_ASM(const s32, "game/code_00211360", btlExecuteAiTableAction);
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_00211F38);
+INCLUDE_ASM(const s32, "game/code_00211360", btlResolveCommandSlotAndKind);
 
 /* Compare HP against a signed percentage using the native products and unsigned comparison. */
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {

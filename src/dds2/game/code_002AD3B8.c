@@ -72,7 +72,7 @@ extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern void mnuDrawCampIconBackdropByKind(s32 kind, dds3ProcessID_t *task);
 extern void mnuDrawCampGridAndLabel(u32, u32, u32, u32, u32, u32, u32);
-extern u8 *D_00435E70;
+extern u8 *datItemMessages;
 extern void mnuSetMenuPageFlags(MenuSprites *, u32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
@@ -656,7 +656,7 @@ s32 mnuDrawStaffPartyValuePage(dds3ProcessID_t *task) {
         s32 selectedLabel = node->sortKeySecondary;
 
         if (node->sortKeyPrimary != 0) {
-            mnuDrawCampGridAndLabel(1, selectedLabel, D_00435E70, context, 1, 1, 0x53);
+            mnuDrawCampGridAndLabel(1, selectedLabel, datItemMessages, context, 1, 1, 0x53);
         } else {
             mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
         }
@@ -994,7 +994,7 @@ s32 mnuDrawStaffValuePage(dds3ProcessID_t *task) {
         owned = menu->windows[3]->list->cursor->sortKeyPrimary;
         selectionId = menu->windows[3]->list->cursor->sortKeySecondary;
         if (owned != 0) {
-            mnuDrawCampGridAndLabel(1, selectionId, D_00435E70, (s32)context, 1, 1, 0x53);
+            mnuDrawCampGridAndLabel(1, selectionId, datItemMessages, (s32)context, 1, 1, 0x53);
         } else {
             mnuDrawCampGridAndLabelDefault(1, 0, 0, (s32)context, 1, 0x53);
         }

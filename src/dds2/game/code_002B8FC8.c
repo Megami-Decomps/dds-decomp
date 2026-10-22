@@ -176,7 +176,7 @@ extern char mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
-extern u8 *D_00435E6C;
+extern u8 *datSkillMessages;
 
 extern void mnuDrawCampIconBackdropByKind();
 

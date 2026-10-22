@@ -784,7 +784,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
     return 0;
 }
 
-extern u8 *D_00435E70;
+extern u8 *datItemMessages;
 extern void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
                                     s32 drawOption, s32 textOption, s32 layer);
 
@@ -796,7 +796,7 @@ void mnuRefreshStaffWindowDescription(MenuStaffContext *context, s32 windowIndex
     s32 selectedLabel = node->sortKeySecondary;
 
     if (node->sortKeyPrimary != 0) {
-        mnuDrawCampGridAndLabel(0, selectedLabel, D_00435E70, (s32)context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(0, selectedLabel, datItemMessages, (s32)context, 1, 1, 0x53);
     } else {
         mnuDrawCampGridAndLabelDefault(0, emptyLabel, 0, (s32)context, 1, 0x53);
     }

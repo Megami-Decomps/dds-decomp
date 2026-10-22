@@ -29,7 +29,7 @@ extern void mnuRefreshStaffWindowDescription(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
-extern u8 *D_003BAA9C;
+extern u8 *datItemMessages;
 extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(datUnitWork_t *entry, u32 menuValue);
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -561,7 +561,7 @@ s32 mnuDrawStaffPartyValuePage(dds3ProcessID_t *task) {
         s32 selectedLabel = node->sortKeySecondary;
 
         if (node->sortKeyPrimary != 0) {
-            mnuDrawCampGridAndLabel(1, selectedLabel, D_003BAA9C, context, 1, 1, 0x53);
+            mnuDrawCampGridAndLabel(1, selectedLabel, datItemMessages, context, 1, 1, 0x53);
         } else {
             mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
         }

@@ -58,8 +58,8 @@ extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 #include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPtr(s32);
 
-extern u8 *D_00435E6C;
-extern u8 *D_00435E70;
+extern u8 *datSkillMessages;
+extern u8 *datItemMessages;
 extern void itfSetTextDrawLimit(s32);
 extern _FRQ *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
@@ -926,13 +926,13 @@ _FRQ *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
+        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)datSkillMessages, flags);
         break;
     case 1:
-        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)D_00435E70, flags);
+        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)datItemMessages, flags);
         break;
     case 2:
-        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
+        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)datSkillMessages, flags);
         break;
     }
     itfSetTextDrawLimit(-1);

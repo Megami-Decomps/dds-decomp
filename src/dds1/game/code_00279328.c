@@ -18,7 +18,7 @@ extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
-extern u8 *D_003BAA98;
+extern u8 *datSkillMessages;
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char mnuSkillMenuPagePopupEntry[];
@@ -150,7 +150,7 @@ s32 ptySkillMenuEnterPage(dds3ProcessID_t *callback) {
     }
     label = menu->selected->list->cursor->sortKeyPrimary;
     if (label != 0xFFFF && label != 0) {
-        mnuDrawCampGridAndLabel(1, label, D_003BAA98, context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(1, label, datSkillMessages, context, 1, 1, 0x53);
     } else {
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
@@ -244,7 +244,7 @@ s32 ptySkillMenuEnterConfirm(dds3ProcessID_t *callback) {
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(3);
-    mnuDrawCampGridAndLabel(1, menu->selected->list->cursor->sortKeyPrimary, D_003BAA98, context, 1, 1, 0x53);
+    mnuDrawCampGridAndLabel(1, menu->selected->list->cursor->sortKeyPrimary, datSkillMessages, context, 1, 1, 0x53);
     menu->selected->list->stateFlags &= ~8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->selected, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((SkillMenuContext *)context)->actor));

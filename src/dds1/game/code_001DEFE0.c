@@ -4032,13 +4032,13 @@ extern f32 btlMeasureSideFilteredActorBounds(s32, BtlUnit *, BtlUnit *, s8, f32 
 
 extern f32 btlBuildProjectedActorPairBoundsVU(s32, BtlUnit *, BtlUnit *, s8, s8, f32 *, f32 *, const f32 *, const f32 *);
 
-extern f32 D_0035F590[4];
+extern f32 btlCameraTerminalPoint[4];
 
-extern f32 D_0035F5A0[4];
+extern f32 btlCameraTerminalDirection[4];
 
-extern f32 D_0035F5B0[4];
+extern f32 btlCameraTerminalEye[4];
 
-extern f32 D_003BB690;
+extern f32 btlCameraTerminalDistance;
 
 /* Select a camera policy, construct its focus and eye, and initialize the
  * optional endpoint used by the camera cursor. */
@@ -5315,13 +5315,13 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(length);
-        D_003BB690 = length;
+        btlCameraTerminalDistance = length;
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5A0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5B0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
         VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
         break;
 
     case 4: /* 001E9A78 */
@@ -5341,13 +5341,13 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(length);
-        D_003BB690 = length;
+        btlCameraTerminalDistance = length;
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5A0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5B0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
         VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
         break;
 
     case 7: case 8: /* 001E9B70 */
@@ -5374,13 +5374,13 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(length);
-        D_003BB690 = length;
+        btlCameraTerminalDistance = length;
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5A0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5B0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
         VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
         break;
 
     case 0xF: /* 001E9CA8 */
@@ -5400,13 +5400,13 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, destination);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(length);
-        D_003BB690 = length;
+        btlCameraTerminalDistance = length;
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5A0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
         VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5B0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
         VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
         break;
 
     case 1: case 5: case 6: case 9: case 0xA: case 0xB: case 0xC: case 0xD: case 0xE:
@@ -6447,13 +6447,13 @@ extern void func_001EBE88(BtlLinkedCommand *, BtlCamState *,
 extern void SetRotateMatrixX(f32);
 
 
-extern f32 D_0035F590[4];
+extern f32 btlCameraTerminalPoint[4];
 
-extern f32 D_0035F5A0[4];
+extern f32 btlCameraTerminalDirection[4];
 
-extern f32 D_0035F5B0[4];
+extern f32 btlCameraTerminalEye[4];
 
-extern f32 D_003BB690;
+extern f32 btlCameraTerminalDistance;
 
 INCLUDE_ASM(const s32, "game/code_001DEFE0", func_001EBE88);
 
@@ -6532,12 +6532,12 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf11, pose->position);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
                     VU0_NEGATE_XYZ(vf10);
-                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_SCALAR_OP(btlCameraTerminalDistance, "vmulx.xyzw vf10, vf10, vf2x");
                     VU0_LOAD_VF(vf11, focus);
                     VU0_ADD(vf10, vf10, vf11);
-                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
                     break;
                 case 10:
                 case 11:
@@ -6577,12 +6577,12 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                         VU0_ADD(vf10, vf10, vf11);
                         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
                     }
-                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
                     VU0_NEGATE_XYZ(vf10);
-                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_SCALAR_OP(btlCameraTerminalDistance, "vmulx.xyzw vf10, vf10, vf2x");
                     VU0_LOAD_VF(vf11, focus);
                     VU0_ADD(vf10, vf10, vf11);
-                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
                     break;
                 case 13:
                     VU0_LOAD_VF(vf10, CURSOR->pathStart);
@@ -6610,36 +6610,36 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LENGTH_VF10(pose->distance);
                     VU0_NORMALIZE_VF10();
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
-                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
                     VU0_NEGATE_XYZ(vf10);
-                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_SCALAR_OP(btlCameraTerminalDistance, "vmulx.xyzw vf10, vf10, vf2x");
                     VU0_LOAD_VF(vf11, focus);
                     VU0_ADD(vf10, vf10, vf11);
-                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
                     break;
                 case 5:
                     if (command->flags & 0x200) value[0] = -value[0];
-                    if (value[0] != 0.0f && 0.0f <= D_0035F5A0[2]) value[1] = -value[1];
+                    if (value[0] != 0.0f && 0.0f <= btlCameraTerminalDirection[2]) value[1] = -value[1];
                     sdfConvertEulerAnglesToQuaternionVU(value[1], value[0], value[2]);
                     effMiscQuaternionToMatrixVU();
-                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
                     VU0_APPLY_MATRIX(vf10, vf10);
-                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5A0);
-                    VU0_LOAD_VF(vf10, D_0035F5A0);
-                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
-                    VU0_LOAD_VF(vf11, D_0035F590);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
+                    VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
+                    VU0_SCALAR_OP(btlCameraTerminalDistance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, btlCameraTerminalPoint);
                     VU0_ADD(vf10, vf10, vf11);
-                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5B0);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
                     flags = records[*currentIndex].flags00;
                     if (flags & 4) {
                         VU0_LOAD_VF(vf10, pose->direction);
                         VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
-                        VU0_LOAD_VF(vf11, D_0035F5B0);
+                        VU0_LOAD_VF(vf11, btlCameraTerminalEye);
                         VU0_ADD(vf10, vf10, vf11);
                         VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
                     } else if (flags & 1) {
                         VU0_LOAD_VF(vf10, pose->position);
-                        VU0_LOAD_VF(vf11, D_0035F5B0);
+                        VU0_LOAD_VF(vf11, btlCameraTerminalEye);
                         VU0_SUB(vf10, vf10, vf11);
                         VU0_LENGTH_VF10(pose->distance);
                         VU0_NORMALIZE_VF10();
@@ -11413,7 +11413,7 @@ INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB678);
 
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB680);
 
-INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB690);
+INCLUDE_SDATA(const s32, "game/code_001DEFE0", btlCameraTerminalDistance);
 
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB694);
 

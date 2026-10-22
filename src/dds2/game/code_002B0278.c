@@ -196,7 +196,7 @@ extern char mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
-extern u8 *D_00435E6C;
+extern u8 *datSkillMessages;
 
 extern void mnuDrawCampIconBackdropByKind(s32 kind, dds3ProcessID_t *task);
 
@@ -357,7 +357,7 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
 extern void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task);
 
 extern const char *D_003E78D0[];
-extern u8 *D_00435E70;
+extern u8 *datItemMessages;
 extern void mnuDrawStaffValueGrid(s32, s32, s32, MenuContext *);
 extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
 extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
@@ -386,7 +386,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
     if (selection != 0) {
         if (choices->thirdListReset == 0) {
             if (choices->windows[4]->list->cursor->sortKeyPrimary != 0) {
-                mnuDrawCampGridAndLabel(2, selection, D_00435E70, context, 1, 1, 0x53);
+                mnuDrawCampGridAndLabel(2, selection, datItemMessages, context, 1, 1, 0x53);
             } else {
                 mnuDrawCampGridAndLabelDefault(2, 0, 0, context, 1, 0x53);
             }
@@ -397,7 +397,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
             frDestroyFontRequestAfter(glyph);
             selection = mnuGetPartyEntryCurrentId(unit);
             if (selection != 0) {
-                mnuDrawCampGridAndLabel(3, selection, D_00435E70, context, 1, 1, 0x53);
+                mnuDrawCampGridAndLabel(3, selection, datItemMessages, context, 1, 1, 0x53);
             } else {
                 mnuDrawCampGridAndLabelDefault(3, 0, 0, context, 1, 0x53);
             }
@@ -2629,7 +2629,7 @@ s32 ptySkillMenuEnterPage(dds3ProcessID_t *callback) {
     }
     label = ((MenuWindowContainer *)menu[9])->list->cursor->sortKeyPrimary;
     if (label != 0xffff && label != 0) {
-        mnuDrawCampGridAndLabel(0, label, D_00435E6C, context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(0, label, datSkillMessages, context, 1, 1, 0x53);
     } else {
         mnuDrawCampGridAndLabelDefault(0, 0, 0, context, 1, 0x53);
     }
@@ -2717,7 +2717,7 @@ s32 ptySkillMenuOpenSelectedSkillPage(dds3ProcessID_t *callback) {
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(3);
-    mnuDrawCampGridAndLabel(0, ((SkillMenuRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary, D_00435E6C, context, 1, 1, 0x53);
+    mnuDrawCampGridAndLabel(0, ((SkillMenuRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary, datSkillMessages, context, 1, 1, 0x53);
     ((SkillMenuRuntime *)menu)->selectedWindow->list->stateFlags &= ~8;
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
@@ -2887,7 +2887,7 @@ s32 mnuOpenSkillDetailPanel(dds3ProcessID_t *callback) {
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(0xf);
     if (label != 0xffff && label != 0) {
-        mnuDrawCampGridAndLabel(0, label, D_00435E6C, context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(0, label, datSkillMessages, context, 1, 1, 0x53);
     } else {
         mnuDrawCampGridAndLabelDefault(0, 0, 0, context, 1, 0x53);
     }
