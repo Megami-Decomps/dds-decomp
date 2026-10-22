@@ -3,6 +3,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "file_job_type.h"
+#include "file_config_task.h"
 #include "sdf_vu_rotation_axes.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
@@ -3341,24 +3342,6 @@ typedef struct FileConfigListNode {
     FileConfigCountdown *resource;   /* 0x70 */
 } FileConfigListNode;
 
-/* Save/config task context: its four resource slots start at +0x10. */
-typedef struct FileConfigTask {
-    struct sdfMemHandle_t *backingAllocation; /* 0x00: descriptor owning this task */
-    s32 state;      /* 0x04 */
-    s32 ticks;
-    struct MenuList *frame; /* 0x0C: owned save/config list */
-    struct EffectSlotSet *slots[4]; /* 0x10 */
-    u8 pad20[4];
-    s32 result;     /* 0x24: negative when the queued load failed */
-    s16 previousIndex;
-    s16 transitionTicks;
-    f32 choiceFade;
-    f32 labelFade;
-    u32 pending;    /* 0x34: zero when no load can start */
-    MenuResourceWork *effect; /* 0x38: effect resource requested for the save scene */
-} FileConfigTask;
-typedef char FileConfigTask_size_check[(sizeof(FileConfigTask) == 0x3C) ? 1 : -1];
-typedef char FileConfigTask_state_offset_check[((u32)&((FileConfigTask *)0)->state == 0x04) ? 1 : -1];
 extern FileConfigTask *GBWK;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
