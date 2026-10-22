@@ -6,6 +6,7 @@
 #include "fld.h"
 #include "sdf.h"
 #include "fld_light_set.h"
+#include "fld_sky_buffer.h"
 
 extern u32 D_0038BBD8[];
 
@@ -33,8 +34,6 @@ extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
 extern void dds3SetFogPara(s32, f32, f32, f32, f32);
 
 extern void fldSetFilterAnime(u32);
-
-extern void *fldSkyLightSetBuffer;
 
 extern SdfFlagListWork *fldCameraColorEffect;
 
