@@ -42,7 +42,7 @@ s32 dds3SetFilter2Para(s32 blendControl);
 
 extern char D_004126D0[];
 
-s32 dds3SetMFilterPara(s32 blendControl);
+void dds3SetMFilterPara(u32 blendControl);
 void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 blendControl);
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl);
 
@@ -833,7 +833,7 @@ s32 scrCommand_FILTER2_OFF(void)
 s32 scrCommand_MFILTER_PARA(void)
 {
     s32 blendMode;
-    s32 blendControl;
+    u32 blendControl;
     blendMode = scrGetIntPara(0);
     switch (blendMode)
     {
@@ -994,4 +994,3 @@ u32 scrCommand_SCR_EXISTS()
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126D0);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126F0);
-
