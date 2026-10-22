@@ -29,6 +29,7 @@
 #include "btl_effect_table.h"
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
+#include "btl_action_state_handler.h"
 #include "btl_ui.h"
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
@@ -265,13 +266,7 @@ typedef struct BtlUnit BtlUnit;
 extern void btlAdvanceHistoryCounter(ActionStateLink *);
 
 
-typedef struct BtlStateHandler {
-    void (*start)(void *);
-    void (*update)(void *);
-    const char *name; /* debug label, never called */
-} BtlStateHandler;
-
-extern BtlStateHandler D_003B69D8[];
+extern BtlActionStateHandler D_003B69D8[];
 
 
 typedef struct BtlFxSrcB {
