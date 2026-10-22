@@ -138,7 +138,7 @@ extern void btlSyncPlayerWork(BtlUnit *);
 
 extern void fldInitializeSceneGroups(void);
 
-extern u8 *D_00435E64;
+extern u8 *datSkillNames;
 
 extern u8 *D_00435E5C;
 

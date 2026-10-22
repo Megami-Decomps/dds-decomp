@@ -6,6 +6,7 @@
 #include "kwln.h"
 #include "mnu_reset_selection_widths_api.h"
 #include "mnu_result.h"
+#include "mnu_party_panel_api.h"
 
 
 
@@ -67,7 +68,6 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
 }
 
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
-extern void mnuDrawPanelItemValueMeter(s32, s32, s32, DatPartyRecord *, MenuSpriteState *, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
@@ -91,7 +91,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     }
     mnuApplyPackedGroupValues(context->panelHandle, unit->itemId);
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
-    mnuDrawPanelItemValueMeter(0, 0, 0, unit, context->spriteHandle, 0x53);
+    mnuDrawPartySkillListPanel(0, 0, 0, unit, context->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(context);
     evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
 }

@@ -120,7 +120,7 @@ extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
-extern u8 *D_00435E64;
+extern u8 *datSkillNames;
 extern u8 btlActionPassLabel[];
 extern u8 btlActionRetreatLabel[];
 extern const u8 *D_003BEB38[];
@@ -860,7 +860,7 @@ s32 btlPollActorOrEntryLabelTask(void *arguments) {
                 btlCreateSkillNamePanel(D_003BEB58[0]);
             }
         } else {
-            btlCreateSkillNamePanel(D_00435E64 + resourceIndex * 17);
+            btlCreateSkillNamePanel(datSkillNames + resourceIndex * 17);
         }
     }
     if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {

@@ -730,7 +730,7 @@ extern u8 *D_00435E48;
 extern u8 *D_00435E4C;
 extern u8 *D_00435E5C;
 extern u8 *D_00435E60;
-extern u8 *D_00435E64;
+extern u8 *datSkillNames;
 extern char D_003A41A8[][0x20];
 extern char D_003A47E8[][0x20];
 extern char *D_00386048[];
@@ -805,7 +805,7 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
         itfMesCopyStringToWindowTableSlot(window, slotIndex, number);
         break;
     case 5:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_00435E64 + value * 0x11));
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(datSkillNames + value * 0x11));
         break;
     case 6:
         itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003A41A8[value]);

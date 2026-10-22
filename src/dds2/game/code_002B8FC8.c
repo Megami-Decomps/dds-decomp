@@ -437,7 +437,7 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags);
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 unused, s32 spriteFlags);
 
 void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
                                     MenuProfilePanel *resource,
@@ -1769,9 +1769,9 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
 }
 
 void mnuConfigurePanelResource(MenuScrollPanel *menu, struct EffectSlotSet *model,
-                               u32 resourceIndex, u32 color) {
+                               u32 resourceIndex, u32 retract) {
     mnuActivatePendingPanelResource(menu);
-    menu->color = color;
+    menu->retract = retract;
     menu->pending.set = model;
     menu->pending.index = resourceIndex;
     effConfigureIndexedSlotResource(model, resourceIndex, menu->handles[0], 0, 3);

@@ -5752,7 +5752,7 @@ s32 btlDestroyTaskC(void) {
 }
 
 extern const BattlePanelColors D_00416650;
-extern u8 *D_00435E64;
+extern u8 *datSkillNames;
 extern u32 btlGetActiveUnitId(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
@@ -5805,7 +5805,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
             id = list->entries[work->itemIndex].skill;
             if (btlAccessRecordedLinkageSkillFlag(id, 2) == 0 && btlAccessPendingLinkageSkillFlag(id, 2) == 0) {
                 btlAccessPendingLinkageSkillFlag(id, 0);
-                evtCopyEntryStringToActiveWindow(0, D_00435E64 + id * 17);
+                evtCopyEntryStringToActiveWindow(0, datSkillNames + id * 17);
                 dspStartEntry(0);
                 work->itemIndex++;
                 sndSetStationedSeVolume(7);
@@ -8780,7 +8780,7 @@ extern u8 D_003B5B10[];
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
-extern u8 *D_00435E64;
+extern u8 *datSkillNames;
 
 extern u8 *D_00435E5C;
 
@@ -8829,7 +8829,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
-    handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
+    handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, datSkillNames + index * 17, 0);
     btlSubmitSharedTextGlyph(handle);
     itfSetTextDrawLimit(-1);
 }
@@ -10198,7 +10198,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
                 memset(text, 0, sizeof(text));
-                sprintf(text, D_00436828, D_00435E64 + btlFindHuntTutorialSkill() * 17);
+                sprintf(text, D_00436828, datSkillNames + btlFindHuntTutorialSkill() * 17);
                 evtCopyEntryStringToActiveWindow(0, text);
                 dspStartEntry(2);
                 btlSetCommandPanelFadeMode(0, 8);

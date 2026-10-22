@@ -32,6 +32,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_panel_item.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_panel_state.h"
@@ -61,24 +62,6 @@ extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
 extern s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item);
 extern void sndDestroyFileQueueWrapper(u32 handle);
 /* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
-
-/* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
-struct MenuPanelItem {
-    u8 pad00[0x10];
-    s32 value10; /* Pixel span used by signed stat scaling. */
-    s32 value14;
-    s32 value18;
-    u32 option;
-    s32 selection;
-    u32 value24;
-    u32 value28;
-    MenuGridSlot spriteGridSlots[9]; /* 0x2C */
-    MenuGridSlot gridSlots[5]; /* 0x74 */
-    u8 pad9C[4];
-    u32 initialValue; /* 0xA0 */
-    u32 selectionRamp; /* 0xA4 */
-    s32 phase;
-};
 
 extern void mnuSetGroupPair(struct MenuPanelItem *, u32, u32);
 
@@ -116,9 +99,6 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 #define EVT_STAGE_ENTRY_BYTES 60
 #define EVT_STAGE_MODEL_RECORD_BYTES 624
 #define EVT_STAGE_COLUMN_VALUE_COUNT 8
-#define EVT_STAGE_QUEUE_PENDING 1
-#define EVT_STAGE_QUEUE_REQUESTING 2
-#define EVT_STAGE_QUEUE_SETUP_COMPLETE 4
 #define EVT_STAGE_MOTION_IDLE 0
 #define EVT_STAGE_MOTION_QUEUED 1
 #define EVT_STAGE_MOTION_PLAYING 2
@@ -132,11 +112,10 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 #define FILE_REQUEST_COMPLETE_STATE 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
-typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 mnuScrollListToPreviousPage();
 
-extern void mnuInitializeQueuedCommandEffect();
+extern void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry);
 extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
@@ -1327,7 +1306,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPanelItemValueMeter);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartySkillListPanel);
 
 /* Create the DDS2 simple sprite state from its three resource sets. */
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
@@ -1712,9 +1691,9 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
     sdfChipFreeDirect(item);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPanelItemDetail);
 
-extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
+extern void mnuDrawPanelItemDetail(s32, s32, s32, s32, s32, MenuPanelItem *, u32);
 
 void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   MenuPanelItem *item, u32 flags) {
@@ -1729,7 +1708,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   item->spriteGridSlots[0].index, flags);
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[1].set,
                   item->spriteGridSlots[1].index, flags);
-    func_002C2AE8(x, y, depth, fade, mode, item, flags);
+    mnuDrawPanelItemDetail(x, y, depth, fade, mode, item, flags);
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[8].set,
                   item->spriteGridSlots[8].index, flags);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {

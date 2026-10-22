@@ -167,7 +167,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
 }
 
 extern DspUnitName *D_00435E48;
-extern DspUnitName *D_00435E64;
+extern DspUnitName *datSkillNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 scrGetIndexedRecordAddress(u16, s32 *);
@@ -191,7 +191,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
         evtCopyEntryStringToActiveWindow(
             0, D_00435E48[item->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
-            1, D_00435E64[skillId].encodedText);
+            1, datSkillNames[skillId].encodedText);
         dspSetActive(1);
         dspStartEntry(0);
         scene->pendingSkillIndex++;
