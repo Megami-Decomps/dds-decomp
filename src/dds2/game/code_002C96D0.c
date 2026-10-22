@@ -1148,12 +1148,12 @@ s32 slCancel(void) {
 }
 
 extern struct sdfMemHandle_t *fileSaveIconResourceHandle;
-extern u32 fileSaveIconRequest;
+extern struct FileRequest *fileSaveIconRequest;
 extern char D_0042B6A8[];
 
 s32 fileLoadIconFileAndResetSelection(void) {
     fileSaveIconResourceHandle = 0;
-    fileSaveIconRequest = (u32)fileLoad(D_0042B6A8);
+    fileSaveIconRequest = fileLoad(D_0042B6A8);
     return fileResetSelection();
 }
 
@@ -1163,7 +1163,7 @@ s32 fileResetSlotSelection(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     fileSaveIconResourceHandle = 0;
-    fileSaveIconRequest = (u32)fileLoad(D_0042B6A8);
+    fileSaveIconRequest = fileLoad(D_0042B6A8);
     return slEndingTop();
 }
 
@@ -2545,7 +2545,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
 
 s32 slCalc(dds3ProcessID_t *task) {
     s32 next;
-    u32 job;
+    struct FileRequest *job;
     s32 (*cur)();
     D_00437CFC++;
     fileDrawMenuFrame((s32)task);
@@ -2559,12 +2559,12 @@ s32 slCalc(dds3ProcessID_t *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && pacFileCheckEnd((struct FileRequest *)job) != 0) {
+    if (job != 0 && pacFileCheckEnd(job) != 0) {
         fileSaveIconRequest = 0;
-        fileSaveIconResourceHandle = fileGetMemHandle((struct FileRequest *)(u32)job);
-        fileSaveIconData = (u32)fileGetLoadPtr((struct FileRequest *)(u32)job);
-        fileSaveIconDataSize = fileGetLoadSize((struct FileRequest *)(u32)job);
-        fileHandleFree((struct FileRequest *)(u32)job);
+        fileSaveIconResourceHandle = fileGetMemHandle(job);
+        fileSaveIconData = (u32)fileGetLoadPtr(job);
+        fileSaveIconDataSize = fileGetLoadSize(job);
+        fileHandleFree(job);
     }
     return 0;
 }
@@ -2832,9 +2832,9 @@ void fileReleaseMenuResources(void) {
             dds3VisibleSceneBasic((dds3Basic_t *)world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileSync((struct FileRequest *)fileSaveIconRequest);
-            fileSaveIconResourceHandle = fileGetMemHandle((struct FileRequest *)(u32)fileSaveIconRequest);
-            fileHandleFree((struct FileRequest *)(u32)fileSaveIconRequest);
+            fileSync(fileSaveIconRequest);
+            fileSaveIconResourceHandle = fileGetMemHandle(fileSaveIconRequest);
+            fileHandleFree(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
         sdfMemFreeHandleDirect((s32 *)&fileSaveIconResourceHandle);
@@ -4065,7 +4065,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD5);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD8);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveIconRequest);
+INCLUDE_SDATA(struct FileRequest * const, "game/code_002C96D0", fileSaveIconRequest);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CE4);
 
@@ -8599,4 +8599,3 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E18);
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E20);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E28);
-
