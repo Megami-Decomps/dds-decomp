@@ -721,7 +721,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109028);
+INCLUDE_ASM(const s32, "game/code_00107EF8", evtSubmitTexturedGradientQuadPoints);
 
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
