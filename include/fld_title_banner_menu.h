@@ -6,7 +6,7 @@
 struct KwlnTask;
 
 /* Task initializer used by the field title-banner panel in both games. */
-s32 fldInitializeTitleBannerTask(struct KwlnTask *task);
+s32 fldInputPanelProcess1(struct KwlnTask *task);
 
 /* Title-banner consumer confirms these four halfwords and their offsets. */
 typedef struct FldTitleBannerMenu {
@@ -19,7 +19,7 @@ typedef struct FldTitleBannerMenu {
 typedef char FldTitleBannerMenu_size_must_be_8[
     (sizeof(FldTitleBannerMenu) == 8) ? 1 : -1];
 
-FldTitleBannerMenu *fldSetTitleBannerPending(s32 isPending);
-FldTitleBannerMenu *fldSetTitleBannerChoice(s32 choice);
+FldTitleBannerMenu *fldInputPanelSetDraw(s32 isPending);
+FldTitleBannerMenu *fldInputPanelSetMessage(s32 choice);
 
 #endif /* FLD_TITLE_BANNER_MENU_H */

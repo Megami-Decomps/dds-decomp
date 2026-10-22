@@ -111,15 +111,15 @@ typedef char EffPCPBlockSetWork_source_offset_must_be_0x108[
     ((u32)&((EffPCPBlockSetWork *)0)->source == 0x108) ? 1 : -1];
 
 /* The builder consumes a native parameter table and returns its retained work. */
-EffPCPBlockSetWork *effPcpBuildBlockSet(void *parameterTable);
-EffPCPBlockSetWork *effPcpCreateBlockSetWork(
+EffPCPBlockSetWork *effPCPAgiFireballCreatePCF(void *parameterTable);
+EffPCPBlockSetWork *effPCPAgiFireballCreate(
     const EffPCPBlockSetParams *params, void **blocks);
-EffPCPBlockSetWork *effPcpBlockSetCloneShared(EffPCPBlockSetWork *source);
-EffPCPBlockSetWork *effPcpCloneBlockWithUnitMatrix(EffPCPBlockSetWork *source);
-EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *source);
-void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
-void effPcpCopyVector60(EffPCPBlockSetWork *work, const void *source);
-void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, const void *source);
-void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 color);
+EffPCPBlockSetWork *effPCPAgiFireballCopy(EffPCPBlockSetWork *source);
+EffPCPBlockSetWork *effPCPAgiFireballSpCopy(EffPCPBlockSetWork *source);
+EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *source);
+void effPCPAgiFireballDelete(EffPCPBlockSetWork *work);
+void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source);
+void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *source);
+void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color);
 
 #endif /* EFF_PCP_BLOCK_SET_H */

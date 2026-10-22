@@ -51,14 +51,14 @@ typedef char DevState_callbackContext_offset_must_be_0x3C[
     ((u32)&((DevState *)0)->callbackContext == 0x3C) ? 1 : -1];
 
 /* Stable state APIs. Callback factories keep caller-specific callback types. */
-DevState *sdfDevCreateCommandState(const char *path);
+DevState *sdfFileOpen(const char *path);
 s32 sdfFileCmdRead(DevState *state, void *data, s32 byteCount);
 s32 sdfFileCmdWrite(DevState *state, const void *data, s32 byteCount);
 s32 sdfFileCmdFree(DevState *state);
 s32 sdfFileCmdClearError(DevState *state);
 s32 sdfFileCmdClose(DevState *request);
-void sdfDevQueueReadAndWait(DevState *state, void *buffer, s32 byteCount);
-u32 sdfDevQueueControlAndWait(DevState *state);
-void sdfDevWaitThenReleaseCommandState(DevState *state);
+void sdfFileRead(DevState *state, void *buffer, s32 byteCount);
+u32 sdfFileLength(DevState *state);
+void sdfFileClose(DevState *state);
 
 #endif /* SDF_DEV_STATE_H */

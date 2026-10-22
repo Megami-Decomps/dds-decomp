@@ -18,6 +18,6 @@ typedef char VuLightingPacket_tag_at_70[
     ((u32)&((VuLightingPacket *)0)->tag == 0x70) ? 1 : -1];
 
 /* Store the resident VU matrix and scaled rows into the supplied frame packet. */
-void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket);
+void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket);
 
 #endif /* SDF_VU_LIGHTING_H */

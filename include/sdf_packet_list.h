@@ -8,24 +8,24 @@ struct SdfDmaNode;
 struct SdfPoolNode;
 
 struct SdfListHead *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
-struct SdfListHead *sdfCreateResetPacketList(void);
-void sdfInitPacketList(struct SdfListHead *list);
+struct SdfListHead *dds3FontReqAllocDrawTag(void);
+void sdfDrawTagInit(struct SdfListHead *list);
 
-void sdfAppendPacket(struct SdfListHead *list, u32 packetAddress);
+void sdfDrawTagLink(struct SdfListHead *list, u32 packetAddress);
 void sdfAppendPacketRange(struct SdfListHead *list, u32 packetAddress,
                           u32 rangeTailAddress);
 void sdfAppendReferencePacket(struct SdfListHead *list, u32 packetAddress);
-void sdfAppendCallPacket(struct SdfListHead *list, u32 packetAddress);
-void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packetAddress);
-void sdfAppendDmaPrimary(struct SdfListHead *list, u32 source,
+void sdfDrawTagLinkCall(struct SdfListHead *list, u32 packetAddress);
+void sdfDrawTagLinkRefGif(struct SdfListHead *list, u32 packetAddress);
+void sdfGrLinkDispFrameTex(struct SdfListHead *list, u32 source,
                          struct SdfDmaNode *node);
-void sdfAppendDmaSecondary(struct SdfListHead *list, u32 source,
+void sdfGrLinkDrawFrameTex(struct SdfListHead *list, u32 source,
                            struct SdfDmaNode *node);
-void sdfConnectPacketLists(struct SdfListHead *previous, struct SdfListHead *incoming);
+void sdfGrJoinDrawTag(struct SdfListHead *previous, struct SdfListHead *incoming);
 
-void sdfAppendPacketList(struct SdfPoolNode *pool, struct SdfListHead *item);
-void sdfPrependPacketList(struct SdfPoolNode *pool, struct SdfListHead *item);
-s32 sdfPrependIfMode1(struct SdfPoolNode *pool, s32 mode, struct SdfListHead *item);
+void sdfGrOtNormalReg(struct SdfPoolNode *pool, struct SdfListHead *item);
+void sdfGrOtFuncLinkToHead(struct SdfPoolNode *pool, struct SdfListHead *item);
+s32 sdfGrOtNormalCallback(struct SdfPoolNode *pool, s32 mode, struct SdfListHead *item);
 struct SdfListHead *sdfFlushPoolNodes(struct SdfPoolNode *node);
 
 #endif /* SDF_PACKET_LIST_H */

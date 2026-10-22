@@ -12,7 +12,7 @@
 #include "dat_state.h"
 #include "eff.h"
 
-extern void mnuCreateConfigTasks(s32 mode);
+extern void dds3ConfigProcessStart(s32 mode);
 
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
@@ -21,7 +21,7 @@ extern const char D_003BC6D0[];
 extern char D_003BC6D8[];
 
 
-extern s32 fileConsumeConfigTaskReady(void);
+extern s32 checkConfigState(void);
 
 extern u8 mnuCampCommandReturnPopupEntry[];
 
@@ -121,7 +121,7 @@ s32 mnuStartStaffDisplay(KwlnTask *task) {
     StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
     mnuSetStaffDisplayMode(5, context);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel, context->singleResource, 0, 1);
-    mnuCreateConfigTasks(0);
+    dds3ConfigProcessStart(0);
     return 1;
 }
 
@@ -139,7 +139,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state == 0) {
-        if (fileConsumeConfigTaskReady() == 0) {
+        if (checkConfigState() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, mnuCampCommandReturnPopupEntry);
         }
         return 0;

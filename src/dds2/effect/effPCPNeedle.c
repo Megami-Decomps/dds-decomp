@@ -14,35 +14,35 @@
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
+extern void dds3TrackPolyColorSet(u32 system, s32 index, u32 value);
 
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_003B1530[4];
 
 
-extern void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src);
+extern void dds3NeedleModelSetMatrix(Matrix4 *dst, const Matrix4 *src);
 
-void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    parReleaseCellSystem(work->system);
-    effReleaseAttachedResources(work->resource);
+void effPCPNeedleSpiralDelete(EffPCPNeedleWork *work) {
+    dds3TrackPolyDelete(work->system);
+    dds3NeedleModelDelete(work->resource);
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-EffPCPNeedleWork *effPCPNeedleCreate(void *parameters) {
+EffPCPNeedleWork *effPCPNeedleSpiralCreatePCF(void *parameters) {
     EffPCPNeedleParams *work;
 
-    work = effParamTableGetBlock(parameters, 0);
-    return effNeedleCreateWork(work);
+    work = dds3EffectPCPDataGetData(parameters, 0);
+    return effPCPNeedleSpiralCreate(work);
 }
 
 /* Recreate needle work directly from the parameter prefix used by duplication. */
-EffPCPNeedleWork *effNeedleCreateFromParams(EffPCPNeedleParams *parameters) {
-    return effNeedleCreateWork(parameters);
+EffPCPNeedleWork *effPCPNeedleSpiralCopy(EffPCPNeedleParams *parameters) {
+    return effPCPNeedleSpiralCreate(parameters);
 }
 
 /* Advance the orbiting needle entries and rebuild their camera-facing trails. */
-void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
+void effPCPNeedleSpiralDraw(EffPCPNeedleWork *work) {
     f32 position[4];
     f32 axis[4];
     f32 vertices[2][4];
@@ -82,8 +82,8 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
     if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU((struct BtlUnit *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        sdfVuBuildLookAtBasis(work->params.position, position, D_003B1530);
-        sdfInvertRigidVuTransform();
+        LookAtMatrix(work->params.position, position, D_003B1530);
+        ReverseMatrix();
         VU0_STORE_MATRIX_UNCLOBBERED(work->resource->matrix);
     } else {
         VU0_LOAD_MATRIX(work->resource->matrix);
@@ -116,7 +116,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
                 VU0_LOAD_MATRIX(work->resource->matrix);
                 radius = (u32)slot->radius;
                 position[0] = sdfCos(slot->angle) * radius;
-                position[1] = sdfSinPoly(slot->angle) * radius;
+                position[1] = sdfSin(slot->angle) * radius;
                 position[2] = 0.0f;
                 VU0_LOAD_VF(vf10, position);
                 VU0_ROTATE_VEC(vf10, vf10);
@@ -124,11 +124,11 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
                 slot->direction[0] = position[0];
                 slot->direction[1] = position[1];
                 slot->direction[2] = position[2];
-                effSetResourceEntryPosition(work->resource, i, position);
+                dds3NeedleModelSetPosition(work->resource, i, position);
             }
 
             if (age >= 0 && age <= duration) {
-                effGetResourceEntryPosition(work->resource, i, resourcePosition);
+                dds3NeedleModelGetPosition(work->resource, i, resourcePosition);
                 VU0_LOAD_VF(vf10, viewOffset);
                 VU0_LOAD_VF(vf11, resourcePosition);
                 VU0_ADD(vf10, vf10, vf11);
@@ -137,7 +137,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
                 position[0] = slot->direction[0];
                 position[1] = slot->direction[1];
                 position[2] = slot->direction[2];
-                sdfBuildVuRotationFromAxisAngle(slot->angle, (const RwV3d *)axis);
+                SetRotateMatrixAxis(slot->angle, (const RwV3d *)axis);
                 slot->angle += angleStep;
                 VU0_LOAD_VF(vf10, position);
                 VU0_ROTATE_VEC(vf10, vf10);
@@ -158,7 +158,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
                 VU0_LOAD_VF(vf11, work->params.position);
                 VU0_ADD(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
-                effSetResourceEntryPosition(work->resource, i, position);
+                dds3NeedleModelSetPosition(work->resource, i, position);
 
                 if (age < fadeIn && fadeIn != 0) {
                     t = (f32)age / (f32)fadeIn;
@@ -168,8 +168,8 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
                     t = fadeOut < duration - age || fadeOut == 0
                         ? 1.0f : (f32)(duration - age) / (f32)fadeOut;
                 }
-                color = effBlendColor(baseColor & 0xFFFFFF, baseColor, t);
-                effSetResourceEntryValue(work->resource, i, color);
+                color = effColorBlend(baseColor & 0xFFFFFF, baseColor, t);
+                dds3NeedleModelSetColor(work->resource, i, color);
 
                 if (age > 0) {
                     VU0_LOAD_VF(vf10, viewOffset);
@@ -193,30 +193,30 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
                     VU0_MOVE_VF(vf10, vf12);
                     VU0_SUB(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, vertices[1]);
-                    parUpdateCellVertexPair(work->system, i, (const u128 *)vertices);
-                    parFadeAlphaCell(work->system, i);
-                    effBillSetEntryValue((u32)work->system, i, (color & 0xFF000000) | 0x808080);
+                    dds3TrackPolySet(work->system, i, (const u128 *)vertices);
+                    dds3TrackPolyVCRefresh_ParType1(work->system, i);
+                    dds3TrackPolyColorSet((u32)work->system, i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
-                effSetResourceEntryValue(work->resource, i, 0);
-                effBillSetEntryValue((u32)work->system, i, 0);
-                parCellInit(work->system, i);
+                dds3NeedleModelSetColor(work->resource, i, 0);
+                dds3TrackPolyColorSet((u32)work->system, i, 0);
+                dds3TrackPolyListInit(work->system, i);
             }
             slot->age++;
             i++;
             slot++;
         } while (i < count);
     }
-    parPrependCellNode(work->system);
-    effDrawInstancedResourceTrianglesVU(work->resource);
+    dds3TrackPolyDraw(work->system);
+    dds3NeedleModelDraw(work->resource);
 }
 
 
-void effPCPNeedleCopyVector(void *dst, void *src) {
+void effPCPNeedleSpiralSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
 /* Copy the supplied transform into the needle's resource matrix. */
 void effNeedleSetResourceMatrix(EffPCPNeedleWork *work, void *matrix) {
-    effCopyMatrixVU((Matrix4 *)work->resource->matrix, matrix);
+    dds3NeedleModelSetMatrix((Matrix4 *)work->resource->matrix, matrix);
 }

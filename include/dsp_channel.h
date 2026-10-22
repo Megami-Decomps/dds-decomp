@@ -4,6 +4,6 @@
 #include "common.h"
 
 /* Close the active display channel and return its status. */
-s32 dspCloseChannel(void);
+s32 fclDestroyMessage(void);
 
 #endif /* DSP_CHANNEL_H */

@@ -10,17 +10,17 @@ typedef struct {
 } EffPCPEventWorkFields;
 
 /* vu0 routine: copy the PCP event-work position vector, including its fourth lane. */
-void effPcpEventWorkSetPosition(void *work, void *position) {
+void effPCPHelperBEDSetPosition(void *work, void *position) {
     PCP_COPY_VECTOR(work, position);
 }
 
 /* Set the scale consumed by the PCP map-event update. */
-void effPcpEventWorkSetScale(EffPCPEventWorkFields *work, f32 scale) {
+void effPCPHelperBEDSetScale(EffPCPEventWorkFields *work, f32 scale) {
     work->scale = scale;
 }
 
 /* Set the packed color used to tint the map event's children. */
-void effPcpEventWorkSetColor(EffPCPEventWorkFields *work, u32 color) {
+void effPCPHelperBEDSetColor(EffPCPEventWorkFields *work, u32 color) {
     work->color = color;
 }
 

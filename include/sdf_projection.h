@@ -49,14 +49,14 @@ extern SdfProjectionRecord D_0037F7B0;
 extern SdfProjectionRecord D_0037F980;
 #endif
 extern void sdfCameraBuildProjection(SdfCamera *);
-void sdfSetViewFieldOfView(f32 value);
+void dds3SetScreenFovy(f32 value);
 /* Project the point in VU0 vf10 through the active view/projection matrices.
  * The routine writes the screen-scaled point back to vf10 and returns no value. */
-void sdfProjectVuVectorToScreen(void);
+void effScreenOffset(void);
 /* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
-void sdfVuBuildLookAtBasis(const void *directionPoint, const void *basisOrigin, const void *up);
+void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
 struct ConsMatrixPacket;
-extern void sdfConsBuildMatrixPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, void *);
-extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);
+extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, void *);
+extern void sdf3DSetCamera(SdfProjectionRecord *, void *);
 
 #endif /* SDF_PROJECTION_H */

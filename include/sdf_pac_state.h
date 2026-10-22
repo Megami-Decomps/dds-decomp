@@ -78,15 +78,15 @@ typedef char PacState_queueHead_must_be_at_0x30[
 typedef char PacState_queueTail_must_be_at_0x34[
     ((u32)&((PacState *)0)->queueTail == 0x34) ? 1 : -1];
 
-void sdfPacInitializeDispatchPacket(PacState *state, void *callbackAddress);
-s32 sdfPacFeedInput(PacState *state, const u8 *input, s32 inputByteCount);
-void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
-void sdfPacReadListAllocationCount(PacState *state);
+void sdfPacInit(PacState *state, void *callbackAddress);
+s32 sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount);
+void sdfPacUseSrc(PacState *state, s32 consumedBytes);
+void sdfPacTexListDecoder0(PacState *state);
 void sdfPacSkipAllocationEntryBytes(PacState *state);
-void sdfQueueAndResetPacketWork(PacState *state,
+void sdfPacTexListDecoderInit(PacState *state,
                                 SdfPacStreamPacketHeader *packet);
-void sdfPacUsePacketPayloadMemory(PacState *state);
-void sdfPacUseHighAddressAllocator(PacState *state);
-void sdfPacReleasePacketQueueNodes(PacState *state);
+void sdfPacSetStay(PacState *state);
+void sdfPacSetFromTail(PacState *state);
+void sdfPacFree(PacState *state);
 
 #endif /* SDF_PAC_STATE_H */

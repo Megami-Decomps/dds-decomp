@@ -14,8 +14,8 @@
 #include "ee_mmi.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
-extern SdfTexResource * sdfTexAllocHead(s32 type, s32 kind, s32 unused);
-extern SdfTexResource * sdfTexAllocHeadHigh(s32 size, s32 allocationMode);
+extern SdfTexResource * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
+extern SdfTexResource * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 extern SdfTex * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
@@ -25,13 +25,13 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 
 
-SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
+SdfTexBuf *sdfTexMakeGIFPacketSub(SdfTex *texture, s32 variant);
 
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
 
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
-s32 __attribute__((const)) sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
+s32 __attribute__((const)) sdfTexGetClutDataSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
     s32 colorsPerPalette;
 
@@ -43,19 +43,19 @@ s32 __attribute__((const)) sdfTexGetPaletteByteSize(s32 textureFormat, s32 palet
     return colorsPerPalette * bytesPerColor * paletteCount;
 }
 
-void sdfTexAllocatePaletteData(SdfTex *texture) {
-    s32 size = sdfTexGetPaletteByteSize(texture->pixelFormat, texture->clutFormat,
+void sdfTexAllocClutBuff(SdfTex *texture) {
+    s32 size = sdfTexGetClutDataSize(texture->pixelFormat, texture->clutFormat,
                                       texture->paletteCount);
     texture->paletteDataSize = size;
-    texture->paletteData = sdfAllocateBlockBySizeThreshold(size);
+    texture->paletteData = sdfAllocAuto(size);
 }
 
 /* Copy retained palette bytes without changing the texture resource metadata. */
-void sdfTexCopyImageData(SdfTex *texture, const u8 *source) {
+void sdfTexCopyClutData(SdfTex *texture, const u8 *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
-SdfTex *sdfTexCreateWithAllocatedResources(s32 width, s32 height, u32 format,
+SdfTex *sdfTexAlloc(s32 width, s32 height, u32 format,
     u32 maxMipLevel, u32 paletteFormat, u32 paletteCount) {
     s32 indexed = 0;
     s32 bitsPerPixel;
@@ -90,7 +90,7 @@ SdfTex *sdfTexCreateWithAllocatedResources(s32 width, s32 height, u32 format,
     }
     secondary = NULL;
     if (indexed) {
-        secondary = sdfTexAllocHead(format, paletteFormat, paletteCount);
+        secondary = sdfTexAllocClut(format, paletteFormat, paletteCount);
     }
     mipWidth = width;
     mipHeight = height;
@@ -101,7 +101,7 @@ SdfTex *sdfTexCreateWithAllocatedResources(s32 width, s32 height, u32 format,
         mipWidth >>= 1;
         mipHeight >>= 1;
     } while (mipLevel++ != maxMipLevel);
-    primary = sdfTexAllocHeadHigh(words, 2);
+    primary = sdfGsMemAllocFromTail(words, 2);
     primary->width = width;
     primary->height = height;
     primary->format = format;
@@ -115,9 +115,9 @@ void sdfTexRelease(SdfTex *texture) {
     SdfTex *prev;
 
     if (texture->reference->cloneSource == NULL) {
-        sdfUpdateTextureHeadsWithInterruptsMasked(texture->primaryResource);
+        sdfGsMemFree(texture->primaryResource);
     }
-    sdfUpdateTextureHeadsWithInterruptsMasked(texture->secondaryResource);
+    sdfGsMemFree(texture->secondaryResource);
     sdfChipFreeDirect(texture->primaryBuffer);
     sdfChipFreeDirect(texture->secondaryBuffer);
     next = texture->next;
@@ -130,8 +130,8 @@ void sdfTexRelease(SdfTex *texture) {
     } else {
         sdfResourceListHead = prev;
     }
-    sdfFreeMemoryFromEitherHeap(texture->paletteData);
-    sdfFreeMemoryFromEitherHeap(texture->intensityMap);
+    sdfFreeAuto(texture->paletteData);
+    sdfFreeAuto(texture->intensityMap);
     sdfChipFreeDirect(texture->reference);
     sdfChipFreeDirect(texture);
 }
@@ -152,7 +152,7 @@ void sdfTexReleaseReference(SdfTex *texture) {
     }
 }
 
-/* Hand the last reference to sdfPendingQueuePush rather than releasing it here. */
+/* Hand the last reference to sdfDelayedResrcEntry rather than releasing it here. */
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
     SdfTexRef *ref;
     s32 remainingReferenceCount;
@@ -163,45 +163,45 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = remainingReferenceCount;
         if (remainingReferenceCount == 0) {
             texture->resourceKey = 0;
-            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
+            sdfDelayedResrcEntry(&sdfTextureReleaseQueue, texture);
         }
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", sdfBuildTextureStatePacket);
+INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexSetPacket);
 
 /* Allocate and populate one of the two resource packet variants. */
-SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
+SdfTexBuf *sdfTexMakeGIFPacketSub(SdfTex *texture, s32 variant) {
     SdfTexBuf *packet;
     u32 primary;
     u32 secondary;
 
     packet = sdfChipAllocDirect(0x40);
-    primary = sdfTexGetPrimaryResourceWord(texture);
-    secondary = sdfTexGetSecondaryResourceWord(texture);
-    sdfBuildTextureStatePacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
+    primary = sdfTexGetPixelAddr(texture);
+    secondary = sdfTexGetCLUTAddr(texture);
+    sdfTexSetPacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
     return packet;
 }
 
 /* Store the first packet on the texture. */
-void sdfTexCreateFirstPacket(SdfTex *texture) {
-    texture->primaryBuffer = sdfTexCreateResourcePacket(texture, 0);
+void sdfTexMakeGIFPacket(SdfTex *texture) {
+    texture->primaryBuffer = sdfTexMakeGIFPacketSub(texture, 0);
 }
 
 /* Store the second packet on the texture. */
-void sdfTexCreateSecondPacket(SdfTex *texture) {
-    texture->secondaryBuffer = sdfTexCreateResourcePacket(texture, 1);
+void sdfTexMakeGIFPacketCtx2(SdfTex *texture) {
+    texture->secondaryBuffer = sdfTexMakeGIFPacketSub(texture, 1);
 }
 
 /* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
-void sdfTexRefreshResourcePackets(SdfTex *texture) {
+void sdfTexRebuildPacket(SdfTex *texture) {
     SdfTexBuf *buffer;
 
     buffer = texture->primaryBuffer;
     if (buffer != NULL) {
-        sdfBuildTextureStatePacket(buffer, texture->width, texture->height,
-                     sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
-                     sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
+        sdfTexSetPacket(buffer, texture->width, texture->height,
+                     sdfTexGetPixelAddr(texture), texture->pixelFormat,
+                     sdfTexGetCLUTAddr(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
                      texture->maxMipLevel, texture->lodParameters,
                      texture->clampMode, 0);
@@ -209,9 +209,9 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 
     buffer = texture->secondaryBuffer;
     if (buffer != NULL) {
-        sdfBuildTextureStatePacket(buffer, texture->width, texture->height,
-                     sdfTexGetPrimaryResourceWord(texture), texture->pixelFormat,
-                     sdfTexGetSecondaryResourceWord(texture), texture->clutFormat,
+        sdfTexSetPacket(buffer, texture->width, texture->height,
+                     sdfTexGetPixelAddr(texture), texture->pixelFormat,
+                     sdfTexGetCLUTAddr(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
                      texture->maxMipLevel, texture->lodParameters,
                      texture->clampMode, 1);
@@ -239,47 +239,47 @@ SdfTex *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 mode)
             existing = existing->prev;
         }
     }
-    texture = sdfTexCreateWithAllocatedResources(header->width, header->height, header->pixelFormat, header->maxMipLevel, header->clutFormat, header->paletteCount);
+    texture = sdfTexAlloc(header->width, header->height, header->pixelFormat, header->maxMipLevel, header->clutFormat, header->paletteCount);
     texture->lodParameters = header->lodParameters;
     texture->unk1E = header->unk1A;
     texture->clampMode = header->clampMode;
     texture->resourceKey = header->resourceKey;
     texture->battleTextureSlot = header->battleTextureSlot;
     pixels = (u8 *)header + (header->payloadOffsetFlags & SDF_TEXTURE_PAYLOAD_EXTRA_OFFSET_MASK) + sizeof(*header);
-    if (sdfTexGetPaletteCount(texture) != 0) {
-        sdfTexAllocatePaletteData(texture);
-        sdfTexCopyImageData(texture, pixels);
-        pixels = sdfTexSubmitPixelsForFormat(texture, sdfTexGetSecondaryResourceWord(texture), pixels, mode);
+    if (sdfTexGetCLUTCount(texture) != 0) {
+        sdfTexAllocClutBuff(texture);
+        sdfTexCopyClutData(texture, pixels);
+        pixels = sdfTexTransCLUT(texture, sdfTexGetCLUTAddr(texture), pixels, mode);
     }
     format = texture->pixelFormat;
     width = texture->width;
     height = texture->height;
     levels = texture->maxMipLevel;
-    destination = sdfTexGetPrimaryResourceWord(texture);
-    bits = sdfTexFormatSizeHint(format);
+    destination = sdfTexGetPixelAddr(texture);
+    bits = sdfTexGetTexelBitCount(format);
     do {
-        pixels = sdfTexSubmitImageCopy(destination, width, height, format, pixels, mode);
+        pixels = sdfTexTransData(destination, width, height, format, pixels, mode);
         levels--;
         destination += (bits * width * height) >> 5;
         width >>= 1;
         height >>= 1;
     } while (levels != -1);
-    sdfTexCreateFirstPacket(texture);
+    sdfTexMakeGIFPacket(texture);
     return texture;
 }
 
 /* Build the texture and its packet with variant zero. */
-SdfTex *sdfTexAcquireResourceTexture(const SdfTextureFileHeader *header) {
+SdfTex *sdfTexSet(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 0);
 }
 
 /* Build the texture and its packet with variant one. */
-SdfTex *sdfTexAcquireAlternateResourceTexture(const SdfTextureFileHeader *header) {
+SdfTex *sdfTexSetDirect(const SdfTextureFileHeader *header) {
     return sdfTexCreateFromFileHeader(header, 1);
 }
 
 /* Build weighted-RGB intensity bytes from retained palette color data. */
-void sdfTexBuildIntensityMap(SdfTex *texture) {
+void sdfTexSetMonoClut(SdfTex *texture) {
     s32 stride;
     s32 paletteColorCount;
     u8 *output;
@@ -298,7 +298,7 @@ void sdfTexBuildIntensityMap(SdfTex *texture) {
     }
     output = texture->intensityMap;
     if (output == NULL) {
-        output = sdfAllocateBlockBySizeThreshold(paletteColorCount);
+        output = sdfAllocAuto(paletteColorCount);
         texture->intensityMap = output;
     }
     source = texture->paletteData;

@@ -18,9 +18,9 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
     SdfDrawPacket *drawPacket;
     BlurPacketQuad *quad;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    packet = (u64 *)sdfAllocPacketAligned(0x40);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
     packet[0] = 3;
     packet[1] = 0x5000000310000000ULL;
     packet[2] = 0x1000000000008002ULL;
@@ -29,10 +29,10 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
     packet[5] = 72;
     packet[6] = params->blendControl;
     packet[7] = 67;
-    sdfAppendPacket(list, (u32)packet);
-    sdfConsCreateDrawPacket(list, resource, 1);
-    drawPacket = effCreateSizedDrawPacket(1, 0x200);
-    quad = billGetWorkTransformMatrix(drawPacket);
+    sdfDrawTagLink(list, (u32)packet);
+    sdf2DLinkTexPacket(list, resource, 1);
+    drawPacket = effPkt2DAllocTriStrip(1, 0x200);
+    quad = effPkt2DGetPrimPtr(drawPacket);
     quad->color[0] = params->color[0];
     quad->color[1] = params->color[1];
     quad->color[2] = params->color[2];
@@ -72,22 +72,22 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8
     quad->vertices[2].xyzControl = 0;
     quad->vertices[3].depth = 0;
     quad->vertices[3].xyzControl = 0;
-    sdfAppendPacket(list, (u32)drawPacket);
+    sdfDrawTagLink(list, (u32)drawPacket);
     D_003253C8.append(&D_003253C8, list);
 }
 
 
 
 /* Clone rectangle parameters and select a fresh source handle. */
-EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
+EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *src) {
     EffResourceRectWork *dst = sdfChipAllocDirect(sizeof(EffResourceRectWork));
 
-    dst->texture = effGetBillResourceTexture(0);
+    dst->texture = dds3BillboardGetGeneralTex(0);
     memcpy(&dst->params, src, sizeof(*src));
     return dst;
 }
 
-void effReleaseResourceTemplate(EffResourceRectWork *work) {
+void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *work) {
     sdfChipFreeDirect(work);
 }
 
@@ -128,9 +128,9 @@ void effComputeBlurRectBounds(EffResourceRectWork *work) {
 typedef struct EffTrackPolyData EffTrackPolyData;
 
 
-extern EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps);
-extern void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *gradientColors);
-extern void effTrackPolySetDrawKind(EffTrackPolyData *data, u32 kind);
+extern EffTrackPolyData *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps);
+extern void dds3HermitianTrackPolySetVC(EffTrackPolyData *data, u32 *gradientColors);
+extern void dds3HermitianTrackPolySetBlend(EffTrackPolyData *data, u32 kind);
 
 /* Clone a model track with independent history and gradient storage. */
 EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
@@ -139,8 +139,8 @@ EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src) {
     dst->params = *src;
     dst->params.unk1C = 0xC;
     dst->updateCount = 0;
-    dst->data = effTrackPolyAllocateHistoryData(dst->params.historyLength, 0xC);
-    effTrackPolyFillGradientColors(dst->data, src->gradientColors);
-    effTrackPolySetDrawKind(dst->data, src->kind);
+    dst->data = dds3HermitianTrackPolyCreate(dst->params.historyLength, 0xC);
+    dds3HermitianTrackPolySetVC(dst->data, src->gradientColors);
+    dds3HermitianTrackPolySetBlend(dst->data, src->kind);
     return dst;
 }

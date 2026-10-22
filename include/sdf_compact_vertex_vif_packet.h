@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,
+u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes,
     const void *halfAttributes, const void *wordAttributes, s32 vertexCount,
     void *(*allocatePacket)(s32));
 

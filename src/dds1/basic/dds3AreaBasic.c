@@ -4,13 +4,13 @@
 
 
 /* Exchange the area's slot, retaining the native selector pair (0, 5). */
-s32 dds3ExchangeAreaSlot(void *areaObject) {
-    dds3ExchangeSlot(areaObject, 0, 5);
+s32 CB_ReleaseObjectBasic(void *areaObject) {
+    dds3ObjectBaseSetControlBasicType(areaObject, 0, 5);
     return 1;
 }
 
 /* A missing callback returns one; otherwise propagate its return unchanged. */
-s32 dds3InvokeAreaCallback(Dds3AreaObjectView *areaObject) {
+s32 CB_BasicDrawProcuder(Dds3AreaObjectView *areaObject) {
     s32 (*callback)(Dds3AreaObjectView *);
 
     callback = areaObject->callbackRecord->callback;

@@ -20,7 +20,7 @@ typedef char EffResourceList_size_must_be_12[(sizeof(EffResourceList) == 12) ? 1
 typedef char EffResourceListNode_size_must_be_60[(sizeof(EffResourceListNode) == 60) ? 1 : -1];
 
 
-/* Complete 0x44-byte browser owner returned by effCreateResourceListDescriptor. */
+/* Complete 0x44-byte browser owner returned by dds3EffectFileListWindowCreate. */
 typedef struct EffResourceDescriptor {
     s32 x;
     s32 y;
@@ -44,19 +44,19 @@ typedef char EffResourceDescriptor_size_must_be_0x44[
     sizeof(EffResourceDescriptor) == 0x44 ? 1 : -1];
 
 
-EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list);
-void effFreeWorkList(EffResourceList *list);
-void effFreeWork(EffResourceDescriptor *work);
-void effSetMsgHeader(EffResourceDescriptor *work, s32 x, s32 y);
+EffResourceDescriptor *dds3EffectFileListWindowCreate(EffResourceList *list);
+void dds3EffectFileListDelete(EffResourceList *list);
+void dds3EffectFileListWindowDelete(EffResourceDescriptor *work);
+void dds3EffectFileListWindowSetPos(EffResourceDescriptor *work, s32 x, s32 y);
 u32 effGetWorkParam(EffResourceDescriptor *work);
-u32 effGetWorkLink(EffResourceDescriptor *work);
-u32 effFormatMsgNames(EffResourceDescriptor *work, char *destination);
-void effSetWorkFirst(EffResourceDescriptor *work, u32 delay);
-void effSetWorkSecond(EffResourceDescriptor *work, u32 surface);
-void effSetMsgPair(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);
-void effSetWorkTextureResource(EffResourceDescriptor *work, const char *textureResource);
-EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags);
-s32 effUpdateResourceBrowser(EffResourceDescriptor *work);
-void effDrawResourceTexturePreview(EffResourceDescriptor *overlay);
+u32 dds3EffectFileListWindowGetState(EffResourceDescriptor *work);
+u32 dds3EffectFileListWindowGetFilename(EffResourceDescriptor *work, char *destination);
+void dds3EffectFileListWindowSetOt(EffResourceDescriptor *work, u32 delay);
+void dds3EffectFileListWindowSetPadWait(EffResourceDescriptor *work, u32 surface);
+void dds3EffectFileListWindowSetWindowColor(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);
+void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureResource);
+EffResourceList *dds3EffectFileListCreate(char *path, s32 flags);
+s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *work);
+void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay);
 
 #endif

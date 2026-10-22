@@ -17,7 +17,7 @@ extern u32 D_003E274C[];
 
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 
-extern void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
+extern void cmpDrawPanelEffCell(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
 
 /* Connect prerequisite cells with a straight stroke or a three-stroke bend. */
 void mnuDrawMantraPrerequisiteLink(s32 x, s32 y, s32 z, s32 cellWidth,
@@ -63,15 +63,15 @@ void mnuDrawMantraPrerequisiteLink(s32 x, s32 y, s32 z, s32 cellWidth,
 
         turnX = (endX - (cellWidth >> 3) * 3 + bendInset) << 4;
         startPixelY = (startY + startOffset) << 3;
-        uiDrawUniformColorLine(startX << 4, startPixelY, z,
+        cmpDrawPanelEffCell(startX << 4, startPixelY, z,
                                turnX, startPixelY, z, color, surface);
         endPixelY = (endY + targetOffset) << 3;
-        uiDrawUniformColorLine(turnX, startPixelY, z,
+        cmpDrawPanelEffCell(turnX, startPixelY, z,
                                turnX, endPixelY, z, color, surface);
-        uiDrawUniformColorLine(turnX, endPixelY, z,
+        cmpDrawPanelEffCell(turnX, endPixelY, z,
                                endX << 4, endPixelY, z, color, surface);
     } else {
-        uiDrawUniformColorLine(startX << 4, (endY + startOffset) << 3, z,
+        cmpDrawPanelEffCell(startX << 4, (endY + startOffset) << 3, z,
                                endX << 4, endY << 3, z, color, surface);
         /* Native flat stroke uses jal before attachment cleanup. Qualified trace:
          * sandbox_MatchA/deep_link_F2_trace, rtl.01.sibling call545/reset549;
@@ -238,7 +238,7 @@ mnuAdvanceMantraGridFeedback(MnuGridFeedbackState *voice) {
         break;
     }
     if (notify == 1) {
-        sndSetSequenceVolumePan(0x15, 0x7F, 0x3F);
+        p2sdPlaySE(0x15, 0x7F, 0x3F);
     }
 }
 
@@ -310,7 +310,7 @@ void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackSt
 
 
 static inline s16 mnuRandomPulseDuration(void *state) {
-    return sdfGetRandFloat(state) * 120.0f + 30.0f;
+    return dds3GetRandFloatA(state) * 120.0f + 30.0f;
 }
 
 void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
@@ -323,7 +323,7 @@ void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
         return;
     }
     pulse->timer = 0;
-    random = sdfGetRandFloat(0);
+    random = dds3GetRandFloatA(0);
     switch (pulse->mode) {
     case 1:
         if (random < 0.3f) {
@@ -343,7 +343,7 @@ void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
         pulse->duration = mnuRandomPulseDuration(0);
         return;
     case 3:
-        if (sdfGetRandFloat(0) < 0.1f) {
+        if (dds3GetRandFloatA(0) < 0.1f) {
             pulse->mode = 4;
             pulse->duration = 50;
             return;

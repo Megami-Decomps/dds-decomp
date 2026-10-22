@@ -6,7 +6,7 @@
 
 /* One frame state's packet: a DMA end tag carrying VIF DIRECT, then a TEST
  * write, a full-screen sprite of two vertices, and the TEST and ALPHA writes
- * that close it (evtInitializeFrameStatePacketTemplates fills them). */
+ * that close it (dds3InitZClearDrawTag fills them). */
 typedef struct EvtFrameStatePacket {
     SdfDmaTagHeader dma;
     u64 testGifTag;

@@ -14,8 +14,8 @@ typedef struct ActionSub {
 } ActionSub;
 
 
-EffWorldNode *evtSpawnActionObjB(s32 objectKey, s32 b, s32 c, s32 objectName) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_B);
+EffWorldNode *dds3AddModelRangeBasicNew(s32 objectKey, s32 b, s32 c, s32 objectName) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_B);
 
     obj->value = (const char *)objectName;
     ((ActionSub *)obj->data)->unk10 = 0;
@@ -23,21 +23,21 @@ EffWorldNode *evtSpawnActionObjB(s32 objectKey, s32 b, s32 c, s32 objectName) {
     return obj;
 }
 
-void dds3SetPathStateValue(EffWorldNode *path, u32 value) {
+void dds3SetPathBasicSpline(EffWorldNode *path, u32 value) {
     ((Dds3PathStatePayload *)path->data)->value = value;
 }
 
-u32 dds3GetPathStateValueById(u32 id) {
+u32 dds3SearchSceneBasicWorkData(u32 id) {
     EffWorldNode *path;
     EffWorldNode *world;
 
-    world = dds3GetWorldSecondaryObject();
-    path = dds3FindWorldObjectNodeByKey(world, id, 6);
+    world = dds3GetControlScene();
+    path = dds3SearchSceneBasic(world, id, 6);
     return ((Dds3PathStatePayload *)path->data)->value;
 }
 
-EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_D);
+EffWorldNode *dds3AddEventBasic(s32 key, void *work, s32 name) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_D);
 
     obj->data = work;
     obj->key = key;
@@ -45,11 +45,11 @@ EffWorldNode *evtSpawnActionObjD(s32 key, void *work, s32 name) {
     return obj;
 }
 
-void *dds3GetWorldObjectPayload(EffWorldNode *object) {
+void *dds3EventBasicGetResource(EffWorldNode *object) {
     return object->data;
 }
 
-void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame) {
+void dds3PathEvalSpline(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame) {
     u32 count = keys->count;
     u32 i;
     u32 *frames = keys->frames;
@@ -66,8 +66,8 @@ void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKey
     *weight = 1.0f;
 }
 
-EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_10);
+EffWorldNode *dds3AddPathBasic(s32 key, void *work, const char *name) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_10);
 
     obj->key = key;
     obj->value = name;
@@ -75,9 +75,9 @@ EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name) {
     return obj;
 }
 
-extern EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
+extern EffPrimitiveCurve *dds3AllocSplineHandle(f32 *data, u32 count, s32 mode);
 
-Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
+Dds3PathCurveWork *dds3AllocPathBasicWorkData(EffWorldNode *object) {
     Dds3PathCurveTable *table = object->data;
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;
@@ -108,7 +108,7 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
             positionSamples = keys->data.position;
             work->counter.flags |= DDS3_PATH_POSITION_CHANNEL;
             work->positionKeys = keys;
-            work->primitiveCurve = effCreatePrimitiveCurve(positionSamples[0], keys->count, 1);
+            work->primitiveCurve = dds3AllocSplineHandle(positionSamples[0], keys->count, 1);
             break;
         case DDS3_PATH_CURVE_ROTATION:
             work->rotationKeys = keys;

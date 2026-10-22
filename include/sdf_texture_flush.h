@@ -3,7 +3,7 @@
 
 #include "sdf_gs_packet.h"
 
-void sdfInitializeTextureFlushRegister(SdfGsRegisterWrite *write);
-void sdfInitializeTextureFlushPacket(SdfGsTextureFlushPacket *packet);
+void sdfPrimSetTexflushElem(SdfGsRegisterWrite *write);
+void sdfPrimSetTexflushPacket(SdfGsTextureFlushPacket *packet);
 
 #endif

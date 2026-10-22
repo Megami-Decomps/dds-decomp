@@ -119,7 +119,7 @@ extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
-extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+extern void itfMesMngSetVarImmediate(s32, u32, const void *);
 extern u8 *datSkillNames;
 extern u8 btlActionPassLabel[];
 extern u8 btlActionRetreatLabel[];
@@ -157,7 +157,7 @@ void func_0020EA10(void) {
 
 
 
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPos(SdfModel *model, s32 id);
 extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 
 void btlDrawActorGroundDisc(BtlUnit *unit) {
@@ -208,7 +208,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
 
     dds3GetPosPoseSet((EffWorldNode *)unit->effectObject);
     VU0_STORE_VF(vf10, actorPosition);
-    if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
+    if (sdfModelGetMarkPos(model->inner, 0) == 0) {
         VU0_LOAD_VF(vf10, actorPosition);
     }
     VU0_STORE_VF(vf10, position);
@@ -272,7 +272,7 @@ s32 btlAiCheckStatusRollEligibility(ActionStateLink *task) {
 }
 
 extern f32 btlUnitGetTopY(BtlUnit *unit);
-extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
+extern s32 nbClipEffectNum(s32 screen[4]);
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
@@ -302,13 +302,13 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         return;
     }
     VU0_LOAD_VF(vf10, baseline);
-    visible = btlProjectForwardPositionToPackedScreen(screen);
+    visible = nbClipEffectNum(screen);
     x = screen[0] >> 4;
     y = screen[1] >> 3;
     if (!visible || x < 12 || x >= 501 || y < 48 || y >= 324) {
         if (btlSetActorEffectParameter(unit, 1) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-            visible = btlProjectForwardPositionToPackedScreen(screen);
+            visible = nbClipEffectNum(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && !(unit->status.stateFlags & 0x400000) &&
@@ -328,7 +328,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
             candidate[2] = baseline[2];
             candidate[1] -= unit->height * unit->scale * 0.25f;
             VU0_LOAD_VF(vf10, candidate);
-            visible = btlProjectForwardPositionToPackedScreen(screen);
+            visible = nbClipEffectNum(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
             if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -339,7 +339,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         }
         btlUnitGetMuzzlePosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
-        visible = btlProjectForwardPositionToPackedScreen(screen);
+        visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -349,7 +349,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         }
         candidate[1] += unit->height * unit->scale * 0.5f;
         VU0_LOAD_VF(vf10, candidate);
-        visible = btlProjectForwardPositionToPackedScreen(screen);
+        visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -361,7 +361,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         VU0_STORE_VF_UNCLOBBERED(vf10, candidate);
         candidate[1] -= unit->height * unit->scale * 0.5f;
         VU0_LOAD_VF(vf10, candidate);
-        visible = btlProjectForwardPositionToPackedScreen(screen);
+        visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
         y = screen[1] >> 3;
         if (visible == 1 && x >= 12 && x < 501 && y >= 48 && y < 324) {
@@ -642,7 +642,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         }
         VU0_LOAD_VF(vf11, args->anchorOffset);
         VU0_ADD(vf10, vf10, vf11);
-        if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
+        if (nbClipEffectNum(screen) != 0) {
             screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][0] * 40.0f) << 4;
             screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][1] * 40.0f) << 3) + 320;
             btlDrawCenteredUnsignedNumber(screen[0], screen[1] - rise, value, color, offsets);
@@ -791,7 +791,7 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
         VU0_LOAD_VF(vf11, args->anchorOffset);
         VU0_ADD(vf10, vf10, vf11);
 
-        if (btlProjectForwardPositionToPackedScreen(screen)) {
+        if (nbClipEffectNum(screen)) {
             screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][0] * 40.0f) << 4;
             screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.counter.offsetIndex][1] * 40.0f) << 3) + 320;
 
@@ -1206,7 +1206,7 @@ s32 btlAdvanceActorEffectLabelTask(void *arguments) {
         if (owner != 0) {
             itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
             sprintf(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
-            itfMesCopyStringToWindowTableSlot(battleState->messageWindows[0], 1, text);
+            itfMesMngSetVarImmediate(battleState->messageWindows[0], 1, text);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], 0xD5);
     }
@@ -1236,7 +1236,7 @@ BtlRuntimeTask *btlCreateTimedActorEffectLinkTask(BtlUnit *owner, s32 arg) {
     return task;
 }
 
-extern s32 scrReadIntParameter(s32 index);
+extern s32 scrGetIntPara(s32 index);
 extern BtlUnit *btlFindUnitByModeClear(s32 id);
 extern BtlUnit *btlFindUnitByModeFlagged(s32 id);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *actor, s32 arg);
@@ -1250,9 +1250,9 @@ s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
     BtlUnit *unit;
     BtlRuntimeTask *task;
 
-    mode = scrReadIntParameter(0);
-    unitId = scrReadIntParameter(1);
-    arg = scrReadIntParameter(2);
+    mode = scrGetIntPara(0);
+    unitId = scrGetIntPara(1);
+    arg = scrGetIntPara(2);
     if (mode == 0) {
         unit = btlFindUnitByModeClear(unitId);
     } else {

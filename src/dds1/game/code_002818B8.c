@@ -24,7 +24,7 @@ extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 void mnuDrawWidthScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     u32 colors[4];
     s32 width = 0x138;
-    s32 color = uiBlendColors(0x14806E4D, 0x14806E00, work->blend);
+    s32 color = fclBlendColor(0x14806E4D, 0x14806E00, work->blend);
     s32 height = 0x170;
 
     if (work->compact == 0) {
@@ -43,7 +43,7 @@ void mnuDrawWidthScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s
 
 void mnuDrawHeightScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     u32 colors[4];
-    s32 color = uiBlendColors(0x80501E80, 0x80501E00, work->blend);
+    s32 color = fclBlendColor(0x80501E80, 0x80501E00, work->blend);
     s32 height = 0x4A;
     s32 extent;
 
@@ -69,7 +69,7 @@ void mnuDrawPanelFadeSprite(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surfac
     u32 transparentColor;
     s32 height;
 
-    color = uiBlendColors(0x5A3C8026, 0x5A3C8000, work->blend);
+    color = fclBlendColor(0x5A3C8026, 0x5A3C8000, work->blend);
     transparentColor = color & 0xFFFFFF00;
     colors[0] = color;
     colors[1] = color;
@@ -189,9 +189,9 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     mnuDrawPartyRowFrameVariant(x, y, z, menu, panelIndex, 0, surface);
     labelX = x + iconPositions[2];
     labelY = y + iconPositions[3];
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, transition);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, transition);
     if (panel->iconBundle != NULL) {
-        color = uiBlendColors(0xFFF06480, color, panel->iconBundle->fade);
+        color = fclBlendColor(0xFFF06480, color, panel->iconBundle->fade);
         alpha = 0x100 - panel->iconBundle->fade;
     } else {
         alpha = transition;
@@ -249,7 +249,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     char text[16];
     MenuPageSlot *panel = &menu->slots[panelIndex];
     s32 alpha = menu->transitionValue;
-    u32 textColor = uiBlendColors(0x80808080, 0x80808000, alpha);
+    u32 textColor = fclBlendColor(0x80808080, 0x80808000, alpha);
     /* As in the command panel, inferred bounds preserve distinct array alias
      * sets for independent literal copies in the stock compiler. */
     s32 positions[4] = {32, 16, 0x280, 0x60};

@@ -87,11 +87,11 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 
 #include "dds3_world_secondary.h"
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
-extern void itfPanelSetStatus(s32 windowIndex, s32 status);
-extern void itfPanelSetPairFirst(s32 windowIndex, s32 status);
+extern void itfMesMngSetPhase(s32 windowIndex, s32 status);
+extern void itfMesMngSetSelPhase(s32 windowIndex, s32 status);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern char mnuTerminalPopupEntries[];
-extern void itfMesDestroyWindowIfPresent(s32 window);
+extern void itfMesMngRelease(s32 window);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA74;
 extern u8 *D_003BAA78;
@@ -104,8 +104,8 @@ extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 /* Close the current display channel before ensuring a replacement window.
  * DDS1 retains the legacy argument taken from the context's resource pair. */
 void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
-    dspCloseChannel();
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)*(u32 *)((u8 *)context + 0x60));
+    fclDestroyMessage();
+    fclInitMessage((struct ItfMesSub *)*(u32 *)((u8 *)context + 0x60));
 }
 
 /* Start the first eligible special, scene, or active-party flag event.
@@ -118,33 +118,33 @@ s32 dspStartFlagEvent(s32 context) {
 
     if (panelKind < 2) {
         if (panelKind >= 0) {
-            if (mdlFlagTest(DSP_FLAG_EVENT_REQUIRED) != 0 && mdlFlagTest(DSP_FLAG_EVENT_HANDLED) == 0) {
+            if (evtBitCheck(DSP_FLAG_EVENT_REQUIRED) != 0 && evtBitCheck(DSP_FLAG_EVENT_HANDLED) == 0) {
                 dspSetActive(1);
-                dspStartEntry(DSP_FLAG_EVENT_SPECIAL_ENTRY);
-                mdlFlagSet(DSP_FLAG_EVENT_HANDLED);
+                fclStartMessage(DSP_FLAG_EVENT_SPECIAL_ENTRY);
+                evtBitOn(DSP_FLAG_EVENT_HANDLED);
                 return 1;
             }
             for (index = 0; index < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); index++) {
-                if (mdlFlagTest(mnuSceneFlagEventEntries[index].requiredFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[index].handledFlag) == 0) {
+                if (evtBitCheck(mnuSceneFlagEventEntries[index].requiredFlag) != 0 && evtBitCheck(mnuSceneFlagEventEntries[index].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, (const void *)(D_003BAA84 + mnuSceneFlagEventEntries[index].areaIndex * DSP_AREA_TEXT_BYTES));
                     evtCopyEntryStringToActiveWindow(1, (const void *)(D_003BAA78 + mnuSceneFlagEventEntries[index].nameIndex * DSP_NAME_TEXT_BYTES));
                     evtCopyEntryStringToActiveWindow(2, (const void *)(D_003BAA74 + mnuSceneFlagEventEntries[index].dialogIndex * DSP_DIALOG_TEXT_BYTES));
-                    dspStartEntry(DSP_FLAG_EVENT_SCENE_ENTRY);
-                    mdlFlagSet(mnuSceneFlagEventEntries[index].handledFlag);
+                    fclStartMessage(DSP_FLAG_EVENT_SCENE_ENTRY);
+                    evtBitOn(mnuSceneFlagEventEntries[index].handledFlag);
                     return 1;
                 }
             }
             for (index = 0; index < EVT_PARTY_SLOT_COUNT; index++) {
                 slot = &datGameState->party[index];
-                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
-                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
+                if ((slot->flags & 1) != 0 && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
+                    && evtBitCheck(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, (const void *)(D_003BAA70 + slot->unitId * DSP_DIALOG_TEXT_BYTES));
-                    dspStartEntry(DSP_FLAG_EVENT_PARTY_ENTRY);
-                    mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
+                    fclStartMessage(DSP_FLAG_EVENT_PARTY_ENTRY);
+                    evtBitOn(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
                     return 1;
                 }
             }
@@ -177,7 +177,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
         return result;
     }
     if (*popupSlot == 0) {
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (dspStartFlagEvent(workAddress) == 0) {
                 mnuSetPopupEntryFlagged(popupSlot, mnuTerminalPopupEntries);
             }
@@ -214,7 +214,7 @@ u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
         evtSetBoundedDisplayValue(1, 0);
     }
     else {
-        kwlnFadeInStart(0, 0, 0, 0xf);
+        dds3FadeOut(0, 0, 0, 0xf);
     }
     return 1;
 }
@@ -224,7 +224,7 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
     struct MenuTerminalWork *work = (struct MenuTerminalWork *)dds3GetProcessData(task);
 
     mnuApplyFadeTrackMode(1, work);
-    kwlnFadeOutStart(0, 0, 0, 0);
+    dds3FadeIn(0, 0, 0, 0);
     return 1;
 }
 
@@ -251,7 +251,7 @@ s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
                 ready = 1;
             }
         } else {
-            ready = kwlnFadeIsActive() == 0;
+            ready = dds3FadeCheck() == 0;
         }
         if (ready) {
             mnuSetPopupEntryFlagged(popupSlot, D_0036AE48);
@@ -321,7 +321,7 @@ s32 evtCopyWorldObjectEntryValue(s32 objectId, s32 destination) {
     EffWorldNode *source;
     EffWorldNode *destinationNode;
 
-    source = dds3FindIndexedObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(), 9,
+    source = dds3SceneBasicSearchNameAndType((EffWorldNode *)dds3GetControlScene(), 9,
                                                   (const u8 *)objectId);
     if (source != NULL) {
         destinationNode = (EffWorldNode *)destination;
@@ -333,35 +333,35 @@ s32 evtCopyWorldObjectEntryValue(s32 objectId, s32 destination) {
 
 /* Recreate the secondary world selection only when its packed key changes.
  * Preserve the signed shift/add rather than treating this as an unsigned OR. */
-void evtSwitchWorldValueIfChanged(s32 high, s32 low) {
+void fclLoadStage(s32 high, s32 low) {
     s32 key = (high << 16) + low;
-    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != key) {
-        evtCreateWorldObjectForKey(high, low);
+    if (dds3GetMapNo(dds3GetControlScene()) != key) {
+        evtLoadArea(high, low);
     }
 }
 
-extern void kwlnDrawEnableCd0(s32 duration);
-extern void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale);
-extern void kwlnDrawSetupC70B(s32 duration);
+extern void dds3DistBlurOff(s32 duration);
+extern void dds3SetBlur(s32 duration, s32 alpha, s32 scale);
+extern void dds3MultiBlurOff(s32 duration);
 
 /* Reset draw offsets and the five enabled screen-effect modes. */
-void evtResetDrawTransitions(void) {
-    kwlnDrawSetOverlayTransition(0, 0, 0);
-    kwlnDrawSetupC70B(0);
-    kwlnDrawEnableCd0(0);
-    effDisableRectangleBlur();
-    effDisableTexturedBlur();
-    effDisableTexturedSquare();
-    effDisableFilterBlur();
-    effDisableColorRectangle();
+void fclFilterOFF(void) {
+    dds3SetBlur(0, 0, 0);
+    dds3MultiBlurOff(0);
+    dds3DistBlurOff(0);
+    Eve_BlurOFF();
+    Eve_PartialMultiBlurOFF();
+    Eve_PartialMultiFilterOFF();
+    Eve_DistortionBlurOFF();
+    Eve_FilterOFF();
 }
 
-extern s32 evtCommandShutdownStage(void);
+extern s32 evtCommand_FIELD_CLS(void);
 
 /* Shut down the stage before clearing its draw transitions. */
 void evtShutdownStageAndResetDrawTransitions(void) {
-    evtCommandShutdownStage();
-    evtResetDrawTransitions();
+    evtCommand_FIELD_CLS();
+    fclFilterOFF();
 }
 
 typedef struct QuadRecord {
@@ -376,7 +376,7 @@ typedef struct QuadRecord {
 /* Fill three words, two adjacent halfwords and a final word.
  * These fields are write-only here; their rendering meanings are unknown.
  * DDS1 takes word-sized inputs for the halfword stores and truncates them. */
-void evtFillQuadRecordFields(s32 firstWord, s32 secondWord, s32 thirdWord, s32 firstHalfword, s32 secondHalfword, s32 lastWord, QuadRecord *record) {
+void fclInitPanelPos(s32 firstWord, s32 secondWord, s32 thirdWord, s32 firstHalfword, s32 secondHalfword, s32 lastWord, QuadRecord *record) {
     record->unk00 = firstWord;
     record->unk04 = secondWord;
     record->unk08 = thirdWord;
@@ -386,7 +386,7 @@ void evtFillQuadRecordFields(s32 firstWord, s32 secondWord, s32 thirdWord, s32 f
 }
 
 /* Destroy a nonzero, registered task. The declared return value is not set. */
-s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
+s32 fclScriptForcedEnd(s32 task) {
     if (task != 0) {
         if (dds3GetProcessStat((KwlnTask *)task)) {
             dds3KillProcess((KwlnTask *)task, 0);
@@ -394,17 +394,17 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     }
 }
 
-extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
+extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
-s32 evtReplaceScriptProcessTask(s32 processId, s32 processValue, s32 *taskSlot) {
+s32 fclScriptStart(s32 processId, s32 processValue, s32 *taskSlot) {
     s32 task;
 
     if (taskSlot != 0) {
-        evtDestroyRegisteredTaskIfPresent(*taskSlot);
+        fclScriptForcedEnd(*taskSlot);
     }
-    task = scrCreateTaskForProcessId(EVT_SCRIPT_PROCESS_PRIORITY, processId, processValue);
+    task = scrStartScript2(EVT_SCRIPT_PROCESS_PRIORITY, processId, processValue);
     evtClearActiveFlag(0);
     if (taskSlot != 0) {
         *taskSlot = task;
@@ -426,7 +426,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
 }
 
 /* Three-way ascending comparison of the two unsigned bytes. */
-s32 evtCompareBytesAscending(u8 *left, u8 *right) {
+s32 cmpItemOrder(u8 *left, u8 *right) {
     u8 leftValue = *left;
     u8 rightValue = *right;
 
@@ -453,11 +453,11 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
 
 /* Perform the requested number of random swaps, not a Fisher-Yates shuffle.
  * Positive swapCount requires nonzero length; equal positions are allowed. */
-void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
+void shuffleIndices(u8 *buffer, u32 length, s32 swapCount) {
     s32 swapIndex;
     for (swapIndex = 0; swapIndex < swapCount; swapIndex++) {
-        u8 *first = buffer + sdfGetRand(0) % length;
-        u8 *second = buffer + sdfGetRand(0) % length;
+        u8 *first = buffer + dds3GetRandA(0) % length;
+        u8 *second = buffer + dds3GetRandA(0) % length;
         u8 value = *first;
         *first = *second;
         *second = value;
@@ -468,7 +468,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
 void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
     u32 handle;
 
-    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, &record->dataAddress, 0);
+    handle = (u32)sdfDevLoadFileEx((const char *)(u32)resourceId, &record->dataAddress, 0);
     record->handle = handle;
 }
 
@@ -478,13 +478,13 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
 }
 
 struct ItfMesSub;
-extern s32 itfMesCreateWindow(struct ItfMesSub *sub);
+extern s32 itfMesMngInitialize(struct ItfMesSub *sub);
 
 /* Create the singleton message window only when its handle is negative. */
-s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *sub) {
+s32 fclInitMessage(struct ItfMesSub *sub) {
     if (dspWindowHandle < 0) {
-        dspWindowHandle = itfMesCreateWindow(sub);
-        itfMesSetWindowPageAndRefresh(dspWindowHandle, 2, 0);
+        dspWindowHandle = itfMesMngInitialize(sub);
+        itfMesMngChangeWindowType(dspWindowHandle, 2, 0);
         return 1;
     }
     return 0;
@@ -495,18 +495,18 @@ s32 evtSetMessageWindowPageValue(s32 pageValue) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    itfMesSetWindowPageAndRefresh(dspWindowHandle, 0, pageValue);
+    itfMesMngChangeWindowType(dspWindowHandle, 0, pageValue);
     return 1;
 }
 
 /* Start an entry, mark the first panel value pending, and enable control state one. */
-s32 dspStartEntry(s32 entry) {
+s32 fclStartMessage(s32 entry) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    itfMesSetWindowHighFlags(dspWindowHandle, DSP_WINDOW_ENTRY_FLAG);
+    itfMesMngMarkBitStat(dspWindowHandle, DSP_WINDOW_ENTRY_FLAG);
     itfMesStartEntry(dspWindowHandle, entry, 0);
-    itfPanelSetPairFirst(dspWindowHandle, -1);
+    itfMesMngSetSelPhase(dspWindowHandle, -1);
     dspWindowControlState = DSP_WINDOW_CONTROL_ACTIVE;
     return 1;
 }
@@ -532,11 +532,11 @@ void evtSetMessageWindowOptionWhenOpen(s32 option) {
 }
 
 /* Return the retained option byte, even when the window is closed. */
-s8 evtGetMessageWindowOption(void) {
+s8 fclGetCurrentSelMessagePos(void) {
     return evtMessageWindowOption;
 }
 
-extern s32 itfPanelGetPairSecond(s32 windowIndex);
+extern s32 itfMesMngGetSelectNo(s32 windowIndex);
 
 /* Read the second panel halfword, or -1 when no message window exists.
  * Despite the inherited name, this is not a sound-driver query. */
@@ -544,7 +544,7 @@ s32 dspReadWindowSecondPanelValue(void) {
     if (dspWindowHandle < 0) {
         return -1;
     }
-    return itfPanelGetPairSecond(dspWindowHandle);
+    return itfMesMngGetSelectNo(dspWindowHandle);
 }
 
 /* Return the captured signed-byte panel value without querying the live window. */
@@ -552,20 +552,20 @@ s8 evtGetCapturedWindowPanelValue(void) {
     return dspCapturedSoundMode;
 }
 
-extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
+extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 
 /* Reset an open window, optionally notify it first, and report whether it existed.
- * Cleanup leaves the singleton handle intact; dspCloseChannel destroys it. */
+ * Cleanup leaves the singleton handle intact; fclDestroyMessage destroys it. */
 u32 evtCleanupMessageWindow(s32 notify) {
     u32 cleaned;
 
     cleaned = 0;
     if (-1 < dspWindowHandle) {
-        itfPanelSetStatus(dspWindowHandle, 0);
+        itfMesMngSetPhase(dspWindowHandle, 0);
         if (notify != 0) {
-            itfMesFinishWindowAndClearStatus(dspWindowHandle);
+            itfMesMngMsgWndCls(dspWindowHandle);
         }
-        itfMesCleanupWindow(dspWindowHandle, 0);
+        itfMesMngRequestMessageRelease(dspWindowHandle, 0);
         dspSetActive(1);
         dspWindowControlState = 0;
         cleaned = 1;
@@ -579,12 +579,12 @@ u32 evtFinishMessageWindowAndNotify(void) {
 }
 
 /* Destroy an existing singleton window and invalidate its handle and control gates. */
-s32 dspCloseChannel(void) {
+s32 fclDestroyMessage(void) {
     s32 window = dspWindowHandle;
     if (window < 0) {
         return 0;
     }
-    itfMesDestroyWindowIfPresent(window);
+    itfMesMngRelease(window);
     dspWindowHandle = -1;
     dspWindowControlState = 0;
     dspWindowStateGate = 0;
@@ -592,7 +592,7 @@ s32 dspCloseChannel(void) {
 }
 
 /* A closed window reports zero; the state gate hides only control state two. */
-s32 evtGetMessageWindowControlState(void) {
+s32 fclChkMessage(void) {
     if (dspWindowHandle < 0) {
         return 0;
     }
@@ -604,22 +604,22 @@ s32 evtGetMessageWindowControlState(void) {
     return (s8)dspWindowControlState;
 }
 
-extern s32 itfPanelGetPairFirst(s32 windowIndex);
+extern s32 itfMesMngGetSelPhase(s32 windowIndex);
 
 /* Snapshot the second panel halfword only after the first halfword is nonnegative. */
 s32 dspCaptureWindowSecondPanelValue(void) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    if (itfPanelGetPairFirst(dspWindowHandle) < 0) {
+    if (itfMesMngGetSelPhase(dspWindowHandle) < 0) {
         return 0;
     }
     dspCapturedSoundMode = dspReadWindowSecondPanelValue();
     return 1;
 }
 
-extern s8 itfPanelGetStatus(s32 windowIndex);
-extern s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
+extern s8 itfMesMngGetPhase(s32 windowIndex);
+extern s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
@@ -632,14 +632,14 @@ void dspAdvanceMessageWindowControl(s32 notify) {
     case 0:
         return;
     case DSP_WINDOW_CONTROL_ACTIVE:
-        if (itfPanelGetStatus(handle) < 0) {
+        if (itfMesMngGetPhase(handle) < 0) {
             dspWindowControlState = DSP_WINDOW_CONTROL_GATED;
         }
         return;
     case DSP_WINDOW_CONTROL_GATED:
         if (D_003BC410 >= 0) {
-            itfMesSetOptionValue(handle, 3, 1);
-            itfMesCountClearBits(dspWindowHandle, evtMessageWindowOption);
+            itfMesMngSetSelectDefKey(handle, 3, 1);
+            itfMesMngSetSelect(dspWindowHandle, evtMessageWindowOption);
             itfMesBuildOptionList(dspWindowHandle, D_003BC410);
             D_003BC410 = -1;
         }
@@ -665,10 +665,10 @@ void dspRequestMessageWindowModeOne(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-extern void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText);
+extern void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const void *sourceText);
 
 void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
-    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceText);
+    itfMesMngSetVarImmediate(dspWindowHandle, slotIndex, sourceText);
 }
 
 /* Return the gate byte independently of the singleton window's existence. */
@@ -681,30 +681,30 @@ s8 dspGetWindowStateGate(void) {
  * Callers must already have a valid window. */
 void dspSetActive(s32 enabled) {
     if (enabled) {
-        itfMesClearWindowHighFlags(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_MAIN);
-        itfMesClearWindowHighFlags(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
+        itfMesMngClearBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_MAIN);
+        itfMesMngClearBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
         dspWindowStateGate = 0;
-        itfPanelSetStatus(dspWindowHandle, 1);
+        itfMesMngSetPhase(dspWindowHandle, 1);
         dspWindowControlState = DSP_WINDOW_CONTROL_ACTIVE;
     } else {
-        itfMesSetWindowHighFlags(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_MAIN);
-        itfMesSetWindowHighFlags(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
+        itfMesMngMarkBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_MAIN);
+        itfMesMngMarkBitStat(dspWindowHandle, DSP_WINDOW_DISABLE_FLAG_SECONDARY);
         dspWindowStateGate = 1;
     }
 }
 
-extern void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
-extern void itfPanelEmitRecord(s32 windowIndex, s32 topDelta);
+extern void itfMesMngSetMesPosition(s32 window, s32 x, s32 y);
+extern void itfMesMngSetOffsetY1(s32 windowIndex, s32 topDelta);
 
 /* Convert x/y to the window's 16-by-8 coordinate units and set its panel offset.
  * The original signed shifts are retained, including their input assumptions. */
 void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
-    itfMesBlk24MoveTo(dspWindowHandle, x << 4, y << 3);
-    itfPanelEmitRecord(dspWindowHandle, -((DSP_WINDOW_PANEL_BASE_Y - y) << 3));
+    itfMesMngSetMesPosition(dspWindowHandle, x << 4, y << 3);
+    itfMesMngSetOffsetY1(dspWindowHandle, -((DSP_WINDOW_PANEL_BASE_Y - y) << 3));
 }
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
-s32 evtIsTaskInActiveStates(s32 task) {
+s32 fclChkMessageDraw(s32 task) {
     if (dds3GetProcessStat((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
@@ -739,11 +739,11 @@ u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
     return evtDisplayValues[displayValueIndex];
 }
 
-extern s32 scrReadIntParameter(s32 parameterIndex);
+extern s32 scrGetIntPara(s32 parameterIndex);
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
 s32 evtOpSetActiveEntryFlag(void) {
-    s32 flagIndex = scrReadIntParameter(0);
+    s32 flagIndex = scrGetIntPara(0);
 
     evtActiveEntryFlags.flags[flagIndex] = 1;
     return 1;
@@ -752,20 +752,20 @@ s32 evtOpSetActiveEntryFlag(void) {
 /* Script opcode: return a display-table value, clamping only its upper index.
  * It does not activate or test an active-entry flag. */
 s32 evtOpReadDisplayValue(void) {
-    s32 displayValueIndex = scrReadIntParameter(0);
+    s32 displayValueIndex = scrGetIntPara(0);
     if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
         displayValueIndex = EVT_LAST_DISPLAY_VALUE;
     }
-    scrSetIntegerReturnValue(evtDisplayValues[displayValueIndex]);
+    scrSetIntReturnValue(evtDisplayValues[displayValueIndex]);
     return 1;
 }
 
 /* Acquire the loaded data's texture reference, then release its temporary resource.
  * DDS1 passes the size output as a pointer, unlike DDS2's address-valued slot. */
-u32 evtLoadTextureFromResourcePath(u32 path) {
+u32 fclLoadTexture(u32 path) {
     u32 info[2];
-    u32 allocation = (u32)sdfReadNamedResource((const char *)(u32)path, info, &info[1]);
-    u32 texture = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
+    u32 allocation = (u32)sdfDevLoadFileEx((const char *)(u32)path, info, &info[1]);
+    u32 texture = (u32)sdfTexSet((SdfTextureFileHeader *)(info[0]));
 
     sdfMemFreeDirect((struct SdfMemBlock *)(u32)(allocation));
     return texture;

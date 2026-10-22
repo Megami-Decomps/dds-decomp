@@ -20,8 +20,8 @@
 #include "eff_offset_triangle.h"
 #include "eff_packet_params.h"
 
-extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
-extern SdfTex *kwlnTextureGetHeldReference(void);
+extern s32 sdf2DGetPrimPtr(s32 packetAddress);
+extern SdfTex *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_0037FB88;
 extern SdfPoolNode D_00380588;
@@ -37,14 +37,14 @@ extern void (*D_003AAFC0[])(f32, EffectDispatchState *);
 extern BillDispatch effBillConstructorEntries[];
 
 #include "sdf_packet_alloc.h"
-extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
-extern void effBattleReleaseParameterBanks(SoundMixer *);
+extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+extern void effBTLPartDelete(SoundMixer *);
 extern void dds3EndCrossfade(void);
 extern const char D_00414430[];
-extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
+extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 #include "kwln_texture_reference_flag_api.h"
-extern void kwlnTextureClearReferenceFlag(void);
-extern void kwlnTextureReleaseHeldReference(void);
+extern void dds3RenderTextureOFF(void);
+extern void dds3FreeRenderTexture(void);
 #include "sdf_debug_api.h"
 extern f32 D_003AAEB0[4];
 extern f32 kwlnHeldTextureTargetVector[];
@@ -60,7 +60,7 @@ extern u32 D_00436410;
 
 
 
-void *effBillCreateDispatch(s32 index, void *arg) {
+void *dds3SpPolyCreate(s32 index, void *arg) {
     EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
 
     effect->handler = index;
@@ -68,7 +68,7 @@ void *effBillCreateDispatch(s32 index, void *arg) {
     return effect;
 }
 
-void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
+void *dds3SpPolyCopy(EffectDispatchState *effect) {
     EffectDispatchState *result = effBillConstructorEntries[effect->handler].func(effect);
 
     result->handler = effect->handler;
@@ -77,35 +77,35 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
 }
 
 /* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
-void billDestroyDispatchedObject(EffectDispatchState *effect) {
+void dds3SpPolyDelete(EffectDispatchState *effect) {
     effBillConstructorEntries[effect->handler].destroy(effect);
 }
 
 /* Invoke the update column of the selected constructor/update/destructor record. */
-void billUpdateDispatchedObject(EffectDispatchState *effect) {
+void dds3SpPolyDraw(EffectDispatchState *effect) {
     effBillConstructorEntries[effect->handler].callback(effect);
 }
 
-void effInvokeHandlerAndMarkActive(EffectDispatchState *effect) {
+void dds3SpPolyReset(EffectDispatchState *effect) {
     D_003AAFB0[effect->handler](effect);
     effect->valueB2 = 1;
 }
 
-void effRunPreHandlerAndActivate(EffectDispatchState *effect, f32 factor) {
+void dds3SpPolySetScale(EffectDispatchState *effect, f32 factor) {
     D_003AAFC0[effect->handler](factor, effect);
-    effInvokeHandlerAndMarkActive(effect);
+    dds3SpPolyReset(effect);
 }
 
-u16 effBillGetQueuedCount(EffectDispatchState *effect) {
+u16 dds3SpPolyGetState(EffectDispatchState *effect) {
     return effect->valueB2;
 }
 
-void billCopyDispatchWorkVector(void *dst, void *src) {
+void dds3SpPolySetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
 /* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via sdfComposeVuMatrixFromRegisters */
-void effComposeBillboardTransformMatrix(EffectDispatchState *effect, void *matrix) {
+void dds3SpPolySetRotateMatrix(EffectDispatchState *effect, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_LOAD_MATRIX_B(effect->sourceMatrix);
     sdfComposeVuMatrixFromRegisters();
@@ -113,28 +113,28 @@ void effComposeBillboardTransformMatrix(EffectDispatchState *effect, void *matri
 }
 
 /* Set the packed color consumed by the dispatched polygon work. */
-void billSetDispatchedObjectColor(EffectDispatchState *effect, u32 value) {
+void dds3SpPolySetRGBA(EffectDispatchState *effect, u32 value) {
     effect->value60 = value;
 }
 
 /* A value staged with no pending work is immediately mirrored to the active slot. */
-void effBillSetWorkValue(BillWork *work, u8 value) {
+void dds3SpPolySetLoop(BillWork *work, u8 value) {
     if (work->pendingCount == 0) {
         work->stagedValue = value;
     }
     work->currentValue = value;
 }
 
-u8 billGetCurrentValue(EffectDispatchState *effect) {
+u8 dds3SpPolyGetLoop(EffectDispatchState *effect) {
     return effect->value64;
 }
 
-void billSetDispatchedObjectValue1C(EffectDispatchState *effect, u32 value) {
+void dds3PolygonSetColor(EffectDispatchState *effect, u32 value) {
     effect->value1C = value;
 }
 
 /* Append position, position+(0,5,0), position+(0,5,5), with optional normals/color. */
-void effAppendOffsetTriangle(EffOffsetTriangleView *work, const f32 *position) {
+void dds3PolygonTriangleSet(EffOffsetTriangleView *work, const f32 *position) {
     s32 count = work->count;
     f32 point[4] __attribute__((aligned(16)));
     f32 (*positions)[4];
@@ -164,17 +164,17 @@ void effAppendOffsetTriangle(EffOffsetTriangleView *work, const f32 *position) {
     work->count = count + 3;
 }
 
-void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {
+void dds3TrackPolyColorSet(EffectDispatchState *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 
-BlurPacketQuad *billGetWorkTransformMatrix(void *packet) {
+BlurPacketQuad *effPkt2DGetPrimPtr(void *packet) {
     return (BlurPacketQuad *)((u8 *)packet + 0x20);
 }
 
-SdfDrawPacket *effCreateSizedDrawPacket(s32 height, s32 flags) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
-    sdfConsInitPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
+SdfDrawPacket *effPkt2DAllocTriStrip(s32 height, s32 flags) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(9, height));
+    sdf2DMakePrimPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
     return packet;
 }
 
@@ -211,14 +211,14 @@ void effAppendGouraudTexturedQuadPacket(SdfListHead *chain, s32 primitive,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
                  s32 x3, s32 y3, f32 s3, f32 t3, s32 color3, s32 depth) {
-    u64 *packet = (u64 *)sdfAllocPacketAligned(0x90);
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x90);
 
     packet[0] = 0x20000008;
     packet[1] = 0x5000000810000000ULL;
     effWriteGouraudTexturedQuadPacket(packet + 2, primitive, x0, y0, s0, t0, color0,
                  x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
                  x3, y3, s3, t3, color3, depth);
-    sdfAppendPacket(chain, (u32)packet);
+    sdfDrawTagLink(chain, (u32)packet);
 }
 
 void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
@@ -246,17 +246,17 @@ void effAppendTexturedTrianglePacket(SdfListHead *chain, s32 color, s32 primitiv
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
-    u64 *packet = (u64 *)sdfAllocPacketAligned(0x60);
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x60);
 
     packet[0] = 0x20000005;
     packet[1] = 0x5000000510000000ULL;
     billWriteFloatTextureTrianglePacket(packet + 2, color, primitive, x0, y0, u0, v0,
                  x1, y1, u1, v1, x2, y2, u2, v2, depth);
-    sdfAppendPacket(chain, (u32)packet);
+    sdfDrawTagLink(chain, (u32)packet);
 }
 
-u64 *effBuildDrawPacketWithFlags(u32 flags) {
-    u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
+u64 *effPkt2DAllocF4(u32 flags) {
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x80);
 
     packet[0] = 7;
     packet[1] = 0x5000000700000000ULL;
@@ -274,7 +274,7 @@ extern u32 D_003AAFD0[];
 
 
 /* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
-void *effCreateVertexDrawPacket(EffPacketParams *params) {
+void *effPkt3DPrimMakePoly(EffPacketParams *params) {
     s32 parameterCount = params->parameterCount;
     s32 vertexCount = params->vertexCount;
     u32 primitive = params->primitive | 0x48;
@@ -317,7 +317,7 @@ void *effCreateVertexDrawPacket(EffPacketParams *params) {
     allocationSize = (allocationSize + 15) & ~15;
     allocate = params->allocate;
     if (allocate == NULL) {
-        allocate = sdfAllocPacketAligned;
+        allocate = sdfGrAllocPacketBuff;
     }
     packet = allocate(allocationSize);
 
@@ -401,7 +401,7 @@ void *effCreateVertexDrawPacket(EffPacketParams *params) {
 }
 
 
-void dds3StartCrossfade(s32 frames) {
+void dds3CrossfadeStart(s32 frames) {
     u8 *entry;
     s32 i;
     u64 clearValue;
@@ -417,8 +417,8 @@ void dds3StartCrossfade(s32 frames) {
         kwlnHeldTextureEyeVector[1] = 0.0f;
         kwlnHeldTextureEyeVector[2] = 0.0f;
         D_00435CD0 = 0x80808080;
-        kwlnCreateHeldTextureBuffer(0x100, 0xE0, kwlnHeldTextureTargetVector[0]);
-        kwlnTextureSetReferenceFlagIfPresent();
+        dds3AllocRenderTexture(0x100, 0xE0, kwlnHeldTextureTargetVector[0]);
+        dds3RenderTextureON();
         i = 0;
         entry = D_00380870;
         clearValue = 0x80008000ULL;
@@ -454,13 +454,13 @@ void dds3UpdateCrossfade(void) {
         return;
     }
     if (D_0043640C == 0) {
-        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(list);
-        reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary(list,
-            (u32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes),
+        list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
+        sdfGrLinkDispFrameTex(list,
+            (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes),
             reference);
-        texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+        texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
         texturePacket[0] = 3;
         texturePacket[1] = 0x5000000310000000ULL;
         texturePacket[2] = 0x1000000000008002ULL;
@@ -469,8 +469,8 @@ void dds3UpdateCrossfade(void) {
         texturePacket[5] = 0x3B;
         texturePacket[6] = 0;
         texturePacket[7] = 0x3F;
-        sdfAppendPacket(list, (u32)texturePacket);
-        blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+        sdfDrawTagLink(list, (u32)texturePacket);
+        blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = 0x5000000310000000ULL;
         blendPacket[2] = 0x1000000000008002ULL;
@@ -479,9 +479,9 @@ void dds3UpdateCrossfade(void) {
         blendPacket[5] = 0x47;
         blendPacket[6] = 0x44;
         blendPacket[7] = 0x42;
-        sdfAppendPacket(list, (u32)blendPacket);
-        sprite = sdfConsAllocateColumnPacket(1);
-        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
+        sdfDrawTagLink(list, (u32)blendPacket);
+        sprite = sdf2DAllocSprite(1);
+        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
         vertex->r = 0x80;
         vertex->g = 0x80;
         vertex->b = 0x80;
@@ -498,17 +498,17 @@ void dds3UpdateCrossfade(void) {
         vertex->corner[1].y = 0x86F8;
         vertex->corner[1].mask = 0xFF0000;
         vertex->corner[1].flag = 0;
-        sdfAppendPacket(list, (u32)sprite);
+        sdfDrawTagLink(list, (u32)sprite);
         D_0037FB88.append(&D_0037FB88, list);
     }
     D_0043640C = (u32)D_0043640C + 1;
     alpha = (128 - (u32)((f32)(u32)D_0043640C * 128.0f /
                        (f32)(u32)D_00436410)) & 0xFF;
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    sdfConsCreateDrawPacket(list, kwlnTextureGetHeldReference(), 0);
-    sprite = sdfConsAllocateColumnPacket(1);
-    vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sdf2DLinkTexPacket(list, dds3GetRenderTexture(), 0);
+    sprite = sdf2DAllocSprite(1);
+    vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr((s32)sprite);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
@@ -525,19 +525,19 @@ void dds3UpdateCrossfade(void) {
     vertex->corner[1].y = 0x8700;
     vertex->corner[1].mask = 0xFF0000;
     vertex->corner[1].flag = 0;
-    sdfAppendPacket(list, (u32)sprite);
+    sdfDrawTagLink(list, (u32)sprite);
     D_00380588.append(&D_00380588, list);
 }
 
 /* Release the captured texture and clear the active crossfade state. */
 void dds3EndCrossfade(void) {
-    kwlnTextureClearReferenceFlag();
-    kwlnTextureReleaseHeldReference();
+    dds3RenderTextureOFF();
+    dds3FreeRenderTexture();
     D_00436408 = 0;
     printf(D_00414430);
 }
 
-extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *src);
+extern void effBTLPartCreate(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
@@ -546,7 +546,7 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
 
     mixer->resource = allocation;
     memcpy(mixer, src, 0xC38);
-    effBattleRebuildClonedParameterBanks(mixer, src);
+    effBTLPartCreate(mixer, src);
     mixer->active = 0;
     mixer->voiceList = NULL;
     return mixer;
@@ -558,24 +558,24 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
 
     while (voice != NULL) {
         next = voice->next;
-        effReleaseBattleVoiceOwner(voice);
+        effBTLCutDelete(voice);
         voice = next;
     }
-    effBattleReleaseParameterBanks(mixer);
+    effBTLPartDelete(mixer);
     sdfMemFreeDirect(mixer->resource);
 }
 
-s32 sndGetMixerBankCallbackFrame(SoundMixer *mixer, u16 kind) {
+s32 effBTLGetMotionChangeFrame(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.callbackFrame;
 }
 
-s32 sndGetMixerBankTriggerFrame(SoundMixer *mixer, u16 kind) {
+s32 effBTLGetCutEndFrame(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.triggerFrame;
 }
 
-s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind) {
+s32 effBTLGetDrawEndFrame(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     if (kind == 2) {
         return mixer->banks[bank].list.triggerFrame;
@@ -583,7 +583,7 @@ s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind) {
     return mixer->banks[bank].list.colorRampEndFrame;
 }
 
-void sndUnlinkVoice(BattleEffect *voice) {
+void effBTLCutListRelease(BattleEffect *voice) {
     BattleEffect **link = &voice->state->voiceList;
     BattleEffect *cur;
 
@@ -649,11 +649,11 @@ BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner
         remaining = entryCount;
         do {
             if (entry->paramKind != 0xFFFE) {
-                *workSlot = effParamWorkDuplicate(entry->value.work);
+                *workSlot = dds3EffectPartCopy(entry->value.work);
                 if (callbackEnabled != 0 && owner != NULL &&
                     (entry->aimParams.kind == 0 || entry->aimParams.kind == 4)) {
                     f32 scale = effGetActorScaleForParameterWork((struct BtlUnit *)effect->owner);
-                    effParamWorkCallback1(*workSlot, scale);
+                    dds3EffectPartSetScale(*workSlot, scale);
                 }
             } else {
                 *workSlot = NULL;

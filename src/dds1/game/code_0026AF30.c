@@ -16,7 +16,7 @@ extern void fldReleaseCameraColorEffect(void);
 
 extern void sdfDisableFlagListViewTargetRelativeMode(void);
 
-extern void evtDestroySecondaryWorldNode(void);
+extern void evtFreeStage(void);
 
 #include "dds3_world_secondary.h"
 extern void mnuCreateTitleCameraWorldEntry(void);
@@ -36,10 +36,10 @@ s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
 }
 
 void mnuInitializeTitleCameraScene(void) {
-    evtCreateWorldObjectForKey(1, 1);
-    dds3SetWorldObject(NULL);
+    evtLoadArea(1, 1);
+    dds3SetActiveScene(NULL);
     mnuCreateTitleCameraWorldEntry();
-    dds3SetWorldObject(dds3GetWorldSecondaryObject());
+    dds3SetActiveScene(dds3GetControlScene());
 
     D_003BA8EC = 0x80000000;
     mnuTitleCameraPosition[0] = 0.0f;
@@ -59,5 +59,5 @@ void mnuInitializeTitleCameraScene(void) {
 void mnuMovieShutdownA(void) {
     fldReleaseCameraColorEffect();
     sdfDisableFlagListViewTargetRelativeMode();
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
 }

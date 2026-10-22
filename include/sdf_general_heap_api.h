@@ -3,6 +3,6 @@
 
 struct SdfMemBlock;
 
-struct SdfMemBlock *sdfGetFirstGeneralHeapBlock(void);
+struct SdfMemBlock *sdfMemGetTop(void);
 
 #endif /* SDF_GENERAL_HEAP_API_H */

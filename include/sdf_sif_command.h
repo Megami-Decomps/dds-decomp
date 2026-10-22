@@ -15,8 +15,8 @@ typedef char SifCommandSizeCheck[sizeof(SifCommand) == 0x10 ? 1 : -1];
 
 void sdfPktSetCmd(SifCommand *packet, s32 index);
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
-void *sdfFormatSifPacket(void *packet, const char *format, ...);
-void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index,
+void *sdfDevPrintfEx(void *packet, const char *format, ...);
+void *sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index,
                                   const char *format, ...);
 
 #endif

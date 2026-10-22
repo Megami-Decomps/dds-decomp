@@ -38,7 +38,7 @@ extern u8 D_003BD638[];
 
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
-void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
+void movieOpenStream(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
     SoundFormat soundFormat;
     struct SdfMemBlock *allocation;
     MovPacStream *pacWork;
@@ -78,14 +78,14 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         }
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfFileCmdReadOpen(name,
-                                                        (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
+                                                        (void *)movieGetStreamSize, (s32)owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
-                                            sdfMovieLinearStreamReadCallback, owner, descriptor->source);
+                                            movieCopyChunk, owner, descriptor->source);
         return;
     }
 
     if (sdfMoviePacRingSemaphore < 0) {
-        sdfMoviePacRingSemaphore = sdfCreateSemaphore(1, 1, 0);
+        sdfMoviePacRingSemaphore = sdfCreateSema(1, 1, 0);
     }
     sdfMoviePacRingFullFrame = -1;
     pacWork = sdfAllocAndClearQuadwords(sizeof(MovPacStream));
@@ -102,19 +102,19 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     pacWork->scratch = pacWork->scratchBuffer;
     owner->state = SDF_MOVIE_STATE_INITIAL;
     owner->deviceState = sdfFileCmdReadOpen(name,
-                                                    (void *)sdfMovieHandlePacDeviceEvent, (s32)owner);
+                                                    (void *)movieReadChunk, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
     sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
-                                        sdfMoviePacStreamReadCallback, owner, descriptor->source);
+                                        movieParseHeader, owner, descriptor->source);
 }
 
 extern void sdfCreateSemaphoreFromOptions(void);
-extern void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
-extern void sdfSoundStopMoviePlayback(void);
+extern void sdfIpuFree(SdfStreamFrameNode *);
+extern void p2sdSyncMovie(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
-void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
+void movieCloseStream(MovObj *job) {
     if (job->active != 0) {
         job->stopRequested = 1;
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */
@@ -135,16 +135,16 @@ void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
             sdfMemFreeDirect(stream->allocation);
             sdfChipFreeDirect(stream);
         }
-        sdfDestroyStreamFrameNode(&job->soundNode);
+        sdfIpuFree(&job->soundNode);
         if (job->pacEnabled != 0) {
-            sdfSoundStopMoviePlayback();
+            p2sdSyncMovie();
         }
         job->active = 0;
     }
 }
 
 /* Decoder completion requires drained input and no completed output buffers pending. */
-s32 sdfPacCheckDecoderStatus(MovObj *job) {
+s32 sdfMovieIsFinished(MovObj *job) {
     if (job->soundNode.drained == 0) {
         return 0;
     }
@@ -152,28 +152,28 @@ s32 sdfPacCheckDecoderStatus(MovObj *job) {
 }
 
 /* Start the packet counter at -1 and select a custom or built-in packet callback. */
-void sdfPacInitializeDispatchPacket(PacState *packet, void *callbackAddress) {
+void sdfPacInit(PacState *packet, void *callbackAddress) {
     memset(packet, 0, sizeof(*packet));
     packet->packetCounter = PAC_INITIAL_PACKET_COUNTER;
     if (callbackAddress != NULL) {
         packet->packetCallback = (s32 (*)())callbackAddress;
     } else {
-        packet->packetCallback = sdfPacDispatchPacket;
+        packet->packetCallback = sdfPacStdCallback;
     }
 }
 
 /* Retain packet-owned payload memory rather than allocating a separate resource. */
-void sdfPacUsePacketPayloadMemory(PacState *state) {
+void sdfPacSetStay(PacState *state) {
     state->flags = state->flags | PAC_STATE_USE_PACKET_MEMORY;
 }
 
 /* Select the high-address allocator for packet payload resources. */
-void sdfPacUseHighAddressAllocator(PacState *state) {
+void sdfPacSetFromTail(PacState *state) {
     state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
 }
 
 /* Advance the queue cursor before returning each node to the chip allocator. */
-void sdfPacReleasePacketQueueNodes(PacState *state) {
+void sdfPacFree(PacState *state) {
     PacWork *cursor = state->queueHead;
     PacWork *current = cursor;
 
@@ -190,7 +190,7 @@ void sdfPacMarkPhaseFinished(u8 *phaseByte) {
 }
 
 /* Consume byteCount bytes without bounds checks, updating the cursor and both counters. */
-void sdfPacAdvanceInput(PacState *state, s32 byteCount) {
+void sdfPacUseSrc(PacState *state, s32 byteCount) {
     state->inputCursor = state->inputCursor + byteCount;
     state->inputAvailable = state->inputAvailable - byteCount;
     state->consumedBytes = state->consumedBytes + byteCount;
@@ -214,7 +214,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     }
     inputHeader = (SdfPacStreamPacketHeader *)state->inputCursor;
     /* Advance only the fixed header; retain its original address for the callback. */
-    sdfPacAdvanceInput(state, PAC_HEADER_BYTES);
+    sdfPacUseSrc(state, PAC_HEADER_BYTES);
     packetBytes = inputHeader->payloadSize;
     state->packetCounter++;
     /* The high nibble encodes extension bytes, not a bit offset. */

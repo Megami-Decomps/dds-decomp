@@ -41,7 +41,7 @@ extern void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActivePro
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *skillPackage) {
     BrsRewardSummary *res = &skillPackage->rewards;
-    u32 color = uiBlendColors(0xFFF06480, 0xFFF06400, 0x100 - skillPackage->fadeProgress);
+    u32 color = fclBlendColor(0xFFF06480, 0xFFF06400, 0x100 - skillPackage->fadeProgress);
 
     mnuCampDrawMenuIconLayer(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1], 0, color, res, 0x53, skillPackage);
     brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3], 0, color, res, 0x53, skillPackage);
@@ -409,7 +409,7 @@ counted:
             break;
         }
         {
-            s32 recipient = eligible[sdfGetRand(NULL) % eligibleCount];
+            s32 recipient = eligible[dds3GetRandA(NULL) % eligibleCount];
             gains[recipient] += overflow;
         }
     }
@@ -480,7 +480,7 @@ void brsBuildUnitProgressRow(BrsProgressRow *progressRow, DatPartyRecord *partyR
 
 u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource, s32 context) {
     ptyGetCurrentProfileId(resource->unit);
-    return uiBlendColors(0x80808080, 0x80808000, blend);
+    return fclBlendColor(0x80808080, 0x80808000, blend);
 }
 
 
@@ -515,7 +515,7 @@ extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork
 extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowUnitInfo(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern s32 brsPollResultCounterCompletion(void);
-extern void sndQueueSoundId(u32 sound);
+extern void p2sdStopSe(u32 sound);
 
 void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
     KwlnTask *task;
@@ -569,7 +569,7 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
     }
     if (brsPollResultCounterCompletion() != 0 && work != NULL && work->resultPhase == 1) {
         work->resultPhase = 2;
-        sndQueueSoundId(20);
+        p2sdStopSe(20);
     }
 }
 

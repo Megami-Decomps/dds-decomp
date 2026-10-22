@@ -48,7 +48,7 @@ extern DevState *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(DevState *, s32, s32, s32, s32),
                                           s32 callbackContext);
 extern s32 sdfFileCmdFileSize();
-extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
+extern s32 sdfFileRpcReadCallback(DevState *, s32, s32, s32, s32);
 
 
 
@@ -57,12 +57,12 @@ extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
 extern s32 D_00439224;
 
-extern void sdfRebuildPoolChain();
+extern void sdfGrSortOtSetup();
 
-extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32 count);
+extern DevRequest *sdfTexListNew(s32 count);
 
 /* Read the entry count word, size the list for it and arm the skip handler. */
-void sdfPacReadListAllocationCount(PacState *state) {
+void sdfPacTexListDecoder0(PacState *state) {
     u32 count;
     PacListAllocation *allocation;
     PacWork *work;
@@ -70,22 +70,22 @@ void sdfPacReadListAllocationCount(PacState *state) {
     if (state->inputAvailable != 0) {
         /* The aligned packet count is read with native lw semantics. */
         count = *(const u32 *)state->inputCursor;
-        sdfPacAdvanceInput(state, 4);
+        sdfPacUseSrc(state, 4);
         allocation = state->slot.list;
         work = state->queueTail;
         allocation->entryCount = count;
         allocation->entryIndex = 0;
-        work->resourceHandle = sdfCreateConfiguredBufferedResourceList(count);
+        work->resourceHandle = sdfTexListNew(count);
         state->pendingBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
         state->onInput = sdfPacSkipAllocationEntryBytes;
     }
 }
 
-void sdfQueueAndResetPacketWork(PacState *state,
+void sdfPacTexListDecoderInit(PacState *state,
                                 SdfPacStreamPacketHeader *packet) {
-    sdfPacEnqueuePacket(state, packet);
+    sdfPacNewResrc(state, packet);
     state->slot.list = sdfChipAllocDirect(0x30);
-    state->onInput = sdfPacReadListAllocationCount;
+    state->onInput = sdfPacTexListDecoder0;
 }
 
 enum {
@@ -122,7 +122,7 @@ extern const u8 *D_0047BC80[16];
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
-s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
+s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
     s32 count;
     s32 offset;
     u8 *output;
@@ -279,14 +279,14 @@ s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, const u8 *input, s32 inputByt
     return 0;
 }
 
-void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
+void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
     decoder->output = output;
     decoder->state = 1;
 }
 
 extern f32 D_0040B5F0[][4];
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
-SdfPacket *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;
     f32 (*viewport)[4];
     u128 *cursor;
@@ -298,7 +298,7 @@ SdfPacket *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s
     u32 secondClip;
     u32 quadwordCount;
 
-    packet = (SdfPacket *)sdfGetPacketCursor();
+    packet = (SdfPacket *)sdfGrOpenPacketBuff();
     cursor = (u128 *)(packet + 1);
     viewport = D_0040B5F0;
     VU0_LOAD_VF_AT(vf14, 0x0, viewport);
@@ -388,7 +388,7 @@ SdfPacket *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s
         cursor += 4;
         emitted += 2;
     }
-    sdfSetPacketCursorAligned((s32)cursor & 0x0FFFFFFF);
+    sdfGrClosePacketBuff((s32)cursor & 0x0FFFFFFF);
     quadwordCount = emitted * 2 + 1;
     packet->unk0 = (quadwordCount & 0xFFFF) | 0x20000000;
     packet->unk8 = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
@@ -398,19 +398,19 @@ SdfPacket *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s
 }
 
 /* vu0 routine: render line pairs using the cached composed matrix. */
-SdfPacket *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     VU0_LOAD_MATRIX(D_0040B620);
-    return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
+    return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
 /* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
-SdfPacket *sdfDrawPostmultipliedLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     sdfPostmultiplyVuMatrixFromMemory(D_0040B620);
-    return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
+    return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
 /* Initialize a zeroed TMX0 header with the caller's palette metadata. */
-void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 paletteCount, s32 clutFormat) {
+void sdfTmxSetHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 paletteCount, s32 clutFormat) {
     memset(header, 0, sizeof(SdfTextureFileHeader));
     header->clutFormat = clutFormat;
     header->width = width;
@@ -422,7 +422,7 @@ void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 he
 }
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
-void sdfStreamSendChunk(void) {
+void sdfFileRpcContinueRead(void) {
     s32 chunkBytes = D_0047BCC0.remainingBytes;
 
     if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
@@ -434,7 +434,7 @@ void sdfStreamSendChunk(void) {
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
-s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAddress,
+s32 sdfFileRpcReadCallback(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
     SdfStreamState *stream = &D_0047BCC0;
     s32 dmaId;
@@ -460,18 +460,18 @@ s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAdd
         transfer.attributes = 0;
         dmaId = sceSifSetDma(&transfer, 1);
         while (sceSifDmaStat(dmaId) >= 0) {
-            timer = sdfReadTimerCount();
-            while ((s32)sdfGetElapsedTimerTicks(timer) <= 0) {
+            timer = sdfGetRunTimeCountBase();
+            while ((s32)sdfGetRunTimeCount(timer) <= 0) {
             }
         }
-        timer = sdfReadTimerCount();
-        while ((s32)sdfGetElapsedTimerTicks(timer) < 0x64) {
+        timer = sdfGetRunTimeCountBase();
+        while ((s32)sdfGetRunTimeCount(timer) < 0x64) {
         }
         stream->destination += byteCount;
         stream->transferredBytes += byteCount;
         stream->remainingBytes -= byteCount;
         if (stream->remainingBytes > 0) {
-            sdfStreamSendChunk();
+            sdfFileRpcContinueRead();
         } else {
             SignalSema(stream->semaphore);
         }
@@ -491,12 +491,12 @@ s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAdd
 /* Dispatch a stream command, wait for completion, and return the shared reply buffer.
  * request is a scalar argument except for a read command, which carries a read-request address.
  * An unrecognized command leaves the shared reply unchanged. */
-s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
+s32 *sdfFileRpcHandler(u32 command, s32 request) {
     SdfStreamState *state = &D_0047BCC0;
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
-        state->deviceState = sdfFileCmdReadOpen((const char *)request, sdfStreamHandleDeviceEvent, 0);
+        state->deviceState = sdfFileCmdReadOpen((const char *)request, sdfFileRpcReadCallback, 0);
         if (state->deviceState != 0) {
             WaitSema(state->semaphore);
             deviceState = state->deviceState;
@@ -520,7 +520,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
         state->remainingBytes = ((SdfStreamReadRequest *)request)->byteCount;
         state->transferredBytes = 0;
         state->destination = (u8 *)((SdfStreamReadRequest *)request)->destinationAddress;
-        sdfStreamSendChunk();
+        sdfFileRpcContinueRead();
         WaitSema(state->semaphore);
         D_0047BE00[0] = state->transferredBytes;
         break;
@@ -537,16 +537,16 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
 extern u8 sdfPfsDebugMode;
 extern u8 D_0047BD00[];
 /* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
-void sdfRunStreamIopRpcServer(void) {
+void SdfFileRpcServerThreadProc(void) {
     SdfStreamState *state = &D_0047BCC0;
     SceIoStat info;
     u8 queue[0x20];
     u8 server[0x50];
     char *module;
 
-    state->semaphore = sdfCreateSemaphore(0, 1, 0);
+    state->semaphore = sdfCreateSema(0, 1, 0);
     sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x66504F49, sdfStreamDispatchSynchronousCommand,
+    sceSifRegisterRpc(server, 0x66504F49, sdfFileRpcHandler,
                       D_0047BD00, 0, 0, queue);
     module = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
     if (sdfPfsDebugMode != 0 &&
@@ -554,14 +554,14 @@ void sdfRunStreamIopRpcServer(void) {
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs0:/userirx/sdfiopfl.irx";
     }
-    sdfSendNamedResourceRequest(module, 0, NULL, NULL);
+    SdfIopFileRpc(module, 0, NULL, NULL);
     WakeupThread(D_00439224);
     sceSifRpcLoop(queue);
 }
 
 /* Start the newly created worker, then record and suspend the calling thread. */
-void sdfStartAndSuspendWorkerThread(void) {
-    s32 workerId = sdfCreateThreadWithAllocatedWorkspace(sdfRunStreamIopRpcServer, 0x1000, 0x4C);
+void sdfStartFileRpcServer(void) {
+    s32 workerId = sdfCreateThreadWithStack(SdfFileRpcServerThreadProc, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
     D_00439224 = GetThreadId();
@@ -571,7 +571,7 @@ void sdfStartAndSuspendWorkerThread(void) {
 extern char *D_0040BE00[];
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
-void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
+void LoadMcModules(const char *prefix, s32 moduleGroup) {
     char path[0x100];
     char **moduleNames = &D_0040BE00[moduleGroup * SDF_IOP_MODULES_PER_GROUP];
     s32 moduleIndex;
@@ -585,7 +585,7 @@ void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
 }
 
 /* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */
-SdfKeyTreeNode *sdfRotateBalancedTreeSecondLink(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
+SdfKeyTreeNode *sdfSortOtAvlRotateLR(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
     SdfKeyTreeNode *childRoot = heavyChild;
     SdfKeyTreeNode *pivot;
 
@@ -614,7 +614,7 @@ SdfKeyTreeNode *sdfRotateBalancedTreeSecondLink(SdfKeyTreeNode *heavyChild, SdfK
 }
 
 /* Rebalance a left-heavy parent using its heavy child; return the new subtree root. */
-SdfKeyTreeNode *sdfRotateBalancedTreeFirstLink(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
+SdfKeyTreeNode *sdfSortOtAvlRotateRL(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
     SdfKeyTreeNode *childRoot = heavyChild;
     SdfKeyTreeNode *pivot;
 
@@ -643,7 +643,7 @@ SdfKeyTreeNode *sdfRotateBalancedTreeFirstLink(SdfKeyTreeNode *heavyChild, SdfKe
 }
 
 /* Walk the insertion path upward, updating balance flags and reconnecting a rotated subtree. */
-void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
+void sdfSortOtAvlCheckBalance(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
                    SdfKeyTreeNode **root) {
     SdfKeyTreeNode *parent;
     SdfKeyTreeNode *replacement = NULL;
@@ -661,11 +661,11 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
                 return;
             }
             if (balance > 1) {
-                replacement = sdfRotateBalancedTreeSecondLink(child, parent);
+                replacement = sdfSortOtAvlRotateLR(child, parent);
                 break;
             }
             if (balance < -1) {
-                replacement = sdfRotateBalancedTreeFirstLink(child, parent);
+                replacement = sdfSortOtAvlRotateRL(child, parent);
                 break;
             }
             child = parent;
@@ -684,7 +684,7 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
 }
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
-void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyPoolNode *item) {
+void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyPoolNode *item) {
     SdfKeyTreeNode *path[SDF_KEY_TREE_PATH_LIMIT];
     s32 depth = 0;
     SdfKeyTreeNode **link = tree;
@@ -710,32 +710,32 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyPoolNode *item) {
         cur = *link;
     }
     item->next = NULL;
-    node = (SdfKeyTreeNode *)sdfAllocPacketAligned(0x10);
+    node = (SdfKeyTreeNode *)sdfGrAllocPacketBuff(0x10);
     node->right = NULL;
     node->left = NULL;
     node->item = item;
     *link = node;
     node->balance = 0;
     if (depth != 0) {
-        sdfRebalanceFloatKeyTreeAfterInsert(path, depth, node, tree);
+        sdfSortOtAvlCheckBalance(path, depth, node, tree);
     }
 }
 
-void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
+void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node) {
     if (node->packetHeadAddress != 0) {
         if (node->kind == SDF_POOL_FREE_KIND) {
             node->next = pool->freeHead;
             pool->freeHead = node;
         } else {
-            sdfInsertFloatKeyTreeItem(pool->keyTree, node);
+            sdfSortOtAvlRegist(pool->keyTree, node);
         }
     }
 }
 
-extern void sdfConnectPacketLists(void *left, void *right);
+extern void sdfGrJoinDrawTag(void *left, void *right);
 
 /* Append a pool-node chain after the list's tail, or make it the head of an empty list, then advance the tail to the chain's last node. */
-void sdfAppendPoolNodeChain(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+void sdfGrSortOtFixup(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
     SdfKeyPoolNode *current;
     SdfKeyPoolNode *next;
 
@@ -743,11 +743,11 @@ void sdfAppendPoolNodeChain(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode *
         if (*tail == NULL) {
             *head = first;
         } else {
-            sdfConnectPacketLists(*tail, first);
+            sdfGrJoinDrawTag(*tail, first);
         }
         current = first;
         while ((next = current->next) != NULL) {
-            sdfConnectPacketLists(current, next);
+            sdfGrJoinDrawTag(current, next);
             current = next;
         }
         *tail = current;
@@ -755,36 +755,36 @@ void sdfAppendPoolNodeChain(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode *
 }
 
 /* Append items in descending key order (right, item, left). The starting node must be non-null. */
-void sdfKeyTreeApply(SdfKeyTreeNode *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+void sdfGrSortOtTraverse(SdfKeyTreeNode *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
     SdfKeyTreeNode *next;
 
     do {
         if (node->right != NULL) {
-            sdfKeyTreeApply(node->right, head, tail);
+            sdfGrSortOtTraverse(node->right, head, tail);
         }
-        sdfAppendPoolNodeChain(node->item, head, tail);
+        sdfGrSortOtFixup(node->item, head, tail);
         next = node->left;
         node = next;
     } while (next != NULL);
 }
 
 /* Rebuild the pool's chain: collect the free list's chain, then append every key tree node's chain, and store the resulting head and tail. */
-void sdfRebuildPoolChain(SdfPool *pool) {
+void sdfGrSortOtSetup(SdfPool *pool) {
     SdfKeyPoolNode *head = NULL;
     SdfKeyPoolNode *tail = NULL;
 
-    sdfAppendPoolNodeChain(pool->freeHead, &head, &tail);
+    sdfGrSortOtFixup(pool->freeHead, &head, &tail);
     if (pool->keyTree[0] != NULL) {
-        sdfKeyTreeApply(pool->keyTree[0], &head, &tail);
+        sdfGrSortOtTraverse(pool->keyTree[0], &head, &tail);
     }
     pool->head = head;
     pool->tail = tail;
 }
 
-void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode) {
+void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode) {
     switch (mode) {
     case SDF_POOL_REBUILD_CHAIN:
-        sdfRebuildPoolChain(pool);
+        sdfGrSortOtSetup(pool);
         break;
     case SDF_POOL_PUSH_FREE:
         if (freeNode->packetHeadAddress != 0) {
@@ -795,9 +795,9 @@ void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNo
     }
 }
 
-void sdfInstallPoolNodeReleaseCallbacks(SdfPool *pool) {
-    pool->release = sdfReleasePoolNode;
-    pool->update = sdfUpdatePoolFreeListByMode;
+void sdfModelSetOtCallbacks(SdfPool *pool) {
+    pool->release = sdfGrSortOtReg;
+    pool->update = sdfGrSortOtCallback;
 }
 
 INCLUDE_RODATA(const s32, "game/code_003478C0", D_0042EDD0);

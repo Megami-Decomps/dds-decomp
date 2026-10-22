@@ -18,14 +18,14 @@ typedef char SdfFloatCounter_duration_at_0x08[
 typedef char SdfFloatCounter_time_at_0x0C[
     ((u32)&((SdfFloatCounter *)0)->time == 0x0C) ? 1 : -1];
 
-s32 sdfStepWrappingFloatCounter(SdfFloatCounter *counter);
-void sdfSetFloatCounterDirection(SdfFloatCounter *counter, u32 direction);
-u32 sdfGetFloatCounterDirection(const SdfFloatCounter *counter);
-f32 evtGetValueScaleFactor(const SdfFloatCounter *counter);
-void evtScaleValueByMultiplier(SdfFloatCounter *counter, f32 multiplier);
-void sdfFreezeFloatCounter(SdfFloatCounter *counter);
-void sdfUnfreezeFloatCounter(SdfFloatCounter *counter);
-void sdfEnableFloatCounterWrap(SdfFloatCounter *counter);
-void sdfDisableFloatCounterWrap(SdfFloatCounter *counter);
+s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter);
+void dds3PathBasicControlAlterMode(SdfFloatCounter *counter, u32 direction);
+u32 dds3PathBasicControlGetMode(const SdfFloatCounter *counter);
+f32 dds3PathBasicControlGetRatio(const SdfFloatCounter *counter);
+void dds3PathBasicControlSetRatio(SdfFloatCounter *counter, f32 multiplier);
+void dds3PathBasicPauseOn(SdfFloatCounter *counter);
+void dds3PathBasicPauseOff(SdfFloatCounter *counter);
+void dds3PathBasicLoopOn(SdfFloatCounter *counter);
+void dds3PathBasicLoopOff(SdfFloatCounter *counter);
 
 #endif /* SDF_FLOAT_COUNTER_H */

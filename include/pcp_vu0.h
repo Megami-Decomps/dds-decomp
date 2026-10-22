@@ -242,7 +242,7 @@ typedef struct {
     : : "f" (t))
 /* vf28-vf31 = (vf28-vf31) * (vf20-vf23): the full 4x4 product with the
  * primary on the left, column sums landing in vf2/vf3/vf4 before the copy
- * back. DDS1 sdfVuMultiplyScratchByPrimary / DDS2 code_00336B48. */
+ * back. DDS1 MultMatrixRevNoArg_C / DDS2 code_00336B48. */
 #define VU0_MATRIX4_MUL_PRIMARY_LEFT() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vmulax.xyzw ACC, vf28, vf20x\n\tvmadday.xyzw ACC, vf29, vf20y\n\t" \
@@ -257,7 +257,7 @@ typedef struct {
     ".set reorder" \
     : : : "memory")
 /* vf28-vf31 = (vf20-vf23) * (vf28-vf31): the same product with the scratch
- * bank on the left. DDS1 sdfVuMultiplyPrimaryByScratch / DDS2 code_00336B48. */
+ * bank on the left. DDS1 MultMatrixNoArg_C / DDS2 code_00336B48. */
 #define VU0_MATRIX4_MUL_SCRATCH_LEFT() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vmulax.xyzw ACC, vf20, vf28x\n\tvmadday.xyzw ACC, vf21, vf28y\n\t" \
@@ -297,7 +297,7 @@ typedef struct {
 /* vf28-vf31 = rigid inverse of itself: transpose the 3x3 and set the
  * translation row to -(R^T * t). The transpose uses vf0 (not vf31) as its
  * fourth source, which is what distinguishes it from VU0_MATRIX4_TRANSPOSE.
- * DDS1 sdfInvertRigidVuTransform / DDS2 code_00335EE8. */
+ * DDS1 ReverseMatrix / DDS2 code_00335EE8. */
 #define VU0_MATRIX4_INVERT_RIGID() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
@@ -310,7 +310,7 @@ typedef struct {
     ".set reorder\n")
 /* Same, with the per-axis scale divided out first: rows are transposed and
  * then divided by |row|^2 before the translation is negated. DDS1
- * sdfInvertScaledVuTransform / DDS2 code_00335EE8. */
+ * InversMatrix / DDS2 code_00335EE8. */
 #define VU0_MATRIX4_INVERT_SCALED() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vmula.xyz ACC, vf28, vf28\n\tvmadda.xyz ACC, vf29, vf29\n\tvmadd.xyz vf2, vf30, vf30\n\t" \
@@ -647,7 +647,7 @@ typedef struct {
     : "=r" (dst) : "r" (base), "i" (off) : "memory")
 /* Scale the rows of the primary matrix by the full vector vf10 (no
  * broadcast: vmul.xyz per row). This is the model root scale application
- * both games spell out (DDS1/DDS2 sdfModelUpdateRootTransforms); it differs
+ * both games spell out (DDS1/DDS2 sdfModelEvalTm2); it differs
  * from VU0_SCALE_MATRIX_ROWS, which broadcasts one component per row. */
 #define VU0_MUL_MATRIX_ROWS_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyz vf28, vf28, vf10\n\tvmul.xyz vf29, vf29, vf10\n\t" \
@@ -661,7 +661,7 @@ typedef struct {
     : : "m" (a), "m" (b), "m" (c), "m" (d) : "memory")
 /* Blend two source rows (+0x30) by the weight at node + 0x40, writing row
  * +0x30 back (xy lerp of sourceA toward sourceB). Shared by the DDS1/DDS2
- * sdfVuBlendNodeXY twins. */
+ * corePktLerpUVChain twins. */
 #define VU0_BLEND_NODE_XY(node, a, b) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
     "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
@@ -689,8 +689,8 @@ typedef struct {
  * This is retail's sequence verbatim, including its two slips: the second key
  * is loaded from the first pointer again, and vf3 is fed the raw z word ($3)
  * instead of the second packed vector ($4). The second pointer is therefore
- * fetched (operand %1) but never read. Users: DDS1 sdfMotionBlendVectorKeys, DDS2
- * sdfMotionBlendVectorKeys (sdfMotion vec3 key blend).
+ * fetched (operand %1) but never read. Users: DDS1 sdfMotInterpolateKeyXYZ, DDS2
+ * sdfMotInterpolateKeyXYZ (sdfMotion vec3 key blend).
  */
 #define VU0_LERP_VEC3_KEYS(first, second, t) __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -759,13 +759,13 @@ typedef struct {
     : : "r" (dst) : "$1", "$2", "$f0", "$f2", "memory")
 
 /* dst.xyz = a.xyz + b.xyz, retaining dst.w.
- * Retail: vadd.xyz dst,a,b; DDS1 effPcpDrawBeamGeometryNode and DDS2 effPcpDrawBeamGeometryNode
+ * Retail: vadd.xyz dst,a,b; DDS1 dds3RingPolyExpListDraw and DDS2 dds3RingPolyExpListDraw
  * add a beam position to the primary matrix's translation row. */
 #define VU0_ADD_XYZ(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyz " #dst ", " #a ", " #b "\n\t.set reorder")
 
 /* Quaternion conjugate divided by its squared length; vf10 is input/result.
- * Shared COP2 sequence in both games' effMiscInvertQuaternionVU. */
+ * Shared COP2 sequence in both games' Inverse. */
 #define VU0_QUAT_INVERSE_VF10() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vmul.xyzw vf2, vf10, vf10\n\t" \
@@ -804,7 +804,7 @@ typedef struct {
 
 /* Rotate the basis at vectors+0x40 into vf24-vf26, caching its original
  * three vectors separately. Matrix rows start at matrix+0x10.
- * Shared COP2 sequence in both games' sdfVuRotateObjectBasis. */
+ * Shared COP2 sequence in both games' corePktLoadWorldLightMtx. */
 #define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "lqc2 vf2, 0x40(%0)\n\tlqc2 vf5, 0x10(%1)\n\t" \
@@ -817,7 +817,7 @@ typedef struct {
     : : "r" (vectors), "r" (matrix), "r" (cache) : "memory")
 
 /* Interpolate the XY pair at +0x30 and vector at +0x20 by node's +0x40 W.
- * Shared COP2 sequence in both games' sdfVuBlendNodeVectors; the linked-list
+ * Shared COP2 sequence in both games' corePktLerpUVColorChain; the linked-list
  * traversal remains in C. */
 #define VU0_BLEND_NODE_VECTORS(node, first, second) __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -835,7 +835,7 @@ typedef struct {
  * clip value to +0x10.w. The region test and its branch are part of the block
  * (the delay-slot lqc2 is the assembler's reorder swap), so the whole COP2
  * sequence is one statement. Shared by DDS1 func_002DEAC0 and DDS2
- * sdfVuInterpolateClipVertex. */
+ * corePktMakeEdgePoint. */
 #define VU0_INTERPOLATE_CLIP_VERTEX(out, first, second) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vaddx.w vf2, vf0, vf0x\n\tlbu $2, 0x50(%1)\n\tlqc2 vf4, 0x10(%1)\n\tlqc2 vf5, 0x10(%2)\n\t" \
@@ -854,7 +854,7 @@ typedef struct {
  * flags holds the plane bits that every corner fails. The ANDs of $2/$3 are part
  * of the block; that is why the result can take the bounds register. ACC,
  * vf2-vf5, $2/$3 and $6/$7 are scratch. Shared by both games'
- * sdfModelTestTransformedClipVectors. */
+ * sdfModelCheckBounds. */
 #define VU0_CLIP_TEST_BOX_CORNERS(flags, bounds) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "ldr $2, 0(%1)\n\tldl $2, 7(%1)\n\tlw $3, 8(%1)\n\t" \

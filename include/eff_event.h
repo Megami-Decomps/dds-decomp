@@ -72,13 +72,13 @@ typedef char EffectEventVectorParameters_color_at_0x2C[
 
 /* The event constructor copies a serialized, caller-specific 0x30-byte
  * parameter record. Its retained work owner is opaque to external users. */
-EffEventWork *effEventCreate(struct SoundMixer *owner, u16 kind, const void *params);
+EffEventWork *effEveBEDCutCreate(struct SoundMixer *owner, u16 kind, const void *params);
 /* Copy a caller-built 0x30-byte record into the event's initialization prefix. */
-void effEventCopyFileRecordHeader(EffEventWork *destination, const void *source);
-void effEventReleaseNode(EffEventWork *work);
-void effEventSetScale(EffEventWork *work, f32 scale);
+void effEveBEDCutSetParams(EffEventWork *destination, const void *source);
+void effEveBEDCutDelete(EffEventWork *work);
+void effEveBEDCutSetScale(EffEventWork *work, f32 scale);
 void effEventUpdateEffectParameters(EffEventWork *work);
 
-ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object);
+ObjBase *dds3EventObjectBasicGetControlWorkData(const EffWorldNode *object);
 
 #endif

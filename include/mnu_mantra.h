@@ -33,7 +33,7 @@ typedef struct MtrSelectionFlags {
 /* mtrAdvanceMantraResourceLoadState's progress through mtrMantraResourceFiles. */
 typedef struct MtrResourceLoadState {
     struct FileRequest *fileEntry;
-    struct FileRequest *archive; /* released through btlStageTaskCleanupCallback when set */
+    struct FileRequest *archive; /* released through pacFileHandleFree_ when set */
     s16 state;
     u16 entryIndex;
     s32 partyMask; /* bit unitId - 1 per active party member; tested with srav */

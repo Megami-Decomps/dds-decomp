@@ -4,7 +4,7 @@
 #include "sdf_gs_packet.h"
 
 /* DMA/VIF transfer header and packed A+D GIF tag, excluding register payload. */
-void sdfInitializeDmaReferenceTag(SdfGsPacketHeader *header, s32 payloadQwords);
+void sdfGrSetRegsPacketHeader(SdfGsPacketHeader *header, s32 payloadQwords);
 
 /* GIF tag followed by a REF transfer and the patchable NEXT link. */
 typedef struct SdfDmaReferenceChainPacket {
@@ -22,7 +22,7 @@ typedef char SdfDmaReferenceChainPacket_reference_at_0x20[
 typedef char SdfDmaReferenceChainPacket_next_at_0x30[
     ((u32)&((SdfDmaReferenceChainPacket *)0)->nextTag == 0x30) ? 1 : -1];
 
-void sdfBuildDmaReferenceChain(SdfDmaReferenceChainPacket *packet,
+void sdfGrSetRefGifPacket(SdfDmaReferenceChainPacket *packet,
     u32 sourceAddress, s32 qwordCount);
 
 #endif

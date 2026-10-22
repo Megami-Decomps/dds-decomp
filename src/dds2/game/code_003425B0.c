@@ -83,7 +83,7 @@ typedef union SdfSoundCommand {
 
 extern SdfSoundCommand D_00438B84;
 
-extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
+extern s32 sdfPrintf(const char *fmt, ...);
 extern char D_0042E590[];
 extern char D_0042E5B0[];
 extern char D_0042E5C8[];
@@ -106,8 +106,8 @@ extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 
 
-extern void sdfDispatchNextStreamNode(s32 skipInterruptGuard);
-extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
+extern void sdfIpuExecQueue(s32 skipInterruptGuard);
+extern s32 sdfIpuDecode(SdfStreamFrameNode *);
 
 
 extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
@@ -122,37 +122,37 @@ extern char *D_0040BBD8[];
 extern char *D_0040BBE8[];
 
 
-void sndStartReducedBgm(void) {
-    sndQueueCommandPacket(0x180, 0, 0, 0);
+void p2sdBgmVolDown(void) {
+    sdfSndSendCmd(0x180, 0, 0, 0);
 }
 
-void sndStopReducedBgm(void) {
-    sndQueueCommandPacket(400, 0, 0, 0);
+void p2sdBgmVolUp(void) {
+    sdfSndSendCmd(400, 0, 0, 0);
 }
 
-void sndTransitionBgm(s32 channel) {
-    sndQueueCommandPacket(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
+void p2sdSetBgmTrack(s32 channel) {
+    sdfSndSendCmd(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 
-s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {
+s32 p2sdLoadPcmFile(const char *name, u8 channel) {
     if (sdfSoundCommandBusy != 0) {
         return 1;
     }
     strcpy(D_0040BAF8, name);
-    sndSendCommandPacket((channel >> 3) | 0xF0, 0, 0, 0);
+    sdfSndSendSyncCmd((channel >> 3) | 0xF0, 0, 0, 0);
     return 0;
 }
 
-u32 sdfSoundIsCommandBusy(void) {
+u32 p2sdGetPcmState(void) {
     return sdfSoundCommandBusy;
 }
 
-void sdfSoundStopNamedPlayback(void) {
-    sndSendCommandPacket(0x100, 0, 0, 0);
+void p2sdSyncSound(void) {
+    sdfSndSendSyncCmd(0x100, 0, 0, 0);
 }
 
 void sndSendChannelGroupCommand110(u8 channel) {
-    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
+    sdfSndSendSyncCmd(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
 void sdfSoundSetChannelCount(u32 channels) {
@@ -162,10 +162,10 @@ void sdfSoundSetChannelCount(u32 channels) {
     if (channels == 0) {
         channels = 1;
     }
-    sndSendCommandPacket((channels - 1) | 0x1d0, 0, 0, 0);
+    sdfSndSendSyncCmd((channels - 1) | 0x1d0, 0, 0, 0);
 }
 
-u32 sdfSoundTryQueueCommand(u32 command) {
+u32 p2sdSetPcmCallback(u32 command) {
     if (sdfSoundCommandStatus != 0) {
         return 0;
     }
@@ -175,12 +175,12 @@ u32 sdfSoundTryQueueCommand(u32 command) {
 
 /* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is
  * pending; returns nonzero when busy. */
-s32 sndTrySendChannelGroupCommand120(u8 channel) {
+s32 p2sdPlayPcm(u8 channel) {
     if (sdfSoundCommandStatus) {
         return 1;
     }
     channel = (channel >> 3) & 0xF;
-    sndSendCommandPacket(0x120 | channel, 0, 0, 0);
+    sdfSndSendSyncCmd(0x120 | channel, 0, 0, 0);
     return 0;
 }
 
@@ -189,18 +189,18 @@ u32 sdfSoundGetCommandStatus(void) {
 }
 
 /* Stop the movie's named sound playback after its stream is released. */
-void sdfSoundStopMoviePlayback(void) {
-    sndSendCommandPacket(0x100, 0, 0, 0);
+void p2sdSyncMovie(void) {
+    sdfSndSendSyncCmd(0x100, 0, 0, 0);
 }
 
 /* Separate native copy of the command-0x110 channel-group sender. */
 void sndSendChannelGroupCommand110Duplicate(u8 channel) {
-    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
+    sdfSndSendSyncCmd(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
 
 /* Event 5 invalidates the EE cache before waking the waiting sound thread. */
-s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
+s32 sdfFileRpcCallback(s32 unused, u32 event) {
     switch (event) {
     case SDF_DEV_EVENT_READ_REPLY:
         FlushCache(0);
@@ -221,10 +221,10 @@ extern s32 D_004391D8;
 extern DevState *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
 extern DevState *sdfFileCmdReadOpen(const char *path, void *callback, s32 callbackContext);
-extern void sndCopyToIopAndWait(s32, void *, s32);
+extern void sdfSndTransToIOP(s32, void *, s32);
 
 /* Handle sound-file/buffer RPC commands and return the shared reply words. */
-u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
+u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
     char path[0x100];
 
     switch (command) {
@@ -236,7 +236,7 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         }
         sdfSoundCommandBusy = 1;
         mnuBuildVoiceResourcePath(path, D_0040BAF8);
-        state = sdfFileCmdReadOpen(path, sdfSoundHandleRpcEvent, 0);
+        state = sdfFileCmdReadOpen(path, sdfFileRpcCallback, 0);
         D_004391DC = state;
         if (state != NULL) {
             WaitSema(sdfSoundRpcSemaphore);
@@ -260,7 +260,7 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         if (buffer != NULL) {
             sdfFileCmdRead(D_004391DC, buffer, D_004391D4->byteCount);
             WaitSema(sdfSoundRpcSemaphore);
-            sndCopyToIopAndWait(D_004391D4->destination, buffer, D_004391D4->byteCount);
+            sdfSndTransToIOP(D_004391D4->destination, buffer, D_004391D4->byteCount);
             sdfMemFreeDirect(allocation);
             D_0047B440[0] = D_004391D4->byteCount;
         } else {
@@ -283,7 +283,7 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
     case 4: {
         s32 bytes;
         D_004391D4 = request;
-        sndCopyToIopAndWait(request->destination, D_0047B418.data + D_004391D8, request->byteCount);
+        sdfSndTransToIOP(request->destination, D_0047B418.data + D_004391D8, request->byteCount);
         bytes = D_004391D4->byteCount;
         D_0047B440[0] = bytes;
         D_004391D8 += bytes;
@@ -305,7 +305,7 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
         D_004391D4 = request;
         buffer = D_00438B84.read(request->byteCount);
         if (buffer != NULL) {
-            sndCopyToIopAndWait(D_004391D4->destination, buffer, D_004391D4->byteCount);
+            sdfSndTransToIOP(D_004391D4->destination, buffer, D_004391D4->byteCount);
             D_0047B440[0] = D_004391D4->byteCount;
         } else {
             D_0047B440[0] = -1;
@@ -320,17 +320,17 @@ u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
     return D_0047B440;
 }
 
-void sdfSoundStartRpcServer(void) {
+void SifRpcServerThreadProc(void) {
     u8 queue[0x20];
     u8 server[0x50];
-    s32 semaphore = sdfCreateSemaphore(0, 1, 0);
+    s32 semaphore = sdfCreateSema(0, 1, 0);
     sdfSoundRpcSemaphore = semaphore;
     if (semaphore <= 0) {
         for (;;) {
         }
     }
     sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x54524E53, sdfSoundHandleRpcRequest, D_0047B440, 0, 0, queue);
+    sceSifRegisterRpc(server, 0x54524E53, sdfFileRpcHandleCmd, D_0047B440, 0, 0, queue);
     sceSifRpcLoop(queue);
 }
 
@@ -435,8 +435,8 @@ void sdfSoundSetTableEntry(u32 kind, u8 *src) {
         }
         break;
     }
-    sndCopyToIopAndWait(D_004391EC, sndMidiTrackState, 0x8D0);
-    sndSendCommandPacket(0x1F0, 0, 0, 0);
+    sdfSndTransToIOP(D_004391EC, sndMidiTrackState, 0x8D0);
+    sdfSndSendSyncCmd(0x1F0, 0, 0, 0);
 }
 
 /* Refresh the sound table, then copy the selected slice into dst. */
@@ -445,7 +445,7 @@ void sdfSoundGetTableEntry(u32 kind, u8 *dst) {
     u8 *src;
     s32 i;
 
-    sndSendCommandPacket(0x200, 0, 0, 0);
+    sdfSndSendSyncCmd(0x200, 0, 0, 0);
     switch (kind) {
     case 0:
         table = sndMidiTrackState;
@@ -549,34 +549,34 @@ extern char D_00438C00[];
 extern char D_00438C08[];
 extern char D_00438C10[];
 
-void sdfPrintHexMemoryDump(const u8 *data, s32 size) {
+void sdfDumpHexLine(const u8 *data, s32 size) {
     s32 column = 0;
     s32 i;
 
     while (size > 0) {
         if (column == 0) {
-            sdfPrintFormattedDevMessage(D_00438BE0, data);
+            sdfPrintf(D_00438BE0, data);
             column = (u32)data & 0xF;
             for (i = column; i > 0; i--) {
-                sdfPrintFormattedDevMessage(D_00438BE8);
+                sdfPrintf(D_00438BE8);
             }
         } else if (column == 8) {
-            sdfPrintFormattedDevMessage(D_00438BF0);
+            sdfPrintf(D_00438BF0);
         } else {
-            sdfPrintFormattedDevMessage(D_00438BF8);
+            sdfPrintf(D_00438BF8);
         }
-        sdfPrintFormattedDevMessage(D_00438C00, *data++);
+        sdfPrintf(D_00438C00, *data++);
         column++;
         if (column == 0x10) {
             column = 0;
-            sdfPrintFormattedDevMessage(D_00438C08);
+            sdfPrintf(D_00438C08);
         }
         size--;
     }
     if (column == 0) {
-        sdfPrintFormattedDevMessage(D_00438C08);
+        sdfPrintf(D_00438C08);
     } else {
-        sdfPrintFormattedDevMessage(D_00438C10);
+        sdfPrintf(D_00438C10);
     }
 }
 
@@ -591,7 +591,7 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5F0);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E610);
 
-void sdfPrintDmaChain(u32 *dmaTag) {
+void sdfDumpDmaChain(u32 *dmaTag) {
     u32 *returnStack[2];
     u32 *cursor;
     u32 tag;
@@ -601,11 +601,11 @@ void sdfPrintDmaChain(u32 *dmaTag) {
     s32 depth = 0;
     s32 done = 0;
 
-    sdfPrintFormattedDevMessage(D_0042E590, dmaTag);
+    sdfPrintf(D_0042E590, dmaTag);
     cursor = dmaTag;
     for (;;) {
         if (((u32)cursor & 0xF) != 0) {
-            sdfPrintFormattedDevMessage(D_0042E5B0, cursor);
+            sdfPrintf(D_0042E5B0, cursor);
             return;
         }
 
@@ -613,7 +613,7 @@ void sdfPrintDmaChain(u32 *dmaTag) {
         tagAddress = cursor[1];
         tagType = (tag >> 28) & 7;
         tagDataCount = tag & 0xFFFF;
-        sdfPrintFormattedDevMessage(D_0042E5C8, cursor, D_0040BB18[tagType], tag, tagAddress, cursor[2], cursor[3]);
+        sdfPrintf(D_0042E5C8, cursor, D_0040BB18[tagType], tag, tagAddress, cursor[2], cursor[3]);
         cursor += 4;
 
         switch (tagType) {
@@ -631,7 +631,7 @@ void sdfPrintDmaChain(u32 *dmaTag) {
             break;
         case 5:
             if (depth == 2) {
-                sdfPrintFormattedDevMessage(D_0042E5F0);
+                sdfPrintf(D_0042E5F0);
                 return;
             }
             returnStack[depth++] = cursor;
@@ -651,7 +651,7 @@ void sdfPrintDmaChain(u32 *dmaTag) {
         }
 
         if (done != 0) {
-            sdfPrintFormattedDevMessage(D_0042E610, cursor);
+            sdfPrintf(D_0042E610, cursor);
             return;
         }
     }
@@ -667,7 +667,7 @@ extern char *D_0040BB38[16];
 extern char *D_0040BB78[8];
 extern s32 D_0040BB98[16];
 
-void sdfDumpDmaVifCommandStream(u32 *source) {
+void sdfGrFlushOtChain(u32 *source) {
     u32 *returnStack[2];
     u32 *cursor;
     u32 *wordCursor = NULL;
@@ -683,7 +683,7 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
     s32 done;
     u32 value;
 
-    sdfPrintFormattedDevMessage("<<< DMA-VIF dump start [%p] >>>\n", source);
+    sdfPrintf("<<< DMA-VIF dump start [%p] >>>\n", source);
     cursor = source;
     directRow = 0;
     tagAddress = 0;
@@ -697,14 +697,14 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
             case 0: {
                 u32 tag;
                 if ((u32)cursor & 0xF) {
-                    sdfPrintFormattedDevMessage(D_0042E5B0, cursor);
+                    sdfPrintf(D_0042E5B0, cursor);
                     return;
                 }
                 tag = cursor[0];
                 tagAddress = cursor[1];
                 tagId = (tag >> 28) & 7;
                 qwc = tag & 0xFFFF;
-                sdfPrintFormattedDevMessage("\n%08X [DMA %s] : %08X %08X\n",
+                sdfPrintf("\n%08X [DMA %s] : %08X %08X\n",
                                            cursor, D_0040BB18[tagId], tag, tagAddress);
                 wordCursor = cursor + 2;
                 cursor += 4;
@@ -743,7 +743,7 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                     break;
                 case 5:
                     if (depth == 2) {
-                        sdfPrintFormattedDevMessage("\ncall stack nest overflow!\n");
+                        sdfPrintf("\ncall stack nest overflow!\n");
                         return;
                     }
                     returnStack[depth++] = cursor + qwc * 4;
@@ -774,70 +774,70 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                 s32 format;
                 s32 unpackFormat;
 
-                sdfPrintFormattedDevMessage("%08X %c%08X : ", (u32)(wordCursor - 1),
+                sdfPrintf("%08X %c%08X : ", (u32)(wordCursor - 1),
                                            interrupt, value);
                 switch (opcode) {
                 case 0x00:
-                    sdfPrintFormattedDevMessage("VIF NOP\n");
+                    sdfPrintf("VIF NOP\n");
                     break;
                 case 0x01:
-                    sdfPrintFormattedDevMessage("VIF STCYCL (CL=%d, WL=%d)\n", (s32)(immediate & 0xFF),
+                    sdfPrintf("VIF STCYCL (CL=%d, WL=%d)\n", (s32)(immediate & 0xFF),
                                     (s32)(immediate >> 8));
                     break;
                 case 0x02:
-                    sdfPrintFormattedDevMessage("VIF OFFSET (%04X)\n", immediate & 0x3FF);
+                    sdfPrintf("VIF OFFSET (%04X)\n", immediate & 0x3FF);
                     break;
                 case 0x03:
-                    sdfPrintFormattedDevMessage("VIF BASE   (%04X)\n", immediate & 0x3FF);
+                    sdfPrintf("VIF BASE   (%04X)\n", immediate & 0x3FF);
                     break;
                 case 0x04:
-                    sdfPrintFormattedDevMessage("VIF ITOP   (%04X)\n", immediate & 0x3FF);
+                    sdfPrintf("VIF ITOP   (%04X)\n", immediate & 0x3FF);
                     break;
                 case 0x05:
-                    sdfPrintFormattedDevMessage("VIF STMOD  (%d)\n", (s32)(immediate & 3));
+                    sdfPrintf("VIF STMOD  (%d)\n", (s32)(immediate & 3));
                     break;
                 case 0x06:
-                    sdfPrintFormattedDevMessage("VIF MSKPATH3 (%s)\n",
+                    sdfPrintf("VIF MSKPATH3 (%s)\n",
                                     (immediate & 0x8000) ? D_00438C18 : D_00438C20);
                     break;
                 case 0x07:
-                    sdfPrintFormattedDevMessage("VIF MARK   (%04X)\n", immediate);
+                    sdfPrintf("VIF MARK   (%04X)\n", immediate);
                     break;
                 case 0x10:
-                    sdfPrintFormattedDevMessage("VIF FLUSHE\n");
+                    sdfPrintf("VIF FLUSHE\n");
                     break;
                 case 0x11:
-                    sdfPrintFormattedDevMessage("VIF FLUSH\n");
+                    sdfPrintf("VIF FLUSH\n");
                     break;
                 case 0x13:
-                    sdfPrintFormattedDevMessage("VIF FLUSHA\n");
+                    sdfPrintf("VIF FLUSHA\n");
                     break;
                 case 0x14:
-                    sdfPrintFormattedDevMessage("VIF MSCAL  (%04X)\n", immediate);
+                    sdfPrintf("VIF MSCAL  (%04X)\n", immediate);
                     break;
                 case 0x15:
-                    sdfPrintFormattedDevMessage("VIF MSCALF (%04X)\n", immediate);
+                    sdfPrintf("VIF MSCALF (%04X)\n", immediate);
                     break;
                 case 0x17:
-                    sdfPrintFormattedDevMessage("VIF MSCNT\n");
+                    sdfPrintf("VIF MSCNT\n");
                     break;
                 case 0x20:
                     dataMode = 1;
-                    sdfPrintFormattedDevMessage("VIF STMASK\n");
+                    sdfPrintf("VIF STMASK\n");
                     break;
                 case 0x30:
                     dataMode = 2;
                     n = 4;
-                    sdfPrintFormattedDevMessage("VIF STROW\n");
+                    sdfPrintf("VIF STROW\n");
                     break;
                 case 0x31:
                     dataMode = 3;
                     n = 4;
-                    sdfPrintFormattedDevMessage("VIF STCOL\n");
+                    sdfPrintf("VIF STCOL\n");
                     break;
                 case 0x4A:
                     n = num * 2;
-                    sdfPrintFormattedDevMessage("VIF MPG   (%04X)\n", immediate);
+                    sdfPrintf("VIF MPG   (%04X)\n", immediate);
                     if (n == 0) {
                         n = 0x200;
                     }
@@ -848,7 +848,7 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                     if (n == 0) {
                         n = 0x40000;
                     }
-                    sdfPrintFormattedDevMessage("VIF DIRECT (%06X bytes)\n", (u32)(n * 4));
+                    sdfPrintf("VIF DIRECT (%06X bytes)\n", (u32)(n * 4));
                     dataMode = 5;
                     directRow = 0;
                     break;
@@ -857,7 +857,7 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                     if (n == 0) {
                         n = 0x40000;
                     }
-                    sdfPrintFormattedDevMessage("VIF DIRECTHL (%06X bytes)\n", (u32)(n * 4));
+                    sdfPrintf("VIF DIRECTHL (%06X bytes)\n", (u32)(n * 4));
                     dataMode = 6;
                     directRow = 0;
                     break;
@@ -865,19 +865,19 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                     if ((opcode & 0x60) == 0x60) {
                         unpackFormat = opcode & 0xF;
                         if (D_0040BB38[unpackFormat] == NULL) {
-                            sdfPrintFormattedDevMessage("illegal unpack type !\n");
+                            sdfPrintf("illegal unpack type !\n");
                             return;
                         }
                         format = (((s32)immediate >> 13) & 6) | (((s32)opcode >> 4) & 1);
                         dataMode = 7;
-                        sdfPrintFormattedDevMessage("VIF UNPACK%s %s,%04X,%04X\n",
+                        sdfPrintf("VIF UNPACK%s %s,%04X,%04X\n",
                                                    D_0040BB78[format],
                                                    D_0040BB38[unpackFormat],
                                                    immediate & 0x3FF, num);
                         bits = D_0040BB98[unpackFormat];
                         n = (bits * (s32)num + 0x1F) >> 5;
                     } else {
-                        sdfPrintFormattedDevMessage("unkown vif command\n");
+                        sdfPrintf("unkown vif command\n");
                         return;
                     }
                     break;
@@ -885,19 +885,19 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                 break;
             }
             case 1:
-                sdfPrintFormattedDevMessage("    STMASK : %08X\n", value);
+                sdfPrintf("    STMASK : %08X\n", value);
                 dataMode = 0;
                 break;
             case 2:
                 n--;
-                sdfPrintFormattedDevMessage("    STROW : %08X\n", value);
+                sdfPrintf("    STROW : %08X\n", value);
                 if (n == 0) {
                     dataMode = 0;
                 }
                 break;
             case 3:
                 n--;
-                sdfPrintFormattedDevMessage("    STCOL : %08X\n", value);
+                sdfPrintf("    STCOL : %08X\n", value);
                 if (n == 0) {
                     dataMode = 0;
                 }
@@ -909,19 +909,19 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
                 break;
             case 5:
                 if (directRow == 0) {
-                    sdfPrintFormattedDevMessage(D_00438CD0);
+                    sdfPrintf(D_00438CD0);
                 } else {
-                    sdfPrintFormattedDevMessage(D_00438BF8);
+                    sdfPrintf(D_00438BF8);
                 }
                 directRow++;
-                sdfPrintFormattedDevMessage(D_00438CD8, value);
+                sdfPrintf(D_00438CD8, value);
                 if (directRow == 4) {
                     directRow = 0;
-                    sdfPrintFormattedDevMessage(D_00438C08);
+                    sdfPrintf(D_00438C08);
                 }
                 if (--n == 0) {
                     if (directRow != 0) {
-                        sdfPrintFormattedDevMessage(D_00438C08);
+                        sdfPrintf(D_00438C08);
                     }
                     dataMode = 0;
                 }
@@ -939,30 +939,30 @@ void sdfDumpDmaVifCommandStream(u32 *source) {
             }
         }
         if (done != 0) {
-            sdfPrintFormattedDevMessage("<<< DMA-VIF normal end [%p] >>>\n", (void *)wordCursor);
+            sdfPrintf("<<< DMA-VIF normal end [%p] >>>\n", (void *)wordCursor);
             return;
         }
     }
 }
 
-void sdfDumpGsMemoryForward(void) {
+void sdfDumpGsMemory(void) {
     char buf[8];
     SdfTexResource *head;
     SdfTexResource *node;
     SdfTexResource *walk;
     char *name;
 
-    sdfPrintFormattedDevMessage(sdfGsMemoryDumpHeader);
-    head = sdfGetTextureListHead();
+    sdfPrintf(sdfGsMemoryDumpHeader);
+    head = sdfGsMemGetLinkHead();
     node = head;
     while (node != 0) {
         if (node->allocationMode < 4) {
             name = D_0040BBD8[node->allocationMode];
         } else {
-            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
+            sdfPrintf(buf, sdfGsMemoryTypeFormat, node->allocationMode);
             name = buf;
         }
-        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->next, node->prev, name, node->word, node->size);
+        sdfPrintf(sdfGsMemoryDumpRowFormat, node, node->next, node->prev, name, node->word, node->size);
         walk = head;
         while (walk != node) {
             walk = walk->prev;
@@ -971,24 +971,24 @@ void sdfDumpGsMemoryForward(void) {
     }
 }
 
-void sdfDumpGsMemoryBackward(void) {
+void sdfDumpGsMemory2(void) {
     char buf[8];
     SdfTexResource *head;
     SdfTexResource *node;
     SdfTexResource *walk;
     char *name;
 
-    sdfPrintFormattedDevMessage(sdfGsMemoryDumpHeader);
-    head = sdfGetTextureBlockListHead();
+    sdfPrintf(sdfGsMemoryDumpHeader);
+    head = sdfGsMemGetLinkTail();
     node = head;
     while (node != 0) {
         if (node->allocationMode < 4) {
             name = D_0040BBE8[node->allocationMode];
         } else {
-            sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
+            sdfPrintf(buf, sdfGsMemoryTypeFormat, node->allocationMode);
             name = buf;
         }
-        sdfPrintFormattedDevMessage(sdfGsMemoryDumpRowFormat, node, node->next, node->prev, name, node->word, node->size);
+        sdfPrintf(sdfGsMemoryDumpRowFormat, node, node->next, node->prev, name, node->word, node->size);
         walk = head;
         while (walk != node) {
             walk = walk->next;
@@ -1001,10 +1001,10 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpHeader);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpRowFormat);
 
-void sndPrintMemoryInfo(void) {
+void sdfDumpMemory(void) {
     SdfGeneralHeapStats info;
-    sdfGetGeneralHeapStats(&info);
-    sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
+    sdfMemGetInfo(&info);
+    sdfPrintf(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
                     info.totalBytes, info.freeBytes,
                     info.largestFreeBytes, info.smallestFreeBytes,
                     info.blockCount, info.freeBlockCount);
@@ -1013,37 +1013,37 @@ void sndPrintMemoryInfo(void) {
 extern char D_00438C08[];
 
 /* Print the chip heap totals and how many cells are in use per size class (1..16, 17..32, ...). */
-void sdfPrintChipHeapInfo(void) {
+void sdfDumpChipMemory(void) {
     SdfChipHeapStats stats;
     u32 limit = 16;
     s32 i = 0;
     u32 first;
     u32 *used;
 
-    sdfGetChipHeapStats(&stats);
-    sdfPrintFormattedDevMessage(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlockCount, stats.partialBlockCount);
-    sdfPrintFormattedDevMessage("\n several size alloc count...\n");
+    sdfChipGetInfo(&stats);
+    sdfPrintf(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlockCount, stats.partialBlockCount);
+    sdfPrintf("\n several size alloc count...\n");
     first = 0;
     used = stats.usedCells;
     do {
-        sdfPrintFormattedDevMessage("       for %3d .. %4d : %d\n", first, limit, *used++);
+        sdfPrintf("       for %3d .. %4d : %d\n", first, limit, *used++);
         i++;
         first = limit + 1;
         limit *= 2;
     } while (i != 7);
-    sdfPrintFormattedDevMessage(D_00438C08, first);
+    sdfPrintf(D_00438C08, first);
 }
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
  * outData receives the block address, outSize the file size; without outData the block is released. */
-SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u32 *outSize, s32 extra) {
-    DevState *state = sdfDevCreateCommandState(name);
-    s32 size = sdfDevQueueControlAndWait(state);
+SdfMemBlock *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32 extra) {
+    DevState *state = sdfFileOpen(name);
+    s32 size = sdfFileLength(state);
     SdfMemBlock *handle = sdfMemAllocDirect(size + extra);
     u32 address = sdfMemLock(handle);
 
-    sdfDevQueueReadAndWait(state, (void *)address, size);
-    sdfDevWaitThenReleaseCommandState(state);
+    sdfFileRead(state, (void *)address, size);
+    sdfFileClose(state);
     if (outData != NULL) {
         *outData = address;
     } else {
@@ -1055,8 +1055,8 @@ SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u3
     return handle;
 }
 
-SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize) {
-    return sdfDevReadResourceWithExtraSpace(name, outAddress, outSize, 0);
+SdfMemBlock *sdfDevLoadFileEx(const char *name, u32 *outAddress, u32 *outSize) {
+    return sdfDevLoadFile(name, outAddress, outSize, 0);
 }
 
 SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
@@ -1064,24 +1064,24 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
     SdfTex *result;
     u32 info[4];
 
-    buffer = sdfReadNamedResource(name, info, 0);
-    result = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
+    buffer = sdfDevLoadFileEx(name, info, 0);
+    result = sdfTexSet((SdfTextureFileHeader *)(info[0]));
     sdfMemFreeDirect(buffer);
     return result;
 }
 
-extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32 capacity);
+extern DevRequest *sdfTexListNew(s32 capacity);
 
-DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
+DevRequest *sdfTexSetTB(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;
     s32 count = resource->textureCount;
-    DevRequest *handle = sdfCreateConfiguredBufferedResourceList(count);
+    DevRequest *handle = sdfTexListNew(count);
     const SdfTextureOffsetListEntry *entry;
     if (count != i) {
         entry = (const SdfTextureOffsetListEntry *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
-            sdfAppendResourceListItem(handle, sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(
+            sdfTexListAdd(handle, sdfTexSet((SdfTextureFileHeader *)(
                 (void *)((const u8 *)resource + entry->textureHeaderOffset))));
             entry++;
         } while (i != count);
@@ -1094,8 +1094,8 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
     DevRequest *result;
     u32 info[4];
 
-    buffer = sdfReadNamedResource(name, info, 0);
-    result = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)info[0]);
+    buffer = sdfDevLoadFileEx(name, info, 0);
+    result = sdfTexSetTB((const SdfTextureOffsetListHeader *)(u32)info[0]);
     sdfMemFreeDirect(buffer);
     return result;
 }
@@ -1104,7 +1104,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
-    sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload,
+    sdfAddressResolver((s32 *)payload, (s32)payload,
                                    payload + resource->relocationOffset, resource->relocationByteCount);
     return payload;
 }
@@ -1112,7 +1112,7 @@ u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
 /* Return the retained allocation handle and publish the relocated payload address. */
 SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayload) {
     u32 info[4];
-    SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
+    SdfMemBlock *buffer = sdfDevLoadFileEx(name, info, 0);
     *outPayload = sdfRelocatePackedResourcePayload((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
@@ -1121,7 +1121,7 @@ SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **ou
 u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
-    sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload,
+    sdfAddressResolver((s32 *)payload, (s32)payload,
                                    payload + resource->relocationOffset, resource->relocationByteCount);
     return payload;
 }
@@ -1129,7 +1129,7 @@ u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource
 /* Return the retained allocation handle and publish the relocated payload address. */
 SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayload) {
     u32 info[4];
-    SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
+    SdfMemBlock *buffer = sdfDevLoadFileEx(name, info, 0);
     *outPayload = sdfRelocatePackedResourceWordsFromHeader((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
@@ -1138,7 +1138,7 @@ SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPa
  * Low tag bits select one-, two-, or three-byte deltas; tag 7 encodes a run.
  * tableBytes bounds the encoded byte stream, not the number of relocated words.
  */
-void sdfRelocatePackedResourceWords(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes) {
+void sdfAddressResolver(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes) {
     const u8 *commandCursor = table;
     s32 value;
     s32 runIndex;
@@ -1166,7 +1166,7 @@ void sdfRelocatePackedResourceWords(s32 *words, s32 relocationBase, const u8 *ta
 }
 
 /* Remove a queued node without clearing its old links; the caller may own the interrupt guard. */
-void sdfStreamNodeUnlink(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
+void sdfIpuDetachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
     SdfStreamFrameNode *previousNode;
     SdfStreamFrameNode *nextNode;
@@ -1194,13 +1194,13 @@ void sdfStreamNodeUnlink(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
 }
 
 /* Move a node to the queue tail, using one interrupt guard for unlink plus append. */
-void sdfStreamNodeAppend(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
+void sdfIpuAttachQueue(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
     if (skipInterruptGuard == 0) {
         interruptsEnabled = DIntr();
     }
     if (node->queued != 0) {
-        sdfStreamNodeUnlink(node, 1);
+        sdfIpuDetachQueue(node, 1);
     }
     node->queued = 1;
     if (sdfStreamNodeListTail == 0) {
@@ -1217,7 +1217,7 @@ void sdfStreamNodeAppend(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
 }
 
 /* Walk link addresses to append to the independent singly-linked sound list. */
-void sdfSoundAppendNode(SdfStreamFrameNode *node) {
+void sdfIpuAttachTask(SdfStreamFrameNode *node) {
     SdfStreamFrameNode **tailLink = &sdfSoundNodeHead;
     SdfStreamFrameNode *currentNode = *tailLink;
     if (currentNode != NULL) {
@@ -1231,7 +1231,7 @@ void sdfSoundAppendNode(SdfStreamFrameNode *node) {
 }
 
 /* Unlink the first matching sound node; absence leaves the list unchanged. */
-void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
+void sdfIpuDetachTask(SdfStreamFrameNode *node) {
     SdfStreamFrameNode **nodeLink = &sdfSoundNodeHead;
     SdfStreamFrameNode *currentNode = *nodeLink;
     while (currentNode != NULL) {
@@ -1247,7 +1247,7 @@ void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
 
 
 /* Allocate two width-by-height frames, using four bytes per pixel for mode zero, two otherwise. */
-void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
+void sdfIpuAllocBuff(SdfStreamFrameNode *node) {
     s32 bytesPerPixel = SDF_STREAM_PIXEL_BYTES_WIDE;
     s32 size;
 
@@ -1257,17 +1257,17 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     size = node->width * node->height;
     size *= bytesPerPixel;
     node->bufferSize = size;
-    node->frameBuffers[0] = sdfAllocateBlockBySizeThreshold(size);
-    node->frameBuffers[1] = sdfAllocateBlockBySizeThreshold(size);
+    node->frameBuffers[0] = sdfAllocAuto(size);
+    node->frameBuffers[1] = sdfAllocAuto(size);
 }
 
 /* Each 16-byte DMA tag holds control/address bits and a zero reserved half. */
-void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
+void sdfIpuMakeToIpuDmaTag(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
     s32 remaining = (bytes + 15) & ~15;
     SdfStreamInputDmaTag *tag;
     u32 address;
 
-    tag = sdfAllocateBlockBySizeThreshold(((remaining + 0xFFEFF) / 0xFFF00) * 16);
+    tag = sdfAllocAuto(((remaining + 0xFFEFF) / 0xFFF00) * 16);
     node->inputDmaChain = tag;
     address = (u32)source & SDF_EE_PHYSICAL_MASK;
     do {
@@ -1284,7 +1284,7 @@ void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *node, u8 *source, s32 bytes
 }
 
 /* Build the two GIF upload buffers for the node's tiled frame images. */
-void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node) {
+void sdfIpuMakeBltPacket(SdfStreamFrameNode *node) {
     s32 pixelMode;
     u32 tileQwords;
     s32 width;
@@ -1327,7 +1327,7 @@ void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node) {
 
     bufferIndex = 0;
     do {
-        packet = sdfAllocateBlockBySizeThreshold(packetBytes);
+        packet = sdfAllocAuto(packetBytes);
         node->transferPacketBuffers[bufferIndex] = packet;
         sourceAddress = (u32)node->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
 
@@ -1374,7 +1374,7 @@ void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node) {
 
 
 /* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
-void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
+void sdfIpuInitCb(SdfStreamFrameNode *node, SoundFormat *format) {
     memset(node, 0, SDF_STREAM_NODE_BYTES);
     if (format->hasAudio == 0) {
         node->audioMode = SDF_STREAM_AUDIO_DISABLED;
@@ -1391,38 +1391,38 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
 
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
-void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize) {
+void sdfIpuSetDecodeParams(SdfStreamFrameNode *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
     u8 *frameBytes = sourceAddress;
-    sdfSoundInitNodeFromFormat(node, format);
+    sdfIpuInitCb(node, format);
     node->width = ((SdfStreamFrameHeader *)frameBytes)->width;
     node->cycleLength = ((SdfStreamFrameHeader *)frameBytes)->cycleLength;
     node->height = ((SdfStreamFrameHeader *)frameBytes)->height;
-    sdfAllocateStreamFrameBuffers(node);
-    sdfBuildStreamInputDmaChain(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
+    sdfIpuAllocBuff(node);
+    sdfIpuMakeToIpuDmaTag(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = DIntr();
-    sdfStreamNodeAppend(node, 0);
+    sdfIpuAttachQueue(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    sdfDispatchNextStreamNode(0);
+    sdfIpuExecQueue(0);
 }
 
 /* Store the callback and movie context, then allocate the feed ring and leading mirror bytes. */
-void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, MovObj *readContext) {
-    sdfSoundInitNodeFromFormat(node, format);
+void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, MovObj *readContext) {
+    sdfIpuInitCb(node, format);
     node->read = readSource;
     node->readContext = readContext;
     node->active = 1;
-    node->scratchBuffer = (u8 *)sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
+    node->scratchBuffer = (u8 *)sdfAllocAuto(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
-extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
+extern SdfTexResource *sdfGsMemAllocRect(s32, s32, s32, s32, s32);
 
 /* Query for a complete header before reading it. Texture dimensions are rounded
  * only when larger than one GS page; smaller dimensions remain unchanged.
  */
-void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
+void sdfIpuAllocGsRect(SdfStreamFrameNode *node) {
     SdfStreamFrameHeader header;
     s32 readStatus;
     s32 interruptsEnabled;
@@ -1458,22 +1458,22 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
                 textureHeight = (textureHeight + SDF_STREAM_NARROW_HEIGHT_MASK) & ~SDF_STREAM_NARROW_HEIGHT_MASK;
             }
         }
-        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, SDF_TEX_RESOURCE_TEXTURE, 0);
+        texture = sdfGsMemAllocRect(textureWidth, textureHeight, pixelFormat, SDF_TEX_RESOURCE_TEXTURE, 0);
         node->textureHead = texture;
         node->resourceWord = texture->word;
     }
-    sdfAllocateStreamFrameBuffers(node);
+    sdfIpuAllocBuff(node);
     interruptsEnabled = DIntr();
-    sdfStreamNodeAppend(node, 0);
+    sdfIpuAttachQueue(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
     }
 }
 
-extern void sdfTexQueueResourceRelease(s32);
-extern void sdfTexQueuePendingWork(SdfTexResource *texture);
+extern void sdfImageSetChainReleaseMem(s32);
+extern void sdfGsMemFreeDelayed(SdfTexResource *texture);
 
-void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
+void sdfIpuFree(SdfStreamFrameNode *node) {
     s32 interruptsEnabled;
     s32 wasActive;
     u32 dmaEnable;
@@ -1481,8 +1481,8 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     interruptsEnabled = DIntr();
     wasActive = 0;
     node->drained = 1;
-    sdfSoundRemoveNode(node);
-    sdfStreamNodeUnlink(node, 1);
+    sdfIpuDetachTask(node);
+    sdfIpuDetachQueue(node, 1);
     if (sdfIpuOutputStream == node) {
         HW_WRITE(IPU_CTRL, 0x40000000);
         sceIpuSync(0, 0);
@@ -1497,19 +1497,19 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    sdfFreeMemoryFromEitherHeap(node->inputDmaChain);
-    sdfFreeMemoryFromEitherHeap(node->frameBuffers[0]);
-    sdfFreeMemoryFromEitherHeap(node->frameBuffers[1]);
-    sdfTexQueueResourceRelease((s32)node->transferPacketBuffers[0]);
-    sdfTexQueueResourceRelease((s32)node->transferPacketBuffers[1]);
+    sdfFreeAuto(node->inputDmaChain);
+    sdfFreeAuto(node->frameBuffers[0]);
+    sdfFreeAuto(node->frameBuffers[1]);
+    sdfImageSetChainReleaseMem((s32)node->transferPacketBuffers[0]);
+    sdfImageSetChainReleaseMem((s32)node->transferPacketBuffers[1]);
     if (node->scratchBuffer != 0) {
-        sdfFreeMemoryFromEitherHeap(node->scratchBuffer - 0x100);
+        sdfFreeAuto(node->scratchBuffer - 0x100);
     }
     if (node->textureHead != 0) {
-        sdfTexQueuePendingWork(node->textureHead);
+        sdfGsMemFreeDelayed(node->textureHead);
     }
     if (wasActive != 0) {
-        sdfDispatchNextStreamNode(0);
+        sdfIpuExecQueue(0);
     }
 }
 
@@ -1518,7 +1518,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
  * data; EOF permits a partial final read. Copy the final slot's trailing bytes
  * into the prefix mirror, retaining the original copy even for a partial read.
  */
-void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
+void sdfIpuHandleDmaEnd(SdfStreamFrameNode *feed) {
     s32 writeSlot;
     s32 filledSlots;
     s32 availableBytes;
@@ -1568,7 +1568,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 }
 
 /* Start IPU input from the initial chain or a feed slot; defer an empty ring. */
-void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
+void sdfIpuSetToIpuDma(SdfStreamFrameNode *stream) {
     if (stream->active == 0) {
         sdfIpuInputStream = stream;
         HW_WRITE(D4_TADR, (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK);
@@ -1590,7 +1590,7 @@ void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
 }
 
 /* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
-void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
+void sdfIpuSetFromIpuDma(SdfStreamFrameNode *stream) {
     u8 bufferIndex = stream->bufferIndex;
     HW_WRITE(D3_MADR, (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK);
     HW_WRITE(D3_QWC, stream->bufferSize / SDF_STREAM_QWORD_BYTES);
@@ -1599,7 +1599,7 @@ void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
 }
 
 /* Read the FDEC result, then issue FDEC with an eight-bit advance; return the earlier result. */
-s32 sdfSoundSyncIpu(void) {
+s32 IpuWriteCommand(void) {
     s32 decodedBits;
     HW_WRITE(IPU_CMD, SDF_IPU_FDEC);
     sceIpuSync(0, 0);
@@ -1610,10 +1610,10 @@ s32 sdfSoundSyncIpu(void) {
     return decodedBits;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfStartStreamNodeIpuTransfer);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfIpuDecode);
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
-void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
+void sdfIpuExecQueue(s32 skipInterruptGuard) {
     SdfStreamFrameNode *node;
     s32 interruptsEnabled = 0;
 
@@ -1628,8 +1628,8 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
     while (node != 0) {
         if (node->completedBufferCount + node->pendingPlaybackSubmissions < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
-            sdfStreamNodeUnlink(node, 1);
-            sdfStartStreamNodeIpuTransfer(node);
+            sdfIpuDetachQueue(node, 1);
+            sdfIpuDecode(node);
             break;
         }
         node = node->streamNext;
@@ -1644,7 +1644,7 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
 
 /* Sleep for IPU completion, advance cycle state and requeue non-drained nodes;
  * the DMA worker runs indefinitely and retains the native completion-byte gates. */
-void sdfIpuDmaCompletionWorker(void) {
+void sdfIpuDecodeThread(void) {
     SdfStreamFrameNode *work;
     s32 interruptsEnabled;
 
@@ -1675,22 +1675,22 @@ void sdfIpuDmaCompletionWorker(void) {
         }
         if (work->drained == 0) {
             interruptsEnabled = DIntr();
-            sdfStreamNodeAppend(work, 0);
+            sdfIpuAttachQueue(work, 0);
             if (interruptsEnabled != 0) {
                 EIntr();
             }
         }
-        sdfDispatchNextStreamNode(0);
+        sdfIpuExecQueue(0);
     }
 }
 
-s32 sdfWakeIpuCompletionWorker(void) {
+s32 sdfIpuFromDmacHandler(void) {
     iWakeupThread(D_00439214);
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;
 }
 
-s32 sdfCompleteIpuInputFeedDma(void) {
+s32 sdfIpuToDmacHandler(void) {
     SdfStreamFrameNode *stream = sdfIpuInputStream;
 
     if (stream != NULL) {
@@ -1705,8 +1705,8 @@ s32 sdfCompleteIpuInputFeedDma(void) {
                 }
                 stream->filledSlots--;
             }
-            sndFillStreamFeedRing(stream);
-            sdfSoundStartIpuInputDma(stream);
+            sdfIpuHandleDmaEnd(stream);
+            sdfIpuSetToIpuDma(stream);
         }
     }
     EE_ENABLE_INTERRUPTS_SYNC();
@@ -1714,7 +1714,7 @@ s32 sdfCompleteIpuInputFeedDma(void) {
 }
 
 /* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
-u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
+u32 sdfIpuGetActivePacket(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
     if (channel->isEnabled != 0) {
         selectedEntry = channel->previousEntries[channel->entryIndex];
@@ -1723,7 +1723,7 @@ u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
 }
 
 /* Return the indexed current entry only when enabled; the byte index is unchecked. */
-u32 sndGetSelectedChannelEntry(SndMidiChannel *channel) {
+u32 sdfIpuGetActiveFrame(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
     if (channel->isEnabled != 0) {
         selectedEntry = channel->currentEntries[channel->entryIndex];
@@ -1732,7 +1732,7 @@ u32 sndGetSelectedChannelEntry(SndMidiChannel *channel) {
 }
 
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
-void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
+void sdfIpuFinishActiveFrame(SdfStreamFrameNode *node) {
     s32 interruptsEnabled = DIntr();
     s32 pendingBuffers = node->completedBufferCount;
     s32 remainingBuffers = pendingBuffers - 1;
@@ -1748,23 +1748,23 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    sdfDispatchNextStreamNode(0);
+    sdfIpuExecQueue(0);
 }
 
-extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
+extern void sdfIpuMakeBltPacket(SdfStreamFrameNode *node);
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
-s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
+s32 sdfIpuSetChainTag(SdfStreamFrameNode *node) {
     u32 *selectedBuffer;
     if (node->completedBufferCount == 0) {
         return 0;
     }
     selectedBuffer = (u32 *)(node->transferPacketIndex * 4 + (s32)node + 0x28);
     if (*selectedBuffer == 0) {
-        sdfBuildStreamFrameTransferPackets(node);
+        sdfIpuMakeBltPacket(node);
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (SdfTextureDmaTail *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
-    sdfAdvanceBufferedPlayback(node);
+    sdfImageSetChainTag(*selectedBuffer, (SdfTextureDmaTail *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
+    sdfIpuFinishActiveFrame(node);
     return 1;
 }
 
@@ -1777,7 +1777,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
     s32 interruptsEnabled;
 
     if (node != NULL && node->inputDmaStartPending != 0) {
-        sdfSoundStartIpuInputDma(node);
+        sdfIpuSetToIpuDma(node);
     }
     node = sdfSoundNodeHead;
     while (node != NULL) {
@@ -1788,7 +1788,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
         /* The playback provider views the same 0x8C stream allocation. */
         switch (node->playbackPhase) {
         case SDF_STREAM_PLAYBACK_FIRST_COMPLETION:
-            sdfSubmitBufferedPlayback(node);
+            sdfIpuSetChainTag(node);
             node->playbackPhase = SDF_STREAM_PLAYBACK_CADENCED;
             node->playbackCadenceRemainder = node->playbackCadenceStep;
             break;
@@ -1796,7 +1796,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
             if (D_00438D04 != 1) {
                 elapsed += node->playbackCadenceStep;
                 if (elapsed >= cadence) {
-                    if (sdfSubmitBufferedPlayback(node) != 0) {
+                    if (sdfIpuSetChainTag(node) != 0) {
                         elapsed -= cadence;
                     }
                 }
@@ -1805,11 +1805,11 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
             break;
         }
         if (node->active == 1) {
-            sdfStreamInitializeFromHeader(node);
+            sdfIpuAllocGsRect(node);
             if (D_00438D04 != 1) {
                 if (node->filledSlots < SDF_STREAM_RING_SLOTS) {
                     interruptsEnabled = DIntr();
-                    sndFillStreamFeedRing(node);
+                    sdfIpuHandleDmaEnd(node);
                     if (interruptsEnabled != 0) {
                         EIntr();
                     }
@@ -1819,16 +1819,16 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
         }
         node = node->next;
     }
-    sdfDispatchNextStreamNode(0);
+    sdfIpuExecQueue(0);
 }
 
 void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, u8 *source, s32 size, s32 resourceWord) {
-    sdfStreamOpen(node, format, source, size);
+    sdfIpuSetDecodeParams(node, format, source, size);
     node->resourceWord = resourceWord;
-    sdfSoundAppendNode(node);
+    sdfIpuAttachTask(node);
 }
 
-void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, u8 *source, s32 size, SdfTex *resource) {
+void sdfIpuSetOutputTex(SdfStreamFrameNode *node, SdfStreamParams *params, u8 *source, s32 size, SdfTex *resource) {
     SdfStreamParams streamParams = *params;
     switch (resource->pixelFormat) {
     case 0:
@@ -1838,48 +1838,48 @@ void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params
         streamParams.hasAudio = 1;
         break;
     }
-    sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPrimaryResourceWord(resource));
+    sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPixelAddr(resource));
 }
 
 void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, MovObj *readContext, s32 resourceWord) {
-    sdfSoundInitFormattedNode(node, format, read, readContext);
+    sdfIpuStrmDecodeInit(node, format, read, readContext);
     node->resourceWord = resourceWord;
-    sdfSoundAppendNode(node);
+    sdfIpuAttachTask(node);
 }
 
 extern s32 D_004391FC;
 extern s32 D_00439200;
 extern u8 sdfIpuStreamThreadStack[];
 extern s32 sdfAddHandler(s32 kind, s32 index, s32 handler, s32 argument, s32 option);
-extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern void sdfIpuDmaCompletionWorker();
+extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern void sdfIpuDecodeThread();
 
-void sdfSoundInitIpuStream(void) {
+void sdfIpuInit(void) {
     sceIpuInit();
     HW_WRITE(IPU_CMD, 0x90000000);
     sdfSoundNodeHead = 0;
     sdfIpuOutputStream = NULL;
-    D_004391FC = sdfAddHandler(1, 3, (s32)sdfWakeIpuCompletionWorker, -1, 0);
+    D_004391FC = sdfAddHandler(1, 3, (s32)sdfIpuFromDmacHandler, -1, 0);
     EnableDmac(3);
-    D_00439200 = sdfAddHandler(1, 4, (s32)sdfCompleteIpuInputFeedDma, -1, 0);
+    D_00439200 = sdfAddHandler(1, 4, (s32)sdfIpuToDmacHandler, -1, 0);
     EnableDmac(4);
-    D_00439214 = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
+    D_00439214 = CreateThreadSimple((void *)sdfIpuDecodeThread, sdfIpuStreamThreadStack, 0x800, 0x46);
     _StartThread(D_00439214, 0);
 }
 
 extern s32 D_004391FC;
 extern s32 D_00439200;
-extern void sdfRemoveHandler();
+extern void sdfIpuRemoveHandler();
 
 /* Remove both IPU handlers and forward the final completion-source disable result. */
-s32 sdfSoundShutdownIpuStreamHandlers(void) {
+s32 sdfIpuClose(void) {
     if (D_004391FC != 0) {
-        sdfRemoveHandler(D_004391FC);
+        sdfIpuRemoveHandler(D_004391FC);
         D_004391FC = 0;
     }
     DisableDmac(3);
     if (D_00439200 != 0) {
-        sdfRemoveHandler(D_00439200);
+        sdfIpuRemoveHandler(D_00439200);
         D_00439200 = 0;
     }
     return DisableDmac(4);
@@ -1891,7 +1891,7 @@ void sdfPrintTextLine(const char *text) {
     puts(text);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfMoviePacReserveRingBlock);
+INCLUDE_ASM(const s32, "game/code_003425B0", movieWaitSema);
 
 /* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
 void sdfSetStreamFrameDrawMode(u32 value) {
@@ -1909,7 +1909,7 @@ void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfMovieQueueFrameSprite);
 
 extern MovObj *sdfMoviePacSoundMovie;
-extern void *sdfMoviePacReserveRingBlock(s32);
+extern void *movieWaitSema(s32);
 extern void sdfMovieQueueFrameSprite(MovObj *, SdfPoolNode *);
 
 /* DMA/VIF/GIF header then nine A+D register writes for the sprite.
@@ -1948,11 +1948,11 @@ void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
         movie->stream.pac->ringLength >= 0x1000) {
         movie->pad21 = 1;
         sdfMoviePacSoundMovie = movie;
-        sdfSoundTryQueueCommand((u32)sdfMoviePacReserveRingBlock);
-        sndTrySendChannelGroupCommand120(movie->packetLimit);
+        p2sdSetPcmCallback((u32)movieWaitSema);
+        p2sdPlayPcm(movie->packetLimit);
     }
 
-    packet = (SdfMovieDrawPacket *)sdfAllocPacketAligned(sizeof(SdfMovieDrawPacket));
+    packet = (SdfMovieDrawPacket *)sdfGrAllocPacketBuff(sizeof(SdfMovieDrawPacket));
     packet->header.dmaTag = 0x100000A;
     height = movie->soundNode.height;
     width = movie->soundNode.width;
@@ -1992,7 +1992,7 @@ void sdfMovieDrawFrame(MovObj *movie, SdfPoolNode *pool) {
         (u32)(movie->unk04 + movie->unk0C);
     packet->vertexExtent.registerId = SDF_GS_XYZ2;
     list = sdfPrimAllocDrawTag(0);
-    sdfAppendPacket(list, (u32)packet);
+    sdfDrawTagLink(list, (u32)packet);
     pool->append(pool, list);
 }
 

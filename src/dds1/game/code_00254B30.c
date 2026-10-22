@@ -260,7 +260,7 @@ void itfDspPopulatePrimaryLabels(void) {
     sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
-    dspStartEntry(0);
+    fclStartMessage(0);
     evtStoreValueAndCaptureWindowPanelValue(8);
 }
 
@@ -276,7 +276,7 @@ void itfDspPopulateAlternateLabels(void) {
     sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
-    dspStartEntry(1);
+    fclStartMessage(1);
     evtStoreValueAndCaptureWindowPanelValue(8);
 }
 
@@ -291,27 +291,27 @@ void itfDspPopulateThirdLabels(void) {
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
-    dspStartEntry(2);
+    fclStartMessage(2);
 }
 
 void itfDspSignalA(void) {
-    dspStartEntry(3);
+    fclStartMessage(3);
 }
 
 void itfDspSignalB(void) {
-    dspStartEntry(4);
+    fclStartMessage(4);
 }
 
 void itfDspSignalC(void) {
-    dspStartEntry(5);
+    fclStartMessage(5);
 }
 
 void itfDspSignalD(void) {
-    dspStartEntry(6);
+    fclStartMessage(6);
 }
 
 void itfDspSignalE(void) {
-    dspStartEntry(7);
+    fclStartMessage(7);
 }
 
 
@@ -323,16 +323,16 @@ void mnuUpdateSparkle(DspParticle *spark) {
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;
-            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 30.0f + 1.0f;
-        } else if (sdfGetRandFloat(0) > 0.7f) {
-            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 30.0f + 0.0f;
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 30.0f + 1.0f;
+        } else if (dds3GetRandFloatA(0) > 0.7f) {
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 30.0f + 0.0f;
         } else {
             spark->phase = 1;
-            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 60.0f + 45.0f;
-            spark->z = (sdfGetRandFloat(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
-            spark->size = sdfGetRandFloat(0) * 10.0f;
-            spark->x = sdfGetRandFloat(0) * 512.0f + -256.0f;
-            spark->y = sdfGetRandFloat(0) * 448.0f + -128.0f;
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 60.0f + 45.0f;
+            spark->z = (dds3GetRandFloatA(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = dds3GetRandFloatA(0) * 10.0f;
+            spark->x = dds3GetRandFloatA(0) * 512.0f + -256.0f;
+            spark->y = dds3GetRandFloatA(0) * 448.0f + -128.0f;
         }
     }
 }
@@ -347,10 +347,10 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
 
     state->countdown = state->countdown - 1;
     if (state->countdown < 0) {
-        duration = sdfGetRandFloat(0) * 60.0f + 60.0f;
+        duration = dds3GetRandFloatA(0) * 60.0f + 60.0f;
         state->period = duration;
         state->countdown = duration;
-        state->strength = sdfGetRandFloat(0) * 0.20000005f + 0.4f;
+        state->strength = dds3GetRandFloatA(0) * 0.20000005f + 0.4f;
     }
     /* Advance every particle, including those waiting for their next phase. */
     particle = state->particles;
@@ -375,7 +375,7 @@ void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 sur
     fraction = 1.0f - (f32)particle->timer / particle->timerMax;
     x = (s32)(particle->x + fraction * particle->z);
     y = particle->y;
-    alpha = (s32)(sdfSinPoly(fraction * 3.14159265f) * 25.6f);
+    alpha = (s32)(sdfSin(fraction * 3.14159265f) * 25.6f);
     mnuDrawSpriteAtPlacement(x, y, 1, alpha, sprite, 0x2D, 0x20, surfaceIndex);
 }
 
@@ -442,7 +442,7 @@ void mnuDrawMantraSparkScene(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x2A, context);
     factor = (f32)scene->sparkles.countdown / (f32)scene->sparkles.period;
     factor = 1.0f - factor;
-    factor = scene->sparkles.strength * sdfSinPoly(factor * 3.14159265f) +
+    factor = scene->sparkles.strength * sdfSin(factor * 3.14159265f) +
              0.2f;
     mnuDrawPlacedSpriteFromTable(0, 0, 0, (f32)alpha * factor, 0x2B, context);
     sparkles = &scene->sparkles;
@@ -545,7 +545,7 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
     f32 baseScale = (f32)scale;
     s32 drawScale;
 
-    wave = sdfSinPoly(wave * 3.1415926f);
+    wave = sdfSin(wave * 3.1415926f);
 
     mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x1F, context);
     drawScale = (s32)(baseScale * (wave * 0.5f + 0.5f));
@@ -683,8 +683,8 @@ void func_00256E90(s32 frame, s32 unused, s32 alpha, s32 context) {
     }
     fade = ((f32)frame) / 5.0f;
     angle = fade * 3.141592503f;
-    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSinPoly(angle), 20, context);
-    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSinPoly(angle), 21, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSin(angle), 20, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alphaValue * sdfSin(angle), 21, context);
 }
 
 #undef MANTRA_COMMON_SPRITE

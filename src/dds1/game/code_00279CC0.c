@@ -226,7 +226,7 @@ s32 mnuStepSkillDetailControl(KwlnTask *callback) {
 
 void mnuDrawSelectionLabel(s32 selection) {
     FrFontGlyph *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
-    frFontSetChildColors(item, 0xA09DC366);
+    frSetFontColor(item, 0xA09DC366);
     frFontDrawGlyphChain(item, 1, 0x53);
     frDestroyFontRequestAfter(item);
 }

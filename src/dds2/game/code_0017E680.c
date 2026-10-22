@@ -19,11 +19,11 @@
 
 extern EffResourceRenderState effResourceDrawParams;
 
-void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
+void effPCPNeedleSpiralSetColor(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
+extern void *effPkt3DPrimMakePoly(EffResourceRenderState *);
 extern f32 effResourceDefaultTrianglePoints[][4];
 extern u32 effResourceDefaultTriangleColors[];
 
@@ -31,7 +31,7 @@ extern SdfPoolNode *effResourceDrawSurfaces[];
 
 
 /* Create an effect resource work with count entries, its entry list inline at +0x74. */
-EffResourceWork *effCreateResourceEntryWork(u32 count) {
+EffResourceWork *dds3NeedleModelCreate(u32 count) {
     struct SdfMemBlock *allocation;
     EffResourceWork *work;
     EffResourceEntry *entries;
@@ -49,9 +49,9 @@ EffResourceWork *effCreateResourceEntryWork(u32 count) {
     work->scale[2] = 1.0f;
     work->streamAllocation = NULL;
     EE_MMI_UNIT_MATRIX(work);
-    asset = sdfCreateAssetWithDrawEntries();
+    asset = sdfMatNew();
     work->drawAsset = asset;
-    sdfSetPrimaryStateFloat(asset, 1.0f);
+    sdfMatSetConstant(asset, 1.0f);
     entries = work->entries;
     i = 0;
     if (count != 0) {
@@ -66,14 +66,14 @@ EffResourceWork *effCreateResourceEntryWork(u32 count) {
     return work;
 }
 
-void effReleaseAttachedResources(EffResourceWork *effect) {
-    sdfQueueAssetRelease(effect->drawAsset);
+void dds3NeedleModelDelete(EffResourceWork *effect) {
+    sdfMatFreeDelayed(effect->drawAsset);
     effReleaseOptionalResource(effect);
     sdfMemFreeDirect(effect->backingAllocation);
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
-void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
+void dds3NeedleModelDraw(EffResourceWork *work) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
     EffResourceEntry *entry;
@@ -81,9 +81,9 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     u32 remaining;
     u32 triangleSize;
 
-    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
-    sdfConsAppendAssetPacket(packet, work->drawAsset, 0);
+    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packet);
+    sdf3DPrimLinkMat(packet, work->drawAsset, 0);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale[0];
     matrix[5] = work->scale[1];
@@ -100,7 +100,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         matrix[13] = entry->position[1];
         matrix[14] = entry->position[2];
         VU0_LOAD_MATRIX(matrix);
-        sdfConsAppendVuPacket(packet, 0);
+        sdf3DPrimLinkTm(packet, 0);
         if (work->streamAllocation == NULL) {
             remaining = 12;
             effResourceDrawParams.colors = effResourceDefaultTriangleColors;
@@ -116,7 +116,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         effResourceDrawParams.parameterCount = 16;
         effResourceDrawParams.vertexCount = 48;
         while (remaining >= 48) {
-            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effResourceDrawParams));
+            sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&effResourceDrawParams));
             if (work->streamAllocation == NULL) {
                 effResourceDrawParams.colors += 48;
                 effResourceDrawParams.positions += 48;
@@ -130,7 +130,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         if (remaining >= 3) {
             effResourceDrawParams.parameterCount = remaining / triangleSize;
             effResourceDrawParams.vertexCount = remaining;
-            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effResourceDrawParams));
+            sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&effResourceDrawParams));
         }
     }
     effResourceDrawSurfaces[work->mode]->append(effResourceDrawSurfaces[work->mode], packet);
@@ -175,7 +175,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
 
         negativeHeight = -height;
         unitVectors[0][0] = sdfCos(angle);
-        unitVectors[0][1] = sdfSinPoly(angle);
+        unitVectors[0][1] = sdfSin(angle);
         unitVectors[0][2] = 0.0f;
         halfStep = step * 0.5f;
         middleAngle = angle + halfStep;
@@ -188,7 +188,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         positions++;
         unitVectors[0][0] =
             sdfCos(middleAngle);
-        unitVectors[0][1] = sdfSinPoly(middleAngle);
+        unitVectors[0][1] = sdfSin(middleAngle);
         unitVectors[0][2] = 0.0f;
         positions[0][0] = 0.0f;
         positions[0][1] = 0.0f;
@@ -196,7 +196,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
         unitVectors++;
         positions++;
         unitVectors[0][0] = sdfCos(angle);
-        unitVectors[0][1] = sdfSinPoly(angle);
+        unitVectors[0][1] = sdfSin(angle);
         unitVectors[0][2] = 0.0f;
         positions[0][0] = unitVectors[0][0] * radiusScale;
         positions[0][1] = unitVectors[0][1] * radiusScale;
@@ -217,37 +217,37 @@ void effReleaseOptionalResource(EffResourceWork *effect) {
     }
 }
 
-void effSetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
+void dds3NeedleModelSetPosition(EffResourceWork *effect, s32 index, f32 *vec) {
     f32 *dst = (f32 *)(index * sizeof(EffResourceEntry) + (s32)effect->entries);
     dst[0] = vec[0];
     dst[1] = vec[1];
     dst[2] = vec[2];
 }
 
-void effGetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
+void dds3NeedleModelGetPosition(EffResourceWork *effect, s32 index, f32 *vec) {
     f32 *src = (f32 *)(index * sizeof(EffResourceEntry) + (s32)effect->entries);
     vec[0] = src[0];
     vec[1] = src[1];
     vec[2] = src[2];
 }
 
-void effSetResourceEntryValue(EffResourceWork *effect, s32 index, u32 color) {
+void dds3NeedleModelSetColor(EffResourceWork *effect, s32 index, u32 color) {
     effect->entries[index].color = color;
 }
 
 /* vu0 routine: copy a 0x40-byte matrix from src to dst through vf28-vf31 */
-void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src) {
+void dds3NeedleModelSetMatrix(Matrix4 *dst, const Matrix4 *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(dst);
 }
 
 /* Create the shared billboard set with its default colour and scale. */
-EffBillboardSetWork *effCreateBillboardResourceWork(EffBillboardSetParams *params) {
+EffBillboardSetWork *effPCPSparkleSphereCreate(EffBillboardSetParams *params) {
     EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfChipAllocDirect(0x20);
 
     billboard->mode = params->mode;
     billboard->handle = effCreateBillboardSharingIndexedResource(2);
-    billSetBillboardMode(billboard->handle, 2);
+    dds3BillboardSetMode(billboard->handle, 2);
     billboard->color = 0x80808080;
     billboard->scale = 100.0f;
     return billboard;

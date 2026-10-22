@@ -27,7 +27,7 @@ typedef struct ParObj {
     u32 restartStepCount;         /* 0xA4 */
     u8 padA8[8];
     f32 matrix[16];               /* 0xB0 */
-    u32 parameterWord;           /* 0xF0: set through parSetObjectParameterWord. */
+    u32 parameterWord;           /* 0xF0: set through dds3ParticleSetRGBA. */
     BillObj *billboard;           /* 0xF4 */
     EffectBufferTail *buffer;     /* 0xF8 */
     u32 pendingRestartSteps;      /* 0xFC: count, not a pointer */

@@ -3,15 +3,15 @@
 #include "scr_string_parameter_api.h"
 
 /* The setter returns the context it set the value in (scrTraceCode.c). */
-extern ScrData *scrSetIntegerReturnValue(s32 retVal);
+extern ScrData *scrSetIntReturnValue(s32 retVal);
 
 struct EvtUnit;
 
 
 
-extern const char *fldGetTaskRecordValue(u32 key);
+extern const char *fldEveHitResName_Find(u32 key);
 
-extern void fldSelectCameraByActorName(const char *entry);
+extern void fldDoor_ExitCamera(const char *entry);
 
 extern s32 fldResolveEventSelectorTarget(s32 index);
 
@@ -19,17 +19,17 @@ extern s32 fldDispatchInteractionAction(s32 param0, s32 param1);
 
 extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
 
-extern void fldStartSelectedActorTask(void);
+extern void fldInfToWAP(void);
 
 extern s32 fldGetSelectedActorMotionId(void);
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 
-extern void fldStopCurrentBgm(void);
+extern void fldPauseBgm(void);
 
-extern void fldReleaseCurrentBgm(void);
+extern void fldBgmFadeOut(void);
 
-extern void fldPlayCurrentBgmSound(void);
+extern void fldBgmStop(void);
 
 extern void fldPlayFieldSeVolumePan(s32 soundId);
 
@@ -47,67 +47,67 @@ extern s32 fldFindEffectByName(char *str);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
-extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
+extern struct EvtUnit *evtGetUnitHandle(s32 param);
 
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 scrReadIntParameter(s32);
+extern s32 scrGetIntPara(s32);
 
 extern s32 D_0032E48C[];
 
 
-extern u8 fldIsSceneStateEight(void);
+extern u8 fldDoor_ChkWarp(void);
 
 extern s32 fldCurrentBgmId[];
 
-s32 fldCmdQuerySceneValue(void) {
-    scrSetIntegerReturnValue(fldQuerySelectedActorMotionState(scrReadIntParameter(0)));
+s32 fldCommand_FLD_WARP_GET_DOOR(void) {
+    scrSetIntReturnValue(fldQuerySelectedActorMotionState(scrGetIntPara(0)));
     return 1;
 }
 
-extern s32 fldFindTaskRecordId(u32 task);
+extern s32 fldEveHitResID_Find(u32 task);
 extern void fldApplyActorEntryTrigger(s32 checkTaskRecord);
 
-u32 fldCmdUpdateTaskRecordScene(void) {
+u32 fldCommand_FLD_WARP_RUN_START(void) {
     s32 scene;
-    if (fldIsSceneStateEight()) {
+    if (fldDoor_ChkWarp()) {
         scene = 0;
     } else {
-        scene = fldFindTaskRecordId((u32)scrGetCurrentContext()->task);
+        scene = fldEveHitResID_Find((u32)scrGetScriptHandle()->task);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
 }
 
-s32 fldCmdDispatchInteractionAction(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+s32 fldCommand_FLD_INF_NEXT(void) {
+    s32 param0 = scrGetIntPara(0);
+    s32 param1 = scrGetIntPara(1);
 
-    scrSetIntegerReturnValue(fldDispatchInteractionAction(param0, param1));
+    scrSetIntReturnValue(fldDispatchInteractionAction(param0, param1));
     return 1;
 }
 
-s32 fldCmdGetActorSlotAttribute(void) {
-    s32 actorId = scrReadIntParameter(0);
-    s32 attribute = scrReadIntParameter(1);
+s32 fldCommand_FLD_INF_GET(void) {
+    s32 actorId = scrGetIntPara(0);
+    s32 attribute = scrGetIntPara(1);
 
-    scrSetIntegerReturnValue(fldGetActorSlotAttribute(actorId, attribute));
+    scrSetIntReturnValue(fldGetActorSlotAttribute(actorId, attribute));
     return 1;
 }
 
-s32 fldCmdGetResolvedEventSelectorTarget(void) {
-    return (s32)scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
+s32 fldCommand_FLD_INF_GETPANEL(void) {
+    return (s32)scrSetIntReturnValue(fldResolveEventSelectorTarget(1));
 }
 
-s32 fldCmdStartSelectedActorTask(void) {
-    fldStartSelectedActorTask();
+s32 fldCommand_FLD_INF_GOWAP(void) {
+    fldInfToWAP();
     return 1;
 }
 
 extern void fldStartSceneBgm(void);
 
 s32 fldCmdStartSceneBgm(void) {
-    fldCurrentBgmId[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrGetIntPara(0);
     fldStartSceneBgm();
     return 1;
 }
@@ -115,54 +115,54 @@ s32 fldCmdStartSceneBgm(void) {
 extern void fldStartSceneBgmAlternate(void);
 
 s32 fldCmdStartSceneBgmAlternate(void) {
-    fldCurrentBgmId[0] = scrReadIntParameter(0);
+    fldCurrentBgmId[0] = scrGetIntPara(0);
     fldStartSceneBgmAlternate();
     return 1;
 }
 
 s32 fldCmdStopCurrentBgm(void) {
-    fldStopCurrentBgm();
+    fldPauseBgm();
     return 1;
 }
 
 s32 fldCmdPlayCurrentBgmSound(void) {
-    fldPlayCurrentBgmSound();
+    fldBgmStop();
     return 1;
 }
 
 s32 fldCmdReleaseCurrentBgm(void) {
-    fldReleaseCurrentBgm();
+    fldBgmFadeOut();
     return 1;
 }
 
 s32 fldCommandPlaySeVolumePan(void) {
-    fldPlayFieldSeVolumePan(scrReadIntParameter(0));
+    fldPlayFieldSeVolumePan(scrGetIntPara(0));
     return 1;
 }
 
 s32 fldCommandPlaySe(void) {
-    fldPlayFieldSe(scrReadIntParameter(0));
+    fldPlayFieldSe(scrGetIntPara(0));
     return 1;
 }
 
 /* Unlike the other field commands, this reports the archive poll result. */
 u8 fldCommandLoadArchive(void) {
-    return fldPollArchiveLoad(scrReadIntParameter(0)) != 0;
+    return fldPollArchiveLoad(scrGetIntPara(0)) != 0;
 }
 
 /* Script command: set volume and pan for a grouped sequence ID. */
-s32 fldCmdSetArchiveSoundVolumePan(void) {
-    s32 sequenceGroup = scrReadIntParameter(0);
-    s32 sequenceIndex = scrReadIntParameter(1);
+s32 fldCommand_FLD_MSE_PLAY2(void) {
+    s32 sequenceGroup = scrGetIntPara(0);
+    s32 sequenceIndex = scrGetIntPara(1);
 
     fldSetArchiveSoundVolumePan(sequenceGroup, sequenceIndex);
     return 1;
 }
 
 /* Script command: pass the same grouped sequence ID to the other sound path. */
-s32 fldCmdPlayArchiveSound(void) {
-    s32 sequenceGroup = scrReadIntParameter(0);
-    s32 sequenceIndex = scrReadIntParameter(1);
+s32 fldCommand_FLD_MSE_STOP2(void) {
+    s32 sequenceGroup = scrGetIntPara(0);
+    s32 sequenceIndex = scrGetIntPara(1);
 
     fldPlayArchiveSound(sequenceGroup, sequenceIndex);
     return 1;
@@ -170,46 +170,46 @@ s32 fldCmdPlayArchiveSound(void) {
 
 /* Script command: start a field title using its field ID and display argument. */
 s32 fldCommandStartTitle(void) {
-    s32 fieldId = scrReadIntParameter(0);
-    s32 titleArg = scrReadIntParameter(1);
+    s32 fieldId = scrGetIntPara(0);
+    s32 titleArg = scrGetIntPara(1);
 
     fldStartTitle(fieldId, titleArg, 0x3c);
     return 1;
 }
 
-s32 fldCmdSetDefaultEncounterId(void) {
+s32 fldCommand_FLD_SET_ENCOUNT(void) {
     s32 value;
 
-    value = scrReadIntParameter(0);
+    value = scrGetIntPara(0);
     D_0032E48C[0] = value;
     return 1;
 }
 
 /* Look up the command's task record before applying its associated entry. */
-s32 fldCmdApplyTaskRecordEntry(void) {
-    ScrData *command = scrGetCurrentContext();
-    const char *record = fldGetTaskRecordValue((u32)command->task);
+s32 fldCommand_FLD_EXIT_CAMERA(void) {
+    ScrData *command = scrGetScriptHandle();
+    const char *record = fldEveHitResName_Find((u32)command->task);
 
     if (record != NULL) {
-        fldSelectCameraByActorName(record);
+        fldDoor_ExitCamera(record);
     }
     return 1;
 }
 
-s32 fldScriptReturnSelectedActorMotionId(void) {
-    scrSetIntegerReturnValue(fldGetSelectedActorMotionId());
+s32 fldCommand_FLD_WARP_GET_WARPEFF(void) {
+    scrSetIntReturnValue(fldGetSelectedActorMotionId());
     return 1;
 }
 
 s32 fldCmdInitializeHuntSparkUnit(void) {
-    fldInitializeHuntSparkUnit(evtGetWorldUnitNestedValue(scrReadIntParameter(0)));
+    fldInitializeHuntSparkUnit(evtGetUnitHandle(scrGetIntPara(0)));
     return 1;
 }
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
 s32 fldCommandFindEffectByName(void) {
-    char *effectName = scrReadStringParameter(0);
+    char *effectName = scrGetStrPara(0);
 
-    scrSetIntegerReturnValue(fldFindEffectByName(effectName));
+    scrSetIntReturnValue(fldFindEffectByName(effectName));
     return 1;
 }

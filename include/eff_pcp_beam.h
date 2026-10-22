@@ -88,7 +88,7 @@ typedef struct EffPCPBeamLargeWork {
     EffPCPBeamNode *node;
 } EffPCPBeamLargeWork;
 
-void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius);
+void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius);
 
 typedef char EffPCPBeamNode_size_must_be_0xB0[
     (sizeof(EffPCPBeamNode) == 0xB0) ? 1 : -1];

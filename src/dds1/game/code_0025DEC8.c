@@ -18,7 +18,7 @@ void itfEmitSelectedGlyph(ShopScene *context, s32 unused, s32 layoutFlags,
     if (list->count != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x970, 0xb58, 1, list->cursor->camp.id, (FrFontTextBank *)D_003BAA9C,
                               layoutFlags);
-        frFontSetChildColors(glyph, color);
+        frSetFontColor(glyph, color);
         frFontDrawGlyphChain(glyph, 1, glyphAttribute);
         frDestroyFontRequestAfter(glyph);
         return;

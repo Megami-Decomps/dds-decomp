@@ -35,7 +35,7 @@ extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
 
-extern f32 fldNormalizedVectorDot(f32 *, f32 *);
+extern f32 vecDot(f32 *, f32 *);
 
 extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
@@ -45,9 +45,9 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 #include "sdf_vector_transform.h"
-extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
-extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
-extern void sdfVec3ScaleInPlace(f32 scale, f32 *vector);
+extern f32 vecNormalize(f32 *vector);
+extern void vecTranslate(f32 *, f32 *, f32 *);
+extern void vecScale(f32 scale, f32 *vector);
 
 extern u64 itfCreateTightFont3TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 itfCreateFont2TextGlyph(s32, s32, u64, u64, u64, u64);
@@ -92,7 +92,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
 
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
     SdfMemBlock *allocation = sdfMemAllocDirect(0x14);
-    TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress(allocation);
+    TaskWork *work = (TaskWork *)sdfMemGetPtr(allocation);
 
     memset(work, 0, 0x14);
     work->allocation = allocation;
@@ -264,7 +264,7 @@ SdfGrid *sdfGridCreate(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16
     u32 cellCount = width * height;
     s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
     struct SdfMemBlock *allocation = sdfMemAllocDirect(size);
-    SdfGrid *grid = (SdfGrid *)sdfMemoryGetBlockAddress(allocation);
+    SdfGrid *grid = (SdfGrid *)sdfMemGetPtr(allocation);
 
     memset(grid, 0, size);
     grid->allocation = allocation;

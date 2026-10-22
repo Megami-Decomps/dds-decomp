@@ -36,7 +36,7 @@ extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *skillPackage) {
     BrsRewardSummary *res = &skillPackage->rewards;
     s32 rowOffset = 0x80;
-    u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - skillPackage->fadeProgress);
+    u32 color = fclBlendColor(0x80808080, 0x80808000, 0x100 - skillPackage->fadeProgress);
 
     itfDrawCountText(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1] + rowOffset, 0, color, res, 0x53);
     brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3] + rowOffset, 0, color, res, 0x53);
@@ -158,7 +158,7 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
 }
 
 s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
-    if (mdlFlagTest(0x902) == 0 && unit->unitId == 4) {
+    if (evtBitCheck(0x902) == 0 && unit->unitId == 4) {
         return 1;
     }
     return 0;
@@ -403,7 +403,7 @@ counted:
             break;
         }
         {
-            s32 recipient = eligible[sdfGetRand(NULL) % eligibleCount];
+            s32 recipient = eligible[dds3GetRandA(NULL) % eligibleCount];
             gains[recipient] += overflow;
         }
     }
@@ -474,11 +474,11 @@ void brsBuildUnitProgressRow(BrsProgressRow *progressRow, DatPartyRecord *partyR
 }
 
 struct FrFontGlyph;
-extern void frFontSetGlyphChainDimensions(struct FrFontGlyph *, s32, s32);
+extern void frSetFontSize(struct FrFontGlyph *, s32, s32);
 
 void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
-    frFontSetGlyphChainDimensions((struct FrFontGlyph *)(u32)fontContext, 0xc, 0x10);
-    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)fontContext,
+    frSetFontSize((struct FrFontGlyph *)(u32)fontContext, 0xc, 0x10);
+    frSetFontSpace((struct FrFontGlyph *)(u32)fontContext,
         -4);
 }
 
@@ -486,7 +486,7 @@ void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
 /* The row renderer also passes its context word; this blend helper ignores it. */
 u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource, s32 context) {
     ptyGetCurrentProfileId(resource->unit);
-    return uiBlendColors(0x80808080, 0x80808000, blend);
+    return fclBlendColor(0x80808080, 0x80808000, blend);
 }
 
 
@@ -518,7 +518,7 @@ extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork
 extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowUnitInfo(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern s32 brsPollResultCounterCompletion(void);
-extern void sndQueueSoundId(u32 sound);
+extern void p2sdStopSe(u32 sound);
 
 void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
     KwlnTask *task;
@@ -568,7 +568,7 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
     }
     if (brsPollResultCounterCompletion() != 0 && work != NULL && work->resultPhase == 1) {
         work->resultPhase = 2;
-        sndQueueSoundId(20);
+        p2sdStopSe(20);
     }
 }
 

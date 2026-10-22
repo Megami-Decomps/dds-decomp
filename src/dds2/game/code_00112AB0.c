@@ -5,33 +5,33 @@
 #include "eff_dependency.h"
 #include "eff_event.h"
 
-extern ObjBase *dds3GetLightObjectResource(EffWorldNode *object);
+extern ObjBase *dds3LightObjectBasicGetControlWorkData(EffWorldNode *object);
 
 
 
 
 
 /* Each object kind keeps its handle in a different structure. */
-ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *worldNode) {
+ObjBase *dds3GetBaseControlWorkData(EffWorldNode *worldNode) {
     ObjBase *handle;
 
     handle = 0;
     switch ((worldNode->kindTag >> 24) - 4) {
-    case 0: handle = dds3GetCameraHandle(worldNode); break;
-    case 1: handle = dds3GetEffectObjectModelHolder(worldNode); break;
-    case 2: handle = effObjGetDataHandle(worldNode); break;
-    case 3: handle = effObjGetObjectHandle(worldNode); break;
-    case 4: handle = dds3GetResourceOwnerHandle(worldNode); break;
-    case 5: handle = dds3GetLightObjectResource(worldNode); break;
+    case 0: handle = dds3GetCameraObjectBaseControlWorkData(worldNode); break;
+    case 1: handle = dds3UnitObjectBasicGetControlWorkData(worldNode); break;
+    case 2: handle = dds3MatterObjectBasicGetControlWorkData(worldNode); break;
+    case 3: handle = dds3EffectObjectBasicGetControlWorkData(worldNode); break;
+    case 4: handle = dds3EventObjectBasicGetControlWorkData(worldNode); break;
+    case 5: handle = dds3LightObjectBasicGetControlWorkData(worldNode); break;
     }
     return handle;
 }
 
 
-void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value) {
+void dds3ObjectBaseSetControlBasicSvs(EffWorldNode *object, u32 value) {
     ObjBase *base;
 
-    base = dds3GetObjectOwnedHandle(object);
+    base = dds3GetBaseControlWorkData(object);
     base->unk44 = value;
 }
 
@@ -41,7 +41,7 @@ s32 dds3CreateCameraData(EffWorldNode *object) {
     CameraData *inner;
     ObjBase *objectBase;
 
-    effObjInnerCreate(object);
+    dds3InitPoseSet(object);
     inner = sdfChipAllocDirect(0x90);
     object->data = inner;
     objectBase = dds3CreateSlotResourceState(object);

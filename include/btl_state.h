@@ -506,7 +506,7 @@ typedef struct BtlState {
     struct SdfMemBlock *fieldF2ResourceId; /* 0x2BC */
     struct SdfMemBlock *fieldTBResourceId; /* 0x2C0 */
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
-    s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
+    s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetUserData */
     s32 boundTask; /* 0x2CC */
     struct KwlnTask *sceneObject; /* 0x2D0: command-panel task created at 001CAB60. */
     struct KwlnTask *spriteObject; /* 0x2D4: scene sprite task; destroyed with its hierarchy. */

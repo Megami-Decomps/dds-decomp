@@ -25,37 +25,37 @@
 
 
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(VuWork *work);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(VuWork *work);
 
-/* Split ring addressing at position 128; retain the native 96-byte stride. */ void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition);
+/* Split ring addressing at position 128; retain the native 96-byte stride. */ void corePktSetupPointBuff(VuWork *work, s32 ringPosition);
 
-/* Select textured or colored emission; preserve the native no-argument calls. */ void sdfVuEmitSelectedNodePacket(VuWork *work);
+/* Select textured or colored emission; preserve the native no-argument calls. */ void corePktEmitBase(VuWork *work);
 
 /* Emit selected geometry, then apply flag callbacks; the first may change flags. */
-void sdfVuApplySelectedWorkFlags(VuWork *work) {
+void corePktEmitAllPasses(VuWork *work) {
     u32 selectedFlags;
 
-    sdfVuEmitSelectedNodePacket(work);
+    corePktEmitBase(work);
     selectedFlags = work->selectedFlags;
     if ((selectedFlags & 0x1000) != 0) {
-        sdfVuUpdateSelectedNodeGeometry(work);
+        corePktEmitMultiTexPass(work);
         selectedFlags = work->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {
-        sdfVuNodeVertexLighting((u32)work);
+        corePktEmitRefMapPass((u32)work);
         return;
     }
 }
 
-extern void sdfVuBuildVisibleTriangleList(VuWork *work);
+extern void corePktBuildFaceList(VuWork *work);
 
-extern void func_002DF710(VuWork *work);
+extern void corePktBuildBackFaceList(VuWork *work);
 
-extern void sdfVuLightNegatedNormals(u32 base, s32 count);
+extern void corePktRelightBackFaces(u32 base, s32 count);
 
 /* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
-void sdfVuBeginPacketFromWork(VuWork *work) {
-    u32 packetStart = sdfGetPacketCursor();
+void corePktOpenAndEmit(VuWork *work) {
+    u32 packetStart = sdfGrOpenPacketBuff();
     u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
     u32 ringAddress = ((alignedStart + 0x40) & SDF_DMA_ADDRESS_MASK) | 0x30000000;
     work->packetStart = packetStart;
@@ -67,23 +67,23 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
-        sdfVuBuildVisibleTriangleList(work);
-        sdfVuApplySelectedWorkFlags(work);
-        sdfVuConfigureWorkRingDma(work, work->param1);
+        corePktBuildFaceList(work);
+        corePktEmitAllPasses(work);
+        corePktSetupPointBuff(work, work->param1);
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
-        sdfVuLightNegatedNormals(work->dmaBase, work->param1);
-        func_002DF710(work);
-        sdfVuApplySelectedWorkFlags(work);
+        corePktRelightBackFaces(work->dmaBase, work->param1);
+        corePktBuildBackFaceList(work);
+        corePktEmitAllPasses(work);
     } else {
-        sdfVuBuildVisibleTriangleList(work);
-        sdfVuApplySelectedWorkFlags(work);
+        corePktBuildFaceList(work);
+        corePktEmitAllPasses(work);
     }
 }
 
 /* Pad and finalize the packet; inactive or empty work returns NULL. */
-u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
+u64 *corePktClosePacket(VuWork *work) {
     u32 cursor;
     u32 start;
     s32 quadwords;
@@ -98,7 +98,7 @@ u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
     cursor = (u32)work->cursor;
     start = (u32)work->ringStart;
     if (cursor == start) {
-        sdfSetPacketCursorAligned(work->packetStart);
+        sdfGrClosePacketBuff(work->packetStart);
         return NULL;
     }
 
@@ -113,7 +113,7 @@ u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
         cursor += 0x10;
     }
 
-    sdfSetPacketCursorAligned(cursor & 0x0FFFFFFF);
+    sdfGrClosePacketBuff(cursor & 0x0FFFFFFF);
     header = (u64 *)work->header;
     descriptor = 0x20000000 | (quadwords & 0xFFFF);
     gifTag = 0x1100000000000000ULL;

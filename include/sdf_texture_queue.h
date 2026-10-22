@@ -33,6 +33,6 @@ typedef char SdfTextureQueue_layout[
      (u32)&((SdfTextureQueue *)0)->packetTail == 0x10) ? 1 : -1];
 
 /* packetAddress is the EE DMA address; packetTail points to its terminal tag. */
-void sdfTexEnqueuePacketWithSemaphore(SdfDmaAddress packetAddress, SdfTextureDmaTail *packetTail);
+void sdfImageSetChainTag(SdfDmaAddress packetAddress, SdfTextureDmaTail *packetTail);
 
 #endif /* SDF_TEXTURE_QUEUE_H */

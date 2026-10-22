@@ -29,7 +29,7 @@
 extern void mnuDestroyEffectResources(MenuEffectResources *resources);
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
 extern void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, s32 texture);
-extern void sndStopReducedBgm(void);
+extern void p2sdBgmVolUp(void);
 
 extern u32 mnuMovieShutdownCounter;
 
@@ -57,7 +57,7 @@ extern s32 mnuDrawCampFieldSkillPage(KwlnTask *task);
 
 extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
 
-extern s32 dds3AdminReadPreviousSignedSample(void);
+extern s32 dds3AdminiGetPrevSequence(void);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 
@@ -73,14 +73,14 @@ extern void mnuBuildCampTitleEffectResourceList(u8 *);
 
 extern void mnuResetGradientFadeColor(u8 *, s32);
 
-extern void sndStartReducedBgm(void);
+extern void p2sdBgmVolDown(void);
 
 
 
 extern void scrClearPackedScriptFlags(DatPartyRecord *);
 extern void mnuClearEntryBlocked(s32);
 
-extern void mdlFlagClear(s32);
+extern void evtBitOff(s32);
 
 extern void scrClearProfileFlagsTable(void);
 
@@ -130,7 +130,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         datGameState->inventory.counts[i] = 0;
         mnuClearEntryBlocked(i);
     }
-    mdlFlagClear(0x901);
+    evtBitOff(0x901);
     scrClearProfileFlagsTable();
     mnuRebuildMantraCategoryAvailability();
     scrResetAndSetPairedGlobalFlags();
@@ -643,7 +643,7 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
             const s32 *flagCursor = flagIds;
             do {
                 s32 flag = *flagCursor;
-                if (flag == 0 || mdlFlagTest(flag) != 0) {
+                if (flag == 0 || evtBitCheck(flag) != 0) {
                     visibleCount++;
                 }
                 index++;
@@ -694,7 +694,7 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
             if (flagIds != NULL) {
                 s32 flag = *(const s32 *)(entryOffset + (u32)flagIds);
                 if (flag != 0) {
-                    if (mdlFlagTest(flag) != 0) {
+                    if (evtBitCheck(flag) != 0) {
                         node = mnuAppendWindowListNode(window, *entryCursor);
                     }
                 } else {
@@ -829,7 +829,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     /* Keep the zero case first to preserve the matched branch layout. */
-    if (dds3AdminReadPreviousSignedSample() == 0) {
+    if (dds3AdminiGetPrevSequence() == 0) {
         ((MenuStaffContext *)menuBytes)->menuResource =
             mnuAllocateValueRecord(0);
     } else {
@@ -839,14 +839,14 @@ u8 *mnuCreateStaffMenuWork(void) {
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);
     mnuEnableCampBadgeFade(effectBytes);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)(s32)mnuCampMessagePack);
+    fclInitMessage((struct ItfMesSub *)(s32)mnuCampMessagePack);
     movLoadTitleEffects(menuBytes);
     mnuBuildCampTitleEffectResourceList(menuBytes);
     mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);
     mnuBuildListSlotTableA((ListSlotWork *)menuBytes);
     mnuBuildListSlotTableB((ListSlotWork *)menuBytes);
     mnuBuildSkillSlotTable((ListSlotWork *)menuBytes);
-    sndStartReducedBgm();
+    p2sdBgmVolDown();
     return menuBytes;
 }
 
@@ -861,14 +861,14 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
     mnuDestroyScrollPanel(((MenuStaffContext *)menuBytes)->scrollPanel);
     mnuShutdownContext((MenuPageWindow *)(menuBytes + 0x284));
-    dspCloseChannel();
+    fclDestroyMessage();
     mnuDestroyEffectResources(menuBytes + 0x11c);
     mnuReleaseTitleEffectResourceGroups((MenuStaffContext *)menuBytes);
     movReleaseTitleEffects(menuBytes);
     effDestroyEffectList(((MenuStaffContext *)menuBytes)->menuResource);
     sdfMemFreeDirect(((MenuStaffContext *)menuBytes)->allocation);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
-    sndStopReducedBgm();
+    p2sdBgmVolUp();
 }
 
 s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
@@ -882,7 +882,7 @@ s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
 
 extern s32 evtStageTestAdvanceResourceWork(void);
 
-extern s32 fileConsumeConfigTaskReady(void);
+extern s32 checkConfigState(void);
 
 extern void mnuDestroyCampTasks(void);
 
@@ -898,10 +898,10 @@ s32 mnuStaffCampCancelCheck(KwlnTask *task) {
         return 0;
     }
     result = 0;
-    if (evtGetMessageWindowControlState() == 0) {
+    if (fclChkMessage() == 0) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
             if (evtStageTestAdvanceResourceWork() != 1) {
-                if (fileConsumeConfigTaskReady() == 0) {
+                if (checkConfigState() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);
                     return -1;
@@ -929,7 +929,7 @@ void mnuCreateCampTasks(void) {
     dds3StartProcess(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, (u32)menu);
     dds3LinkProcess(drawTask, dds3StartProcess("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
     dds3LinkProcess(drawTask, dds3StartProcess("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
-    kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
+    dds3FadeIn(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
 }
 
@@ -960,7 +960,7 @@ s32 mnuAcknowledgeCampState(void) {
 u8 mnuIsFadeIdle(void) {
     s32 fadeActive;
 
-    fadeActive = kwlnFadeIsActive();
+    fadeActive = dds3FadeCheck();
     return fadeActive == 0;
 }
 
@@ -973,14 +973,14 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
     s32 magnitude;
     MenuStaffContext *visual = (MenuStaffContext *)work;
 
-    if (mdlFlagTest(0x290) == 0) {
+    if (evtBitCheck(0x290) == 0) {
         return;
     }
     effDrawTextureSlotWithBlendedCornerColors((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawResource, 0x3F, layer);
     sprintf(buffer, D_00437B80, datGameState->header.currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = itfCreateTightFont3TextGlyph((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
-                           uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
+                           fclBlendColor(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
     frFontDrawGlyphChain((FrFontGlyph *)object, 1, layer);
     frDestroyFontRequestAfter((FrFontGlyph *)object);
     offset = visual->titleSlide;
@@ -1095,11 +1095,11 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
     }
     if (textTable != 0) {
         if (conditionTable != 0 && ((s32 *)conditionTable)[labelIndex] != 0) {
-            if (mdlFlagTest(((s32 *)conditionTable)[labelIndex]) != 0) labelIndex += labelOffset;
+            if (evtBitCheck(((s32 *)conditionTable)[labelIndex]) != 0) labelIndex += labelOffset;
         }
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
-        frFontSetChildColors(glyph, 0xA09DC35A);
+        frSetFontColor(glyph, 0xA09DC35A);
         frFontDrawGlyphChain(glyph, 1, layer);
         frDestroyFontRequestAfter(glyph);
     }

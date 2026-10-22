@@ -9,13 +9,13 @@
 
 struct SdfMemBlock;
 
-extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
+extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
 
 extern void fldReleaseFieldResources(void);
 
 /* Release field resources before clearing the scene object's state word.
  * The scene resource handle/address are released separately. */
-void dds3ClearSceneObjectState(EffWorldNode *worldNode) {
+void dds3SceneBasicFreeScene(EffWorldNode *worldNode) {
     EvtWorldTable *worldData;
 
     worldData = (EvtWorldTable *)worldNode->data;
@@ -35,9 +35,9 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
         return 0;
     }
     if (worldData->sceneResourceHandle != 0) {
-        evtReleaseSceneResource(worldNode);
+        dds3SceneBasicReleaseScriptFile(worldNode);
     }
-    resourceHandle = sdfReadNamedResource(resourceName, &resolvedAddress, 0);
+    resourceHandle = sdfDevLoadFileEx(resourceName, &resolvedAddress, 0);
     resourceAddress = (void *)resolvedAddress;
     if (resourceAddress == NULL) {
         return 0;
@@ -51,7 +51,7 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
  * attachment, 0 otherwise. NULL preserves the current resource. A non-NULL
  * handle releases the old resource first, so failure does not restore it;
  * a NULL resolved address fails attachment without undoing the retain. */
-s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
+s32 dds3SceneBasicLoadScriptFile_FromMem(EffWorldNode *worldNode, void *resourceHandle) {
     s32 notAttachedStatus = 0;
     u32 resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
@@ -60,7 +60,7 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
         return notAttachedStatus;
     }
     if (worldData->sceneResourceHandle != 0) {
-        evtReleaseSceneResource(worldNode);
+        dds3SceneBasicReleaseScriptFile(worldNode);
     }
     resourceAddress = sdfMemLock((struct SdfMemBlock *)resourceHandle);
     if (resourceAddress != 0) {
@@ -73,7 +73,7 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
 
 /* Release a stored allocation handle when present, then always clear both
  * handle and resolved address. Safe for an already-cleared resource state. */
-void evtReleaseSceneResource(EffWorldNode *worldNode) {
+void dds3SceneBasicReleaseScriptFile(EffWorldNode *worldNode) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (worldData->sceneResourceHandle != 0) {
@@ -95,20 +95,20 @@ s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
     if (taskName == NULL) {
         return 0;
     }
-    scriptIndex = bfFindScriptIndexByName(sceneScript, taskName);
+    scriptIndex = scrSearchProcedureName(sceneScript, taskName);
     if (scriptIndex < 0) {
         return 0;
     }
     if (dds3SearchProcessName(taskName) != NULL) {
         return 0;
     }
-    return scrCreateTaskForProcessId(0x3EA, (s32)sceneScript, scriptIndex);
+    return scrStartScript2(0x3EA, (s32)sceneScript, scriptIndex);
 }
 
 /* Destroy the task selected by taskName; NULL or an absent task is a no-op.
  * unusedContext is not read. The nested early return retains the matched
  * jal/epilogue rather than turning the destruction into a sibling call. */
-void evtDestroyNamedTask(void *unusedContext, const char *taskName) {
+void dds3SceneBasicEndScript(void *unusedContext, const char *taskName) {
     KwlnTask *task;
 
     if (taskName != NULL) {

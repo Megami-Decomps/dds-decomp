@@ -374,7 +374,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     work->savedSelection = object->list->cursor->index;
     mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 5, 0);
     evtStageTestInit(0);
-    kwlnFadeOutStart(0, 0, 0, 0);
+    dds3FadeIn(0, 0, 0, 0);
     evtPrintDeveloperConsoleMessage(D_00426360);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
@@ -412,7 +412,7 @@ void mnuReleaseMantraMenuDrawResources(MnuStatusResource *object) {
 void mnuCleanupMantraVisualsAndResetTitleStream(MnuStatusResource *object) {
     mnuStoreMantraPanelFlagsToScript(object);
     mnuReleaseMiddleMantraSpriteSlots();
-    kwlnFadeOutStart(0, 0, 0, 0);
+    dds3FadeIn(0, 0, 0, 0);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
 }
@@ -434,7 +434,7 @@ s32 mtrChkMantraCompleteMaster(DatPartyRecord *unit) {
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
 
     evtPrintDeveloperConsoleMessage("mtrChkMantraCompleteMaster!!\n");
-    if (mdlFlagTest(flagIds[flagIndices[unit->unitId]]) != 0) {
+    if (evtBitCheck(flagIds[flagIndices[unit->unitId]]) != 0) {
         return 0;
     }
     evtPrintDeveloperConsoleMessage("Bit Check None ....\n");
@@ -448,7 +448,7 @@ s32 mtrChkMantraCompleteMaster(DatPartyRecord *unit) {
 s32 mnuSetSelectedMantraOptionFlag(DatPartyRecord *party) {
     u16 flagIds[6] = {0x9a0, 0x9a1, 0x9a2, 0x9a3, 0x9a4, 0x9a5};
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
-    mdlFlagSet(flagIds[flagIndices[party->unitId]]);
+    evtBitOn(flagIds[flagIndices[party->unitId]]);
     return 1;
 }
 
@@ -607,10 +607,10 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *resource) {
         result = 6;
     }
     switch (sound) {
-    case 1: sndSetSequenceVolumePan(2, 0x7F, 0x3F); break;
-    case 2: sndSetSequenceVolumePan(8, 0x7F, 0x3F); break;
-    case 3: sndSetSequenceVolumePan(0xA, 0x7F, 0x3F); break;
-    case 4: sndSetSequenceVolumePan(4, 0x7F, 0x3F); break;
+    case 1: p2sdPlaySE(2, 0x7F, 0x3F); break;
+    case 2: p2sdPlaySE(8, 0x7F, 0x3F); break;
+    case 3: p2sdPlaySE(0xA, 0x7F, 0x3F); break;
+    case 4: p2sdPlaySE(4, 0x7F, 0x3F); break;
     }
     return result;
 }
@@ -717,11 +717,11 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         if (index != -1) {
             party = mnuGetNodeValueByIndex(object, index);
             mnuSetSelectedMantraOptionFlag(party);
-            dspCloseChannel();
-            evtCreateMessageWindowIfMissing(object->messageDefinition);
+            fclDestroyMessage();
+            fclInitMessage(object->messageDefinition);
             evtCopyEntryStringToActiveWindow(0, datUnitNames[party->unitId].encodedText);
             evtCopyEntryStringToActiveWindow(1, datUnitNames[party->unitId + 16].encodedText);
-            dspStartEntry(3);
+            fclStartMessage(3);
             mnuSelectMantraUnitByIndex(object, (s8)index);
             work->sourceNextState = 3;
             work->sourceWaitFrames = 10;
@@ -735,7 +735,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         }
         break;
     case 3:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             work->sourceNextState = 1;
             work->drawBits.sourceKind = 18;
             work->sourceWaitFrames = 30;
@@ -804,8 +804,8 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             evtPrintDeveloperConsoleMessage(D_00426DD0);
             mnuRefreshMantraSelectionResources(object);
             if (mnuGetActiveMantraModelFlagState() >= 2 ||
-                mdlFlagTest(0x977) || mdlFlagTest(0x978) ||
-                mdlFlagTest(0x979) || mdlFlagTest(0x97A)) {
+                evtBitCheck(0x977) || evtBitCheck(0x978) ||
+                evtBitCheck(0x979) || evtBitCheck(0x97A)) {
                 mnuShowMantraScrollCursor(object->menu.selectionController);
             }
             if ((u16)(work->sourceMode - 3) >= 2 && work->sourceFlag != 0) {
@@ -833,7 +833,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
             mnuSpawnMantraSpecialNodeIcon(object->menu.selectionController);
             mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
-            mdlFlagSet(work->src->completionFlagId);
+            evtBitOn(work->src->completionFlagId);
             work->alternateSelector = work->defaultSelector;
             work->defaultSelector = position;
         } else if ((work->src->bits & 0xF00) == 0x200) {
@@ -915,7 +915,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     case 11:
         work->frame++;
         if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
-            mdlFlagSet(work->src->completionFlagId);
+            evtBitOn(work->src->completionFlagId);
             work->frame = 0;
             work->drawBits.hasSource = 0;
             work->src = NULL;
@@ -962,12 +962,12 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         work->drawBits.sourceKind = 15;
         break;
     case 15:
-        dspCloseChannel();
-        evtCreateMessageWindowIfMissing(object->messageDefinition);
+        fclDestroyMessage();
+        fclInitMessage(object->messageDefinition);
         evtPrintDeveloperConsoleMessage(D_00426FB0, work->drawBits.sourceDialogVariant);
         dialogResult = mnuHandleMantraSourceDialogResult(work->src, object);
         if (dialogResult == 0) {
-            dspCloseChannel();
+            fclDestroyMessage();
             work->drawBits.sourceKind = 17;
         } else {
             if (dialogResult > 0) {
@@ -978,7 +978,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         }
         break;
     case 16:
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             work->drawBits.sourceKind = 17;
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage(D_00426FF8);
@@ -1083,13 +1083,13 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
     }
     switch (sound) {
     case 1:
-        sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        p2sdPlaySE(0, 0x7F, 0x3F);
         break;
     case 3:
-        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        p2sdPlaySE(10, 0x7F, 0x3F);
         break;
     case 4:
-        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        p2sdPlaySE(4, 0x7F, 0x3F);
         break;
     }
     return result;

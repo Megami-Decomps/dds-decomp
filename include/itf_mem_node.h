@@ -23,9 +23,9 @@ typedef char MemRingHeaderSizeCheck[(sizeof(MemRingHeader) == 0x0C) ? 1 : -1];
 typedef char MemRingHeaderFirstOffsetCheck[
     ((u32)&((MemRingHeader *)0)->first == 0x04) ? 1 : -1];
 
-MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count);
-void *itfDequeueMemNode(MemNode *pool);
-s32 itfEnqueueMemNode(void *payload, MemNode *pool);
-u32 itfReleaseMemNodeBuffer(MemNode *pool);
+MemNode *frAllocFontTable(s32 payloadBytes, s32 count);
+void *frAllocFontNode(MemNode *pool);
+s32 frFreeFontNode(void *payload, MemNode *pool);
+u32 frFreeFontTable(MemNode *pool);
 
 #endif

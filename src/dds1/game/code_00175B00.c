@@ -19,35 +19,35 @@
 
 /* The four setter callbacks belong to the flat-ring effect's 0x13C-byte
  * instance, not to the drawable used by the resource helpers below. */
-extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *);
+extern PcpScatterRes *dds3ScatterPolyListTexResourceCopy(PcpScatterRes *);
 
-extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
-extern void effPcpScatterResRelease(PcpScatterRes *);
+extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(u32 resId);
+extern void dds3ScatterPolyListTexResourceDelete(PcpScatterRes *);
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
-void effScatterCopyFlatParameterVector(PcpScatterPlainInstance *work, void *src) {
+void effPCPWwSpherePolySetPosition(PcpScatterPlainInstance *work, void *src) {
     PCP_COPY_VECTOR(work->params.origin, src);
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
-void effScatterSetFlatInstanceScale(PcpScatterPlainInstance *work, f32 scale) {
+void effPCPWwSpherePolySetScale(PcpScatterPlainInstance *work, f32 scale) {
     work->scale = scale;
 }
 
 /* Set the instance color used by the particle fade pass. */
-void effScatterSetFlatInstanceColor(PcpScatterPlainInstance *work, u32 color) {
+void effPCPWwSpherePolySetColor(PcpScatterPlainInstance *work, u32 color) {
     work->color = color;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) {
+void effPCPWwSpherePolySetRotateMatrix(PcpScatterPlainInstance *work, void *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
 extern EffPacketParams effScatterDrawParams;
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
-PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
+PcpScatterDraw *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
     s32 vectors = pairs * 2 + 2;
     s32 totalVectors = vectors * count;
     s32 bytes = (totalVectors * 6 + vectors + count) * 4;
@@ -80,8 +80,8 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
     object->allocation = allocation;
     object->scale = 1.0f;
     object->sharedResource = NULL;
-    object->asset = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(object->asset, 1.0f);
+    object->asset = sdfMatNew();
+    sdfMatSetConstant(object->asset, 1.0f);
     memset(object->vertexColors, 0x80, vectors * 4);
     quarter = vectors >> 2;
     if (quarter >= 2) {
@@ -106,14 +106,14 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
 }
 
 /* Release the shared scatter resource before the object's private assets. */
-void effReleaseScatterObject(PcpScatterDraw *object) {
+void dds3WhirlwindPolyListDelete(PcpScatterDraw *object) {
     PcpScatterDraw *current;
 
     current = object;
     if (current->sharedResource != 0) {
-        effPcpScatterResRelease(current->sharedResource);
+        dds3ScatterPolyListTexResourceDelete(current->sharedResource);
     }
-    sdfQueueAssetRelease(current->asset);
+    sdfMatFreeDelayed(current->asset);
     sdfMemFreeDirect(current->allocation);
     sdfChipFreeDirect(object);
 }
@@ -121,15 +121,15 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
 extern u8 effScatterTriangleIndices[];
 extern SdfPoolNode *effScatterDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
-extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 particleIndex);
-extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 particleIndex);
+extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern f32 *dds3WhirlwindPolyListGetVertex(PcpScatterDraw *object, s32 particleIndex);
+extern f32 *dds3WhirlwindPolyListGetUV(PcpScatterDraw *object, s32 particleIndex);
 struct SdfAsset;
 
-extern u32 effGetScatterEntry(PcpScatterDraw *object, s32 particleIndex);
+extern u32 dds3WhirlwindPolyListGetABGR(PcpScatterDraw *object, s32 particleIndex);
 
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
-void effScatterDrawObject(PcpScatterDraw *object) {
+void dds3WhirlwindPolyListDraw(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
     EffPacketParams *draw;
@@ -138,8 +138,8 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     s32 particleIndex;
     SdfPoolNode *surface;
 
-    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
+    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[10] = matrix[5] = matrix[0] = object->scale;
     object->matrix[12] = object->origin[0];
@@ -148,27 +148,27 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     VU0_LOAD_MATRIX(object->matrix);
     VU0_LOAD_MATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
-    sdfConsAppendVuPacket(packet, 0);
+    sdf3DPrimLinkTm(packet, 0);
     if (object->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset,
                       object->sharedResource->textureHandle);
     }
-    sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
+    sdf3DPrimLinkMat(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;
     effScatterDrawParams.parameters = (const u32 *)effScatterTriangleIndices;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
         draw = &effScatterDrawParams;
         remaining = object->vectorsPerParticle;
-        draw->positions = (u128 *)effGetScatterWideBlock(object, particleIndex);
-        draw->texcoords = effGetScatterNarrowBlock(object, particleIndex);
+        draw->positions = (u128 *)dds3WhirlwindPolyListGetVertex(object, particleIndex);
+        draw->texcoords = dds3WhirlwindPolyListGetUV(object, particleIndex);
         draw->colors = object->vertexColors;
-        draw->color = effGetScatterEntry(object, particleIndex);
+        draw->color = dds3WhirlwindPolyListGetABGR(object, particleIndex);
         draw->parameterCount = 16;
         draw->vertexCount = 18;
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
-                sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effScatterDrawParams));
+                sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&effScatterDrawParams));
                 effScatterDrawParams.positions += 16;
                 effScatterDrawParams.colors += 16;
                 effScatterDrawParams.texcoords += 32;
@@ -176,7 +176,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
             if (remaining >= 4) {
                 draw->parameterCount = remaining - 2;
                 draw->vertexCount = remaining;
-                sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(draw));
+                sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(draw));
             }
         }
     }
@@ -185,46 +185,46 @@ void effScatterDrawObject(PcpScatterDraw *object) {
 }
 
 /* Give this object its own reference to a newly created scatter resource. */
-void effCreateScatterResource(PcpScatterDraw *object, u32 resource) {
+void dds3WhirlwindPolyListSetTex(PcpScatterDraw *object, u32 resource) {
     PcpScatterRes *shared;
 
-    shared = effPcpScatterResCreate(resource);
+    shared = dds3ScatterPolyListTexResourceCreate(resource);
     object->sharedResource = shared;
 }
 
 /* Share another object's scatter resource while retaining a separate reference. */
-void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source) {
+void dds3WhirlwindPolyListCopyTex(PcpScatterDraw *object, PcpScatterDraw *source) {
     PcpScatterRes *shared;
 
-    shared = effPcpScatterResAddRef(source->sharedResource);
+    shared = dds3ScatterPolyListTexResourceCopy(source->sharedResource);
     object->sharedResource = shared;
 }
 
 /* Compute the address of a 16-byte-wide block within the stride. */
-f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 particleIndex) {
+f32 *dds3WhirlwindPolyListGetVertex(PcpScatterDraw *object, s32 particleIndex) {
     return object->points + particleIndex * object->vectorsPerParticle * 4;
 }
 
 /* Compute the address of an 8-byte-wide block within the stride. */
-f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 particleIndex) {
+f32 *dds3WhirlwindPolyListGetUV(PcpScatterDraw *object, s32 particleIndex) {
     return object->uv + particleIndex * object->vectorsPerParticle * 2;
 }
 
-u32 effGetScatterEntry(PcpScatterDraw *object, s32 particleIndex) {
+u32 dds3WhirlwindPolyListGetABGR(PcpScatterDraw *object, s32 particleIndex) {
     return object->colors[particleIndex];
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, const void *src) {
+void dds3WhirlwindPolyListSetRotateMatrix(PcpScatterDraw *object, const void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(object->matrix);
 }
 
-extern void parDispatchSub(u32, s32, s32, s32);
+extern void dds3TrackPolyVCSet(u32, s32, s32, s32);
 extern EffRandState effDefaultRandomState[];
 
-/* effNeedleCreateWork */
-EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
+/* effPCPNeedleSpiralCreate */
+EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *params) {
     SdfMemBlock *allocation = sdfMemAllocDirect(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
     EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfMemLock(allocation);
     u32 slotIndex;
@@ -239,14 +239,14 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     work->count = params->count;
     work->color = 0x80808080;
     work->system = 0;
-    resource = effCreateResourceEntryWork(params->count);
+    resource = dds3NeedleModelCreate(params->count);
     resource->mode = params->mode;
     work->resource = resource;
     effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
                             params->outerColor, params->radiusScale, params->viewOffset);
-    work->system = parAllocateCellSystem(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub((u32)work->system, 1, work->params.unk58, work->params.unk58);
-    parSetCellDrawBucket(work->system, (u16)work->params.mode);
+    work->system = dds3TrackPolyCreate(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
+    dds3TrackPolyVCSet((u32)work->system, 1, work->params.unk58, work->params.unk58);
+    dds3TrackPolySetMode(work->system, (u16)work->params.mode);
     count = work->count;
     delayRange = params->randomDelayRange;
     slot = work->slots;
@@ -254,10 +254,10 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     radiusBase = work->params.radiusBase;
     radiusJitter = work->params.radiusJitter;
     for (slotIndex = 0; slotIndex < count; slotIndex++, slot++) {
-        slot->angle = sdfGetRandFloat(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
-        slot->radius = radiusBase * (sdfGetRandFloat(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
-        slot->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayRange);
-        effSetResourceEntryValue(work->resource, slotIndex, 0x808080);
+        slot->angle = dds3GetRandFloatA(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
+        slot->radius = radiusBase * (dds3GetRandFloatA(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
+        slot->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayRange);
+        dds3NeedleModelSetColor(work->resource, slotIndex, 0x808080);
     }
     return work;
 }

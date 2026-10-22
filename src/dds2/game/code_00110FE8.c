@@ -4,7 +4,7 @@
 #include "dds3_area_callback.h"
 #include "evt_world.h"
 
-s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *targetNode) {
+s32 dds3SceneBasicExistBasicFromType(EffWorldNode *object, s32 slotIndex, EffWorldNode *targetNode) {
     EffWorldNode *node;
 
     if (object == NULL || targetNode == 0) {
@@ -20,7 +20,7 @@ s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldN
     return 0;
 }
 
-s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *targetNode) {
+s32 dds3SceneBasicExistBasic(EffWorldNode *object, EffWorldNode *targetNode) {
     EvtWorldSlot *slots;
     s32 i;
 
@@ -44,20 +44,20 @@ s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *targetN
     return 0;
 }
 
-void dds3SetWorldObjectValue(EffWorldNode *worldNode, u32 areaRoomKey) {
+void dds3SetMapNo(EffWorldNode *worldNode, u32 areaRoomKey) {
     if (worldNode != NULL) {
         ((EvtWorldTable *)worldNode->data)->areaRoomKey = areaRoomKey;
     }
 }
 
-s32 dds3GetWorldObjectValue(EffWorldNode *worldNode) {
+s32 dds3GetMapNo(EffWorldNode *worldNode) {
     if (worldNode == NULL) {
         return -1;
     }
     return ((EvtWorldTable *)worldNode->data)->areaRoomKey;
 }
 
-EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 slotIndex, const u8 *name) {
+EffWorldNode *dds3SceneBasicSearchNameAndType(EffWorldNode *object, s32 slotIndex, const u8 *name) {
     EffWorldNode *node;
     u8 *s;
     s32 i;
@@ -90,7 +90,7 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 slo
     return NULL;
 }
 
-EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name) {
+EffWorldNode *dds3SceneBasicSearchName(EffWorldNode *object, const u8 *name) {
     EffWorldNode *node;
     s32 i;
 
@@ -98,7 +98,7 @@ EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name
         return NULL;
     }
     for (i = 0; i < 0x12; i++) {
-        node = dds3FindIndexedObjectChainNodeByName(object, i, name);
+        node = dds3SceneBasicSearchNameAndType(object, i, name);
         if (node != NULL) {
             return node;
         }
@@ -108,42 +108,42 @@ EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name
 
 
 
-s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
+s32 AreaBasicConstructor(EffWorldNode *object) {
     WorldIndexNode **indexNodes;
     u32 i;
 
     indexNodes = sdfChipAllocDirect(8);
     object->data = indexNodes;
     for (i = 0; i < 2; i++) {
-        indexNodes[i] = dds3AppendWorldIndexNode(0);
+        indexNodes[i] = dds3GetBasicArrayHandle(0);
     }
     return 1;
 }
 
-s32 dds3ExchangeAreaSlot(void *areaObject);
+s32 CB_ReleaseObjectBasic(void *areaObject);
 
 
 
-void dds3DestroyObjectPointerChains(EffWorldNode *object) {
+void AreaBasicDestructor(EffWorldNode *object) {
     WorldIndexNode **indexNodes;
     u32 i;
 
     indexNodes = object->data;
-    dds3VisitWorldObjectValues((WorldValueIndices *)indexNodes[0], (s32 (*)(u32))dds3ExchangeAreaSlot);
-    dds3VisitWorldObjectValues((WorldValueIndices *)indexNodes[1], (s32 (*)(u32))dds3ExchangeAreaSlot);
+    dds3ForEachBasicArray((WorldValueIndices *)indexNodes[0], (s32 (*)(u32))CB_ReleaseObjectBasic);
+    dds3ForEachBasicArray((WorldValueIndices *)indexNodes[1], (s32 (*)(u32))CB_ReleaseObjectBasic);
     for (i = 0; i < 2; i++) {
-        dds3DestroyWorldIndexNode(indexNodes[i]);
+        dds3FreeBasicArrayHandle(indexNodes[i]);
     }
     sdfChipFreeDirect(indexNodes);
 }
 
-u32 dds3WorldIndexUpdateNoop(void) {
+u32 AreaBasicMainprocuder(void) {
     return 1;
 }
 
-s32 ddsDispatchFirstWorldIndexAreas(EffWorldNode *object) {
+s32 AreaBasicDrawprocuder(EffWorldNode *object) {
     WorldIndexNode **indexNodes = object->data;
 
-    dds3VisitWorldObjectValues((WorldValueIndices *)indexNodes[0], (s32 (*)(u32))dds3InvokeAreaCallback);
+    dds3ForEachBasicArray((WorldValueIndices *)indexNodes[0], (s32 (*)(u32))CB_BasicDrawProcuder);
     return 1;
 }

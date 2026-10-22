@@ -5,7 +5,7 @@
 
 struct SdfPoolNode;
 
-void sdfModelBuildVisibleNodePackets(struct SdfPoolNode **surfaces, SdfModel *model);
+void sdfModelTempPacketLinkOt(struct SdfPoolNode **surfaces, SdfModel *model);
 void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **surfaces, SdfModel *model);
 
 static inline void sdfBuildModelPacketsVia(

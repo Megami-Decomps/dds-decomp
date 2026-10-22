@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Access view consumed by effAppendOffsetTriangle; opaque spans are retained
+/* Access view consumed by dds3PolygonTriangleSet; opaque spans are retained
  * because this helper only reads or writes the listed fields. */
 typedef struct EffOffsetTriangleView {
     u16 flags;                 /* 0x00: mask 0x2 enables normals; 0x4 enables colors */

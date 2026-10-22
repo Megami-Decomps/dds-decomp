@@ -15,23 +15,23 @@
 
 
 
-ScrData *bfParseFLW0(void *header, s32 procedureIndex);
+ScrData *fldFlowParse(void *header, s32 procedureIndex);
 
 
 /* Load a script resource, create its VM process and retain its resource handle. */
-ScrData *scrOpenProcessFromResource(const char *path, s32 option)
+ScrData *scrLoadScriptFile(const char *path, s32 option)
 {
     u32 resourceInfo[4];
     SdfMemBlock *handle;
     u32 resourceAddress;
     ScrData *process;
-    handle = sdfReadNamedResource(path, resourceInfo, 0);
+    handle = sdfDevLoadFileEx(path, resourceInfo, 0);
     resourceAddress = resourceInfo[0];
     if (resourceAddress == 0)
     {
         return 0;
     }
-    process = bfParseFLW0((void *)resourceAddress, option);
+    process = fldFlowParse((void *)resourceAddress, option);
     if (process != NULL)
     {
         process->scriptHandle = handle;
@@ -39,17 +39,17 @@ ScrData *scrOpenProcessFromResource(const char *path, s32 option)
     return process;
 }
 
-KwlnTask *scrProcCreateTask(u32 priority, ScrData *process)
+KwlnTask *scrStartScriptProcess(u32 priority, ScrData *process)
 {
     KwlnTask *task;
     task = dds3StartProcess(process->procedures[process->procedureIndex].name,
-                          priority, 1, 1, bfTaskUpdate, scrReplaceCurrentTask,
+                          priority, 1, 1, scrScriptProcess, scrScriptShutdown,
                           (u32)process);
     process->task = task;
     return task;
 }
 
-void scrClearProcessGlobals(void)
+void dds3GlobalWorkClearFlags(void)
 {
     s32 globalClearCountdown;
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
@@ -60,29 +60,29 @@ void scrClearProcessGlobals(void)
     }
 }
 
-s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option)
+s32 scrStartScriptByName(s32 priority, const char *path, s32 option)
 {
-    return (s32)scrProcCreateTask(priority, scrOpenProcessFromResource(path, option));
+    return (s32)scrStartScriptProcess(priority, scrLoadScriptFile(path, option));
 }
 
 ScrData *scrCreateProcessWithDefaultOption(const char *path) {
-    return scrOpenProcessFromResource(path, 0);
+    return scrLoadScriptFile(path, 0);
 }
 
-s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option)
+s32 scrStartScript2(s32 priority, s32 processId, s32 option)
 {
-    return (s32)scrProcCreateTask(priority, bfParseFLW0((void *)processId, option));
+    return (s32)scrStartScriptProcess(priority, fldFlowParse((void *)processId, option));
 }
 
 ScrData *scrCreateTaskWithDefaultOption(void *header) {
-    return bfParseFLW0(header, 0);
+    return fldFlowParse(header, 0);
 }
 
-KwlnTask *scrCreateTaskFromContextParameters(u32 priority, void *header,
+KwlnTask *scrRunScriptEx(u32 priority, void *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex)
 {
-    return scrProcCreateTask(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
+    return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
 ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSection,
@@ -93,8 +93,8 @@ ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSec
 }
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
-extern void itfMesDestroyWindowIfPresent(s32);
-extern void evtUnlinkWorkNode(ScrData *process);
+extern void itfMesMngRelease(s32);
+extern void scrUnlinkHandle(ScrData *process);
 
 /* Release the process's VM buffers, resource and named-list allocation. */
 void scrProcDestroyTask(ScrData *process) {
@@ -106,12 +106,12 @@ void scrProcDestroyTask(ScrData *process) {
         sdfChipFreeDirect(process->localFloat);
     }
     if (process->resourceIndex >= 0) {
-        itfMesDestroyWindowIfPresent(process->resourceIndex);
+        itfMesMngRelease(process->resourceIndex);
     }
     if (process->scriptHandle != 0) {
         sdfMemFreeDirect(process->scriptHandle);
     }
-    evtUnlinkWorkNode(process);
+    scrUnlinkHandle(process);
     sdfChipFreeDirect(process);
 }
 
@@ -171,7 +171,7 @@ s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 }
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
-ScrData *scrFindNamedProcessNode(const char *name) {
+ScrData *scrSearchScriptName(const char *name) {
     ScrData *processNode = scrNamedProcessHead;
 
     while (processNode != NULL) {
@@ -184,7 +184,7 @@ ScrData *scrFindNamedProcessNode(const char *name) {
 }
 
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
-s32 bfFindScriptIndexByName(const BfFlw0Header *header, const char *procedureName) {
+s32 scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName) {
     const ScrLabel *procedures = NULL;
     const ScrSection *sections;
     s32 sectionIndex;

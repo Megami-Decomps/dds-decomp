@@ -20,10 +20,10 @@ typedef struct EvtScriptModelWork {
 typedef char EvtScriptModelWork_size_must_be_0x1C[
     (sizeof(EvtScriptModelWork) == 0x1C) ? 1 : -1];
 
-struct EffWorldNode *evtCreateScriptObject(s32 key, struct SdfItemListRef *itemList,
+struct EffWorldNode *dds3AddModelBasic(s32 key, struct SdfItemListRef *itemList,
     struct MotionTable *motionTable, struct EffWorldNode *fallbackModelObject,
     const char *name);
-struct EffWorldNode *evtCreateScriptObjectWithResource(s32 key,
+struct EffWorldNode *dds3AddModelBasic2(s32 key,
     struct SdfItemListRef *itemList, struct MotionTable *motionTable,
     void *loadedModelResource, const char *name);
 

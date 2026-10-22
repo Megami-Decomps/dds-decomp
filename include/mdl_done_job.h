@@ -5,7 +5,7 @@
 
 #define MDL_DONE_JOB_BYTES 0x14
 
-/* Allocated by mdlRequestLoadWithCallback and consumed by the completion path. */
+/* Allocated by mdlFileLoad and consumed by the completion path. */
 typedef struct MdlDoneJob {
     u16 group;            /* 0x00 */
     u16 id;               /* 0x02 */

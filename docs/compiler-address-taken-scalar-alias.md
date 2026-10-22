@@ -98,7 +98,7 @@ The hooks only read registers/memory and log them.
 ## Effect on the actual candidate
 
 The output scalar is a genuine `f32` passed by address to
-`fldClassifyPositionInZoneWithMargin`. The provider writes one scalar. Its
+`HitPositionInside2`. The provider writes one scalar. Its
 contract does not establish an array or a larger aggregate.
 
 At expansion, the full candidate has `mem/f:SF(addressof(reg366), alias
@@ -222,7 +222,7 @@ The resulting first executable difference is in `03.cse`, not merely a late
 conditional-move preference.
 
 The source quantity is a genuine `s32 stage`. An earlier branch passes `&stage`
-to `dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0)`. The affected later branch is:
+to `dds3AdminiCallSequence(0x1C, &stage, 4, 0)`. The affected later branch is:
 
 ```c
 stage = command;
@@ -231,7 +231,7 @@ if (entry->variant != 0) {
 }
 room = entry->warpEntry;
 if (fldAreaState.area != stage) {
-    fldReleaseCurrentBgm();
+    fldBgmFadeOut();
 }
 ```
 

@@ -177,7 +177,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 ke
     EffectSlotSet *instance;
 
     sprintf(path, D_003BD198, base, name);
-    allocation = sdfReadNamedResource(path, &sourceAddress, 0);
+    allocation = sdfDevLoadFileEx(path, &sourceAddress, 0);
     instance = effCreateResourceSlotSetFromAllocation(allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
         sdfMemFreeDirect(allocation);
@@ -190,11 +190,11 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
     struct SdfMemBlock *allocation;
     EffectSlotSet *instance;
 
-    allocation = fileGetResourceHandle(job);
+    allocation = fileGetMemHandle(job);
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
     sdfMemFreeDirect(allocation);
-    filePollEntryCleanup(job);
+    fileHandleFree(job);
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
@@ -202,10 +202,10 @@ void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
     struct SdfMemBlock *allocation;
     EffectSlotSet *instance;
 
-    allocation = fileGetResourceHandle(job);
+    allocation = fileGetMemHandle(job);
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
-    filePollEntryCleanup(job);
+    fileHandleFree(job);
 }
 
 extern s32 sprintf(char *, const char *, ...);
@@ -217,9 +217,9 @@ void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 
     sprintf(path, D_003BD198, base, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
-        fileCreateCallbackRequest(path, 0, (u32)effCompleteRetainedResourceJob, (u32)outInstance);
+        fileLoadEx(path, 0, (u32)effCompleteRetainedResourceJob, (u32)outInstance);
     } else {
-        fileCreateCallbackRequest(path, 0, (u32)effCompleteTransientResourceJob, (u32)outInstance);
+        fileLoadEx(path, 0, (u32)effCompleteTransientResourceJob, (u32)outInstance);
     }
 }
 
@@ -231,7 +231,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     u32 allocation;
 
     sprintf(path, D_003BD198, base, name);
-    allocation = sdfReadNamedResource(path, &sourceAddress, 0);
+    allocation = sdfDevLoadFileEx(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     sdfMemFreeDirect(allocation);
     return mappedResource;
@@ -244,12 +244,12 @@ void effCompleteMappedResourceJob(struct FileRequest *job,
     u32 sourceAddress;
     EffMappedResource *mappedResource;
 
-    allocation = fileGetResourceHandle(job);
+    allocation = fileGetMemHandle(job);
     sourceAddress = sdfMemLock(allocation);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = mappedResource;
     sdfMemFreeDirect(allocation);
-    filePollEntryCleanup(job);
+    fileHandleFree(job);
 }
 
 /* Initialize the output to zero and schedule mapped-record completion. */
@@ -259,7 +259,7 @@ void effRequestMappedResource(const char *base, const char *name,
 
     sprintf(path, D_003BD198, base, name);
     *outMappedResource = 0;
-    fileCreateCallbackRequest(path, 0, (u32)effCompleteMappedResourceJob, (u32)outMappedResource);
+    fileLoadEx(path, 0, (u32)effCompleteMappedResourceJob, (u32)outMappedResource);
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */
@@ -650,7 +650,7 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == (s32)slotIndex) {
                     if (set->textureReferences[slotIndex] == 0) {
-                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceData));
+                        set->textureReferences[slotIndex] = sdfTexSet((SdfTextureFileHeader *)(resourceData));
                     }
                 } else {
                     set->textureReferences[slotIndex] = 0;
@@ -1015,9 +1015,9 @@ typedef union EffSpriteColor {
 } EffSpriteColor;
 
 #include "sdf_packet_alloc.h"
-extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
-extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern void sdfTexSetFilter(SdfTex *, s32, s32);
+extern s32 sdf2DGetPrimPacketSize(s32, s32);
+extern s32 sdf2DGetPrimPtr(s32);
 extern void effSelectPresetByKind(u32, u32);
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
@@ -1034,14 +1034,14 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     SdfPoolNode *drawSurface;
 
     if (mode == 0) {
-        sdfTexSetPrimaryBufferModeBits(texture, 0, 1);
+        sdfTexSetFilter(texture, 0, 1);
     } else {
-        sdfTexSetPrimaryBufferModeBits(texture, 1, 1);
+        sdfTexSetFilter(texture, 1, 1);
     }
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x156, 5, 0x43431, 1);
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    sdf2DMakePrimPacketHeader((SdfDrawPacket *)packet, 0x156, 5, 0x43431, 1);
     /* The SDK size helper also skips the packet's two header quadwords. */
-    packetWords = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packetWords = (u64 *)sdf2DGetPrimPtr(packet);
     left = x + 0x7000;
     top = y + 0x7900;
     textureCoordinates[0] = uvRect->u0 * 16;
@@ -1076,10 +1076,10 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[5] = depth;
     packetWords[9] = depth;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packetList);
-    sdfConsCreateDrawPacket(packetList, texture, 0);
-    sdfAppendPacket(packetList, packet);
+    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packetList);
+    sdf2DLinkTexPacket(packetList, texture, 0);
+    sdfDrawTagLink(packetList, packet);
     drawSurface = &kwlnDrawSurfaces[surfaceId];
     drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
@@ -1094,8 +1094,8 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
     f32 rotatedY;
 
     y = (s32)(y * aspect);
-    rotatedX = sdfCos(radians) * x - sdfSinPoly(radians) * y;
-    rotatedY = sdfSinPoly(radians) * x + sdfCos(radians) * y;
+    rotatedX = sdfCos(radians) * x - sdfSin(radians) * y;
+    rotatedY = sdfSin(radians) * x + sdfCos(radians) * y;
     if (rotatedX > 0.0f) {
         rotatedX += 0.1f;
     } else {
@@ -1143,13 +1143,13 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     SdfPoolNode *drawSurface;
 
     if (mode == 0) {
-        sdfTexSetPrimaryBufferModeBits(texture, 0, 1);
+        sdfTexSetFilter(texture, 0, 1);
     } else {
-        sdfTexSetPrimaryBufferModeBits(texture, 1, 1);
+        sdfTexSetFilter(texture, 1, 1);
     }
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x15C, 3, 0x531, 4);
-    packetWords = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4));
+    sdf2DMakePrimPacketHeader((SdfDrawPacket *)packet, 0x15C, 3, 0x531, 4);
+    packetWords = (u64 *)sdf2DGetPrimPtr(packet);
     left = x + 0x7000;
     top = y + 0x7900;
     right = left + width - 8;
@@ -1231,10 +1231,10 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[22] = (u64)(u32)x3 | ((u64)(u32)y3 << 32);
     packetWords[23] = depth >> 4;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packetList);
-    sdfConsCreateDrawPacket(packetList, texture, 0);
-    sdfAppendPacket(packetList, packet);
+    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packetList);
+    sdf2DLinkTexPacket(packetList, texture, 0);
+    sdfDrawTagLink(packetList, packet);
     drawSurface = &kwlnDrawSurfaces[surfaceId];
     drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);

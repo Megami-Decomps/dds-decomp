@@ -195,7 +195,7 @@ loops or branches require another audit.
 ## Vector-cell strip generation
 
 `func_00163780` (DDS1) and `func_0016B3D8` (DDS2) each match 884 bytes.
-The separate effCreateThunderCellSystemWork constructor supplies kind-4
+The separate effPCPThunderSpherePolyCreate constructor supplies kind-4
 history with 5(p+1) quadwords. The generator computes row count from that
 system capacity before publishing the active cell count, then binds the
 indexed source cell. That source boundary avoids an alias-induced reload.
@@ -225,7 +225,7 @@ color-fill change is included here.
 ## Indexed two-vector strips
 
 `func_001642B0` (DDS1) and `func_0016BF08` (DDS2) each match 748 bytes.
-The separate local effThunderWorkCreate uses kind 0 with groupDivisor=0,
+The separate local effBTLBindCreateTrack uses kind 0 with groupDivisor=0,
 allocating 2(p+1) quadwords. The signed capacity >> 1 gives the row count;
 each iteration writes its positive and negative width endpoints. It reuses
 the recovered VectorParams layout without another field or primitive change.

@@ -178,7 +178,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     u32 id = work->sceneId;
     if (id < 0x400 && (datBattleSceneRecords[id].flags & 0x8000) != 0) {
         *(u32 *)(scene + 0x1F8) |= 8;
-        kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
+        dds3FadeOut(0xFF, 0xFF, 0xFF, 0);
     }
     if (btlRollSurpriseAttack() != 0) {
         *(u8 *)(scene + 0x24A) = 2;
@@ -360,19 +360,19 @@ extern s32 btlMarkInactiveActorCandidates(void);
 extern void btlRestorePartySlotSnapshots(void);
 
 
-extern void kwlnDrawSetOverlayTransition(s32, s32, s32);
+extern void dds3SetBlur(s32, s32, s32);
 
-extern void kwlnDrawEnableD88(s32);
+extern void dds3Blur2Off(s32);
 
-extern void kwlnDrawEnableDc8(s32);
+extern void dds3Filter2Off(s32);
 
-extern void kwlnDrawEnableE08(s32);
+extern void dds3MFilterOff(s32);
 
-extern void kwlnDrawSetupC70B(s32);
+extern void dds3MultiBlurOff(s32);
 
-extern void kwlnDrawEnableCd0(s32);
+extern void dds3DistBlurOff(s32);
 
-extern void kwlnDrawEnableD30(s32);
+extern void dds3RipBlurOff(s32);
 
 extern void btlMarkRuntimeUpdatePending(void);
 
@@ -396,16 +396,16 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
         }
         if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
             kwlnFadeBackgroundStartOut(0);
-            kwlnDrawSetOverlayTransition(0, 0, 1);
-            kwlnDrawEnableD88(0);
-            kwlnDrawEnableDc8(0);
-            kwlnDrawEnableE08(0);
-            kwlnDrawSetupC70B(0);
-            kwlnDrawEnableCd0(0);
-            kwlnDrawEnableD30(0);
+            dds3SetBlur(0, 0, 1);
+            dds3Blur2Off(0);
+            dds3Filter2Off(0);
+            dds3MFilterOff(0);
+            dds3MultiBlurOff(0);
+            dds3DistBlurOff(0);
+            dds3RipBlurOff(0);
             btlMarkRuntimeUpdatePending();
             if (!(*(u32 *)(scene + 0x1F8) & 8)) {
-                kwlnFadeStartIn(0);
+                dds3FadeIn2(0);
             }
             if (fldGetEncounterRuntimeResult() != 0) {
                 fldSetEncounterPendingValue(1);
@@ -1163,7 +1163,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     }
 }
 
-extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+extern void dds3AdminiCallSequence(s32, void *, u32, s32);
 extern void btlDestroyUnit(u8 *);
 extern void fldUnloadPlayerModel(void);
 const char D_003A3470[] __attribute__((aligned(8))) = "btl:wait ADPCM(Phase_END)\n";
@@ -1186,7 +1186,7 @@ extern void btlRemoveActorsWithFlags(u32 mask);
 extern void btlResetActorEntryState(void);
 extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamLocked(void);
-extern void sndQueueNoPayloadCommand1A0(void);
+extern void p2sdStopAllBgm(void);
 extern void sndQueueNoPayloadCommand210(void);
 
 s32 btlUpdateBattleEnd(BtlState *scene) {
@@ -1248,7 +1248,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         case 7:
             fldUnloadPlayerModel();
             request = 0x29E;
-            dds3AdminSubmitModeRequest(6, &request, 4, 0);
+            dds3AdminiCallSequence(6, &request, 4, 0);
             btlBossDebugPrintf(D_003A34E8);
             break;
         case 4:
@@ -1269,13 +1269,13 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         if (scene->eventReady == 1) {
             if (!(scene->endFlags & 1)) {
                 sndQueueNoPayloadCommand210();
-                sndQueueNoPayloadCommand1A0();
+                p2sdStopAllBgm();
                 sndLoadAndPlayStationedSe(0x1C);
                 scene->endFlags |= 1;
             }
         } else {
             sndQueueNoPayloadCommand210();
-            sndQueueNoPayloadCommand1A0();
+            p2sdStopAllBgm();
         }
         if (scene->eventReady == 5) {
             task = scene->tasks;
@@ -1328,7 +1328,7 @@ extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 
 extern s32 mnuIsTitleEntryAvailable();
 
-extern void datAdjustCurrentHp();
+extern void datAddHp();
 
 /* Apply the gated five-percent party delta, then restart the field-load step. */
 void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
@@ -1348,7 +1348,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
                     if (datGameState->party[i].huntExp != 0 || scene->totalAp != 0) {
                         if (!(datGameState->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
-                                datAdjustCurrentHp(&datGameState->party[i],
+                                datAddHp(&datGameState->party[i],
                                                (s32)((f32)datGameState->party[i].maxHp * scale));
                             }
                         }
@@ -1387,7 +1387,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
             switch (work->loadStep) {
             case 0:
                 work->flags &= ~0x10;
-                if (fldLoadAreaResource() != 0) {
+                if (fldLoadNextFile_BtlRet() != 0) {
                     work->loadStep = 1;
                 } else {
                     work->loadStep = 2;
@@ -1397,7 +1397,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
                 break;
             case 1:
                 fldPollAreaResourceLoad();
-                if (fldGetResourceReadyFlag() == 0) {
+                if (fldLoadNextGetStatus() == 0) {
                     work->loadStep = 2;
                     btlBossDebugPrintf("btl:field loding end\n");
                 }
@@ -1484,7 +1484,7 @@ extern s32 btlUpdateDebugEncounterSelector(void);
 
 u32 fldBeginFadeWhenSceneReady(void) {
     if (btlUpdateDebugEncounterSelector() != 0) {
-        kwlnFadeInStart(0, 0, 0, 0);
+        dds3FadeOut(0, 0, 0, 0);
         return 2;
     }
     return 0;

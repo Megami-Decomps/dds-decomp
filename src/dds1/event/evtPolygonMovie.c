@@ -20,9 +20,9 @@
 
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
- *   lerpN  -> evtMovieInterpolateFloatIfEnabled, the float lerp
- *   valueN -> evtMovieInterpolateUintIfEnabled, the u32 lerp
- *   v, m   -> evtMovieInterpolateIntIfEnabled, the s32 lerp over a 2-vector and a 2x2 matrix
+ *   lerpN  -> evtHokanFloat, the float lerp
+ *   valueN -> evtHokanUInt, the u32 lerp
+ *   v, m   -> evtHokanInt, the s32 lerp over a 2-vector and a 2x2 matrix
  *   blendControl is copied from the source record and never blended. */
 
 
@@ -31,12 +31,12 @@
 
 
 
-u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
+u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b);
 
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
  * offsets are relative to the start of the block. */
 
-extern EvtUnit *effObjGetTransitionWork(EffWorldNode *object);
+extern EvtUnit *dds3GetUnitHandleObjectBasic(EffWorldNode *object);
 extern void dds3ObjectBaseOnFlag(EffWorldNode *obj, s32 flags);
 extern void dds3ObjectBaseOffFlag(EffWorldNode *obj, s32 flags);
 
@@ -50,14 +50,14 @@ extern EffResourceRectParams evtMovieDefaultResourceRect;
 extern EffBlurScatterParams evtMovieDefaultBlurScatter;
 extern EffBlurScaleParams evtMovieDefaultBlurScale;
 extern EffBlurQuad D_003686A0;
-extern s32 itfMesCreateWindow(u8 *messageSubData);
-extern void itfMesDestroyWindowIfPresent(s32 handle);
-extern void fileWaitIdle(void);
+extern s32 itfMesMngInitialize(u8 *messageSubData);
+extern void itfMesMngRelease(s32 handle);
+extern void fileSyncAll(void);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 #include "sdf_debug_api.h"
 
-s32 evtPolygonMovieTestFlag(KwlnTask *task)
+s32 evtCheckPolygonMovieRun(KwlnTask *task)
 {
     EvtPolygonMovieTaskState *state;
     s32 set;
@@ -70,7 +70,7 @@ s32 evtPolygonMovieTestFlag(KwlnTask *task)
     return set;
 }
 
-f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b)
+f32 evtHokanFloat(s32 enable, f32 t, f32 a, f32 b)
 {
     if (enable) {
         return a * (1.0f - t) + b * t;
@@ -78,7 +78,7 @@ f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b)
     return a;
 }
 
-s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b)
+s32 evtHokanInt(s32 enable, f32 t, s32 a, s32 b)
 {
     s32 result = a;
 
@@ -88,7 +88,7 @@ s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b)
     return result;
 }
 
-u32 evtMovieInterpolateUintIfEnabled(s32 enable, f32 t, u32 a, u32 b)
+u32 evtHokanUInt(s32 enable, f32 t, u32 a, u32 b)
 {
     if (enable) {
         return (u32)((f32)a * (1.0f - t) + (f32)b * t);
@@ -97,7 +97,7 @@ u32 evtMovieInterpolateUintIfEnabled(s32 enable, f32 t, u32 a, u32 b)
 }
 
 /* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
-u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b)
+u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b)
 {
     s32 color1[4];
     s32 color2[4];
@@ -121,7 +121,7 @@ u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b)
 }
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
-void evtBlendVectorRows(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
+void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
 {
     if (enable == 0) {
         t = 0.0f;
@@ -182,7 +182,7 @@ static inline void evtSetBlendVecW(f32 w)
 
 /* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
  * default vector/colour) */
-void evtBlendParamsC(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *b, EvtBlendVecColor *out)
+void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *b, EvtBlendVecColor *out)
 {
 
     if (enable == 0) {
@@ -235,7 +235,7 @@ void evtBlendParamsC(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *b
     out->color = eePackRGBAWord(128.0f);
 }
 
-void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
+void evtHokanBlur2(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -249,21 +249,21 @@ void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQ
     if (b == NULL) {
         b = &D_00368590;
     }
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
+    out->color = evtHokanColor(enable, t, a->color, b->color);
     out->blendControl = a->blendControl;
-    out->angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->angle, b->angle);
-    out->displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->displacement, b->displacement);
+    out->angle = evtHokanFloat(enable, t, a->angle, b->angle);
+    out->displacement = evtHokanFloat(enable, t, a->displacement, b->displacement);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->position[positionOrCornerIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
+        out->position[positionOrCornerIndex] = evtHokanInt(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[positionOrCornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
+            out->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
 
-void evtBlendParamsB(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateBody *b, EffBlurTemplateBody *out)
+void evtHokanMultBlur(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateBody *b, EffBlurTemplateBody *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -277,22 +277,22 @@ void evtBlendParamsB(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateB
     if (b == NULL) {
         b = &evtMovieDefaultBlurTemplate;
     }
-    out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
-    out->source.color = evtPolygonMovieBlendColor(enable, t, a->source.color, b->source.color);
+    out->extent = evtHokanUInt(enable, t, a->extent, b->extent);
+    out->source.color = evtHokanColor(enable, t, a->source.color, b->source.color);
     out->source.blendControl = a->source.blendControl;
-    out->source.angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->source.angle, b->source.angle);
-    out->source.displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->source.displacement, b->source.displacement);
+    out->source.angle = evtHokanFloat(enable, t, a->source.angle, b->source.angle);
+    out->source.displacement = evtHokanFloat(enable, t, a->source.displacement, b->source.displacement);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->source.position[positionOrCornerIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.position[positionOrCornerIndex], b->source.position[positionOrCornerIndex]);
+        out->source.position[positionOrCornerIndex] = evtHokanInt(enable, t, a->source.position[positionOrCornerIndex], b->source.position[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->source.corners[positionOrCornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.corners[positionOrCornerIndex][coordinateIndex], b->source.corners[positionOrCornerIndex][coordinateIndex]);
+            out->source.corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->source.corners[positionOrCornerIndex][coordinateIndex], b->source.corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
 
-void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, EffSolidRectParams *b, EffSolidRectParams *out)
+void evtHokanFilter(s32 enable, f32 t, EffSolidRectParams *a, EffSolidRectParams *b, EffSolidRectParams *out)
 {
     s32 cornerIndex;
     s32 coordinateIndex;
@@ -308,14 +308,14 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, E
     }
     for (cornerIndex = 0; cornerIndex < 2; cornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[cornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[cornerIndex][coordinateIndex], b->corners[cornerIndex][coordinateIndex]);
+            out->corners[cornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[cornerIndex][coordinateIndex], b->corners[cornerIndex][coordinateIndex]);
         }
     }
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
+    out->color = evtHokanColor(enable, t, a->color, b->color);
     out->blendControl = a->blendControl;
 }
 
-void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRectParams *b, EffResourceRectParams *out)
+void evtHokanMultFilter(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRectParams *b, EffResourceRectParams *out)
 {
     s32 centerCoordinateIndex;
 
@@ -328,16 +328,16 @@ void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRec
     if (b == NULL) {
         b = &evtMovieDefaultResourceRect;
     }
-    out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
+    out->extent = evtHokanUInt(enable, t, a->extent, b->extent);
     for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
-        out->center[centerCoordinateIndex] = evtMovieInterpolateIntIfEnabled(
+        out->center[centerCoordinateIndex] = evtHokanInt(
             enable, t, a->center[centerCoordinateIndex], b->center[centerCoordinateIndex]);
     }
-    out->draw.rgba = evtPolygonMovieBlendColor(enable, t, a->draw.rgba, b->draw.rgba);
+    out->draw.rgba = evtHokanColor(enable, t, a->draw.rgba, b->draw.rgba);
     out->draw.blendControl = a->draw.blendControl;
 }
 
-void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterParams *b, EffBlurScatterParams *out)
+void evtHokanDistBlur(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterParams *b, EffBlurScatterParams *out)
 {
     s32 positionAxisIndex;
 
@@ -350,21 +350,21 @@ void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterP
     if (b == NULL) {
         b = &evtMovieDefaultBlurScatter;
     }
-    out->count = evtMovieInterpolateUintIfEnabled(enable, t, a->count, b->count);
-    out->delaySpread = evtMovieInterpolateUintIfEnabled(enable, t, a->delaySpread, b->delaySpread);
-    out->angleStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->angleStep, b->angleStep);
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
+    out->count = evtHokanUInt(enable, t, a->count, b->count);
+    out->delaySpread = evtHokanUInt(enable, t, a->delaySpread, b->delaySpread);
+    out->angleStep = evtHokanFloat(enable, t, a->angleStep, b->angleStep);
+    out->color = evtHokanColor(enable, t, a->color, b->color);
     out->blendControl = a->blendControl;
-    out->uvDisplacementAngleDegrees = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
-    out->uvDisplacementAmplitude = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
-    out->positionSpread = evtMovieInterpolateUintIfEnabled(enable, t, a->positionSpread, b->positionSpread);
+    out->uvDisplacementAngleDegrees = evtHokanFloat(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
+    out->uvDisplacementAmplitude = evtHokanFloat(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
+    out->positionSpread = evtHokanUInt(enable, t, a->positionSpread, b->positionSpread);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        out->position[positionAxisIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
+        out->position[positionAxisIndex] = evtHokanInt(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
     }
-    out->size = evtMovieInterpolateUintIfEnabled(enable, t, a->size, b->size);
+    out->size = evtHokanUInt(enable, t, a->size, b->size);
 }
 
-void evtBlendParamsF(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParams *b, EffBlurScaleParams *out)
+void evtHokanRipBlur(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParams *b, EffBlurScaleParams *out)
 {
     s32 positionAxisIndex;
 
@@ -377,18 +377,18 @@ void evtBlendParamsF(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParam
     if (b == NULL) {
         b = &evtMovieDefaultBlurScale;
     }
-    out->count = evtMovieInterpolateUintIfEnabled(enable, t, a->count, b->count);
-    out->phaseStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->phaseStep, b->phaseStep);
-    out->spacing = evtMovieInterpolateFloatIfEnabled(enable, t, a->spacing, b->spacing);
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
+    out->count = evtHokanUInt(enable, t, a->count, b->count);
+    out->phaseStep = evtHokanFloat(enable, t, a->phaseStep, b->phaseStep);
+    out->spacing = evtHokanFloat(enable, t, a->spacing, b->spacing);
+    out->color = evtHokanColor(enable, t, a->color, b->color);
     out->blendControl = a->blendControl;
-    out->uvDisplacementAngleDegrees = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
-    out->uvDisplacementAmplitude = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
-    out->angleStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->angleStep, b->angleStep);
+    out->uvDisplacementAngleDegrees = evtHokanFloat(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
+    out->uvDisplacementAmplitude = evtHokanFloat(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
+    out->angleStep = evtHokanFloat(enable, t, a->angleStep, b->angleStep);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        out->position[positionAxisIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
+        out->position[positionAxisIndex] = evtHokanInt(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
     }
-    out->size = evtMovieInterpolateUintIfEnabled(enable, t, a->size, b->size);
+    out->size = evtHokanUInt(enable, t, a->size, b->size);
 }
 
 void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
@@ -405,16 +405,16 @@ void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQ
     if (b == NULL) {
         b = &D_003686A0;
     }
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
+    out->color = evtHokanColor(enable, t, a->color, b->color);
     out->blendControl = a->blendControl;
-    out->angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->angle, b->angle);
-    out->displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->displacement, b->displacement);
+    out->angle = evtHokanFloat(enable, t, a->angle, b->angle);
+    out->displacement = evtHokanFloat(enable, t, a->displacement, b->displacement);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->position[positionOrCornerIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
+        out->position[positionOrCornerIndex] = evtHokanInt(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[positionOrCornerIndex][coordinateIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
+            out->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
@@ -426,15 +426,15 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     if (enable == 0) {
         t = 0.0f;
     }
-    out->x = evtMovieInterpolateIntIfEnabled(enable, t, a->x, b->x);
-    out->w[0] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[0], b->w[0]);
-    out->w[1] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[1], b->w[1]);
-    out->w[2] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[2], b->w[2]);
-    out->w[3] = evtMovieInterpolateIntIfEnabled(enable, t, a->w[3], b->w[3]);
+    out->x = evtHokanInt(enable, t, a->x, b->x);
+    out->w[0] = evtHokanInt(enable, t, a->w[0], b->w[0]);
+    out->w[1] = evtHokanInt(enable, t, a->w[1], b->w[1]);
+    out->w[2] = evtHokanInt(enable, t, a->w[2], b->w[2]);
+    out->w[3] = evtHokanInt(enable, t, a->w[3], b->w[3]);
     out->flagWord = a->flagWord;
     for (colorChannelIndex = 0; colorChannelIndex < 3; colorChannelIndex++) {
-        out->y[colorChannelIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->y[colorChannelIndex], b->y[colorChannelIndex]);
-        out->z[colorChannelIndex] = evtMovieInterpolateIntIfEnabled(enable, t, a->z[colorChannelIndex], b->z[colorChannelIndex]);
+        out->y[colorChannelIndex] = evtHokanInt(enable, t, a->y[colorChannelIndex], b->y[colorChannelIndex]);
+        out->z[colorChannelIndex] = evtHokanInt(enable, t, a->z[colorChannelIndex], b->z[colorChannelIndex]);
     }
 }
 
@@ -442,10 +442,10 @@ void evtPolygonMovieSetObjectMode(EffWorldNode *obj, u32 mode, s32 setFlags, s32
 {
     switch (mode) {
     case 0:
-        effObjGetTransitionWork(obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;
+        dds3GetUnitHandleObjectBasic(obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;
         break;
     case 1:
-        effObjGetTransitionWork(obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
+        dds3GetUnitHandleObjectBasic(obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
         break;
     case 2:
         dds3ObjectBaseOffFlag(obj, 0x400);
@@ -494,7 +494,7 @@ void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
-s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame)
+s32 evtStopMover(EffWorldNode *movie, s32 undo, s32 startFrame, s32 endFrame)
 {
     SdfFloatCounter *clip;
     s32 elapsedFrames;
@@ -510,11 +510,11 @@ s32 evtPolygonMovieScaleByProgress(EffWorldNode *movie, s32 undo, s32 startFrame
         if (duration <= elapsedFrames) {
             elapsedFrames = duration;
         }
-        evtScaleValueByMultiplier(clip, (f32)elapsedFrames / (f32)duration);
+        dds3PathBasicControlSetRatio(clip, (f32)elapsedFrames / (f32)duration);
         if (undo == 0) {
-            sdfFreezeFloatCounter(clip);
+            dds3PathBasicPauseOn(clip);
         } else {
-            sdfUnfreezeFloatCounter(clip);
+            dds3PathBasicPauseOff(clip);
         }
     }
 }
@@ -539,7 +539,7 @@ void evtPolygonMovieClampTime(EffWorldNode *movie, s32 unused, s32 start, s32 en
 }
 
 /* Allocate and clear a polygon-movie event work block. */
-PolyMovieWork *evtPolygonMovieAllocWork(void)
+PolyMovieWork *InitPolygonMovieWorkData(void)
 {
     PolyMovieWork *work;
 
@@ -613,7 +613,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
             if (work->entries[arrayIndex].value == 0) {
                 work->handle = -1;
             } else {
-                work->handle = itfMesCreateWindow(work->mainEntry6Data);
+                work->handle = itfMesMngInitialize(work->mainEntry6Data);
             }
             break;
         case 7:
@@ -767,15 +767,15 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
             sdfChipFreeDirect(work->buffer);
         }
         if (work->handle >= 0) {
-            itfMesDestroyWindowIfPresent(work->handle);
+            itfMesMngRelease(work->handle);
             work->handle = -1;
         }
-        fileWaitIdle();
+        fileSyncAll();
         if (work->mainResource.request != 0) {
-            filePollEntryCleanup(work->mainResource.request);
+            fileHandleFree(work->mainResource.request);
         }
         if (work->secondaryResource.request != 0) {
-            filePollEntryCleanup(work->secondaryResource.request);
+            fileHandleFree(work->secondaryResource.request);
         }
         if (work->mainResource.handle != 0) {
             sdfMemFreeDirect(work->mainResource.handle);
@@ -795,7 +795,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
 }
 
 /* Allocate a resource block holding a fresh "PMD2" header; returns the handle. */
-SdfMemBlock *evtPolygonMovieCreateHeader(PmdHeader **out)
+SdfMemBlock *evtAllocMovieWork(PmdHeader **out)
 {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
     s32 headerBytes;
@@ -856,7 +856,7 @@ s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path
                          eventId / 10 * 10, eventId, eventId, sceneId, eventId, sceneId);
 }
 
-extern s32 sdfPathExists(char *path);
+extern s32 sdfFileCheckExist(char *path);
 const char evtMovieBeforePrimaryLoadMessage[] = "evtGetPolygonMovieWorkData2:0\n";
 const char evtMoviePrimaryLoadedMessage[] = "evtGetPolygonMovieWorkData2:1\n";
 const char evtMovieTertiaryLoadedMessage[] = "eventedit: load pm3 file\n";
@@ -878,24 +878,24 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
     printf(evtMovieBeforePrimaryLoadMessage);
-    handle1 = sdfReadNamedResource(path1, (u32 *)&address1, 0);
+    handle1 = sdfDevLoadFileEx(path1, (u32 *)&address1, 0);
     if (address1 == 0) {
         return NULL;
     }
     printf(evtMoviePrimaryLoadedMessage);
     if (mode == 0) {
-        handle2 = sdfReadNamedResource(path2, (u32 *)&address2, 0);
+        handle2 = sdfDevLoadFileEx(path2, (u32 *)&address2, 0);
     } else {
-        handle2 = evtPolygonMovieCreateHeader(&address2);
+        handle2 = evtAllocMovieWork(&address2);
     }
-    if (mode == 0 && sdfPathExists(path3) == 1) {
-        handle3 = sdfReadNamedResource(path3, (u32 *)&address3, 0);
+    if (mode == 0 && sdfFileCheckExist(path3) == 1) {
+        handle3 = sdfDevLoadFileEx(path3, (u32 *)&address3, 0);
         printf(evtMovieTertiaryLoadedMessage);
     } else {
         handle3 = evtPolygonMovieSynthesizePmd3Header(&address3);
     }
     printf(evtMovieResourcesReadyMessage);
-    work = evtPolygonMovieAllocWork();
+    work = InitPolygonMovieWorkData();
     evtPolygonMovieInitWork(work, address1, address2, address3);
     if (work == NULL) {
         return NULL;
@@ -911,7 +911,7 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
 
 extern u32 D_003BA8EC;
-extern s32 sdfPathExists(char *path);
+extern s32 sdfFileCheckExist(char *path);
 extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
@@ -932,15 +932,15 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
     evtFormatPolygonMoviePaths(event, id, path0, path1, path2);
-    work = evtPolygonMovieAllocWork();
+    work = InitPolygonMovieWorkData();
     work->eventId = event;
     work->sceneId = id;
-    work->mainResource.request = fileQueueDefaultCallbackRequest(path0);
+    work->mainResource.request = fileLoad(path0);
     work->flags |= 2;
-    work->secondaryResource.request = fileQueueDefaultCallbackRequest(path1);
+    work->secondaryResource.request = fileLoad(path1);
     work->flags |= 4;
-    if (sdfPathExists(path2) != 0) {
-        work->tertiaryResource.request = fileQueueDefaultCallbackRequest(path2);
+    if (sdfFileCheckExist(path2) != 0) {
+        work->tertiaryResource.request = fileLoad(path2);
         work->flags |= 0x10;
     } else {
         work->tertiaryResource.request = 0;
@@ -955,21 +955,21 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
 
 
 /* Flag operations act on the scheduler task's user-value context. */
-void evtSetContextFlag(KwlnTask *task) {
+void evtPictureDrawOn(KwlnTask *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)dds3GetProcessData(task);
     context->drawEnabled = context->drawEnabled | EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
-void evtClearContextFlag(KwlnTask *task) {
+void evtPictureDrawOff(KwlnTask *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)dds3GetProcessData(task);
     context->drawEnabled = context->drawEnabled & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
-void evtDestroyTaskHierarchy(u32 taskHandle) {
+void evtKillPictureProcess(u32 taskHandle) {
     dds3KillProcess((KwlnTask *)taskHandle, 1);
 }
 
@@ -981,8 +981,8 @@ EvtPictureWork *evtAllocateContext(void) {
     return context;
 }
 
-void evtSetConvertedContextValue(EvtPictureWork *pictureWork, const char *path) {
-    pictureWork->texture = itfLoadTextureFromAsset(path);
+void LoadTexture(EvtPictureWork *pictureWork, const char *path) {
+    pictureWork->texture = itfMiscLoadTexture(path);
 }
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_003ADDB0);

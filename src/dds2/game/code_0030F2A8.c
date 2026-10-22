@@ -11,9 +11,9 @@
 extern f32 sdfQuatDot(f32 *, f32 *);
 
 
-extern f32 fldNormalizedVectorDot(f32 *, f32 *);
+extern f32 vecDot(f32 *, f32 *);
 
-extern f32 fldVectorLength(f32 *);
+extern f32 vecLength(f32 *);
 
 
 
@@ -32,13 +32,13 @@ void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
 
 
 /* Rotate Y/Z in place; preserve the repeated trig-call order and leave X/W untouched. */
-void fldRotateVectorAroundX(f32 *vector, f32 angle) {
+void pipeCameraLerp(f32 *vector, f32 angle) {
     f32 rotated[4];
     f32 cosine = sdfCos(angle);
-    f32 sine = sdfSinPoly(angle);
+    f32 sine = sdfSin(angle);
 
     rotated[1] = vector[1] * cosine + vector[2] * sine;
-    sine = sdfSinPoly(angle);
+    sine = sdfSin(angle);
     cosine = sdfCos(angle);
     rotated[2] = vector[1] * -sine + vector[2] * cosine;
     vector[1] = rotated[1];
@@ -49,10 +49,10 @@ void fldRotateVectorAroundX(f32 *vector, f32 angle) {
 void fldRotateVectorAroundY(f32 *vector, f32 angle) {
     f32 rotated[4];
     f32 cosine = sdfCos(angle);
-    f32 sine = sdfSinPoly(angle);
+    f32 sine = sdfSin(angle);
 
     rotated[0] = vector[0] * cosine - vector[2] * sine;
-    sine = sdfSinPoly(angle);
+    sine = sdfSin(angle);
     cosine = sdfCos(angle);
     rotated[2] = vector[0] * sine + vector[2] * cosine;
     vector[0] = rotated[0];
@@ -60,13 +60,13 @@ void fldRotateVectorAroundY(f32 *vector, f32 angle) {
 }
 
 /* Rotate X/Y in place; preserve the repeated trig-call order and leave Z/W untouched. */
-void fldRotateVectorAroundZ(f32 *vector, f32 angle) {
+void vecRotate2D(f32 *vector, f32 angle) {
     f32 rotated[4];
     f32 cosine = sdfCos(angle);
-    f32 sine = sdfSinPoly(angle);
+    f32 sine = sdfSin(angle);
 
     rotated[0] = vector[0] * cosine + vector[1] * sine;
-    sine = sdfSinPoly(angle);
+    sine = sdfSin(angle);
     cosine = sdfCos(angle);
     rotated[1] = vector[0] * -sine + vector[1] * cosine;
     vector[0] = rotated[0];
@@ -74,7 +74,7 @@ void fldRotateVectorAroundZ(f32 *vector, f32 angle) {
 }
 
 
-float sdfVec3NormalizeInPlaceAndGetLength(float *vector);
+float vecNormalize(float *vector);
 
 /* Rotate XYZ about a normalized copy of axis; copy inputs before writing XYZ and leave W untouched. */
 void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
@@ -93,15 +93,15 @@ void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
     inputVector.y = vector[1];
     inputVector.z = vector[2];
     scratch = inputVector;
-    sdfVec3NormalizeInPlaceAndGetLength(&normalizedAxis.x);
+    vecNormalize(&normalizedAxis.x);
     rotationMatrix[0] = normalizedAxis.x * normalizedAxis.x * (1.0f - sdfCos(angle)) + sdfCos(angle);
-    rotationMatrix[1] = normalizedAxis.x * normalizedAxis.y * (1.0f - sdfCos(angle)) - normalizedAxis.z * sdfSinPoly(angle);
-    rotationMatrix[2] = normalizedAxis.x * normalizedAxis.z * (1.0f - sdfCos(angle)) + normalizedAxis.y * sdfSinPoly(angle);
-    rotationMatrix[3] = normalizedAxis.y * normalizedAxis.x * (1.0f - sdfCos(angle)) + normalizedAxis.z * sdfSinPoly(angle);
+    rotationMatrix[1] = normalizedAxis.x * normalizedAxis.y * (1.0f - sdfCos(angle)) - normalizedAxis.z * sdfSin(angle);
+    rotationMatrix[2] = normalizedAxis.x * normalizedAxis.z * (1.0f - sdfCos(angle)) + normalizedAxis.y * sdfSin(angle);
+    rotationMatrix[3] = normalizedAxis.y * normalizedAxis.x * (1.0f - sdfCos(angle)) + normalizedAxis.z * sdfSin(angle);
     rotationMatrix[4] = normalizedAxis.y * normalizedAxis.y * (1.0f - sdfCos(angle)) + sdfCos(angle);
-    rotationMatrix[5] = normalizedAxis.y * normalizedAxis.z * (1.0f - sdfCos(angle)) - normalizedAxis.x * sdfSinPoly(angle);
-    rotationMatrix[6] = normalizedAxis.z * normalizedAxis.x * (1.0f - sdfCos(angle)) - normalizedAxis.y * sdfSinPoly(angle);
-    rotationMatrix[7] = normalizedAxis.z * normalizedAxis.y * (1.0f - sdfCos(angle)) + normalizedAxis.x * sdfSinPoly(angle);
+    rotationMatrix[5] = normalizedAxis.y * normalizedAxis.z * (1.0f - sdfCos(angle)) - normalizedAxis.x * sdfSin(angle);
+    rotationMatrix[6] = normalizedAxis.z * normalizedAxis.x * (1.0f - sdfCos(angle)) - normalizedAxis.y * sdfSin(angle);
+    rotationMatrix[7] = normalizedAxis.z * normalizedAxis.y * (1.0f - sdfCos(angle)) + normalizedAxis.x * sdfSin(angle);
     rotationMatrix[8] = normalizedAxis.z * normalizedAxis.z * (1.0f - sdfCos(angle)) + sdfCos(angle);
     vector[0] = scratch.x * rotationMatrix[0] + scratch.y * rotationMatrix[3] + scratch.z * rotationMatrix[6];
     vector[1] = scratch.x * rotationMatrix[1] + scratch.y * rotationMatrix[4] + scratch.z * rotationMatrix[7];
@@ -127,20 +127,20 @@ void sdfVec3AddComponents(float x, float y, float z, float *vector) {
 }
 
 /* Store X/Y/Z; preserve this game's scalar-first argument order. */
-void sdfSetVectorComponents(f32 x, f32 y, f32 z, f32 *out) {
+void vecSet(f32 x, f32 y, f32 z, f32 *out) {
     out[0] = x;
     out[1] = y;
     out[2] = z;
 }
 
-void sdfVec3ScaleInPlace(float factor, float *vector) {
+void vecScale(float factor, float *vector) {
     *vector = *vector * factor;
     vector[1] = vector[1] * factor;
     vector[2] = vector[2] * factor;
 }
 
-float sdfVec3NormalizeInPlaceAndGetLength(float *vector) {
-    float length = fldVectorLength(vector);
+float vecNormalize(float *vector) {
+    float length = vecLength(vector);
 
     vector[0] = vector[0] / length;
     vector[1] = vector[1] / length;
@@ -148,55 +148,55 @@ float sdfVec3NormalizeInPlaceAndGetLength(float *vector) {
     return length;
 }
 
-float fldVectorLength(float *v) {
+float vecLength(float *v) {
     return fsqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
 /* Normalize copies of the input vectors; callers' vectors stay untouched. */
-float fldNormalizedVectorDot(float *left, float *right) {
+float vecDot(float *left, float *right) {
     SdfMathVector4 normalizedLeft, normalizedRight;
     normalizedLeft = *(SdfMathVector4 *)left;
     normalizedRight = *(SdfMathVector4 *)right;
-    sdfVec3NormalizeInPlaceAndGetLength(&normalizedLeft.x);
-    sdfVec3NormalizeInPlaceAndGetLength(&normalizedRight.x);
+    vecNormalize(&normalizedLeft.x);
+    vecNormalize(&normalizedRight.x);
     return normalizedLeft.x * normalizedRight.x + normalizedLeft.y * normalizedRight.y + normalizedLeft.z * normalizedRight.z;
 }
 
-float fldVec3AngleBetween(a, b)
+float vecAngleBetween(a, b)
 float *a;
 float *b;
 {
-    return acosf(fldNormalizedVectorDot(a, b));
+    return acosf(vecDot(a, b));
 }
 
 /* Cross the normalized input copies; the result itself is not normalized. */
-void fldNormalizedVectorCross(float *output, float *left, float *right) {
+void vecTranslate(float *output, float *left, float *right) {
     SdfMathVector4 normalizedLeft, normalizedRight;
     normalizedLeft = *(SdfMathVector4 *)left;
     normalizedRight = *(SdfMathVector4 *)right;
-    sdfVec3NormalizeInPlaceAndGetLength(&normalizedLeft.x);
-    sdfVec3NormalizeInPlaceAndGetLength(&normalizedRight.x);
+    vecNormalize(&normalizedLeft.x);
+    vecNormalize(&normalizedRight.x);
     output[0] = normalizedLeft.y * normalizedRight.z - normalizedLeft.z * normalizedRight.y;
     output[1] = normalizedLeft.z * normalizedRight.x - normalizedLeft.x * normalizedRight.z;
     output[2] = normalizedLeft.x * normalizedRight.y - normalizedLeft.y * normalizedRight.x;
 }
 
 /* Rotate rows 1 and 2 of the matrix about the X axis by `angle`. */
-void sdfRotateMatrixBasisAboutX(SdfMat4 *matrix, f32 angle) {
+void mtxRotateX(SdfMat4 *matrix, f32 angle) {
     SdfMat4 rotated;
 
     rotated.m[0] = matrix->m[0];
     rotated.m[1] = matrix->m[1];
     rotated.m[2] = matrix->m[2];
     rotated.m[3] = matrix->m[3];
-    rotated.m[4] = matrix->m[4] * sdfCos(angle) + matrix->m[8] * sdfSinPoly(angle);
-    rotated.m[5] = matrix->m[5] * sdfCos(angle) + matrix->m[9] * sdfSinPoly(angle);
-    rotated.m[6] = matrix->m[6] * sdfCos(angle) + matrix->m[10] * sdfSinPoly(angle);
-    rotated.m[7] = matrix->m[7] * sdfCos(angle) + matrix->m[11] * sdfSinPoly(angle);
-    rotated.m[8] = matrix->m[4] * -sdfSinPoly(angle) + matrix->m[8] * sdfCos(angle);
-    rotated.m[9] = matrix->m[5] * -sdfSinPoly(angle) + matrix->m[9] * sdfCos(angle);
-    rotated.m[10] = matrix->m[6] * -sdfSinPoly(angle) + matrix->m[10] * sdfCos(angle);
-    rotated.m[11] = matrix->m[7] * -sdfSinPoly(angle) + matrix->m[11] * sdfCos(angle);
+    rotated.m[4] = matrix->m[4] * sdfCos(angle) + matrix->m[8] * sdfSin(angle);
+    rotated.m[5] = matrix->m[5] * sdfCos(angle) + matrix->m[9] * sdfSin(angle);
+    rotated.m[6] = matrix->m[6] * sdfCos(angle) + matrix->m[10] * sdfSin(angle);
+    rotated.m[7] = matrix->m[7] * sdfCos(angle) + matrix->m[11] * sdfSin(angle);
+    rotated.m[8] = matrix->m[4] * -sdfSin(angle) + matrix->m[8] * sdfCos(angle);
+    rotated.m[9] = matrix->m[5] * -sdfSin(angle) + matrix->m[9] * sdfCos(angle);
+    rotated.m[10] = matrix->m[6] * -sdfSin(angle) + matrix->m[10] * sdfCos(angle);
+    rotated.m[11] = matrix->m[7] * -sdfSin(angle) + matrix->m[11] * sdfCos(angle);
     rotated.m[12] = matrix->m[12];
     rotated.m[13] = matrix->m[13];
     rotated.m[14] = matrix->m[14];
@@ -205,21 +205,21 @@ void sdfRotateMatrixBasisAboutX(SdfMat4 *matrix, f32 angle) {
 }
 
 /* Rotate rows 0 and 2 of the matrix about the Y axis by `angle`. */
-void sdfRotateMatrixBasisAboutY(SdfMat4 *matrix, f32 angle) {
+void mtxRotateY(SdfMat4 *matrix, f32 angle) {
     SdfMat4 rotated;
 
-    rotated.m[0] = matrix->m[0] * sdfCos(angle) + matrix->m[8] * -sdfSinPoly(angle);
-    rotated.m[1] = matrix->m[1] * sdfCos(angle) + matrix->m[9] * -sdfSinPoly(angle);
-    rotated.m[2] = matrix->m[2] * sdfCos(angle) + matrix->m[10] * -sdfSinPoly(angle);
-    rotated.m[3] = matrix->m[3] * sdfCos(angle) + matrix->m[11] * -sdfSinPoly(angle);
+    rotated.m[0] = matrix->m[0] * sdfCos(angle) + matrix->m[8] * -sdfSin(angle);
+    rotated.m[1] = matrix->m[1] * sdfCos(angle) + matrix->m[9] * -sdfSin(angle);
+    rotated.m[2] = matrix->m[2] * sdfCos(angle) + matrix->m[10] * -sdfSin(angle);
+    rotated.m[3] = matrix->m[3] * sdfCos(angle) + matrix->m[11] * -sdfSin(angle);
     rotated.m[4] = matrix->m[4];
     rotated.m[5] = matrix->m[5];
     rotated.m[6] = matrix->m[6];
     rotated.m[7] = matrix->m[7];
-    rotated.m[8] = matrix->m[0] * sdfSinPoly(angle) + matrix->m[8] * sdfCos(angle);
-    rotated.m[9] = matrix->m[1] * sdfSinPoly(angle) + matrix->m[9] * sdfCos(angle);
-    rotated.m[10] = matrix->m[2] * sdfSinPoly(angle) + matrix->m[10] * sdfCos(angle);
-    rotated.m[11] = matrix->m[3] * sdfSinPoly(angle) + matrix->m[11] * sdfCos(angle);
+    rotated.m[8] = matrix->m[0] * sdfSin(angle) + matrix->m[8] * sdfCos(angle);
+    rotated.m[9] = matrix->m[1] * sdfSin(angle) + matrix->m[9] * sdfCos(angle);
+    rotated.m[10] = matrix->m[2] * sdfSin(angle) + matrix->m[10] * sdfCos(angle);
+    rotated.m[11] = matrix->m[3] * sdfSin(angle) + matrix->m[11] * sdfCos(angle);
     rotated.m[12] = matrix->m[12];
     rotated.m[13] = matrix->m[13];
     rotated.m[14] = matrix->m[14];
@@ -228,17 +228,17 @@ void sdfRotateMatrixBasisAboutY(SdfMat4 *matrix, f32 angle) {
 }
 
 /* Rotate rows 0 and 1 of the matrix about the Z axis by `angle`. */
-void sdfRotateMatrixBasisAboutZ(SdfMat4 *matrix, f32 angle) {
+void mtxRotateZ(SdfMat4 *matrix, f32 angle) {
     SdfMat4 rotated;
 
-    rotated.m[0] = matrix->m[0] * sdfCos(angle) + matrix->m[4] * sdfSinPoly(angle);
-    rotated.m[1] = matrix->m[1] * sdfCos(angle) + matrix->m[5] * sdfSinPoly(angle);
-    rotated.m[2] = matrix->m[2] * sdfCos(angle) + matrix->m[6] * sdfSinPoly(angle);
-    rotated.m[3] = matrix->m[3] * sdfCos(angle) + matrix->m[7] * sdfSinPoly(angle);
-    rotated.m[4] = matrix->m[0] * -sdfSinPoly(angle) + matrix->m[4] * sdfCos(angle);
-    rotated.m[5] = matrix->m[1] * -sdfSinPoly(angle) + matrix->m[5] * sdfCos(angle);
-    rotated.m[6] = matrix->m[2] * -sdfSinPoly(angle) + matrix->m[6] * sdfCos(angle);
-    rotated.m[7] = matrix->m[3] * -sdfSinPoly(angle) + matrix->m[7] * sdfCos(angle);
+    rotated.m[0] = matrix->m[0] * sdfCos(angle) + matrix->m[4] * sdfSin(angle);
+    rotated.m[1] = matrix->m[1] * sdfCos(angle) + matrix->m[5] * sdfSin(angle);
+    rotated.m[2] = matrix->m[2] * sdfCos(angle) + matrix->m[6] * sdfSin(angle);
+    rotated.m[3] = matrix->m[3] * sdfCos(angle) + matrix->m[7] * sdfSin(angle);
+    rotated.m[4] = matrix->m[0] * -sdfSin(angle) + matrix->m[4] * sdfCos(angle);
+    rotated.m[5] = matrix->m[1] * -sdfSin(angle) + matrix->m[5] * sdfCos(angle);
+    rotated.m[6] = matrix->m[2] * -sdfSin(angle) + matrix->m[6] * sdfCos(angle);
+    rotated.m[7] = matrix->m[3] * -sdfSin(angle) + matrix->m[7] * sdfCos(angle);
     rotated.m[8] = matrix->m[8];
     rotated.m[9] = matrix->m[9];
     rotated.m[10] = matrix->m[10];
@@ -251,7 +251,7 @@ void sdfRotateMatrixBasisAboutZ(SdfMat4 *matrix, f32 angle) {
 }
 
 /* Transpose through a local copy so source and destination may alias. */
-void sdfTransposeMatrix(SdfMat4 *destination, SdfMat4 *source) {
+void mtxStore(SdfMat4 *destination, SdfMat4 *source) {
     SdfMat4 sourceCopy = *source;
 
     destination->m[0] = sourceCopy.m[0];
@@ -302,9 +302,9 @@ struct SdfMemBlock *sdfSampleBernsteinCurve(SdfMathVector4 *controlPoints, s32 d
     s32 j;
 
     coefficientBlock = sdfMemAllocDirect(degree + 1);
-    coefficients = (f32 *)sdfMemoryGetBlockAddress(coefficientBlock);
+    coefficients = (f32 *)sdfMemGetPtr(coefficientBlock);
     outputBlock = sdfMemAllocDirect(sampleCount + 2);
-    output = (SdfMathVector4 *)sdfMemoryGetBlockAddress(outputBlock);
+    output = (SdfMathVector4 *)sdfMemGetPtr(outputBlock);
 
     for (i = 0; i <= degree; i++) {
         coefficients[i] = 1.0f;
@@ -371,7 +371,7 @@ float sdfPowFloatByTruncatedExponent(float base, float exponent) {
     return power;
 }
 
-void sdfConvertMatrixToQuaternion(f32 quaternion[4], f32 matrix[4][4]) {
+void vecDistance(f32 quaternion[4], f32 matrix[4][4]) {
     f32 trace;
     f32 scale;
     s32 i;

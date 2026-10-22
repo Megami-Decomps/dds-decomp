@@ -52,7 +52,7 @@ typedef struct EvtLoadedRecord {
 
 typedef char EvtLoadedRecord_size_must_be_0x0C[(sizeof(EvtLoadedRecord) == 0x0C) ? 1 : -1];
 
-/* The primary object returned by dds3GetWorldObject is distinct from the active
+/* The primary object returned by dds3GetActiveScene is distinct from the active
  * world's WorldInfo payload. Event lookup, lip-sync and viewer code share this chain:
  * object +0x18 -> table +0x08 -> 0x0C-byte slot entries, each with head +0x04.
  * DDS1 and DDS2 use the same observed layout. Node payloads depend on the slot. */
@@ -92,13 +92,13 @@ typedef char EvtWorldTable_size_must_be_0x40[
 
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
-void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled);
-void dds3SetWorldObjectValue(EffWorldNode *worldNode, u32 areaRoomKey);
-s32 dds3GetWorldObjectValue(EffWorldNode *worldNode);
+void dds3VisibleSceneBasic(EffWorldNode *object, s8 enabled);
+void dds3SetMapNo(EffWorldNode *worldNode, u32 areaRoomKey);
+s32 dds3GetMapNo(EffWorldNode *worldNode);
 
 /* Scene resource scripts are selected by name on a world node. The start
  * result is the task-handle word returned by the script task creator. */
 s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName);
-void evtDestroyNamedTask(void *unusedContext, const char *taskName);
+void dds3SceneBasicEndScript(void *unusedContext, const char *taskName);
 
 #endif /* EVT_WORLD_H */

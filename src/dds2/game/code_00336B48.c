@@ -68,18 +68,18 @@ typedef struct {
 extern s32 D_00439180;
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
-void sdfVuMultiplyPrimaryByScratch(void) {
+void MultMatrixNoArg_C(void) {
         VU0_MATRIX4_MUL_PRIMARY_LEFT();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf20-vf23 (4x4 product) */
-void sdfVuMultiplyScratchByPrimary(void) {
+void MultMatrixRevNoArg_C(void) {
         VU0_MATRIX4_MUL_SCRATCH_LEFT();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void sdfPremultiplyVuMatrixFromMemory(void *matrix) {
+void MultMatrix(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
 }
@@ -87,18 +87,18 @@ void sdfPremultiplyVuMatrixFromMemory(void *matrix) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfPostmultiplyVuMatrixFromMemory(const void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
-    sdfMultiplyVuMatrixInPlace();
+    MultMatrixRevNoArg();
 }
 
 /* Transform inputVector by the matrix resident in VU0; write outputVector. */
-void sdfVuTransformVector(void *outputVector, void *inputVector) {
+void ApplyMatrix(void *outputVector, void *inputVector) {
     VU0_LOAD_VF(vf10, inputVector);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, outputVector);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-f32 sdfVuDot3(void *left, void *right) {
+f32 InnerProduct(void *left, void *right) {
     f32 dot;
     VU0_LOAD_VF(vf10, left);
     VU0_LOAD_VF(vf11, right);
@@ -107,7 +107,7 @@ f32 sdfVuDot3(void *left, void *right) {
 }
 
 /* Write the XYZ cross product of leftVector and rightVector via VU0. */
-void sdfVuCross3(void *outputVector, void *leftVector, void *rightVector) {
+void OuterProduct(void *outputVector, void *leftVector, void *rightVector) {
     VU0_LOAD_VF(vf10, leftVector);
     VU0_LOAD_VF(vf11, rightVector);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
@@ -117,7 +117,7 @@ void sdfVuCross3(void *outputVector, void *leftVector, void *rightVector) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* Build direction from the first vector relative to the second, then derive up/right. */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
-void sdfVuBuildLookAtBasis(const void *directionPoint, const void *basisOrigin, const void *up) {
+void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
     VU0_LOAD_VF(vf10, basisOrigin);
     VU0_MOVE_VF(vf31, vf10);
     VU0_MOVE_VF(vf11, vf10);
@@ -134,14 +134,14 @@ void sdfVuBuildLookAtBasis(const void *directionPoint, const void *basisOrigin, 
     VU0_MOVE_VF(vf10, vf30);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_MOVE_VF(vf29, vf10);
-    sdfInvertRigidVuTransform();
+    ReverseMatrix();
 }
 
-void sdfConfigureScratchpadRingTransfer(void) {
+void sdfVu1Init(void) {
 }
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */
-void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition) {
+void corePktSetupPointBuff(VuWork *work, s32 ringPosition) {
     u32 ringEnd = (u32)work + 0x78;
     if (ringPosition < 0x80) {
         work->ringWrapCount = 0x80 - ringPosition;
@@ -166,7 +166,7 @@ void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition) {
 }
 
 /* Decode four leading halfwords; selectionMask filters flags, not the payload. */
-void sdfInitializeVuWorkParameters(VuWork *work, u16 *parameterWords, u32 selectionMask) {
+void corePktInitCb(VuWork *work, u16 *parameterWords, u32 selectionMask) {
     u8 *payload = (u8 *)(parameterWords + 4);
     u16 ringPosition;
     u16 parameterFlags;
@@ -184,18 +184,18 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *parameterWords, u32 select
     D_00439184 = selectedFlags & 0x78;
     work->payload = payload;
     work->state = 0;
-    sdfVuConfigureWorkRingDma(work, ringPosition);
+    corePktSetupPointBuff(work, ringPosition);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
-void sdfVuRotateObjectBasis(void *vectors) {
+void corePktLoadWorldLightMtx(void *vectors) {
     void *m = (void *)sdfVuSelectedTransformMatrix;
     VU0_ROTATE_BASIS_AND_CACHE(vectors, m, sdfVuObjectBasisCache);
 }
 
 /* vu0 routine: modulate and clamp packed colors against the reference rows. */
-void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference, u32 packedColor,
                    u32 firstColor, u32 secondColor,
                    f32 blend, f32 scale, f32 y) {
     f32 scaledY;
@@ -210,8 +210,8 @@ void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference, 
                                      firstColor, secondColor, blend);
 }
 
-void sdfVuTransformWorkAtOffset(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
-    sdfVuBuildPackedColorTransform(out, sdfVuSelectedTransformMatrix, packedColor,
+void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
+    corePktMakeFaceDivParm(out, sdfVuSelectedTransformMatrix, packedColor,
                   work->unk08, work->unk04,
                   work->unk1C,
                   work->x + deltaX,

@@ -149,7 +149,7 @@ independently supported contract:
 
 | Observation | Recovered fact | Validation beyond the final instruction diff |
 | --- | --- | --- |
-| Same `abs.s`, different motion of nearby constants | Game module uses the existing `ffabsf` asm helper | Paired DDS1/DDS2 `effCalcViewAxisWidthFactor`, larger `func_001726E8`, and a kernel builtin counterexample |
+| Same `abs.s`, different motion of nearby constants | Game module uses the existing `ffabsf` asm helper | Paired DDS1/DDS2 `dds3BillboardGetDirectionScale`, larger `func_001726E8`, and a kernel builtin counterexample |
 | Indexed displacement exceeds the apparent scalar remainder | Nested record levels contribute separate offset splits | `BtlState.debug`, its actual extent/offset guards, and multiple related accesses |
 | X/Y pointers share differently despite equal byte offsets | Real coordinate arrays differ from two scalar members | `BattleActorPanelEntry.position[2]`, both title consumers and pass-00 address RTL |
 | A store/reload has unexpected dependencies | Access through a union component differs from access through its actual active member type | Existing `BattleLinkedEffectState` member, lifecycle/mode evidence and scheduler edges |
@@ -280,7 +280,7 @@ the full unit and both retail builds pass.
 
 An explicit positive guard around a post-tested cached-cursor loop keeps the
 five-word residual. Direct owner access in neighboring
-`dds3RemoveCurrentWorldValueEntry` is byte-neutral and leaves seven differing
+`dds3DeleteBasicArray` is byte-neutral and leaves seven differing
 words. The rule is to inspect the actual PRE and pointer quantities, rather
 than replace cached cursors indiscriminately.
 
@@ -403,7 +403,7 @@ manufacturing one.
 ## Keep experiments useful and bounded
 
 For VU/MMI operands, check which scalar transfers belong to GCC and which
-belong inside the SDK block. DDS2 `sdfVuMultiplyNodeColors` initially differed
+belong inside the SDK block. DDS2 `corePktSetConstColor` initially differed
 by three prologue words: a candidate with an explicit `mfc1` inside the block
 gave the work-pointer copy scheduler priority 5 and the scale constant 4.
 The SDK-style `"r"` input for the binary32 scale, consumed by `qmtc2`, lets

@@ -22,16 +22,16 @@
 #include "sdf.h"
 /* Declared before first use (were implicit int). */
 extern void itfMesBuildEntryGlyph(ItfMesState *mes);
-extern void itfMesInitCharTable(s32 *table);
+extern void CommitVarTable(s32 *table);
 #include "sdf_debug_api.h"
 extern ItfMesGlobals itfMesWork;
 
 
 
 extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
-extern void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue);
-extern s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask);
-extern s32 sndSeqSelectPoll(ItfMesState *);
+extern void ChangeFontColorAll(FrFontGlyph *node, u8 flagValue);
+extern s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask);
+extern s32 SelectItem(ItfMesState *);
 extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
 extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *glyph);
@@ -45,15 +45,15 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern ItfMesDebugState D_00357D80;
 
 
-extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
+extern void itfPnlDraw(UiSprite *sprite, SdfPoolNode *surface);
 
-extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
+extern void ChangeFontPosition(FrFontGlyph *node, s32 dx, s32 dy);
 
-extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
+extern void DebugDrawWindowLine(UiSprite *sprite);
 
-extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *seq);
+extern s32 SelectItemDefKey(ItfMesBlk40 *seq);
 
-extern void itfMesSetRowItemFlag(FrFontGlyph *glyphChain, s32 rowIndex, s32 rowCount, s32 requestedFlagValue);
+extern void ChangeFontColor(FrFontGlyph *glyphChain, s32 rowIndex, s32 rowCount, s32 requestedFlagValue);
 extern s8 D_00324530[];
 
 
@@ -83,21 +83,21 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
         }
     }
     spriteTop = pos->y + place->bounds[1];
-    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], spriteTop, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->renderValue);
+    itfPnlSetPosition(place->sprite, pos->x + place->bounds[0], spriteTop, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->renderValue);
     place->sprite->screenY = spriteTop;
-    itfPanelUpdateValuesAndNotify(place->sprite, place->red, place->green, place->blue, 0);
+    itfPnlSetColor(place->sprite, place->red, place->green, place->blue, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
-void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
+void OpenCheckSpeakerWindow(ItfMesState *panel) {
     ItfMesBlk14 *origin = &panel->blk14;
     ItfMesBlkA4 *place = &panel->blkA4;
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
             place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesWork.windowTexture);
-            itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->renderValue);
-            itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
+            itfPnlSetPosition(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->renderValue);
+            itfPnlSetColor(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
         panel->flags = (panel->flags & ~0x3000) | 0x1000;
     } else if (place->frame != 0) {
@@ -105,7 +105,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
     }
 }
 
-void itfResetCursorPositionAndState(ItfMesBlk14 *cursor, s32 resetPosition) {
+void InitializeSpeaker(ItfMesBlk14 *cursor, s32 resetPosition) {
     if (resetPosition != 0) {
         cursor->x = 0x280;
         cursor->y = 0xa10;
@@ -114,7 +114,7 @@ void itfResetCursorPositionAndState(ItfMesBlk14 *cursor, s32 resetPosition) {
     cursor->selectedIndex = 0xffff;
 }
 
-void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
+void InitializeMessage(ItfMesEntryBlock *cur, s32 resetPos) {
     if (resetPos != 0) {
         cur->x = 0x4B0;
         cur->y = 0xAF8;
@@ -157,7 +157,7 @@ void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     itfMesConfigurePanelBoundsAndFadeLimit(block, 0, 0);
 }
 
-void itfClearDrawStateWords(ItfMesTextSlots *slots) {
+void InitializeVariable(ItfMesTextSlots *slots) {
     s32 remaining;
     u32 *cursor;
 
@@ -170,7 +170,7 @@ void itfClearDrawStateWords(ItfMesTextSlots *slots) {
     } while (-1 < remaining);
 }
 
-void itfResetBattleFadeState(BtlFade *fade, s32 preserveKind) {
+void InitializeCurCtr(BtlFade *fade, s32 preserveKind) {
     if (preserveKind == 0) {
         fade->kind = 0;
     }
@@ -180,7 +180,7 @@ void itfResetBattleFadeState(BtlFade *fade, s32 preserveKind) {
     fade->textAdvanceFrameCount = 0;
 }
 
-void btlSetFadePhaseAlphaTimer(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
+void ForceSetCurCtr(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
     fade->phase = phase;
     fade->alpha = alpha;
     fade->timer = timer;
@@ -189,21 +189,21 @@ void btlSetFadePhaseAlphaTimer(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
 void btlReleaseEffectResourceHandles(ItfMesState *effect) {
     ItfMesBlkA4 *place = &effect->blkA4;
     if (place->frame != NULL) {
-        itfPanelReleasePrimitiveResources(place->frame);
+        itfPnlRelease(place->frame);
         place->frame = NULL;
     }
     if (place->sprite != NULL) {
-        itfPanelReleasePrimitiveResources(place->sprite);
+        itfPnlRelease(place->sprite);
         place->sprite = NULL;
     }
     if (place->overlay != NULL) {
-        itfPanelReleasePrimitiveResources(place->overlay);
+        itfPnlRelease(place->overlay);
         place->overlay = NULL;
     }
     effect->flags &= ~0xF00;
 }
 
-void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
+void ReleaseAllVariable(ItfMesTextSlots *slots) {
     s32 remaining;
     s32 index;
 
@@ -273,7 +273,7 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s
 }
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
-void btlUpdateFadeIndicator(ItfMesState *panel);
+void CalcCurCtr(ItfMesState *panel);
 
 void itfMesAdvanceEntryText(ItfMesState *mes);
 
@@ -281,7 +281,7 @@ void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *object) {
     itfMesUpdatePanelFades(object);
     itfMesAdvanceEntryText(object);
     itfUpdateSoundSelectionTransition(object);
-    btlUpdateFadeIndicator(object);
+    CalcCurCtr(object);
 }
 
 void itfMesUpdatePanelFades(ItfMesState *panel) {
@@ -323,7 +323,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
         if (sprite->alpha <= 0) {
             sprite->alpha = 0;
             panel->flags &= ~0x3000;
-            itfPanelReleasePrimitiveResources(sprite);
+            itfPnlRelease(sprite);
             place->frame = NULL;
         }
         break;
@@ -344,7 +344,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
         if (sprite->alpha <= 0) {
             sprite->alpha = 0;
             panel->flags &= ~0xC00;
-            itfPanelReleasePrimitiveResources(sprite);
+            itfPnlRelease(sprite);
             place->overlay = NULL;
         }
         break;
@@ -375,20 +375,20 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
             return;
         }
         if (entryBlock->textInterfaceMask != 0) {
-            sndSetSequenceVolumePan(9, 0x7F, 0x3F);
+            p2sdPlaySE(9, 0x7F, 0x3F);
         }
-        itfResetBattleFadeState(&mes->fade, 0);
+        InitializeCurCtr(&mes->fade, 0);
         entryBlock->itemIndex++;
         if (entryBlock->itemIndex >= entryBlock->tableCount) {
             entryBlock->textState = -1;
             return;
         }
-        itfMesInitCharTable((s32 *)mes->textSlots.addresses);
+        CommitVarTable((s32 *)mes->textSlots.addresses);
         if (mes->temporaryFontEntry != 0) {
-            frFontLoadTemporaryEntry(mes->temporaryFontEntry);
+            frSetExtDic(mes->temporaryFontEntry);
         }
         itfMesBuildEntryGlyph(mes);
-        itfMesCreatePanelOriginFrameWhenVisible(mes);
+        OpenCheckSpeakerWindow(mes);
         mes->flags = (mes->flags & ~7) | 3;
         return;
     }
@@ -430,22 +430,22 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
         }
         if ((flags & 0xC00) != 0x400) {
             if (entry->glyphChain != NULL) {
-                itfMesSetChildChainFlags(entry->glyphChain, 3);
+                ChangeFontColorAll(entry->glyphChain, 3);
             }
             selection->selectionState = 2;
             panel->flags = (panel->flags & ~0x38) | 0x18;
         }
         break;
     case 2:
-        if ((flags & 0x38) == 0x20 && sndSeqSelectPoll(panel) == 1) {
-            selection->glyphChain = itfMesTrimGlyphChainToRow(selection->glyphChain,
+        if ((flags & 0x38) == 0x20 && SelectItem(panel) == 1) {
+            selection->glyphChain = UnchainFontHandleUnit(selection->glyphChain,
                 selection->selectedIndex, selection->rowCount);
             if ((flags & 0xC00) == 0x800) {
                 panel->flags |= 0xC00;
             }
-            selection->selectedIndex = itfMesNthClearBit(selection->selectedIndex, selection->panelValue);
+            selection->selectedIndex = GetMaskedIndex(selection->selectedIndex, selection->panelValue);
             selection->optionCount = 0;
-            btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
+            ForceSetCurCtr(&panel->fade, 1, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;
             selection->glyphColorIntensity = 0x80;
             selection->selectionState = 3;
@@ -456,9 +456,9 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
         if (selection->glyphColorIntensity <= 0) {
             selection->glyphColorIntensity = 0;
             selection->selectionState = 4;
-            itfResetBattleFadeState(&panel->fade, 0);
+            InitializeCurCtr(&panel->fade, 0);
         }
-        itfMesRecolorNodeChildren(selection->glyphChain, selection->glyphColorIntensity);
+        ChangeFontAlpha(selection->glyphChain, selection->glyphColorIntensity);
         return;
     case 4:
         if (entry->glyphChain != NULL && entry->y < 0xAF8) {
@@ -475,22 +475,22 @@ void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
     ItfMesEntryBlock *pos = &panel->entryBlock;
     ItfMesBlkA4 *place = &panel->blkA4;
     pos->y += dy;
-    itfMesOffsetNodeChain(pos->glyphChain, 0, dy);
+    ChangeFontPosition(pos->glyphChain, 0, dy);
     if (place->sprite != 0) {
-        itfAdvancePanelLayoutAndNotify(place->sprite, 0, dy, 0, 0, 0);
+        itfPnlSetPositionOffset(place->sprite, 0, dy, 0, 0, 0);
     }
     if (place->frame != 0) {
-        itfAdvancePanelLayoutAndNotify(place->frame, 0, dy, 0, dy, 0);
+        itfPnlSetPositionOffset(place->frame, 0, dy, 0, dy, 0);
     }
     if (origin->glyphChain != NULL) {
         origin->y += dy;
-        itfMesOffsetNodeChain(origin->glyphChain, 0, dy);
+        ChangeFontPosition(origin->glyphChain, 0, dy);
     }
 }
 
-void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir);
+void SelectItemMove(ItfMesBlk40 *obj, s32 dir);
 
-s32 sndSeqSelectPoll(ItfMesState *panel) {
+s32 SelectItem(ItfMesState *panel) {
     ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
@@ -506,18 +506,18 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
         }
     }
     if (dir != 0) {
-        sndStepSequenceIndex(sel, dir);
-        itfResetBattleFadeState(&panel->fade, 1);
+        SelectItemMove(sel, dir);
+        InitializeCurCtr(&panel->fade, 1);
     }
     if (kwlnTaskPadButtonStates.confirm < 0) {
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        p2sdPlaySE(8, 0x7F, 0x3F);
         return 1;
     }
-    if (sel->optionCount > 0 && (index = itfMesFindPressedOptionRank(sel)) >= 0) {
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+    if (sel->optionCount > 0 && (index = SelectItemDefKey(sel)) >= 0) {
+        p2sdPlaySE(8, 0x7F, 0x3F);
         if (index != sel->selectedIndex) {
-            itfMesSetRowItemFlag(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
-            itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 1);
+            ChangeFontColor(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
+            ChangeFontColor(sel->glyphChain, index, sel->rowCount, 1);
             sel->selectedIndex = index;
             sel->savedIndex = index;
         }
@@ -526,10 +526,10 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
     return 0;
 }
 
-void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir) {
+void SelectItemMove(ItfMesBlk40 *obj, s32 dir) {
     s32 cur = obj->selectedIndex;
     u16 maxv;
-    itfMesSetRowItemFlag(obj->glyphChain, cur, obj->rowCount, 0);
+    ChangeFontColor(obj->glyphChain, cur, obj->rowCount, 0);
     if (dir < 0) {
         cur = cur - 1;
         if (cur < 0) {
@@ -543,13 +543,13 @@ void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir) {
         }
         maxv = obj->rowCount;
     }
-    itfMesSetRowItemFlag(obj->glyphChain, cur, (s16)maxv, 1);
+    ChangeFontColor(obj->glyphChain, cur, (s16)maxv, 1);
     obj->selectedIndex = cur;
     obj->savedIndex = cur;
-    sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+    p2sdPlaySE(1, 0x7F, 0x3F);
 }
 
-s32 itfMesFindPressedOptionRank(ItfMesBlk40 *selection) {
+s32 SelectItemDefKey(ItfMesBlk40 *selection) {
     s32 i;
 
     for (i = 0; i < selection->optionCount; i++) {
@@ -578,7 +578,7 @@ s32 itfMesFindPressedOptionRank(ItfMesBlk40 *selection) {
 }
 
 
-void btlUpdateFadeIndicator(ItfMesState *panel) {
+void CalcCurCtr(ItfMesState *panel) {
     BtlFade *fade = &panel->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
@@ -642,7 +642,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
                     selection->selectedIndex = 0;
                     selection->savedIndex = 0;
                 }
-                itfMesSetRowItemFlag(selection->glyphChain, selection->selectedIndex, selection->rowCount, 1);
+                ChangeFontColor(selection->glyphChain, selection->selectedIndex, selection->rowCount, 1);
                 panel->flags = (panel->flags & ~0x38) | 0x20;
                 panel->fade.kind = 2;
             }
@@ -668,24 +668,24 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
     place = &panel->blkA4;
     if ((panel->flags & 0x300) >= 0x100) {
         if (panel->panelMode != 3) {
-            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
+            itfPnlDraw(place->sprite, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
         }
         itfMesWork.flags |= 2;
         if (place->overlay != 0) {
-            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
+            itfPnlDraw(place->overlay, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
         }
     }
     if (D_00357D80.window != NULL && D_00357D80.window->state == panel && place != 0) {
-        itfQueueSpriteQuadPacket(place->sprite);
+        DebugDrawWindowLine(place->sprite);
     }
 }
 
 extern DrawColorRec D_00357FC8[];
 #include "sdf_packet_alloc.h"
 extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
-extern void itfSendTablePacket(SdfListHead *, s32, s32);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawSpritePrim2(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfMiscDrawAlphaPrim(SdfListHead *, s32, s32);
 
 void itfDrawSelectedSoundRow(ItfMesState *panel) {
     DrawColorRec uv;
@@ -705,8 +705,8 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     if (selected == -1) {
         return;
     }
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
     x = selection->x;
     y = (s32)selection->y - ((selection->rowCount * 21 - 21) << 3) + selected * 0xA0;
     bounds[0].x = x - 0x1D0;
@@ -727,7 +727,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     color.components[1] = 0x80;
     color.components[2] = 0x80;
     color.components[3] = 0x26;
-    itfQueueTextureBoundQuadPacket(bounds, &uv, &color, panel->renderValue,
+    itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue,
                                   itfMesWork.windowTexture, 0, list);
 
     bounds[0].x = x - 0xF0;
@@ -739,7 +739,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     uv.components[2] = 0x350;
     uv.components[3] = 0xC0;
     color.components[3] = fade->alpha;
-    itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
+    itfMiscDrawSpritePrim2(bounds, &uv, &color, panel->renderValue, 0, list);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
         rightExpansion = expansion << 1;
@@ -749,9 +749,9 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
         bounds[1].x += rightExpansion;
         bounds[1].y += verticalExpansion;
         color.components[3] = fade->timer;
-        itfSendTablePacket(list, 1, 0);
-        itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
-        itfSendTablePacket(list, 0, 0);
+        itfMiscDrawAlphaPrim(list, 1, 0);
+        itfMiscDrawSpritePrim2(bounds, &uv, &color, panel->renderValue, 0, list);
+        itfMiscDrawAlphaPrim(list, 0, 0);
     }
     surface = &kwlnDrawSurfaces[panel->drawSurfaceIndex];
     surface->append(surface, list);
@@ -762,8 +762,8 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", itfDrawSoundSelectorOptionPanel);
 extern u8 D_00358008[];
 extern u8 D_00357FF8[];
 extern s32 D_00358018[];
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern void itfSendTablePacket(SdfListHead *, s32, s32);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawAlphaPrim(SdfListHead *, s32, s32);
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
 void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
@@ -777,13 +777,13 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
     bounds[1] = 0xC60;
     bounds[2] = 0x1BD0;
     bounds[3] = 0xD58;
-    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
+    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packet);
     D_00358018[3] = 0xFF;
-    itfQueueTextureBoundQuadPacket(bounds, D_00358008, D_00358018, panel->renderValue,
+    itfMiscDrawSpritePrim(bounds, D_00358008, D_00358018, panel->renderValue,
                                   itfMesWork.windowTexture, 0, packet);
     D_00358018[3] = fade->alpha;
-    itfQueueTextureBoundQuadPacket(bounds, D_00357FF8, D_00358018, panel->renderValue,
+    itfMiscDrawSpritePrim(bounds, D_00357FF8, D_00358018, panel->renderValue,
                                   itfMesWork.windowTexture, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
@@ -792,17 +792,17 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *panel) {
         bounds[2] += expansion * 2;
         bounds[3] += expansion;
         D_00358018[3] = fade->timer;
-        itfSendTablePacket(packet, 1, 0);
-        itfQueueTextureBoundQuadPacket(bounds, D_00357FF8, D_00358018, panel->renderValue,
+        itfMiscDrawAlphaPrim(packet, 1, 0);
+        itfMiscDrawSpritePrim(bounds, D_00357FF8, D_00358018, panel->renderValue,
                                       itfMesWork.windowTexture, 0, packet);
-        itfSendTablePacket(packet, 0, 0);
+        itfMiscDrawAlphaPrim(packet, 0, 0);
     }
     surface = &kwlnDrawSurfaces[panel->drawSurfaceIndex];
     surface->append(surface, packet);
 }
 
 
-s32 itfUpdateActiveMessageWindows(void) {
+s32 CalcMsgMng_Process(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
@@ -811,13 +811,13 @@ s32 itfUpdateActiveMessageWindows(void) {
     return 0;
 }
 
-extern void itfMesDestroyWindow(s32 window);
-extern u32 fldIsUpdateInhibited(void);
+extern void DestructFlow(s32 window);
+extern u32 dds3NullDrawProc(void);
 
-s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
+s32 DrawMsgMng_Process(KwlnTask *task) {
     ItfMesPoolNode *node;
 
-    if (fldIsUpdateInhibited() != 0) {
+    if (dds3NullDrawProc() != 0) {
         return 0;
     }
     for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
@@ -827,13 +827,13 @@ s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     return 0;
 }
 
-void itfMesDestroyActiveWindowsAndReleaseTexture(void) {
+void DrawMsgMng_Shutdown(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     s32 window;
     while (node != 0) {
         window = node->index;
         node = node->next;
-        itfMesDestroyWindow(window);
+        DestructFlow(window);
     }
     sdfTexReleaseReferenceViaHandler(itfMesWork.windowTexture);
     itfMesWork.windowTexture = NULL;
@@ -844,9 +844,9 @@ extern SdfPoolNode D_00325708;
 extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
-extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
+extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
-void itfQueueSpriteQuadPacket(UiSprite *sprite) {
+void DebugDrawWindowLine(UiSprite *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},
@@ -855,13 +855,13 @@ void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     };
     SdfListHead *list;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, list);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    itfMiscDrawLineStripPrim(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, list);
     D_00325708.append(&D_00325708, list);
 }
 
-void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
+void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
     UiSprite *sprite = panel->sprite;
     s32 *bounds;
     s32 dx;
@@ -886,17 +886,17 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
         if (dx != 0 || dy != 0) {
             switch (boundsMode) {
             case 0:
-                itfAdvancePanelLayoutAndNotify(sprite, dx, dy, 0, 0, 0);
+                itfPnlSetPositionOffset(sprite, dx, dy, 0, 0, 0);
                 bounds[0] += dx;
                 bounds[1] += dy;
                 break;
             case 1:
-                itfAdvancePanelLayoutAndNotify(sprite, 0, 0, dx, dy, 0);
+                itfPnlSetPositionOffset(sprite, 0, 0, dx, dy, 0);
                 bounds[2] += dx;
                 bounds[3] += dy;
                 break;
             case 2:
-                itfAdvancePanelLayoutAndNotify(sprite, dx, dy, dx, dy, 0);
+                itfPnlSetPositionOffset(sprite, dx, dy, dx, dy, 0);
                 bounds[0] += dx;
                 bounds[1] += dy;
                 bounds[2] += dx;
@@ -908,7 +908,7 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 boundsMode) {
 }
 
 /* Step the panel fade limit by pad input: one per press, ten with the fast modifier held. */
-void sndStepIndexByPad(ItfMesBlkA4 *panel) {
+void DebugMoveWinAlpha(ItfMesBlkA4 *panel) {
     s32 step;
 
     if (kwlnTaskPadButtonStates.coarseDown & 2) {
@@ -934,7 +934,7 @@ void sndStepIndexByPad(ItfMesBlkA4 *panel) {
     }
 }
 
-ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
+ItfMesPoolNode *DebugChangeInstance(ItfMesPoolNode *node) {
     s32 index = 0;
     s32 count = itfMesWork.activeWindowCount;
 
@@ -969,40 +969,40 @@ extern char D_003A1500[]; /* "TestMsgMngD" */
 
 extern s32 D_003BA8EC;
 
-extern s32 scrCreateTaskForProcessId(s32, u8 *, s32);
+extern s32 scrStartScript2(s32, u8 *, s32);
 
 
-extern void sndCycleTestMessageResource(void);
+extern void TestMsgReloadTexture(void);
 
-extern s32 itfUpdateTestMessageResourceInput(KwlnTask *task);
+extern s32 TestMsgMngC_Process(KwlnTask *task);
 
-extern void itfPrintTestMessageCallback(void);
+extern void itfDebugPrintMark(void);
 
-extern s32 sndUpdateTestMsgTask(KwlnTask *task);
+extern s32 TestMsgMngD_Process(KwlnTask *task);
 
 
-void sndCreateTestMsgTasks(void) {
+void itfDebugMesMngInitialize(void) {
     D_003BA8EC = 0x80FFFFFF;
-    sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(((ScrData *)dds3GetProcessData(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->resourceIndex, itfPrintTestMessageCallback);
-    dds3StartProcess(D_003A14F0, 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
-    dds3StartProcess(D_003A1500, 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
+    TestMsgReloadTexture();
+    itfMesMngSetKutiCallback(((ScrData *)dds3GetProcessData(scrStartScript2(0x3E8, D_00358038, 0)))->resourceIndex, itfDebugPrintMark);
+    dds3StartProcess(D_003A14F0, 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
+    dds3StartProcess(D_003A1500, 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }
 
-void sndCycleTestMessageResource(void) {
+void TestMsgReloadTexture(void) {
     if (sndTestMessageTexture != 0) {
         sdfTexReleaseReferenceViaHandler(sndTestMessageTexture);
         sndTestMessageTexture = 0;
     }
     sndTestMessageResourceIndex = (sndTestMessageResourceIndex + 1) & 3;
     if (sndTestMessageResourceIndex != 3) {
-        sndTestMessageTexture = itfLoadTextureFromAsset(D_00358308[sndTestMessageResourceIndex]);
+        sndTestMessageTexture = itfMiscLoadTexture(D_00358308[sndTestMessageResourceIndex]);
     }
 }
 
-s32 itfUpdateTestMessageResourceInput(KwlnTask *task) {
+s32 TestMsgMngC_Process(KwlnTask *task) {
     if (D_00324530[0] < 0) {
-        sndCycleTestMessageResource();
+        TestMsgReloadTexture();
     }
     return 0;
 }
@@ -1017,13 +1017,13 @@ extern u8 D_00358328[];
 extern u8 D_00358338[];
 
 
-s32 sndUpdateTestMsgTask(KwlnTask *task) {
+s32 TestMsgMngD_Process(KwlnTask *task) {
     SdfListHead *mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
-        mem = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(mem);
-        itfSendTablePacket(mem, 0, 0);
-        itfQueueTextureBoundQuadPacket(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
+        mem = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(mem);
+        itfMiscDrawAlphaPrim(mem, 0, 0);
+        itfMiscDrawSpritePrim(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
         D_003255A8.append(&D_003255A8, mem);
         return 0;
     }
@@ -1040,7 +1040,7 @@ INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A1528);
 
 INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A1540);
 
-void itfPrintTestMessageCallback(void) {
+void itfDebugPrintMark(void) {
     printf("********* AAAA ********\n");
 }
 
@@ -1051,34 +1051,34 @@ typedef struct ItfFovPanelWork {
 } ItfFovPanelWork;
 
 extern ItfFovPanelWork D_003D73C0;
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
-extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
+extern s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
 
-s32 btlEditCameraFieldOfView(void) {
+s32 pbDebugPrintPanel(void) {
     SifCommand packet;
     SdfListHead *list;
     f32 radiansToDegrees = 57.2957795f;
 
-    list = sdfCreateResetPacketList();
-    sdfAppendPacket(list,
-                    (u32)sdfCreateBorderedRectanglePacket(0x8500, 0x79C0, 0xFEFFFF,
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list,
+                    (u32)dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
                                   0xA80, 0x120, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
-    sdfAppendPacket(list,
-                    (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
+    sdfDrawTagLink(list,
+                    (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
     D_00325708.append(&D_00325708, list);
     if (kwlnTaskPadButtonStates.secondaryCancel < 0) {
         return -1;
     }
     D_003D73C0.degrees = sdfSceneProjectionParameters.camera.fov * radiansToDegrees;
-    if (itfStepFloatWithPad(&D_003D73C0.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
+    if (pbCalcFovDegrees(&D_003D73C0.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
         sdfSceneProjectionParameters.camera.fov = D_003D73C0.degrees * 0.0174532925f;
     }
     return 0;
 }
 
-s32 itfStepFloatWithPad(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
+s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
     f32 current = *angleDegrees;
     s32 changed = 0;
 
@@ -1167,7 +1167,7 @@ extern char D_003BB280[];
 extern char D_003BB288[];
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
-s32 kwlnUpdateBlurDebugMenu(void) {
+s32 pbDebugPrintPanel2(void) {
     SifCommand packet;
     SdfListHead *list;
     s32 row;
@@ -1175,11 +1175,11 @@ s32 kwlnUpdateBlurDebugMenu(void) {
     s16 previous;
     s32 highlight;
 
-    list = sdfCreateResetPacketList();
-    sdfAppendPacket(list,
-        (u32)sdfCreateBorderedRectanglePacket(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list,
+        (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
-    sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet,
+    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
         "BLUR:        %s", kwlnDrawOverlayEnabled ? D_003BB260 : D_003BB268));
 
     y = 0x7A20;
@@ -1187,14 +1187,14 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         sdfPktInit(&packet, 0x82C0, D_003D73D0.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         D_003D73D0.blink++;
         if (D_003D73D0.blink < 32 || (D_003D73D0.blink & 31) < 18) {
-            sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB270));
+            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB270));
         }
     }
 
     for (row = 0; row != 3; row++) {
         sdfPktInit(&packet, 0x82C0, y, 0xFF0000, 0);
-        sdfAppendPacket(list,
-            (u32)sdfFormatSifPacket(&packet, D_003BB278, D_00358348[row]));
+        sdfDrawTagLink(list,
+            (u32)sdfDevPrintfEx(&packet, D_003BB278, D_00358348[row]));
         highlight = 0;
         if (D_003D73D0.editing != 0 && row == D_003D73D0.selection) {
             highlight = 6;
@@ -1202,22 +1202,22 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         sdfPktInit(&packet, 0x8800, y, 0xFF0000, highlight);
         switch (row) {
         case 0:
-            sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB280, kwlnDrawOverlayAlpha));
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_003BB280, kwlnDrawOverlayAlpha));
             break;
         case 1:
-            sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB280, kwlnDrawOverlayScale));
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_003BB280, kwlnDrawOverlayScale));
             break;
         case 2:
-            sdfAppendPacket(list,
-                (u32)sdfFormatSifPacket(&packet, D_003BB288, D_003BA910[0], D_003BA910[1]));
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_003BB288, D_003BA910[0], D_003BA910[1]));
             break;
         }
         y += 0x60;
     }
-    sdfAppendPacket(list,
-        (u32)sdfCreateBorderedRectanglePacket((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
+    sdfDrawTagLink(list,
+        (u32)dds3PrimFrameRect((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 

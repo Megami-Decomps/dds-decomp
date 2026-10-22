@@ -97,7 +97,7 @@
     : : "r" (rgba) : "$2")
 
 /* Multiply two RGBA8888 words as four float lanes, scaled by binary32 unit.
- * DDS2 sdfVuMultiplyNodeColors uses the SDK unpack style twice ($2/vf2 and
+ * DDS2 corePktSetConstColor uses the SDK unpack style twice ($2/vf2 and
  * $3/vf3), then vmul/vmulx and returns vf2 through a 128-bit C operand.
  * Tried: four C byte masks, float conversions and multiplications; gcc emits
  * scalar andi/srl/cvt.s.w/mul.s, not pextlb/pextlh or the VU operations.
@@ -339,7 +339,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 /*
  * Pack an aligned four-word vector into an unaligned three-word stream:
  * lq $3,0(src); pcpyud $2,$3,$0; sdr $3,0(dst); sdl $3,7(dst); sw $2,8(dst).
- * Retail: effCreateVertexDrawPacket and sdfBuildPrimitiveAttributeVifPacket
+ * Retail: effPkt3DPrimMakePoly and sdf3DPrimMakePoly
  * in both games, twice per builder (positions and normals).
  * Tried u128 C extraction: cc1 rejects >>64 as an unsupported wide operation;
  * union half/word extraction spills the quadword rather than emitting pcpyud.
@@ -375,7 +375,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 /*
  * Load a word from an unaligned address, `lwr` first. cc1's own unaligned
  * accesses (block moves, packed fields) emit `lwl` first, and block moves
- * also store with swl/swr. Retail: DDS1 sdfBuildTexturedQuadVifPacket and
+ * also store with swl/swr. Retail: DDS1 sdfBillBoardMake1 and
  * DDS2 func_0033B530 (texture-quad UV words).
  */
 #define EE_LOAD_UNALIGNED_WORD(out, src) __asm__ volatile ( \
@@ -389,7 +389,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
  *     mfc1 $2,255.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
  *     vftoi0.xyzw vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out
  * $2 is not declared clobbered, like EE_MMI_RGBA_PACK_F128. Users: DDS1
- * kwlnSetDrawColorTarget and DDS2 kwlnSetDrawColorTarget.
+ * dds3SetFogColor and DDS2 dds3SetFogColor.
  */
 #define EE_MMI_RGBA_PACK_F255(out) __asm__ volatile ( \
     ".set noreorder\n" \
@@ -405,7 +405,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Gather one column of four 16-byte matrix rows into a VU register.
- * Retail: four branches each in both games' dds3LightEditorAngleEdit
+ * Retail: four branches each in both games' mdlSetDebugMatrix
  * and evtRotateViewerPositionFromPad repeat the fixed $2-$5 SDK scratch sequence:
  * lw $2/$3/$4/$5 at 0/0x10/0x20/0x30(src); pextlw $2,$3,$2;
  * pextlw $4,$5,$4; pcpyld $2,$4,$2; qmtc2.ni $2,vf.
@@ -445,7 +445,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Bare `sync` (sync.l): orders the preceding stores before the next access.
- * Retail: the DMA channel kick in DDS1 sdfDevConsKickPacketDma / DDS2 sdfDevConsKickPacketDma
+ * Retail: the DMA channel kick in DDS1 sdfDevConsDrawFlush / DDS2 sdfDevConsDrawFlush
  * (`*chcr |= 0x40; sync;` before sceDmaSendN), as in Sony's libkernel
  * inline usage.
  */
@@ -453,11 +453,11 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /* Interrupt-enable sequence: finish preceding stores before enabling handlers.
  * Independent retail sites: DDS2 func_00345268 (+0x14), func_00345298
- * (+0x7C), and sdfGraphWakeDisplayThread (+0x18); DDS1 sdfWakeImageUploadThreadOnDmac uses it too. */
+ * (+0x7C), and sdfDrawThIntHandler (+0x18); DDS1 sdfImageSetDmacHandler uses it too. */
 #define EE_ENABLE_INTERRUPTS_SYNC() __asm__ volatile ("sync\n\tei")
 
 /* Expand packed RGB5 channels into byte lanes (PEXT5), before replicating
- * their high bits into the low three bits. Both games' sdfTexBuildIntensityMap
+ * their high bits into the low three bits. Both games' sdfTexSetMonoClut
  * share this texture-intensity conversion instruction.
  * Registers are selected by gcc; the output may reuse the input register. */
 #define EE_MMI_PEXT5(out, in) __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))

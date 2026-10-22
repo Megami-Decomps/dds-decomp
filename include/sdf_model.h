@@ -7,12 +7,12 @@
  * four-word subrecord. The item list has a variable-length body of SdfItem
  * records beginning at its firstItem array. */
 typedef struct SdfItemList SdfItemList;
-/* Values understood by sdfDrawNodeBuildFromItemAndCommands. */
+/* Values understood by sdfModelNodeSet. */
 #define SDF_ITEM_COMMAND_SETUP_INLINE_LISTS 0
 #define SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE 1
 
 /* Per-item view after packed-resource or scene relocation, applied by
- * sdfDrawNodeSetFromItem. Command-list fields hold relocated pointers. */
+ * sdfModelNodeBaseSet. Command-list fields hold relocated pointers. */
 typedef struct SdfItem {
     u16 commandSetupMode; /* 0x00: selects the optional command-list form */
     u16 reserved02;       /* 0x02 */
@@ -39,7 +39,7 @@ typedef struct SdfItem {
 typedef char SdfItem_size_must_be_0x50[(sizeof(SdfItem) == 0x50) ? 1 : -1];
 
 /* Scale the model root transform and propagate its draw-node tree for frame. */
-void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
+void sdfModelEvalTm2(SdfModel *model, s32 frame);
 typedef char SdfItem_boundsCorners_at_40[
     ((u32)&((SdfItem *)0)->boundsCorners == 0x40) ? 1 : -1];
 typedef char SdfItem_commandData_at_44[
@@ -60,7 +60,7 @@ typedef char SdfItemList_firstItem_must_be_at_0x10[
 typedef struct SdfItemListRef {
     SdfItemList *items; /* 0x00 */
     u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
-    s32 slotPairCount; /* 0x08: passed to sdfModelAllocateSlotPairs */
+    s32 slotPairCount; /* 0x08: passed to sdfModelMakeMorphList */
     struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
 } SdfItemListRef;
 
@@ -69,26 +69,26 @@ typedef char SdfItemListRef_serializedAssetData_at_4[((u32)&((SdfItemListRef *)0
 typedef char SdfItemListRef_slotPairCount_at_8[((u32)&((SdfItemListRef *)0)->slotPairCount == 8) ? 1 : -1];
 typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkTable == 0xC) ? 1 : -1];
 
-SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef);
-SdfModel *sdfModelCreateWithItems(void *assetData, SdfItemListRef *listRef);
-SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *listRef);
-void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
+SdfModel *sdfModelMakeRoot(void *assetData, SdfItemListRef *listRef);
+SdfModel *sdfModelMake(void *assetData, SdfItemListRef *listRef);
+SdfModel *sdfModelMakeEarly(void *assetData, SdfItemListRef *listRef);
+void sdfModelLinkDrawPacket(SdfDrawNode *node, u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector,
                                 s32 listIndex);
-void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
-void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
+void sdfModelMakeLocalTm(SdfDrawNode *node);
+void sdfModelNodeSet(SdfDrawNode *node, SdfItem *item);
 /* Build the kind-3 command packet; zero means there is no packet to append. */
-u32 sdfModelBuildKind3CommandPacket(SdfDrawNode *node, void *payload,
+u32 sdfCorePacketGen(SdfDrawNode *node, void *payload,
                                    s32 nodeFlags, s32 color,
                                    f32 firstScalar, f32 secondScalar,
                                    s32 frame, s32 skipCommands);
 /* The draw node owns the lazily allocated workspace; callers receive a borrowed
  * pointer to it, and must not release it independently. */
-u8 *sdfEnsureFreeRootWorkspace(SdfDrawNode *root);
+u8 *sdfModelAllocTmPacket(SdfDrawNode *root);
 /* Releases each allocation in both free-node lists. The list heads remain
  * stored on root and must not be traversed again after this call. */
-void sdfFreeNodeLists(SdfDrawNode *root);
+void sdfModelPacketFree(SdfDrawNode *root);
 /* Refresh the current per-node transforms from the model's selected frame. */
-void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
+void sdfModelEvalTm(SdfModel *model);
 
 #endif /* SDF_MODEL_H */

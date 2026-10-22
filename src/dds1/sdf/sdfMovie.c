@@ -12,7 +12,7 @@ s32 sdfFileCmdFileSize(DevState *state);
 extern s32 sdfMoviePacRingSemaphore;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
-void sdfMovieScheduleLinearStreamRead(MovObj *movie) {
+void movieReadNextChunk(MovObj *movie) {
     MovLinearStream *stream = movie->stream.linear;
     s32 remaining = movie->remainingBytes;
     s32 readSize;
@@ -49,7 +49,7 @@ void sdfMovieScheduleLinearStreamRead(MovObj *movie) {
 }
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
-s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+s32 movieGetStreamSize(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
     MovLinearStream *stream;
     s32 restoreInterrupts;
 
@@ -75,7 +75,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
-            sdfMovieScheduleLinearStreamRead(movie);
+            movieReadNextChunk(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ:
@@ -90,7 +90,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
                 movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
                 sdfFileCmdClose(deviceState);
             } else {
-                sdfMovieScheduleLinearStreamRead(movie);
+                movieReadNextChunk(movie);
             }
         }
         break;
@@ -107,7 +107,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
 }
 
 /* Queue a movie-PAC block only when both ring-buffer room predicates allow it. */
-void sdfMovieProcessPendingData(MovObj *movie) {
+void movieReadHeaderChunk(MovObj *movie) {
     MovPacStream *stream;
     s32 remaining;
 
@@ -125,7 +125,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *readBuffer, s32 bytesRead, MovObj *movie) {
+s32 movieReadChunk(DevState *deviceState, s32 operation, void *readBuffer, s32 bytesRead, MovObj *movie) {
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
@@ -166,7 +166,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
         break;
     case SDF_MOVIE_STATE_PAC_MASK_READ:
         if (operation == SDF_DEV_EVENT_READ_REPLY) {
-            sdfMovieProcessPendingData(movie);
+            movieReadHeaderChunk(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ: {
@@ -226,7 +226,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
                 movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
                 sdfFileCmdClose(deviceState);
             } else {
-                sdfMovieProcessPendingData(movie);
+                movieReadHeaderChunk(movie);
             }
         }
         break;
@@ -244,7 +244,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *rea
 }
 
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
+s32 movieCopyChunk(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
     MovLinearStream *stream = movie->stream.linear;
 
     switch (operation) {
@@ -285,7 +285,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, 
             return 0;
         }
         if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
-            sdfMovieScheduleLinearStreamRead(movie);
+            movieReadNextChunk(movie);
         }
         break;
     }
@@ -294,8 +294,8 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, 
 }
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
-    void sdfMovieCopyPacStreamSpan(void *destination, const void *source, u32 byteCount) {
+s32 movieParseHeader(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *dataBuffer, s32 byteCount) {
+    void movieMemcpy(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
     MovPacStream *stream = movie->stream.pac;
@@ -321,13 +321,13 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32
 
             if (wrappedBytes >= 0) {
                 s32 firstSpan = byteCount - wrappedBytes;
-                sdfMovieCopyPacStreamSpan(dataBuffer, bufferStart + readOffset, firstSpan);
+                movieMemcpy(dataBuffer, bufferStart + readOffset, firstSpan);
                 if (wrappedBytes > 0) {
-                    sdfMovieCopyPacStreamSpan((u8 *)dataBuffer + firstSpan, bufferStart, wrappedBytes);
+                    movieMemcpy((u8 *)dataBuffer + firstSpan, bufferStart, wrappedBytes);
                 }
                 stream->pacReadOffset = wrappedBytes;
             } else {
-                sdfMovieCopyPacStreamSpan(dataBuffer, bufferStart + readOffset, byteCount);
+                movieMemcpy(dataBuffer, bufferStart + readOffset, byteCount);
                 stream->pacReadOffset = readOffset + byteCount;
             }
             stream->pacBufferedBytes -= byteCount;
@@ -338,7 +338,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32
             return 0;
         }
         if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
-            sdfMovieProcessPendingData(movie);
+            movieReadHeaderChunk(movie);
         }
         break;
     }

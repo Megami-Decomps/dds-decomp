@@ -3,7 +3,7 @@
 
 #include "sdf_texture_draw_packet.h"
 
-SdfDrawPacket *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags,
+SdfDrawPacket *sdf2DMakePrimPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags,
                                        s32 registerCount, s64 registerList,
                                        s32 loopCount);
 

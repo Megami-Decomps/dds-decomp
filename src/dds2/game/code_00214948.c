@@ -151,9 +151,9 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void evtSetTransitionMotionScale(EvtUnit *, f32);
+extern void evtSetWaitMotionSpeed(EvtUnit *, f32);
 
-extern void evtStoreUnitMotionShortParameters(void *, s32, s32);
+extern void evtSetWaitHokanFrame(void *, s32, s32);
 
 extern u32 btlGetSubtaskTargetMode(void);
 
@@ -184,7 +184,7 @@ extern s32 btlGroup400UnitHasAction(BtlUnit *, s32);
 
 extern s8 D_00438F84;
 
-extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
+extern s32 sdfModelGetNodeIndexByName(SdfModel *, const char *);
 
 extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 
@@ -1312,7 +1312,7 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     if (command->flags & 0x200) {
         angle = -angle;
     }
-    sdfVuLoadRotationMatrixY(angle);
+    SetRotateMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -1621,7 +1621,7 @@ extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, BtlOperandEntry 
 
 s64 btlRestoreEnemyUnitWhenModelFlagSet(BtlUnit *battler, BtlOperandEntry *resource) {
     if (battler->status.flags & 0x400) {
-        if (mdlFlagTest(0x82b)) {
+        if (evtBitCheck(0x82b)) {
             btlRestoreUnitMinimumValueAndClearStatus(battler, resource);
         }
     }
@@ -1652,7 +1652,7 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
     if (count == 0) {
         return -1;
     }
-    mdlFlagSet(0x804);
+    evtBitOn(0x804);
     return 6;
 }
 
@@ -1779,7 +1779,7 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     handle->flags = flags & ~8;
 }
 
-extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
+extern void evtSetUnitMotion(EvtUnit *, s32, s32, s32, s32);
 
 
 
@@ -1805,11 +1805,11 @@ void btlPrepareUnitMotionWithSavedOverride(BtlUnit *unit, s32 selector, s32 firs
             }
         }
     }
-    evtPrepareUnitMotionState(unit->ext, selector, firstParameter, secondParameter, mode);
+    evtSetUnitMotion(unit->ext, selector, firstParameter, secondParameter, mode);
     unit->ext->owner->first->frameStep = frameStep;
     if (secondParameter == 0) {
-        mdlAddEntryFlagged(unit->ext->owner, 0, selector);
-        sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+        mdlLoopMotion(unit->ext->owner, 0, selector);
+        sdfMotionSeek(unit->ext->owner->first, 0.0f);
     }
 }
 
@@ -1887,7 +1887,7 @@ s32 btlSelectAction211CameraPair(BtlLinkedCommand *command) {
     switch (command->actionCode) {
     case 0x211:
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (sdfGetRandInt(0, 3)) {
+        switch (dds3GetRandIntA(0, 3)) {
         case 0:
             btlBossDebugPrintf("3SIK:LKG-0 ++++\n");
             btlSetEffectCameraKeys((s32)command,
@@ -2493,11 +2493,11 @@ s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
     if (((BattleWork *)btlGetRuntime())->state22C == 5) {
         return 1;
     }
-    object = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6, (const u8 *)D_0041A378);
+    object = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 6, (const u8 *)D_0041A378);
     if (object == NULL) {
         return 1;
     }
-    dds3SetObjectPayloadWord8(object, 1);
+    dds3MatterObjectBasicSetAlpMode(object, 1);
     return 1;
 }
 
@@ -2510,11 +2510,11 @@ s32 btlPrepareGateDefeatCandidateClear(u8 *unit) {
     if (((BattleWork *)btlGetRuntime())->state22C == 5) {
         return 1;
     }
-    object = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6, (const u8 *)D_0041A378);
+    object = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 6, (const u8 *)D_0041A378);
     if (object == NULL) {
         return 1;
     }
-    dds3SetObjectPayloadWord8(object, 2);
+    dds3MatterObjectBasicSetAlpMode(object, 2);
     return 1;
 }
 
@@ -2820,7 +2820,7 @@ s8 btlDispatchNamedChunkNode(const char *name) {
     }
     resource = battler->ext;
     chunk = resource->owner->inner;
-    index = sdfNamedChunkFindId(chunk, name);
+    index = sdfModelGetNodeIndexByName(chunk, name);
     if (index == -1) {
         return 1;
     }
@@ -2851,7 +2851,7 @@ void btlClearNamedChunkFlags(const char *name) {
     if (battler != 0 && (battler->status.flags & 2) != 0) {
         EvtUnit *resource = battler->ext;
         SdfModel *chunk = resource->owner->inner;
-        s32 index = sdfNamedChunkFindId(chunk, name);
+        s32 index = sdfModelGetNodeIndexByName(chunk, name);
         if (index != -1) {
             DevRequest *data = chunk->list;
             SdfDrawNode **entries = data->buffer;
@@ -2986,8 +2986,8 @@ void btlUpdateSpecialActorChunkFade(void) {
                     if (unitId >= 0x111) {
                         s32 nodeIndex = unitId == 0x111 ? 1 : 2;
 
-                        if (mdlGetNodeMotionIndex(unit->ext->owner, nodeIndex) == 0x11) {
-                            if (unit->ext->slotC[nodeIndex] < mdlGetNodeFrameAsInt(unit->ext->owner, nodeIndex)) {
+                        if (mdlGetMotionNum(unit->ext->owner, nodeIndex) == 0x11) {
+                            if (unit->ext->slotC[nodeIndex] < mdlGetMotionFrameEx(unit->ext->owner, nodeIndex)) {
                                 btlClearNamedChunkFlags(unit->partyRecord.unitId == 0x111 ? D_00436CE0 : D_00436CE8);
                                 unit->status.stateFlags &= ~0x80000;
                             }
@@ -3029,14 +3029,14 @@ INCLUDE_ASM(const s32, "game/code_00214948", func_0021A978);
 void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value) {
     if (((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit != unit) {
         if (!(unit->status.flags & 0x400)) {
-            evtUnitSetStoredParameter(unit->ext, group);
-            evtSetTransitionMotionScale(unit->ext, value);
+            evtSetWaitMotion(unit->ext, group);
+            evtSetWaitMotionSpeed(unit->ext, value);
             return;
         }
         switch (unit->partyRecord.unitId) {
         case 0x110:
-            evtUnitSetStoredParameter(unit->ext, group);
-            evtSetTransitionMotionScale(unit->ext, value);
+            evtSetWaitMotion(unit->ext, group);
+            evtSetWaitMotionSpeed(unit->ext, value);
             break;
         case 0x111:
             unit->ext->tableValues[1] = group;
@@ -3053,12 +3053,12 @@ void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value) {
 void btlSetUnitResourceHalvesByMode(BtlUnit *unit, s32 first, s32 second) {
     if (((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit != unit) {
         if (!(unit->status.flags & 0x400)) {
-            evtStoreUnitMotionShortParameters(unit->ext, first, second);
+            evtSetWaitHokanFrame(unit->ext, first, second);
             return;
         }
         switch (unit->partyRecord.unitId) {
         case 0x110:
-            evtStoreUnitMotionShortParameters(unit->ext, first, second);
+            evtSetWaitHokanFrame(unit->ext, first, second);
             break;
         case 0x111:
             unit->ext->unk108[1] = first;
@@ -3382,14 +3382,14 @@ void func_0021B828(ActionStateLink *task) {
     }
     if (bossIndex != -1 && effect->alternateTarget == 0) {
         switch (btlGetActorIndexedSignedValue(task->unit, skillId)) {
-        case 0: mdlFlagSet(0xBE0); break;
-        case 1: mdlFlagSet(0xBE1); break;
-        case 2: mdlFlagSet(0xBE2); break;
-        case 3: mdlFlagSet(0xBE3); break;
-        case 4: mdlFlagSet(0xBE4); break;
-        case 5: mdlFlagSet(0xBE5); break;
-        case 6: mdlFlagSet(0xBE6); break;
-        case 7: mdlFlagSet(0xBE7); break;
+        case 0: evtBitOn(0xBE0); break;
+        case 1: evtBitOn(0xBE1); break;
+        case 2: evtBitOn(0xBE2); break;
+        case 3: evtBitOn(0xBE3); break;
+        case 4: evtBitOn(0xBE4); break;
+        case 5: evtBitOn(0xBE5); break;
+        case 6: evtBitOn(0xBE6); break;
+        case 7: evtBitOn(0xBE7); break;
         }
     }
     if (bossIndex == -1 && effect->alternateTarget == 0) {
@@ -3484,7 +3484,7 @@ void func_0021B828(ActionStateLink *task) {
                 btlSetSkillTaskResults(task, 1, resultKind, skillId);
                 btlBossDebugPrintf("btl:VURITO guard [NORMAL or CRITICAL][%d]\n", task->indexWork.adjustedValue);
             }
-            mdlFlagSet(0x832);
+            evtBitOn(0x832);
             effect->guardHandled = 1;
             effect->guard = unit;
             group->inactive = btlIsUnitDefeatTriggeredByValueDelta(unit, hpDelta) != 0;
@@ -3674,7 +3674,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     command->camera.direction[0] = 1.0f;
     btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
-    sdfVuLoadRotationMatrixY(-0.87266463f);
+    SetRotateMatrixY(-0.87266463f);
         VU0_STORE_VF(vf10, pose->direction);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, command->backCamera.direction);
@@ -3726,16 +3726,16 @@ s32 rotate;
     if (rotate == 1 && runtime[0x134] == 3) {
         switch (kind) {
         case 0:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            sdfVuLoadRotationMatrixX(angle);
+            SetRotateMatrixX(angle);
             sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -3754,7 +3754,7 @@ s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, 
     return result;
 }
 
-extern void sdfVuLoadSecondaryRotationMatrixX(f32);
+extern void SetRotateMatrixX_B(f32);
 
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
@@ -3774,12 +3774,12 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         btlBuildBattleUnitFramingCameraPose(command, &command->frontCamera, 25.0f);
         btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
         if (command->frontCamera.direction[0] > 0.0f) {
-            sdfVuLoadRotationMatrixY(-0.87266463f);
+            SetRotateMatrixY(-0.87266463f);
         } else {
-            sdfVuLoadRotationMatrixY(0.87266463f);
+            SetRotateMatrixY(0.87266463f);
         }
-        sdfVuLoadSecondaryRotationMatrixX(-0.34906585f);
-        sdfMultiplyVuMatrixInPlace();
+        SetRotateMatrixX_B(-0.34906585f);
+        MultMatrixRevNoArg();
         VU0_STORE_VF(vf10, command->frontCamera.direction);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, command->backCamera.direction);
@@ -3800,7 +3800,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             return 1;
         case 0x197:
             btlFlagAllUnitDefeatCandidatesTask();
-            switch (sdfGetRandInt(0, 2)) {
+            switch (dds3GetRandIntA(0, 2)) {
             case 0:
                 btlBossDebugPrintf("VURI:I-Z_G-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -3816,7 +3816,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             }
             /* retail keeps the out-of-range roll falling into the generic picks (b to the mod-3 roll) */
         default:
-            switch (sdfGetRandInt(0, 3)) {
+            switch (dds3GetRandIntA(0, 3)) {
             case 0:
                 btlBossDebugPrintf("VURI:I-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -3850,7 +3850,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (sdfGetRandInt(0, 3)) {
+        switch (dds3GetRandIntA(0, 3)) {
         case 0:
             btlBossDebugPrintf("VURI_A:I-0 ++++\n");
             btlSetEffectCameraKeys((s32)command,
@@ -3882,7 +3882,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        switch (sdfGetRandInt(0, 3)) {
+        switch (dds3GetRandIntA(0, 3)) {
         case 0:
             btlBossDebugPrintf("VURI_B:I-0 ++++\n");
             btlSetEffectCameraKeys((s32)command,
@@ -3954,7 +3954,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                 if (btlCanUseActorCategoryFlag4(command)) {
                     btlClearAllUnitDefeatCandidatesTask();
                     btlApplyCombinedActorFlags((u8 *)command);
-                    switch (sdfGetRandInt(0, 2)) {
+                    switch (dds3GetRandIntA(0, 2)) {
                     case 0:
                         btlBossDebugPrintf(D_0041A5E0);
                         btlSetEffectCameraKeys((s32)command,
@@ -4033,7 +4033,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (btlCanUseLinkedActor(command)) {
                 cameraMode = 0;
                 if (!btlCanUseActorCategoryFlag2(command)) {
-                    cameraMode = sdfGetRandInt(0, 2);
+                    cameraMode = dds3GetRandIntA(0, 2);
                 }
             } else {
                 cameraMode = 1;
@@ -4061,7 +4061,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
     if (btlCanUseLinkedActor(command)) {
         cameraMode = 0;
         if (!btlCanUseActorCategoryFlag2(command)) {
-            cameraMode = sdfGetRandInt(0, 2);
+            cameraMode = dds3GetRandIntA(0, 2);
         }
     } else {
         cameraMode = 1;
@@ -4131,7 +4131,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                 return 1;
             }
             btlFlagAllUnitDefeatCandidatesTask();
-            switch (sdfGetRandInt(0, 3)) {
+            switch (dds3GetRandIntA(0, 3)) {
             case 0:
                 btlBossDebugPrintf("VURI:ITP-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,
@@ -4186,7 +4186,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (link->unit->partyRecord.unitId == 0x111) {
                 switch (targetSlot) {
                 case 0:
-                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -523.6f, -141.7f, -1094.1f, -0.041f, -0.102f, -0.005f, 0.985f, -568.6f,
@@ -4199,7 +4199,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 1:
-                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -300.6f, -113.2f, -1052.8f, -0.053f, -0.154f, 0.0f, 0.978f, -329.1f,
@@ -4212,7 +4212,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 2:
-                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -13.6f, -225.4f, -1001.0f, 0.029f, -0.156f, -0.01f, 0.978f, -47.7f,
@@ -4228,7 +4228,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             } else {
                 switch (targetSlot) {
                 case 0:
-                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             129.6f, -149.0f, -921.7f, -0.014f, 0.231f, -0.008f, 0.963f, 179.3f,
@@ -4241,7 +4241,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 1:
-                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             256.7f, -83.8f, -943.7f, -0.084f, 0.146f, -0.017f, 0.976f, 317.2f,
@@ -4254,7 +4254,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 2:
-                    if (sdfGetRand((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             400.8f, -282.1f, -874.3f, 0.128f, 0.121f, 0.014f, 0.975f, 438.3f,
@@ -4278,7 +4278,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                 return 1;
             }
             if (link->unit->partyRecord.unitId == 0x111) {
-                switch (sdfGetRandInt(0, 2)) {
+                switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     btlBossDebugPrintf("VURI_A:NAGIBA-0 ++++\n");
                     btlSetEffectCameraKeys((s32)command,
@@ -4293,7 +4293,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     return 1;
                 }
             } else {
-                switch (sdfGetRandInt(0, 2)) {
+                switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     btlBossDebugPrintf("VURI_B:NAGIBA-0 ++++\n");
                     btlSetEffectCameraKeys((s32)command,
@@ -4369,7 +4369,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     return 1;
                 }
                 if (link->unit->partyRecord.unitId == 0x111) {
-                    switch (sdfGetRandInt(0, 2)) {
+                    switch (dds3GetRandIntA(0, 2)) {
                     case 0:
                         btlBossDebugPrintf("VURI_A:ITP-0 ++++\n");
                         btlSetEffectCameraKeys((s32)command,
@@ -4384,7 +4384,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                         return 1;
                     }
                 } else {
-                    switch (sdfGetRandInt(0, 2)) {
+                    switch (dds3GetRandIntA(0, 2)) {
                     case 0:
                         btlBossDebugPrintf("VURI_B:ITP-0 ++++\n");
                         btlSetEffectCameraKeys((s32)command,
@@ -4641,7 +4641,7 @@ extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 
 extern u32 btlIsMarkedActionSceneStateActive(void);
 
-extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
+extern void fldCamUpdateDefault(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
@@ -4950,7 +4950,7 @@ void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
     }
     if (count != 0) {
         actor->indexWork.phase = 2;
-        actor->indexWork.skillId = choices[sdfGetRandInt(NULL, count)];
+        actor->indexWork.skillId = choices[dds3GetRandIntA(NULL, count)];
         btlBossDebugPrintf("btl:boss CHERUN shadow = %X\n", actor->indexWork.skillId);
     }
 }
@@ -4984,7 +4984,7 @@ s32 btlChoosePartyMemberShadowId(void) {
     if (count == 0) {
         return 0x12A;
     }
-    unit = choices[sdfGetRandInt(NULL, count)];
+    unit = choices[dds3GetRandIntA(NULL, count)];
     btlBossDebugPrintf(D_0041AAF8, unit->partyRecord.unitId);
     state = &battle->effect->summon;
     unitId = unit->partyRecord.unitId;
@@ -5862,7 +5862,7 @@ u32 btlTickAction6B(BtlLinkedCommand *unit) {
     if (unit->motionProgress >= 0) {
         if (unit->motionProgress >= 0xF) {
             btlClearRuntimeFlag2000();
-            btlSetDefaultActionCameraPose(unit, &unit->camera);
+            fldCamUpdateDefault(unit, &unit->camera);
         } else {
             btlSetRuntimeFlag2000();
         }
@@ -5968,7 +5968,7 @@ void btlRestoreLinkedActorSceneColor(void) {
         if (actor != NULL && (actor->status.flags & 2)) {
             VU0_LOAD_VF(vf10, D_0037F770[0]);
             EE_MMI_RGBA_PACK(packed[0]);
-            evtSetUnitRgbTransition(actor->ext, 0, packed[0]);
+            evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }
     }
 }
@@ -6134,7 +6134,7 @@ void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstP
     u32 index;
 
     if (!(unit->status.flags & 0x400)) {
-        evtPrepareUnitMotionState(unit->ext, selector, firstParameter, secondParameter, mode);
+        evtSetUnitMotion(unit->ext, selector, firstParameter, secondParameter, mode);
         unit->ext->owner->first->frameStep = frameStep;
     } else {
         state = &((BtlState *)btlGetRuntime())->effect->action;
@@ -6144,7 +6144,7 @@ void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstP
             }
         }
         group = btlGetSpecialActionGroupEntry(unit, selector);
-        evtPrepareUnitMotionState(unit->ext, group, firstParameter, secondParameter, mode);
+        evtSetUnitMotion(unit->ext, group, firstParameter, secondParameter, mode);
         unit->ext->owner->first->frameStep = frameStep;
         if (selector == 0xB) {
             if (unit->partyRecord.unitId == 0x121) {
@@ -6153,9 +6153,9 @@ void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstP
             frameStep = ((BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
                 unit->resourceKind, unit->resourceIndex))->motions[0].alphaFrameScale;
             selector = btlGetSpecialActionGroupEntry(unit, 0);
-            evtUnitSetStoredParameter(unit->ext, selector);
-            evtSetTransitionMotionScale(unit->ext, frameStep);
-            evtStoreUnitMotionShortParameters(unit->ext, 0, 0);
+            evtSetWaitMotion(unit->ext, selector);
+            evtSetWaitMotionSpeed(unit->ext, frameStep);
+            evtSetWaitHokanFrame(unit->ext, 0, 0);
             unit->effectIndex = selector;
             unit->effectParameter = 1;
             unit->effectScale = frameStep;
@@ -6165,29 +6165,29 @@ void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstP
 
                     index = btlGetSpecialActionIndex(unit);
                     linkedGroup = D_003BF758[1][index];
-                    evtPrepareUnitMotionState(state->actor->ext, linkedGroup, 0, 0, 0);
+                    evtSetUnitMotion(state->actor->ext, linkedGroup, 0, 0, 0);
                     state->actor->ext->owner->first->frameStep = 1.0f;
-                    evtUnitSetStoredParameter(state->actor->ext, D_003BF758[0][index]);
-                    evtSetTransitionMotionScale(state->actor->ext, 1.0f);
-                    evtStoreUnitMotionShortParameters(state->actor->ext, 0, 0);
+                    evtSetWaitMotion(state->actor->ext, D_003BF758[0][index]);
+                    evtSetWaitMotionSpeed(state->actor->ext, 1.0f);
+                    evtSetWaitHokanFrame(state->actor->ext, 0, 0);
                 }
             }
         }
     }
     if (secondParameter == 0) {
-        mdlAddEntryFlagged(unit->ext->owner, 0, group);
-        sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+        mdlLoopMotion(unit->ext->owner, 0, group);
+        sdfMotionSeek(unit->ext->owner->first, 0.0f);
     }
 }
 
 void btlApplySpecialActionRenderGroup(BtlUnit *unit, u32 group, f32 opacity) {
     if ((unit->status.flags & 0x400) == 0) {
-        evtUnitSetStoredParameter(unit->ext, group);
-        evtSetTransitionMotionScale(unit->ext, opacity);
+        evtSetWaitMotion(unit->ext, group);
+        evtSetWaitMotionSpeed(unit->ext, opacity);
     } else {
         group = btlGetSpecialActionGroupEntry(unit, group);
-        evtUnitSetStoredParameter(unit->ext, group);
-        evtSetTransitionMotionScale(unit->ext, opacity);
+        evtSetWaitMotion(unit->ext, group);
+        evtSetWaitMotionSpeed(unit->ext, opacity);
     }
 }
 
@@ -6468,16 +6468,16 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
         if (rotate == 1 && battle->unk268 == 3) {
             switch (cameraPreset) {
             case 0:
-                sdfVuLoadRotationMatrixX(-0.13089969f);
+                SetRotateMatrixX(-0.13089969f);
                 sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
                 sdfComposeVuMatrixFromRegisters();
                 break;
             case 1:
-                sdfVuLoadRotationMatrixX(-0.13089969f);
+                SetRotateMatrixX(-0.13089969f);
                 break;
             case 2: {
                 f32 angle = -0.13089969f;
-                sdfVuLoadRotationMatrixX(angle);
+                SetRotateMatrixX(angle);
                 sdfVuLoadSecondaryRotationMatrixY(angle);
                 sdfComposeVuMatrixFromRegisters();
                 break;
@@ -6510,7 +6510,7 @@ extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
 extern char D_0041ACC0[];
 
 void btlChooseBrahmaIndividualCamera(u32 unit) {
-    switch (sdfGetRandInt(0, 2)) {
+    switch (dds3GetRandIntA(0, 2)) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
         btlFlagAllUnitDefeatCandidatesTask();
@@ -6531,7 +6531,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041ACA8);
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041ACC0);
 
 void btlChooseBrahmaGroupCamera(u32 unit) {
-    switch (sdfGetRandInt(0, 2)) {
+    switch (dds3GetRandIntA(0, 2)) {
     case 0:
         btlBossDebugPrintf("BRAHMA:ALL-0 ++++\n");
         btlSetEffectCameraKeys((s32)unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
@@ -6714,7 +6714,7 @@ s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 mode
         break;
     }
     btlFlagAllUnitDefeatCandidatesTask();
-    switch (sdfGetRandInt(NULL, 3)) {
+    switch (dds3GetRandIntA(NULL, 3)) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
         btlSetEffectCameraKeys((s32)command,
@@ -7129,16 +7129,16 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
     if (rotate == 1 && runtime[0x134] == 3) {
         switch (kind) {
         case 0:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            sdfVuLoadRotationMatrixX(angle);
+            SetRotateMatrixX(angle);
             sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -7184,7 +7184,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
             if (btlCanUseLinkedActor(command) != 0) {
                 cameraMode = 0;
                 if (btlCanUseActorCategoryFlag2(command) == 0) {
-                    cameraMode = sdfGetRandInt(0, 2);
+                    cameraMode = dds3GetRandIntA(0, 2);
                 }
             } else {
                 cameraMode = 1;
@@ -7198,7 +7198,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
                 case 0x59: case 0x5E: case 0x7F: case 0xBE: case 0xDB:
                 case 0xDC: case 0xDF:
                     btlFlagAllUnitDefeatCandidatesTask();
-                    switch (sdfGetRandInt(0, 2)) {
+                    switch (dds3GetRandIntA(0, 2)) {
                     case 0:
                         btlBossDebugPrintf("SETO:T-0 ++++\n");
                         btlSetEffectCameraKeys((s32)command,
@@ -7230,7 +7230,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
         if (btlCanUseLinkedActor(command) != 0) {
             cameraMode = 0;
             if (btlCanUseActorCategoryFlag2(command) == 0) {
-                cameraMode = sdfGetRandInt(0, 2);
+                cameraMode = dds3GetRandIntA(0, 2);
             }
         } else {
             cameraMode = 1;
@@ -7406,7 +7406,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B3B8);
 
 void btlChooseSatanAttackCamera(s32 actor) {
     btlFlagAllUnitDefeatCandidatesTask();
-    switch (sdfGetRandInt(NULL, 3)) {
+    switch (dds3GetRandIntA(NULL, 3)) {
     case 0:
         btlBossDebugPrintf(D_0041B3B8);
         btlSetEffectCameraKeys(actor,
@@ -7431,7 +7431,7 @@ void btlChooseSatanAttackCamera(s32 actor) {
 
 /* Choose Satan keys; cases zero/one mark all candidates, case two marks only the linked group. */
 void btlChooseSatanGroupAwareCamera(s32 actor) {
-    switch (sdfGetRandInt(NULL, 3)) {
+    switch (dds3GetRandIntA(NULL, 3)) {
     case 0:
         btlBossDebugPrintf("SATAN:I-0 ++++\n");
         btlFlagAllUnitDefeatCandidatesTask();
@@ -7543,16 +7543,16 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
     if (rotate == 1 && runtime->formationMode == 3) {
         switch (kind) {
         case 0:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            sdfVuLoadRotationMatrixX(angle);
+            SetRotateMatrixX(angle);
             sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -7677,7 +7677,7 @@ s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 mod
         command->flags |= 0x800;
         return 1;
     }
-    shot = sdfGetRandInt(NULL, 3);
+    shot = dds3GetRandIntA(NULL, 3);
     switch (shot) {
     case 0:
     case 1:
@@ -7741,7 +7741,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
             if (btlCanUseLinkedActor(command) != 0) {
                 cameraMode = 0;
                 if (btlCanUseActorCategoryFlag2(command) == 0) {
-                    cameraMode = sdfGetRandInt(0, 2);
+                    cameraMode = dds3GetRandIntA(0, 2);
                 }
             } else {
                 cameraMode = 1;
@@ -7765,7 +7765,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
         if (btlCanUseLinkedActor(command) != 0) {
             cameraMode = 0;
             if (btlCanUseActorCategoryFlag2(command) == 0) {
-                cameraMode = sdfGetRandInt(0, 2);
+                cameraMode = dds3GetRandIntA(0, 2);
             }
         } else {
             cameraMode = 1;
@@ -7808,7 +7808,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
                 return 1;
             }
             btlFlagAllUnitDefeatCandidatesTask();
-            switch (sdfGetRandInt(0, 3)) {
+            switch (dds3GetRandIntA(0, 3)) {
             case 0:
                 btlBossDebugPrintf("SATAN:ITP-0 ++++\n");
                 btlSetEffectCameraKeys((s32)command,

@@ -5,14 +5,14 @@
 
 struct ItfMesSub;
 
-s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *definition);
+s32 fclInitMessage(struct ItfMesSub *definition);
 
 u32 evtFinishMessageWindowAndNotify(void);
 
 /* Returns the signed control-state byte as s32. Returns 0 when no window is
  * open, or when a nonzero state gate hides control state 2. This is a state
  * value, not a boolean; other stored values pass through. */
-s32 evtGetMessageWindowControlState(void);
+s32 fclChkMessage(void);
 
 s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 displayValue);
 /* Store the opaque value and snapshot the panel field when a window is open.

@@ -133,7 +133,7 @@ extern s8 effRectangleBlurEnabled;
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 
-extern void effDrawSolidRectangle(EffSolidRectParams *arg);
+extern void dds3EffectFilter(EffSolidRectParams *arg);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
@@ -198,7 +198,7 @@ s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
 
 /* Evaluate at the entry t before advancing. The first segment carries excess t;
  * the second stores t = 1 and returns 0 after producing output at the entry t. */
-s32 effStepBezierSlotSegment(EffSegmentedBezierSlot *slot, f32 *out) {
+s32 effPCPBezierEval(EffSegmentedBezierSlot *slot, f32 *out) {
     f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
@@ -262,53 +262,53 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
-void effDrawMarkerBoxAtPoint(f32 *position) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+void effDebugPointDraw(f32 *position) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
 
-    sdfInitPacketList(list);
+    sdfDrawTagInit(list);
     VU0_LOAD_VF(vf10, position);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, screen);
     x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
+    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 /* Project a point and use color for both the marker's fill and border. */
-void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+void effDebugPointDraw2(f32 *position, s32 color) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
 
-    sdfInitPacketList(list);
+    sdfDrawTagInit(list);
     VU0_LOAD_VF(vf10, position);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, screen);
     x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
+    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-extern u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
+extern u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
 
 /* Draw a GS line between two projected points, using the fixed marker color. */
-void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+void effDebugLineDraw(f32 *from, f32 *to) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 start[EFF_EVENT_VECTOR_COMPONENTS];
     f32 end[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[4]; /* written, never read; retail keeps the frame slot */
@@ -317,12 +317,12 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     s32 x1;
     s32 y1;
 
-    sdfInitPacketList(list);
+    sdfDrawTagInit(list);
     VU0_LOAD_VF(vf10, from);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, start);
     VU0_LOAD_VF(vf10, to);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, end);
     x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
@@ -332,13 +332,13 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     pixel[1] = y0;
     pixel[2] = x1;
     pixel[3] = y1;
-    sdfAppendPacket(list, (u32)(fldCreateColoredLinePacket((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
+    sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 /* Draw a GS line between two projected points, using color at both vertices. */
-void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
+void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
     f32 start[EFF_EVENT_VECTOR_COMPONENTS];
     f32 end[EFF_EVENT_VECTOR_COMPONENTS];
     s32 pixel[4]; /* written, never read; retail keeps the frame slot */
@@ -347,12 +347,12 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     s32 x1;
     s32 y1;
 
-    sdfInitPacketList(list);
+    sdfDrawTagInit(list);
     VU0_LOAD_VF(vf10, from);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, start);
     VU0_LOAD_VF(vf10, to);
-    sdfProjectVuVectorToScreen();
+    effScreenOffset();
     VU0_STORE_VF(vf10, end);
     x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
     y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
@@ -362,21 +362,21 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     pixel[1] = y0;
     pixel[2] = x1;
     pixel[3] = y1;
-    sdfAppendPacket(list, (u32)(fldCreateColoredLinePacket((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
+    sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 /* Submit a formatted native command at biased screen coordinates. */
-void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 commandIndex, s32 format) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(sdfCreateFormattedSifCommand(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
+void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)(sdfDevPrintf(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
+void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));
     f32 vertices[40][4] __attribute__((aligned(16)));
@@ -392,8 +392,8 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
     u32 ring = 0;
     u32 segment;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
     do {
         colors[ring++] = color;
     } while (ring < 40);
@@ -406,7 +406,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
             out = vertices;
             longitude = 0.0f;
             ringY = radius * sdfCos(latitude);
-            ringRadius = radius * sdfSinPoly(latitude);
+            ringRadius = radius * sdfSin(latitude);
             VU0_LOAD_MATRIX(matrix);
             VU0_LOAD_VF(vf11, center);
             point[0] = ringRadius;
@@ -423,7 +423,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
                 longitude += 0.31415924429893494f;
                 point[0] = sdfCos(longitude) * ringRadius;
                 point[1] = ringY;
-                point[2] = sdfSinPoly(longitude) * ringRadius;
+                point[2] = sdfSin(longitude) * ringRadius;
                 VU0_LOAD_VF(vf10, point);
                 VU0_CLEAR_W(vf10);
                 VU0_APPLY_MATRIX(vf10, vf10);
@@ -431,9 +431,9 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
                 VU0_STORE_VF(vf10, *out);
                 out++;
             }
-            sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
+            sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
         }
-        sdfVuLoadRotationMatrixX(1.5707963f);
+        SetRotateMatrixX(1.5707963f);
         VU0_LOAD_MATRIX_B_F32(matrix);
         sdfComposeVuMatrixFromRegisters();
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);
@@ -451,29 +451,29 @@ extern f32 D_0043645C;
 extern f32 effTriangleVertexScratch[4][4];
 extern u32 D_003B21A0[4];
 extern SdfPoolNode D_00380028;
-extern void *effCreateVertexDrawPacket(EffPacketParams *params);
+extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
 
-extern void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
-extern void sdfConsAppendVuPacket(SdfListHead *packetList, s32 (*allocatePacket)(s32));
+extern void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset, s32 (*allocatePacket)(s32));
+extern void sdf3DPrimLinkTm(SdfListHead *packetList, s32 (*allocatePacket)(s32));
 
-void effDrawRotatingTriangleAtPosition(f32 *position) {
+void effDebugSelectCursorDraw(f32 *position) {
     SdfAsset *asset = D_00436458;
     SdfListHead *list;
     EffPacketParams packet;
 
     if (asset == NULL) {
-        asset = sdfCreateAssetWithDrawEntries();
+        asset = sdfMatNew();
         D_00436458 = asset;
-        sdfSetPrimaryStateFloat(asset, 1.0f);
+        sdfMatSetConstant(asset, 1.0f);
     }
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    sdfVuLoadRotationMatrixY(D_0043645C);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    SetRotateMatrixY(D_0043645C);
     D_0043645C += 0.10471974313259125f;
     VU0_LOAD_VF(vf10, position);
     VU0_ADD_XYZ(vf31, vf31, vf10);
-    sdfConsAppendVuPacket(list, NULL);
+    sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
     packet.primitive = 0x4000;
     effTriangleVertexScratch[2][2] = 0.0f;
@@ -493,15 +493,15 @@ void effDrawRotatingTriangleAtPosition(f32 *position) {
     packet.vertexCount = 3;
     packet.positions = (u128 *)effTriangleVertexScratch;
     packet.texcoords = NULL;
-    sdfConsAppendAssetPacket(list, D_00436458, NULL);
-    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&packet));
+    sdf3DPrimLinkMat(list, D_00436458, NULL);
+    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&packet));
     D_00380028.append(&D_00380028, list);
 }
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
-void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
+void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
     f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
     f32 vertices[40][4];
     u32 colors[40];
@@ -516,8 +516,8 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     f32 angle;
     f32 oppositeAngle;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
     for (ring = 0; ring < 40; ring++) {
         colors[ring] = color;
     }
@@ -539,13 +539,13 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
             angle += angleStep;
             point[0] = sdfCos(angle) * radius;
             point[1] = y;
-            point[2] = sdfSinPoly(angle) * radius;
+            point[2] = sdfSin(angle) * radius;
             VU0_LOAD_VF(vf10, point);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, *out);
             out++;
         }
-        sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
+        sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
         y += heightStep;
     }
 
@@ -555,21 +555,21 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     for (segment = 0; segment < 20; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
-        point[2] = sdfSinPoly(angle) * radius;
+        point[2] = sdfSin(angle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
         out++;
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
-        point[2] = sdfSinPoly(angle) * radius;
+        point[2] = sdfSin(angle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
         out++;
         angle += angleStep;
     }
-    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
+    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
 
     out = vertices;
     VU0_LOAD_VF(vf11, center);
@@ -577,7 +577,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
-        point[2] = sdfSinPoly(angle) * radius;
+        point[2] = sdfSin(angle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
@@ -585,14 +585,14 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = -height * 0.5f;
-        point[2] = sdfSinPoly(oppositeAngle) * radius;
+        point[2] = sdfSin(oppositeAngle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
         out++;
         angle += angleStep;
     }
-    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 20, 0x80));
+    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
 
     out = vertices;
     VU0_LOAD_VF(vf11, center);
@@ -600,7 +600,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
-        point[2] = sdfSinPoly(angle) * radius;
+        point[2] = sdfSin(angle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
@@ -608,127 +608,127 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = height * 0.5f;
-        point[2] = sdfSinPoly(oppositeAngle) * radius;
+        point[2] = sdfSin(oppositeAngle) * radius;
         VU0_LOAD_VF(vf10, point);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, *out);
         out++;
         angle += angleStep;
     }
-    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 20, 0x80));
+    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
     surface = &kwlnDrawSurfaces[55];
     surface->append(surface, list);
 }
 
 
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 /* Submit a filled rectangle and its line-strip border. Keep native width/height
  * scaling and the distinct shift/multiply forms used by the other draw paths. */
-void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
+void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-void effEnableRectangleBlur(void) {
+void Eve_BlurON(void) {
     effRectangleBlurEnabled = 1;
 }
 
-void effDisableRectangleBlur(void) {
+void Eve_BlurOFF(void) {
     effRectangleBlurEnabled = 0;
 }
 
 /* Copy only the 0x28-byte source prefix; retain the screen record's trailing bytes. */
-void effCopyRectangleBlurParameters(const EffBlurQuad *parameters) {
+void Eve_BlurSetParam(const EffBlurQuad *parameters) {
     memcpy(&effBlurRectangleParameters, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 /* Expose the rectangle-blur parameter block by address. */
-EffScreenDrawParams *effGetCh70Params(void) {
+EffScreenDrawParams *Eve_BlurGetParam(void) {
     return &effBlurRectangleParameters;
 }
 
-void effEnableTexturedBlur(void) {
+void Eve_PartialMultiBlurON(void) {
     effTexturedBlurEnabled = 1;
 }
 
-void effDisableTexturedBlur(void) {
+void Eve_PartialMultiBlurOFF(void) {
     effTexturedBlurEnabled = 0;
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
-void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters) {
+void Eve_PartialMultiBlurSetParam(EffBlurTemplateBody *parameters) {
     effBlurPixelWork->body = *parameters;
 }
 
 /* Return the current textured-blur work without retaining it. */
-EffBlurTemplate *effGetCh71Work(void) {
+EffBlurTemplate *Eve_PartialMultiBlurGetParams(void) {
     return effBlurPixelWork;
 }
 
-void effSetCh71Id(SdfTex *texture) {
+void Eve_PartialMultiBlurSetTex(SdfTex *texture) {
     effBlurPixelWork->texture = texture;
 }
 
 /* Select the same resource-table entry used by the filter-blur initializer. */
-void effInitCh71Id(void) {
-    effBlurPixelWork->texture = effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
+void Eve_PartialMultiBlurSetDefTex(void) {
+    effBlurPixelWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
-void effEnableFilterBlur(void) {
+void Eve_DistortionBlurON(void) {
     effFilterBlurEnabled = 1;
 }
 
-void effDisableFilterBlur(void) {
+void Eve_DistortionBlurOFF(void) {
     effFilterBlurEnabled = 0;
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
-void effCopyFilterBlurParameters(EffBlurScatterParams *parameters) {
+void Eve_DistortionBlurSetParam(EffBlurScatterParams *parameters) {
     effFilterBlurWork->params = *parameters;
 }
 
 /* Return the current filter-blur work without retaining it. */
-EffBlurScatterWork *effGetCh72Work(void) {
+EffBlurScatterWork *Eve_DistortionBlurGetParams(void) {
     return effFilterBlurWork;
 }
 
-void effSetCh72Id(SdfTex *sourceHandle) {
+void Eve_DistortionBlurSetTex(SdfTex *sourceHandle) {
     effFilterBlurWork->texture = sourceHandle;
 }
 
 /* Install the filter-blur resource-table texture without changing its slots. */
-void effInitCh72Id(void) {
-    effFilterBlurWork->texture = effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
+void Eve_DistortionBlurSetDefTex(void) {
+    effFilterBlurWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
-void effEnableStaggeredBlur(void) {
+void Eve_RippleBlurON(void) {
     effStaggeredBlurEnabled = 1;
 }
 
-void effDisableStaggeredBlur(void) {
+void Eve_RippleBlurOFF(void) {
     effStaggeredBlurEnabled = 0;
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
-void effCopyStaggeredBlurParameters(EffBlurScaleParams *parameters) {
+void Eve_RippleBlurSetParam(EffBlurScaleParams *parameters) {
     effStaggeredBlurWork->params = *parameters;
 }
 
 /* Return the current staggered-blur work without retaining it. */
-EffBlurScaleWork *effGetCh76Work(void) {
+EffBlurScaleWork *Eve_RippleBlurGetParams(void) {
     return effStaggeredBlurWork;
 }
 
-void effSetCh76Id(SdfTex *sourceHandle) {
+void Eve_RippleBlurSetTex(SdfTex *sourceHandle) {
     effStaggeredBlurWork->texture = sourceHandle;
 }
 
 /* Install the staggered-blur resource-table texture without changing its slots. */
-void effInitCh76Id(void) {
-    effStaggeredBlurWork->texture = effGetBillResourceTexture(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
+void Eve_RippleBlurSetDefTex(void) {
+    effStaggeredBlurWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
 }
 
 void effEnableFramebufferQuad(void) {
@@ -749,58 +749,58 @@ EffScreenDrawParams *effGetCh73Params(void) {
     return &D_003B2238;
 }
 
-void effEnableColorRectangle(void) {
+void Eve_FilterON(void) {
     effColorRectangleEnabled = 1;
 }
 
-void effDisableColorRectangle(void) {
+void Eve_FilterOFF(void) {
     effColorRectangleEnabled = 0;
 }
 
 /* Replace the complete solid-rectangle parameter block. */
-void effCopyColorRectangleParameters(EffSolidRectParams *parameters) {
+void Eve_FilterSetParam(EffSolidRectParams *parameters) {
     effColorRectangleParameters = *parameters;
 }
 
 /* Expose the solid-rectangle parameter block by address. */
-EffSolidRectParams *effGetCh74Params(void) {
+EffSolidRectParams *Eve_FilterGetParams(void) {
     return &effColorRectangleParameters;
 }
 
-void effEnableTexturedSquare(void) {
+void Eve_PartialMultiFilterON(void) {
     effTexturedSquareEnabled = 1;
 }
 
-void effDisableTexturedSquare(void) {
+void Eve_PartialMultiFilterOFF(void) {
     effTexturedSquareEnabled = 0;
 }
 
 /* Copy the resource template body while preserving its selected resource. */
-void effCopyTexturedSquareParameters(EffResourceRectParams *parameters) {
+void Eve_PartialMultiFilterSetParam(EffResourceRectParams *parameters) {
     effTexturedSquareWork->params = *parameters;
 }
 
 /* Return the current textured-square work without retaining it. */
-EffResourceRectWork *effGetCh75Work(void) {
+EffResourceRectWork *Eve_PartialMultiFilterGetParams(void) {
     return effTexturedSquareWork;
 }
 
-void effSetCh75Id(SdfTex *texture) {
+void Eve_PartialMultiFilterSetTex(SdfTex *texture) {
     effTexturedSquareWork->texture = texture;
 }
 
 /* Install the textured-square resource-table texture while retaining its body. */
-void effInitCh75Id(void) {
-    effTexturedSquareWork->texture = effGetBillResourceTexture(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+void Eve_PartialMultiFilterSetDefTex(void) {
+    effTexturedSquareWork->texture = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
-void effInitWorks(void) {
-    effBlurPixelWork = effCloneBlurTemplate((EffBlurTemplateBody *)D_003B2208);
-    effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003B21D8);
-    effTexturedSquareWork = effCloneResourceTemplate((EffResourceRectParams *)D_003B2278);
-    effStaggeredBlurWork = effCloneBlurWorkWithSlots((EffBlurScaleParams *)D_003B22A0);
-    effGetCh76Work()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
+void Eve_EffectInit(void) {
+    effBlurPixelWork = dds3EffectPartialMultiBlurCreate((EffBlurTemplateBody *)D_003B2208);
+    effFilterBlurWork = dds3EffectDistortionBlurCreate((EffBlurScatterParams *)D_003B21D8);
+    effTexturedSquareWork = dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)D_003B2278);
+    effStaggeredBlurWork = dds3EffectRippleBlurCreate((EffBlurScaleParams *)D_003B22A0);
+    Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
 /* Dispatch enabled draw families independently, in their native order. */
@@ -821,7 +821,7 @@ void effDispatchActive(void) {
         effBlurDrawFramebufferQuad(&D_003B2238.source);
     }
     if (effColorRectangleEnabled) {
-        effDrawSolidRectangle(&effColorRectangleParameters);
+        dds3EffectFilter(&effColorRectangleParameters);
     }
     if (effTexturedSquareEnabled) {
         effResourceRectDrawPixels(effTexturedSquareWork);
@@ -983,7 +983,7 @@ extern EffEventSetupRecord effSolidRectangleSetupRecord;
 extern s8 effSolidRectangleSetupReady;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
-s8 effEventAdvanceSolidRectangleSetup(void) {
+s8 evtViewerCheckDirty(void) {
     if (effSolidRectangleSetupReady == 0) {
         if (effSolidRectangleSetupRecord.callback != 0) {
             *effSolidRectangleSetupRecord.callbackResult = effSolidRectangleSetupRecord.callback(effSolidRectangleSetupRecord.source);
@@ -1019,7 +1019,7 @@ extern EffEventSetupRecord effResourceRectangleSetupRecord;
 extern s8 D_0043651C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
-s8 effEventAdvanceResourceTemplateSetup(void) {
+s8 mfilterRun(void) {
     if (D_0043651C == 0) {
         if (effResourceRectangleSetupRecord.callback != 0) {
             *effResourceRectangleSetupRecord.callbackResult = effResourceRectangleSetupRecord.callback(&effResourceRectangleSetupParameters);
@@ -1042,12 +1042,12 @@ s8 effEventAdvanceResourceTemplateSetup(void) {
 }
 
 /* Expose the resource-template setup body by address. */
-EffResourceRectParams *effEventGetResourceTemplateSetupParams(void) {
+EffResourceRectParams *mfilterGetParam(void) {
     return &effResourceRectangleSetupParameters;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
-void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters) {
+void mfilterSetParam(EffResourceRectParams *parameters) {
     effResourceRectangleSetupParameters = *parameters;
 }
 
@@ -1055,7 +1055,7 @@ extern EffEventSetupRecord effStaggeredBlurSetupRecord;
 extern s8 effStaggeredBlurSetupReady;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
-s8 effEventAdvanceScaleBlurSetup(void) {
+s8 rblurProcess(void) {
     if (effStaggeredBlurSetupReady == 0) {
         if (effStaggeredBlurSetupRecord.callback != 0) {
             *effStaggeredBlurSetupRecord.callbackResult = effStaggeredBlurSetupRecord.callback(&effStaggeredBlurSetupParameters);
@@ -1078,20 +1078,20 @@ s8 effEventAdvanceScaleBlurSetup(void) {
 }
 
 /* Expose the scale-blur setup parameters by address. */
-EffBlurScaleParams *effEventGetScaleBlurSetupParams(void) {
+EffBlurScaleParams *rblurGetParam(void) {
     return &effStaggeredBlurSetupParameters;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
-void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters) {
+void rblurSetParam(EffBlurScaleParams *parameters) {
     effStaggeredBlurSetupParameters = *parameters;
 }
 
-SoundMixer *effEventCloneSoundMixer(SoundMixer *source) {
+SoundMixer *effEveBEDCreate(SoundMixer *source) {
     return sndMixerClone(source);
 }
 
-void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
+void effEveBEDDelete(SoundMixer *mixer) {
     sndReleaseAllVoices(mixer);
 }
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
@@ -1100,19 +1100,19 @@ struct EffEventWork {
     struct EvtUnit *actor; /* Linked event unit supplies its model owner. */
     BattleEffect *effect;
 };
-extern void effBattleSetScale(BattleEffect *effect, f32 scale);
+extern void effBTLCutSetScale(BattleEffect *effect, f32 scale);
 
 extern BattleEffect * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
-EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
+EffEventWork *effEveBEDCutCreate(SoundMixer *owner, u16 kind, const void *params) {
     const EffEventInit *init = (const EffEventInit *)params;
     EffEventWork *work = sdfChipAllocDirect(EFF_EVENT_COMPACT_WORK_BYTES);
 
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
     work->effect = effCreateBattleVoiceOwner(owner, kind, 0, 0);
-    effBattleSetScale(work->effect, init->param);
+    effBTLCutSetScale(work->effect, init->param);
     return work;
 }
 
@@ -1130,36 +1130,36 @@ extern u32 D_00436538;
 extern u8 D_003B2D20[];
 
 /* Release the attached effect before freeing the event work. */
-void effEventReleaseNode(EffEventWork *work) {
-    effReleaseBattleVoiceOwner(work->effect);
+void effEveBEDCutDelete(EffEventWork *work) {
+    effBTLCutDelete(work->effect);
     sdfChipFreeDirect(work);
 }
 
 /* Copy the serialized init prefix, retaining the event's actor and effect links. */
-void effEventCopyFileRecordHeader(EffEventWork *destination, const void *source) {
+void effEveBEDCutSetParams(EffEventWork *destination, const void *source) {
     memcpy(&destination->init, source, sizeof(destination->init));
 }
 
 /* Copy one serialized event record; either byte buffer may be unaligned. */
-void effEventCopySerializedRecord(const void *source, void *destination) {
+void effEveBEDCutGetParams(const void *source, void *destination) {
     memcpy(destination, source, EFF_EVENT_EVENT_RECORD_BYTES);
 }
 
 /* Forward the effect's scale value without modifying the record's init prefix. */
-void effEventSetScale(EffEventWork *work, f32 scale) {
-    effBattleSetScale(work->effect, scale);
+void effEveBEDCutSetScale(EffEventWork *work, f32 scale) {
+    effBTLCutSetScale(work->effect, scale);
 }
 
-void effEventSetState(EffEventWork *work, void *actor) {
+void effEveBEDCutSetUnitHandle(EffEventWork *work, void *actor) {
     work->actor = actor;
 }
 
 #include "evt_unit.h"
 #include "mdl.h"
 
-extern void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffectVectorRequest *params);
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
-extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
+extern void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *params);
+extern s32 sdfModelGetMarkPos(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 id);
 extern const f32 D_00414A00[4];
 
 /* Callbacks consume the VU0 output buffers; see docs/idioms.md,
@@ -1192,37 +1192,37 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
     for (entryIndex = 0; entryIndex < count; entryIndex++, entry++) {
         if (entry->zeroKindCount < frame && effect->parameterWorks[entryIndex] != NULL) {
             if (entry->aimParams.kind != 5 || work->actor == NULL) {
-                effEventLoadSelectedAimPositionVu(&work->init, &entry->aimParams);
+                effEveBEDPartGetPositionPtr(&work->init, &entry->aimParams);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
-                effParamWorkCallback0(effect->parameterWorks[entryIndex], position);
-                effParamWorkCallback2(effect->parameterWorks[entryIndex], rotationMatrix);
+                dds3EffectPartSetPosition(effect->parameterWorks[entryIndex], position);
+                dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], rotationMatrix);
             } else {
                 model = work->actor->owner->inner;
-                sdfLoadMapRecordPositionVector(model, entry->aimParams.count);
+                sdfModelGetMarkPos(model, entry->aimParams.count);
                 VU0_STORE_VF_UNCLOBBERED(vf10, position);
-                effParamWorkCallback0(effect->parameterWorks[entryIndex], position);
+                dds3EffectPartSetPosition(effect->parameterWorks[entryIndex], position);
                 /* The callback can change the entry's scale kind. */
                 if (entry->aimParams.kind == 5) {
-                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.count);
+                    sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     VU0_LOAD_MATRIX_B(rotationMatrix);
                     sdfComposeVuMatrixFromRegisters();
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
-                    effParamWorkCallback2(effect->parameterWorks[entryIndex], matrix);
+                    dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 } else {
-                    mdlLoadTertiaryVectorVU(work->actor->owner);
+                    mdlGetScale(work->actor->owner);
                     VU0_GET_VF10_X(scale);
-                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.count);
+                    sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     if (scale != 0.0f) {
                         VU0_SET_ONES_XYZ(vf10);
                         VU0_SCALAR_OP(1.0f / scale, "vmulx.xyzw vf10, vf10, vf2x");
                         VU0_SCALE_MATRIX_ROWS(vf10);
                     }
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
-                    effParamWorkCallback2(effect->parameterWorks[entryIndex], matrix);
+                    dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 }
             }
-            effParamWorkCallback3(effect->parameterWorks[entryIndex], color);
-            effParamWorkInvokeCallback(effect->parameterWorks[entryIndex]);
+            dds3EffectPartSetColor(effect->parameterWorks[entryIndex], color);
+            dds3EffectPartDraw(effect->parameterWorks[entryIndex]);
         }
     }
     if (effect->triggerFrame == frame && effect->triggerFrameCallback != NULL) {
@@ -1233,7 +1233,7 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
 
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
-EffEventLight *effEventLightCreate(SoundMixer *mixer, f32 param) {
+EffEventLight *effSimpleBEDCreate(SoundMixer *mixer, f32 param) {
     EffEventLight *work = sdfChipAllocDirect(sizeof(EffEventLight));
 
     work->init.orientation[3] = 1.0f;
@@ -1248,27 +1248,27 @@ EffEventLight *effEventLightCreate(SoundMixer *mixer, f32 param) {
     work->init.position[0] = 0;
     work->init.position[2] = 0;
     work->init.position[3] = 0;
-    work->handle = effEventCloneSoundMixer(mixer);
-    work->owner = effEventCreate(work->handle, 0, &work->init);
+    work->handle = effEveBEDCreate(mixer);
+    work->owner = effEveBEDCutCreate(work->handle, 0, &work->init);
     work->active = 1;
     return work;
 }
 
 /* Release the effect, invoke shared teardown only when flagged, then free the holder. */
-void effEventLightDestroy(EffEventLight *work) {
-    effEventReleaseNode(work->owner);
+void effSimpleBEDDelete(EffEventLight *work) {
+    effEveBEDCutDelete(work->owner);
     if (work->active != 0) {
-        effEventReleaseSoundMixerVoices(work->handle);
+        effEveBEDDelete(work->handle);
     }
     sdfChipFreeDirect(work);
 }
 
 /* Clone the init block/effect using the same handle; clear the shared-teardown flag. */
-EffEventLight *effEventLightClone(EffEventLight *src) {
+EffEventLight *effSimpleBEDCopy(EffEventLight *src) {
     EffEventInit *block = &src->init;
     EffEventLight *work = sdfChipAllocDirect(sizeof(EffEventLight));
 
-    work->owner = effEventCreate(src->handle, 0, block);
+    work->owner = effEveBEDCutCreate(src->handle, 0, block);
     work->handle = src->handle;
     memcpy(&work->init, block, sizeof(work->init));
     work->active = 0;
@@ -1276,23 +1276,23 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 }
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
-void effEventLightUpdateEffectParameters(EffEventLight *work) {
+void effSimpleBEDDraw(EffEventLight *work) {
     effEventUpdateEffectParameters(work->owner);
 }
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */
-void effEventLightSetPosition(EffEventLight *work, f32 *position) {
+void effSimpleBEDSetPosition(EffEventLight *work, f32 *position) {
     work->init.position[0] = position[0];
     work->init.position[1] = position[1] - work->init.height * 0.5f;
     work->init.position[2] = position[2];
     work->init.position[3] = 0;
-    effEventCopyFileRecordHeader(work->owner, &work->init);
+    effEveBEDCutSetParams(work->owner, &work->init);
 }
 
 /* Copy the holder's updated packed tint to its event record. */
-void effEventBindEffect(EffEventLight *work, u32 color) {
+void effSimpleBEDSetRGBA(EffEventLight *work, u32 color) {
     work->init.color = color;
-    effEventCopyFileRecordHeader(work->owner, &work->init);
+    effEveBEDCutSetParams(work->owner, &work->init);
 }
 
 
@@ -1304,7 +1304,7 @@ extern u8 sdfViewUpVector[];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
-void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffectVectorRequest *params) {
+void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *params) {
     f32 out[EFF_EVENT_VECTOR_COMPONENTS];
     f32 dir[EFF_EVENT_VECTOR_COMPONENTS];
     f32 pos[EFF_EVENT_VECTOR_COMPONENTS];
@@ -1343,8 +1343,8 @@ void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffectVectorRequest
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
-        sdfVuBuildLookAtBasis(pos, sdfViewTargetVector, sdfViewUpVector);
-        sdfInvertRigidVuTransform();
+        LookAtMatrix(pos, sdfViewTargetVector, sdfViewUpVector);
+        ReverseMatrix();
         VU0_LOAD_VF(vf10, dir);
         VU0_CLEAR_W(vf10);
         VU0_APPLY_MATRIX(vf10, vf10);
@@ -1380,7 +1380,7 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 /* Allocate particles plus their owner, copy parameters and acquire shared textures. */
 INCLUDE_RODATA(const s32, "effect/effEvent", D_00414A00);
 
-EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
+EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
     u32 particleCount = src->particleCount;
     u32 particleBytes = particleCount * sizeof(EffEventBillParticle);
     SdfMemBlock *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(EffEventBillSet));
@@ -1416,11 +1416,11 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
 
 /* Drop the shared texture reference count; zero dispatches both resource handles.
  * The retained allocation is released afterwards, regardless of that count. */
-void effEventReleaseSharedResources(EffEventBillSet *work) {
+void effEVECombParSmokeDelete(EffEventBillSet *work) {
     D_00436530 = D_00436530 - 1;
     if (D_00436530 == 0) {
-        billDispatchByKind((BillObj *)D_00436534);
-        billDispatchByKind((BillObj *)D_00436538);
+        dds3BillboardDelete((BillObj *)D_00436534);
+        dds3BillboardDelete((BillObj *)D_00436538);
     }
     sdfMemFreeDirect(work->allocationHandle);
 }
@@ -1429,7 +1429,7 @@ extern EffRandState effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
    the base-scale random factor; motion's Y component begins as zero height. */
-void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
+void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
     EffEventBillParticle *particle = &work->particles[index];
     f32 direction[EFF_EVENT_VECTOR_COMPONENTS];
     f32 scaleFactor;
@@ -1437,50 +1437,50 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     s32 startDelaySpread = work->head.startDelaySpread;
     s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    particle->age = -(sdfGetRand((EffRandState *)effDefaultRandomState) % startDelaySpread);
-    particle->motionDelay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % motionDelaySpread);
-    scaleFactor = sdfGetRandFloat(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
+    particle->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % startDelaySpread);
+    particle->motionDelay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % motionDelaySpread);
+    scaleFactor = dds3GetRandFloatA(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
     particle->baseScale = work->head.baseScale * scaleFactor;
-    particle->scalePhaseX = sdfGetRandFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    particle->scalePhaseY = sdfGetRandFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    particle->scalePhaseStepX = work->head.scalePhaseStep * (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f);
-    particle->scalePhaseStepY = work->head.scalePhaseStep * (sdfGetRandFloat(effDefaultRandomState) * 0.5f + 0.5f);
-    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
-    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
-    particle->rotation = sdfGetRandFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    if (sdfGetRand((EffRandState *)effDefaultRandomState) & 1) {
-        particle->angularSpeed = work->head.angularSpeed * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
+    particle->scalePhaseX = dds3GetRandFloatA(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseY = dds3GetRandFloatA(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseStepX = work->head.scalePhaseStep * (dds3GetRandFloatA(effDefaultRandomState) * 0.5f + 0.5f);
+    particle->scalePhaseStepY = work->head.scalePhaseStep * (dds3GetRandFloatA(effDefaultRandomState) * 0.5f + 0.5f);
+    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (dds3GetRandFloatA(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (dds3GetRandFloatA(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->rotation = dds3GetRandFloatA(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    if (dds3GetRandA((EffRandState *)effDefaultRandomState) & 1) {
+        particle->angularSpeed = work->head.angularSpeed * (dds3GetRandFloatA(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
     } else {
-        particle->angularSpeed = -(work->head.angularSpeed * (sdfGetRandFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
+        particle->angularSpeed = -(work->head.angularSpeed * (dds3GetRandFloatA(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
     }
     spawnRadius = work->head.spawnRadius;
-    direction[0] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    direction[1] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    direction[2] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[1] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
     /* Each coordinate consumes its own radial random factor, not one shared radius. */
-    particle->position[0] = spawnRadius * sdfGetRandFloat(effDefaultRandomState) * direction[0];
-    particle->position[1] = spawnRadius * sdfGetRandFloat(effDefaultRandomState) * direction[1];
-    particle->position[2] = spawnRadius * sdfGetRandFloat(effDefaultRandomState) * direction[2];
-    particle->motion[0] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->position[0] = spawnRadius * dds3GetRandFloatA(effDefaultRandomState) * direction[0];
+    particle->position[1] = spawnRadius * dds3GetRandFloatA(effDefaultRandomState) * direction[1];
+    particle->position[2] = spawnRadius * dds3GetRandFloatA(effDefaultRandomState) * direction[2];
+    particle->motion[0] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     particle->motion[1] = 0;
-    particle->motion[2] = (sdfGetRandFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->motion[2] = (dds3GetRandFloatA(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, particle->motion);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, particle->motion);
-    particle->swayAmplitude = work->head.swayAmplitude * (sdfGetRandFloat(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
+    particle->swayAmplitude = work->head.swayAmplitude * (dds3GetRandFloatA(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
     particle->swayPhase = 0;
-    particle->verticalSpeed = work->head.verticalSpeed * (sdfGetRandFloat(effDefaultRandomState) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
-    particle->lateralSpeed = work->head.lateralSpeed * (sdfGetRandFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
+    particle->verticalSpeed = work->head.verticalSpeed * (dds3GetRandFloatA(effDefaultRandomState) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
+    particle->lateralSpeed = work->head.lateralSpeed * (dds3GetRandFloatA(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
 extern f32 sdfViewEyeVector[4];
-extern void billInvokeCallback(BillObj *obj);
+extern void dds3BillboardDraw(BillObj *obj);
 
 /* vu0 routine: camera-right normalization and position addition use the
- * native SDK pipeline. As in effEventDrawBillSet, position W is untouched. */
+ * native SDK pipeline. As in effEVECombParSmokeDraw, position W is untouched. */
 void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     f32 position[4], origin[4], lateral[4];
     EffEventBillParticle *particle;
@@ -1508,12 +1508,12 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
     PCP_COPY_VECTOR(origin, work->head.position);
-    billSetBillboardMode((BillObj *)D_00436534, work->head.drawMode);
-    billSetBillboardMode((BillObj *)D_00436538, 3);
+    dds3BillboardSetMode((BillObj *)D_00436534, work->head.drawMode);
+    dds3BillboardSetMode((BillObj *)D_00436538, 3);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->age;
         if (age == 0) {
-            effEventRandomizeBillboardParticle(work, index);
+            effEVECombParSmokePartInit(work, index);
         }
         if (age > 0 && age <= duration) {
             f32 swaySine, sway, alpha;
@@ -1524,7 +1524,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
                 particle->position[0] += lateral[0] * lateralSpeed;
                 particle->position[1] += lateral[1] * lateralSpeed;
                 particle->position[2] += lateral[2] * lateralSpeed;
-                swaySine = sdfSinPoly(particle->swayPhase);
+                swaySine = sdfSin(particle->swayPhase);
                 sway = particle->swayAmplitude * swaySine;
                 particle->motion[1] += particle->verticalSpeed;
                 position[0] = particle->position[0] + particle->motion[0] * sway;
@@ -1547,7 +1547,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             } else {
                 alpha = 1.0f;
             }
-            drawColor = effBlendColor(color & 0xFFFFFF, color, alpha);
+            drawColor = effColorBlend(color & 0xFFFFFF, color, alpha);
             scaleY = particle->baseScale;
             phaseCosine = sdfCos(particle->scalePhaseX);
             modulationX = particle->scaleAmplitudeX * phaseCosine;
@@ -1559,15 +1559,15 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, position);
             effCopyVector((BillObj *)D_00436534, position);
-            billSetChildScaleComponents((BillObj *)D_00436534, scaleX, scaleY);
-            billSetChildParameter((BillObj *)D_00436534, drawColor);
-            billSetRotationAngle((BillObj *)D_00436534, particle->rotation);
-            billInvokeCallback((BillObj *)D_00436534);
+            dds3BillboardSetScale((BillObj *)D_00436534, scaleX, scaleY);
+            dds3BillboardSetRGBA((BillObj *)D_00436534, drawColor);
+            dds3BillboardSetRotate((BillObj *)D_00436534, particle->rotation);
+            dds3BillboardDraw((BillObj *)D_00436534);
             effCopyVector((BillObj *)D_00436538, position);
-            billSetChildScaleComponents((BillObj *)D_00436538, scaleX, scaleY);
-            billSetChildParameter((BillObj *)D_00436538, drawColor);
-            billSetRotationAngle((BillObj *)D_00436538, particle->rotation);
-            billInvokeCallback((BillObj *)D_00436538);
+            dds3BillboardSetScale((BillObj *)D_00436538, scaleX, scaleY);
+            dds3BillboardSetRGBA((BillObj *)D_00436538, drawColor);
+            dds3BillboardSetRotate((BillObj *)D_00436538, particle->rotation);
+            dds3BillboardDraw((BillObj *)D_00436538);
             particle->scalePhaseX += particle->scalePhaseStepX;
             particle->scalePhaseY += particle->scalePhaseStepY;
             particle->rotation += particle->angularSpeed;
@@ -1582,16 +1582,16 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
 }
 
 struct DmaPacketHeader;
-extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
-extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
+extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
+extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 extern SdfPoolNode D_003802A8;
 
-extern s32 billGetChildValue(BillObj *effect);
+extern s32 dds3BillboardGetTex(BillObj *effect);
 
 /* DDS2 event-bill renderer, reconstructed from the native owner and its
  * current providers. The VIF position stream consumes XYZ only: native never
  * initializes the temporary position's W before its full-vector add/copy. */
-void effEventDrawBillSet(EffEventBillSet *work) {
+void effEVECombParSmokeDraw(EffEventBillSet *work) {
     EffEventBillBatch primary, secondary;
     f32 matrix[4][4];
     f32 position[4], origin[4], lateral[4];
@@ -1612,29 +1612,29 @@ void effEventDrawBillSet(EffEventBillSet *work) {
     SdfPoolNode *surface;
     primary.count = 0;
     secondary.count = 0;
-    primaryList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(primaryList);
-    secondaryList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(secondaryList);
-    primaryTexture = (SdfTex *)billGetChildValue((BillObj *)D_00436534);
-    texturePacket = (struct DmaPacketHeader *)sdfAllocPacketAligned(0x20);
-    textureBuffer = sdfTexGetPrimaryBuffer(primaryTexture);
-    textureBytes = sdfTexGetPrimaryBufferSize(primaryTexture);
-    sdfConsInitDmaPacketHeader(texturePacket, (u32)textureBuffer, textureBytes);
+    primaryList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(primaryList);
+    secondaryList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(secondaryList);
+    primaryTexture = (SdfTex *)dds3BillboardGetTex((BillObj *)D_00436534);
+    texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
+    textureBuffer = sdfTexGetPacket(primaryTexture);
+    textureBytes = sdfTexGetPacketLength(primaryTexture);
+    sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
     sdfAppendReferencePacket(primaryList, (u32)texturePacket);
-    secondaryTexture = (SdfTex *)billGetChildValue((BillObj *)D_00436538);
-    texturePacket = (struct DmaPacketHeader *)sdfAllocPacketAligned(0x20);
-    textureBuffer = sdfTexGetPrimaryBuffer(secondaryTexture);
-    textureBytes = sdfTexGetPrimaryBufferSize(secondaryTexture);
-    sdfConsInitDmaPacketHeader(texturePacket, (u32)textureBuffer, textureBytes);
+    secondaryTexture = (SdfTex *)dds3BillboardGetTex((BillObj *)D_00436538);
+    texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
+    textureBuffer = sdfTexGetPacket(secondaryTexture);
+    textureBytes = sdfTexGetPacketLength(secondaryTexture);
+    sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
     sdfAppendReferencePacket(secondaryList, (u32)texturePacket);
     EE_MMI_UNIT_MATRIX(matrix);
-    geometryPacket = (u8 *)sdfAllocPacketAligned(0x38);
-    sdfInitGeometryDmaPacket(geometryPacket, matrix[0]);
-    sdfAppendPacket(primaryList, (u32)geometryPacket);
-    geometryPacket = (u8 *)sdfAllocPacketAligned(0x38);
-    sdfInitGeometryDmaPacket(geometryPacket, matrix[0]);
-    sdfAppendPacket(secondaryList, (u32)geometryPacket);
+    geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
+    sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
+    sdfDrawTagLink(primaryList, (u32)geometryPacket);
+    geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
+    sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
+    sdfDrawTagLink(secondaryList, (u32)geometryPacket);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
@@ -1658,7 +1658,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->age;
         if (age == 0) {
-            effEventRandomizeBillboardParticle(work, index);
+            effEVECombParSmokePartInit(work, index);
         }
         if (age > 0 && age <= duration) {
             f32 swaySine, sway, alpha, transition;
@@ -1672,7 +1672,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
                 particle->position[0] += lateral[0] * lateralSpeed;
                 particle->position[1] += lateral[1] * lateralSpeed;
                 particle->position[2] += lateral[2] * lateralSpeed;
-                swaySine = sdfSinPoly(particle->swayPhase);
+                swaySine = sdfSin(particle->swayPhase);
                 sway = particle->swayAmplitude * swaySine;
                 particle->motion[1] += particle->verticalSpeed;
                 position[0] = particle->position[0] + particle->motion[0] * sway;
@@ -1696,7 +1696,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
                 alpha = 1.0f;
             }
             if (age < colorStart) {
-                primaryColor = effBlendColor(0, color & 0xFF000000, alpha);
+                primaryColor = effColorBlend(0, color & 0xFF000000, alpha);
             } else if (age < colorStart + colorFrames) {
                 if (colorFrames > 0) {
                     transition = (f32)(age - colorStart) / (f32)colorFrames;
@@ -1704,12 +1704,12 @@ void effEventDrawBillSet(EffEventBillSet *work) {
                 } else {
                     transition = 1.0f;
                 }
-                primaryColor = effBlendColor(color & 0xFF000000, color, transition);
-                primaryColor = effBlendColor(primaryColor & 0xFFFFFF, primaryColor, alpha);
+                primaryColor = effColorBlend(color & 0xFF000000, color, transition);
+                primaryColor = effColorBlend(primaryColor & 0xFFFFFF, primaryColor, alpha);
             } else {
-                primaryColor = effBlendColor(color & 0xFFFFFF, color, alpha);
+                primaryColor = effColorBlend(color & 0xFFFFFF, color, alpha);
             }
-            secondaryColor = effBlendColor(color & 0xFFFFFF, color, alpha);
+            secondaryColor = effColorBlend(color & 0xFFFFFF, color, alpha);
             scaleY = particle->baseScale;
             phaseCosine = sdfCos(particle->scalePhaseX);
             modulationX = particle->scaleAmplitudeX * phaseCosine;
@@ -1739,7 +1739,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
             halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
             cosine = sdfCos(particle->rotation);
-            sine = sdfSinPoly(particle->rotation);
+            sine = sdfSin(particle->rotation);
             cornerX = center - halfWidth;
             cornerY = center - halfHeight;
             primary.corners[slot][0] = cornerX * cosine - cornerY * sine;
@@ -1777,7 +1777,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
             halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
             cosine = sdfCos(particle->rotation);
-            sine = sdfSinPoly(particle->rotation);
+            sine = sdfSin(particle->rotation);
             cornerX = center - halfWidth;
             cornerY = center - halfHeight;
             secondary.corners[slot][0] = cornerX * cosine - cornerY * sine;
@@ -1797,12 +1797,12 @@ void effEventDrawBillSet(EffEventBillSet *work) {
             secondary.count++;
             }
             if (primary.count == 15) {
-                sdfAppendPacket(primaryList, (u32)sdfBuildCompactVertexVifPacket(primary.positions,
+                sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.positions,
                     primary.colors, primary.uv, primary.corners, 15, 0));
                 primary.count = 0;
             }
             if (secondary.count == 15) {
-                sdfAppendPacket(secondaryList, (u32)sdfBuildCompactVertexVifPacket(secondary.positions,
+                sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.positions,
                     secondary.colors, secondary.uv, secondary.corners, 15, 0));
                 secondary.count = 0;
             }
@@ -1814,16 +1814,16 @@ void effEventDrawBillSet(EffEventBillSet *work) {
         else particle->age++;
     }
     if (primary.count > 0) {
-        sdfAppendPacket(primaryList, (u32)sdfBuildCompactVertexVifPacket(primary.positions,
+        sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.positions,
             primary.colors, primary.uv, primary.corners, primary.count, 0));
     }
     if (secondary.count > 0) {
-        sdfAppendPacket(secondaryList, (u32)sdfBuildCompactVertexVifPacket(secondary.positions,
+        sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.positions,
             secondary.colors, secondary.uv, secondary.corners, secondary.count, 0));
     }
-    stateList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(stateList);
-    statePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    stateList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(stateList);
+    statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     statePacket[0] = 3;
     statePacket[1] = 0x5000000310000000ULL;
     statePacket[2] = 0x1000000000008002ULL;
@@ -1833,11 +1833,11 @@ void effEventDrawBillSet(EffEventBillSet *work) {
     statePacket[5] = 0x47;
     statePacket[6] = 0x44;
     statePacket[7] = 0x42;
-    sdfAppendPacket(stateList, (u32)statePacket);
+    sdfDrawTagLink(stateList, (u32)statePacket);
     D_003802A8.append(&D_003802A8, stateList);
-    stateList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(stateList);
-    statePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    stateList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(stateList);
+    statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     statePacket[0] = 3;
     statePacket[1] = 0x5000000310000000ULL;
     statePacket[2] = 0x1000000000008002ULL;
@@ -1847,7 +1847,7 @@ void effEventDrawBillSet(EffEventBillSet *work) {
     statePacket[5] = 0x47;
     statePacket[6] = 0x42;
     statePacket[7] = 0x42;
-    sdfAppendPacket(stateList, (u32)statePacket);
+    sdfDrawTagLink(stateList, (u32)statePacket);
     surface = &kwlnDrawSurfaces[60];
     surface->append(surface, stateList);
     (surface - 1)->append(surface - 1, primaryList);
@@ -1856,23 +1856,23 @@ void effEventDrawBillSet(EffEventBillSet *work) {
 
 
 /* Copy one full vector quadword through vf10, including its fourth component. */
-void effEventCopyParameterVector(void *dst, void *src) {
+void effEVECombParSmokeSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
 /* Set the native byte flag without normalizing it to a boolean. */
-void effEventSetWorkFlag(EffEventBillSet *work, u8 flag) {
+void effEVECombParSmokeSetZtest(EffEventBillSet *work, u8 flag) {
     work->flag = flag;
 }
 
 /* Copy the serialized emitter parameters without changing their values. */
-void effEventCopyParameterBlock(const EffEventBillParams *source, EffEventBillParams *destination) {
+void effEVECombParSmokeGetParams(const EffEventBillParams *source, EffEventBillParams *destination) {
     *destination = *source;
 }
 
 /* Copy parameters and clamp only start-delay spread and fade divisors;
  * motionDelaySpread remains unvalidated on this native path. */
-void effCopyEventBlockAndClampPositiveParameters(EffEventBillParams *destination, const EffEventBillParams *source) {
+void effEVECombParSmokeSetParams(EffEventBillParams *destination, const EffEventBillParams *source) {
     *destination = *source;
     if (destination->fadeIn <= 0) {
         destination->fadeIn = 1;
@@ -1886,12 +1886,12 @@ void effCopyEventBlockAndClampPositiveParameters(EffEventBillParams *destination
 }
 
 /* Create from the installed default emitter block; the returned pointer is unused. */
-void effEventInstallBillParticleSet(void) {
-    effEventBillSetCreate(D_003B2D20);
+void effEVECombParSmokeCreate2(void) {
+    effEVECombParSmokeCreate(D_003B2D20);
 }
 
 
-EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind, void *params) {
+EffChanWork *effAPPoint4Create(const EffChanHead *source, u16 kind, void *params) {
     const EffChanHead *head = source;
     u32 recordCount = head->count;
     SdfMemBlock *allocation = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
@@ -1907,16 +1907,16 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->slots = effAllocSlotArray(recordCount);
+    work->slots = dds3Bezier4PCreate(recordCount);
     if (recordCount != 0) {
         delayModulus = work->head.spread;
-        parameterTemplate = effParamWorkCreate(kind, params);
+        parameterTemplate = dds3EffectPartCreate(kind, params);
         record->param = parameterTemplate;
-        record->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
+        record->delay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
-            record->param = effParamWorkDuplicate(parameterTemplate);
-            record->delay = -(sdfGetRand((EffRandState *)effDefaultRandomState) % delayModulus);
+            record->param = dds3EffectPartCopy(parameterTemplate);
+            record->delay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayModulus);
             record++;
         }
     }
@@ -1924,11 +1924,11 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
 }
 
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
-EffChanWork *effEventParticleSetCreateFromTable(void *data) {
-    void *block0 = effParamTableGetBlock(data, 0);
-    void *block1 = effParamTableGetBlock(data, 1);
+EffChanWork *effAPPoint4CreatePCF(void *data) {
+    void *block0 = dds3EffectPCPDataGetData(data, 0);
+    void *block1 = dds3EffectPCPDataGetData(data, 1);
 
-    return effEventCreateChannelFromParams(block0, effParamTableGetWord2(data, 1), block1);
+    return effAPPoint4Create(block0, dds3EffectPCPDataGetType(data, 1), block1);
 }
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436458);

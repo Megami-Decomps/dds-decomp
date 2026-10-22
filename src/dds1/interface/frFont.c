@@ -18,11 +18,11 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void evtLipsStopFunction(void);
-extern void frFontFreeEntry(s32 slotId);
+extern void frDelFontStyle(s32 slotId);
 extern s32 mnuQueryTitleSoundBusy(void);
-/* frFontListInsert is void in the game font TU; preserve C89 call scope here.
+/* fmRetFontMem is void in the game font TU; preserve C89 call scope here.
  * An early void declaration moves the cache-count update at +0x5C/+0x60/+0x64
- * from retail $3 to $2 in frFontReleaseUnreferencedGlyphItem. */
+ * from retail $3 to $2 in frFlushGsFontTable. */
 
 
 
@@ -41,13 +41,13 @@ extern s32 frFontDefaultGlyphCellSize;
 void frFontCreateContext();
 
 
-extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
+extern s32 frEraseEffect(FrFontGlyph *glyph);
 
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
-extern FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *destination);
-extern void frFontSetupGlyph(FrFontChildGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption);
+extern FrFontGlyph *frSetUserImage(FrFontRecord *source, FrFontGlyph *destination);
+extern void frInitTextHandle(FrFontChildGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption);
 extern void frFontInitGlyph(FrFontGlyph *glyph);
 extern u32 frFontGetGlyphCellWidth(u8 fontIndex);
 extern u32 frFontGetGlyphCellHeight(u8 fontIndex);
@@ -55,11 +55,11 @@ extern s8 frFontGlyphAdvanceBySlot[];
 
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
-FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
+FrFontGlyph *frCombineFontRequest(FrFontGlyph *previous, FrFontGlyph *next);
 extern u8 D_003BB17C;
 FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
-u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
+u32 frGetStrWidth(FrFontGlyph *parentGlyph);
 
 
 extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
@@ -96,7 +96,7 @@ extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 #define FR_FONT_POSITION_BAND_HEIGHT 0x54
 
 /* Ensure the four named default font files are installed, in slot order. */
-void frFontLoadDefaultFonts(void) {
+void frLoadStyleAll(void) {
     frFontEnsureSlotLoaded(0, "/font/font0.fnt");
     frFontEnsureSlotLoaded(1, "/font/font1.fnt");
     frFontEnsureSlotLoaded(2, "/font/font2.fnt");
@@ -104,23 +104,23 @@ void frFontLoadDefaultFonts(void) {
 }
 
 /* Free each installed entry, including the temporary slot, without reloading. */
-void frFontFreeAllEntries(void) {
+void frDelStyleAll(void) {
     s32 fontIndex;
 
     for (fontIndex = 0; fontIndex < FR_FONT_ENTRY_CAPACITY; fontIndex++) {
         if (frFontWork.entries[fontIndex].resource != NULL) {
-            frFontFreeEntry((u8)fontIndex);
+            frDelFontStyle((u8)fontIndex);
         }
     }
 }
 
 extern u8 frFontImageBlockData[];
 /* This caller passes the full image-buffer word; the callee consumes its low half. */
-extern void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image);
+extern void frCopyFontClutToVram(s32 buffer, s32 image);
 
 /* Assemble six 16-word image blocks from little-endian source bytes and upload
  * each to its matching GS buffer. The inner countdown includes zero. */
-void frFontUploadImageBlocks(void) {
+void frSetFontClut(void) {
     u32 imageWords[FR_FONT_IMAGE_WORD_COUNT];
     s32 bufferIndex = 0;
     s32 sourceWordOffset = 0;
@@ -141,7 +141,7 @@ void frFontUploadImageBlocks(void) {
             wordCountdown--;
         } while (wordCountdown >= 0);
 
-        sdfUploadGsImageUnderSemaphore(*imageBuffer++, (s32)imageWords);
+        frCopyFontClutToVram(*imageBuffer++, (s32)imageWords);
         bufferIndex++;
         sourceWordOffset += FR_FONT_IMAGE_WORD_COUNT;
     } while (bufferIndex < FR_FONT_IMAGE_BUFFER_COUNT);
@@ -150,21 +150,21 @@ void frFontUploadImageBlocks(void) {
 
 /* Remove an unreferenced cached item from its font table, return its resource
  * node to the list and decrement the live cache count. NULL item is a no-op. */
-void frFontReleaseUnreferencedGlyphItem(FrFontChildGlyph *glyph) {
+void frFlushGsFontTable(FrFontChildGlyph *glyph) {
     FrFontRecord *cachedItem = glyph->cachedItem;
 
     if (cachedItem != NULL) {
         if (cachedItem->refs == 0) {
             frFontWork.entries[glyph->renderValueOrSetupOrShade.setupBytes.fontIndex].slots[cachedItem->id] = 0;
-            frFontListInsert(cachedItem->list);
+            fmRetFontMem(cachedItem->list);
             frFontWork.cachedItemCount--;
         }
     }
 }
 
 /* Retain the chain if any fade value changed; otherwise release it and return NULL. */
-FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
-    if (frFontAdvanceGlyphFade(glyph) != 0) {
+FrFontGlyph *frDestroyFontRequest(FrFontGlyph *glyph) {
+    if (frEraseEffect(glyph) != 0) {
         return glyph;
     }
     return frFontReleaseGlyphChain(glyph);
@@ -187,14 +187,14 @@ FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
             nextChildGlyph = childGlyph->next;
             if (childGlyph->sourceItem == NULL) {
                 childGlyph->cachedItem->refs--;
-                frFontReleaseUnreferencedGlyphItem(childGlyph);
+                frFlushGsFontTable(childGlyph);
             }
-            itfEnqueueMemNode(childGlyph, frFontWork.itemPool);
+            frFreeFontNode(childGlyph, frFontWork.itemPool);
             frFontWork.itemCount--;
             childGlyph = nextChildGlyph;
         }
         previousGlyph = currentGlyph->previous;
-        itfEnqueueMemNode(currentGlyph, frFontWork.glyphPool);
+        frFreeFontNode(currentGlyph, frFontWork.glyphPool);
         currentGlyph = previousGlyph;
         frFontWork.glyphCount--;
     } while (currentGlyph != NULL);
@@ -204,24 +204,24 @@ FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
 /* Link without repositioning into the draw-buffer-indexed queue; return 0.
  * The low-byte buffer index is used directly, without a two-slot bounds check. */
 s32 frDestroyFontRequestAfter(FrFontGlyph *glyph) {
-    FrFontGlyph **queueSlot = &frFontWork.glyphSlots[kwlnGetDrawBufferIndex() & 0xFF];
+    FrFontGlyph **queueSlot = &frFontWork.glyphSlots[dds3GetFrameID() & 0xFF];
 
     *queueSlot = frFontLinkGlyph(*queueSlot, glyph, 0);
     return 0;
 }
 
 /* Return the live count of retained font-cache records. */
-s32 frFontGetCachedItemCount(void) {
+s32 frGetGsFontNum(void) {
     return frFontWork.cachedItemCount;
 }
 
 /* Return the live pooled child-glyph count. */
-s32 frFontGetChildGlyphCount(void) {
+s32 frGetTextHandleNum(void) {
     return frFontWork.itemCount;
 }
 
 /* Return the live pooled parent-glyph count. */
-s32 frFontGetParentGlyphCount(void) {
+s32 frGetFontHandleNum(void) {
     return frFontWork.glyphCount;
 }
 
@@ -320,19 +320,19 @@ void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
 }
 
 /* Create a glyph wrapper for source and append it to an optional destination chain. */
-FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *destination) {
+FrFontGlyph *frSetUserImage(FrFontRecord *source, FrFontGlyph *destination) {
     FrFontChildGlyph *glyph;
     FrFontChildGlyph *previous;
 
     if (destination == NULL) {
-        destination = itfDequeueMemNode(frFontWork.glyphPool);
+        destination = frAllocFontNode(frFontWork.glyphPool);
         frFontWork.glyphCount++;
         frFontInitGlyph(destination);
     }
-    glyph = itfDequeueMemNode(frFontWork.itemPool);
+    glyph = frAllocFontNode(frFontWork.itemPool);
     previous = destination->lastChild;
     frFontWork.itemCount++;
-    frFontSetupGlyph(glyph, 0, 0, 0, 0xA09DC300, 0);
+    frInitTextHandle(glyph, 0, 0, 0, 0xA09DC300, 0);
     if (previous == NULL) {
         destination->firstChild = glyph;
     } else {
@@ -353,28 +353,28 @@ FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *desti
 
 /* Append a source-glyph reference wrapper, not a deep copy of source storage.
  * If wrapper creation returns NULL, preserve the original destination. */
-FrFontGlyph *frFontAppendClonedGlyph(FrFontRecord *source, FrFontGlyph *destination) {
-    FrFontGlyph *referenceChain = frFontAppendGlyphReference(source, 0);
+FrFontGlyph *frLinkUserImage(FrFontRecord *source, FrFontGlyph *destination) {
+    FrFontGlyph *referenceChain = frSetUserImage(source, 0);
 
     if (referenceChain == NULL) {
         return destination;
     }
-    return frFontLinkGlyphAfterPrevious(destination, referenceChain);
+    return frCombineFontRequest(destination, referenceChain);
 }
 
 
 
-extern FntNode *frFontDetachFirstResourceNode(void);
+extern FntNode *fmRentFontMem(void);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */
-FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 ownsPixels) {
+FrFontRecord *frTranslateUserData(s32 width, s32 height, void *pixels, s8 ownsPixels) {
     s32 imagePosition[2];
     SdfImageUploadRequest uploadRequest;
     FntNode *atlasNode;
     FrFontRecord *cachedItem;
 
-    atlasNode = frFontDetachFirstResourceNode();
+    atlasNode = fmRentFontMem();
     cachedItem = atlasNode->item;
     /* Convert fixed-point atlas placement to integer image coordinates. */
     imagePosition[0] = atlasNode->uv.u0 >> FR_FONT_ATLAS_POSITION_SHIFT;
@@ -394,19 +394,19 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
     uploadRequest.destination = frFontWork.atlas.bufferBase << FR_FONT_ATLAS_DEST_SHIFT;
     uploadRequest.x = imagePosition[0];
     uploadRequest.y = imagePosition[1];
-    sdfTexQueueImageUpload(&uploadRequest);
+    sdfImageSetReq(&uploadRequest);
     return cachedItem;
 }
 
 /* Decode one packed font-resource entry into a fixed-size clone.
  * Neither allocation nor entry index is checked. */
-u8 *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
+u8 *frDecodeFontImage(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
     u8 *clonedResource = sdfChipAllocDirect(FR_FONT_RESOURCE_CLONE_BYTES);
     ItfPackedResourceSegments segments;
 
-    itfSplitRelativeSegments(entry->resource, &segments);
-    itfDecodePackedResourceEntry(clonedResource, entryIndex, entry->resource, &segments);
+    frGetFontImagePtrs(entry->resource, &segments);
+    frDecodeFontRow(clonedResource, entryIndex, entry->resource, &segments);
     return clonedResource;
 }
 
@@ -414,7 +414,7 @@ extern u16 frFontGetSlotCellHeight(s32 index);
 
 /* Retain a cached table item, or create/upload a new one and cache it.
  * New records start with one reference; itemIndex is not bounds-checked. */
-FrFontRecord *frFontRetainOrCreateCachedItem(FrFontChildGlyph *glyph, s32 itemIndex) {
+FrFontRecord *frTranslateFont2GS(FrFontChildGlyph *glyph, s32 itemIndex) {
     FrFontEntry *entry = &frFontWork.entries[glyph->renderValueOrSetupOrShade.setupBytes.fontIndex];
     FrFontRecord *cachedItem = entry->slots[itemIndex];
     u8 *clonedResource;
@@ -423,8 +423,8 @@ FrFontRecord *frFontRetainOrCreateCachedItem(FrFontChildGlyph *glyph, s32 itemIn
         cachedItem->refs++;
         return cachedItem;
     }
-    clonedResource = frFontCloneEntryResource(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex, itemIndex);
-    cachedItem = frFontCreateAtlasItem(frFontGetSlotCellWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frFontGetSlotCellHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, 1);
+    clonedResource = frDecodeFontImage(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex, itemIndex);
+    cachedItem = frTranslateUserData(frFontGetSlotCellWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frFontGetSlotCellHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, 1);
     cachedItem->id = itemIndex;
     entry->slots[itemIndex] = cachedItem;
     frFontWork.cachedItemCount++;
@@ -433,7 +433,7 @@ FrFontRecord *frFontRetainOrCreateCachedItem(FrFontChildGlyph *glyph, s32 itemIn
 
 /* Store the font/options, narrowed glyph code and high flag bits, then clear
  * positioning/links. Other glyph fields are deliberately not fully reset here. */
-void frFontSetupGlyph(FrFontChildGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption) {
+void frInitTextHandle(FrFontChildGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption) {
     glyph->renderValueOrSetupOrShade.setupBytes.fontIndex = fontIndex;
     glyph->renderValueOrSetupOrShade.setupBytes.firstOption = firstOption;
     glyph->renderValueOrSetupOrShade.setupBytes.secondOption = secondOption;
@@ -479,9 +479,9 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
     s32 fontIndex = fontIndexArg & 0xFF;
     FrFontEntry *entry;
 
-    glyph = itfDequeueMemNode(frFontWork.itemPool);
+    glyph = frAllocFontNode(frFontWork.itemPool);
     frFontWork.itemCount++;
-    frFontSetupGlyph(glyph, glyphId, fontIndex, firstOption, 0xA09DC300, secondOption);
+    frInitTextHandle(glyph, glyphId, fontIndex, firstOption, 0xA09DC300, secondOption);
 
     if ((u16)glyph->glyphCodeOrContext.glyphCode < 0x80) {
         glyphIndex = (u16)glyph->glyphCodeOrContext.glyphCode - 0x20;
@@ -494,7 +494,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
     if (glyphIndex >= entry->resourceHeader->widthCount) {
         glyphIndex = 0x147;
     }
-    glyph->cachedItem = frFontRetainOrCreateCachedItem(glyph, glyphIndex);
+    glyph->cachedItem = frTranslateFont2GS(glyph, glyphIndex);
     frFontFillGlyphMetrics(glyph, glyphIndex);
     if (glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags & 0x10) {
         glyph->y = frFontGetInitialGlyphY((s8)fontIndex, glyphIndex);
@@ -512,7 +512,7 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
     if (newGlyphChain == NULL) {
         return previousGlyph;
     }
-    return frFontLinkGlyphAfterPrevious(previousGlyph, newGlyphChain);
+    return frCombineFontRequest(previousGlyph, newGlyphChain);
 }
 
 /* Decode text into child glyphs appended to an existing or newly pooled head. */
@@ -534,7 +534,7 @@ FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
         length = strlen(text);
     }
     if (head == NULL) {
-        head = itfDequeueMemNode(frFontWork.glyphPool);
+        head = frAllocFontNode(frFontWork.glyphPool);
         frFontWork.glyphCount++;
         frFontInitGlyph(head);
     }
@@ -567,7 +567,7 @@ FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
 
 /* Double the masked input byte and saturate the stored byte at 0x80.
  * Keep the original signed constant used for the saturated byte assignment. */
-void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue) {
+void frSetDrawSpeed(FrFontGlyph *glyph, s32 inputValue) {
     s32 encodedValue = (inputValue & FR_FONT_BYTE_MASK) * 2;
 
     if (encodedValue >= FR_FONT_CONTEXT_BYTE_THRESHOLD) {
@@ -580,18 +580,18 @@ void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue) {
 /* Enable the glyph mode and initialize its encoded byte to the cap. */
 void frFontEnableContextMode(FrFontGlyph *glyph) {
     glyph->contextModeEnabled = 1;
-    frFontSetContextEncodedByte(glyph, FR_FONT_CONTEXT_ENABLE_VALUE);
+    frSetDrawSpeed(glyph, FR_FONT_CONTEXT_ENABLE_VALUE);
 }
 
 /* Store the signed spacing byte and refresh the cached child-chain advance. */
-void frFontSetSpacingAndMeasureGlyphs(FrFontGlyph *glyph, s32 spacing) {
+void frSetFontSpace(FrFontGlyph *glyph, s32 spacing) {
     glyph->glyphCodeOrContext.byteRoles.spacing = spacing;
-    glyph->advance = frFontMeasureGlyphChain(glyph);
+    glyph->advance = frGetStrWidth(glyph);
 }
 
 /* Set the initial glyph's halfword dimensions and every visited child's advance/
  * byte dimensions, then remeasure only the initial glyph. Input must be non-NULL. */
-void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight) {
+void frSetFontSize(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight) {
     FrFontGlyph *targetGlyph = glyph;
     FrFontChildGlyph *childGlyph;
 
@@ -604,11 +604,11 @@ void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cell
             childGlyph->cellDimensions.cellHeight = cellHeight;
         }
     }
-    targetGlyph->advance = frFontMeasureGlyphChain(targetGlyph);
+    targetGlyph->advance = frGetStrWidth(targetGlyph);
 }
 
 /* Store the glyph position without scaling. */
-void frFontSetGlyphPosition(FrFontGlyph *glyph, u32 x, u32 y) {
+void frSetDrawPosition(FrFontGlyph *glyph, u32 x, u32 y) {
     glyph->x = x;
     glyph->y = y;
 }
@@ -630,7 +630,7 @@ void frSetFontColorNo(FrFontGlyph *glyph, u8 firstOption) {
 }
 
 /* Replace each child's full color word across the parent glyph chain. */
-void frFontSetChildColors(FrFontGlyph *parentNode, u32 colorWord) {
+void frSetFontColor(FrFontGlyph *parentNode, u32 colorWord) {
     for (; parentNode != NULL; parentNode = parentNode->previous) {
         FrFontChildGlyph *childNode;
         for (childNode = parentNode->firstChild; childNode != NULL; childNode = childNode->next) {
@@ -661,7 +661,7 @@ void frSetFontDrawOT(u32 renderFlags) {
 /* Step only second-option-2 children: decrease the low byte by eight, clamp at
  * zero and move y by sixteen while changing it. Return whether any step occurred,
  * not whether the resulting chain still has a nonzero fade value. */
-s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
+s32 frEraseEffect(FrFontGlyph *glyph) {
     FrFontChildGlyph *childGlyph;
     s32 didChange = 0;
 
@@ -891,14 +891,14 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 renderFlags) {
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
 s32 frFlipPacketBuf(KwlnTask *task) {
-    s32 queueIndex = (kwlnGetDrawBufferIndex() & FR_FONT_BYTE_MASK) == 0;
+    s32 queueIndex = (dds3GetFrameID() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);
     return 0;
 }
 
 /* Link chains with the renderer's relative-positioning option enabled. */
-FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next) {
+FrFontGlyph *frCombineFontRequest(FrFontGlyph *previous, FrFontGlyph *next) {
     return frFontLinkGlyph(previous, next, 1);
 }
 
@@ -922,18 +922,18 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
 }
 
 /* Bind the caller's font data into the reserved temporary entry. */
-void frFontLoadTemporaryEntry(u8 *fontData) {
-    frFontBindResourceSections(FR_FONT_TEMPORARY_SLOT, fontData, 0);
+void frSetExtDic(u8 *fontData) {
+    frAddFontStyle(FR_FONT_TEMPORARY_SLOT, fontData, 0);
 }
 
 /* Free the reserved temporary font entry. */
-void frFontFreeTemporaryEntry(void) {
-    frFontFreeEntry(FR_FONT_TEMPORARY_SLOT);
+void frDestroyExtDic(void) {
+    frDelFontStyle(FR_FONT_TEMPORARY_SLOT);
 }
 
 /* Count characters until a zero lead byte. Any negative signed lead consumes
  * two bytes without checking its trailer; input must be a valid packed stream. */
-s32 frFontCountChars(s8 *text) {
+s32 frStrLen(s8 *text) {
     s32 characterCount = 0;
 
     while (*text != 0) {
@@ -949,7 +949,7 @@ s32 frFontCountChars(s8 *text) {
 
 /* Sum one parent's child advances and signed spacing after every child, even
  * the last. Require a non-NULL parent; preserve the existing unsigned result. */
-u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph) {
+u32 frGetStrWidth(FrFontGlyph *parentGlyph) {
     FrFontChildGlyph *childGlyph = parentGlyph->firstChild;
     s32 totalAdvance = 0;
 
@@ -967,7 +967,7 @@ u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph) {
 
 /* Sum all child advances/spacing from the chain origin. This is neither a line
  * count nor a maximum line width; require a non-NULL glyphChain. */
-u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
+u32 frGetStrWidth2(FrFontGlyph *glyphChain) {
     FrFontGlyph *parentGlyph;
     FrFontChildGlyph *childGlyph;
     s32 totalAdvance = 0;
@@ -1115,7 +1115,7 @@ s32 frFontMeasureGlyphStripWidth(s32 requestedLine, FrFontGlyph *glyph) {
                 bottom = currentY + FR_FONT_POSITION_BAND_HEIGHT;
                 if (currentY < bottom) {
                     do {
-                        width += frFontMeasureGlyphChain(node);
+                        width += frGetStrWidth(node);
                         node = node->next;
                     } while (node != NULL && node->y < bottom);
                 }
@@ -1186,7 +1186,7 @@ INCLUDE_ASM(const s32, "interface/frFont", frFontCenterGlyphChainAt);
 /* Read the packed table count, then skip the table and its trailing metadata
  * word to reach the encoded text. The native parser copies that metadata even
  * though this lookup does not use its value. */
-u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode) {
+u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode) {
     u32 offset;
     u32 tableCount;
     u32 textMetadata;
@@ -1243,14 +1243,14 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
                     (const char *)D_003BB180, 0, ctx->firstOption,
                     ctx->secondOption, NULL);
             }
-            frFontSetContextEncodedByte(ctx->glyphChain, ctx->contextEncodedByte);
+            frSetDrawSpeed(ctx->glyphChain, ctx->contextEncodedByte);
             previousMode = mode;
         }
 
         existingGlyph = frFontBuildGlyphChain(glyphText, mode, ctx->firstOption,
                                        ctx->secondOption, ctx->glyphChain);
         ctx->glyphChain = existingGlyph;
-        frFontSetSpacingAndMeasureGlyphs(existingGlyph, frFontEncodedTextGlyphSpacing);
+        frSetFontSpace(existingGlyph, frFontEncodedTextGlyphSpacing);
     }
 }
 
@@ -1264,7 +1264,7 @@ void frFontCreateContext(ctx)
     FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_003BB180, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
-    frFontSetContextEncodedByte(childGlyph, ctx->contextEncodedByte);
+    frSetDrawSpeed(childGlyph, ctx->contextEncodedByte);
     ctx->pendingCreate = 0;
 }
 
@@ -1288,13 +1288,13 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
         pending = ctx->pendingPosition;
     }
     if (pending != 0) {
-        frFontSetGlyphPosition(ctx->glyphChain, ctx->x, ctx->y);
+        frSetDrawPosition(ctx->glyphChain, ctx->x, ctx->y);
         ctx->pendingPosition = 0;
     }
 }
 
 /* Advance by eight times cursor spacing and request both context updates. */
-void frFontAdvanceContextCursor(FrFontCtx *ctx) {
+void frMessageReturnCode(FrFontCtx *ctx) {
     ctx->y += frFontContextCursorSpacing * FR_FONT_CONTEXT_CURSOR_SCALE;
     ctx->pendingCreate = 1;
     ctx->pendingPosition = 1;

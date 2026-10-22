@@ -38,7 +38,7 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *menu);
 extern void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots);
 extern void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
 extern void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
-/* Original-style implicit int, kept: matched code depends on it: fileSetPreviewLocation, mnuSelectLastListNode. */
+/* Original-style implicit int, kept: matched code depends on it: slSetTmnlID, mnuSelectLastListNode. */
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -62,7 +62,7 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 
 extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuFirstPresentMainCharacterIndex(void);
-extern void evtCreateEventScriptProcess(s32);
+extern void evtStartEvent(s32);
 extern void evtClearActiveFlag(s32);
 extern s8 D_00437859;
 
@@ -222,7 +222,7 @@ u8 mnuIsReducedTerminalModeEnabled(MenuSlotState *unusedContext) {
     s32 unlocked;
 
     (void)unusedContext;
-    unlocked = mdlFlagTest(0x31);
+    unlocked = evtBitCheck(0x31);
     return unlocked != 0;
 }
 
@@ -393,7 +393,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     FrFontGlyph *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
-    sprite = itfCreateFont2TextGlyph(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
+    sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frDestroyFontRequestAfter(sprite);
 }
@@ -422,7 +422,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
         effDrawTextureSlotWithBlendedCornerColors(0, rowY, depth, scale, 0, host->resourceBank[0], 0x1C, priority);
         sprintf(text, D_00437868, entry->requiredAmount);
         glyph = itfCreateFont3TextGlyph(0x1810, 0x268, depth,
-            uiBlendColors(0xA09DC380, 0xA09DC300, scale), text, 0);
+            fclBlendColor(0xA09DC380, 0xA09DC300, scale), text, 0);
         frSetFontColorNo(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, priority);
         frDestroyFontRequestAfter(glyph);
@@ -558,7 +558,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     }
     color = (node->flags48 & 1) ? 0xA09DC320 : 0xA09DC380;
     color = mnuBlendListNodeColorByFlags(color, node);
-    color = uiBlendColors(color, color & ~0xFF, width);
+    color = fclBlendColor(color, color & ~0xFF, width);
     glyph = itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
     frSetFontColorNo(glyph, chainFlags);
     frFontDrawGlyphChain(glyph, 1, priority);
@@ -617,7 +617,7 @@ void mnuBuildEligibleSlotList(MenuSlotState *host) {
         if (host->reduced == 0 && host->slot == i) {
             continue;
         }
-        if (mdlFlagTest(D_0038A3B8[i].requiredModelFlag) == 0 &&
+        if (evtBitCheck(D_0038A3B8[i].requiredModelFlag) == 0 &&
             D_0038A3B8[i].requiredModelFlag != 0) {
             continue;
         }
@@ -767,19 +767,19 @@ void mnuTerminalFadeOrClose(s32 flag, MenuSlotState *state) {
 
         if (reducedMode < 3) {
             if (reducedMode > 0) {
-                kwlnFadeOutStart(0, 0, 0, 0xF);
-            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
-                kwlnFadeOutStart(0, 0, 0, 0xF);
+                dds3FadeIn(0, 0, 0, 0xF);
+            } else if (evtBitCheck(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
+                dds3FadeIn(0, 0, 0, 0xF);
             } else {
-                evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
+                evtStartEvent(MNU_TERMINAL_EXIT_PROCESS);
             }
-        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
-            kwlnFadeOutStart(0, 0, 0, 0xF);
+        } else if (evtBitCheck(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(state) != 0) {
+            dds3FadeIn(0, 0, 0, 0xF);
         } else {
-            evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
+            evtStartEvent(MNU_TERMINAL_EXIT_PROCESS);
         }
     } else {
-        evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
+        evtStartEvent(MNU_TERMINAL_EXIT_PROCESS);
     }
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(1, 1);
@@ -907,8 +907,8 @@ s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host
 
 
 
-extern void sndStartTrackExtended(s32);
-extern void sndReleaseTrackHandle(s32);
+extern void p2sdPlayBGMFade(s32);
+extern void p2sdStopBGM(s32);
 
 /* Mode one optionally starts the BGM and releases the group; other modes use the
  * counterpart sound action and texture release. Only enable == 1 sends sound calls.
@@ -921,16 +921,16 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
         if (enable == 1) {
             /* Both arms are identical in retail; kept as written. */
             if (work->reduced == 0) {
-                sndStartTrackExtended(work->bgmHandle);
+                p2sdPlayBGMFade(work->bgmHandle);
             } else {
-                sndStartTrackExtended(work->bgmHandle);
+                p2sdPlayBGMFade(work->bgmHandle);
             }
         }
         D_00437859 = 1;
         mnuReleaseResourceGroup(address);
     } else {
         if (enable == 1) {
-            sndReleaseTrackHandle(work->bgmHandle);
+            p2sdStopBGM(work->bgmHandle);
         }
         D_00437859 = 0;
         mnuReleaseMenuResourceGroup(address, 1);
@@ -988,7 +988,7 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
 }
 
 extern s32 fldGetCurrentBgmHandle(void);
-extern void sndEnsureMidiBankResident(u32);
+extern void p2sdLoadSMGFile(u32);
 
 /* Select the native default/current BGM handle and make only its bank bits resident.
  * DDS2's default has a zero low halfword; DDS1's default includes track one. */
@@ -998,25 +998,25 @@ void mnuTerminalSelectResourceBank(MenuSlotState *host) {
     } else {
         host->bgmHandle = fldGetCurrentBgmHandle();
     }
-    sndEnsureMidiBankResident(host->bgmHandle & MNU_BGM_BANK_MASK);
+    p2sdLoadSMGFile(host->bgmHandle & MNU_BGM_BANK_MASK);
 }
 
-extern void sndStartReducedBgm(void);
-extern void sndStopReducedBgm(void);
+extern void p2sdBgmVolDown(void);
+extern void p2sdBgmVolUp(void);
 
 /* Mode zero starts the selected BGM in full mode or invokes the reduced-mode action.
  * Other modes use their counterpart actions; keep the native selection field. */
 void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
     if (mode == 0) {
         if (host->reduced == 0) {
-            sndStartTrackExtended(host->bgmHandle);
+            p2sdPlayBGMFade(host->bgmHandle);
         } else {
-            sndStartReducedBgm();
+            p2sdBgmVolDown();
         }
     } else if (host->reduced == 0) {
-        sndReleaseTrackHandle(host->bgmHandle);
+        p2sdStopBGM(host->bgmHandle);
     } else {
-        sndStopReducedBgm();
+        p2sdBgmVolUp();
     }
 }
 
@@ -1039,7 +1039,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj->slotCopy = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair((u32)"/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)obj->messageResources.dataAddress);
+    fclInitMessage((struct ItfMesSub *)obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->selectedSlots[i] = -1;
     }
@@ -1054,7 +1054,7 @@ extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void fldApplyTerminalActorSelection(s32 a, s32 b);
-extern void fldProcessDeferredSceneCommand(void);
+extern void fldProc_CallSisetuReturn(void);
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
@@ -1066,7 +1066,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
         mnuReleaseTerminalSceneResources(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, task);
-        dspCloseChannel();
+        fclDestroyMessage();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfMemFreeDirect(work->heapHandle);
         mnuTerminalTaskState = 2;
@@ -1075,14 +1075,14 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
         mnuStopResourceTask();
     }
     fldApplyTerminalActorSelection(work->reduced, work->slot);
-    fldProcessDeferredSceneCommand();
+    fldProc_CallSisetuReturn();
 }
 
 /* Draw/step the task's gradient indicator, then select its message-control mode. */
 s32 mnuUpdateTerminalMessageWindowIndicator(KwlnTask *task) {
     MenuGradientFade *context = &((MenuSlotState *)dds3GetProcessData(task))->gradientFade;
     mnuDrawAndStepGradientFade(context, 0x53);
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         mnuSetStateValue(&context->active, 1);
     } else {
         mnuSetStateValue(&context->active, 0);
@@ -1158,12 +1158,12 @@ s32 evtRunTerminalPanelSync(KwlnTask *request) {
 
 /* Require the fade to be inactive before testing message-window control for idle. */
 s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
-    s32 fadeActive = kwlnFadeIsActive();
+    s32 fadeActive = dds3FadeCheck();
 
     if (fadeActive != 0) {
         return 0;
     }
-    return evtGetMessageWindowControlState() == 0;
+    return fclChkMessage() == 0;
 }
 
 extern char mnuTerminalPopupEntries[];
@@ -1924,7 +1924,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
                         }
                         break;
                     case 1:
-                        kwlnFadeInStart(0, 0, 0, 0xF);
+                        dds3FadeOut(0, 0, 0, 0xF);
                     default:
                         mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action * 28);
                         break;
@@ -1996,14 +1996,14 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
     mnuTerminalSelectSlot(0, -2, state);
     mnuTerminalSetTrack(1, 0);
     mnuReleaseResourceGroup(state);
-    kwlnFadeOutStart(0, 0, 0, 15);
+    dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileStartMemoryCardMenuForMode(s32 mode);
-extern void fileSetPreviewLocation(s32 x, s32 y);
+extern void slSetTmnlID(s32 x, s32 y);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
@@ -2014,17 +2014,17 @@ s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     if (result != 0) {
         return result;
     }
-    if (kwlnFadeIsActive() != 0) {
+    if (dds3FadeCheck() != 0) {
         return 0;
     }
-    if (state->fileTaskActive == 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
+    if (state->fileTaskActive == 0 && sdfDelayedResrcCheck() == 0) {
         mnuReleaseResourceGroupTextureHandles((u32)state);
-        fileSetPreviewLocation(state->reduced, state->slot);
+        slSetTmnlID(state->reduced, state->slot);
         fileStartMemoryCardMenuForMode(0);
         state->fileTaskActive = 1;
     }
     if (state->dispatchStatus == 0 && fileMenuTaskExists() == 0 &&
-        sdfCheckPendingWorkWithInterrupts() == 0) {
+        sdfDelayedResrcCheck() == 0) {
         state->fileTaskActive = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
     }
@@ -2168,7 +2168,7 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
                 entry = &node->terminal;
                 buttons = 0;
                 fldSaveSceneOptionsAndClearFlags(&datGameState->party[entry->entryId]);
-                sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+                p2sdPlaySE(0x10, 0x7F, 0x3F);
                 mnuReleaseSelectedProgressPanel(host);
                 datAddCurrencyClamped(-entry->requiredAmount);
                 mnuRefreshThresholdNodeFlags(host->progressList);
@@ -2212,7 +2212,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
         /* The scene record supplies the steady label's low packed-color byte. */
         color = *(u8 *)&work->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
     } else {
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, work->progressList->scale);
+        color = fclBlendColor(0xA09DC380, 0xA09DC300, work->progressList->scale);
     }
     font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);
@@ -2258,7 +2258,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
         return result;
     }
     if (*panel == 0) {
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (fldClassifyRemainingFrames((void *)state) == 0) {
                 mnuSetPopupEntry(panel, mnuTerminalFollowupFadePopupEntry);
             }
@@ -2271,7 +2271,7 @@ s32 mnuBeginTerminalExitTransition(KwlnTask *request) {
     s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
-    if (evtGetMessageWindowControlState() == 0 && dispatchState->exitState == 0) {
+    if (fclChkMessage() == 0 && dispatchState->exitState == 0) {
         mnuConfigureTerminalSlotEffects(2, (MenuSlotState *)state);
         mnuTerminalSelectSlot(2, -1, (MenuSlotState *)state);
         mnuSetTerminalPanelMotionMode(2, (MenuSlotState *)state);
@@ -2310,7 +2310,7 @@ s32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
     evtRememberDispatchCallback(0, (MenuSlotState *)state);
     *(u32 *)(state + 0xA0) = 0;
     evtFinishMessageWindowAndNotify();
-    dspCloseChannel();
+    fclDestroyMessage();
     return 1;
 }
 
@@ -2323,7 +2323,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuTerminalSelectSlot(3, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)((MenuSlotState *)state)->messageResources.dataAddress);
+    fclInitMessage((struct ItfMesSub *)((MenuSlotState *)state)->messageResources.dataAddress);
     return 1;
 }
 
@@ -2343,14 +2343,14 @@ s32 evtPollDispatchAfterFade(KwlnTask *request) {
     s32 *dispatch = &state->dispatchStatus;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result == 0) {
-        if (kwlnFadeIsActive() == 0) {
+        if (dds3FadeCheck() == 0) {
             if (state->fadeStarted == 0) {
                 state->fadeStarted = 1;
                 mnuCreateResourceTask();
             }
             if (*dispatch == 0 && state->fadeStarted == 1 &&
                 mnuCheckResourceTask() == 0) {
-                if (sdfCheckPendingWorkWithInterrupts() != 0) return 0;
+                if (sdfDelayedResrcCheck() != 0) return 0;
                 mnuTerminalSelectResourceBank((MenuSlotState *)state);
                 state->fadeStarted = 0;
                 mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
@@ -2395,7 +2395,7 @@ u32 evtPrepareSelectedMenuEntry(KwlnTask *task) {
     }
     evtCopyEntryStringToActiveWindow(0, D_003A41A8[*selectionIndex].encodedText);
     dspSetActive(1);
-    dspStartEntry(0);
+    fclStartMessage(0);
     evtSetMessageWindowOptionWhenOpen(1);
     evtStoreValueAndCaptureWindowPanelValue(6);
     return 1;
@@ -2416,7 +2416,7 @@ s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
 
     if (result == 0) {
         /* Choose the follow-up only after menu and message-window work is idle. */
-        if (*dispatch == 0 && evtGetMessageWindowControlState() == 0) {
+        if (*dispatch == 0 && fclChkMessage() == 0) {
             if (evtGetCapturedWindowPanelValue() == 0) {
                 mnuResetProgressModeFromOwner((u8 *)state);
                 mnuSetPopupEntryFlagged(dispatch, mnuTerminalReturnToMenuPopupEntry);
@@ -2456,10 +2456,10 @@ u32 evtBCheckPanelMode(KwlnTask *task) {
     dspSetActive(1);
     switch (state->displayMode) {
     case 1:
-        dspStartEntry(1);
+        fclStartMessage(1);
         break;
     case 2:
-        dspStartEntry(2);
+        fclStartMessage(2);
         break;
     }
     return 1;
@@ -2476,7 +2476,7 @@ s32 evtBContinueDispatchOrRestoreTable(KwlnTask *request) {
     if (result != 0) {
         return result;
     }
-    if (*dispatch == 0 && evtGetMessageWindowControlState() == 0) {
+    if (*dispatch == 0 && fclChkMessage() == 0) {
         mnuSetPopupEntry(dispatch, (void *)state->dispatchValue);
     }
     return 0;
@@ -2513,7 +2513,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     }
     evtRememberDispatchCallback(0, (s32)context);
     context->exitState = 1;
-    sndReleaseTrackHandle(context->bgmHandle);
+    p2sdStopBGM(context->bgmHandle);
     evtClearActiveFlag(0);
     return 1;
 }
@@ -2529,7 +2529,7 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
     ((MenuSlotState *)state)->stage = 1;
     ((MenuSlotState *)state)->exitState = 0;
-    kwlnFadeOutStart(0, 0, 0, 15);
+    dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
 
@@ -2543,14 +2543,14 @@ s32 evtBStartSelectionChainAfterFade(KwlnTask *request) {
         if (*dispatch == 0 && fldClassifyRemainingFrames((void *)state) == 0) {
             switch (state->stage) {
             case 1:
-                kwlnFadeInStart(0, 0, 0, 15);
+                dds3FadeOut(0, 0, 0, 15);
                 if (state->mode != 0) {
                     mnuTerminalSelectResourceBank((MenuSlotState *)state);
                 }
                 state->stage = 2;
                 break;
             case 2:
-                if (kwlnFadeIsActive() == 0) {
+                if (dds3FadeCheck() == 0) {
                     mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
                 }
                 break;
@@ -2643,17 +2643,17 @@ s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
                 if (state->stage == 0) {
                     ready = 0;
                     mnuLoadTerminalSceneResourceBanks((MenuSlotState *)state);
-                    kwlnFadeOutStart(0, 0, 0, 15);
+                    dds3FadeIn(0, 0, 0, 15);
                     state->stage = 1;
                 }
             }
         } else {
             if (state->stage == 0) {
                 mnuLoadTerminalSceneResourceBanks((MenuSlotState *)state);
-                kwlnFadeOutStart(0, 0, 0, 15);
+                dds3FadeIn(0, 0, 0, 15);
                 state->stage = 1;
             } else {
-                ready = kwlnFadeIsActive() == 0;
+                ready = dds3FadeCheck() == 0;
             }
         }
         if (ready != 0) {

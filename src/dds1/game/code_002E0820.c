@@ -33,7 +33,7 @@
 #include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dev_console_node.h"
 #include "btl.h"
-extern void sdfTransposeVuMatrix(void);
+extern void DiagMatrix(void);
 
 #define SDF_PAD_ENTRY_COUNT 2
 
@@ -151,11 +151,11 @@ extern SdfTex *D_003BD390;
 extern s32 D_003BDA20;
 
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void sdfPremultiplyVuMatrixFromMemory(void *matrix);
+/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(void *matrix);
 
-INCLUDE_ASM(const s32, "game/code_002E0820", sdfModelBuildKind3CommandPacket);
+INCLUDE_ASM(const s32, "game/code_002E0820", sdfCorePacketGen);
 
-void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source) {
+void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source) {
     SdfDrawNode **objects = model->list->buffer;
     u16 *indices = &source->count;
     if ((source->flags & 0x800) != 0) {
@@ -163,25 +163,25 @@ void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source) {
         if (count != 0) {
             indices++;
             do {
-                sdfEnsureFreeRootWorkspace(objects[*indices++]);
+                sdfModelAllocTmPacket(objects[*indices++]);
             } while (--count != 0);
         }
     }
 }
 
-void sdfVuSelectTransformMatrix(u32 matrixAddress) {
+void sdfCoreDrawSetLight(u32 matrixAddress) {
     sdfVuSelectedTransformMatrix = matrixAddress;
 }
 
 /* Cache the object's vector only when its address changes, not its contents. */
-void sdfVuCacheObjectVector(u8 *sourceObject) {
+void sdfCoreDrawSetFog(u8 *sourceObject) {
     if (D_003BDA2C != (u32)sourceObject) {
         D_003BDA2C = (u32)sourceObject;
         PCP_COPY_VECTOR(&D_003F9890, sourceObject + 0x10);
     }
 }
 
-void sdfVuSetGlobalScale(f32 scale) {
+void sdfCoreDrawSetZBias(f32 scale) {
     D_003BDA30 = scale;
 }
 
@@ -202,64 +202,64 @@ extern s32 D_003BDA20;
 
 
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
-void sdfConsUploadDmaProgram(s32 workspaceBytes) {
+void sdfCoreDrawInit(s32 workspaceBytes) {
     u32 *dmaChannel = sceDmaGetChan(0);
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
-    sdfReleaseMemorySlot(&D_003BD350);
+    sdfMemFreeHandleDirect(&D_003BD350);
     D_003BD350 = (u32)sdfMemAllocDirect(workspaceBytes);
     D_003BDA20 = sdfMemLock((struct SdfMemBlock *)(D_003BD350));
 }
 
 /* Fixed allocation size; the texture is deliberately unused. */
-u32 sdfConsGetTextureDrawPacketSize(SdfTex *texture) {
+u32 sdf2DGetTexPacketSize(SdfTex *texture) {
     return SDF_TEXTURE_DRAW_PACKET_BYTES;
 }
 
 /* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
-SdfTextureDrawPacket *sdfConsInitTextureDrawPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
     drawPacket->header.quadwords = 4;
     drawPacket->header.gifTag = 0x1000000000008003ULL;
     drawPacket->header.command = 0x50000004;
     drawPacket->header.pad08 = 0;
     drawPacket->header.payloadHeader = SDF_GIF_REGISTER_AD;
-    drawPacket->textureWordA = sdfTexGetPrimarySamplingState(texture);
+    drawPacket->textureWordA = sdfTexGetTex1Reg(texture);
     drawPacket->registerAddressA = contextOffset + 0x14;
-    drawPacket->textureWordB = sdfTexGetPrimaryTextureState(texture);
+    drawPacket->textureWordB = sdfTexGetTex0Reg(texture);
     drawPacket->registerAddressB = contextOffset + 6;
-    drawPacket->textureWordC = sdfTexGetPrimaryClampState(texture);
+    drawPacket->textureWordC = sdfTexGetClampReg(texture);
     drawPacket->registerAddressC = contextOffset + 8;
     return drawPacket;
 }
 
 /* Allocate and append texture state; return its packet address. */
-s32 sdfConsCreateDrawPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
-    s32 packetBytes = sdfConsGetTextureDrawPacketSize(texture);
-    SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfAllocPacketAligned(packetBytes);
-    s32 packetAddress = (s32)sdfConsInitTextureDrawPacket(packet, texture, contextOffset);
-    sdfAppendPacket(packetList, packetAddress);
+s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
+    s32 packetBytes = sdf2DGetTexPacketSize(texture);
+    SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfGrAllocPacketBuff(packetBytes);
+    s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, contextOffset);
+    sdfDrawTagLink(packetList, packetAddress);
     return packetAddress;
 }
 
 /* Exclude the two header quadwords from the reference payload count. */
-u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes) {
-    sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
+u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes) {
+    sdfGrSetRegsPacketHeader((SdfGsPacketHeader *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
     return packetAddress;
 }
 
 /* Packed GIF loops contain registerCount values, plus two header quadwords. */
-s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount) {
+s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount) {
     return (registerCount * loopCount + 2) << SDF_DMA_QWORD_SHIFT;
 }
 
 /* Return the packet payload address after the DMA/GIF header. */
-s32 sdfConsMeasurePacketWithHeader(s32 packetAddress) {
+s32 sdf2DGetPrimPtr(s32 packetAddress) {
     return packetAddress + 0x20;
 }
 
 /* Build packed GIF NLOOP/NREG/PRIM fields and its VIF DIRECT command. */
-SdfDrawPacket *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
+SdfDrawPacket *sdf2DMakePrimPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
     s32 packetQuadwords = registerCount * loopCount + 1;
     s64 gifTag = loopCount | ((s64)registerCount << SDF_GIF_NREG_SHIFT);
 
@@ -274,14 +274,14 @@ SdfDrawPacket *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags
 }
 
 /* Allocate loopCount sprite loops with RGBAQ, UV, XYZ2, UV, XYZ2 registers. */
-SdfDrawPacket *sdfConsAllocateColumnPacket(s32 loopCount) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
-    sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
+SdfDrawPacket *sdf2DAllocSprite(s32 loopCount) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, loopCount));
+    sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
     return packet;
 }
 
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
-void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
+void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
@@ -294,7 +294,7 @@ void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, SdfProjectionRecord *nod
     VU0_LOAD_VF_MEMORY(vf10, &node->camera.originX);
     VU0_STORE_VF(vf10, packet->vecB);
     VU0_LOAD_MATRIX(transformMatrix);
-    sdfInvertRigidVuTransform();
+    ReverseMatrix();
     VU0_MOVE_VF(vf10, vf31);
     VU0_STORE_VF(vf10, packet->vecC);
     VU0_STORE_VF(vf10, node->inverseOrigin);
@@ -313,7 +313,7 @@ extern u8 D_003984B0[];
 extern u8 D_003984F0[];
 
 /* Cache node data, its composed transform, and the transformed cached origin. */
-void sdfConsCacheTransformedNode(SdfProjectionRecord *node, void *transformMatrix) {
+void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(D_003984B0);
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
@@ -325,12 +325,12 @@ void sdfConsCacheTransformedNode(SdfProjectionRecord *node, void *transformMatri
 }
 
 /* Set the first DMA reference fallback used when a model has no override. */
-void sdfConsSetDefaultFirstReference(u32 referenceSource) {
+void sdf3DSetDefaultLight(u32 referenceSource) {
     D_003BD374 = referenceSource;
 }
 
 /* Set the second DMA reference fallback used when a model has no override. */
-void sdfConsSetDefaultSecondReference(u32 referenceSource) {
+void sdf3DSetDefaultFog(u32 referenceSource) {
     D_003BD378 = referenceSource;
 }
 
@@ -372,7 +372,7 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     projectionMatrix[10] = 0;
     projectionMatrix[15] = 0;
     projectionMatrix[14] = projectionMatrix[11] = 1.0f;
-    sdfPremultiplyVuMatrixFromMemory(projectionMatrix);
+    MultMatrix(projectionMatrix);
     VU0_STORE_MATRIX(camera->matrix);
     camera->halfWidth = halfWidth;
     centerY = (camera->bottom - camera->top) * 0.5f;
@@ -401,7 +401,7 @@ extern u8 D_00398390[]; /* fallback up vector */
  * directions as columns (negated, unit length), colors and their sum, and a
  * basis built from the first light's direction. The axis scratch is volatile:
  * retail keeps its stores in source order. */
-void sdfBuildLightingPacket(SdfLightingPacketStorage *packet, SdfLightSources sources, f32 *ambient) {
+void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSources sources, f32 *ambient) {
     f32 direction[4] __attribute__((aligned(16)));
     volatile f32 axis[4] __attribute__((aligned(16)));
     f32 (*first)[4];
@@ -470,7 +470,7 @@ void sdfBuildLightingPacket(SdfLightingPacketStorage *packet, SdfLightSources so
     VU0_CLEAR_W(vf10);
     VU0_MOVE_VF(vf29, vf10);
     VU0_MOVE_VF(vf31, vf0);
-    sdfTransposeVuMatrix();
+    DiagMatrix();
     VU0_LOAD_VF(vf10, first[1]);
     VU0_NORMALIZE_VF10();
     EE_MMI_LOAD_MATRIX_COLUMN(vf11, D_003984B0 + 8);
@@ -501,7 +501,7 @@ typedef struct ConsFrustumPacket {
 } ConsFrustumPacket;
 
 /* Emit projection depth coefficients and a GS FOGCOL A+D write. */
-void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams) {
+void sdf3DMakeFogPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams) {
     f32 rangeMax = projectionParams->fogFar;
     f32 rangeMin = projectionParams->fogNear;
     f32 nearZ = projectionParams->depthNear;
@@ -525,7 +525,7 @@ void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *
 }
 
 /* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
-void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes) {
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes) {
     s32 quadwordCount = (payloadBytes + 15) >> SDF_DMA_QWORD_SHIFT;
     packet->quadwords = quadwordCount;
     packet->address = sourceAddress & SDF_DMA_ADDRESS_MASK;
@@ -539,7 +539,7 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 
 extern u8 D_00324350[];
 
 /* Append the second fixed program block as a DMA reference packet. */
-void sdfConsAppendProgramReferencePacket(SdfListHead *packetList, DmaPacketHeader *packet) {
+void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet) {
     packet->address = (u32)D_00320630 & SDF_DMA_ADDRESS_MASK;
     packet->quadwords = (D_00324350 - D_00320630) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
@@ -550,16 +550,16 @@ void sdfConsAppendProgramReferencePacket(SdfListHead *packetList, DmaPacketHeade
     sdfAppendReferencePacket(packetList, (u32)packet);
 }
 
-extern void sdfInitializeTmxImageHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
+extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
 
 /* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
-void sdfConsCreatePowerLookupTexture(void) {
+void sdf3DInitSpecularTex2(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(0x2440);
     SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfMemLock(allocation);
     s32 i;
     s32 j;
 
-    sdfInitializeTmxImageHeader(&texture->header, 0x80, 0x40, 0x13, 1, 0);
+    sdfTmxSetHeader(&texture->header, 0x80, 0x40, 0x13, 1, 0);
     texture->header.byteCount = 0x2440;
     texture->header.clampMode = 5;
     /* The physical CLUT slot j decodes to the logical intensity i. */
@@ -577,7 +577,7 @@ void sdfConsCreatePowerLookupTexture(void) {
             value *= power;
         }
     }
-    D_003BD380 = sdfTexAcquireResourceTexture(&texture->header);
+    D_003BD380 = sdfTexSet(&texture->header);
     sdfMemFreeDirect(allocation);
 }
 
@@ -593,7 +593,7 @@ extern u8 D_00317C20[];
 
 extern u8 D_0031BC60[];
 
-extern void sdfConsCreatePowerLookupTexture(void);
+extern void sdf3DInitSpecularTex2(void);
 
 extern u64 sdfPowerLookupTextureState;
 
@@ -608,33 +608,33 @@ extern u8 D_00317C20[];
 extern u8 D_0031BC60[];
 
 /* Acquire texture resources, split their TEX0 words, and initialize queues. */
-void sdfInitializeResourceQueuesAndTextureWords(void) {
+void sdf3DInit(void) {
     s64 textureWord;
-    sdfConsCreatePowerLookupTexture();
-    textureWord = sdfTexGetPrimaryTextureState(D_003BD380);
+    sdf3DInitSpecularTex2();
+    textureWord = sdfTexGetTex0Reg(D_003BD380);
     sdfPowerLookupTextureState = textureWord;
     D_003241D8[0] = textureWord;
     D_003241D8[1] = textureWord >> 32;
-    D_003BD37C = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_00317C20);
-    textureWord = sdfTexGetPrimaryTextureState(D_003BD37C);
+    D_003BD37C = sdfTexSetDirect((SdfTextureFileHeader *)D_00317C20);
+    textureWord = sdfTexGetTex0Reg(D_003BD37C);
     D_00324290[0] = textureWord;
     D_00324290[1] = textureWord >> 32;
-    D_003BD390 = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_0031BC60);
-    textureWord = sdfTexGetPrimaryTextureState(D_003BD390);
+    D_003BD390 = sdfTexSetDirect((SdfTextureFileHeader *)D_0031BC60);
+    textureWord = sdfTexGetTex0Reg(D_003BD390);
     D_00324214[0] = textureWord;
     D_00324214[1] = textureWord >> 32;
-    sdfInitializeObjectListRequest();
-    sdfRegisterResourceQueueCallbacks();
+    sdfModelInitSystem();
+    sdfMatInitSystem();
 }
 
 extern u8 D_00398580[];
 
 /* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
-void sdfConsAppendClearPacket(SdfListHead *packetList,
+void sdf3DPrimLinkResetTm(SdfListHead *packetList,
                              s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
-        allocatePacket = sdfAllocPacketAligned;
+        allocatePacket = sdfGrAllocPacketBuff;
     }
     referencePacket = (u64 *)allocatePacket(0x20);
     referencePacket[0] = ((u64)((u32)D_00398580 & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
@@ -644,7 +644,7 @@ void sdfConsAppendClearPacket(SdfListHead *packetList,
 }
 
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
-void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket) {
+void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket) {
     VU0_STORE_MATRIX_AND_UNIT_ROWS(lightingPacket);
     lightingPacket->tag[0] = SDF_VIF_ITOP_LIGHTING;
     lightingPacket->tag[1] = SDF_VIF_MSCAL_COMMAND;
@@ -653,31 +653,31 @@ void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket) {
 }
 
 /* Append inline matrix/lighting data using allocatePacket or the default allocator. */
-void sdfConsAppendVuPacket(SdfListHead *packetList,
+void sdf3DPrimLinkTm(SdfListHead *packetList,
                            s32 (*allocatePacket)(s32)) {
     u64 *dmaPacket;
     if (allocatePacket == NULL) {
-        allocatePacket = sdfAllocPacketAligned;
+        allocatePacket = sdfGrAllocPacketBuff;
     }
     dmaPacket = (u64 *)allocatePacket(0x90);
     dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
     dmaPacket[1] = 0x6C07C000ULL << 32;
-    sdfWriteVuLightingPacket((VuLightingPacket *)(dmaPacket + 2));
-    sdfAppendPacket(packetList, (u32)dmaPacket);
+    sdf3DPrimSetTmPacket((VuLightingPacket *)(dmaPacket + 2));
+    sdfDrawTagLink(packetList, (u32)dmaPacket);
 }
 
 extern vu8 sdfCurrentBufferIndex;
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
-void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset,
+void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
                               s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
-        allocatePacket = sdfAllocPacketAligned;
+        allocatePacket = sdfGrAllocPacketBuff;
     }
-    sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
+    sdfMatUpdatePacket(asset, (s8)sdfCurrentBufferIndex);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfInitAssetDrawEntryReferenceNode(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfMatMakePacket(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
@@ -689,7 +689,7 @@ extern f32 D_003BD35C;
 extern u32 D_00398500[];
 
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
-u32 *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
+u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     s32 stripWords = request->stripWordCount;
     s32 count = request->vertexCount;
     s32 headerWords = 18;
@@ -730,7 +730,7 @@ u32 *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
     bytes = (headerWords + stripWords + wordsPerVertex * count) * 4;
     bytes = (bytes + 15) & ~15;
     allocate = request->allocate;
-    if (allocate == NULL) allocate = sdfAllocPacketAligned;
+    if (allocate == NULL) allocate = sdfGrAllocPacketBuff;
     packet = allocate(bytes);
     *(u64 *)packet = (u64)(u16)((bytes >> 4) - 1) | 0x20000000ULL;
     packet[2] = 0x6102C000;
@@ -810,7 +810,7 @@ u32 *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
     return packet;
 }
 
-void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
+void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix) {
     *(u16 *)packet = 2;
     *(u32 *)(packet + 8) = 0x6403C000;
     *(f32 *)(packet + 12) = matrix[0];
@@ -826,7 +826,7 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
 
 /* Build a one-vertex textured-quad VIF packet: the position, color, the four
  * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
-void sdfBuildTexturedQuadVifPacket(u8 *packet, const f32 *position, u32 color, const void *uv,
+void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color, const void *uv,
                                    const f32 *quad) {
     *(u16 *)packet = 7;
     *(u32 *)(packet + 8) = 0x6C01C000;
@@ -861,14 +861,14 @@ void sdfBuildTexturedQuadVifPacket(u8 *packet, const f32 *position, u32 color, c
     *(u32 *)(packet + 124) = 0;
 }
 
-s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
+s32 sdfBillBoardGetPacketSize(s32 count) {
     return count * 0x40 + 0x40;
 }
 
 /* Build XYZ and attribute VIF streams; return the packet address.
  * vertexCount must be positive; n retains its native count/byte-size reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -877,9 +877,9 @@ u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttri
     s32 n;
     s32 vertexIndex;
 
-    packetBytes = sdfMeasureVertexAttributePacketBytes(vertexCount);
+    packetBytes = sdfBillBoardGetPacketSize(vertexCount);
     if (allocatePacket == NULL) {
-        cursor = (u32 *)sdfAllocPacketAligned(packetBytes);
+        cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
     } else {
         cursor = allocatePacket(packetBytes);
     }
@@ -932,7 +932,7 @@ u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttri
 /* Build a one-vertex VIF packet for a two-texture quad: the position, both
  * colors, the interleaved primary/secondary UV corners (copied as unaligned
  * words) and the eight quad corner coordinates. */
-void sdfBuildTwoTextureQuadVifPacket(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
+void sdfMultiBillBoardMake1(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
                    const void *primaryUv, const void *secondaryUv, const f32 *quad) {
     *(u16 *)packet = 8;
     *(u32 *)(packet + 8) = 0x6C01C000;
@@ -971,12 +971,12 @@ void sdfBuildTwoTextureQuadVifPacket(u8 *packet, const f32 *position, u32 primar
     *(u32 *)(packet + 140) = 0x14000008;
 }
 
-u32 sdfMeasureAlignedRecordBufferBytes(s32 count) {
+u32 sdfMultiBillBoardGetPacketSize(s32 count) {
     return (count * 0x54 + 0x4bU) & 0xfffffff0;
 }
 
 /* Build a quad packet from paired colors and per-corner UV sets. */
-u32 *sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;
@@ -985,9 +985,9 @@ u32 *sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAt
     s32 n;
     s32 i;
 
-    bytes = sdfMeasureAlignedRecordBufferBytes(count);
+    bytes = sdfMultiBillBoardGetPacketSize(count);
     if (alloc == NULL) {
-        cursor = (u32 *)sdfAllocPacketAligned(bytes);
+        cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
     } else {
         cursor = alloc(bytes);
     }
@@ -1037,7 +1037,7 @@ u32 *sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAt
 /* Build a one-vertex textured-quad VIF packet with four corner colors: the
  * position, colors, UV corners (copied as unaligned words) and the eight quad
  * corner coordinates. */
-void sdfBuildFourColorTexturedQuadVifPacket(u8 *packet, const f32 *position, const u32 *colors, const void *uv, const f32 *quad) {
+void sdfBillBoardVcMake1(u8 *packet, const f32 *position, const u32 *colors, const void *uv, const f32 *quad) {
     *(u16 *)packet = 8;
     *(u32 *)(packet + 8) = 0x6C01C000;
     *(u32 *)(packet + 12) = 1;
@@ -1076,12 +1076,12 @@ void sdfBuildFourColorTexturedQuadVifPacket(u8 *packet, const f32 *position, con
 }
 
 /* Preserve the native 76-byte-record formula and 16-byte alignment rounding. */
-u32 sdfMeasureAlignedRecordStorage(s32 count) {
+u32 sdfBillBoardVcGetPacketSize(s32 count) {
     return (count * 0x4c + 0x4bU) & 0xfffffff0;
 }
 
 /* Build a quad packet with four corner colors, UV pairs and XY offset pairs. */
-u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attributes,
+u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
                   const void *halfAttributes, const void *wordAttributes,
                   s32 count, void *(*alloc)(s32)) {
     s32 bytes;
@@ -1092,9 +1092,9 @@ u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attribut
     s32 n;
     s32 i;
 
-    bytes = sdfMeasureVertexAttributePacketBytes(count);
+    bytes = sdfBillBoardGetPacketSize(count);
     if (alloc == NULL) {
-        cursor = (u32 *)sdfAllocPacketAligned(bytes);
+        cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
     } else {
         cursor = alloc(bytes);
     }
@@ -1145,7 +1145,7 @@ u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attribut
 /* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
  * position, colors, interleaved primary/secondary UV corners (copied as
  * unaligned words) and the eight quad corner coordinates. */
-void sdfBuildTwoTextureQuadVifPacketWithCornerColors(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
+void sdfMultiBillBoardVcMake1(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
                    const void *secondaryUv, const void *quad) {
     *(u16 *)packet = 10;
     *(u32 *)(packet + 8) = 0x6C01C000;
@@ -1178,14 +1178,14 @@ void sdfBuildTwoTextureQuadVifPacketWithCornerColors(u8 *packet, const f32 *posi
     *(u32 *)(packet + 172) = 0;
 }
 
-u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
+u32 sdfMultiBillBoardVcGetPacketSize(s32 count) {
     return (count * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
 /* Build the wider attribute VIF stream; return the packet address.
  * vertexCount must be positive; preserve the native copy lengths and n reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 sdfBuildWideVertexVifPacket(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -1194,9 +1194,9 @@ u32 sdfBuildWideVertexVifPacket(u128 *positions, void *byteAttributes, void *hal
     s32 n;
     s32 vertexIndex;
 
-    packetBytes = sdfMeasureAlignedDrawPacketSize(vertexCount);
+    packetBytes = sdfMultiBillBoardVcGetPacketSize(vertexCount);
     if (allocatePacket == NULL) {
-        cursor = (u32 *)sdfAllocPacketAligned(packetBytes);
+        cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
     } else {
         cursor = allocatePacket(packetBytes);
     }
@@ -1259,7 +1259,7 @@ extern s32 scePadSetActDirect(s32 port, s32 slot, void *actData);
 
 /* Drive mode/actuator setup and normalize this pad's latest reply.
  * Motor requests are sent only when their cached values change. */
-void sdfPadUpdatePort(SdfPadEntry *entry) {
+void sdfPadControl(SdfPadEntry *entry) {
     u8 reply[SDF_PAD_REPLY_BUFFER_BYTES];
     u8 actuatorData[SDF_PAD_ACTUATOR_BYTES];
     s32 port = entry->port;
@@ -1406,13 +1406,13 @@ void sdfPadUpdatePort(SdfPadEntry *entry) {
     }
 }
 
-extern void sdfPadUpdatePort(SdfPadEntry *entry);
+extern void sdfPadControl(SdfPadEntry *entry);
 
 /* Update each configured logical pad entry. */
-void sdfPadUpdatePorts(void) {
+void sdfPadManager(void) {
     s32 padIndex;
     for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
-        sdfPadUpdatePort(&sdfPadPorts[padIndex]);
+        sdfPadControl(&sdfPadPorts[padIndex]);
     }
 }
 
@@ -1474,22 +1474,22 @@ void sdfPadBuildButtonStates(void) {
 }
 
 /* Store a mode request for the indexed logical pad; setup applies it later. */
-void sdfPadRequestMode(s32 padIndex, u8 requestedMode) {
+void sdfPadChangeMode(s32 padIndex, u8 requestedMode) {
     sdfPadPorts[padIndex].requestedMode = requestedMode;
 }
 
 /* Store the small-motor request without validating the logical pad index. */
-void sdfPadSetSmallMotor(s32 padIndex, u16 strength) {
+void sdfPadSetAct0(s32 padIndex, u16 strength) {
     sdfPadPorts[padIndex].smallMotor = strength;
 }
 
 /* Store the large-motor request without validating the logical pad index. */
-void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
+void sdfPadSetAct1(s32 padIndex, u8 strength) {
     sdfPadPorts[padIndex].largeMotor = strength;
 }
 
 /* Despite the legacy console-prefixed name, set both pad motor low bytes. */
-void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor) {
+void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor) {
     SdfPadEntry *entry = &sdfPadPorts[padIndex];
     entry->smallMotor = smallMotor & SDF_PAD_MOTOR_VALUE_MASK;
     sdfPadPorts[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
@@ -1505,7 +1505,7 @@ extern s32 scePadInit(s32);
 
 
 /* Open both configured port/slot pairs and reset the public input arrays. */
-void sdfPadInit(void) {
+void sdfPadInitManager(void) {
     s32 padIndex;
 
     scePadInit(0);
@@ -1536,23 +1536,23 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        sdfConsoleFontTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00315BA0));
+        sdfConsoleFontTexture = sdfTexSet((SdfTextureFileHeader *)(D_00315BA0));
     }
 }
 
 /* Ensure initialization and return the cached console texture. */
-void *sdfDevConsGetResourceHandle(void) {
+void *sdfDevConsGetFontHandle(void) {
     sdfDevConsInit();
     return sdfConsoleFontTexture;
 }
 
 /* Return the packed glyph-UV table indexed by character minus 0x20. */
-u32 *sdfDevConsGetGlyphUvTable(void) {
+u32 *sdfDevConsGetFontUvTable(void) {
     return sdfConsoleGlyphTexcoords;
 }
 
 /* Append to the next-linked list and move its stored tail to this node. */
-void sdfDevConsListInsert(DevConsState *node) {
+void sdfDevConsLinkToTop(DevConsState *node) {
     DevConsState *previousTail = D_003BD3C0;
 
     node->next = NULL;
@@ -1564,7 +1564,7 @@ void sdfDevConsListInsert(DevConsState *node) {
 }
 
 /* Unlink this node, moving the stored tail when its next link is NULL. */
-void sdfDevConsListRemove(DevConsState *node) {
+void sdfDevConsUnlink(DevConsState *node) {
     DevConsState *nextNode = node->next;
     DevConsState *previousNode = node->previousNode;
 
@@ -1579,28 +1579,28 @@ void sdfDevConsListRemove(DevConsState *node) {
 }
 
 /* Unlink the console, release its cell-buffer allocation, then free the node. */
-void sdfDevConsNodeDestroy(DevConsState *node) {
-    sdfDevConsListRemove(node);
+void sdfDevConsClose(DevConsState *node) {
+    sdfDevConsUnlink(node);
     sdfMemFreeDirect(node->bufferAllocation);
     sdfChipFreeDirect(node);
 }
 
 /* Reset both cursor coordinates and clear the two-byte character-cell grid. */
-void sdfDevConsNodeClear(DevConsState *node) {
+void sdfDevConsClearInside(DevConsState *node) {
     node->cursorColumn = 0;
     node->cursorRow = 0;
     memset(node->cells, 0, node->columns * node->rows * SDF_CONSOLE_CELL_BYTES);
 }
 
 /* Reset a console through the existing clear operation. */
-void sdfDevConsResetNode(DevConsState *node) {
-    sdfDevConsNodeClear(node);
+void sdfDevConsClear(DevConsState *node) {
+    sdfDevConsClearInside(node);
 }
 
 /* Allocate a two-byte character grid and link it for cleanup.
  * Allocation uses the supplied dimensions; clearing uses their stored s16
  * values. Dimensions and the two opaque halfword inputs are not validated. */
-DevConsState *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
+DevConsState *sdfDevConsOpen(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
     DevConsState *node;
     struct SdfMemBlock *bufferAllocation;
 
@@ -1616,8 +1616,8 @@ DevConsState *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 col
     bufferAllocation = sdfMemAllocDirect((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferAllocation = bufferAllocation;
     node->cells = (u8 *)sdfMemLock(bufferAllocation);
-    sdfDevConsNodeClear(node);
-    sdfDevConsListInsert(node);
+    sdfDevConsClearInside(node);
+    sdfDevConsLinkToTop(node);
     return node;
 }
 

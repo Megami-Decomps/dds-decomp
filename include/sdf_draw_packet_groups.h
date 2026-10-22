@@ -19,8 +19,8 @@ typedef struct SdfDrawPacketGroups {
     u64 syncPacketWords[2] QWORD_ALIGNED; /* a DMA tag: NEXT, with VIF FLUSHA */
 } SdfDrawPacketGroups;
 
-void sdfInitializeDrawPacketGroups(SdfDrawPacketGroups *packets);
-void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, SdfDrawPacketGroups *packets);
+void sdfModelSetDrawEnv(SdfDrawPacketGroups *packets);
+void sdfModelDrawEnvLinkOt(SdfPoolNode **owners, SdfDrawPacketGroups *packets);
 
 typedef char SdfDrawPacketGroup_size_must_be_0x60[
     (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];

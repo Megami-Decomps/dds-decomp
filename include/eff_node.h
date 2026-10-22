@@ -34,17 +34,17 @@ typedef char EffTypeOps_size_must_be_0x30[(sizeof(EffTypeOps) == 0x30) ? 1 : -1]
 
 extern EffTypeOps effNodeTypeOperations[];
 
-EffNode *effCreateNode(u16 type, u16 arg, s32 parameter);
-void effDestroyNode(EffNode *node);
-void effUpdateNode(EffNode *node);
-void effRestartNodeInstance(EffNode *node);
-void effApplyNodeScale(EffNode *node, f32 factor);
+EffNode *dds3EffectCreate(u16 type, u16 arg, s32 parameter);
+void dds3EffectDelete(EffNode *node);
+void dds3EffectDraw(EffNode *node);
+void dds3EffectReset(EffNode *node);
+void dds3EffectSetScale(EffNode *node, f32 factor);
 s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node);
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix);
 void effSetNodeParameterValue(EffNode *node, u32 parameterWord);
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag);
 s32 effInvokeOptionalNodeInstanceCallback(EffNode *node);
-EffNode *effCloneSourceWithTypeHandler(const EffNode *source);
+EffNode *dds3EffectCopy(const EffNode *source);
 
 #endif

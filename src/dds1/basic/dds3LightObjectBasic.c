@@ -5,25 +5,25 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-void effObjFreeInner(EffWorldNode *object);
-void dds3DestroyObjectBase(ObjBase *object);
+void dds3FreePoseSet(EffWorldNode *object);
+void dds3ObjectBaseFreeControlWorkData(ObjBase *object);
 extern f32 (*D_00324770[4])[4];
 extern f32 kwlnDefaultColorVector[4];
 
 
 /* Releases the light's buffer and resource before freeing the object itself. */
-void lightReleaseObject(EffWorldNode *light) {
+void lightdestructor(EffWorldNode *light) {
     EffLightData *data;
 
     data = light->data;
     sdfChipFreeDirect(data->buffer);
-    dds3DestroyObjectBase(data->resourceState);
+    dds3ObjectBaseFreeControlWorkData(data->resourceState);
     sdfChipFreeDirect(light->data);
     light->data = NULL;
-    effObjFreeInner(light);
+    dds3FreePoseSet(light);
 }
 
-s32 lightBlendAmbientColors(EffWorldNode *lightObject) {
+s32 lightmainprocedure(EffWorldNode *lightObject) {
     SdfLightSources sources;
     EffLightData *data;
     u32 flags;
@@ -79,6 +79,6 @@ s32 lightBlendAmbientColors(EffWorldNode *lightObject) {
         VU0_STORE_VF(vf11, kwlnDefaultColorVector);
     }
     sources[0] = (f32 (*)[4])data;
-    sdfBuildLightingPacket(data->buffer, sources, data->secondaryColor);
+    sdf3DMakeLightParallelPacket(data->buffer, sources, data->secondaryColor);
     return 1;
 }

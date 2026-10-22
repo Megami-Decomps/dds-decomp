@@ -156,10 +156,12 @@ def cmd_apply(args):
     sources.write_text("# addr\tname\tevidence|inferred\tnote\n" +
                        "\n".join(provenance[a] for a in sorted(provenance)) + "\n")
     if renames:
-        pattern = re.compile(r"\b(" + "|".join(map(re.escape, renames)) + r")\b")
+        # String literals are matched first so a task name such as "fileMan" is
+        # left alone when the function fileMan is renamed.
+        pattern = re.compile(r'"(?:\\.|[^"\\\n])*"|\b(' + "|".join(map(re.escape, renames)) + r")\b")
         for path in (ROOT / "src" / args.version).rglob("*.c"):
             text = path.read_text()
-            changed = pattern.sub(lambda m: renames[m[1]], text)
+            changed = pattern.sub(lambda m: renames[m[1]] if m[1] else m[0], text)
             if changed != text:
                 path.write_text(changed)
     print(f"{len(curated)} names applied, {len(renames)} renamed in src/{args.version}")

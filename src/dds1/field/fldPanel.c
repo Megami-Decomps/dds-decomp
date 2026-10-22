@@ -9,7 +9,7 @@ extern KwlnTask *fldInputPanelTaskHandle;
 
 
 
-void fldReleasePanelState(KwlnTask *panelTask) {
+void fldInputPanelShutdown(KwlnTask *panelTask) {
     void *panelChipBlock;
 
     panelChipBlock = (void *)dds3GetProcessData(panelTask);
@@ -17,17 +17,17 @@ void fldReleasePanelState(KwlnTask *panelTask) {
     fldInputPanelTaskHandle = 0;
 }
 
-void fldCreateInputPanelTask(void) {
-    fldInputPanelTaskHandle = dds3StartProcess("inputpanel", 0x2B0B, 1, 1, fldInitializeTitleBannerTask, fldReleasePanelState, 0);
+void fldInitInputPanel(void) {
+    fldInputPanelTaskHandle = dds3StartProcess("inputpanel", 0x2B0B, 1, 1, fldInputPanelProcess1, fldInputPanelShutdown, 0);
 }
 
-void fldDestroyPanelTaskIfPresent(void) {
+void fldFreeInputPanel(void) {
     if (fldInputPanelTaskHandle != 0) {
         dds3KillProcess(fldInputPanelTaskHandle, 1);
     }
 }
 
-FldTitleBannerMenu *fldSetTitleBannerPending(s32 isPending) {
+FldTitleBannerMenu *fldInputPanelSetDraw(s32 isPending) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(fldInputPanelTaskHandle);
@@ -35,7 +35,7 @@ FldTitleBannerMenu *fldSetTitleBannerPending(s32 isPending) {
     return menu;
 }
 
-FldTitleBannerMenu *fldSetTitleBannerChoice(s32 choice) {
+FldTitleBannerMenu *fldInputPanelSetMessage(s32 choice) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(fldInputPanelTaskHandle);

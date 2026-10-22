@@ -37,7 +37,7 @@ extern ParReleaseRecord *parRecordListHead;
 
 #include "sdf_packet_alloc.h"
 struct SdfListHead;
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
 
 extern ParDispatch parKindConstructorEntries[];
@@ -53,9 +53,9 @@ extern ParDispatch parKindConstructorEntries[];
 extern void (*D_0034E5E0[])(void *, void *, void *);
 
 extern void *memcpy(void *dst, void *src, u32 n);
-extern void polyInitializeBasicRingCells(void *);
+extern void dds3SpPoly_Ring_Old_BuffInit(void *);
 
-extern void parControlInit();
+extern void dds3TrackPolyInit();
 
 extern u8 D_003D64B0[];
 
@@ -63,11 +63,11 @@ extern u8 D_003D64B0[];
 
 extern EffPacketParams parDrawControl;
 
-extern u16 parGetRestartFlag(ParObj *obj);
+extern u16 dds3ParticleGetState(ParObj *obj);
 
 
 
-extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
+extern void dds3TrackPolySet2(ParSystem *, s32, const u128 *);
 
 
 
@@ -89,11 +89,11 @@ extern u8 sdfViewEyeVector[];
 
 extern u8 sdfViewTargetVector[];
 
-void parSetObjectParameterWord(ParObj *work, u32 parameterWord) {
+void dds3ParticleSetRGBA(ParObj *work, u32 parameterWord) {
     work->parameterWord = parameterWord;
 }
 
-void parObjSetMode(ParObj *object, s32 mode) {
+void dds3ParticleSetTypeFlag(ParObj *object, s32 mode) {
     mode &= 0xFF;
     switch (object->dispatchIndex) {
     case 1:
@@ -118,7 +118,7 @@ void parObjSetMode(ParObj *object, s32 mode) {
     object->restartFlag = 1;
 }
 
-u8 parObjGetMode(ParObj *object) {
+u8 dds3ParticleGetLoop(ParObj *object) {
     switch (object->dispatchIndex) {
     case 1:
     case 5:
@@ -141,17 +141,17 @@ u8 parObjGetMode(ParObj *object) {
 
 typedef struct BillObj BillObj;
 
-ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
+ParObj *dds3ParticleExpCreate(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
     BillObj *billboard;
 
     if (resource->type != 3 || resource->offset != 0) {
         object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
         object = parKindConstructorEntries[kind].func(object);
-        billboard = billCreateIndexed(resource->type, (u32)(resource + 1));
-        billSetChildScaleComponents(billboard, object->billboardScale, object->billboardScaleY);
-        billSetBillboardMode(billboard, object->billboardMode);
-        billMarkKindOneFlag(billboard);
+        billboard = dds3BillboardCreate(resource->type, (u32)(resource + 1));
+        dds3BillboardSetScale(billboard, object->billboardScale, object->billboardScaleY);
+        dds3BillboardSetMode(billboard, object->billboardMode);
+        dds3BillboardSetAnimColorAdvMode(billboard);
         object->billboard = billboard;
     } else {
         object = parKindConstructorEntries[kind].func(object);
@@ -160,27 +160,27 @@ ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
     return object;
 }
 
-ParObj *parInstantiateKind(ParObj *source) {
+ParObj *dds3ParticleExpCopy(ParObj *source) {
     ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func(source);
     particle->dispatchIndex = source->dispatchIndex;
     if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
-        BillObj *billboard = billCloneObjectRetainingSharedData(source->billboard);
-        billSetChildScaleComponents(billboard, particle->billboardScale, particle->billboardScaleY);
-        billSetBillboardMode(billboard, particle->billboardMode);
-        billMarkKindOneFlag(billboard);
+        BillObj *billboard = dds3BillboardCopy(source->billboard);
+        dds3BillboardSetScale(billboard, particle->billboardScale, particle->billboardScaleY);
+        dds3BillboardSetMode(billboard, particle->billboardMode);
+        dds3BillboardSetAnimColorAdvMode(billboard);
         particle->billboard = billboard;
     }
     return particle;
 }
 
-void parObjDispatch(ParObj *object) {
+void dds3ParticleExpDelete(ParObj *object) {
     parKindConstructorEntries[object->dispatchIndex].destroy(object);
 }
 
-extern void billInvokeCallback(BillObj *);
+extern void dds3BillboardDraw(BillObj *);
 
 /* Apply queued updates, then draw live records and submit the kind's resource. */
-void effParUpdateAndDrawInstance(ParObj *effect) {
+void dds3ParticleExpDraw(ParObj *effect) {
     EffectBufferRecord *record;
     BillObj *billboard;
     u32 step;
@@ -243,8 +243,8 @@ void effParUpdateAndDrawInstance(ParObj *effect) {
                     record->scale = 0;
                 }
                 record->spin += spinStep * spinDirection;
-                billSetAnimationFrameForImmediateAdvance(billboard, age);
-                billInvokeCallback(billboard);
+                dds3BillboardSetAnimKey(billboard, age);
+                dds3BillboardDraw(billboard);
             }
             spinDirection *= alternate;
             --step;
@@ -254,49 +254,49 @@ void effParUpdateAndDrawInstance(ParObj *effect) {
     parSubmitKindDrawing(&effect->kindState);
 }
 
-extern void parRestartKind(ParObj *obj);
-extern void parScaleAndRestartKind(ParObj *obj, f32 factor);
+extern void dds3ParticleReset(ParObj *obj);
+extern void dds3ParticleSetScale(ParObj *obj, f32 factor);
 
-void parRestartInstanceCallback(ParObj *obj) {
-    parRestartKind(obj);
+void dds3ParticleExpReset(ParObj *obj) {
+    dds3ParticleReset(obj);
 }
 
-void effParScaleComponent(float scale, ParObj *work) {
-    parScaleAndRestartKind(work, scale);
+void dds3ParticleExpSetScale(float scale, ParObj *work) {
+    dds3ParticleSetScale(work, scale);
     work->scaleEnd *= scale;
 }
 
 /* Descriptor query: return the complete 16-bit restart state. */
-u16 effParGetInstanceRestartFlag(ParObj *obj) {
-    return parGetRestartFlag(obj);
+u16 dds3ParticleExpGetState(ParObj *obj) {
+    return dds3ParticleGetState(obj);
 }
 
-void parCopyVector(void *dst, void *src) {
+void dds3ParticleExpSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-extern void parComposeEffectTransformMatrices(ParObj *effect, void *matrix);
+extern void dds3ParticleSetRotateMatrix(ParObj *effect, void *matrix);
 
-void parRebuildInstanceTransforms(ParObj *effect, void *matrix) {
-    parComposeEffectTransformMatrices(effect, matrix);
+void dds3ParticleExpSetRotateMatrix(ParObj *effect, void *matrix) {
+    dds3ParticleSetRotateMatrix(effect, matrix);
 }
 
-void effParSetInstanceParameterWord(ParObj *work, u32 parameterWord) {
+void dds3ParticleExpSetRGBA(ParObj *work, u32 parameterWord) {
     work->parameterWord = parameterWord;
 }
 
 void parChangeInstanceMode(ParObj *work, u8 mode) {
-    parObjSetMode(work, mode);
+    dds3ParticleSetTypeFlag(work, mode);
 }
 
 /* Descriptor query: select the kind's current mode byte. */
-u8 effParGetInstanceMode(ParObj *work) {
-    return parObjGetMode(work);
+u8 dds3ParticleExpGetLoop(ParObj *work) {
+    return dds3ParticleGetLoop(work);
 }
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
-void parUpdateSharedScaleAndDelta(ParKindState *obj) {
+void dds3Particle_EffectInit(ParKindState *obj) {
     f32 scale;
 
     switch (obj->kind) {
@@ -325,50 +325,50 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
 }
 
 
-extern void parUpdateBillboardCrossStrip(s32, s32, u32);
+extern void dds3Particle_TrackSet(s32, s32, u32);
 
-extern void parUpdateBillboardCrossTriangle(s32, s32, u32);
+extern void dds3Particle_Track2Set(s32, s32, u32);
 
 void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
-        parPrependHistorySample(work->payload.history.table, index, color, speed);
+        dds3Particle_BlurSet(work->payload.history.table, index, color, speed);
         return;
     case 2:
-        parUpdateBillboardCrossStrip((s32)work->payload.crossStrip.drawSystem, index, color);
+        dds3Particle_TrackSet((s32)work->payload.crossStrip.drawSystem, index, color);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->payload.crossTriangle.drawSystem, index, color);
+        dds3Particle_Track2Set((s32)work->payload.crossTriangle.drawSystem, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes(work->payload.trackPolygon.modelList, index, color);
+        dds3Particle_Track3Set(work->payload.trackPolygon.modelList, index, color);
         break;
     }
 }
 
-extern void parClearHistorySlotPoints(s32, s32);
+extern void dds3Particle_BlurClearItem(s32, s32);
 
 void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearHistorySlotPoints((s32)work->payload.history.table, index);
+        dds3Particle_BlurClearItem((s32)work->payload.history.table, index);
         return;
     case 2:
-        parCellInit(work->payload.crossStrip.drawSystem, index);
+        dds3TrackPolyListInit(work->payload.crossStrip.drawSystem, index);
         return;
     case 3:
-        parCellInit(work->payload.crossTriangle.drawSystem, index);
+        dds3TrackPolyListInit(work->payload.crossTriangle.drawSystem, index);
         return;
     case 4:
-        effTrackPolyResetIndexedWork(work->payload.trackPolygon.modelList, index);
+        Eff_ModelTrackPolyListReset(work->payload.trackPolygon.modelList, index);
         break;
     }
 }
 
-extern void effBillSetEntryValue(s32, s32, u32);
+extern void dds3TrackPolyColorSet(s32, s32, u32);
 
 
-void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
+void dds3Particle_TrackSet(s32 particle, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
@@ -386,16 +386,16 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
-    parUpdateCellVertexPair((ParSystem *)particle, index, axis);
-    parFadeAlphaCell((ParSystem *)particle, index);
-    effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
+    dds3TrackPolySet((ParSystem *)particle, index, axis);
+    dds3TrackPolyVCRefresh_ParType1((ParSystem *)particle, index);
+    dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-extern void effBillSetEntryValue(s32, s32, u32);
+extern void dds3TrackPolyColorSet(s32, s32, u32);
 
-extern void parFadeTriangleCellAlpha(ParSystem *system, s32 cellIndex);
+extern void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex);
 
-void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
+void dds3Particle_Track2Set(s32 particle, s32 index, u32 color) {
     u128 axis[3];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
@@ -414,12 +414,12 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[2]);
-    parUpdateCellVertexTriangle((ParSystem *)particle, index, axis);
-    parFadeTriangleCellAlpha((ParSystem *)particle, index);
-    effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
+    dds3TrackPolySet2((ParSystem *)particle, index, axis);
+    dds3TrackPolyVCRefresh_ParType2((ParSystem *)particle, index);
+    dds3TrackPolyColorSet(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color) {
+void dds3Particle_Track3Set(EffTrackPolyList *list, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
@@ -437,25 +437,25 @@ void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
-    effTrackPolyPushIndexedWorkEndpoints(list, index, axis);
+    Eff_ModelTrackPolyListVertexSet(list, index, axis);
     effTrackPolySetIndexedColor(list, index, (color & 0xFF000000) | 0x808080);
 }
 
-u32 parGetEmitterCellGroupDivisor(void) {
+u32 dds3Particle_TrackPolyGetRecTiming(void) {
     return 0;
 }
 
-void parSysReset(void) {
+void dds3PolygonManagerInit(void) {
     parRecordListHead = 0;
-    parControlInit();
+    dds3TrackPolyInit();
     sdfRandomizeByTime((EffRandState *)&D_003D64B0);
 }
 
 /* Particle-system startup hook; the empty retail body matches the DDS2 twin. */
-void parInitializeParticleSubsystem(void) {
+void dds3PolygonManagerExit(void) {
 }
 
-ParReleaseRecord *func_0015B258(s32 count, s16 flags, s16 options) {
+ParReleaseRecord *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
     s32 vertexCount;
     s32 bytes;
     struct SdfMemBlock *allocation;
@@ -493,19 +493,19 @@ ParReleaseRecord *func_0015B258(s32 count, s16 flags, s16 options) {
     memset(&record->request, 0, sizeof(record->request));
     record->request.color = 0x80808080;
     if (!(options & 1)) record->request.primitive = 0x4000;
-    asset = sdfCreateAssetWithDrawEntries();
+    asset = sdfMatNew();
     record->asset = asset;
-    if (!(options & 2)) sdfSetPrimaryStateFloat(asset, 1.0f);
+    if (!(options & 2)) sdfMatSetConstant(asset, 1.0f);
     return record;
 }
 
-void parReleaseAssetRecord(ParReleaseRecord *record) {
+void dds3PolygonDelete(ParReleaseRecord *record) {
     record->flags = 1;
-    sdfQueueAssetRelease(record->asset);
+    sdfMatFreeDelayed(record->asset);
     sdfMemFreeDirect(record->allocation);
 }
 
-void parPrependRecordListNode(ParReleaseRecord *node) {
+void dds3PolygonDraw(ParReleaseRecord *node) {
     node->next = parRecordListHead;
     parRecordListHead = node;
 }
@@ -516,7 +516,7 @@ static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, SdfListHead *pack
     pool->append(pool, packet);
 }
 
-void parDrawPendingParticleRecords(void) {
+void dds3PolygonLinkOt(void) {
     ParReleaseRecord *record;
     SdfListHead *packet;
     s32 remaining;
@@ -527,10 +527,10 @@ void parDrawPendingParticleRecords(void) {
         priorityPool = &kwlnDrawSurfaces[51];
         do {
             if (record->drawCount != 0 && record->flags != 1) {
-                packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
-                sdfInitPacketList(packet);
-                sdfConsAppendClearPacket(packet, 0);
-                sdfConsAppendAssetPacket(packet, record->asset, 0);
+                packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+                sdfDrawTagInit(packet);
+                sdf3DPrimLinkResetTm(packet, 0);
+                sdf3DPrimLinkMat(packet, record->asset, 0);
                 flags = record->flags;
                 remaining = record->drawCount;
                 record->request.positions = record->positions;
@@ -540,7 +540,7 @@ void parDrawPendingParticleRecords(void) {
                 record->request.parameterCount = 16;
                 record->request.vertexCount = 48;
                 while (remaining >= 48) {
-                    sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&record->request));
+                    sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->request));
                     record->request.positions += 48;
                     if (flags & 1) record->request.texcoords += 96;
                     if (flags & 2) record->request.normals += 48;
@@ -550,7 +550,7 @@ void parDrawPendingParticleRecords(void) {
                 if (remaining > 0) {
                     record->request.parameterCount = remaining / 3;
                     record->request.vertexCount = remaining;
-                    sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&record->request));
+                    sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->request));
                 }
                 record->drawCount = 0;
                 if (flags & 0x10) parAppendDrawSurfacePool(priorityPool, packet);
@@ -564,16 +564,16 @@ void parDrawPendingParticleRecords(void) {
 }
 
 /* Replace the record asset's primary texture and dirty its draw state. */
-void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
+void dds3PolygonSetTex(ParReleaseRecord *record, SdfTex *texture) {
     sdfSetAssetPrimaryTextureAddress(record->asset, texture);
 }
 
-void parControlInit(void) {
+void dds3TrackPolyInit(void) {
     memset(&parDrawControl, 0, 0x2C);
     parDrawControl.primitive = 0x4000;
 }
 
-ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
+ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     s32 total;
     struct SdfMemBlock *allocation;
     s32 base;
@@ -617,10 +617,10 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         ParCell *cell = (ParCell *)(i * sizeof(ParCell) + (s32)system->cells);
         cell->history = (u128 *)((u8 *)system->vertices + i * perCell * 0x10);
         cell->colors = system->colors + i * perCell;
-        parCellInit(system, i);
+        dds3TrackPolyListInit(system, i);
     }
-    system->asset = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(system->asset, 1.0f);
+    system->asset = sdfMatNew();
+    sdfMatSetConstant(system->asset, 1.0f);
     system->kind = kind;
     system->cellCount = count;
     system->bucket = 2;
@@ -632,12 +632,12 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     return system;
 }
 
-void parReleaseCellSystem(ParSystem *system) {
-    sdfQueueAssetRelease(system->asset);
+void dds3TrackPolyDelete(ParSystem *system) {
+    sdfMatFreeDelayed(system->asset);
     sdfMemFreeDirect(system->allocation);
 }
 
-void parCellInit(ParSystem *system, s32 cellIndex) {
+void dds3TrackPolyListInit(ParSystem *system, s32 cellIndex) {
     ParCell *cell = (ParCell *)(cellIndex * 20 + (u32)system->cells);
 
     cell->color = 0x80808080;
@@ -645,12 +645,12 @@ void parCellInit(ParSystem *system, s32 cellIndex) {
     cell->vertexCount = 0;
 }
 
-void parPrependCellNode(ParSystem *node) {
+void dds3TrackPolyDraw(ParSystem *node) {
     node->next = D_003BB014;
     D_003BB014 = node;
 }
 
-void parUpdateCellVertexPair(ParSystem *system, s32 cellIndex, const u128 *vertices) {
+void dds3TrackPolySet(ParSystem *system, s32 cellIndex, const u128 *vertices) {
     ParCell *cell = &system->cells[cellIndex];
     u128 *vertex;
     s32 shiftCount;
@@ -675,7 +675,7 @@ void parUpdateCellVertexPair(ParSystem *system, s32 cellIndex, const u128 *verti
     PCP_COPY_VECTOR(vertex + 1, vertices + 1);
 }
 
-void parTranslateCellVertices(ParSystem *system, s32 cellIndex, const u128 *delta) {
+void dds3TrackPolyMove(ParSystem *system, s32 cellIndex, const u128 *delta) {
     ParCell *cell = system->cells + cellIndex;
     s32 count = system->vertexWordCount;
     u128 *vertex = cell->history;
@@ -693,7 +693,7 @@ void parTranslateCellVertices(ParSystem *system, s32 cellIndex, const u128 *delt
     }
 }
 
-void parUpdateCellVertexTriangle(ParSystem *system, s32 cellIndex, const u128 *vertices) {
+void dds3TrackPolySet2(ParSystem *system, s32 cellIndex, const u128 *vertices) {
     ParCell *cell = &system->cells[cellIndex];
     u128 *vertex;
     s32 shiftCount;
@@ -719,7 +719,7 @@ void parUpdateCellVertexTriangle(ParSystem *system, s32 cellIndex, const u128 *v
     PCP_COPY_VECTOR(vertex + 2, vertices + 2);
 }
 
-void parTranslateCellTriangleVertices(ParSystem *system, s32 cellIndex, const u128 *delta) {
+void dds3TrackPolyMove2(ParSystem *system, s32 cellIndex, const u128 *delta) {
     ParCell *cell = system->cells + cellIndex;
     s32 count = cell->vertexCount / 3;
     u128 *vertex = cell->history;
@@ -743,7 +743,7 @@ void parTranslateCellTriangleVertices(ParSystem *system, s32 cellIndex, const u1
     }
 }
 
-void parFadeAlphaCell(ParSystem *system, s32 cellIndex) {
+void dds3TrackPolyVCRefresh_ParType1(ParSystem *system, s32 cellIndex) {
     u32 count = system->cells[cellIndex].vertexCount >> 1;
     u32 *vertex = system->cells[cellIndex].colors;
     u32 word = vertex[0];
@@ -776,7 +776,7 @@ void parFadeAlphaCell(ParSystem *system, s32 cellIndex) {
 
 extern f32 D_0034E5A0[4];
 /* Fade one triangle cell's middle and edge colors toward transparent along its history. */
-void parFadeTriangleCellAlpha(ParSystem *system, s32 cellIndex) {
+void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex) {
     u32 count = system->cells[cellIndex].vertexCount / 3;
     ParTriangleVertexColors *vertex;
     u32 middleWord;
@@ -840,7 +840,7 @@ void parFadeTriangleCellAlpha(ParSystem *system, s32 cellIndex) {
     }
 }
 
-void parFillVertexPairs(ParSystem *system, u32 firstColor, u32 secondColor) {
+void dds3TrackPolyVCSet_Normal(ParSystem *system, u32 firstColor, u32 secondColor) {
     s32 perCell = system->vertexWordCount >> 1;
     s32 cellCount = system->cellCount;
     s32 cellIndex;
@@ -857,7 +857,7 @@ void parFillVertexPairs(ParSystem *system, u32 firstColor, u32 secondColor) {
     }
 }
 
-void parFadeAlphaAllCells(ParSystem *system, u32 color) {
+void dds3TrackPolyVCSet_Acute(ParSystem *system, u32 color) {
     u32 perCell = system->vertexWordCount >> 1;
     u32 count = system->cellCount;
     u32 i;
@@ -897,7 +897,7 @@ void parFadeAlphaAllCells(ParSystem *system, u32 color) {
     }
 }
 
-void parFadeAlphaUpDownAllCells(ParSystem *system, u32 color) {
+void dds3TrackPolyVCSet_AcuteW(ParSystem *system, u32 color) {
     u32 words = system->vertexWordCount;
     u32 count = system->cellCount;
     u32 quarter = words >> 2;
@@ -958,7 +958,7 @@ void parFadeAlphaUpDownAllCells(ParSystem *system, u32 color) {
     }
 }
 
-void parFillTriangleCellColors(ParSystem *system, s32 middleWord, s32 edgeWord) {
+void dds3TrackPolyVCSet2_Normal(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 3;
@@ -987,7 +987,7 @@ void parFillTriangleCellColors(ParSystem *system, s32 middleWord, s32 edgeWord) 
     }
 }
 
-void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWord) {
+void dds3TrackPolyVCSet2_Acute(ParSystem *system, u32 middleWord, u32 edgeWord) {
     f32 cur0[4];
     f32 cur1[4];
     f32 step0[4];
@@ -1056,7 +1056,7 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
     }
 }
 
-void parFadeTriangleCellAlphaUpDown(ParSystem *system, u32 middleWord, u32 edgeWord) {
+void dds3TrackPolyVCSet2_AcuteW(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     u32 middleAlpha = middleWord & 0xFF000000;
@@ -1100,7 +1100,7 @@ void parFadeTriangleCellAlphaUpDown(ParSystem *system, u32 middleWord, u32 edgeW
     }
 }
 
-void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
+void dds3TrackPolyVC3Set_Normal(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 6;
@@ -1133,7 +1133,7 @@ void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s
 }
 
 /* Fade the three strip colors toward transparent across each cell. */
-void parDecreaseStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void dds3TrackPolyVC3Set_Acute(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1181,7 +1181,7 @@ void parDecreaseStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord
 }
 
 /* Raise then lower the three alphas across the two halves of each strip cell. */
-void parRiseFallStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void dds3TrackPolyVC3Set_AcuteW(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1242,7 +1242,7 @@ void parRiseFallStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord
     }
 }
 
-void parFillCellVertexQuads(ParSystem *system, u32 firstColor, u32 secondColor) {
+void dds3TrackPolyVCSet4_Normal(ParSystem *system, u32 firstColor, u32 secondColor) {
     s32 perCell = system->vertexWordCount >> 2;
     s32 cellCount = system->cellCount;
 
@@ -1263,7 +1263,7 @@ void parFillCellVertexQuads(ParSystem *system, u32 firstColor, u32 secondColor) 
 }
 
 /* Keep middle/edge RGB while ramping vertex alpha down to zero in each cell. */
-void effParSetCellColorsWithAlphaFade(ParSystem *system, u32 middleWord, u32 edgeWord) {
+void dds3TrackPolyVCSet4_Acute(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 perCell = system->vertexWordCount >> 2;
     s32 count = system->cellCount;
     u32 middleAlpha = middleWord & 0xFF000000;
@@ -1301,7 +1301,7 @@ void effParSetCellColorsWithAlphaFade(ParSystem *system, u32 middleWord, u32 edg
 }
 
 /* Keep middle/edge RGB while ramping alpha up and down around the cell midpoint. */
-void effParSetCellColorsWithAlphaPeak(ParSystem *system, u32 middleWord, u32 edgeWord) {
+void dds3TrackPolyVCSet4_AcuteW(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     u32 middleAlpha = middleWord & 0xFF000000;
@@ -1349,7 +1349,7 @@ void effParSetCellColorsWithAlphaPeak(ParSystem *system, u32 middleWord, u32 edg
     }
 }
 
-void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
+void dds3TrackPolyVC5Set_Normal(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 5;
@@ -1381,7 +1381,7 @@ void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWor
 }
 
 /* Fade the three symmetric colors toward transparent across each cell. */
-void parDecreaseSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void dds3TrackPolyVC5Set_Acute(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1428,7 +1428,7 @@ void parDecreaseSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middle
 }
 
 /* Increase each symmetric color's alpha from zero across the cell. */
-void parIncreaseSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void dds3TrackPolyVC5Set_AcuteR(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1475,7 +1475,7 @@ void parIncreaseSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middle
 }
 
 /* Raise then lower the three alphas across the two halves of each cell. */
-void parRiseFallSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+void dds3TrackPolyVC5Set_AcuteW(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
 {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -1534,11 +1534,11 @@ void parRiseFallSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middle
     }
 }
 
-void parSetCellDrawBucket(ParSystem *system, u16 bucket) {
+void dds3TrackPolySetMode(ParSystem *system, u16 bucket) {
     system->bucket = bucket;
 }
 
-void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB) {
+void dds3TrackPolyVCSet(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB) {
     u16 id = *(u16 *)work;
 
     D_0034E5E0[id * 3 + sub](work, dispatchArgA, dispatchArgB);
@@ -1553,7 +1553,7 @@ extern SdfPoolNode *D_0034E620[];
 
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
-void parDrawPendingCellSystems(void) {
+void dds3TrackPolyLinkOt(void) {
     SdfListHead *lists[5];
     SdfListHead **slot;
     SdfListHead *list;
@@ -1573,12 +1573,12 @@ void parDrawPendingCellSystems(void) {
         slot = &lists[system->bucket];
         list = *slot;
         if (list == 0) {
-            *slot = (SdfListHead *)sdfAllocPacketAligned(0x20);
-            sdfInitPacketList(*slot);
-            sdfConsAppendClearPacket(*slot, NULL);
+            *slot = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(*slot);
+            sdf3DPrimLinkResetTm(*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket(list, (SdfAsset *)system->asset, NULL);
+        sdf3DPrimLinkMat(list, (SdfAsset *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.parameters = D_0034E360;
@@ -1592,14 +1592,14 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                     parDrawControl.positions += 16;
                     parDrawControl.colors += 16;
                 }
                 if (remaining >= 4) {
                     parDrawControl.parameterCount = remaining - 2;
                     parDrawControl.vertexCount = remaining;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
@@ -1614,14 +1614,14 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                     parDrawControl.positions += 12;
                     parDrawControl.colors += 12;
                 }
                 if (remaining >= 6) {
                     parDrawControl.parameterCount = (remaining / 3) * 4 - 4;
                     parDrawControl.vertexCount = remaining;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
@@ -1636,7 +1636,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                     parDrawControl.positions += 5;
                     parDrawControl.colors += 5;
                 }
@@ -1653,7 +1653,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                     parDrawControl.positions += 6;
                     parDrawControl.colors += 6;
                 }
@@ -1670,7 +1670,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
-                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                     parDrawControl.positions += 12;
                     parDrawControl.colors += 12;
                 }
@@ -1683,25 +1683,25 @@ void parDrawPendingCellSystems(void) {
         }
     }
     if (lists[4] != 0) {
-        specialList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(specialList);
-        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        specialList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(specialList);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[4] = 0x8000000026ULL;
         packet[5] = 0x42;
-        sdfAppendPacket(specialList, (u32)packet);
+        sdfDrawTagLink(specialList, (u32)packet);
         parAppendDrawSurfacePool(&kwlnDrawSurfaces[56], specialList);
-        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfAppendPacket(lists[4], (u32)packet);
+        sdfDrawTagLink(lists[4], (u32)packet);
         parAppendDrawSurfacePool(&kwlnDrawSurfaces[56], lists[4]);
     }
     D_003BB014 = NULL;
@@ -1709,7 +1709,7 @@ void parDrawPendingCellSystems(void) {
 
 
 
-ParBlock *parAllocateDrawBlock(s32 count) {
+ParBlock *dds3TrianglePolyCreate(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
     struct SdfMemBlock *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
@@ -1721,24 +1721,24 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     block->colors = (u32 *)vertices;
     block->allocation = allocation;
     block->positions = (u128 *)base;
-    block->asset = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(block->asset, 1.0f);
+    block->asset = sdfMatNew();
+    sdfMatSetConstant(block->asset, 1.0f);
     return block;
 }
 
-void parReleaseDrawBlock(ParBlock *block) {
-    sdfQueueAssetRelease(block->asset);
+void dds3TrianglePolyDelete(ParBlock *block) {
+    sdfMatFreeDelayed(block->asset);
     sdfMemFreeDirect(block->allocation);
 }
 
 
 
-void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+void dds3TrianglePolyLinkOt(SdfPoolNode *emitter, ParBlock *cmd) {
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     EffPacketParams state;
     s32 remaining;
-    sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
     state.parameterCount = 0x10;
@@ -1749,17 +1749,17 @@ void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
     state.color = cmd->color;
     while (remaining >= 0x30) {
         remaining -= 0x30;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
     }
     if (remaining > 0) {
         parDrawControl.parameterCount = remaining / 3;
         parDrawControl.vertexCount = remaining;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
     }
     parAppendDrawSurfacePool(emitter, list);
 }
 
-ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
+ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
     ParEmitDesc *desc = sdfChipAllocDirect(src->count * 4 + 0xF0);
 
     memset(desc, 0, 0xF0);
@@ -1770,11 +1770,11 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     if (desc->cells.verticesPerCell < 3) {
         desc->cells.verticesPerCell = 3;
     }
-    desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(desc->cells.cellSystem, 0,
+    desc->cells.cellSystem = dds3TrackPolyCreate(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
+    dds3TrackPolyVCSet(desc->cells.cellSystem, 0,
                    *(void **)((u8 *)&desc->cells + 0x14),
                    *(void **)((u8 *)&desc->cells + 0x18));
-    polyInitializeBasicRingCells(desc);
+    dds3SpPoly_Ring_Old_BuffInit(desc);
     return desc;
 }
 

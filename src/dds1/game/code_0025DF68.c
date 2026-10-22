@@ -134,7 +134,7 @@ void mnuDrawPulsingMenuIcon(ShopScene *object, s32 amplitude, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
     s8 phase = object->pulseFrame;
     f32 angle = (f32)phase / 120.0f * 6.2831852f;
-    s32 offset = (s32)((f32)amplitude * sdfSinPoly(angle));
+    s32 offset = (s32)((f32)amplitude * sdfSin(angle));
 
     effDrawSpriteWithCornerFade(mnuCommonIconPlacements[1][BRS_ICON_X] << 4,
                   mnuCommonIconPlacements[1][BRS_ICON_Y] << 3,
@@ -239,7 +239,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct M
         if (context->unk08 > 60) {
             context->unk08 = 0;
         }
-        pulse = sdfSinPoly((f32)context->unk08 / 60.0f * 3.1415926f) * fade;
+        pulse = sdfSin((f32)context->unk08 / 60.0f * 3.1415926f) * fade;
         index = list->cursor->index;
         row = index - first;
         effDrawSpriteWithCornerFade(0x3D0, (row * 21 + 0x98) << 3, 0, (u32)(fade * 256.0f), 0, layer, 0x20, mode);
@@ -567,7 +567,7 @@ void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
         s32 transitionFrames = 20;
         s32 displayedValue;
 
-        sndSetSequenceVolumePan(19, 127, 63);
+        p2sdPlaySE(19, 127, 63);
         state->elapsedFrames++;
         displayedValue = state->previousValue +
                          ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /

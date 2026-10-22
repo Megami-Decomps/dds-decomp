@@ -23,8 +23,8 @@ typedef struct ParTable {
 typedef char ParSlot_size_must_be_0x10[(sizeof(ParSlot) == 0x10) ? 1 : -1];
 typedef char ParTable_size_must_be_0x10[(sizeof(ParTable) == 0x10) ? 1 : -1];
 
-void parReleaseHistorySlotTable(ParTable *table);
+void dds3Particle_BlurDelete(ParTable *table);
 /* Prepends the current particle vector to the selected slot's point history. */
-void parPrependHistorySample(ParTable *table, s32 slotIndex, u32 color, f32 billboardScale);
+void dds3Particle_BlurSet(ParTable *table, s32 slotIndex, u32 color, f32 billboardScale);
 
 #endif
