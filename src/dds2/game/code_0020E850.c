@@ -1160,10 +1160,9 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
 }
 
 /* Waits for the task startup delay, then finishes when its two actor slots are clear. */
-s32 btlWaitEffectTask(void *arguments) {
-    BtlAnalysisPanelWaitArgs *task = arguments;
+s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
     if (task->elapsedTicks == 0) {
-        btlCreateAnalysisPanelTask(task->value, 0);
+        btlCreateAnalysisPanelTask(task->panelEntry, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
     if (task->elapsedTicks >= 0x11) {

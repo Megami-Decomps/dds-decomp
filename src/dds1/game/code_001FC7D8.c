@@ -1122,7 +1122,7 @@ extern u32 btlRequestAnalysisPanelClose(void);
 
 s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
     if (task->elapsedTicks == 0) {
-        btlCreateAnalysisPanelTask(task->value, 0);
+        btlCreateAnalysisPanelTask(task->panelEntry, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
     if (task->elapsedTicks >= 0x11) {
