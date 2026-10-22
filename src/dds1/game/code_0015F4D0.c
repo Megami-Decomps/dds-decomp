@@ -33,7 +33,7 @@ extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 extern void (*D_0034E680[])(EffectDispatchState *);
 extern void (*D_0034E690[])(f32, EffectDispatchState *);
 extern void effBattleReleaseParameterBanks(SoundMixer *);
-extern void dds3EndCrossfade();
+extern void dds3EndCrossfade(void);
 extern const char D_003A0D70[];
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 #include "kwln_texture_reference_flag_api.h"
