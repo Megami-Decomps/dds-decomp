@@ -30,7 +30,7 @@ extern s32 sdfThreadWakeWorkerId;
 extern u8 D_003BD480;
 
 /* Wake the worker only for its registered event; the byte counter never underflows. */
-s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
+s32 VblankIntcHandler(s32 eventId) {
     if (eventId == SDF_THREAD_COMPLETION_EVENT) {
         iWakeupThread(sdfThreadWakeWorkerId);
         if (D_003BD480 != 0) {
@@ -43,10 +43,10 @@ s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 
 /* Each wake-up broadcasts to every tracked thread under the list semaphore. */
-void sdfWakeQueuedThreadWaiters(void) {
+void VblankThreadProc(void) {
     SdfThreadNode *threadEntry;
 
-    sdfAddHandler(0, SDF_THREAD_COMPLETION_EVENT, sdfWakeThreadOnCompletionEvent, -1, 0);
+    sdfAddHandler(0, SDF_THREAD_COMPLETION_EVENT, VblankIntcHandler, -1, 0);
     EnableIntc(SDF_THREAD_COMPLETION_EVENT);
     for (;;) {
         SleepThread();
@@ -60,24 +60,24 @@ void sdfWakeQueuedThreadWaiters(void) {
 }
 
 extern void InitThread(void);
-extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern char D_003E1EF0[];
 
 /* Initialize the tracked-thread list and its semaphore before starting the wake worker. */
-s32 sdfStartQueuedThreadWakeWorker(void) {
+s32 sdfInitThreadSystem(void) {
     s32 threadId;
 
     InitThread();
     sdfThreadWakeTick = 0;
     sdfTrackedThreadHead = NULL;
-    sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
-    threadId = sdfCreateThread((void *)sdfWakeQueuedThreadWaiters, D_003E1EF0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
+    sdfTrackedThreadSemaphore = sdfCreateSema(1, 1, 0);
+    threadId = CreateThreadSimple((void *)VblankThreadProc, D_003E1EF0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
     sdfThreadWakeWorkerId = threadId;
     return _StartThread(threadId, 0);
 }
 
 /* Record the calling thread, set its sleep priority, then return the SDK sleep result. */
-s32 sdfThreadSleepSelf(void) {
+s32 sdfSetMainThreadPriority(void) {
     s32 threadId = GetThreadId();
 
     sdfSleepThreadId = threadId;
@@ -86,7 +86,7 @@ s32 sdfThreadSleepSelf(void) {
 }
 
 /* Promote the next list node to current; an empty list clears current. */
-void sdfSelectNextChipPage(SdfChipClass *sizeClass) {
+void sdfChipAllocNextPage(SdfChipClass *sizeClass) {
     SdfChipPage *nextPage;
 
     nextPage = sizeClass->availablePages;
@@ -97,17 +97,17 @@ void sdfSelectNextChipPage(SdfChipClass *sizeClass) {
 }
 
 /* Pop a recycled cell, count it live, and advance when its page becomes full. */
-SdfChipCell *sdfAllocRecycledChipCell(SdfChipClass *sizeClass, SdfChipPage *page) {
+SdfChipCell *sdfChipAllocGetFree(SdfChipClass *sizeClass, SdfChipPage *page) {
     SdfChipCell *freeCell = page->freeCells;
     page->usedCells++;
     page->freeCells = freeCell->nextFree;
     if (page->usedCells == sizeClass->cellCount) {
-        sdfSelectNextChipPage(sizeClass);
+        sdfChipAllocNextPage(sizeClass);
     }
     return freeCell;
 }
 
-SdfChipCell *sdfAllocFreshChipCell(SdfChipClass *sizeClass, SdfChipPage *page) {
+SdfChipCell *sdfChipAllocPageGrow(SdfChipClass *sizeClass, SdfChipPage *page) {
     s16 cellCount = sizeClass->cellCount;
     s32 usedCells = (u16)page->usedCells + 1;
     s32 remaining = page->bumpCellsRemaining;
@@ -117,24 +117,24 @@ SdfChipCell *sdfAllocFreshChipCell(SdfChipClass *sizeClass, SdfChipPage *page) {
     cell = (SdfChipCell *)(page->base + (cellCount - remaining) * sizeClass->cellSize);
     page->bumpCellsRemaining = remaining - 1;
     if (page->bumpCellsRemaining == 0) {
-        page->allocate = sdfAllocRecycledChipCell;
+        page->allocate = sdfChipAllocGetFree;
         if ((s16)usedCells == cellCount) {
-            sdfSelectNextChipPage(sizeClass);
+            sdfChipAllocNextPage(sizeClass);
         }
     }
     return cell;
 }
 
-SdfChipCell *sdfAllocFromNewChipPage(SdfChipClass *sizeClass) {
+SdfChipCell *sdfChipAllocNewPage(SdfChipClass *sizeClass) {
     SdfChipPage *page = sdfFreeChipPages;
 
     sdfFreeChipPages = page->next;
     page->usedCells = 0;
-    page->allocate = sdfAllocFreshChipCell;
+    page->allocate = sdfChipAllocPageGrow;
     sizeClass->currentPage = page;
     page->sizeClass = sizeClass;
     page->bumpCellsRemaining = sizeClass->cellCount;
-    return sdfAllocFreshChipCell(sizeClass, page);
+    return sdfChipAllocPageGrow(sizeClass, page);
 }
 
 
@@ -152,7 +152,7 @@ void *sdfChipAllocDirect(s32 size) {
     sizeClass = &sdfChipClassTable.classes[index];
     interruptsDisabled = DIntr();
     if (sizeClass->currentPage == NULL) {
-        result = sdfAllocFromNewChipPage(sizeClass);
+        result = sdfChipAllocNewPage(sizeClass);
     } else {
         result = sizeClass->currentPage->allocate(sizeClass, sizeClass->currentPage);
     }

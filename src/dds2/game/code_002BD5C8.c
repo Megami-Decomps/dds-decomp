@@ -131,14 +131,14 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, Effect
         current = mnuGetItemRequirementCount(entryId);
         required = mnuGetItemRequirementValue(entryId);
         sprintf(text, D_00437C38, required - current);
-        color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
+        color = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
         glyph = itfCreateFont2TextGlyph(x, y, 0, color, text, 0);
         frSetFontColorNo((FrFontGlyph *)glyph, 4);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frDestroyFontRequestAfter((FrFontGlyph *)glyph);
         effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
         sprintf(text, D_00437C38, required);
-        color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
+        color = fclBlendColor(0xA09DC340, 0xA09DC300, alpha);
         glyph = itfCreateFont2TextGlyph(thresholdX, y, 0, color, text, 0);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frDestroyFontRequestAfter((FrFontGlyph *)glyph);
@@ -151,8 +151,8 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     void **sprite = page->item;
     u32 i = 0;
     s32 alpha = page->drawAlpha;
-    u32 color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
-    s32 showCurrent = mdlFlagTest(0x901);
+    u32 color = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
+    s32 showCurrent = evtBitCheck(0x901);
     s32 x = page->slideOffset * 16 + 0xC80;
     s32 value;
     struct FrFontGlyph *glyph;
@@ -243,8 +243,8 @@ void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 su
     color = (color & 0xFF) | 0xD7ABFA00;
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
     item = frFontBuildGlyphChain(text, 0, 0, 0, 0);
-    frFontSetChildColors(item, color);
-    frFontSetGlyphPosition(item, x, y);
+    frSetFontColor(item, color);
+    frSetDrawPosition(item, x, y);
     frFontDrawGlyphChain(item, 1, surface);
     frDestroyFontRequestAfter(item);
 }
@@ -260,7 +260,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 texture;
     struct FrFontGlyph *item;
 
-    texture = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    texture = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
         if (scrGetIndexedRecordAddress(code & 0xFFFF, &outValue) != 0) {
@@ -289,7 +289,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
     if (slot->iconBundle != NULL) {
         mnuDrawFadeIcons(x, y, depth, slot->kind,
             slot->iconBundle, surface);
-        color = uiBlendColors(0xA09DC380, 0xA09DC300,
+        color = fclBlendColor(0xA09DC380, 0xA09DC300,
             slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
@@ -352,7 +352,7 @@ void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        dst->workEntries->geometry.cornerColors[i] = uiBlendColors(
+        dst->workEntries->geometry.cornerColors[i] = fclBlendColor(
             dst->workEntries->savedColors[i],
             src->workEntries->savedColors[i],
             amount / 2 + 0x80);

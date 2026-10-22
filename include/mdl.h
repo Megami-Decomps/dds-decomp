@@ -135,7 +135,7 @@ typedef struct MdlLoadPayload {
     DevRequest *partList;
 } MdlLoadPayload;
 
-/* mdlRequestAsset allocates this 0x2C-byte callback work record. */
+/* mdlPrepare allocates this 0x2C-byte callback work record. */
 typedef struct MdlLoadRequest {
     u16 group;
     u16 id;
@@ -175,7 +175,7 @@ struct MdlCtx {
         u32 word;
         struct {
             s16 id;
-            s16 motionIndex; /* Entry index passed to sdfMotionInitialize. */
+            s16 motionIndex; /* Entry index passed to sdfMotionChangeBlend. */
         } h;
     } current;
     MdlResourceItem *resourceItems;
@@ -205,38 +205,38 @@ typedef char MdlResourceItem_size_must_be_0x20[(sizeof(MdlResourceItem) == 0x20)
 typedef char MdlObjectAttachment_size_must_be_0x18[(sizeof(MdlObjectAttachment) == 0x18) ? 1 : -1];
 
 /* Model-context lifetime, per-frame update, and broadcast accessors. */
-void mdlDestroyContext(MdlCtx *ctx);
-void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces);
-MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id);
-u16 mdlGetContextResourceGroup(MdlCtx *ctx);
-u16 mdlGetContextResourceId(MdlCtx *ctx);
-u32 mdlGetBroadcastValue(MdlCtx *ctx);
-void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value);
-void mdlSetResourceFrame(MdlCtx *ctx, MdlResourceItem *item, s32 frame);
-void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *item, f32 amount);
-void mdlBroadcastMasked(MdlCtx *ctx, u32 value);
+void mdlFree(MdlCtx *ctx);
+void mdlLink(MdlCtx *ctx, struct SdfPoolNode **surfaces);
+MdlCtx *mdlLoad(u32 group, u32 id);
+u16 mdlGetMajorNum(MdlCtx *ctx);
+u16 mdlGetMinorNum(MdlCtx *ctx);
+u32 mdlGetColor(MdlCtx *ctx);
+void mdlSetEffectColor(MdlCtx *ctx, u32 value);
+void mdlSetEffectColorSub(MdlCtx *ctx, MdlResourceItem *item, s32 frame);
+void mdlSetEffectScaleSub(MdlCtx *ctx, MdlResourceItem *item, f32 amount);
+void mdlSetColor(MdlCtx *ctx, u32 value);
 
 /* Motion-record selection and lookup. */
-void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex);
-void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex);
-void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+void mdlSingleMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+void mdlLoopMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+void mdlSmoothSingleMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                        f32 blendDurationFrames);
-void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+void mdlSmoothLoopMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                           f32 blendDurationFrames);
-u8 mdlHasNode(MdlCtx *ctx, s32 searchId);
+u8 mdlHasMotionEx(MdlCtx *ctx, s32 searchId);
 
 /* The referenced halfword is promoted to a word-sized SDK result. */
-s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);
+s32 mdlGetNumOfCut(MdlCtx *ctx, s32 searchId);
 
 /* Count of following entity-slot packets in a grouped record. */
-u16 mdlGetRecordSlotCount(const MdlRecord *record);
+u16 mdlPibGetMotionCount(const MdlRecord *record);
 
 /* VU helpers transfer vectors through vf10 and basis rows through vf28-vf30. */
-void mdlLoadPrimaryVectorVU(MdlCtx *ctx);
-void mdlStorePrimaryVectorVU(MdlCtx *ctx);
-void mdlLoadRotationQuaternionVU(MdlCtx *ctx);
-void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
-void mdlLoadTertiaryVectorVU(MdlCtx *ctx);
-void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
+void mdlGetPosition(MdlCtx *ctx);
+void mdlSetPosition(MdlCtx *ctx);
+void mdlGetRotate(MdlCtx *ctx);
+void mdlSetRotate(MdlCtx *ctx);
+void mdlGetScale(MdlCtx *ctx);
+void mdlSetScale(MdlCtx *ctx);
 
 #endif /* MDL_H */

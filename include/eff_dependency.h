@@ -35,11 +35,11 @@ typedef char EffectDependencyState_node_at_0x2C[((u32)&((EffectDependencyState *
 typedef char EffectDependencyState_config_at_0x3C[((u32)&((EffectDependencyState *)0)->config == 0x3C) ? 1 : -1];
 typedef char EffectDependencyState_position_at_0x40[((u32)&((EffectDependencyState *)0)->sourcePosition == 0x40) ? 1 : -1];
 
-void dds3ResetWorldResourceState(EffWorldNode *object);
-void effUpdateConfiguredBillboard(EffWorldNode *object);
+void dds3EffectObjectBasicUnlinkObject(EffWorldNode *object);
+void dds3EffectObjectBasicCalcFldEx(EffWorldNode *object);
 
-void effObjReleaseStateDependencies(EffectDependencyState *state);
+void FreeEffectData(EffectDependencyState *state);
 
-ObjBase *effObjGetObjectHandle(EffWorldNode *object);
+ObjBase *dds3EffectObjectBasicGetControlWorkData(EffWorldNode *object);
 
 #endif

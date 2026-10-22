@@ -7,7 +7,7 @@
  * model flag the row requires. DDS1 and DDS2 share the layout. */
 typedef struct {
     s16 unk0;
-    s16 requiredModelFlag; /* Shared table halfword tested by mdlFlagTest. */
+    s16 requiredModelFlag; /* Shared table halfword tested by evtBitCheck. */
 } FldIndexPair;
 
 #endif

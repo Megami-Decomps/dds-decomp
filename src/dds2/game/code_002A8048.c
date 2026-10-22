@@ -13,10 +13,10 @@
 #include "sce_io.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
-extern void kwlnDrawEnableDc8(s32 duration);
-extern void sdfSoundInitIpuStream(void);
+extern void dds3Filter2Off(s32 duration);
+extern void sdfIpuInit(void);
 
-extern s32 scrReadIntParameter(s32);
+extern s32 scrGetIntPara(s32);
 
 extern u16 mnuMovieTaskState;
 
@@ -30,7 +30,7 @@ extern char mnuMovieViewerTaskName[];
 
 extern MnuMovieList mnuMovieList;
 
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 
 extern s8 sdfPadButtonStates[32];
@@ -46,60 +46,60 @@ extern s32 mnuMovieViewer(void);
 extern void mnuStartMovieDrawTaskForResource(const char *, SdfMovieDescriptor *);
 void mnuRequestIndexedMovieResource(s32 index);
 
-void mnuStopMovieDrawTask(void);
+void movieStop(void);
 
 s32 mnuCheckMovieDecoderStatus(void);
 
-s32 mnuSetFrameDivisor(void) {
+s32 movieMan_Process(void) {
     sdfAdvanceStreamPlayback(0x3c / mnuMovieTaskState);
     return 0;
 }
 
-void mnuCreateMovieManagerTask(void) {
-    sdfSoundInitIpuStream();
-    dds3StartProcess("movieMan", 0x385, 1, 0, (TaskUpdate)mnuSetFrameDivisor, 0, 0);
+void dds3StartMovieManager(void) {
+    sdfIpuInit();
+    dds3StartProcess("movieMan", 0x385, 1, 0, (TaskUpdate)movieMan_Process, 0, 0);
 }
 
 u32 mnuScriptRequestMovieByIndex(void) {
     s32 movieIndex;
 
-    movieIndex = scrReadIntParameter(0);
+    movieIndex = scrGetIntPara(0);
     mnuRequestIndexedMovieResource(movieIndex);
     mnuMovieShutdownCounter = 0;
     return 1;
 }
 
 u32 mnuScriptStopMovieAndResetDraw(void) {
-    mnuStopMovieDrawTask();
+    movieStop();
     mnuMovieShutdownCounter = 0;
-    kwlnDrawEnableDc8(0);
+    dds3Filter2Off(0);
     return 1;
 }
 
 extern s8 D_0037F530[];
 extern s32 scrCommandIsProcessControlFlagClear(void);
-extern void kwlnDrawSetDc8Second(u32);
-extern void kwlnDrawSetDc8First(u32);
-extern void kwlnDrawSetupDc8(s32);
+extern void dds3SetFilter2Para(u32);
+extern void dds3SetFilter2RGBA(u32);
+extern void dds3Filter2On(s32);
 extern s32 itfPanelReleaseHold(void);
 
 s32 mnuUpdateMovieDrawShutdownCountdown(void) {
     if (mnuMovieShutdownCounter == 0 && scrCommandIsProcessControlFlagClear() == 1 && D_0037F530[0] < 0) {
         mnuMovieShutdownCounter = 1;
-        kwlnDrawSetDc8Second(0x44);
-        kwlnDrawSetDc8First(0x80000000);
-        kwlnDrawSetupDc8(0x1E);
+        dds3SetFilter2Para(0x44);
+        dds3SetFilter2RGBA(0x80000000);
+        dds3Filter2On(0x1E);
         itfPanelReleaseHold();
     }
     if (mnuMovieShutdownCounter > 0) {
         if (mnuMovieShutdownCounter == 0x1E) {
-            mnuStopMovieDrawTask();
-            scrSetIntegerReturnValue(0);
+            movieStop();
+            scrSetIntReturnValue(0);
             return 1;
         }
         mnuMovieShutdownCounter = mnuMovieShutdownCounter + 1;
     }
-    scrSetIntegerReturnValue(mnuCheckMovieDecoderStatus() == 0);
+    scrSetIntReturnValue(mnuCheckMovieDecoderStatus() == 0);
     return 1;
 }
 
@@ -115,7 +115,7 @@ s32 mnuCanDrawMovie(void) {
     return 0;
 }
 
-void mnuClearMovieList(void) {
+void movieViewerFree(void) {
     MnuMovieListNode *node = mnuMovieList.head;
     if (node != NULL) {
         do {
@@ -132,7 +132,7 @@ void mnuClearMovieList(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A8048", mnuBuildMovieViewerList);
 
-MnuMovieListNode *mnuGetMovieListNodeAtOffset(void) {
+MnuMovieListNode *movieViewerStep(void) {
     MnuMovieListNode *entry = mnuMovieList.head;
     s32 remaining = mnuMovieList.cursor;
     if (entry != 0 && remaining > 0) {
@@ -150,7 +150,7 @@ INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF0);
 
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF8);
 
-void mnuDrawMovieList(void) {
+void movieDebugDrawInfo(void) {
     MnuMovieListNode *node;
     SdfListHead *packets;
     s32 selected;
@@ -160,7 +160,7 @@ void mnuDrawMovieList(void) {
         return;
     }
     packets = mnuMovieList.packets;
-    sdfAppendPacket(packets, (u32)sdfCreateBorderedRectanglePacket(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
+    sdfDrawTagLink(packets, (u32)dds3PrimFrameRect(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
     selected = mnuMovieList.cursor;
     i = mnuMovieList.top;
     node = mnuMovieList.head;
@@ -169,24 +169,24 @@ void mnuDrawMovieList(void) {
         node = node->next;
     }
     for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
     }
     if (mnuMovieList.top != 0) {
-        sdfQueueFlatTriangle(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
+        sdfPrimLinkF3(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
     }
     if (node != NULL) {
-        sdfQueueFlatTriangle(packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
+        sdfPrimLinkF3(packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
     }
 }
 
 
 
-void mnuDrawMovieProgressCounter(void) {
+void MovieViewerDrawFrameInfo(void) {
     SdfListHead *list;
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = mnuMovieList.packets;
-        sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
+        sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
     }
 }
 
@@ -223,13 +223,13 @@ s32 mnuMovieViewer(void) {
             }
         }
     } else if (kwlnTaskPadButtonStates[0x21] < 0 || kwlnTaskPadButtonStates[0x28] < 0 || kwlnTaskPadButtonStates[0x2A] < 0) {
-        node = mnuGetMovieListNodeAtOffset();
+        node = movieViewerStep();
         if (node != NULL) {
-            mnuStopMovieDrawTask();
+            movieStop();
             mnuStartMovieDrawTaskForResource(node->path, &mnuMovieViewerDrawDescriptor);
             mnuMovieList.playing = 1;
         } else {
-            mnuStopMovieDrawTask();
+            movieStop();
             mnuRequestIndexedMovieResource(0x30);
         }
     } else if (((u8)kwlnTaskPadButtonStates[0x27] & 2) != 0 && mnuMovieList.cursor < mnuMovieList.total - 1) {
@@ -246,42 +246,42 @@ s32 mnuMovieViewer(void) {
     }
 
     mnuMovieList.packets = (SdfListHead *)sdfPrimAllocDrawTag(0);
-    mnuDrawMovieList();
-    mnuDrawMovieProgressCounter();
+    movieDebugDrawInfo();
+    MovieViewerDrawFrameInfo();
     D_003805A8.append(&D_003805A8, mnuMovieList.packets);
     D_00438FF0 = D_00438A90[0];
     return 0;
 }
 
-void mnuCreateMovieViewerTask(void) {
+void InitMovieViewer(void) {
     mnuBuildMovieViewerList();
     mnuMovieList.task = dds3StartProcess(mnuMovieViewerTaskName, 0x2b02, 1, 0,
                                        (TaskUpdate)mnuMovieViewer, 0, 0);
 }
 
-void mnuDestroyMovieViewerTask(void) {
+void FinishMovieViewer(void) {
     KwlnTask *movieTask = dds3SearchProcessName(mnuMovieViewerTaskName);
     if (movieTask != NULL) {
         dds3KillProcess(movieTask, 0);
         mnuMovieList.task = 0;
-        mnuStopMovieDrawTask();
+        movieStop();
     }
-    mnuClearMovieList();
+    movieViewerFree();
 }
 
-void mnuMarkMovieDrawValuesPending(void) {
+void movieViewerSetFlags(void) {
     mnuMovieDrawSources.wordPending = 1;
     mnuMovieDrawSources.blockPending = 1;
 }
 
-void mnuBindMovieDrawValueSources(void) {
+void movieViewerInitRegs(void) {
     mnuMovieDrawSources.wordSource = 0x10002010;
     mnuMovieDrawSources.blockSource = (u32)&mnuMovieDrawContext;
-    mnuMarkMovieDrawValuesPending();
+    movieViewerSetFlags();
 }
 
 /* Copy a source word and a 0x40-byte block when their pending flags are set. */
-void mnuCommitPendingMovieDrawValues(void) {
+void movieViewerDrawInfo(void) {
     if (mnuMovieDrawSources.wordPending != 0) {
         mnuMovieDrawSources.word = *(s32 *)mnuMovieDrawSources.wordSource;
     }
@@ -290,7 +290,7 @@ void mnuCommitPendingMovieDrawValues(void) {
     }
 }
 
-s32 mnuUpdateIpuRegisterViewer(void) {
+s32 movieViewerDebugDraw(void) {
     SdfListHead *packets;
     s32 n;
     s32 i;
@@ -300,12 +300,12 @@ s32 mnuUpdateIpuRegisterViewer(void) {
 
     if (mnuMovieDrawSources.started == 0) {
         mnuMovieDrawSources.started = 1;
-        mnuBindMovieDrawValueSources();
+        movieViewerInitRegs();
     }
     if (sdfPadButtonStates[0x11] != 0) {
-        mnuMarkMovieDrawValuesPending();
+        movieViewerSetFlags();
     } else if (sdfPadButtonStates[0x12] != 0) {
-        mnuBindMovieDrawValueSources();
+        movieViewerInitRegs();
     } else if (sdfPadButtonStates[0x15] & 2) {
         mnuMovieDrawSources.cursor++;
         if (mnuMovieDrawSources.cursor == 0x10) {
@@ -339,26 +339,26 @@ s32 mnuUpdateIpuRegisterViewer(void) {
             }
         }
     }
-    mnuCommitPendingMovieDrawValues();
-    packets = sdfCreateResetPacketList();
-    sdfAppendPacket(packets, (u32)sdfCreateBorderedRectanglePacket(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
-    sdfCreatePacketA(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
+    movieViewerDrawInfo();
+    packets = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(packets, (u32)dds3PrimFrameRect(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
+    sdfPrimLinkRect(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
+    sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
     if (mnuMovieDrawSources.wordPending != 0) {
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.word));
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.word));
     } else {
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
     }
     n = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, "%08X", mnuMovieDrawSources.blockSource + n));
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, y, 0xFF0080, 0, "%08X", mnuMovieDrawSources.blockSource + n));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, n++) {
             if (mnuMovieDrawSources.blockPending != 0) {
-                sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "%02X", mnuMovieDrawSources.block[n]));
+                sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, "%02X", mnuMovieDrawSources.block[n]));
             } else {
-                sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "**"));
+                sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, "**"));
             }
         }
     }

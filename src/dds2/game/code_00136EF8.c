@@ -35,7 +35,7 @@
 /* Declared before first use (were implicit int). */
 extern void fldDrawCameraColorScrollingGradient(void);
 
-extern void evtSetDrawSurfaceIndex();
+extern void eglSetOt();
 
 extern void evtSubmitPrimaryGsTest();
 
@@ -72,13 +72,13 @@ extern s32 D_00436188;
 
 extern s32 D_0043617C;
 
-extern f32 fldDotVector(f32 *, f32 *);
+extern f32 fldVecDot(f32 *, f32 *);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldDrawCameraColorScrollingGradient);
 
 void fldInitializeCameraColorResource(void) {
-    fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
-    fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
+    fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
+    fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldRainTextureResource);
@@ -137,7 +137,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
-void fldHitAlloc(void) {
+void fldAllocPlaneTable(void) {
     struct SdfMemBlock *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
     void *storage;
 
@@ -153,7 +153,7 @@ void fldHitAlloc(void) {
 }
 
 /* Release both retained resources and clear the usable buffer addresses. */
-void fldHitFree(void) {
+void fldFreeMatterTable(void) {
     sdfMemUnlock((struct SdfMemBlock *)fldValueRecordResource);
     sdfMemFreeDelayedDirect((struct SdfMemBlock *)fldValueRecordResource);
     fldValueRecords = NULL;
@@ -163,19 +163,19 @@ void fldHitFree(void) {
 }
 
 /* Dot product of XYZ only; any fourth vector component is ignored. */
-float fldDotVector(float *left, float *right) {
+float fldVecDot(float *left, float *right) {
     return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
 /* Return the Euclidean XYZ length without normalizing the input vector. */
-f32 fldCalculateVectorLength(const f32 *vector) {
+f32 MATH_VectorLength(const f32 *vector) {
     return fsqrtf(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
 /* Build a normalized plane from three vertices spaced four floats apart.
  * Snap near-zero normal components before deriving D from the third vertex.
  * Degenerate triangles retain the native divide-by-zero behavior. */
-void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant) {
+void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant) {
     f32 firstPoint[4];
     f32 secondPoint[4];
     f32 thirdPoint[4];
@@ -210,7 +210,7 @@ void fldCalcTrianglePlane(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normal
 }
 
 /* Return the first matching record's world node; NULL also denotes a missing ID. */
-struct EffWorldNode *fldHitGetMatter(s32 id) {
+struct EffWorldNode *fldFindMatterIndex(s32 id) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
@@ -227,7 +227,7 @@ struct EffWorldNode *fldHitGetMatter(s32 id) {
 }
 
 /* Update every matching ID, including duplicates; leave other records intact. */
-void fldHitLinkMatter(s32 id, struct EffWorldNode *worldNode) {
+void fldFindMatterIndexFrom(s32 id, struct EffWorldNode *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
@@ -249,11 +249,11 @@ void fldClrCollision(void) {
     D_00436188 = 0;
     D_0043617C = 0;
     if (fldValueRecords != NULL) {
-        fldHitFree();
+        fldFreeMatterTable();
     }
 }
 
-void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
+void fldMakePlane(FldCollisionDescriptor *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
@@ -285,7 +285,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
     s32 i;
     s32 component;
     if (fldValueRecords == NULL) {
-        fldHitAlloc();
+        fldAllocPlaneTable();
     }
     for (pass = 0; pass < 5; pass++) {
         s32 faceCount;
@@ -331,7 +331,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         copiedVertices[i][2] = vertices[i][2];
                     }
                 }
-                fldCalcTrianglePlane(copiedVertices[0], &capturedPlane[0],
+                fldMakeEveHitPlanes(copiedVertices[0], &capturedPlane[0],
                                      &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                 for (i = 0; i < 3; i++) {
                     record->normal[i] = capturedPlane[i];
@@ -343,7 +343,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     }
                     record->vertices[i][3] = 1.0f;
                 }
-                record->planeConstant = fldDotVector(record->normal, record->vertices[0]);
+                record->planeConstant = fldVecDot(record->normal, record->vertices[0]);
                 absX = record->normal[0];
                 absX = ffabsf(absX);
                 absY = ffabsf(record->normal[1]);
@@ -406,17 +406,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     planeY = &record->plane[0][1];
                     planeZ = &record->plane[0][2];
                     limit0 = &record->limit[0];
-                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
                     *planeY = capturedPlane[1];
                     *planeZ = capturedPlane[2];
-                    *limit0 = fldDotVector(planeX, edgeTriangle[0]);
-                    if (fldDotVector(center, planeX) - *limit0 < 0.0f) {
+                    *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    if (fldVecDot(center, planeX) - *limit0 < 0.0f) {
                         *planeX = -capturedPlane[0];
                         *planeY = -capturedPlane[1];
                         *planeZ = -capturedPlane[2];
-                        *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                        *limit0 = fldVecDot(planeX, edgeTriangle[0]);
                     }
                     edgeTriangle[0][0] = 0.0f;
                     edgeTriangle[0][1] = vertices[1][1];
@@ -431,17 +431,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     planeY = &record->plane[1][1];
                     planeZ = &record->plane[1][2];
                     limit1 = &record->limit[1];
-                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
                     *planeY = capturedPlane[1];
                     *planeZ = capturedPlane[2];
-                    *limit1 = fldDotVector(planeX, edgeTriangle[1]);
-                    if (fldDotVector(center, planeX) - *limit1 < 0.0f) {
+                    *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    if (fldVecDot(center, planeX) - *limit1 < 0.0f) {
                         *planeX = -capturedPlane[0];
                         *planeY = -capturedPlane[1];
                         *planeZ = -capturedPlane[2];
-                        *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                        *limit1 = fldVecDot(planeX, edgeTriangle[1]);
                     }
                     if (record->count == 3) {
                         edgeTriangle[0][0] = 0.0f;
@@ -457,17 +457,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[2][1];
                         planeZ = &record->plane[2][2];
                         limit2 = &record->limit[2];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                     } else {
                         edgeTriangle[0][0] = 0.0f;
@@ -483,17 +483,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[2][1];
                         planeZ = &record->plane[2][2];
                         limit2 = &record->limit[2];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                         edgeTriangle[0][0] = 0.0f;
                         edgeTriangle[0][1] = vertices[3][1];
@@ -508,17 +508,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[3][1];
                         planeZ = &record->plane[3][2];
                         limit3 = &record->limit[3];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit3 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit3 < 0.0f) {
+                        *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit3 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit3 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                     }
                 }
@@ -564,17 +564,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     planeY = &record->plane[0][1];
                     planeZ = &record->plane[0][2];
                     limit0 = &record->limit[0];
-                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
                     *planeY = capturedPlane[1];
                     *planeZ = capturedPlane[2];
-                    *limit0 = fldDotVector(planeX, edgeTriangle[0]);
-                    if (fldDotVector(center, planeX) - *limit0 < 0.0f) {
+                    *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    if (fldVecDot(center, planeX) - *limit0 < 0.0f) {
                         *planeX = -capturedPlane[0];
                         *planeY = -capturedPlane[1];
                         *planeZ = -capturedPlane[2];
-                        *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                        *limit0 = fldVecDot(planeX, edgeTriangle[0]);
                     }
                     edgeTriangle[0][0] = vertices[1][0];
                     edgeTriangle[0][1] = 0.0f;
@@ -589,17 +589,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     planeY = &record->plane[1][1];
                     planeZ = &record->plane[1][2];
                     limit1 = &record->limit[1];
-                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
                     *planeY = capturedPlane[1];
                     *planeZ = capturedPlane[2];
-                    *limit1 = fldDotVector(planeX, edgeTriangle[1]);
-                    if (fldDotVector(center, planeX) - *limit1 < 0.0f) {
+                    *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    if (fldVecDot(center, planeX) - *limit1 < 0.0f) {
                         *planeX = -capturedPlane[0];
                         *planeY = -capturedPlane[1];
                         *planeZ = -capturedPlane[2];
-                        *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                        *limit1 = fldVecDot(planeX, edgeTriangle[1]);
                     }
                     if (record->count == 3) {
                         edgeTriangle[0][0] = vertices[2][0];
@@ -615,17 +615,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[2][1];
                         planeZ = &record->plane[2][2];
                         limit2 = &record->limit[2];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                     } else {
                         edgeTriangle[0][0] = vertices[2][0];
@@ -641,17 +641,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[2][1];
                         planeZ = &record->plane[2][2];
                         limit2 = &record->limit[2];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                         edgeTriangle[0][0] = vertices[3][0];
                         edgeTriangle[0][1] = 0.0f;
@@ -666,17 +666,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[3][1];
                         planeZ = &record->plane[3][2];
                         limit3 = &record->limit[3];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit3 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit3 < 0.0f) {
+                        *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit3 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit3 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                     }
                 }
@@ -722,17 +722,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     planeY = &record->plane[0][1];
                     planeZ = &record->plane[0][2];
                     limit0 = &record->limit[0];
-                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
                     *planeY = capturedPlane[1];
                     *planeZ = capturedPlane[2];
-                    *limit0 = fldDotVector(planeX, edgeTriangle[0]);
-                    if (fldDotVector(center, planeX) - *limit0 < 0.0f) {
+                    *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    if (fldVecDot(center, planeX) - *limit0 < 0.0f) {
                         *planeX = -capturedPlane[0];
                         *planeY = -capturedPlane[1];
                         *planeZ = -capturedPlane[2];
-                        *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                        *limit0 = fldVecDot(planeX, edgeTriangle[0]);
                     }
                     edgeTriangle[0][0] = vertices[1][0];
                     edgeTriangle[0][1] = vertices[1][1];
@@ -747,17 +747,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                     planeY = &record->plane[1][1];
                     planeZ = &record->plane[1][2];
                     limit1 = &record->limit[1];
-                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
                     *planeY = capturedPlane[1];
                     *planeZ = capturedPlane[2];
-                    *limit1 = fldDotVector(planeX, edgeTriangle[1]);
-                    if (fldDotVector(center, planeX) - *limit1 < 0.0f) {
+                    *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    if (fldVecDot(center, planeX) - *limit1 < 0.0f) {
                         *planeX = -capturedPlane[0];
                         *planeY = -capturedPlane[1];
                         *planeZ = -capturedPlane[2];
-                        *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                        *limit1 = fldVecDot(planeX, edgeTriangle[1]);
                     }
                     if (record->count == 3) {
                         edgeTriangle[0][0] = vertices[2][0];
@@ -773,17 +773,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[2][1];
                         planeZ = &record->plane[2][2];
                         limit2 = &record->limit[2];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                     } else {
                         edgeTriangle[0][0] = vertices[2][0];
@@ -799,17 +799,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[2][1];
                         planeZ = &record->plane[2][2];
                         limit2 = &record->limit[2];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                         edgeTriangle[0][0] = vertices[3][0];
                         edgeTriangle[0][1] = vertices[3][1];
@@ -824,17 +824,17 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
                         planeY = &record->plane[3][1];
                         planeZ = &record->plane[3][2];
                         limit3 = &record->limit[3];
-                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
                         *planeY = capturedPlane[1];
                         *planeZ = capturedPlane[2];
-                        *limit3 = fldDotVector(planeX, edgeTriangle[2]);
-                        if (fldDotVector(center, planeX) - *limit3 < 0.0f) {
+                        *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit3 < 0.0f) {
                             *planeX = -capturedPlane[0];
                             *planeY = -capturedPlane[1];
                             *planeZ = -capturedPlane[2];
-                            *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                            *limit3 = fldVecDot(planeX, edgeTriangle[2]);
                         }
                     }
                 }
@@ -853,7 +853,7 @@ void fldAddCollisionPoly(FldCollisionDescriptor *geometry, f32 *translation,
     D_00436188++;
 }
 
-s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, FldValueRecord *zone) {
+s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, FldValueRecord *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -882,7 +882,7 @@ s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margi
         planar[1] = pos[1];
     }
     for (planeIndex = 0; planeIndex < count; planeIndex++) {
-        dist = fldDotVector(probe, zone->plane[planeIndex]) - zone->limit[planeIndex];
+        dist = fldVecDot(probe, zone->plane[planeIndex]) - zone->limit[planeIndex];
         slack = dist + margin;
         if (slack < 0.0f) {
             *out = -1.0f;
@@ -974,11 +974,11 @@ void fldHitChkUnitElvOnly(f32 *input) {
         } else {
             relative = 0;
         }
-        distance = fldDotVector(position, fldValueRecords[index].normal);
+        distance = fldVecDot(position, fldValueRecords[index].normal);
         distance -= fldValueRecords[index].planeConstant;
         if (ffabsf(distance) < margin) {
             record = &fldValueRecords[index];
-            fldClassifyPositionInZoneWithMargin(&clearance, record->mode, record->count, 45.0f, position, record);
+            HitPositionInside2(&clearance, record->mode, record->count, 45.0f, position, record);
             inside = clearance < 0.0f ? 0 : 1;
             if (inside == 1) {
                 if (fldValueRecords[index].worldNode != 0) {
@@ -1106,7 +1106,7 @@ void fldHitChkUnitDamage(f32 *position) {
     distanceVector[1] = point[1] - reference[1];
     distanceVector[2] = point[2] - reference[2];
 
-    if (fldCalculateVectorLength(distanceVector) < 0.1f) {
+    if (MATH_VectorLength(distanceVector) < 0.1f) {
         position[0] = reference[0];
         position[1] = reference[1];
         position[2] = reference[2];
@@ -1157,7 +1157,7 @@ void fldHitChkUnitDamage(f32 *position) {
                     reference[2] = savedReference[2] - node->inner->position[2];
                 }
 
-                planeDistance = fldDotVector(point, fldValueRecords[recordIndex].normal);
+                planeDistance = fldVecDot(point, fldValueRecords[recordIndex].normal);
                 {
                     u32 faceAttributes = fldValueRecords[recordIndex].face->attributes;
                     planeDistance = ffabsf(planeDistance - fldValueRecords[recordIndex].planeConstant);
@@ -1169,7 +1169,7 @@ void fldHitChkUnitDamage(f32 *position) {
                         if (!(planeDistance < margin)) {
                             continue;
                         }
-                        fldClassifyPositionInZoneWithMargin(
+                        HitPositionInside2(
                             &classifiedMargin,
                             fldValueRecords[recordIndex].mode,
                             fldValueRecords[recordIndex].count,
@@ -1210,7 +1210,7 @@ void func_0013AA88(void) {
 /* Project away the selected axis and reject points outside expanded bounds.
  * Return the last negative plane's margin-adjusted distance, not a minimum;
  * no negative plane leaves margin unchanged. Reject results below 0.001. */
-f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *position, FldValueRecord *zone) {
+f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, f32 *position, FldValueRecord *zone) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
     f32 clearance = margin;
@@ -1238,7 +1238,7 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
         planarPosition[1] = position[1];
     }
     for (planeIndex = 0; planeIndex < planeCount; planeIndex++) {
-        planeDistance = fldDotVector(projectedPosition, zone->plane[planeIndex]) - zone->limit[planeIndex];
+        planeDistance = fldVecDot(projectedPosition, zone->plane[planeIndex]) - zone->limit[planeIndex];
         marginDistance = planeDistance + margin;
         if (marginDistance < 0.0f || planarPosition[0] < zone->bound[0] - margin || planarPosition[1] < zone->bound[1] - margin ||
             zone->bound[2] + margin < planarPosition[0] || zone->bound[3] + margin < planarPosition[1]) {
@@ -1256,7 +1256,7 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
 
 extern void fldToggleWorldNodeState(s64 enabled);
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+extern void dds3MatterObjectBasicSetAlpMode(EffWorldNode *object, u32 value);
 
 s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
@@ -1278,7 +1278,7 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     s32 index;
 
     found = -1;
-    secondary = dds3GetWorldSecondaryObject();
+    secondary = dds3GetControlScene();
     if (!((u32)(fldAreaState.area - 200) < 300)) {
         fldToggleWorldNodeState(0);
     }
@@ -1319,9 +1319,9 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
         probeEnd[0] = target[0];
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
-        startDistance = fldDotVector(probeStart, fldValueRecords[index].normal) -
+        startDistance = fldVecDot(probeStart, fldValueRecords[index].normal) -
                         fldValueRecords[index].planeConstant;
-        endDistance = fldDotVector(probeEnd, fldValueRecords[index].normal) -
+        endDistance = fldVecDot(probeEnd, fldValueRecords[index].normal) -
                       fldValueRecords[index].planeConstant;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
@@ -1337,12 +1337,12 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = fldGetPositionZoneClearance(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
+            clearance = HitPositionInside3(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
             if (0.0f <= clearance) {
                 if (fldValueRecords[index].face->attributes & 0x400) {
                     entry = &((FldStopEntry *)fldValueRecords[index].stopData)
                                 [fldValueRecords[index].face->stop];
-                    dds3SetObjectPayloadWord8(dds3FindIndexedObjectChainNodeByName(secondary, 6, entry->name), 4);
+                    dds3MatterObjectBasicSetAlpMode(dds3SceneBasicSearchNameAndType(secondary, 6, entry->name), 4);
                 } else {
                 found = index;
                 ratio = (startDistance + clearance) / total;
@@ -1395,7 +1395,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
     s32 index;
 
     found = -1;
-    dds3GetWorldSecondaryObject();
+    dds3GetControlScene();
     origin[0] = start[0];
     origin[1] = start[1];
     origin[2] = start[2];
@@ -1439,9 +1439,9 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
         probeEnd[0] = target[0];
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
-        startDistance = fldDotVector(probeStart, fldValueRecords[index].normal) -
+        startDistance = fldVecDot(probeStart, fldValueRecords[index].normal) -
                         fldValueRecords[index].planeConstant;
-        endDistance = fldDotVector(probeEnd, fldValueRecords[index].normal) -
+        endDistance = fldVecDot(probeEnd, fldValueRecords[index].normal) -
                       fldValueRecords[index].planeConstant;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
@@ -1457,7 +1457,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = fldGetPositionZoneClearance(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
+            clearance = HitPositionInside3(fldValueRecords[index].mode, fldValueRecords[index].count, 2.0f, probeStart, &fldValueRecords[index]);
             if (0.0f <= clearance) {
                 found = index;
                 ratio = (startDistance + clearance) / total;
@@ -1492,7 +1492,7 @@ s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void fldHitProgramAdd(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;
@@ -1604,8 +1604,8 @@ void fldHitProgramAdd(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].encounter = 0;
     ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[0] = 0;
     ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[1] = 0;
-    fldAddCollisionPoly(&((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry,
-                  origin, dds3AdvanceWorldCounter(), 0, id);
+    fldMakePlane(&((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry,
+                  origin, dds3AllocObjectId(), 0, id);
     D_0043617C++;
 }
 

@@ -173,7 +173,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
 /* Blend the flag-selected packed color with the caller's previous color.
  * DDS1 has two color choices; DDS2 additionally checks flag four. */
 s32 mnuDispatchByFlag(s32 previousColor, MenuListNode *entry) {
-    return uiBlendColors((entry->flags48 & 1) ? MNU_ENTRY_MARKED_COLOR : MNU_ENTRY_DEFAULT_COLOR,
+    return fclBlendColor((entry->flags48 & 1) ? MNU_ENTRY_MARKED_COLOR : MNU_ENTRY_DEFAULT_COLOR,
                          previousColor, entry->animationTimer);
 }
 
@@ -209,7 +209,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
         s32 chainFlag = 0;
 
         color = mnuDispatchByFlag(color, node);
-        color = uiBlendColors(color, color & 0xFFFFFF00, fadeScale);
+        color = fclBlendColor(color, color & 0xFFFFFF00, fadeScale);
         if ((node == list->cursor && (list->stateFlags & 8) == 0) ||
             (node->flags48 & 2) != 0) {
             chainFlag = 4;
@@ -2297,7 +2297,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
 
     value = mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex]);
     alpha = page->drawAlpha;
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
     x += page->slideOffset * 16;
     effDrawSpriteWithCornerFade(x, y, z, alpha, 0, page->primarySprite, 0, surface);
     do {
@@ -2353,9 +2353,9 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 s
 
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
     glyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
-    frFontSetChildColors(glyph, color);
-    width = frFontMeasureGlyphChain(glyph) + 8;
-    frFontSetGlyphPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
+    frSetFontColor(glyph, color);
+    width = frGetStrWidth(glyph) + 8;
+    frSetDrawPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
     frFontDrawGlyphChain(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
 }
@@ -2368,7 +2368,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 color;
     FrFontGlyph *glyph;
 
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
         if (prfResolveMantraNameOrFallback(code & 0xFFFF, &outValue) != 0) {
@@ -2396,7 +2396,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
     if (slot->iconBundle != NULL) {
         mnuDrawAndUpdateFadingSprites(x, y, depth, slot->kind,
             slot->iconBundle, surface);
-        color = uiBlendColors(0xFFF06480, 0xFFF06400,
+        color = fclBlendColor(0xFFF06480, 0xFFF06400,
             slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
@@ -2481,7 +2481,7 @@ void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     s32 ctx = ((MenuBlendOwner *)dst)->colorState;
 
     for (i = 0; i < 4; i++) {
-        s32 result = uiBlendColors(((MenuBlendColors *)ctx)->input[i],
+        s32 result = fclBlendColor(((MenuBlendColors *)ctx)->input[i],
                                    ((MenuBlendColors *)((MenuBlendOwner *)src)->colorState)->input[i],
                                    (s32)amount / 2 + 0x80);
         s32 current = ((MenuBlendOwner *)dst)->colorState;

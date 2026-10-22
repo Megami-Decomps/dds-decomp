@@ -6,9 +6,9 @@
 /* These title-specific wrappers forward an opaque stage-task owner and its
  * handled/not-handled result. */
 #ifdef VERSION_DDS1
-s32 btlStageTaskCleanupCallback(void *request);
+s32 pacFileHandleFree_(void *request);
 #else
-s32 btlStageTaskCleanupCallback(void *request);
+s32 pacFileHandleFree_(void *request);
 #endif
 
 #endif /* BTL_STAGE_TASK_CLEANUP_H */

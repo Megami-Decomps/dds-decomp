@@ -6,7 +6,7 @@
 #include "sdf_vu_blend_node.h"
 
 /* The VU packet builders' work block, filled by
- * sdfInitializeVuWorkParameters from a command's parameter words. */
+ * corePktInitCb from a command's parameter words. */
 typedef struct {
     f32 matrix[4][4];      /* 0x00 */
     u16 param0;            /* 0x40 */

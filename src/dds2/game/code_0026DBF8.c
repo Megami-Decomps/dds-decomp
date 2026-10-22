@@ -315,13 +315,13 @@ struct SdfMemBlock;
 s32 mnuGetActiveMantraModelFlagState(void) {
     s32 result = 0;
 
-    if (mdlFlagTest(0x920)) {
+    if (evtBitCheck(0x920)) {
         result = 1;
     }
-    if (mdlFlagTest(0x921)) {
+    if (evtBitCheck(0x921)) {
         result = 2;
     }
-    if (mdlFlagTest(0x922)) {
+    if (evtBitCheck(0x922)) {
         result = 3;
     }
     return result;
@@ -398,7 +398,7 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     if (datGameState->header.currency != state->shown) {
         s32 steps = 20;
 
-        sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
+        p2sdPlaySE(0x13, 0x7F, 0x3F);
         state->step++;
         sprintf(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
@@ -544,7 +544,7 @@ void mnuReleaseMiddleMantraSpriteSlots(void) {
 
 void mnuStartMantraSpriteLoad(void) {
     if (mnuMantraSpriteSlots[4] == 0) {
-        u32 request = (u32)fileQueuePlainDispatchRequest(D_004250B0);
+        u32 request = (u32)pacLoad(D_004250B0);
         dds3StartProcess(mnuMantraSpriteTaskName, 0x402, 1, 1,
                        mnuLoadMantraSpriteTask, NULL, request);
     }
@@ -570,7 +570,7 @@ void mnuReleaseMantraSpriteSlots(void) {
 
 s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
     FilePacRequest *request = (FilePacRequest *)dds3GetProcessData(task);
-    s32 result = fileRequestIsReady((struct FileRequest *)request);
+    s32 result = pacCheckEnd((struct FileRequest *)request);
     if (result != 0) {
         PacWork *entry = request->packet.queueHead;
         s32 i;
@@ -580,7 +580,7 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
                 sdfMemFreeDirect((struct SdfMemBlock *)(u32)((u32)entry->resourceHandle));
             }
         }
-        btlStageTaskCleanupCallback(request);
+        pacFileHandleFree_(request);
         result = -1;
     }
     return result;
@@ -717,7 +717,7 @@ s32 mnuDrawMantraSineFade(u32 x, u32 y, u32 depth, s32 frame, s32 amount, u32 dr
     f32 wave = (f32)frame / 60.0f;
     s32 shown;
 
-    wave = sdfSinPoly(wave * 3.14159265f);
+    wave = sdfSin(wave * 3.14159265f);
     mnuDrawMantraSprite(x, y, depth, amount, 0x25, 0, drawArg);
     shown = (f32)amount * (wave * 0.5f + 0.5f);
     mnuDrawMantraSprite(0, 0, depth, shown, 0x26, 0, drawArg);
@@ -916,7 +916,7 @@ s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *
         if (state->unk2C != 0) {
             state->unk2C--;
             fadeWeight = (f32)state->unk2C / 30.0f;
-            fadeWeight = sdfSinPoly(fadeWeight * 6.2831852f + (-1.5707963f));
+            fadeWeight = sdfSin(fadeWeight * 6.2831852f + (-1.5707963f));
             fadeWeight = (fadeWeight + 1.0f) * 0.5f;
         }
         mnuDrawMantraCostIcon(x, y, depth, state->entries[state->index], amount, drawArg);
@@ -958,7 +958,7 @@ void func_0026FAC8(void) {
 MantraDrawPool *mnuCreateMantraDrawPool(u32 itemCount) {
     u32 poolBytes = itemCount * MNU_MANTRA_DRAW_ITEM_BYTES + MNU_MANTRA_DRAW_POOL_HEADER_BYTES;
     struct SdfMemBlock *allocation = sdfMemAllocDirect((s32)poolBytes);
-    MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(
+    MantraDrawPool *pool = (MantraDrawPool *)sdfMemGetPtr(
         allocation);
     memset(pool, 0, poolBytes);
     pool->allocation = allocation;
@@ -1330,7 +1330,7 @@ s32 mnuDrawMantraBackgroundPulse(s32 unused, MantraDrawItem *drawItem) {
     value = state->value;
     pulse = (f32)(s16)state->clock / 120.0f;
     alpha = (s32)(value * 128.0f);
-    pulse = (sdfSinPoly(pulse * 6.2831852f + (-1.5707963f)) + 1.0f) * 0.5f;
+    pulse = (sdfSin(pulse * 6.2831852f + (-1.5707963f)) + 1.0f) * 0.5f;
 
     mnuDrawMantraSprite(0, 0, 0, alpha, 0x58, 0, 0x4A);
     mnuDrawMantraSprite(0, 0, 0, (s32)((f32)alpha * pulse * 0.5f), 0x5A, 0, 0x4A);
@@ -1472,7 +1472,7 @@ s32 mnuUpdateMantraBackgroundMaskFade(s32 unused, s32 item) {
 s32 mnuDrawMantraBackgroundMaskPulse(s32 unused, s32 item) {
     MantraPulseFade *data = (MantraPulseFade *)((MantraDrawItem *)item)->data;
     s32 amount = data->scale * 128.0f;
-    f32 wave = sdfSinPoly((f32)(s16)data->cycle / 120.0f * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f));
+    f32 wave = sdfSin((f32)(s16)data->cycle / 120.0f * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f));
 
     mnuDrawMantraPulseFrame(amount, 0x53, (wave + 1.0f) * 0.5f);
     return 0;
@@ -1689,7 +1689,7 @@ s32 mnuDrawMantraLimitLine(s32 unused, MantraDrawItem *item) {
     s32 x;
     s32 y;
 
-    pulse = (sdfSinPoly(pulse * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+    pulse = (sdfSin(pulse * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
     for (i = 0; i < 2; i++) {
         mnuDrawMantraSprite(fade->x + framePositions[i][0], fade->y + framePositions[i][1], 0, alpha, frameSprites[i], 0, 0x4A);
         mnuDrawMantraSprite(fade->x + framePositions[i + 2][0], fade->y + framePositions[i][1], 0, alpha, frameSprites[i], 0x10000, 0x4A);
@@ -2053,8 +2053,8 @@ s32 mnuDrawMantraTitle(s32 unused, MantraDrawItem *item) {
     secondIndex = pulseClock / 12;
     secondPulse = (f32)(pulseClock - secondIndex * 12) / 12.0f;
     blend = 0.0f;
-    firstPulse = (sdfSinPoly(firstPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
-    secondPulse = (sdfSinPoly(secondPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
+    firstPulse = (sdfSin(firstPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
+    secondPulse = (sdfSin(secondPulse * 6.2831852f + -1.5707963f) + 1.0f) * 0.5f;
     if (blink->unk2 != 0) {
         mode = blink->unk2;
     } else if ((s16)blink->variant != 0) {
@@ -2562,7 +2562,7 @@ s32 mnuDrawMantraGauge(s32 unused, s32 item) {
             gauge->pulseClock = 0;
         }
         wave = (s16)gauge->pulseClock / 120.0f;
-        wave = (sdfSinPoly(wave * (3.14159265f * 2.0f) + -3.14159265f) + 1.0f) * 0.5f;
+        wave = (sdfSin(wave * (3.14159265f * 2.0f) + -3.14159265f) + 1.0f) * 0.5f;
         for (i = 0; i < 4; i++) {
             level = gauge->slots[i].level / 10.0f;
             mnuDrawMantraSprite(0, 0, 0, (s32)((f32)alpha * level), icons[i], 0, 0x53);
@@ -2818,7 +2818,7 @@ s32 mnuDrawMantraRecordPanel(u32 pool, MantraDrawItem *item) {
         fade = 1.0f;
     }
     radians = fade * 1.5707963f;
-    fade = sdfSinPoly(radians);
+    fade = sdfSin(radians);
 
     remaining = 15 - record->delay;
     if (remaining < 10) {
@@ -2852,7 +2852,7 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraRecordP
     if (datGameState->header.currency != state->shown) {
         s32 steps = 20;
 
-        sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
+        p2sdPlaySE(0x13, 0x7F, 0x3F);
         state->step++;
         sprintf(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
@@ -2915,7 +2915,7 @@ MantraIconEntry *mnuSpawnMantraIcon(s32 x, s32 y, MantraIconPool *pool, u32 mode
 MantraIconPool *mnuAllocateMantraIconPool(u32 count) {
     u32 size = count * sizeof(MantraIconEntry) + sizeof(MantraIconPool);
     struct SdfMemBlock *handle = sdfMemAllocDirect((s32)size);
-    MantraIconPool *pool = (MantraIconPool *)sdfMemoryGetBlockAddress(handle);
+    MantraIconPool *pool = (MantraIconPool *)sdfMemGetPtr(handle);
 
     memset(pool, 0, size);
     pool->allocation = handle;
@@ -3199,7 +3199,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         }
         x += icon->x;
         y += icon->y;
-        brightness = amount * sdfSinPoly(((f32)icon->timer / 10.0f) * 1.5707963f);
+        brightness = amount * sdfSin(((f32)icon->timer / 10.0f) * 1.5707963f);
         alpha = brightness;
         mnuDrawMantraSprite(x, y, depth, alpha, 0x9C, 0, 0x52);
         alpha = (f32)amount * progress;
@@ -3216,7 +3216,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         } else {
             middle = (f32)(timer - 2) * 0.125f;
         }
-        alpha = amount * sdfSinPoly((1.0f - middle) * 1.5707963f);
+        alpha = amount * sdfSin((1.0f - middle) * 1.5707963f);
         mnuDrawMantraSprite((f32)x + offsets.points[first][0] * end, (f32)y + offsets.points[first][1] * end, depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * end, (f32)y + offsets.points[first + 1][1] * end, depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + offsets.points[first + 2][1] * end, depth, alpha, 0xA2, 0, 0x53);
@@ -3230,7 +3230,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
             } else {
                 middle = 1.0f;
             }
-            alpha = amount * sdfSinPoly((1.0f - middle) * 1.5707963f);
+            alpha = amount * sdfSin((1.0f - middle) * 1.5707963f);
             mnuDrawMantraSprite((f32)x + (offsets.points[first][0] - 1) * end, (f32)y + (offsets.points[first][1] - 1) * end, depth, (f32)alpha * 0.6f, 0xA0, 0, 0x53);
             mnuDrawMantraSprite((f32)x + (offsets.points[first + 1][0] + 1) * end, (f32)y + (offsets.points[first + 1][1] - 1) * end, depth, (f32)alpha * 0.6f, 0xA1, 0, 0x53);
             mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * end, (f32)y + (offsets.points[first + 2][1] + 2) * end, depth, (f32)alpha * 0.6f, 0xA2, 0, 0x53);
@@ -3243,7 +3243,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         y += icon->y;
         mnuDrawMantraSprite(x, y, depth, alpha, 0x9C, 0, 0x52);
         progress = (f32)icon->timer / 40.0f;
-        progress = (sdfSinPoly(progress * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+        progress = (sdfSin(progress * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
         mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0x9D, 0, 0x53);
         mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0x9E, 0, 0x53);
         mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0x9F, 0, 0x53);
@@ -3299,21 +3299,21 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         x += icon->x;
         y += icon->y;
         mnuDrawMantraSprite(x, y, depth, (f32)amount * end, 0x9C, 0, 0x52);
-        alpha = amount * ((sdfSinPoly(progress * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f) * 0.7f;
+        alpha = amount * ((sdfSin(progress * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f) * 0.7f;
         mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 5.0f, (f32)y + offsets.points[first][1] * 5.0f, depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 5.0f, (f32)y + offsets.points[first + 1][1] * 5.0f, depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 5.0f, (f32)y + offsets.points[first + 2][1] * 5.0f, depth, alpha, 0xA2, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 5.0f, (f32)y + offsets.points[first][1] * 5.0f, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 5.0f, (f32)y + offsets.points[first + 1][1] * 5.0f, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 5.0f, (f32)y + offsets.points[first + 2][1] * 5.0f, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
-        alpha = amount * sdfSinPoly(middle * 1.5707963f) * 0.7f;
+        alpha = amount * sdfSin(middle * 1.5707963f) * 0.7f;
         mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 4.0f * middle, (f32)y + offsets.points[first][1] * 4.0f * middle, depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 4.0f * middle, (f32)y + offsets.points[first + 1][1] * 4.0f * middle, depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 4.0f * middle, (f32)y + offsets.points[first + 2][1] * 4.0f * middle, depth, alpha, 0xA2, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first][0] * 4.0f * middle, (f32)y + offsets.points[first][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 1][0] * 4.0f * middle, (f32)y + offsets.points[first + 1][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[first + 2][0] * 4.0f * middle, (f32)y + offsets.points[first + 2][1] * 4.0f * middle, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
-        alpha = amount * sdfSinPoly(end * 1.5707963f);
+        alpha = amount * sdfSin(end * 1.5707963f);
         mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0xA2, 0, 0x53);
@@ -3330,7 +3330,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         } else {
             progress = 1.0f;
         }
-        middle = sdfSinPoly(progress * 1.5707963f);
+        middle = sdfSin(progress * 1.5707963f);
         progress = 1.0f - progress;
         x += icon->x;
         y += icon->y;
@@ -3371,7 +3371,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         x += icon->x;
         y += icon->y;
         mnuDrawMantraSprite(x, y, depth, (f32)amount * end, 0x9C, 0, 0x52);
-        alpha = amount * sdfSinPoly(progress * 1.5707963f) * 0.7f;
+        alpha = amount * sdfSin(progress * 1.5707963f) * 0.7f;
         mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 7.0f, (f32)y + offsets.points[0][1] * 7.0f, depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 7.0f, (f32)y + offsets.points[1][1] * 7.0f, depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 7.0f, (f32)y + offsets.points[2][1] * 7.0f, depth, alpha, 0xA2, 0, 0x53);
@@ -3379,14 +3379,14 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 7.0f, (f32)y + offsets.points[1][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 7.0f, (f32)y + offsets.points[2][1] * 7.0f, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
         middle = 1.0f - middle;
-        alpha = amount * sdfSinPoly(middle * 1.5707963f) * 0.7f;
+        alpha = amount * sdfSin(middle * 1.5707963f) * 0.7f;
         mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 6.0f * middle, (f32)y + offsets.points[0][1] * 6.0f * middle, depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 6.0f * middle, (f32)y + offsets.points[1][1] * 6.0f * middle, depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 6.0f * middle, (f32)y + offsets.points[2][1] * 6.0f * middle, depth, alpha, 0xA2, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[0][0] * 6.0f * middle, (f32)y + offsets.points[0][1] * 6.0f * middle, depth, (f32)alpha * 0.5f, 0xA3, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[1][0] * 6.0f * middle, (f32)y + offsets.points[1][1] * 6.0f * middle, depth, (f32)alpha * 0.5f, 0xA4, 0, 0x53);
         mnuDrawMantraSprite((f32)x + offsets.points[2][0] * 6.0f * middle, (f32)y + offsets.points[2][1] * 6.0f * middle, depth, (f32)alpha * 0.5f, 0xA5, 0, 0x53);
-        alpha = amount * sdfSinPoly(end * 1.5707963f);
+        alpha = amount * sdfSin(end * 1.5707963f);
         mnuDrawMantraSprite(x + offsets.points[first][0], y + offsets.points[first][1], depth, alpha, 0xA0, 0, 0x53);
         mnuDrawMantraSprite(x + offsets.points[first + 1][0], y + offsets.points[first + 1][1], depth, alpha, 0xA1, 0, 0x53);
         mnuDrawMantraSprite(x + offsets.points[first + 2][0], y + offsets.points[first + 2][1], depth, alpha, 0xA2, 0, 0x53);
@@ -3400,7 +3400,7 @@ u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPoo
         timer = icon->timer;
         if (timer < 10) {
             progress = (f32)timer / 10.0f;
-            middle = sdfSinPoly(progress * 1.5707963f);
+            middle = sdfSin(progress * 1.5707963f);
             progress = 1.0f - progress;
         } else {
             progress = 0.0f;
@@ -3486,7 +3486,7 @@ s32 mnuDrawMantraShortLoopIcon(s32 x, s32 y, s32 z, s32 amount, MantraIconPool *
         mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAE, 0, 0x53);
         mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xB2, 0, 0x53);
         ratio = icon->timer / 50.0f;
-        ratio = (sdfSinPoly(ratio * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+        ratio = (sdfSin(ratio * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
         pulseAlpha *= ratio;
         mnuDrawMantraSprite(drawX, drawY, z, pulseAlpha, 0xB0, 0, 0x53);
         mnuDrawMantraSprite(drawX, drawY, z, amount * (1.0f - ratio), 0xB1, 0, 0x53);
@@ -3991,7 +3991,7 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
 
     allocationSize = count * 48 + 0x2DB8;
     handle = sdfMemAllocDirect(allocationSize);
-    pool = (MantraPanelPool *)sdfMemoryGetBlockAddress(handle);
+    pool = (MantraPanelPool *)sdfMemGetPtr(handle);
     memset(pool, 0, allocationSize);
     pool->handle = (u32)handle;
     pool->items = (MantraPanelAnimation *)((u8 *)pool + 0x2DB8);
@@ -4333,7 +4333,7 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
         } else {
             wave = 0.0f;
         }
-        wave = sdfSinPoly(wave * 1.5707963f);
+        wave = sdfSin(wave * 1.5707963f);
         if (panel->frame >= 10) {
             if (panel->frame < 40) {
                 spark = (panel->frame - 10) / 30.0f;
@@ -4354,7 +4354,7 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
         if (panel->frame >= 30) {
             pulse = (panel->frame - 30) / 30.0f;
         }
-        pulse = (sdfSinPoly(pulse * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+        pulse = (sdfSin(pulse * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
         alpha = (f32)amount * scale;
         mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
         mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
@@ -4373,7 +4373,7 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
         for (i = 0; i < 3; i++) {
             angle = phase + i * 2.0943951f;
             mnuDrawMantraSprite((f32)x + sdfCos(angle) * radius,
-                                (f32)y + -sdfSinPoly(angle) * radius, 1, (f32)amount * 0.6f * spark, 0x7D, 0,
+                                (f32)y + -sdfSin(angle) * radius, 1, (f32)amount * 0.6f * spark, 0x7D, 0,
                                 packet);
         }
         sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -4396,7 +4396,7 @@ void mnuResetMantraPulsePhase(s32 unused, u8 *object) {
 
     object[0x20] = 0;
     object[0x21] = 0;
-    index = sdfGetRandFloat(0) * 3.0f;
+    index = dds3GetRandFloatA(0) * 3.0f;
     object[0x22] = table[index];
 }
 
@@ -4435,7 +4435,7 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
     else phases[1] = 0.0f;
     if (panel->stateC < 18) phases[2] = panel->stateC / 18.0f;
     else phases[2] = 0.0f;
-    phases[2] = (sdfSinPoly(phases[2] * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+    phases[2] = (sdfSin(phases[2] * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
     mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, alpha, 0x78, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -4449,7 +4449,7 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
         const f32 angularOffset = (f32)i * 2.0943951f;
         const f32 angle = phaseA * -6.2831853f + angularOffset;
         drawX = (s32)((f32)x + sdfCos(angle) * radius);
-        drawY = (s32)((f32)y + -sdfSinPoly(angle) * radius);
+        drawY = (s32)((f32)y + -sdfSin(angle) * radius);
         sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
         mnuDrawMantraSprite(drawX, drawY, 1, (s32)((f32)alpha * 0.4f), 0x7D, 0x40, packet);
     }
@@ -4473,7 +4473,7 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
         const f32 angularOffset = (f32)i * 2.0943951f;
         const f32 angle = phaseB * -6.2831853f + angularOffset;
         drawX = (s32)((f32)x + sdfCos(angle) * radius);
-        drawY = (s32)((f32)y + -sdfSinPoly(angle) * radius);
+        drawY = (s32)((f32)y + -sdfSin(angle) * radius);
         mnuDrawMantraSprite(drawX, drawY, 1, (s32)((f32)alpha * 0.8f), 0x7B, 0, packet);
     }
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -4576,14 +4576,14 @@ s32 mnuDrawMantraPanelNodeTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
         if (panel->frame < 15) {
             flashFade = 0.0f;
         } else if (panel->frame < 30) {
-            flashFade = (sdfSinPoly(((panel->frame - 10) / 20.0f) * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+            flashFade = (sdfSin(((panel->frame - 10) / 20.0f) * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
         } else {
             flashFade = 0.0f;
         }
         revealFade = 0.0f;
         if (panel->frame >= 20) {
             if (panel->frame < 30) {
-                revealFade = sdfSinPoly((panel->frame - 20) * (3.14159265f / 2.0f) / 10.0f);
+                revealFade = sdfSin((panel->frame - 20) * (3.14159265f / 2.0f) / 10.0f);
             } else {
                 revealFade = 1.0f;
             }
@@ -4606,7 +4606,7 @@ s32 mnuDrawMantraPanelNodeTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
         } else {
             neighborFade = 0.0f;
         }
-        neighborFade = sdfSinPoly(neighborFade * (3.14159265f / 2.0f));
+        neighborFade = sdfSin(neighborFade * (3.14159265f / 2.0f));
         mask = 0;
         mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
         mnuDrawMantraPanelOrbitingEffect(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
@@ -4680,7 +4680,7 @@ void mnuRandomizeMantraPulseIconPhase(s32 unused, u8 *object) {
     u8 table[4] = {0, 10, 20, 30};
     u8 index;
 
-    index = sdfGetRandFloat(0) * 3.0f;
+    index = dds3GetRandFloatA(0) * 3.0f;
     object[0x20] = table[index];
 }
 
@@ -4693,7 +4693,7 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
 
     object[0x20] += 1;
     if (object[0x20] > 0x82) {
-        object[0x20] = table[(u8)(sdfGetRandFloat(0) * 3.0f)];
+        object[0x20] = table[(u8)(dds3GetRandFloatA(0) * 3.0f)];
     }
     t = 0.0f;
     if (object[0x20] >= 0x32) {
@@ -4701,7 +4701,7 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
             t = (object[0x20] - 0x32) / 70.0f;
         }
     }
-    t = (sdfSinPoly(t * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+    t = (sdfSin(t * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
     mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, amount, 0x93, 0, packet);
     mnuDrawMantraSprite(x, y, z, (s32)(amount * (t * 0.25f)), 0x94, 0, packet);
@@ -4892,7 +4892,7 @@ s32 mnuDrawMantraPanelATransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPoo
             s32 orbitAlpha;
             angle = orbitPhase * -(3.14159265f * 2.0f) + i * (3.14159265f * 2.0f / 3.0f);
             drawX = (f32)x + sdfCos(angle) * 14.0f;
-            drawY = (f32)y + -sdfSinPoly(angle) * 14.0f;
+            drawY = (f32)y + -sdfSin(angle) * 14.0f;
             orbitAlpha = alpha * 0.7f * orbitFade;
             mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, orbitAlpha, 1.2f, 0x8D, 0, packet);
             mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, orbitAlpha, 1.2f, 0x8D, 0, packet);
@@ -4959,7 +4959,7 @@ s32 mnuDrawMantraPanelBaseLayer(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
     } else {
         pulse = (panel->stateA - 90) / 40.0f * 0.5f + 0.5f;
     }
-    pulse = (sdfSinPoly(pulse * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
+    pulse = (sdfSin(pulse * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
     mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, (s32)(alpha * 0.8f), 0x8B, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -4972,7 +4972,7 @@ s32 mnuDrawMantraPanelBaseLayer(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
         orbitRadius = 14.0f;
         angle = orbitPhase * -(3.14159265f * 2.0f) + i * (3.14159265f * 2.0f / 3.0f);
         drawX = (f32)x + sdfCos(angle) * orbitRadius;
-        drawY = (f32)y + -sdfSinPoly(angle) * orbitRadius;
+        drawY = (f32)y + -sdfSin(angle) * orbitRadius;
         sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
         drawAlpha = alpha * 0.7f;
         mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, drawAlpha, 1.2f, 0x8D, 0x40, packet);
@@ -5127,7 +5127,7 @@ s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool
         if (panel->frame < 15) {
             flashFade = 0.0f;
         } else if (panel->frame < 30) {
-            flashFade = (sdfSinPoly(((panel->frame - 10) / 20.0f) * (3.14159265f * 2.0f)
+            flashFade = (sdfSin(((panel->frame - 10) / 20.0f) * (3.14159265f * 2.0f)
                                    + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
         } else {
             flashFade = 0.0f;
@@ -5249,7 +5249,7 @@ s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool
     }
     mask = 0;
     i = 0;
-    weight = (sdfSinPoly(weight * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
+    weight = (sdfSin(weight * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
     mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, alpha, 0x93, 0, packet);
     neighbor = mnuGetMantraNodePositionRecord(panel->id)->neighbors;
@@ -5518,7 +5518,7 @@ s32 mnuDrawMantraPanelBTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPoo
             accentPulse = activePulsePhase;
         }
 accent_pulse_ready:
-        accentPulse = sdfSinPoly(accentPulse * (3.14159265f / 2.0f));
+        accentPulse = sdfSin(accentPulse * (3.14159265f / 2.0f));
         panelFade = 1.0f;
         if (panel->frame >= 25) {
             if (panel->frame < 30) {
@@ -5561,7 +5561,7 @@ accent_pulse_ready:
                 flarePulse = (panel->frame - 20) / 10.0f;
             }
         }
-        flarePulse = sdfSinPoly(flarePulse * 3.14159265f);
+        flarePulse = sdfSin(flarePulse * 3.14159265f);
         burstFade = 0.0f;
         if (panel->frame >= 20) {
             if (panel->frame < 30) {
@@ -5804,7 +5804,7 @@ accent_pulse_ready:
             s32 orbitAlpha;
             angle = effectPhase * -(3.14159265f * 2.0f) * 0.3f + i * (3.14159265f * 2.0f / 3.0f);
             drawX = (f32)x + sdfCos(angle) * 14.0f;
-            drawY = (f32)y + -sdfSinPoly(angle) * 14.0f;
+            drawY = (f32)y + -sdfSin(angle) * 14.0f;
             orbitAlpha = alpha * 0.7f * effectPhase;
             mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, orbitAlpha, 1.2f, 0x8D, 0, packet);
             mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, orbitAlpha, 1.2f, 0x8D, 0, packet);
@@ -5932,7 +5932,7 @@ s32 mnuDrawMantraNodeMasteryFlash(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
                 }
             }
         }
-        alpha = amount * sdfSinPoly(scale * 1.5707963f) * 0.3f;
+        alpha = amount * sdfSin(scale * 1.5707963f) * 0.3f;
         mnuDrawMantraSprite(x, y, 0, alpha, 0x77, 0, packet);
         mnuDrawMantraSprite(x, y, 0, alpha, 0xB4, 0x20, packet);
         if (panel->frame >= 90) {
@@ -5946,7 +5946,7 @@ s32 mnuDrawMantraNodeMasteryFlash(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
         } else {
             scale = (40 - panel->frame) / 20.0f;
         }
-        alpha = amount * sdfSinPoly(scale * 1.5707963f) * 0.8f;
+        alpha = amount * sdfSin(scale * 1.5707963f) * 0.8f;
         mnuDrawMantraSprite(x, y, 0, alpha, 0x77, 0, packet);
         mnuDrawMantraSprite(x, y, 0, alpha, 0xB4, 0x20, packet);
         sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -5957,12 +5957,12 @@ s32 mnuDrawMantraNodeMasteryFlash(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
         sdfDispatchSurfaceWithPreparedTexturePacket(packet);
         pulse = panel->frame / 40.0f;
         scale = panel->frame / 60.0f;
-        pulse = sdfSinPoly(pulse * 3.1415926f);
+        pulse = sdfSin(pulse * 3.1415926f);
         phase = scale * -6.2831853f;
         for (i = 0; i < 3; i++) {
             angle = phase + i * 2.0943951f;
             mnuDrawMantraSprite((s32)(x + sdfCos(angle) * 15.0f),
-                                (s32)(y + -sdfSinPoly(angle) * 15.0f), 0, (s32)(amount * pulse * 0.5f), 0x7D, 0,
+                                (s32)(y + -sdfSin(angle) * 15.0f), 0, (s32)(amount * pulse * 0.5f), 0x7D, 0,
                                 packet);
         }
         sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -6111,7 +6111,7 @@ s32 mnuDrawMantraPanelAnimation(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
         } else {
             pulse = 0.0f;
         }
-        pulse = sdfSinPoly(pulse * 1.5707963f);
+        pulse = sdfSin(pulse * 1.5707963f);
         idFade = 0.0f;
         if (panel->frame >= 60) {
             if (panel->frame < 80) idFade = (panel->frame - 60) / 20.0f;
@@ -6179,7 +6179,7 @@ s32 mnuDrawMantraPanelAnimation(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
             if (panel->frame < 55) burstFade = (panel->frame - 32) / 23.0f;
             else burstFade = 1.0f;
         }
-        burstFade = (sdfSinPoly(burstFade * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+        burstFade = (sdfSin(burstFade * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
         burstMove = 0.0f;
         if (panel->frame >= 30) {
             if (panel->frame < 50) burstMove = (panel->frame - 30) / 20.0f;
@@ -6190,7 +6190,7 @@ s32 mnuDrawMantraPanelAnimation(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
             flashFade = 0.0f;
         } else if (panel->frame < 50) {
             f32 flashPhase = (panel->frame - 35) / 15.0f;
-            flashFade = (sdfSinPoly(flashPhase * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+            flashFade = (sdfSin(flashPhase * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
         } else {
             flashFade = 0.0f;
         }
@@ -6239,11 +6239,11 @@ s32 mnuDrawMantraPanelAnimation(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
         sdfDispatchSurfaceWithPreparedTexturePacket(packet);
         drawAlpha = alpha * orbitFade;
         angle = orbitPhase * 6.2831853f;
-        drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSinPoly(angle) * -14.0f);
-        drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSinPoly(angle) * 7.0f);
+        drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSin(angle) * -14.0f);
+        drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSin(angle) * 7.0f);
         mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xFB, 0, packet);
-        drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSinPoly(angle) * 16.0f);
-        drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSinPoly(angle) * -6.0f);
+        drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSin(angle) * 16.0f);
+        drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSin(angle) * -6.0f);
         mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xFB, 0, packet);
         sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
         uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
@@ -6304,14 +6304,14 @@ s32 mnuDrawMantraSingleCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
 
     phase *= 6.2831853f;
     drawX = (s32)(originX + sdfCos(phase) * 7.0f +
-                  sdfSinPoly(phase) * -14.0f);
+                  sdfSin(phase) * -14.0f);
     drawY = (s32)(originY + sdfCos(phase) * -14.0f -
-                  sdfSinPoly(phase) * 7.0f);
+                  sdfSin(phase) * 7.0f);
     mnuDrawMantraSprite(drawX, drawY, 0, amount, 0xFB, 0, packet);
     drawX = (s32)(originX + sdfCos(phase) * -6.0f +
-                  sdfSinPoly(phase) * 16.0f);
+                  sdfSin(phase) * 16.0f);
     drawY = (s32)(originY + sdfCos(phase) * 16.0f -
-                  sdfSinPoly(phase) * -6.0f);
+                  sdfSin(phase) * -6.0f);
     mnuDrawMantraSprite(drawX, drawY, 0, amount, 0xFB, 0, packet);
 
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -6475,22 +6475,22 @@ s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPan
         fade = 1.0f - fade;
         if (panel->frame < 7) spread = panel->frame / 7.0f;
         else spread = 1.0f;
-        spread = sdfSinPoly(spread * 1.5707962512969970703125f);
+        spread = sdfSin(spread * 1.5707962512969970703125f);
         if (panel->frame < 20) emitterFade = (20 - panel->frame) / 20.0f;
         else emitterFade = 0.0f;
         if (panel->frame < 7) radialMove = panel->frame / 7.0f;
         else radialMove = 1.0f;
-        radialMove = 1.0f - sdfSinPoly(radialMove * 1.5707962512969970703125f);
+        radialMove = 1.0f - sdfSin(radialMove * 1.5707962512969970703125f);
         if (panel->frame < 7) burstFadeA = panel->frame / 7.0f;
         else if (panel->frame < 21) burstFadeA = (21 - panel->frame) / 14.0f;
         else burstFadeA = 0.0f;
-        burstFadeA = sdfSinPoly(burstFadeA * 1.5707962512969970703125f);
+        burstFadeA = sdfSin(burstFadeA * 1.5707962512969970703125f);
         burstFadeB = 0.0f;
         if (panel->frame >= 3) {
             if (panel->frame < 10) burstFadeB = (panel->frame - 3) / 7.0f;
             else burstFadeB = 1.0f;
         }
-        burstFadeB = sdfSinPoly(burstFadeB * 1.5707962512969970703125f);
+        burstFadeB = sdfSin(burstFadeB * 1.5707962512969970703125f);
         if (panel->frame < 40) orbitFade = panel->frame / 40.0f;
         else orbitFade = 1.0f;
         orbitPhase = (120.0f - (60.0f - (f32)panel->frame)) / 120.0f;
@@ -6505,7 +6505,7 @@ s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPan
             else idPulse = 1.0f;
         }
         idAlpha = alpha * idFade;
-        idPulse = sdfSinPoly(idPulse * 3.141592502593994140625f);
+        idPulse = sdfSin(idPulse * 3.141592502593994140625f);
         drawAlpha = alpha * fade;
         mnuDrawMantraSprite(x, y, z, drawAlpha, 0x77, 0, packet);
         mnuDrawMantraSprite(x, y, z, drawAlpha, 0xF7, 0, packet);
@@ -6538,7 +6538,7 @@ s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPan
             f32 cosineScale;
             f32 sineScale;
             cosine = sdfCos(orbitAngle);
-            sine = sdfSinPoly(orbitAngle);
+            sine = sdfSin(orbitAngle);
             cosineScale = 7.0f;
             sineScale = -14.0f;
             cosineProduct = cosine * cosineScale;
@@ -6551,7 +6551,7 @@ s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPan
             f32 cosineScale;
             f32 sineScale;
             cosine = sdfCos(orbitAngle);
-            sine = sdfSinPoly(orbitAngle);
+            sine = sdfSin(orbitAngle);
             cosineScale = -14.0f;
             sineScale = 7.0f;
             cosineProduct = cosine * cosineScale;
@@ -6565,7 +6565,7 @@ s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPan
             f32 cosineScale;
             f32 sineScale;
             cosine = sdfCos(orbitAngle);
-            sine = sdfSinPoly(orbitAngle);
+            sine = sdfSin(orbitAngle);
             cosineScale = -6.0f;
             sineScale = 16.0f;
             cosineProduct = cosine * cosineScale;
@@ -6578,7 +6578,7 @@ s32 mnuDrawMantraPanelAccentTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPan
             f32 cosineScale;
             f32 sineScale;
             cosine = sdfCos(orbitAngle);
-            sine = sdfSinPoly(orbitAngle);
+            sine = sdfSin(orbitAngle);
             cosineScale = 16.0f;
             sineScale = -6.0f;
             cosineProduct = cosine * cosineScale;
@@ -6648,7 +6648,7 @@ s32 mnuDrawMantraPanelFourIconEffect(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
         pulse = 1.0f;
     }
     angle = phase * 6.2831853f;
-    pulse = (sdfSinPoly(pulse * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+    pulse = (sdfSin(pulse * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
     mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, alpha, 0xE6, 0, packet);
     mnuDrawMantraSprite(x, y, z, alpha, 0xE8, 0, packet);
@@ -6661,11 +6661,11 @@ s32 mnuDrawMantraPanelFourIconEffect(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
     uiDrawActiveSurfaceRegion(packet);
     mnuDrawMantraSprite(x, y, 0, alpha, 0xEA, 0x20, packet);
     sdfDispatchSurfaceWithPreparedTexturePacket(packet);
-    drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSinPoly(angle) * -14.0f);
-    drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSinPoly(angle) * 7.0f);
+    drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSin(angle) * -14.0f);
+    drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSin(angle) * 7.0f);
     mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xEB, 0, packet);
-    drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSinPoly(angle) * 16.0f);
-    drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSinPoly(angle) * -6.0f);
+    drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSin(angle) * 16.0f);
+    drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSin(angle) * -6.0f);
     mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xEC, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
@@ -6770,7 +6770,7 @@ s32 mnuDrawMantraFourIconPanelTransition(s32 x, s32 y, u32 z, s32 alpha, MantraP
         if (panel->stateB < 20) pulse = panel->stateB / 20.0f;
         else if (panel->stateB < 50) pulse = (panel->stateB - 20) / 30.0f;
         else pulse = 1.0f;
-        pulse = sdfSinPoly(pulse * 3.14159265f);
+        pulse = sdfSin(pulse * 3.14159265f);
         counterOrbitFade = 0.0f;
         if (panel->frame >= 10) {
             if (panel->frame < 20) counterOrbitFade = (panel->frame - 10) / 10.0f;
@@ -6781,7 +6781,7 @@ s32 mnuDrawMantraFourIconPanelTransition(s32 x, s32 y, u32 z, s32 alpha, MantraP
             if (panel->frame < 55) burstFade = (panel->frame - 32) / 23.0f;
             else burstFade = 1.0f;
         }
-        burstFade = (sdfSinPoly(burstFade * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+        burstFade = (sdfSin(burstFade * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
         burstMove = 0.0f;
         if (panel->frame >= 30) {
             if (panel->frame < 50) burstMove = (panel->frame - 30) / 20.0f;
@@ -6792,7 +6792,7 @@ s32 mnuDrawMantraFourIconPanelTransition(s32 x, s32 y, u32 z, s32 alpha, MantraP
             flashFade = 0.0f;
         } else if (panel->frame < 50) {
             f32 flashPhase = (panel->frame - 35) / 15.0f;
-            flashFade = (sdfSinPoly(flashPhase * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+            flashFade = (sdfSin(flashPhase * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
         } else {
             flashFade = 0.0f;
         }
@@ -6818,19 +6818,19 @@ s32 mnuDrawMantraFourIconPanelTransition(s32 x, s32 y, u32 z, s32 alpha, MantraP
         mnuDrawMantraSprite(x, y, 0, alpha, 0xEA, 0x20, packet);
         sdfDispatchSurfaceWithPreparedTexturePacket(packet);
         drawAlpha = alpha * fade;
-        drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSinPoly(angle) * -14.0f);
-        drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSinPoly(angle) * 7.0f);
+        drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSin(angle) * -14.0f);
+        drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSin(angle) * 7.0f);
         mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xEB, 0, packet);
-        drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSinPoly(angle) * 16.0f);
-        drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSinPoly(angle) * -6.0f);
+        drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSin(angle) * 16.0f);
+        drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSin(angle) * -6.0f);
         mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xEC, 0, packet);
         drawAlpha = alpha * counterOrbitFade;
         reverseAngle = -orbitPhase * 6.2831853f + -3.14159265f;
-        drawX = (s32)((f32)x + sdfCos(reverseAngle) * 7.0f + sdfSinPoly(reverseAngle) * -14.0f);
-        drawY = (s32)((f32)y + sdfCos(reverseAngle) * -14.0f - sdfSinPoly(reverseAngle) * 7.0f);
+        drawX = (s32)((f32)x + sdfCos(reverseAngle) * 7.0f + sdfSin(reverseAngle) * -14.0f);
+        drawY = (s32)((f32)y + sdfCos(reverseAngle) * -14.0f - sdfSin(reverseAngle) * 7.0f);
         mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xFB, 0, packet);
-        drawX = (s32)((f32)x + sdfCos(reverseAngle) * -6.0f + sdfSinPoly(reverseAngle) * 16.0f);
-        drawY = (s32)((f32)y + sdfCos(reverseAngle) * 16.0f - sdfSinPoly(reverseAngle) * -6.0f);
+        drawX = (s32)((f32)x + sdfCos(reverseAngle) * -6.0f + sdfSin(reverseAngle) * 16.0f);
+        drawY = (s32)((f32)y + sdfCos(reverseAngle) * 16.0f - sdfSin(reverseAngle) * -6.0f);
         mnuDrawMantraSprite(drawX, drawY, 0, drawAlpha, 0xFB, 0, packet);
         sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
         uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
@@ -6899,11 +6899,11 @@ s32 mnuDrawMantraDualCyclePanel(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool 
     mnuDrawMantraSprite(x, y, 0, alpha, 0xEA, 0x20, packet);
     sdfDispatchSurfaceWithPreparedTexturePacket(packet);
     angle = -phase * 6.2831853f;
-    drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSinPoly(angle) * -14.0f);
-    drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSinPoly(angle) * 7.0f);
+    drawX = (s32)((f32)x + sdfCos(angle) * 7.0f + sdfSin(angle) * -14.0f);
+    drawY = (s32)((f32)y + sdfCos(angle) * -14.0f - sdfSin(angle) * 7.0f);
     mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xFB, 0, packet);
-    drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSinPoly(angle) * 16.0f);
-    drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSinPoly(angle) * -6.0f);
+    drawX = (s32)((f32)x + sdfCos(angle) * -6.0f + sdfSin(angle) * 16.0f);
+    drawY = (s32)((f32)y + sdfCos(angle) * 16.0f - sdfSin(angle) * -6.0f);
     mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xFB, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
@@ -6952,14 +6952,14 @@ MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16 kind) {
     MantraSparkle *spark;
 
     memset(emitter, 0, 0xA8);
-    emitter->duration = sdfGetRandFloat(0) * 20.0f + 5.0f;
+    emitter->duration = dds3GetRandFloatA(0) * 20.0f + 5.0f;
     emitter->kind = kind;
     spark = mnuSpawnMantraSparkle(emitter);
-    spark->age = spark->life * sdfGetRandFloat(0) + 0.0f;
+    spark->age = spark->life * dds3GetRandFloatA(0) + 0.0f;
     spark = mnuSpawnMantraSparkle(emitter);
-    spark->age = spark->life * sdfGetRandFloat(0) + 0.0f;
+    spark->age = spark->life * dds3GetRandFloatA(0) + 0.0f;
     spark = mnuSpawnMantraSparkle(emitter);
-    spark->age = spark->life * sdfGetRandFloat(0) + 0.0f;
+    spark->age = spark->life * dds3GetRandFloatA(0) + 0.0f;
     return emitter;
 }
 
@@ -6984,7 +6984,7 @@ void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, Mantr
     if (emitter->duration < 0) {
         mnuSpawnMantraSparkle(emitter);
         if (emitter->kind == 0) {
-            emitter->duration = sdfGetRandFloat(0) * 10.0f + 5.0f;
+            emitter->duration = dds3GetRandFloatA(0) * 10.0f + 5.0f;
         } else {
             emitter->duration = 1;
         }
@@ -6993,7 +6993,7 @@ void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, Mantr
     for (i = 0; i < 10; i++, spark++) {
         if (spark->active) {
             progress = (f32)spark->age / (f32)spark->life;
-            brightness = (sdfSinPoly(progress * (3.14159265f * 2.0f) + (3.14159265f * -0.5f)) + 1.0f) * 0.5f;
+            brightness = (sdfSin(progress * (3.14159265f * 2.0f) + (3.14159265f * -0.5f)) + 1.0f) * 0.5f;
             /* Retail caps progress rather than the computed brightness here. */
             if (brightness > 1.0f) {
                 progress = 1.0f;
@@ -7003,7 +7003,7 @@ void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, Mantr
                 drawY = spark->vy + y;
             } else {
                 if (progress <= 0.3f) {
-                    brightness = sdfSinPoly(progress * (3.14159265f * 0.5f) / 0.3f);
+                    brightness = sdfSin(progress * (3.14159265f * 0.5f) / 0.3f);
                 } else {
                     brightness = 1.0f - (progress - 0.3f) / 0.7f;
                 }
@@ -7012,7 +7012,7 @@ void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, Mantr
                 }
                 angle = progress * (3.14159265f * 2.5f);
                 drawX = spark->vx * sdfCos(angle) + x;
-                drawY = spark->vy * sdfSinPoly(angle) + y;
+                drawY = spark->vy * sdfSin(angle) + y;
             }
             mnuDrawMantraSprite(drawX, drawY, z, (s32)(amount * brightness), 0x8F, 0, packet);
             spark->age++;
@@ -7034,16 +7034,16 @@ MantraSparkle *mnuSpawnMantraSparkle(MantraSparkleEmitter *emitter) {
         if (spark->active == 0) {
             if (emitter->kind == 0) {
                 if (emitter->count < 6) {
-                    spark->life = sdfGetRandFloat(0) * 80.0f + 50.0f;
-                    spark->vx = sdfGetRandFloat(0) * 4.0f + -2.0f;
-                    spark->vy = sdfGetRandFloat(0) * 4.0f + -2.0f;
+                    spark->life = dds3GetRandFloatA(0) * 80.0f + 50.0f;
+                    spark->vx = dds3GetRandFloatA(0) * 4.0f + -2.0f;
+                    spark->vy = dds3GetRandFloatA(0) * 4.0f + -2.0f;
                 } else {
-                    spark->life = sdfGetRandFloat(0) * 40.0f + 30.0f;
-                    spark->vx = sdfGetRandFloat(0) * 6.0f + -5.0f;
+                    spark->life = dds3GetRandFloatA(0) * 40.0f + 30.0f;
+                    spark->vx = dds3GetRandFloatA(0) * 6.0f + -5.0f;
                     if (spark->vx >= -2.0f) {
                         spark->vx += 4.0f;
                     }
-                    spark->vy = sdfGetRandFloat(0) * 6.0f + -5.0f;
+                    spark->vy = dds3GetRandFloatA(0) * 6.0f + -5.0f;
                     if (spark->vy >= -2.0f) {
                         spark->vy += 4.0f;
                     }
@@ -7052,19 +7052,19 @@ MantraSparkle *mnuSpawnMantraSparkle(MantraSparkleEmitter *emitter) {
                 if (emitter->count >= 6) {
                     return 0;
                 }
-                if (sdfGetRandFloat(0) < 0.7f) {
+                if (dds3GetRandFloatA(0) < 0.7f) {
                     spark->alternateMotion = 0;
-                    spark->life = sdfGetRandFloat(0) * 30.0f + 30.0f;
-                    spark->vx = sdfGetRandFloat(0) * 10.0f + -5.0f;
-                    spark->vy = sdfGetRandFloat(0) * 10.0f + -5.0f;
+                    spark->life = dds3GetRandFloatA(0) * 30.0f + 30.0f;
+                    spark->vx = dds3GetRandFloatA(0) * 10.0f + -5.0f;
+                    spark->vy = dds3GetRandFloatA(0) * 10.0f + -5.0f;
                 } else {
                     spark->alternateMotion = 1;
-                    spark->life = sdfGetRandFloat(0) * 70.0f + 60.0f;
-                    spark->vx = sdfGetRandFloat(0) * 10.0f + -10.0f;
+                    spark->life = dds3GetRandFloatA(0) * 70.0f + 60.0f;
+                    spark->vx = dds3GetRandFloatA(0) * 10.0f + -10.0f;
                     if (spark->vx >= -5.0f) {
                         spark->vx += 10.0f;
                     }
-                    spark->vy = sdfGetRandFloat(0) * 10.0f + -10.0f;
+                    spark->vy = dds3GetRandFloatA(0) * 10.0f + -10.0f;
                     if (spark->vy >= -5.0f) {
                         spark->vy += 10.0f;
                     }
@@ -7110,7 +7110,7 @@ struct MantraBurstPool {
 
 MantraBurstPool *mnuAllocateMantraPanelBurstPool(void) {
     struct SdfMemBlock *handle = sdfMemAllocDirect(0x650);
-    u32 block = sdfMemoryGetBlockAddress(handle);
+    u32 block = sdfMemGetPtr(handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
     ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
@@ -7173,15 +7173,15 @@ void mnuDrawMantraPanelBurstParticles(s32 x, s32 y, u32 z, s32 alpha, MantraBurs
         if ((s16)slot->age >= 4) {
             t = (f32)((s16)slot->age - 4) / 10.0f;
         }
-        speed = sdfSinPoly(t * 1.5707963f) * 15.0f + 1.0f;
+        speed = sdfSin(t * 1.5707963f) * 15.0f + 1.0f;
         if (slot->w.flags & 6) {
             slot->x += speed * sdfCos(
                                    (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
-            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSin((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
         } else {
             slot->x += speed * sdfCos(
                                    (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
-            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSin((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
         }
         drawX = slot->x + (f32)x;
         drawY = slot->y + (f32)y;
@@ -7193,7 +7193,7 @@ void mnuDrawMantraPanelBurstParticles(s32 x, s32 y, u32 z, s32 alpha, MantraBurs
         } else {
             t = (f32)(14 - age) / 6.0f;
         }
-        drawAlpha = (f32)alpha * sdfSinPoly(t * 1.5707963f);
+        drawAlpha = (f32)alpha * sdfSin(t * 1.5707963f);
         if (slot->w.flags & 6) {
             mnuDrawMantraRotatedSprite(drawX, drawY, 0, drawAlpha,
                                        (f32)(slot->w.polar.angleDegrees + angleOffset), 0xBD, 0, packet);
@@ -7222,17 +7222,17 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
             memset(slot, 0, 0x10);
             slot->w.flags = ((slot->w.flags | 1) & 0xFFFFFFF9) | ((side & 3) << 1);
             if (wide) {
-                slot->w.polar.angleDegrees = (s32)(sdfGetRandFloat(0) * 10.0f) * 36;
+                slot->w.polar.angleDegrees = (s32)(dds3GetRandFloatA(0) * 10.0f) * 36;
             } else {
-                slot->w.polar.angleDegrees = (s32)(sdfGetRandFloat(0) * 20.0f) * 18;
+                slot->w.polar.angleDegrees = (s32)(dds3GetRandFloatA(0) * 20.0f) * 18;
             }
             slot->life = 14;
             if (side != 0) {
                 slot->x = (base + 39.0f) * sdfCos(slot->w.polar.angleDegrees * 0.017453293f);
-                slot->y = (base + 39.0f) * sdfSinPoly(slot->w.polar.angleDegrees * 0.017453293f);
+                slot->y = (base + 39.0f) * sdfSin(slot->w.polar.angleDegrees * 0.017453293f);
             } else {
                 slot->x = (base + 19.0f) * sdfCos(slot->w.polar.angleDegrees * 0.017453293f);
-                slot->y = (base + 19.0f) * sdfSinPoly(slot->w.polar.angleDegrees * 0.017453293f);
+                slot->y = (base + 19.0f) * sdfSin(slot->w.polar.angleDegrees * 0.017453293f);
             }
             return slot;
         }
@@ -7242,7 +7242,7 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
 
 MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void) {
     struct SdfMemBlock *handle = sdfMemAllocDirect(0x650);
-    u32 block = sdfMemoryGetBlockAddress(handle);
+    u32 block = sdfMemGetPtr(handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
     ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
@@ -7304,15 +7304,15 @@ s32 mnuUpdateAndDrawMantraBackgroundBursts(s32 x, s32 y, u32 z, s32 alpha, Mantr
         if ((s16)slot->age >= 10) {
             t = (f32)((s16)slot->age - 10) / 20.0f;
         }
-        speed = sdfSinPoly(t * 1.5707963f) * 2.0f + 1.0f;
+        speed = sdfSin(t * 1.5707963f) * 2.0f + 1.0f;
         if (slot->w.flags & 6) {
             slot->x += speed * sdfCos(
                                    (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
-            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSin((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
         } else {
             slot->x += speed * sdfCos(
                                    (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
-            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSin((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
         }
         drawX = slot->x + (f32)x;
         drawY = slot->y + (f32)y;
@@ -7324,7 +7324,7 @@ s32 mnuUpdateAndDrawMantraBackgroundBursts(s32 x, s32 y, u32 z, s32 alpha, Mantr
         } else {
             t = (f32)(30 - age) / 14.0f;
         }
-        drawAlpha = (f32)alpha * sdfSinPoly(t * 1.5707963f);
+        drawAlpha = (f32)alpha * sdfSin(t * 1.5707963f);
         if (slot->w.flags & 6) {
             mnuDrawMantraScaledRotatedCenteredSprite(drawX, drawY, 0, (f32)drawAlpha * 0.1f, 0x5F, 0,
                                                      packet, 4.0f,
@@ -7354,17 +7354,17 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
             memset(slot, 0, 0x10);
             slot->w.flags = ((slot->w.flags | 1) & 0xFFFFFFF9) | ((side & 3) << 1);
             if (wide) {
-                slot->w.polar.angleDegrees = (s32)(sdfGetRandFloat(0) * 10.0f) * 36;
+                slot->w.polar.angleDegrees = (s32)(dds3GetRandFloatA(0) * 10.0f) * 36;
             } else {
-                slot->w.polar.angleDegrees = sdfGetRandFloat(0) * 360.0f;
+                slot->w.polar.angleDegrees = dds3GetRandFloatA(0) * 360.0f;
             }
             slot->life = 30;
             if (side != 0) {
                 slot->x = (base + 50.0f) * sdfCos(slot->w.polar.angleDegrees * 0.017453293f);
-                slot->y = (base + 25.0f) * sdfSinPoly(slot->w.polar.angleDegrees * 0.017453293f);
+                slot->y = (base + 25.0f) * sdfSin(slot->w.polar.angleDegrees * 0.017453293f);
             } else {
                 slot->x = (base + 100.0f) * sdfCos(slot->w.polar.angleDegrees * 0.017453293f);
-                slot->y = (base + 30.0f) * sdfSinPoly(slot->w.polar.angleDegrees * 0.017453293f);
+                slot->y = (base + 30.0f) * sdfSin(slot->w.polar.angleDegrees * 0.017453293f);
             }
             return slot;
         }
@@ -7419,7 +7419,7 @@ void mnuUpdateAndDrawMantraSparkEffect(MantraSparkEffectState *state, s32 sprite
     f32 fraction = (f32)state->sparkle.timer / (f32)state->sparkle.unk4;
 
     fraction = 1.0f - fraction;
-    sdfSinPoly(fraction * 3.14159265f);
+    sdfSin(fraction * 3.14159265f);
     mnuTickMantraSparkParticles(&state->sparkle);
     mnuDrawMantraSparkleEffects(&state->sparkle, state->effectHandle, surfaceIndex);
 }
@@ -7432,10 +7432,10 @@ void mnuTickMantraSparkParticles(MantraSparkState *state) {
 
     state->timer = state->timer - 1;
     if (state->timer < 0) {
-        value = sdfGetRandFloat(0) * 60.0f + 60.0f;
+        value = dds3GetRandFloatA(0) * 60.0f + 60.0f;
         state->unk4 = value;
         state->timer = value;
-        state->unk8 = sdfGetRandFloat(0) * 0.20000005f + 0.4f;
+        state->unk8 = dds3GetRandFloatA(0) * 0.20000005f + 0.4f;
     }
     particle = state->particles;
     for (i = 7; i >= 0; i--) {
@@ -7449,16 +7449,16 @@ void mnuUpdateSparkle(MantraSpark *spark) {
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;
-            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 30.0f + 1.0f;
-        } else if (sdfGetRandFloat(0) > 0.7f) {
-            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 30.0f + 0.0f;
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 30.0f + 1.0f;
+        } else if (dds3GetRandFloatA(0) > 0.7f) {
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 30.0f + 0.0f;
         } else {
             spark->phase = 1;
-            spark->timer = spark->timerMax = sdfGetRandFloat(0) * 60.0f + 45.0f;
-            spark->z = (sdfGetRandFloat(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
-            spark->size = sdfGetRandFloat(0) * 10.0f;
-            spark->x = sdfGetRandFloat(0) * 512.0f + -256.0f;
-            spark->y = sdfGetRandFloat(0) * 448.0f + -128.0f;
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 60.0f + 45.0f;
+            spark->z = (dds3GetRandFloatA(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = dds3GetRandFloatA(0) * 10.0f;
+            spark->x = dds3GetRandFloatA(0) * 512.0f + -256.0f;
+            spark->y = dds3GetRandFloatA(0) * 448.0f + -128.0f;
         }
     }
 }
@@ -7467,7 +7467,7 @@ void mnuUpdateSparkle(MantraSpark *spark) {
 /* Evaluate the active particle's remaining-life sine envelope; discard the result. */
 void mnuEvaluateActiveSparkleSine(MantraSpark *object, u32 sprite, s32 surfaceIndex) {
     if (object->phase != 0) {
-        sdfSinPoly((1.0f - (f32)object->timer / (f32)object->timerMax) * 3.14159265f);
+        sdfSin((1.0f - (f32)object->timer / (f32)object->timerMax) * 3.14159265f);
     }
 }
 
@@ -7518,7 +7518,7 @@ typedef struct MantraEffectPoolHeader {
 u32 mnuAllocateMantraEffectSlotPool(u32 count) {
     u32 size = count * 12 + 0x28;
     u32 handle = (u32)sdfMemAllocDirect((s32)size);
-    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
+    u32 block = sdfMemGetPtr((struct SdfMemBlock *)handle);
     memset((void *)block, 0, size);
     ((MantraEffectPoolHeader *)block)->allocation = handle;
     ((MantraEffectPoolHeader *)block)->slots = block + 0x28;

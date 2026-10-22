@@ -16,8 +16,8 @@
 #include "snd_track_playback_api.h"
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
-extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
-extern void sdfSoundStopNamedPlayback(void);
+extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
+extern void p2sdSyncSound(void);
 
 
 
@@ -26,7 +26,7 @@ void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
     s32 remaining = 0x100 - work->fadeProgress;
 
     if (work->fadeAnimation[rowIndex].backgroundState == 0) {
-        u32 opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
+        u32 opacity = fclBlendColor(0x80808080, 0x80808000, remaining) & 0xFF;
 
         work->fadeAnimation[rowIndex].backgroundOpacity = opacity;
         if (work->fadeAnimation[rowIndex].backgroundOpacity >= 0x80) {
@@ -47,7 +47,7 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     s32 remaining = 0x100 - work->fadeProgress;
 
     if (work->fadeAnimation[rowIndex].portraitReady == 0) {
-        u32 opacity = uiBlendColors(0x80808060, 0x80808000, remaining) & 0xFF;
+        u32 opacity = fclBlendColor(0x80808060, 0x80808000, remaining) & 0xFF;
 
         work->fadeAnimation[rowIndex].portraitOpacity = opacity;
         work->fadeAnimation[rowIndex].portraitPosition[0] = 0;
@@ -60,7 +60,7 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 #include "sdf.h"
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
-extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern void eglSetOt(u32 surfaceIndex);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void btlDrawButtonIconFixed64(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32);
 /* The four sprite corner colours start from the shared grey table. */
@@ -85,7 +85,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
     iconX += work->fadeAnimation[rowIndex].portraitPosition[0];
     iconY = work->fadeAnimation[rowIndex].portraitPosition[1] - 0x14;
-    evtSetDrawSurfaceIndex(surfaceIndex);
+    eglSetOt(surfaceIndex);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
 
     tintUnit = progressRow->unit;
@@ -130,7 +130,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 }
 
 
-extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
+extern void nbPlaySe(u32 sequenceId);
 extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
@@ -145,7 +145,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
     nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
     switch (work->levelAnimation[rowIndex].state) {
     case 0:
-        work->levelAnimation[rowIndex].alpha = uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
+        work->levelAnimation[rowIndex].alpha = fclBlendColor(0x80808080, 0x80808000, fade) & 0xFF;
         if (work->levelAnimation[rowIndex].alpha >= 0x80) {
             work->levelAnimation[rowIndex].state = 1;
         }
@@ -153,7 +153,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
     case 1:
         work->levelAnimation[rowIndex].state++;
         if (work->levelAnimation[rowIndex].remaining > 0 && work->resultPhase == 0) {
-            mnuSetTitleSequenceVolumePan(0x14);
+            nbPlaySe(0x14);
             work->resultPhase = 1;
         }
         break;
@@ -194,7 +194,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
                     work->levelAnimation[rowIndex].iconFrame = 0;
                     work->levelAnimation[rowIndex].alpha = 0;
                     work->levelAnimation[rowIndex].state++;
-                    mnuSetTitleSequenceVolumePan(0x12);
+                    nbPlaySe(0x12);
                 }
             }
         } else {
@@ -217,7 +217,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
             if (work->levelAnimation[rowIndex].alpha >= 128) {
                 work->levelAnimation[rowIndex].state = 2;
                 if (work->levelAnimation[rowIndex].remaining > 0 && work->resultPhase == 0) {
-                    mnuSetTitleSequenceVolumePan(0x14);
+                    nbPlaySe(0x14);
                     work->resultPhase = 1;
                 }
             }
@@ -286,9 +286,9 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
             progress = 0;
         }
         if (row->unit->hp != 0 && !(row->unit->status & 0x4000)) {
-            color = uiBlendColors(0x80808080, 0x80808000, fade);
+            color = fclBlendColor(0x80808080, 0x80808000, fade);
         } else {
-            color = uiBlendColors(0x4F4E4E80, 0x4F4E4E00, fade);
+            color = fclBlendColor(0x4F4E4E80, 0x4F4E4E00, fade);
         }
         sprintf(text, D_003BC578, required - progress);
         glyph = itfCreateFont2TextGlyph(x + 0xC10, y + 0x98, z, color, text, NULL);
@@ -358,8 +358,8 @@ void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSki
     case 1:
         work->levelAnimation[progressRowIndex].iconAngle = (work->levelAnimation[progressRowIndex].iconAngle + 15) % 360;
         work->levelAnimation[progressRowIndex].iconColor =
-            (u32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[progressRowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
-        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[progressRowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+            (u32)(0.0f + (sdfSin((f32)((work->levelAnimation[progressRowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSin((f32)((work->levelAnimation[progressRowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
         work->levelAnimation[progressRowIndex].iconPosition[1] = 0x24 - bob;
         work->levelAnimation[progressRowIndex].iconColor = (work->levelAnimation[progressRowIndex].iconColor > 0) ? ((work->levelAnimation[progressRowIndex].iconColor > 0x80) ? 0x80 : work->levelAnimation[progressRowIndex].iconColor) : 0;
         y = work->levelAnimation[progressRowIndex].iconPosition[1];
@@ -475,8 +475,8 @@ void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsS
     case 1:
         work->profileAnimation[rowIndex].iconAngle = (work->profileAnimation[rowIndex].iconAngle + 15) % 360;
         work->profileAnimation[rowIndex].iconColor =
-            (u32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[rowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
-        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[rowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+            (u32)(0.0f + (sdfSin((f32)((work->profileAnimation[rowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSin((f32)((work->profileAnimation[rowIndex].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
         work->profileAnimation[rowIndex].iconPosition[1] = 0x24 - bob;
         work->profileAnimation[rowIndex].iconColor = (work->profileAnimation[rowIndex].iconColor > 0) ? ((work->profileAnimation[rowIndex].iconColor > 0x80) ? 0x80 : work->profileAnimation[rowIndex].iconColor) : 0;
         y = work->profileAnimation[rowIndex].iconPosition[1];
@@ -716,11 +716,11 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
 
-extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
+extern s32 dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
 
 struct EffWorldNode;
 
-extern void effObjSetInnerFloat(s32 object, f32 value);
+extern void dds3GetRadiusPoseSet(s32 object, f32 value);
 
 
 
@@ -750,7 +750,7 @@ extern s32 D_003BC5C8;
 extern u8 D_003D9178[];
 
 
-extern u32 sdfSoundIsCommandBusy(void);
+extern u32 p2sdGetPcmState(void);
 
 typedef struct { u64 v; } __attribute__((packed)) u64p;
 
@@ -771,8 +771,8 @@ extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
-extern s32 scrReadIntParameter(s32);
-extern u32 sdfSoundIsCommandBusy(void);
+extern s32 scrGetIntPara(s32);
+extern u32 p2sdGetPcmState(void);
 
 extern u32 D_003BC5B0[2];
 
@@ -801,7 +801,7 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 prfGetCapValue(u16);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
-extern void mnuSetTitleSequenceVolumePan(u32 sequenceId);
+extern void nbPlaySe(u32 sequenceId);
 
 
 void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
@@ -824,7 +824,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
     switch (work->profileAnimation[rowIndex].state) {
     case 0:
         work->profileAnimation[rowIndex].alpha =
-            uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
+            fclBlendColor(0x80808080, 0x80808000, fade) & 0xFF;
         if (work->profileAnimation[rowIndex].alpha >= 0x80) {
             work->profileAnimation[rowIndex].state = 1;
         }
@@ -832,7 +832,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
     case 1:
         work->profileAnimation[rowIndex].state++;
         if (work->profileAnimation[rowIndex].remaining > 0 && work->resultPhase == 0) {
-            mnuSetTitleSequenceVolumePan(0x14);
+            nbPlaySe(0x14);
             work->resultPhase = 1;
         }
         break;
@@ -852,7 +852,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
                         work->profileAnimation[rowIndex].iconOpacity = 0x80;
                         work->profileAnimation[rowIndex].iconFrame = 0;
                         work->profileAnimation[rowIndex].state++;
-                        mnuSetTitleSequenceVolumePan(0x12);
+                        nbPlaySe(0x12);
                     }
                 } else {
                     work->profileAnimation[rowIndex].remaining = 0;
@@ -938,7 +938,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
         prfResolveMantraNameOrFallback(profileId, &text);
         textY = y + 0x60;
         glyph = itfCreateConvertedTextGlyph(x + 0x14C0, textY, depth, color, text, NULL);
-        textWidth = frFontMeasureLines(glyph);
+        textWidth = frGetStrWidth2(glyph);
         frDestroyFontRequestAfter(glyph);
         /* The native name origin uses signed half-width truncation. */
         textOffset = -(textWidth / 2);
@@ -1062,8 +1062,8 @@ s32 brsPollResultCounterCompletion(void) {
     return 1;
 }
 
-void mnuSetTitleSequenceVolumePan(u32 sequenceId) {
-    sndSetSequenceVolumePan(sequenceId, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
+void nbPlaySe(u32 sequenceId) {
+    p2sdPlaySE(sequenceId, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
 }
 
 void func_00269400(void) {
@@ -1106,7 +1106,7 @@ extern s32 D_003BC5AC;
 
 extern void sndInitializeIopSoundSystem(char *, s32, char *, s32);
 
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 
 extern void mnuInitializeTitleAudioStreams(void);
 
@@ -1114,12 +1114,12 @@ extern void mnuCreateTitleEffectTask(void);
 
 void mnuInitializeTitleAudioAndEffects(void) {
     if (D_003BC58C != 0) {
-        sndQueueNoPayloadCommand40();
+        p2sdStopAllSe();
         return;
     }
     D_003BC58C = 1;
     sndInitializeIopSoundSystem(D_00377318, 4, D_00377338, 4);
-    sndEnsureMidiBankResident(D_00370D10[0]);
+    p2sdLoadSMGFile(D_00370D10[0]);
     D_003BC5A8 = 4;
     D_003BD8B0 = -1;
     D_003BC5AC = 0;
@@ -1157,10 +1157,10 @@ void mnuCreateTitleEffectTask(void) {
 
 void mnuResetTitleEffectState(s32 command) {
     TitleEffectState *effectState = (TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask);
-    if (sdfSoundIsCommandBusy() != 0) {
-        sdfSoundStopNamedPlayback();
+    if (p2sdGetPcmState() != 0) {
+        p2sdSyncSound();
     }
-    sdfSoundSendNamedCommand(command, 0x7f);
+    p2sdLoadPcmFile(command, 0x7f);
     effectState->frameCounter = 0;
 }
 
@@ -1177,22 +1177,22 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
     TitleEffectState *effectState = (TitleEffectState *)dds3GetProcessData(mnuTitleSoundTask);
 
-    if (sdfSoundIsCommandBusy() != 0) {
+    if (p2sdGetPcmState() != 0) {
         printf("now playeng start...\n");
-        sdfSoundStopNamedPlayback();
+        p2sdSyncSound();
     }
     sprintf(voicePath, "%s%04d.ADB", D_003771D8 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
     printf("--------------- VOICE -> %s\n", voicePath);
-    sdfSoundSendNamedCommand(voicePath, 0x64);
+    p2sdLoadPcmFile(voicePath, 0x64);
     effectState->frameCounter = 0;
 }
 
 void mnuStopTitleVoicePlayback(void) {
-    sdfSoundStopNamedPlayback();
+    p2sdSyncSound();
 }
 
 s32 mnuQueryTitleSoundBusy(void) {
-    return sdfSoundIsCommandBusy();
+    return p2sdGetPcmState();
 }
 
 void mnuNoOpTitleAudio(void) {
@@ -1205,36 +1205,36 @@ s32 mnuGetTitleEffectFrameCounter(void) {
 u32 sndOpStartTrackFromScript(void) {
     s32 sequence;
 
-    sequence = scrReadIntParameter(0);
-    sndStartTrackDefault(sequence);
+    sequence = scrGetIntPara(0);
+    p2sdPlayBGM(sequence);
     return 1;
 }
 
 u32 sndOpSetTrackDefaultVolumePan(void) {
     s32 sequence;
 
-    sequence = scrReadIntParameter(0);
-    sndSetSequenceVolumePan(sequence, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
+    sequence = scrGetIntPara(0);
+    p2sdPlaySE(sequence, SND_TRACK_DEFAULT_VOLUME, SND_TRACK_DEFAULT_PAN);
     return 1;
 }
 
 u32 sndOpSendTitleAudioCommand(void) {
-    sndQueueNoPayloadCommand40();
+    p2sdStopAllSe();
     return 1;
 }
 
 s32 mnuInitializeTitleEffects(void) {
     s32 commandName;
-    commandName = scrReadStringParameter(0);
-    if (sdfSoundIsCommandBusy() != 0) {
-        sdfSoundStopNamedPlayback();
+    commandName = scrGetStrPara(0);
+    if (p2sdGetPcmState() != 0) {
+        p2sdSyncSound();
     }
-    sdfSoundSendNamedCommand(commandName, 0x7f);
+    p2sdLoadPcmFile(commandName, 0x7f);
     return 1;
 }
 
 u32 sndOpStopNamedPlayback(void) {
-    sdfSoundStopNamedPlayback();
+    p2sdSyncSound();
     return 1;
 }
 
@@ -1242,8 +1242,8 @@ u32 sndOpStopNamedPlayback(void) {
 u32 sndOpPushCommandBusyState(void) {
     u32 soundBusy;
 
-    soundBusy = sdfSoundIsCommandBusy();
-    scrSetIntegerReturnValue(soundBusy);
+    soundBusy = p2sdGetPcmState();
+    scrSetIntReturnValue(soundBusy);
     return 1;
 }
 
@@ -1253,7 +1253,7 @@ u32 sndOpAlwaysSucceeds(void) {
 
 s32 movCheckStartupSoundState(void) {
     if (mnuPollTitleStreamStateLocked() == 0) {
-        mnuQueueTitleSoundStreamEntry(scrReadIntParameter(0));
+        mnuQueueTitleSoundStreamEntry(scrGetIntPara(0));
         return 0;
     }
     return mnuPollTitleStreamStateLocked() != 1;
@@ -1308,7 +1308,7 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     s32 bufferBytes = wordCount * SND_TRANSFER_WORD_BYTES;
     s32 halfwordIndex;
 
-    D_003BC5B8 = sdfMemoryGetBlockAddress(sdfMemAllocDirect(bufferBytes));
+    D_003BC5B8 = sdfMemGetPtr(sdfMemAllocDirect(bufferBytes));
     for (halfwordIndex = 0; halfwordIndex < wordCount * SND_TRANSFER_WORD_HALFWORDS; halfwordIndex++) {
         ((u16 *)D_003BC5B8)[halfwordIndex] = 0;
     }

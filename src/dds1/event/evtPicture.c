@@ -9,16 +9,16 @@ extern u8 evtPictureQuadTexcoords[];
 extern u8 evtPictureQuadColor[];
 extern SdfPoolNode D_003255A8;
 #include "sdf_packet_alloc.h"
-extern void itfSendTablePacket(SdfListHead *packet, s32 index, s32 flag);
-extern void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorData, s32 tail, SdfTex *texture, s32 flag, SdfListHead *command);
+extern void itfMiscDrawAlphaPrim(SdfListHead *packet, s32 index, s32 flag);
+extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, SdfTex *texture, s32 flag, SdfListHead *command);
 
 void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
     SdfListHead *packet;
 
-    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
-    itfSendTablePacket(packet, 0, 0);
-    itfQueueTextureBoundQuadPacket(evtPictureQuadBounds, evtPictureQuadTexcoords, evtPictureQuadColor, 0xFFF, texture, 0, packet);
+    packet = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packet);
+    itfMiscDrawAlphaPrim(packet, 0, 0);
+    itfMiscDrawSpritePrim(evtPictureQuadBounds, evtPictureQuadTexcoords, evtPictureQuadColor, 0xFFF, texture, 0, packet);
     D_003255A8.append(&D_003255A8, packet);
 }
 
@@ -37,7 +37,7 @@ s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
 }
 
 /* Drop the picture's texture, then free the task data. */
-void evtPictureReleaseTaskTextureAndState(KwlnTask *task) {
+void evtPictureShutdown(KwlnTask *task) {
     EvtPictureWork *picture;
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);

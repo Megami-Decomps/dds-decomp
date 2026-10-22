@@ -26,10 +26,10 @@ typedef struct
 
 int sceMcGetDir(int, int, const char *, unsigned, int, sceMcTblGetDir *);
 
-void mcChangeCurrentDirectory(u32 context, const char *path);
-void mcMakeDirectory(u32 context, const char *path);
-void mcReadDirectoryEntries(u32 context, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit);
-void mcDeleteFilePath(u32 context, const char *path);
-void mcOpenFilePath(u32 context, const char *path, s32 openFlags);
+void sdfMcFuncChdir(u32 context, const char *path);
+void sdfMcFuncMkdir(u32 context, const char *path);
+void sdfMcFuncGetDir(u32 context, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit);
+void sdfMcFuncDelete(u32 context, const char *path);
+void sdfMcFuncOpen(u32 context, const char *path, s32 openFlags);
 
 #endif

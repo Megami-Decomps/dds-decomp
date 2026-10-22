@@ -922,7 +922,7 @@ extern f32 btlGetActorEffectScale(BtlTask *);
 
 
 
-extern void sdfVuLoadRotationMatrixZ(f32);
+extern void SetRotateMatrixY(f32);
 
 
 /* Pull-back uses 0.55 + ratio * (0.60 - 0.55), with progress capped only above 1.
@@ -975,7 +975,7 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     if (command->flags & 0x200) {
         angle = -angle;
     }
-    sdfVuLoadRotationMatrixZ(angle);
+    SetRotateMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -1055,7 +1055,7 @@ s32 btlClassifyLinkedSkillRequest(BtlUnit *source, BtlUnit *unit, s32 index) {
         return result;
     }
     if (datCommandRecords[index].effectType == 2) {
-        if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
+        if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && evtBitCheck(0x802) != 0) {
             return 1;
         }
         return 4;
@@ -1445,9 +1445,9 @@ s32 btlSetFirstCriticalHpUnitSideFlag(void) {
         if (((BtlUnit *)unit)->status.flags & 1) {
             if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0) {
                 if (((BtlUnit *)unit)->status.flags & 0x200) {
-                    mdlFlagSet(0x811);
+                    evtBitOn(0x811);
                 } else {
-                    mdlFlagClear(0x811);
+                    evtBitOff(0x811);
                 }
                 return 6;
             }
@@ -2763,7 +2763,7 @@ u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (sdfGetRand(&effSharedRandomState) & 1) {
+            if (dds3GetRandA(&effSharedRandomState) & 1) {
                 btlSetEffectCameraKeys(command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -2813,7 +2813,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     command->motionParameter = 10.0f;
     command->motionProgress = 1;
     command->state = 0;
-    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)target, 0);
+    effBTLModelGetMarkPosition2((BtlUnit *)target, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
     command->backCamera.position[1] += 150.0f;
     btlInterpolateVectorStep(&command->frontCamera);
@@ -2948,7 +2948,7 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color)
     }
 }
 
-extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
+extern s32 sdfModelGetNodeIndexByName(SdfModel *, const char *);
 
 s32 btlDispatchNamedChunkNode(void *query) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
@@ -2965,7 +2965,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     }
     model = ((BtlUnit *)unit)->ext->owner;
     descriptor = model->inner;
-    index = sdfNamedChunkFindId(descriptor, query);
+    index = sdfModelGetNodeIndexByName(descriptor, query);
     if (index == -1) {
         return 1;
     }
@@ -3053,7 +3053,7 @@ s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation) {
     }
     if (animation == 1) {
         s32 currentSpecies;
-        currentMotion = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+        currentMotion = mdlGetMotionNum(unit->ext->owner, 0);
         if (currentMotion == animation) {
             return -1;
         }
@@ -3505,7 +3505,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     }
 
     model = selected->ext->owner;
-    mdlLoadTertiaryVectorVU(model);
+    mdlGetScale(model);
     VU0_GET_VF10_X(currentScale);
     if (currentScale == transition->targetScale) {
         return;
@@ -3526,7 +3526,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     VU0_STORE_VF(vf10, inner->scale);
-    mdlStoreTertiaryVectorVU(selected->ext->owner);
+    mdlSetScale(selected->ext->owner);
 
     modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
     modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
@@ -3600,7 +3600,7 @@ void btlInitRandomBossSelection(void) {
     u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
-    ((BtlBossEffectPayload *)data)->selectedId = sdfGetRand(&effSharedRandomState) % 6;
+    ((BtlBossEffectPayload *)data)->selectedId = dds3GetRandA(&effSharedRandomState) % 6;
     btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
@@ -3726,7 +3726,7 @@ void btlStepFocusAngle(void) {
     if (unit == NULL) {
         return;
     }
-    mdlGetNodeMotionIndex(player->ext->owner, 0);
+    mdlGetMotionNum(player->ext->owner, 0);
     if (slot[2] & 4) {
         if ((slot[1] & 0xFF000000) != 0x80000000) {
             slot[1] += 0x10000000;
@@ -3736,7 +3736,7 @@ void btlStepFocusAngle(void) {
             slot[1] += 0xF0000000;
         }
     }
-    evtSetUnitAlphaTransition(((BtlUnit *)*(u32 **)slot)->ext, 0, slot[1]);
+    evtSetUnitColorA(((BtlUnit *)*(u32 **)slot)->ext, 0, slot[1]);
 }
 
 typedef struct BtlEffectTarget {
@@ -3815,7 +3815,7 @@ s32 btlSwapRandomBossSelection(void) {
         return -1;
     }
 
-    newId = sdfGetRand(&effSharedRandomState) % 6;
+    newId = dds3GetRandA(&effSharedRandomState) % 6;
     if (newId == effect->selectedId) {
         newId = (newId + 1) % 6;
     }
@@ -3948,7 +3948,7 @@ void btlRefreshRavanaUnitModelsAndPose(void) {
     }
 }
 
-extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
+extern void fldCamUpdateDefault(BtlLinkedCommand *, BtlCamState *);
 
 /* Event entry carrying a battle task and its action kind. */
 typedef struct BtlEventEntry {
@@ -3976,7 +3976,7 @@ s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry) {
     kind = entry->status;
     if (kind < 9) {
         if (kind >= 4) {
-            btlSetDefaultActionCameraPose(entry, &entry->camera);
+            fldCamUpdateDefault(entry, &entry->camera);
             entry->flags |= 0x1000;
             return 0;
         }
@@ -4142,7 +4142,7 @@ s32 btlPickRandomMarkedTask(void) {
     if (count == 0) {
         return -1;
     }
-    task = candidates[sdfGetRandInt(0, count)];
+    task = candidates[dds3GetRandIntA(0, count)];
     unit = task->unit;
     fldAppendSceneGroupHandle(task);
     task->indexWork.phase = 2;
@@ -4240,7 +4240,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
         if (count == 0) {
             return -1;
         }
-        task = candidates[sdfGetRandInt(0, count)];
+        task = candidates[dds3GetRandIntA(0, count)];
         unit = task->unit;
         fldAppendSceneGroupHandle(task);
         task->indexWork.phase = 2;
@@ -4493,7 +4493,7 @@ s32 btlSelectMissingHariSummon(void) {
     if (count == 0) {
         return -1;
     }
-    selected = sdfGetRand(&effSharedRandomState) % count;
+    selected = dds3GetRandA(&effSharedRandomState) % count;
     btlBossDebugPrintf("btl:HARI2 summon=%X\n", missing[selected]);
     return missing[selected];
 }
@@ -4579,7 +4579,7 @@ s32 func_0020A860(void) {
                     if (species < 0x143) {
                         if (species >= 0x13D) {
                             /* Agility from record 0x13D - 6 + [0, 6); the sum stays int before narrowing. */
-                            s32 value = datEnemyRecords[0x13D].baseStats[3] - 6 + sdfGetRandInt(0, 6);
+                            s32 value = datEnemyRecords[0x13D].baseStats[3] - 6 + dds3GetRandIntA(0, 6);
                             s8 agility = value;
 
                             unit->partyRecord.baseStats[3] = agility;
@@ -4607,7 +4607,7 @@ s32 func_0020A860(void) {
         if (count == 0) {
             return -1;
         }
-        task = candidates[sdfGetRandInt(0, count)];
+        task = candidates[dds3GetRandIntA(0, count)];
         unit = task->unit;
         fldAppendSceneGroupHandle(task);
         task->indexWork.phase = 2;
@@ -4853,7 +4853,7 @@ void btlChooseRandomPresetCameraKeys(unit)
     u32 kind;
 
     btlFlagAllUnitDefeatCandidatesTask();
-    kind = sdfGetRandInt(0, 3);
+    kind = dds3GetRandIntA(0, 3);
     switch (kind) {
     case 0:
         printf(D_003A5FF0);
@@ -4949,16 +4949,16 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
     if (rotate == 1 && runtime[0x122] == 3) {
         switch (kind) {
         case 0:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            sdfVuLoadRotationMatrixX(-0.13089969f);
+            SetRotateMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            sdfVuLoadRotationMatrixX(angle);
+            SetRotateMatrixX(angle);
             sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -5101,7 +5101,7 @@ u8 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
             return 1;
         case 0x1AD:
             btlFlagAllUnitsDefeatCandidate();
-            shot = sdfGetRandInt(0, 4);
+            shot = dds3GetRandIntA(0, 4);
             switch (shot) {
             case 0:
                 printf("DERUTA:0++++++++++++++++++++++++++\n");
@@ -5131,7 +5131,7 @@ u8 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
             return 1;
         default:
             btlFlagAllUnitDefeatCandidatesTask();
-            shot = sdfGetRandInt(0, 5);
+            shot = dds3GetRandIntA(0, 5);
             switch (shot) {
             case 0:
                 printf("I-E:0++++++++++++++++++++++++++\n");
@@ -5211,7 +5211,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
         if (count >= 2 && selector == 0 && mode == 1) {
             if (btlCanUseActorCategoryFlag4(command)) {
                 btlFlagAllUnitDefeatCandidatesTask();
-                shot = sdfGetRandInt(0, 3);
+                shot = dds3GetRandIntA(0, 3);
                 switch (shot) {
                 case 0:
                     printf(D_003A6338);
@@ -5234,14 +5234,14 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
             if (btlCanUseLinkedActor(command)) {
                 variant = 0;
                 if (!btlCanUseActorCategoryFlag2(command)) {
-                    variant = sdfGetRandInt(0, 2);
+                    variant = dds3GetRandIntA(0, 2);
                 }
             } else {
                 variant = 1;
             }
             if (variant == 0) {
                 btlFlagAllUnitDefeatCandidatesTask();
-                shot = sdfGetRandInt(0, 4);
+                shot = dds3GetRandIntA(0, 4);
                 switch (shot) {
                 case 0:
                     printf("TP1:0++++++++++++++++++++++++++\n");
@@ -5278,7 +5278,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
     if (btlCanUseLinkedActor(command)) {
         variant = 0;
         if (!btlCanUseActorCategoryFlag2(command)) {
-            variant = sdfGetRandInt(0, 2);
+            variant = dds3GetRandIntA(0, 2);
         }
     } else {
         variant = 1;

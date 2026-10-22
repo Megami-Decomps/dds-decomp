@@ -7,7 +7,7 @@
 struct EffWorldNode;
 
 /* Setting either selection does not transfer ownership. */
-void dds3SetWorldObject(struct EffWorldNode *primaryObject);
-void dds3SetWorldSecondaryObject(struct EffWorldNode *secondaryObject);
+void dds3SetActiveScene(struct EffWorldNode *primaryObject);
+void dds3SetControlScene(struct EffWorldNode *secondaryObject);
 
 #endif

@@ -457,7 +457,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    if (evtGetMessageWindowControlState() == 0) {
+    if (fclChkMessage() == 0) {
         mnuSetStateValue(&context->gradient.active, 0);
         if (input & 1) {
             list = resources->windows[0]->list;

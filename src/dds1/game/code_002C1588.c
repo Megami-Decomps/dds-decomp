@@ -45,7 +45,7 @@ u32 uiScaleColorRgb(u32 color, u32 scaleFactor) {
 
 /* Blend packed 8-bit-channel colors; weight is mirrored above 0x100 for the
  * first color, with 0x100 - weight used for the second. */
-u32 uiBlendColors(u32 firstColor, u32 secondColor, u32 weight) {
+u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight) {
     u32 a0 = firstColor >> 24;
     u32 r0 = (firstColor & 0xFF0000) >> 16;
     u32 g0 = (firstColor & 0xFF00) >> 8;

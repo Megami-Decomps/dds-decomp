@@ -11,13 +11,13 @@
 typedef float f32;
 
 
-extern void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d* axis, RwMatrix* matrix);
+extern void StoreRotateMatrixAxis(f32 angle, const RwV3d* axis, RwMatrix* matrix);
 
 /* Persona 4 func_004bd380 @ 004BD380 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
+void SetRotateMatrixAxis(f32 angle, const RwV3d* axis)
 {
     RwMatrix matrix;
-    sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);
+    StoreRotateMatrixAxis(angle, axis, &matrix);
     VU0_LOAD_MATRIX(&matrix);
 }
 
@@ -25,7 +25,7 @@ void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
 /* Rotation loaders build the matrix in a volatile scratch array: it is read
  * only by the lqc2 asm through its address, and retail stores its four
  * elements in program order. */
-void sdfVuLoadSecondaryRotationMatrixX(f32 angle) {
+void SetRotateMatrixX_B(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -51,7 +51,7 @@ void sdfVuLoadSecondaryRotationMatrixY(f32 angle) {
     VU0_LOAD_MATRIX_B((f32 *)m);
 }
 
-void sdfVuLoadSecondaryRotationMatrixZ(f32 angle) {
+void SetRotateMatrixZ_B(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -65,16 +65,16 @@ void sdfVuLoadSecondaryRotationMatrixZ(f32 angle) {
 }
 
 /* Build an axis-angle matrix in the VU0 secondary matrix registers. */
-void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
+void SetRotateMatrixAxis_B(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
-    sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);
+    StoreRotateMatrixAxis(angle, axis, &matrix);
     VU0_LOAD_MATRIX_B(&matrix);
 }
 
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
-void sdfRotateVuMatrixAboutX(f32 angle)
+void RotateMatrixX(f32 angle)
 {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -83,7 +83,7 @@ void sdfRotateVuMatrixAboutX(f32 angle)
 }
 
 /* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
-void sdfRotateVuMatrixAboutY(f32 angle)
+void RotateMatrixY(f32 angle)
 {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -92,7 +92,7 @@ void sdfRotateVuMatrixAboutY(f32 angle)
 }
 
 /* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
-void sdfRotateVuMatrixAboutZ(f32 angle)
+void RotateMatrixZ(f32 angle)
 {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -100,16 +100,16 @@ void sdfRotateVuMatrixAboutZ(f32 angle)
     VU0_ROTATE_BASIS_Z(c, s);
 }
 
-extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
+extern void SetRotateMatrixZ_B(f32 angle);
 
 /* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */
-void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
+void SetRotateMatrixXYZ(const RwV3d *rot)
 {
-    sdfVuLoadRotationMatrixX(rot->x);
+    SetRotateMatrixX(rot->x);
     sdfVuLoadSecondaryRotationMatrixY(rot->y);
-    sdfMultiplyVuMatrixInPlace();
-    sdfVuLoadSecondaryRotationMatrixZ(rot->z);
-    sdfMultiplyVuMatrixInPlace();
+    MultMatrixRevNoArg();
+    SetRotateMatrixZ_B(rot->z);
+    MultMatrixRevNoArg();
 }
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
@@ -126,7 +126,7 @@ void sdfComposeVuMatrixFromRegisters(void)
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
-void sdfMultiplyVuMatrixInPlace(void)
+void MultMatrixRevNoArg(void)
 {
         VU0_MATRIX4_MUL_BANK_B_LEFT();
 }

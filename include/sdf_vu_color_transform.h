@@ -13,7 +13,7 @@ typedef struct SdfVuColorTransform {
     f32 colorDelta[4]; /* 0x20 */
 } SdfVuColorTransform;
 
-void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference,
+void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference,
                                     u32 packedColor, u32 firstColor,
                                     u32 secondColor, f32 blend, f32 scale,
                                     f32 y);

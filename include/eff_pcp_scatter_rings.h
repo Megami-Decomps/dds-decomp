@@ -260,13 +260,13 @@ typedef char PcpScatterPlainInstance_allocationHandle_offset_must_be_0x138[
     ((u32)&((PcpScatterPlainInstance *)0)->allocationHandle == 0x138) ? 1 : -1];
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
-PcpScatterInstanceA *effPcpScatterCreateParticleInstance(
+PcpScatterInstanceA *effPCPWhirlwindPolyCreate(
     PcpScatterParamsA *params, u32 resource);
-PcpScatterInstanceB *effScatterCreateDampedRing(
+PcpScatterInstanceB *effPCPWhirlwind2PolyCreate(
     PcpScatterParamsB *params, u32 resource);
-PcpScatterInstanceC *effScatterCreateTwoColorRing(
+PcpScatterInstanceC *effPCPWhirlwind3PolyCreate(
     PcpScatterParamsC *params, u32 resource);
-PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(
+PcpScatterPlainInstance *effPCPWwSpherePolyCreate(
     PcpScatterPlainParams *params, u32 resource);
 
 #endif

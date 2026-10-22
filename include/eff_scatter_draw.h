@@ -32,7 +32,7 @@ typedef char PcpScatterDrawAssetOffsetCheck[
 typedef char PcpScatterDrawAllocationOffsetCheck[
     ((u32)&((PcpScatterDraw *)0)->allocation == 0x78) ? 1 : -1];
 
-void effReleaseScatterObject(PcpScatterDraw *object);
-void effScatterStoreSourceTransformMatrix(PcpScatterDraw *draw, const void *sourceMatrix);
+void dds3WhirlwindPolyListDelete(PcpScatterDraw *object);
+void dds3WhirlwindPolyListSetRotateMatrix(PcpScatterDraw *draw, const void *sourceMatrix);
 
 #endif

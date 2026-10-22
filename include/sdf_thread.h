@@ -13,7 +13,7 @@ typedef struct SdfThreadNode {
 SdfThreadNode *sdfFindThreadNode(s32 threadId);
 
 /* Register a thread node, then start its entry function on the supplied stack. */
-void sdfStartTrackedThread(SdfThreadNode *node, void (*entry)(void),
+void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void),
                            void *stack, s64 stackSize, s32 priority, s32 arg);
 
 #endif /* SDF_THREAD_H */

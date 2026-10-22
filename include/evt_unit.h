@@ -81,7 +81,7 @@ typedef struct EvtUnitVectorSlot {
 typedef char EvtUnitVectorSlotSizeCheck[sizeof(EvtUnitVectorSlot) == 0x40 ? 1 : -1];
 
 /* Event motion work, not the world-list node which contains its address.
- * Setup opcodes pass this same object to evtPrepareUnitMotionState and
+ * Setup opcodes pass this same object to evtSetUnitMotion and
  * evtConfigureUnitMotionSlot; the direction updater passes it to planar aim.
  * targetVector is four floats even when copied as a quadword by VU0/MMI macros.
  * The manager copies the entire object by value: 0x170 (DDS1), 0x1D0 (DDS2).
@@ -140,12 +140,12 @@ typedef struct EvtUnit {
     s16 motionTicks;               /* 0xB2 */
     s16 motionParameter;           /* 0xB4: frames in setup; direction scale in updater */
     s16 directionOffset;           /* 0xB6: updater multiplies by 0.01 */
-    f32 transitionMotionScale;     /* 0xB8: set by evtSetTransitionMotionScale */
+    f32 transitionMotionScale;     /* 0xB8: set by evtSetWaitMotionSpeed */
     s16 unkBC;                     /* 0xBC: stored script/motion parameter */
     s16 unkBE;                     /* 0xBE: first stored short parameter */
     s16 unkC0;                     /* 0xC0: second stored short parameter */
     u8 padC2[2];
-    s16 motionSetupId;             /* 0xC4: motion selected by evtPrepareUnitMotionState */
+    s16 motionSetupId;             /* 0xC4: motion selected by evtSetUnitMotion */
     s16 motionSetupStartFrame;     /* 0xC6 */
     s16 motionSetupEndFrame;       /* 0xC8 */
     s16 motionEndFrame;            /* 0xCA: threshold for the timed motion's final phase */
@@ -229,17 +229,17 @@ typedef struct EvtUnit {
 } EvtUnit;
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, struct MdlCtx *owner);
-s32 evtReleaseUnitTransitionWork(EvtUnit *work);
+s32 evtDeleteUnitHandle(EvtUnit *work);
 
 void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
-void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 duration);
-void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color);
-void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color);
-void evtSetUnitStatusFlags(EvtUnit *unit);
-EvtUnit *evtUnitGetNestedValue(EffWorldNode *unit);
-void evtUnitSetStoredParameter(EvtUnit *unit, s32 value);
+void evtSetUnitLightDir(EvtUnit *unit, s32 duration);
+void evtSetUnitColorRGB(EvtUnit *unit, s32 duration, u32 color);
+void evtSetUnitColorA(EvtUnit *unit, s32 duration, u32 color);
+void evtUnitLightOn(EvtUnit *unit);
+EvtUnit *evtGetUnitHandle2(EffWorldNode *unit);
+void evtSetWaitMotion(EvtUnit *unit, s32 value);
 
-s32 evtTickPackLoad(KwlnTask *task);
-void evtReleaseEventPackResources(KwlnTask *task);
+s32 evtCheckScriptDone(KwlnTask *task);
+void evtWaitEventPackLoad(KwlnTask *task);
 
 #endif /* EVT_UNIT_H */

@@ -194,7 +194,7 @@ typedef struct PcpFlashStreakParams {
 
 /* Paired Flash runtime owners and their variable particle records.
  * Factory allocations place each particle array immediately after its owner. */
-/* Three consecutive packed colors returned by effGetGroupIndexRecord. */
+/* Three consecutive packed colors returned by dds3FlashPolyList2GetVC. */
 typedef struct PcpFlashColorSlot {
     s32 first;
     s32 second;
@@ -570,7 +570,7 @@ typedef struct PcpFlashTrianglePulseParams {
     u32 drawMode;
 } PcpFlashTrianglePulseParams;
 
-PcpFlashTrianglePulseWork *effFlashRecordCreate(PcpFlashTrianglePulseParams *params);
+PcpFlashTrianglePulseWork *effPCPFlashPolySphere2Create(PcpFlashTrianglePulseParams *params);
 
 typedef char PcpFlashScalingOrbitParamsSizeCheck[
     sizeof(PcpFlashScalingOrbitParams) == 0x48 ? 1 : -1];

@@ -25,9 +25,9 @@ typedef char ItfPackedSegmentsSizeCheck[(sizeof(ItfPackedResourceSegments) == 0x
 typedef char ItfPackedOffsetsOffsetCheck[((u32)&((ItfPackedResourceSegments *)0)->entryBitOffsets == 0x04) ? 1 : -1];
 typedef char ItfPackedBitstreamOffsetCheck[((u32)&((ItfPackedResourceSegments *)0)->packedBitstream == 0x08) ? 1 : -1];
 
-void itfSplitRelativeSegments(ItfRelativeSegmentResourceView *resource,
+void frGetFontImagePtrs(ItfRelativeSegmentResourceView *resource,
                               ItfPackedResourceSegments *segments);
-s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex,
+s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex,
                                 void *resourceBase,
                                 ItfPackedResourceSegments *segments);
 

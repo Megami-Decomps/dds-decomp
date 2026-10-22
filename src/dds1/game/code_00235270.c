@@ -41,25 +41,25 @@ extern s32 evtDrawFrameListColumnHeadings();
 
 extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
-extern s32 effEventAdvanceSolidRectangleSetup(void);
+extern s32 evtViewerCheckDirty(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
-extern void sndEnsureMidiBankResident(s32 sequence);
+extern void p2sdLoadSMGFile(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
-extern void effObjSetFlags(void *object, s32 flags);
-extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
-extern void fldSetSwayMode(u32 mode);
-extern void fldSetSkyDrawState(u32 drawState);
-extern void fldSetSkyAlpha(u32 alpha);
-extern s16 fldGetSkyAlpha(void);
+extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
+extern void *dds3AddBEDEffectObjectBasic2(void *obj, void *vecA, void *vecB);
+extern void fldSetFilterAnime(u32 mode);
+extern void fldSkySetAlpha(u32 drawState);
+extern void fldSkySetAlphaOfs(u32 alpha);
+extern s16 fldSkyGetAlphaOfs(void);
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
-extern void fldDrawSkyGradient(void);
-extern void fldSelectDisplayBuffer(s32 id);
+extern void fldSkyDrawFilter(void);
+extern void rsetOtOfs(s32 id);
 extern void fldSubmitTexturedOverlaySprite(void);
-extern void sndStartTrackExtended(s32 track);
-extern void sndTransitionBgm(s32 sequence);
+extern void p2sdPlayBGMFade(s32 track);
+extern void p2sdSetBgmTrack(s32 sequence);
 #include "sdf_debug_api.h"
-extern void sndReleaseTrackHandle(u32 sequence);
-extern void sndQueueSoundId(u32 sequence);
+extern void p2sdStopBGM(u32 sequence);
+extern void p2sdStopSe(u32 sequence);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
@@ -112,35 +112,35 @@ extern u32 evtSkyOverlayEnabled;
 extern char D_003BC0C8[]; /* "NAME:" */
 
 /* Create a task with an initialized event payload. */
-KwlnTask *evtCreateTask(s32 taskId, const char *path) {
+KwlnTask *evtStartPictureProcess2(s32 taskId, const char *path) {
     EvtPictureWork *data;
 
     data = evtAllocateContext();
-    evtSetConvertedContextValue(data, path);
-    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
+    LoadTexture(data, path);
+    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureShutdown, (u32)data);
 }
 
 
-KwlnTask *evtCreateTaskWithValue(s32 taskId, SdfTex *texture) {
+KwlnTask *evtStartPictureProcess(s32 taskId, SdfTex *texture) {
     EvtPictureWork *data;
 
     data = evtAllocateContext();
     data->texture = texture;
-    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureReleaseTaskTextureAndState, (u32)data);
+    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureShutdown, (u32)data);
 }
 
-void evtSetSkyOverlayEnabled(u32 enabled) {
+void evtSetBokasi(u32 enabled) {
     evtSkyOverlayEnabled = enabled;
 }
 
 /* Either set the sky parameter immediately or interpolate from its current value. */
-void evtBeginSkyParameterTransition(s32 duration, s32 target) {
+void evtSetSkyAlpha(s32 duration, s32 target) {
     s16 current;
 
-    current = fldGetSkyAlpha();
+    current = fldSkyGetAlphaOfs();
     if (current != target) {
         if (duration == 0) {
-            fldSetSkyAlpha(target);
+            fldSkySetAlphaOfs(target);
             evtSkyTransitionActive = 0;
         } else {
             evtSkyTransitionDuration = duration;
@@ -152,36 +152,36 @@ void evtBeginSkyParameterTransition(s32 duration, s32 target) {
     }
 }
 
-u16 evtIsSkyTransitionActive(void) {
+u16 evtCheckSkyAlphaAnime(void) {
     return evtSkyTransitionActive;
 }
 
-void evtAdvanceSkyTransition(void) {
+void evtUpdateSkyAlpha(void) {
     if (evtSkyTransitionActive != 0) {
         evtSkyTransitionFrame += 1;
-        fldSetSkyAlpha(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
+        fldSkySetAlphaOfs(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
         if (evtSkyTransitionFrame >= evtSkyTransitionDuration) {
             evtSkyTransitionActive = 0;
         }
     }
 }
 
-s32 evtUpdateSkyTask(KwlnTask *task) {
-    evtAdvanceSkyTransition();
-    fldDrawSkyGradient();
+s32 evtSkyProcess1(KwlnTask *task) {
+    evtUpdateSkyAlpha();
+    fldSkyDrawFilter();
     if (evtSkyOverlayEnabled != 0) {
-        fldSelectDisplayBuffer(0x53);
+        rsetOtOfs(0x53);
         fldSubmitTexturedOverlaySprite();
     }
     return 0;
 }
 
-void evtResetSkyTaskFlags(KwlnTask *task) {
+void evtSkyShutdown(KwlnTask *task) {
     evtSkyTransitionActive = 0;
     evtSkyOverlayEnabled = 0;
 }
 
-void evtDestroySkyTask(void) {
+void evtExitSky(void) {
     KwlnTask *task;
 
     task = dds3SearchProcessName(evtSkyTaskName);
@@ -190,12 +190,12 @@ void evtDestroySkyTask(void) {
     }
 }
 
-s32 evtCreateSkyTask(void) {
-    fldSetSwayMode(0);
-    fldSetSkyDrawState(0x80);
-    fldSetSkyAlpha(0);
+s32 evtInitSky(void) {
+    fldSetFilterAnime(0);
+    fldSkySetAlpha(0x80);
+    fldSkySetAlphaOfs(0);
     fldSetFadeTarget(0, 1, 0);
-    return (s32)dds3StartProcess(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
+    return (s32)dds3StartProcess(evtSkyTaskName, 0x2B0E, 1, 1, evtSkyProcess1, evtSkyShutdown, 0);
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
@@ -206,7 +206,7 @@ s32 evtUpdateFrameVariableTask(KwlnTask *task) {
     return 0;
 }
 
-KwlnTask *evtCreateFrameVariableTask(void) {
+KwlnTask *evtInitFrameVar(void) {
     return dds3StartProcess("FrameVar", 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
 }
 
@@ -225,7 +225,7 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
     s32 textY;
     s32 index;
 
-    kwlnDrawSpriteCell(list, x, y, width, rows);
+    dds3ConsPanelTagLink(list, x, y, width, rows);
     textX = (x << 4) + 0x7000;
     textY = (y << 3) + 0x7900;
     if (header != NULL) {
@@ -246,11 +246,11 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
         textY = ((y - 10) << 3) + 0x7900;
         textX = ((x + 5 * width + 6) << 4) + 0x7000;
         if (first > 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC048));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(textX, textY, 0xFEFFFF, 6, D_003BC048));
         }
         textY = ((y + 12 * rows - 2) << 3) + 0x7900;
         if (index < total) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC050));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(textX, textY, 0xFEFFFF, 6, D_003BC050));
         }
     }
     D_003BC040++;
@@ -259,7 +259,7 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADDE0);
 
 s32 evtAppendValueChangeDebugLabel(SdfListHead *list, s32 x, s32 y) {
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -282,20 +282,20 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
 void evtDrawFloatValueEditorRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003ADE00,
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003ADE00,
                                                                  ctx->floatValue));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE10));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE10));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE28));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE28));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -311,7 +311,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
     f32 step;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 8) {
@@ -345,7 +345,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 evtDrawValueChangeNoticeRow(SdfListHead *list, s32 x, s32 y) {
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -358,19 +358,19 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 void evtDrawValueChangeInstructionRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE78));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -379,7 +379,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
     s32 step;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 7) {
@@ -414,35 +414,35 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 evtFrameChangeHead(SdfListHead *target, s32 x, s32 y) {
-    sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
 void evtViewerDrawFrameChangeRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         return;
     case 7:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
         return;
     case 8:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
         break;
     case 9:
         break;
@@ -453,7 +453,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
     s32 step;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtViewerDrawFrameChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 6) {
@@ -542,31 +542,31 @@ void evtDrawProjectCommandRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
             style = 0;
         }
         if (index == 9) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
                 D_003BC080, labels[index], primaryOptions[mnuCampGetPrimaryOption(ctx)]));
         } else if (index == 10) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
                 D_003BC080, labels[index], secondaryOptions[mnuCampGetSecondaryOption(ctx)]));
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
                 D_003BC088, labels[index]));
         }
     }
 }
 
 extern void evtDrawEntrySelectionRow();
-extern s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
+extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
                                  s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
                                  s32 *secondaryCursor, s32 *primaryCursor);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = sdfCreateResetPacketList();
+    SdfListHead *packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtDrawProjectCommandRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (work->actionMode != 1) {
         return 0;
     }
-    return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, &work->inputA);
+    return dds3SelectMenu(0, 1, 0xB, 1, 0xB, 0, 0, 0, &work->inputA);
 }
 
 extern char D_003BC090[];
@@ -579,7 +579,7 @@ s32 evtDrawStringEntry(SdfListHead *output, s32 x, s32 y, EvtRuntime *work) {
     if (work->title == 0) {
         return 0;
     }
-    sdfAppendPacket(output, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->title));
+    sdfDrawTagLink(output, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, work->title));
     return 2;
 }
 
@@ -593,13 +593,13 @@ void evtDrawSelectableTextRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
         } else {
             color = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, work->itemNames[index]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC090, work->itemNames[index]));
     }
 }
 
 /* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
 s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = sdfCreateResetPacketList();
+    SdfListHead *packets = dds3FontReqAllocDrawTag();
     s32 width = 10;
 
     if (work->title != 0) {
@@ -613,13 +613,13 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     if (work->actionMode != 2) {
         return 0;
     }
-    return kwlnStepTwoListCursors(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, &work->cursor);
+    return dds3SelectMenu(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, &work->cursor);
 }
 
 s32 evtDrawInputValueRow(SdfListHead *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
     sprintf(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
@@ -642,7 +642,7 @@ void evtDrawKeyboardRow(SdfListHead *list, s32 xPosition, s32 y, s32 row, EvtRun
         drawX = x;
         x += 0xC0;
         i++;
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(drawX, y, 0xFEFFFF, color, D_003BC0A0, ch));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(drawX, y, 0xFEFFFF, color, D_003BC0A0, ch));
     } while (i < 0xB);
 }
 
@@ -653,7 +653,7 @@ s32 evtUpdateNameEntryDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 length;
     s32 key;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, ctx,
                      evtDrawInputValueRow, evtDrawKeyboardRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
@@ -661,7 +661,7 @@ s32 evtUpdateNameEntryDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 3) {
         return 0;
     }
-    input = kwlnStepTwoListCursors(0, 11, 4, 11, 4, NULL, NULL,
+    input = dds3SelectMenu(0, 11, 4, 11, 4, NULL, NULL,
                                   &ctx->charCol, &ctx->charRow);
     if (input < 0) {
         return -1;
@@ -706,7 +706,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0D8);
 s32 evtDrawEventFileNameRow(SdfListHead *list, s32 x, s32 y) {
     char text[32];
     sprintf(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
@@ -718,27 +718,27 @@ void evtDrawEventCutSelectRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRun
     }
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0A8));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0B0, D_003BBE78));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC0A8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_003BC0B0, D_003BBE78));
         return;
     case 1:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0B8));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0C0, D_003BBE7A));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC0B8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_003BC0C0, D_003BBE7A));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " L,R = NO-+"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " L,R = NO-+"));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " U,D = SELECT"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " U,D = SELECT"));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE40));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003ADE40));
         return;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE50));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003ADE50));
         return;
     case 7:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " RL  = SET 600"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " RL  = SET 600"));
         break;
     }
 }
@@ -747,7 +747,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
     u32 num;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 9) {
@@ -836,10 +836,10 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
 void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32 x,
                                s32 unused, EvtRuntime *runtime) {
     x += 0x6C0;
-    kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
+    dds3ConsPanelTagLink(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
     if (selected->entryHeader >= 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(
             x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088,
             runtime->entryName[selected->entryHeader]));
     }
@@ -907,12 +907,12 @@ void evtDrawEntrySelectionRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
         } else {
             style = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, names[group->type]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, names[group->type]));
     }
 }
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = sdfCreateResetPacketList();
+    SdfListHead *packets = dds3FontReqAllocDrawTag();
     s32 count;
     s32 shown;
 
@@ -929,7 +929,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     if (count < 0x1D) {
         shown = count;
     }
-    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
+    return dds3SelectMenu(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
 }
 
 extern const char *D_003686F8[];
@@ -948,10 +948,10 @@ s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *runtimeC
         if (kind == 0x15) {
             ctx->frameTextFormat = D_003BC0D0;
             ctx->frameTextWidth = 0;
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003BC0D0));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003BC0D0));
             x += ctx->frameTextWidth * 0xC0;
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003686F8[kind]));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003686F8[kind]));
             x += D_00368750[D_00368768[type].columnTypes[i]] * 0xC0;
         }
     }
@@ -1027,7 +1027,7 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
         }
         switch (D_00368768[type].columnTypes[column]) {
         case 0:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->frame + ctx->frameGroup->metadata.value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->frame + ctx->frameGroup->metadata.value));
             break;
         case 9:
             switch (type) {
@@ -1037,7 +1037,7 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 21: value = node->p08.sh[1]; break;
             case 26: value = node->p08.sh[1]; break;
             }
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             break;
         case 15:
             switch (type) {
@@ -1046,27 +1046,27 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 21:
             case 26: value = node->duration; break;
             }
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             break;
         case 1:
             if (type != 10) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
             } else if (ctx->frameGroup->metadata.option != 3) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC168));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC168));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
             }
             break;
         case 13:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC170));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC170));
             break;
         case 14:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "%.1f %.2f", node->p08.f, node->p0C.f));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "%.1f %.2f", node->p08.f, node->p0C.f));
             break;
         case 2:
             if (type == 7) {
                 value = node->p08.sh[0];
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             }
             break;
         case 3:
@@ -1076,13 +1076,13 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 31: value = node->p08.sh[1]; break;
             }
             if (type == 31 && node->p08.sh[0] == 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC178));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC178));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             }
             break;
         case 4:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->p08.sh[1]));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->p08.sh[1]));
             break;
         case 5:
             switch (type) {
@@ -1100,54 +1100,54 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 25: value = node->p0C.sh[0]; break;
             }
             if (value) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC180));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC180));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC188));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC188));
             }
             break;
         case 12:
             switch (type) {
             case 12:
                 switch (node->p08.sh[0]) {
-                case 0: sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC190)); break;
-                case 1: sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC198)); break;
-                case 2: sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1A0)); break;
+                case 0: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC190)); break;
+                case 1: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC198)); break;
+                case 2: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1A0)); break;
                 }
                 break;
             case 6:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_003688E8[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_003688E8[node->p08.sh[0]]));
                 break;
             case 19:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_003688F8[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_003688F8[node->p08.sh[0]]));
                 break;
             case 1:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_00368918[node->p08.sb[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_00368918[node->p08.sb[0]]));
                 break;
             case 28:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_00368938[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_00368938[node->p08.sh[0]]));
                 break;
             case 10:
                 if (node->p14.sh[0] == 0) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1A8));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1A8));
                 } else {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1B0));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1B0));
                 }
                 break;
             case 30:
                 if (node->p08.sh[1] == 0) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1B8));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1B8));
                 } else {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1C0));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1C0));
                 }
                 break;
             case 31:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_00368948[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_00368948[node->p08.sh[0]]));
                 break;
             case 32:
                 if (node->p08.sh[0] == 0) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1C8));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1C8));
                 } else {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1D0));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1D0));
                 }
                 break;
             }
@@ -1159,9 +1159,9 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 25: value = node->p08.sh[0]; break;
             }
             if (value) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC180));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC180));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC188));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC188));
             }
             break;
         case 16:
@@ -1172,13 +1172,13 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 26: value = node->p0C.sb[0]; break;
             }
             if (value) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC180));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC180));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC188));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC188));
             }
             break;
         case 6:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1D8, node->p08.f * 57.29577637f));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1D8, node->p08.f * 57.29577637f));
             break;
         case 8:
             switch (type) {
@@ -1193,17 +1193,17 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 29: value = node->p08.sh[0]; break;
             case 30: value = node->p08.sh[0]; break;
             }
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E0, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E0, value));
             break;
         case 21:
             value = 0;
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E0, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E0, value));
             break;
         case 7:
             if (type == 5) {
                 value = node->p08.sh[1];
             }
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             break;
         case 10:
             switch (type) {
@@ -1213,21 +1213,21 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 18: value = node->p08.sh[1]; break;
             }
             if (value < 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "-----------"));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "-----------"));
             } else {
                 memcpy(name, ctx->entryName[value], sizeof(name));
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E8, name));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E8, name));
             }
             break;
         case 17:
             value = node->p08.sh[0];
             bank = (value >> 12) & 15;
             if (bank == 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1F0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1F0));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1F8, bank - 1));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1F8, bank - 1));
             }
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x240, y, 0xFEFFFF, style, D_003BC1E0, value & 0xFFF));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x240, y, 0xFEFFFF, style, D_003BC1E0, value & 0xFFF));
             break;
         case 18:
             unavailable = 0;
@@ -1251,51 +1251,51 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 17: value = node->p14.sh[0]; break;
             }
             if (unavailable) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC200));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC200));
             } else if (((value >> 12) & 15) == 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC208));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC208));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "B%d = %d", ((value >> 12) & 15) - 1, value & 0xFFF));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "B%d = %d", ((value >> 12) & 15) - 1, value & 0xFFF));
             }
             break;
         case 19:
             switch (node->p08.sb[0]) {
             case 5:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "%d-%d %s H%d", node->p0C.sb[0], node->p0C.sb[1], D_00368940[node->p0C.sb[2]], node->p0C.sb[3]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "%d-%d %s H%d", node->p0C.sb[0], node->p0C.sb[1], D_00368940[node->p0C.sb[2]], node->p0C.sb[3]));
                 break;
             case 6:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC210, node->p0C.sb[0]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC210, node->p0C.sb[0]));
                 break;
             case 7:
                 value = node->p0C.sh[0];
                 if (value < 0) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "-----------"));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "-----------"));
                 } else {
                     memcpy(name, ctx->entryName[value], sizeof(name));
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E8, name));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E8, name));
                 }
                 break;
             case 3:
                 if (node->p0C.sb[0] == 0 || node->p0C.sb[0] == 2) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC218));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC218));
                 } else {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
                 }
                 if (node->p0C.b[0] < 2) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "    DEF "));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "    DEF "));
                 } else {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "    %.1f", node->p14.f));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "    %.1f", node->p14.f));
                 }
                 break;
             case 4:
                 if (node->p0C.sb[0] == 0 || node->p0C.sb[0] == 2) {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC218));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC218));
                 } else {
-                    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
                 }
                 break;
             default:
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC228));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC228));
                 break;
             }
             break;
@@ -1308,13 +1308,13 @@ void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
             case 23: value = node->p10.sh[0]; break;
             }
             if (value == 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC230));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC230));
             } else if (value == 1) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC238));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC238));
             } else {
                 value -= 2;
                 memcpy(name, ctx->entryName[value], sizeof(name));
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, name));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, name));
             }
             break;
         }
@@ -1351,7 +1351,7 @@ s32 evtFrameListItem(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx
         if (node != NULL) {
             evtDrawFrameListKeyValues(list, x, y, color, node, ctx);
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
     }
 }
@@ -1372,7 +1372,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (D_00368768[group->type].columns == 0) {
         return -1;
     }
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
                  group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtFrameListItem);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
@@ -1398,7 +1398,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
             }
         }
     }
-    result = kwlnStepTwoListCursors(0, columns, group->childCount + 1,
+    result = dds3SelectMenu(0, columns, group->childCount + 1,
                                   columns, shown, NULL, &ctx->frameCursor,
                                   &ctx->frameColumn, &ctx->frameFirst);
     if (kwlnTaskPadButtonStates.syncKey < 0) {
@@ -1424,17 +1424,17 @@ void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRu
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " -----------------------"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " -----------------------"));
         return;
     }
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[i].head; node != NULL; node = node->next) {
+            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[i].head; node != NULL; node = node->next) {
                 if (((char *)node->value) != NULL) {
                     count++;
                     if (count == index) {
-                        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->value)));
+                        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->value)));
                         return;
                     }
                 }
@@ -1450,10 +1450,10 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 shown = 0x17;
     EffWorldNode *node;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[i].head;
+            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetActiveScene())->data)->slots[i].head;
                  node != NULL; node = node->next) {
                 if (node->value != NULL) {
                     count++;
@@ -1472,7 +1472,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (count < shown) {
         shown = count;
     }
-    return kwlnStepTwoListCursors(0, 1, count, 1, shown, NULL,
+    return dds3SelectMenu(0, 1, count, 1, shown, NULL,
                                  &ctx->groupFirst, NULL, &ctx->groupCursor);
 }
 
@@ -1491,13 +1491,13 @@ void evtViewerDrawPendingNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, Evt
     }
     slot = evtEventViewerGetPendingNode(ctx)->parameterBytes[4 + index];
     if (slot >= 0) {
-        node = dds3FindObjectChainNodeByName(dds3GetWorldObject(), ctx->entryName[slot]);
+        node = dds3SceneBasicSearchName(dds3GetActiveScene(), ctx->entryName[slot]);
     }
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
     if (node != NULL) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->value)));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->value)));
     } else {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "   -----------------------"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
 }
 
@@ -1505,7 +1505,7 @@ extern void evtViewerDrawPendingNodeRow();
 
 /* Draw the pending-node selector for group types 20/21; other types return -1. */
 s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = sdfCreateResetPacketList();
+    SdfListHead *packets = dds3FontReqAllocDrawTag();
     s32 rows;
     switch (work->frameGroup->type) {
     case 20:
@@ -1522,7 +1522,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
     if (work->actionMode != 0xC) {
         return 0;
     }
-    return kwlnStepTwoListCursors(0, 1, rows, 1, rows, 0, 0, 0, &work->inputB);
+    return dds3SelectMenu(0, 1, rows, 1, rows, 0, 0, 0, &work->inputB);
 }
 
 
@@ -1531,7 +1531,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
  * and its entry handle, returning two rows used. */
 s32 mnuDrawMessageMenuLabel(SdfListHead *list, s32 x, s32 y, EvtRuntime *work) {
     s32 count = itfMesGetEntryCount(work->windowContext->handle);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
 }
 
@@ -1580,13 +1580,13 @@ void evtDrawMessageDataRow(SdfListHead *list, s32 x, s32 y, u32 kind, EvtRuntime
         if (ctx->messageField != 0) {
             color = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
         if (ctx->windowContext->handle == -1) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
         } else if (itfMesGetWindowEntryItems(ctx->windowContext->handle, ctx->value & 0xFFF) == NULL) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
         }
         break;
     }
@@ -1595,20 +1595,20 @@ void evtDrawMessageDataRow(SdfListHead *list, s32 x, s32 y, u32 kind, EvtRuntime
         if (ctx->messageField != 1) {
             color = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC258, names[(ctx->value >> 12) & 0xF]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC258, names[(ctx->value >> 12) & 0xF]));
         break;
     }
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE78));
         break;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
         break;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         break;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -1622,7 +1622,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 delta;
     s32 handle;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0xD) {
@@ -1679,7 +1679,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
 
 s32 mnuDrawCutFlagLabel(SdfListHead *target, s32 x, s32 y) {
-    sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
+    sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
 
@@ -1694,24 +1694,24 @@ void evtDrawComparisonValueRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRu
     switch (index) {
     case 0:
         flag = ctx->compareField != 0 ? 0 : 4;
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC258, labels[(ctx->value >> 12) & 0xF]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, flag, D_003BC258, labels[(ctx->value >> 12) & 0xF]));
         return;
     case 1:
         flag = ctx->compareField != 1 ? 0 : 4;
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC058, ctx->value & 0xFFF));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, flag, D_003BC058, ctx->value & 0xFFF));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE78));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -1724,7 +1724,7 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 field;
     s32 delta;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0xE) {
@@ -1798,31 +1798,31 @@ void evtDrawGroupPropertyTable(SdfListHead *list, s32 x, s32 y, s32 hidden, EvtR
     }
     for (i = 0; i < D_00368950[group->type].enabled; i++) {
         field = D_00368950[group->type].fields[i];
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + offset * 192, y,
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + offset * 192, y,
             0xFEFFFF, 14, D_00368AA0[field]));
         style = i == runtime->tableColumn && runtime->actionMode == 15 ? 4 : 0;
         switch (field) {
         case 0:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
                 y + 0x80, 0xFEFFFF, style, D_003BC290, runtime->frameGroup->metadata.value));
             break;
         case 1:
             if (runtime->frameGroup->metadata.option < 3) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC088,
                     D_00368AB0[runtime->frameGroup->metadata.option]));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC088,
                     runtime->entryName[runtime->frameGroup->metadata.extra2]));
             }
             break;
         case 2:
             if (runtime->frameGroup->metadata.option == 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC298));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC2A0));
             }
             break;
@@ -1844,7 +1844,7 @@ s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
     s32 field;
     s32 count;
 
-    packets = sdfCreateResetPacketList();
+    packets = dds3FontReqAllocDrawTag();
     group = runtime->frameGroup;
     if (group == NULL) {
         return 0;
@@ -1930,7 +1930,7 @@ s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
 }
 
 s32 mnuDrawMotionChangeLabel(SdfListHead *target, s32 x, s32 y) {
-    sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
+    sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
     return 2;
 }
 
@@ -1946,7 +1946,7 @@ typedef union EvtMotionValue {
     EvtMotionBits bits;
 } EvtMotionValue;
 
-extern Motion *mdlFindNodeById(MdlCtx *model, s32 index);
+extern Motion *mdlGetMotionCtrlr(MdlCtx *model, s32 index);
 
 extern char D_003BC2A8[];
 extern char D_003BBFF0[];
@@ -2168,33 +2168,33 @@ void evtDrawMotionChangeRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime
     }
     packed.word = ctx->value;
     for (i = 0; i < 4; i++) {
-        if (mdlFindNodeById(model, i) != NULL) {
+        if (mdlGetMotionCtrlr(model, i) != NULL) {
             count++;
         }
     }
     switch (row) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
             "GROUP   %d  (MAX %d)", packed.bits.group, count));
         break;
     case 1:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
-            "MOTNO   %d  (MAX %d)", packed.bits.motion, mdlGetNodeRefHalf(model, packed.bits.group)));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
+            "MOTNO   %d  (MAX %d)", packed.bits.motion, mdlGetNumOfCut(model, packed.bits.group)));
         break;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
             "LOOP    %s", loopNames[packed.bits.loop]));
         break;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
             "HOKAN   %d", packed.bits.hokan));
         break;
     case 6:
-        if (mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
-                "MAXFRAME (%d)", mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion]->packedHeader));
+        if (mdlGetMotionCtrlr(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
+                "MAXFRAME (%d)", mdlGetMotionCtrlr(model, packed.bits.group)->motionTable->entries[packed.bits.motion]->packedHeader));
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "(DUMMY)"));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "(DUMMY)"));
         }
         break;
     }
@@ -2212,7 +2212,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     s32 count;
     EvtMotionValue packed;
 
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
@@ -2233,7 +2233,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     packed.word = ctx->value;
-    count = mdlGetNodeRefHalf((MdlCtx *)model, packed.bits.group);
+    count = mdlGetNumOfCut((MdlCtx *)model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
         if (kwlnTaskPadButtonStates.incOne & 2) {
@@ -2243,7 +2243,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                 } else {
                     packed.bits.group = 0;
                 }
-            } while (mdlFindNodeById(model, packed.bits.group) == NULL);
+            } while (mdlGetMotionCtrlr(model, packed.bits.group) == NULL);
         } else if (kwlnTaskPadButtonStates.decOne & 2) {
             do {
                 if (packed.bits.group > 0) {
@@ -2251,9 +2251,9 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                 } else {
                     packed.bits.group = 3;
                 }
-            } while (mdlFindNodeById(model, packed.bits.group) == NULL);
+            } while (mdlGetMotionCtrlr(model, packed.bits.group) == NULL);
         }
-        if (packed.bits.motion >= mdlGetNodeRefHalf((MdlCtx *)model, packed.bits.group)) {
+        if (packed.bits.motion >= mdlGetNumOfCut((MdlCtx *)model, packed.bits.group)) {
             packed.bits.motion = 0;
         }
         break;
@@ -2295,7 +2295,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     ctx->value = packed.word;
-    if (kwlnTaskPadButtonStates.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
+    if (kwlnTaskPadButtonStates.confirm < 0 && mdlGetMotionCtrlr(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
         return 1;
     }
     return kwlnTaskPadButtonStates.cancel >= 0 ? 0 : -1;
@@ -2315,19 +2315,19 @@ void evtDrawGroupListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime 
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC288));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC288));
     } else if (index == 1) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC280));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC280));
         return;
     } else if (index == 2) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003AEA80));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003AEA80));
         return;
     }
     n = 3;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
             if (n == index) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->value)));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->value)));
                 return;
             }
             n++;
@@ -2347,7 +2347,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     count += 3;
-    packets = sdfCreateResetPacketList();
+    packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtDrawGroupListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (ctx->actionMode != 17) {
@@ -2356,7 +2356,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (count < shown) {
         shown = count;
     }
-    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
+    return dds3SelectMenu(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
 /* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
@@ -2364,14 +2364,14 @@ void evtNoOpRGBEditorRow(SdfListHead *list, s32 x, s32 y, s32 row, void *runtime
 }
 
 extern f32 sdfViewMatrix[];
-extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern void FromRotation(f32 angle);
 
 /* vu0 routine: apply the selected camera-axis rotations to a position. */
 void evtRotateViewerPositionFromPad(f32 *position)
 {
     if (kwlnTaskPadButtonStates.incOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
-        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -2379,7 +2379,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_STORE_VF(vf10, position);
     } else if (kwlnTaskPadButtonStates.decOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
-        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -2388,7 +2388,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
     }
     if (kwlnTaskPadButtonStates.incTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
-        effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
+        FromRotation(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -2396,7 +2396,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
         VU0_STORE_VF(vf10, position);
     } else if (kwlnTaskPadButtonStates.decTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
-        effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
+        FromRotation(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, position);
         VU0_TRANSFORM_POINT(vf10, vf10);
@@ -2411,14 +2411,14 @@ extern char D_003BC2C8[];
 extern const char D_003AEB40[];
 extern const char D_003AEB50[];
 extern const char D_003AEB60[];
-extern void *func_0011D6B0(s32, s32, s32, s32);
-extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
+extern void *dds3PrimLine3D(s32, s32, s32, s32);
+extern void dds3PrimDebugTextBox(void *, s32, s32, s32, f32 *);
 extern void mnuShopSavePrimaryTransform(u8 *);
 extern void mnuShopSaveFullTransform(u8 *);
 extern void mnuShopRestoreTransform(u8 *);
-extern void kwlnSetLightColorTarget(s32, s32, f32 *);
-extern void kwlnSetLightDirectionTarget(s32, s32, f32 *);
-extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern void dds3SetLightColor(s32, s32, f32 *);
+extern void dds3SetLightDir(s32, s32, f32 *);
+extern void dds3SetAmbientColor(s32, f32 *);
 extern void evtSetSlotVectors(s32, s32, s32, f32 *, f32 *, f32 *);
 
 
@@ -2428,7 +2428,7 @@ static inline void evtDrawLightRgbComponents(SdfListHead *list, EvtRuntime *runt
     if ((u32)selected >= 3U || runtime->unk232C != 1) {
         selected = -1;
     }
-    fldDrawRgbEditor(list,
+    dds3PrimDebugTextBox(list,
                      (s32)(0x8740u + ((u32)runtime->lightPanelOffset << 4)),
                      y, selected, &runtime->commandMatrix[firstComponent]);
 }
@@ -2448,14 +2448,14 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     EvtUnit *nestedValue = NULL;
 
     group = runtime->frameGroup;
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     x = (s32)((u32)x + (u32)runtime->lightPanelOffset);
 
     evtDrawMenuFrame(list, (s32)((u32)x + 0x64u), y, 0xD, 0x10, 0, 1, (u8 *)runtime,
                      NULL, evtNoOpRGBEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(
         (s32)(0x8680u + ((u32)runtime->lightPanelOffset << 4)),
         D_00368AC8[runtime->unk2328],
         0xFF0080, 0, D_003BC2C0));
@@ -2468,7 +2468,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
             selected = 0;
         }
         VU0_LOAD_VF(vf10, &runtime->commandMatrix[4]);
-        sdfAppendPacket(list, (u32)func_0011D6B0(
+        sdfDrawTagLink(list, (u32)dds3PrimLine3D(
             (s32)(0x88C0u + ((u32)runtime->lightPanelOffset << 4)),
             0x7BD0, 0xFF0080, selected));
         firstRgbMode = runtime->unk2328;
@@ -2480,13 +2480,13 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
                               (s32)((u32)runtime->unk2328 - 4u), 0x7D80,
                               8);
 
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(
         evtLightCaptionX(runtime->lightPanelOffset), D_00368AC8[7],
         0xFF0080, 0, D_003AEB40));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(
         evtLightCaptionX(runtime->lightPanelOffset), D_00368AC8[8],
         0xFF0080, 0, D_003AEB50));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(
         evtLightCaptionX(runtime->lightPanelOffset), D_00368AC8[9],
         0xFF0080, 0, D_003BC2C8));
 
@@ -2590,9 +2590,9 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
     case 0:
         break;
     case 1:
-        kwlnSetLightColorTarget(0, 0, &runtime->commandMatrix[0]);
-        kwlnSetLightDirectionTarget(0, 0, &runtime->commandMatrix[4]);
-        kwlnSetBackgroundColorTarget(0, &runtime->commandMatrix[8]);
+        dds3SetLightColor(0, 0, &runtime->commandMatrix[0]);
+        dds3SetLightDir(0, 0, &runtime->commandMatrix[4]);
+        dds3SetAmbientColor(0, &runtime->commandMatrix[8]);
         evtSetSlotVectors(group->setterId, group->metadata.option, 0,
                           &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
         break;
@@ -2601,12 +2601,12 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
                           &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
         break;
     case 3: {
-        EffWorldNode *world = dds3GetWorldObject();
-        EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(
+        EffWorldNode *world = dds3GetActiveScene();
+        EffWorldNode *node = dds3SceneBasicSearchNameAndType(
             world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
 
         if (node != NULL) {
-            nestedValue = evtUnitGetNestedValue(node);
+            nestedValue = evtGetUnitHandle2(node);
         }
         evtSetSlotVectors(group->setterId, group->metadata.option, (s32)nestedValue,
                           &runtime->commandMatrix[0], &runtime->commandMatrix[4], &runtime->commandMatrix[8]);
@@ -2618,9 +2618,9 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
         case 0:
             break;
         case 1:
-            kwlnSetLightColorTarget(0, 0, &runtime->savedCommandMatrix[0]);
-            kwlnSetLightDirectionTarget(0, 0, &runtime->savedCommandMatrix[4]);
-            kwlnSetBackgroundColorTarget(0, &runtime->savedCommandMatrix[8]);
+            dds3SetLightColor(0, 0, &runtime->savedCommandMatrix[0]);
+            dds3SetLightDir(0, 0, &runtime->savedCommandMatrix[4]);
+            dds3SetAmbientColor(0, &runtime->savedCommandMatrix[8]);
             evtSetSlotVectors(group->setterId, group->metadata.option, 0,
                               &runtime->savedCommandMatrix[0],
                               &runtime->savedCommandMatrix[4],
@@ -2633,11 +2633,11 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, EvtRuntime *runtime) {
                               &runtime->savedCommandMatrix[8]);
             break;
         case 3: {
-            EffWorldNode *world = dds3GetWorldObject();
-            EffWorldNode *node = dds3FindIndexedObjectChainNodeByName(
+            EffWorldNode *world = dds3GetActiveScene();
+            EffWorldNode *node = dds3SceneBasicSearchNameAndType(
                 world, 5, (const u8 *)runtime->entryName[(s8)group->metadata.extra2]);
             if (node != NULL) {
-                nestedValue = evtUnitGetNestedValue(node);
+                nestedValue = evtGetUnitHandle2(node);
             } else {
                 printf((char *)D_003AEB60);
                 break;
@@ -2679,19 +2679,19 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
     s32 status = 0;
 
     group = runtime->frameGroup;
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x + runtime->horizontalOffset + 0x60, y,
                      0xF, 6, 0, 1, runtime, NULL, evtNoOpXYSlotVectorEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                      list);
 
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(
         0x8500 + (runtime->horizontalOffset << 4),
         D_00368AE0[runtime->floatSelection], 0xFF0080, 0, D_003BC2C0));
     row = D_00368AE8;
     i = 0;
     do {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(
             0x85C0 + (runtime->horizontalOffset << 4), row->y, 0xFF0080,
             row->commandIndex, row->format));
         ++row;
@@ -2702,7 +2702,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 0 ? 6 : 0;
 
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(
             valueX, 0x7A80, 0xFF0080, style, D_003BC2E8,
             runtime->floatEditX));
     }
@@ -2710,7 +2710,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
         s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 1 ? 6 : 0;
 
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(
             valueX, 0x7AE0, 0xFF0080, style, D_003BC2F0,
             runtime->floatEditY));
     }
@@ -2724,7 +2724,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
             toggleText = D_003BC188;
         }
 
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(
             valueX, 0x7BA0, 0xFF0080, style, toggleText));
     }
 
@@ -2863,12 +2863,12 @@ void evtDrawOptionalPromptText(SdfListHead *list, s32 x, s32 y, s32 kind, EvtRun
     switch (kind) {
     case 0:
         if (work->commandSecond.text != 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->commandSecond.text));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, work->commandSecond.text));
         }
         return;
     case 1:
         if (work->commandThird.text != 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->commandThird.text));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, work->commandThird.text));
         }
         break;
     }
@@ -2878,7 +2878,7 @@ void evtDrawOptionalPromptText(SdfListHead *list, s32 x, s32 y, s32 kind, EvtRun
 /* In mode 0x14, count down before checking input: zero expires, negative waits
  * indefinitely, and confirm takes precedence over cancel. */
 s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *work) {
-    SdfListHead *packets = sdfCreateResetPacketList();
+    SdfListHead *packets = dds3FontReqAllocDrawTag();
     s32 count;
     evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
@@ -2925,18 +2925,18 @@ void evtViewerDrawGroupRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntim
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC300));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC300));
         return;
     }
     if (index == 1) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "DEFFAULT"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "DEFFAULT"));
         return;
     }
     n = 2;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 0x18) {
             if (n == index) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader]));
                 return;
             }
             n++;
@@ -2956,7 +2956,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     count += 2;
-    packets = sdfCreateResetPacketList();
+    packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtViewerDrawGroupRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (ctx->actionMode != 21) {
@@ -2965,7 +2965,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
     if (count < shown) {
         shown = count;
     }
-    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
+    return dds3SelectMenu(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
 extern char *D_00368B18[];
@@ -2981,17 +2981,17 @@ void evtDrawShadowSettingsRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
     node = evtEventViewerGetPendingNode(ctx);
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "SHADOW CONFIG"));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "SHADOW CONFIG"));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "MODE   :%s", D_00368B18[ctx->shadowMode]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "MODE   :%s", D_00368B18[ctx->shadowMode]));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "ALPHA  :%3d", ctx->shadowAlpha));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "ALPHA  :%3d", ctx->shadowAlpha));
         return;
     case 4:
         if (node->parameterBytes[0] == 3) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "Y ZAHYO:%.1f", (double)ctx->shadowY));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "Y ZAHYO:%.1f", (double)ctx->shadowY));
         }
         break;
     }
@@ -3001,7 +3001,7 @@ void evtDrawShadowSettingsRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
  * selected row's mode, alpha or Y offset; confirm returns 1, cancel -1. */
 s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeChild *node = evtEventViewerGetPendingNode(ctx);
-    SdfListHead *list = sdfCreateResetPacketList();
+    SdfListHead *list = dds3FontReqAllocDrawTag();
     s32 lastRow = 0;
     s32 lastMode = 0;
 
@@ -3107,7 +3107,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-extern s32 effEventAdvanceResourceTemplateSetup();
+extern s32 mfilterRun();
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
     s32 selectedEntry; /* 0x24 */
@@ -3120,7 +3120,7 @@ extern s32 evtActiveEntryFlags;
  * A zero setup status clears runtime control and returns -1. */
 s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
     EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
-    if (effEventAdvanceResourceTemplateSetup() == 0) {
+    if (mfilterRun() == 0) {
         runtime->controlState = 0;
         return -1;
     }
@@ -3145,7 +3145,7 @@ s32 evtPollRuntimeControlReady(KwlnTask *task) {
     EvtRuntime *runtime;
 
     runtime = (EvtRuntime *)dds3GetProcessData(task);
-    if (effEventAdvanceSolidRectangleSetup() == 0) {
+    if (evtViewerCheckDirty() == 0) {
         runtime->controlState = 0;
         return -1;
     }
@@ -3157,7 +3157,7 @@ s32 evtPollRuntimeControlReady(KwlnTask *task) {
 
 typedef char EvtViewKey_size_must_be_0x38[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 
-extern void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y,
+extern void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y,
                                    s32 selected, u32 color,
                                    s32 showNormalized);
 extern char D_003BC318[];
@@ -3190,20 +3190,20 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     s32 color;
     s32 style;
 
-    packetList = sdfCreateResetPacketList();
-    kwlnDrawSpriteCell(packetList, 0x78, 0x138, 0xC, 9);
+    packetList = dds3FontReqAllocDrawTag();
+    dds3ConsPanelTagLink(packetList, 0x78, 0x138, 0xC, 9);
     key = evtEventViewerGetPendingNode(runtime);
 
     style = runtime->editField == 0 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x82C0, 0xFEFFFF, 0, D_003BC318));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x82C0, 0xFEFFFF, style, D_003BC290, key->p0C.sh[0]));
 
     style = runtime->editField == 1 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x8320, 0xFEFFFF, 0, D_003BC320));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x8320, 0xFEFFFF, style, D_003BC290, key->p0C.sh[1]));
 
     selectedChannel = runtime->editField - 2;
@@ -3211,44 +3211,44 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
         selectedChannel = -1;
     }
     color = key->p10.b[0] | (key->p10.b[1] << 8) | (key->p10.b[2] << 16);
-    fldDrawPackedRgbEditor(packetList, 0x7780, 0x8380,
+    dds3PrimDebugTextBoxRGB(packetList, 0x7780, 0x8380,
                            selectedChannel, color, 0);
 
     style = runtime->editField == 5 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x84A0, 0xFEFFFF, 0, D_003BC328));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x84A0, 0xFEFFFF, style, D_003BC290, key->p10.b[3]));
 
     style = runtime->editField == 6 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x8500, 0xFEFFFF, 0, D_003BC330));
     switch ((s8)key->p08.b[1]) {
     case 0:
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7780, 0x8500, 0xFEFFFF, style, D_003AEC00));
         break;
     case 1:
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7780, 0x8500, 0xFEFFFF, style, D_003AEC10));
         break;
     case 2:
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
             0x7780, 0x8500, 0xFEFFFF, style, D_003AEC20));
         break;
     }
 
     style = runtime->editField == 7 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x8560, 0xFEFFFF, 0, D_003BC338));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x8560, 0xFEFFFF, style, D_003AEC30,
         key->p14.f));
 
     style = runtime->editField == 8 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x85C0, 0xFEFFFF, 0, D_003BC340));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x85C0, 0xFEFFFF, style, D_003AEC30,
         key->p18.f));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
@@ -3454,15 +3454,15 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     s32 textY;
     s32 step;
 
-    packetList = (s32)sdfCreateResetPacketList();
+    packetList = (s32)dds3FontReqAllocDrawTag();
     panelX = 0x138;
-    kwlnDrawSpriteCell(packetList, panelX, 0x30, 0xD, 0x10);
+    dds3ConsPanelTagLink(packetList, panelX, 0x30, 0xD, 0x10);
     key = evtEventViewerGetPendingNode(runtime)->payload;
 
     style = runtime->colorSelection == 0 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, 0, "SPEED:"));
-    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, style, "       %d", key->parameters.x));
 
     if (runtime->colorSelection > 0 && runtime->editField < 4) {
@@ -3471,29 +3471,29 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
         selectedChannel = -1;
     }
     color = key->parameters.w[0] | (key->parameters.w[1] << 8) | (key->parameters.w[2] << 16);
-    fldDrawPackedRgbEditor((void *)packetList, 0x7000 + (panelX << 4), 0x7AE0,
+    dds3PrimDebugTextBoxRGB((void *)packetList, 0x7000 + (panelX << 4), 0x7AE0,
                            selectedChannel, color, 0);
 
     style = runtime->colorSelection == 4 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, 0, D_003BC328));
-    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, style, D_003BC290, key->parameters.w[3]));
 
     style = runtime->colorSelection == 5 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, 0, D_003BC330));
     switch ((s32)key->parameters.flagWord) {
     case 0:
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC00));
         break;
     case 1:
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC10));
         break;
     case 2:
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC20));
         break;
     }
@@ -3503,19 +3503,19 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     for (; bank < 3; bank++) {
         style = runtime->colorSelection == bank * 2 + 6 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 144) << 3);
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S%d SPEED:", bank));
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.y[bank]));
 
         style = runtime->colorSelection == bank * 2 + 7 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 156) << 3);
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S0 ALPHA:"));
-        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink((SdfListHead *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.z[bank]));
     }
@@ -3731,7 +3731,7 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
 extern s32 effEventAdvanceScatterBlurSetup(void);
-extern s32 effEventAdvanceScaleBlurSetup(void);
+extern s32 rblurProcess(void);
 extern s32 effEventAdvanceScreenDrawSetup(void);
 extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
 extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
@@ -3759,7 +3759,7 @@ s32 evtPollEffectFrameControl(s32 x, s32 y, EvtRuntime *runtime) {
         }
         break;
     case 0x17:
-        status = effEventAdvanceScaleBlurSetup();
+        status = rblurProcess();
         if (runtime->selectedEntry != 0) {
             *(s32 *)((u8 *)D_003BB130 + 0x2C) = runtime->selectedEntry;
         }
@@ -4431,7 +4431,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 }
 
 extern u8 sdfPfsDebugMode;
-extern void *sdfDevGetPathBuffer(void);
+extern void *sdfFileGetHostRoot(void);
 extern char D_003BC350[];
 extern char D_003BC358[];
 
@@ -4451,8 +4451,8 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             sprintf(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
             sprintf(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
         } else {
-            sprintf(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
-            sprintf(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "%sevent/pmvtool/%s.PM2", sdfFileGetHostRoot(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "%sevent/pmvtool/%s.PM3", sdfFileGetHostRoot(), (char *)&runtime->nameStorage[0x14]);
         }
     } else if (sdfPfsDebugMode) {
         sprintf(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
@@ -4463,10 +4463,10 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             D_003BBE7A, D_003BBE78, D_003BBE7A);
     } else {
         sprintf(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
-            sdfDevGetPathBuffer(), ((u32)D_003BBE78 / 10U) * 10,
+            sdfFileGetHostRoot(), ((u32)D_003BBE78 / 10U) * 10,
             D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
         sprintf(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
-            sdfDevGetPathBuffer(), ((u32)D_003BBE78 / 10U) * 10,
+            sdfFileGetHostRoot(), ((u32)D_003BBE78 / 10U) * 10,
             D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
     }
 
@@ -4610,17 +4610,17 @@ typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20
 typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
 
 
-extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
 extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
-extern void mdlLoadViewerPackage(s32 packageId, s32 partId, s32 flags, void *data, s32 length);
+extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, void *data, s32 length);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
-extern EvtUnit *evtGetWorldUnitNestedValue(s32 key);
-extern s32 evtStageRelinkOwnedNodeResource(void *target, void *owner);
+extern EvtUnit *evtGetUnitHandle(s32 key);
+extern s32 evtPathLinkAndMake(void *target, void *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
-extern s32 evtPreloadBgm(s32 eventId);
-extern s32 evtIsBgmLoaded(s32 eventId);
+extern s32 evtLoadEventBgm(s32 eventId);
+extern s32 evtCheckEventBgmLoaded(s32 eventId);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void kwlnFadeBackgroundStartIn(s32 frames);
@@ -4636,7 +4636,7 @@ typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
-extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+extern void dds3CameraObjectBasicSetFovy(EffWorldNode *, f32);
 /* The camp lookup receives the movie owner through its opaque API boundary. */
 extern s32 mnuCampFindMatchingEntryIndex(void *, EvtRuntime *, s32);
 
@@ -4671,7 +4671,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->mainEntry2Data != NULL) {
         packageId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId;
         partId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->partId;
-        evtCreateWorldObjectFromResource(packageId, partId, (s32)work->mainEntry10Data,
+        evtLoadArea_FromMemory(packageId, partId, (s32)work->mainEntry10Data,
             (s32)work->mainEntry11Data, (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
         group = evtEventViewerCreateEntry(0, runtime);
         group->entryHeader = evtEventViewerAddName(
@@ -4679,7 +4679,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         group->resourceIds.resourceGroup = packageId;
         group->resourceIds.resourceId = partId;
     }
-    worldTable = ((EffWorldNode *)dds3GetWorldSecondaryObject())->data;
+    worldTable = ((EffWorldNode *)dds3GetControlScene())->data;
     for (node = worldTable->slots[4].head; node != NULL; node = node->next) {
         if (node->value != 0) {
             const char *objectName;
@@ -4694,7 +4694,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             if (((EvtViewerPackageRecord *)work->mainEntry3Data)[row].loadOrder == secondaryIndex) {
                 packageId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].packageId;
                 partId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].partId;
-                mdlLoadViewerPackage(packageId, partId, 0x103,
+                mdlPackDecode(packageId, partId, 0x103,
                     (u8 *)work->data + ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].offset,
                     ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].length);
                 objectKey = mdlSpawnCameraSlotViewerObject(packageId, partId);
@@ -4703,7 +4703,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                     EffWorldNode *modelObject;
                     EvtViewerPackageRecord *packages;
                     char *names;
-                    modelObject = dds3FindWorldObjectNodeByKey((void *)dds3GetWorldSecondaryObject(), objectKey, 5);
+                    modelObject = dds3SearchSceneBasic((void *)dds3GetControlScene(), objectKey, 5);
                     packages = (EvtViewerPackageRecord *)work->mainEntry3Data;
                     names = (char *)work->mainEntry1Data;
                     group->info = modelObject;
@@ -4712,8 +4712,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 group->info->value = runtime->entryName[group->entryHeader];
                 group->resourceIds.resourceGroup = packageId;
                 group->resourceIds.resourceId = partId;
-                if (evtGetWorldUnitNestedValue(objectKey)->owner->first != NULL) {
-                    mdlAddEntryPlainEx(evtGetWorldUnitNestedValue(objectKey)->owner, 0, 0, 0.0f, 0.0f);
+                if (evtGetUnitHandle(objectKey)->owner->first != NULL) {
+                    mdlSmoothSingleMotion(evtGetUnitHandle(objectKey)->owner, 0, 0, 0.0f, 0.0f);
                 }
                 {
                     ObjectTransform *transform = group->info->inner;
@@ -4756,7 +4756,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             resources = (EvtViewerResourceRecord *)work->mainEntry22Data;
             group->entryHeader = entryNameIndex;
             resourceBase = (u8 *)work->data;
-            texture = sdfTexAcquireResourceTexture(
+            texture = sdfTexSet(
                 (SdfTextureFileHeader *)(resourceBase + resources[row].offset));
             textureCount = (s32)work->mainEntry22Count;
             group->texture = texture;
@@ -4779,7 +4779,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 if (owner->value != 0) {
                     sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
-                        evtStageRelinkOwnedNodeResource(node, owner);
+                        evtPathLinkAndMake(node, owner);
                     }
                 }
             }
@@ -4787,7 +4787,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 if (owner->value != 0) {
                     sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
-                        evtStageRelinkOwnedNodeResource(node, owner);
+                        evtPathLinkAndMake(node, owner);
                     }
                 }
             }
@@ -4795,7 +4795,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 if (owner->value != 0) {
                     sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
-                        evtStageRelinkOwnedNodeResource(node, owner);
+                        evtPathLinkAndMake(node, owner);
                     }
                 }
             }
@@ -4846,9 +4846,9 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                         printf("oldtable index=%d string=%s\n", oldIndex, oldName);
                         if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4) != -1) {
                             s32 objectNameIndex;
-                            world = dds3GetWorldObject();
+                            world = dds3GetActiveScene();
                             objectNameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
-                            if (dds3FindObjectChainNodeByName(world,
+                            if (dds3SceneBasicSearchName(world,
                                     work->subEntry1Data + objectNameIndex * 32) != NULL) {
                                 s32 linkedNameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                                 key->p0C.h[0] = evtEventViewerAddName(
@@ -4886,7 +4886,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                             (char *)work->subEntry1Data + nameIndex * 32, runtime);
                         camera = group->info;
                         key->serializedValue = serializedNameIndex;
-                        dds3SetCameraFieldOfView(camera, key->p08.f);
+                        dds3CameraObjectBasicSetFovy(camera, key->p08.f);
                     }
                 }
             }
@@ -5219,7 +5219,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
 
     /* 002409AC..00240A84: message track exists only for a live populated window. */
     if (work->handle != -1 && itfMesGetEntryCount(work->handle) != 0) {
-        itfMesSetWindowPageAndRefresh(work->handle, 3, 0);
+        itfMesMngChangeWindowType(work->handle, 3, 0);
         group = evtEventViewerCreateEntry(4, runtime);
         for (row = 0; row < (s32)work->subEntry4Count; row++) {
             if (evtGetRowValue(work, row) == 4) {
@@ -5229,7 +5229,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             }
         }
-        itfMesSetWindowHighFlags(work->handle, 0xD00000);
+        itfMesMngMarkBitStat(work->handle, 0xD00000);
     }
 
     /* Primary rows precede version 6; later versions use the extended table. */
@@ -5443,8 +5443,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     if (soundRowsPresent == 1) {
-        evtPreloadBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
-        while (evtIsBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) == 0) {
+        evtLoadEventBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
+        while (evtCheckEventBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) == 0) {
         }
         printf("smg file load :eventViewer\n");
     }
@@ -5471,13 +5471,13 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
 
 
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *runtime);
-extern void mnuStopMovieDrawTask(void);
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
-extern void kwlnTextureReleaseHeldReference(void);
+extern void movieStop(void);
+extern s32 sdfDelayedResrcCheck(void);
+extern void dds3FreeRenderTexture(void);
 extern u32 kwlnDrawControlFlags;
 extern void evtFormatPolygonMoviePaths(u16 eventId, u16 sceneId, char *path0, char *path1, char *path2);
-extern s32 sdfPathExists(char *path);
-extern void evtDestroySecondaryWorldNode(void);
+extern s32 sdfFileCheckExist(char *path);
+extern void evtFreeStage(void);
 
 s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     char path0[0x80];
@@ -5487,38 +5487,38 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
 
     mnuReleaseCampSceneRegisteredIds(runtime);
     if (runtime->timedActive == 1) {
-        mnuStopMovieDrawTask();
+        movieStop();
         runtime->timedActive = 0;
     }
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
     if (runtime->pendingResource != 0) {
         sdfMemFreeDelayedDirect((struct SdfMemBlock *)runtime->pendingResource);
         runtime->pendingResource = 0;
         runtime->pendingWork = 0;
     }
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
-    kwlnTextureReleaseHeldReference();
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    dds3FreeRenderTexture();
+    while (sdfDelayedResrcCheck() != 0) {
     }
     kwlnDrawControlFlags |= 0x2000000;
     evtFormatPolygonMoviePaths(D_003BBE78, D_003BBE7A, path0, path1, path2);
     if (mode == 1) {
-        if (sdfPathExists(path0) != 1) {
+        if (sdfFileCheckExist(path0) != 1) {
             return 0;
         }
     } else {
-        if (sdfPathExists(path0) != 1 || sdfPathExists(path1) != 1) {
+        if (sdfFileCheckExist(path0) != 1 || sdfFileCheckExist(path1) != 1) {
             return 0;
         }
     }
     evtEventViewerShutdown(runtime);
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
     evtEventViewerReleaseGroups(runtime);
     evtEventViewerReset(runtime);
     runtime->flags |= 1;
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
     work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, mode);
     if (work != NULL) {
@@ -5529,7 +5529,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     return 0;
 }
 
-s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {
+s32 evtGetSoundIndex(s32 eventId, s32 variation) {
     s32 sequenceId;
 
     sequenceId = 0xC7;
@@ -5542,75 +5542,75 @@ s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {
     return ((sequenceId + 0x100) << 0x10) + variation;
 }
 
-s32 evtPreloadBgm(s32 eventId) {
+s32 evtLoadEventBgm(s32 eventId) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtEncodeBgmSoundCode(eventId, 0);
-    sndEnsureMidiBankResident(packedTrackId);
+    packedTrackId = evtGetSoundIndex(eventId, 0);
+    p2sdLoadSMGFile(packedTrackId);
     return packedTrackId;
 }
 
-s32 evtIsBgmLoaded(s32 eventId) {
+s32 evtCheckEventBgmLoaded(s32 eventId) {
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 1;
     }
-    return sndFindPackedTrackLoadStatus(evtEncodeBgmSoundCode(eventId, 0)) == 1;
+    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == 1;
 }
 
-s32 evtPlayBgm(s32 eventId, s32 fade) {
+s32 evtPlayEventBgm(s32 eventId, s32 fade) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, fade);
     printf("Event BGM play :%08X\n", packedTrackId);
-    sndStartTrackDefault(packedTrackId);
+    p2sdPlayBGM(packedTrackId);
     return packedTrackId;
 }
 
-void evtTransitionBgm(s32 eventId, s32 fade) {
+void evtTransEventBgm(s32 eventId, s32 fade) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return;
     }
     packedTrackId = -1;
     if (fade >= 0) {
-        packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+        packedTrackId = evtGetSoundIndex(eventId, fade);
     }
     printf("Event BGM trans :%08X\n", packedTrackId);
-    sndTransitionBgm(packedTrackId);
+    p2sdSetBgmTrack(packedTrackId);
 }
 
-s32 evtFadeInBgm(s32 eventId, s32 fade) {
+s32 evtFadeInEventBgm(s32 eventId, s32 fade) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, fade);
     printf("Event BGM fade in play :%08X\n", packedTrackId);
-    sndStartTrackExtended(packedTrackId);
+    p2sdPlayBGMFade(packedTrackId);
     return packedTrackId;
 }
 
-s32 evtQueueValidatedBgmSoundCode(s32 eventId, s32 fade) {
+s32 evtStopEventBgm(s32 eventId, s32 fade) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
-    sndReleaseTrackHandle(packedTrackId);
+    packedTrackId = evtGetSoundIndex(eventId, fade);
+    p2sdStopBGM(packedTrackId);
     return packedTrackId;
 }
 
-s32 evtSetBgmVolumePan(s32 eventId, s32 fade) {
+s32 evtPlaySe(s32 eventId, s32 fade) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
-    sndSetSequenceVolumePan(packedTrackId, 0x7F, 0x3F);
+    packedTrackId = evtGetSoundIndex(eventId, fade);
+    p2sdPlaySE(packedTrackId, 0x7F, 0x3F);
     return packedTrackId;
 }
 
@@ -5619,27 +5619,27 @@ s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 fade) {
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
-    sndQueueSoundId(packedTrackId);
+    packedTrackId = evtGetSoundIndex(eventId, fade);
+    p2sdStopSe(packedTrackId);
     return packedTrackId;
 }
 
-void evtFormatTaskName(s32 taskId, char *buffer) {
+void evtMakeEventPackName(s32 taskId, char *buffer) {
     sprintf(buffer, D_003BC360, taskId);
 }
 
-KwlnTask *evtFindTaskById(u32 taskId) {
+KwlnTask *evtSearchEventPack(u32 taskId) {
     char taskName[32];
 
-    evtFormatTaskName(taskId, taskName);
+    evtMakeEventPackName(taskId, taskName);
     return dds3SearchProcessName((const char *)taskName);
 }
 
 /* Return this event task's loaded state, or -1 when it does not exist. */
-s32 evtGetEventPackLoadedState(u32 taskId) {
+s32 evtGetEventPackStat(u32 taskId) {
     KwlnTask *task;
 
-    task = evtFindTaskById(taskId);
+    task = evtSearchEventPack(taskId);
     if (task != 0) {
         EvtPackLoadState *state = (EvtPackLoadState *)dds3GetProcessData(task);
         return state->loaded;
@@ -5647,10 +5647,10 @@ s32 evtGetEventPackLoadedState(u32 taskId) {
     return -1;
 }
 
-EvtPackLoadState *evtGetEventPackLoadState(u32 taskId) {
+EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
     KwlnTask *task;
 
-    task = evtFindTaskById(taskId);
+    task = evtSearchEventPack(taskId);
     if (task != 0) {
         return (EvtPackLoadState *)dds3GetProcessData(task);
     }
@@ -5658,12 +5658,12 @@ EvtPackLoadState *evtGetEventPackLoadState(u32 taskId) {
 }
 
 
-void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
+void *evtGetResorceData(u32 taskId, s32 key) {
     s32 i;
     EvtPackLoadState *data;
     KwlnTask *task;
 
-    task = evtFindTaskById(taskId);
+    task = evtSearchEventPack(taskId);
     if (task != 0) {
         data = (EvtPackLoadState *)dds3GetProcessData(task);
         if (data->loaded != 2) {
@@ -5678,11 +5678,11 @@ void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
     }
     return NULL;
 }
-extern void effSetCh72Id(SdfTex *);
+extern void Eve_DistortionBlurSetTex(SdfTex *);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
-    EvtPackLoadState *data = evtGetEventPackLoadState(taskId);
-    void *address = evtFindTaskResourceEntryByKey(taskId, key);
+    EvtPackLoadState *data = evtGetPackProcessData(taskId);
+    void *address = evtGetResorceData(taskId, key);
     SdfTex *texture;
     if (address != 0) {
         SdfTex *old = data->effect72;
@@ -5690,8 +5690,8 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
             sdfTexReleaseReferenceViaHandler(old);
             data->effect72 = 0;
         }
-        texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(address));
-        effSetCh72Id(texture);
+        texture = sdfTexSet((SdfTextureFileHeader *)(address));
+        Eve_DistortionBlurSetTex(texture);
         data->effect72 = texture;
     }
 }
@@ -5727,14 +5727,14 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
 
     memset(vecA, 0, 0x10);
     memset(vecB, 0, 0x10);
-    found = evtFindTaskResourceEntryByKey(taskId, key);
+    found = evtGetResorceData(taskId, key);
     if (found != 0) {
-        obj = effObjCreateEventNode(found, vecA, vecB);
+        obj = dds3AddBEDEffectObjectBasic2(found, vecA, vecB);
         if (obj != 0) {
-            effObjSetFlags(obj, 1);
+            dds3EffectObjectBasicStatOn(obj, 1);
             if (index >= 0) {
                 inner = ((EvtEffectObject *)obj)->inner;
-                effEventSetScale(inner->scaledObject, D_003BAA20[index].modelScale / D_003BAA10->modelScale);
+                effEveBEDCutSetScale(inner->scaledObject, D_003BAA20[index].modelScale / D_003BAA10->modelScale);
             }
             return obj;
         }

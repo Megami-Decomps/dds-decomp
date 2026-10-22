@@ -20,7 +20,7 @@ extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(struct DatPartyRecord *entry
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(struct DatPartyRecord *entryAddress);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
 extern s32 fldGetSceneObjectState(void);
-extern void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
+extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 /* Original-style implicit int, kept: matched code depends on it: btlCountEligibleLinkedActors. */
 
@@ -141,14 +141,14 @@ extern char D_003BB450[];
 
 extern u8 *datRosterDetails;
 
-extern s32 sdfGetRandInt(s32, s32);
+extern s32 dds3GetRandIntA(s32, s32);
 
 
 extern EffRandState effSharedRandomState[];
 
 extern void btlAllocatePanelTaskWork(void);
 
-extern void itfMesDestroyWindowIfPresent(s32);
+extern void itfMesMngRelease(s32);
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
 
@@ -259,7 +259,7 @@ s32 btlSelectSerialEncounter(void) {
         }
 
         {
-            u16 randomIndex = (u16)sdfGetRandInt(0, candidateCount);
+            u16 randomIndex = (u16)dds3GetRandIntA(0, candidateCount);
             u16 selectedIndex = candidates[randomIndex];
 
             state->nextAdjustmentEntryIndex = selectedIndex;
@@ -455,7 +455,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     }
     flags = record->huntPenaltyFlags;
     if (flags == 0x18) {
-        return (sdfGetRand((EffRandState *)effSharedRandomState) & 1) ? 0x10 : 8;
+        return (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 0x10 : 8;
     }
     return flags & 0x18;
 }
@@ -666,7 +666,7 @@ s8 btlChooseStartVoice(void) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
                 s32 flagId = btlStartVoiceRows[unit->partyRecord.unitId].flagId;
-                if (flagId < 0 || mdlFlagTest(flagId)) {
+                if (flagId < 0 || evtBitCheck(flagId)) {
                     candidates[count++] = unit;
                 }
             }
@@ -676,7 +676,7 @@ s8 btlChooseStartVoice(void) {
         btlBossDebugPrintf(D_003A1E38);
         return -1;
     }
-    chosen = candidates[sdfGetRandInt(0, count)];
+    chosen = candidates[dds3GetRandIntA(0, count)];
     category = 2;
     hp = btlReadCurrentUnitHp(&chosen->partyRecord);
     for (unit = state->units; unit != NULL; unit = unit->next) {
@@ -708,7 +708,7 @@ s8 btlChooseStartVoice(void) {
         btlBossDebugPrintf(D_003A1E58, category, chosen->partyRecord.unitId);
         return -1;
     }
-    voice = voices[sdfGetRandInt(0, count)];
+    voice = voices[dds3GetRandIntA(0, count)];
     btlBossDebugPrintf(D_003A1E80, voice, category, chosen->partyRecord.unitId);
     return voice;
 }
@@ -1217,7 +1217,7 @@ void btlUpdateCommandPanelFades(void) {
         for (i = 0; i < 4; i++) {
             btlCommandPanelWork->cornerPhase[i] = (btlCommandPanelWork->cornerPhase[i] + 8) % 360;
             btlCommandPanelWork->cornerFade[i] =
-                (u32)((sdfSinPoly((f32)((btlCommandPanelWork->cornerPhase[i] + 90) % 360) /
+                (u32)((sdfSin((f32)((btlCommandPanelWork->cornerPhase[i] + 90) % 360) /
                                   180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 128.0f);
         }
         break;
@@ -1494,9 +1494,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->resourceAllocationA = sdfReadNamedResource(D_003A21C8, params, 0);
-        btlResourceBlock->resourceAllocationB = sdfReadNamedResource(D_003A21E8, params, 0);
-        btlResourceBlock->resourceAllocationC = sdfReadNamedResource(D_003A2208, params, 0);
+        btlResourceBlock->resourceAllocationA = sdfDevLoadFileEx(D_003A21C8, params, 0);
+        btlResourceBlock->resourceAllocationB = sdfDevLoadFileEx(D_003A21E8, params, 0);
+        btlResourceBlock->resourceAllocationC = sdfDevLoadFileEx(D_003A2208, params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_003BB3E4 = 1;
@@ -1855,7 +1855,7 @@ typedef struct ItfMesSub ItfMesSub;
 
 extern ItfMesSub D_0032A668;
 
-extern s32 itfMesCreateWindow(ItfMesSub *);
+extern s32 itfMesMngInitialize(ItfMesSub *);
 
 extern u32 btlIsNamedBattleTaskRegistered(void);
 
@@ -1894,7 +1894,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     work->state = 0;
     for (i = 0; i < 9; i++) {
         if (work->config.state[i].flag != 0) {
-            work->window[i] = itfMesCreateWindow(&D_0032A668);
+            work->window[i] = itfMesMngInitialize(&D_0032A668);
         }
     }
     work->x = 0x20;
@@ -2225,7 +2225,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
-    work->width = frFontMeasureLines(glyph);
+    work->width = frGetStrWidth2(glyph);
     frDestroyFontRequestAfter(glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;
@@ -2265,9 +2265,9 @@ typedef struct MsgQueueTaskData {
 
 extern const BattlePanelColors D_003A2A90;
 
-extern s32 itfMesMeasureEntryItem(s32, s32, s32);
+extern s32 itfMesMngGetWidth(s32, s32, s32);
 
-extern void itfMesBlk24MoveTo(s32, s32, s32);
+extern void itfMesMngSetMesPosition(s32, s32, s32);
 
 extern s32 btlDrawTimedDialogTask(KwlnTask *);
 
@@ -2367,9 +2367,9 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
 }
 
 extern void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
-extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+extern void itfMesMngSetVarImmediate(s32, u32, const void *);
 extern char D_003BB3F8[];
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -2418,9 +2418,9 @@ s32 btlUpdateValueMessageWindows(KwlnTask *task) {
                     count++;
                     itfMesSetTextSlotFromValue(work->window[i], 0, work->config.state[i].flag, 12);
                     sprintf(text, D_003BB3F8, value);
-                    itfMesCopyStringToWindowTableSlot(work->window[i], 1, text);
-                    width = itfMesMeasureEntryItem(work->window[i], 0, 0);
-                    itfMesBlk24MoveTo(work->window[i], (256 - (width >> 5)) << 4,
+                    itfMesMngSetVarImmediate(work->window[i], 1, text);
+                    width = itfMesMngGetWidth(work->window[i], 0, 0);
+                    itfMesMngSetMesPosition(work->window[i], (256 - (width >> 5)) << 4,
                                       (work->y + lineOffset) << 4);
                     lineOffset += 12;
                     itfMesStartEntry(work->window[i], 0, 0);
@@ -2431,7 +2431,7 @@ s32 btlUpdateValueMessageWindows(KwlnTask *task) {
             halfAlpha = work->alpha >> 1;
             work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
                 (halfAlpha << 24) | 0xA0A0A0;
-            evtSetDrawSurfaceIndex(0x53);
+            eglSetOt(0x53);
             evtSubmitPrimaryGsTest(1, 1, 128, 3, 0, 0, 1, 1);
             evtSubmitPrimaryAlphaBlendMode(1);
             evtSubmitDefaultDepthGradientRect(work->x, work->y - 2, 456, 2,
@@ -2462,8 +2462,8 @@ void itfMesCloseAllWindows(KwlnTask *handle) {
     list = (MesWindowList *)dds3GetProcessData(handle);
     for (i = 0; i < 9; i++) {
         if (list->config.state[i].flag != 0) {
-            itfMesCleanupWindow(list->window[i], 0);
-            itfMesDestroyWindowIfPresent(list->window[i]);
+            itfMesMngRequestMessageRelease(list->window[i], 0);
+            itfMesMngRelease(list->window[i]);
         }
     }
     sdfChipFreeDirect(list);
@@ -2960,9 +2960,9 @@ void btlUpdateAnalysisPanelWindowGeometry(BtlLinkedCommand *command, BtlAnalysis
         f32 insetLeft, insetRight, insetTop, insetBottom;
         f32 insetLimit;
         panel->timer = (panel->timer + 24) % 360;
-        horizontalExtent = (s32)(((sdfSinPoly((f32)((panel->timer + 90) % 360) /
+        horizontalExtent = (s32)(((sdfSin((f32)((panel->timer + 90) % 360) /
             180.0f * 3.14159f) + 1.0f) * 0.5f) * 40.0f + 0.0f);
-        verticalExtent = (s32)(((sdfSinPoly((f32)((panel->timer + 90) % 360) /
+        verticalExtent = (s32)(((sdfSin((f32)((panel->timer + 90) % 360) /
             180.0f * 3.14159f) + 1.0f) * 0.5f) * 34.0f + 0.0f);
         insetLeft = center[0] - 200.0f;
         insetRight = center[0] + 200.0f;
@@ -3041,10 +3041,10 @@ void btlUpdateAnalysisPanelWindowGeometry(BtlLinkedCommand *command, BtlAnalysis
     }
 }
 
-extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglLinkTri(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void evtSubmitViewParamPacket(f32, f32, f32, f32, f32, f32, u32, u32);
+extern void eglLinkLine(f32, f32, f32, f32, f32, f32, u32, u32);
 
 /* Draw the analysis silhouette with a mirrored five-level color ramp.
  * Continues Deep Quasar, Iron Nebula, PiM, Cedar Spark and Luna. */
@@ -3073,21 +3073,21 @@ void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *unused, BtlAnalysisPanelWo
 
     if (work->page < 8) {
         if (work->page >= 0) {
-            evtSetDrawSurfaceIndex(0x53);
+            eglSetOt(0x53);
             evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
-            evtSubmitViewParamPacket(246.0f, 224.0f, 16711680.0f,
+            eglLinkLine(246.0f, 224.0f, 16711680.0f,
                 266.0f, 224.0f, 16711680.0f, depths[1], depths[1]);
-            evtSubmitViewParamPacket(256.0f, 216.0f, 16711680.0f,
+            eglLinkLine(256.0f, 216.0f, 16711680.0f,
                 256.0f, 232.0f, 16711680.0f, depths[1], depths[1]);
 
             for (i = 0; i < 4; i++) {
                 if (work->anchor[1] < work->corners[0][1]) {
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->anchor[0] + deltas[2 * i], work->anchor[1] + deltas[2 * i],
                         work->corners[0][0] + deltas[2 * i], work->corners[0][1] - deltas[2 * i],
                         work->anchor[0] + deltas[2 * i + 1], work->anchor[1] + deltas[2 * i + 1],
                         depths[levels0[6 * i]], depths[levels0[6 * i + 1]], depths[levels0[6 * i + 2]]);
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->anchor[0] + deltas[2 * i + 1], work->anchor[1] + deltas[2 * i + 1],
                         work->corners[0][0] + deltas[2 * i], work->corners[0][1] - deltas[2 * i],
                         work->corners[0][0] + deltas[2 * i + 1], work->corners[0][1] - deltas[2 * i + 1],
@@ -3097,12 +3097,12 @@ void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *unused, BtlAnalysisPanelWo
 
             for (i = 0; i < 4; i++) {
                 if (work->corners[3][0] < work->corners[1][0]) {
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->corners[3][0] + deltas[2 * i], work->corners[3][1] + deltas[2 * i],
                         work->corners[3][0] + deltas[2 * i + 1], work->corners[3][1] + deltas[2 * i + 1],
                         work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
                         depths[levels1[6 * i]], depths[levels1[6 * i + 1]], depths[levels1[6 * i + 2]]);
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
                         work->corners[3][0] + deltas[2 * i + 1], work->corners[3][1] + deltas[2 * i + 1],
                         work->corners[1][0] - deltas[2 * i + 1], work->corners[1][1] + deltas[2 * i + 1],
@@ -3112,12 +3112,12 @@ void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *unused, BtlAnalysisPanelWo
 
             for (i = 0; i < 4; i++) {
                 if (work->corners[0][0] < work->corners[2][0]) {
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->corners[0][0] + deltas[2 * i + 1], work->corners[0][1] - deltas[2 * i + 1],
                         work->corners[0][0] + deltas[2 * i], work->corners[0][1] - deltas[2 * i],
                         work->corners[2][0] - deltas[2 * i], work->corners[2][1] - deltas[2 * i],
                         depths[levels2[6 * i]], depths[levels2[6 * i + 1]], depths[levels2[6 * i + 2]]);
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->corners[0][0] + deltas[2 * i + 1], work->corners[0][1] - deltas[2 * i + 1],
                         work->corners[2][0] - deltas[2 * i], work->corners[2][1] - deltas[2 * i],
                         work->corners[2][0] - deltas[2 * i + 1], work->corners[2][1] - deltas[2 * i + 1],
@@ -3127,12 +3127,12 @@ void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *unused, BtlAnalysisPanelWo
 
             for (i = 0; i < 4; i++) {
                 if (work->corners[1][1] < work->corners[2][1]) {
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
                         work->corners[1][0] - deltas[2 * i + 1], work->corners[1][1] + deltas[2 * i + 1],
                         work->corners[2][0] - deltas[2 * i + 1], work->corners[2][1] - deltas[2 * i + 1],
                         depths[levels3[6 * i]], depths[levels3[6 * i + 1]], depths[levels3[6 * i + 2]]);
-                    evtSubmitGradientTriangle(
+                    eglLinkTri(
                         work->corners[1][0] - deltas[2 * i], work->corners[1][1] + deltas[2 * i],
                         work->corners[2][0] - deltas[2 * i + 1], work->corners[2][1] - deltas[2 * i + 1],
                         work->corners[2][0] - deltas[2 * i], work->corners[2][1] - deltas[2 * i],
@@ -3405,14 +3405,14 @@ s32 btlUpdateGuidePanelTask(KwlnTask *task) {
     case 1:
     case 2:
         if (work->state == 1) {
-            width = itfMesMeasureEntryItem(work->windowIndex, work->entryIndex, 0);
-            itfMesBlk24MoveTo(work->windowIndex, (256 - (width >> 5)) << 4, (work->y + 0x10) << 3);
+            width = itfMesMngGetWidth(work->windowIndex, work->entryIndex, 0);
+            itfMesMngSetMesPosition(work->windowIndex, (256 - (width >> 5)) << 4, (work->y + 0x10) << 3);
             itfMesStartEntry(work->windowIndex, work->entryIndex, 0);
         }
         alpha = ((work->fadeLevel >> 1) + 16) << 24;
         work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
             alpha | 0x080808;
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 1, 128, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(0);
         evtSubmitDefaultDepthGradientRect(0, 0, 0x200, 0x1C0,
@@ -3440,7 +3440,7 @@ s32 btlUpdateGuidePanelTask(KwlnTask *task) {
 
 void btlReleaseMessageWindowTask(KwlnTask *task) {
     BtlGuidePanelWork *work = (BtlGuidePanelWork *)dds3GetProcessData(task);
-    itfMesCleanupWindow(work->windowIndex, 0);
+    itfMesMngRequestMessageRelease(work->windowIndex, 0);
     sdfChipFreeDirect(work);
     btlSetTrackedTaskHandle(9, 0);
 }
@@ -3847,7 +3847,7 @@ void btlUpdatePhasePanelSecondaryAnimation(BattlePhasePanelWork *work) {
         work->saved[4][0] += 2;
         work->saved[4][0] = work->saved[4][0] <= 0 ? 0 : work->saved[4][0] > 32 ? 32 : work->saved[4][0];
         work->angle = (work->angle + 8) % 360;
-        work->current[4][0] = (s32)((sdfSinPoly((f32)((work->angle + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 392.0f + 0.0f);
+        work->current[4][0] = (s32)((sdfSin((f32)((work->angle + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 392.0f + 0.0f);
         if (work->current[3][0] <= 256) work->secondaryPhase++;
         break;
     case 5:
@@ -3860,7 +3860,7 @@ void btlUpdatePhasePanelSecondaryAnimation(BattlePhasePanelWork *work) {
         work->current[3][0] -= 28;
         work->angle = (work->angle + 8) % 360;
         work->angle = work->angle <= 0 ? 0 : work->angle > 180 ? 180 : work->angle;
-        work->current[4][0] = (s32)((sdfSinPoly((f32)((work->angle + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 392.0f + 0.0f);
+        work->current[4][0] = (s32)((sdfSin((f32)((work->angle + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 392.0f + 0.0f);
         for (j = 0; j < 4; j++) {
             work->fade[3][j] -= 28;
             work->fade[3][j] = work->fade[3][j] <= 0 ? 0 : work->fade[3][j] > 128 ? 128 : work->fade[3][j];
@@ -3905,7 +3905,7 @@ void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
     if (work->mode != 0) {
         slots = modeOneSlots;
     }
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
     for (panel = 0; panel < 2; panel++) {
@@ -4143,10 +4143,10 @@ extern u32 btlGetCommandOptionCount(s32, s8, s8);
 extern void btlResetActorSlotPresentationValue(BtlUnit *, BattleSceneObject *);
 extern void btlCreateSelectionTrailTask(s32, s32, s32);
 extern void func_001B3300(BattleSceneObject *, s32);
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
-extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void eglLinkTri(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A29F0);
 
@@ -4184,7 +4184,7 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     case 2:
     case 3:
         D_003BD834->phase = (D_003BD834->phase + 16) % 360;
-        D_003BD834->alpha = (s32)((sdfSinPoly((f32)((D_003BD834->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
+        D_003BD834->alpha = (s32)((sdfSin((f32)((D_003BD834->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
         entry = object->selections[kind].entry;
         cursor = object->selections[kind].cursor;
         row = entry - cursor;
@@ -4243,16 +4243,16 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     effDrawSpriteWithCornerColors(0x90, (y + 0x14F) << 3, 0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
     opacity = (u8)D_003BD834->alpha;
     shade = (opacity >> 2) << 24;
-    evtSetDrawSurfaceIndex(0x53);
+    eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
-    evtSubmitGradientTriangle(0x1F, y + 0x14C, 0xB9, y + 0x14C, 0x11, y + 0x15A,
+    eglLinkTri(0x1F, y + 0x14C, 0xB9, y + 0x14C, 0x11, y + 0x15A,
         shade | 0xFF2400U, shade | 0xA00200U, shade | 0xFF2200U);
-    evtSubmitGradientTriangle(0x11, y + 0x15A, 0xB9, y + 0x14C, 0x15, y + 0x15E,
+    eglLinkTri(0x11, y + 0x15A, 0xB9, y + 0x14C, 0x15, y + 0x15E,
         shade | 0xFF2200U, shade | 0xA00200U, shade | 0xFF2000U);
-    evtSubmitGradientTriangle(0x15, y + 0x15E, 0xB9, y + 0x14C, 0xBD, y + 0x150,
+    eglLinkTri(0x15, y + 0x15E, 0xB9, y + 0x14C, 0xBD, y + 0x150,
         shade | 0xFF2000U, shade | 0xA00200U, shade | 0xC00400U);
-    evtSubmitGradientTriangle(0x15, y + 0x15E, 0xBD, y + 0x150, 0xAF, y + 0x15E,
+    eglLinkTri(0x15, y + 0x15E, 0xBD, y + 0x150, 0xAF, y + 0x15E,
         shade | 0xFF2000U, shade | 0xC00400U, shade | 0xE00800U);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
@@ -4343,19 +4343,19 @@ s32 func_001B3FB0(KwlnTask *task) {
             colors.values, 0, btlResourceBlock->resA, 0xC, 0x53);
         opacity = work->fadeCountdowns[i] & 0xFF;
         shade = (opacity >> 1) << 24;
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
-        evtSubmitGradientTriangle(0x1F, work->positions[i] + 0x14C,
+        eglLinkTri(0x1F, work->positions[i] + 0x14C,
             0xB9, work->positions[i] + 0x14C, 0x11, work->positions[i] + 0x15A,
             shade | 0xFF2400U, shade | 0xA00200U, shade | 0xFF2200U);
-        evtSubmitGradientTriangle(0x11, work->positions[i] + 0x15A,
+        eglLinkTri(0x11, work->positions[i] + 0x15A,
             0xB9, work->positions[i] + 0x14C, 0x15, work->positions[i] + 0x15E,
             shade | 0xFF2200U, shade | 0xA00200U, shade | 0xFF2000U);
-        evtSubmitGradientTriangle(0x15, work->positions[i] + 0x15E,
+        eglLinkTri(0x15, work->positions[i] + 0x15E,
             0xB9, work->positions[i] + 0x14C, 0xBD, work->positions[i] + 0x150,
             shade | 0xFF2000U, shade | 0xA00200U, shade | 0xC00400U);
-        evtSubmitGradientTriangle(0x15, work->positions[i] + 0x15E,
+        eglLinkTri(0x15, work->positions[i] + 0x15E,
             0xBD, work->positions[i] + 0x150, 0xAF, work->positions[i] + 0x15E,
             shade | 0xFF2000U, shade | 0xC00400U, shade | 0xE00800U);
         evtSubmitPrimaryAlphaBlendMode(0);
@@ -4467,7 +4467,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     return 0;
 }
 
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -4505,7 +4505,7 @@ void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
         break;
     }
     if (work->fadeLevels[1] < 0x80) {
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
         evtSubmitDefaultDepthGradientRect(0x100 - work->width / 2,
@@ -4527,10 +4527,10 @@ void btlFreeRegisteredTaskData(KwlnTask *task) {
 
 void btlToggleModelFlagOnInput(void) {
     if (D_00324530[13] < 0) {
-        if (mdlFlagTest(0xC0E)) {
-            mdlFlagClear(0xC0E);
+        if (evtBitCheck(0xC0E)) {
+            evtBitOff(0xC0E);
         } else {
-            mdlFlagSet(0xC0E);
+            evtBitOn(0xC0E);
         }
     }
 }
@@ -4552,7 +4552,7 @@ s32 btlDrawTimedDialogTask(KwlnTask *task) {
     } else {
         expired = 1;
     }
-    width = itfMesMeasureEntryItem(data->id, data->unk08, 0);
+    width = itfMesMngGetWidth(data->id, data->unk08, 0);
     data->fade = 0x80;
     for (i = 0; i < 4; i++) {
         colors.values[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x15, i, data->fade);
@@ -4570,8 +4570,8 @@ s32 btlDrawTimedDialogTask(KwlnTask *task) {
     if (expired) {
         return -1;
     }
-    itfMesBlk24MoveTo(data->id, (0x100 - (width >> 5)) << 4, 0x220);
-    evtSetDrawSurfaceIndex(0x53);
+    itfMesMngSetMesPosition(data->id, (0x100 - (width >> 5)) << 4, 0x220);
+    eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
     itfMesStartEntry(data->id, data->unk08, 0);
@@ -4582,7 +4582,7 @@ void btlReleaseDialogTaskData(KwlnTask *task) {
     s32 *entry;
     btlGetRuntime();
     entry = (s32 *)dds3GetProcessData(task);
-    itfMesCleanupWindow(entry[1], 0);
+    itfMesMngRequestMessageRelease(entry[1], 0);
     sdfChipFreeDirect(entry);
     btlSetTrackedTaskHandle(0, 0);
 }
@@ -4675,7 +4675,7 @@ s32 func_001B4F10(KwlnTask *task) {
                    fadeWindow->fade > 0x80 ? 0x80 : fadeWindow->fade;
 
     }
-    if (mdlFlagTest(0xC0E) == 0 && panelTask != NULL) {
+    if (evtBitCheck(0xC0E) == 0 && panelTask != NULL) {
     kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
     optionCount = (s16)btlGetCommandOptionCount((s32)object,
                                          btlCommandPanelWork->classIndex, 1);
@@ -4847,7 +4847,7 @@ extern const char *D_003BB3D4;
 s32 btlDestroyTaskC(void) {
     KwlnTask *task = dds3SearchProcessName(D_003BB3D0);
     if (task != 0) {
-        dspCloseChannel();
+        fclDestroyMessage();
         if (btlGetTrackedTaskHandle(0xC) != 0) {
             dds3KillProcess((KwlnTask *)btlGetTrackedTaskHandle(0xC), 0);
         }
@@ -4901,7 +4901,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
             if (btlAccessRecordedLinkageSkillFlag(id, 2) == 0 && btlAccessPendingLinkageSkillFlag(id, 2) == 0) {
                 btlAccessPendingLinkageSkillFlag(id, 0);
                 evtCopyEntryStringToActiveWindow(0, D_003BAA8C + id * 17);
-                dspStartEntry(0);
+                fclStartMessage(0);
                 work->itemIndex++;
                 sndSetStationedSeVolume(7);
                 break;
@@ -4918,7 +4918,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
     }
     case 5:
         if (btlIsLinkageTutorialEligible()) {
-            dspStartEntry(1);
+            fclStartMessage(1);
             work->phase++;
         }
         break;
@@ -4936,7 +4936,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
             colors.values[1] = color;
             colors.values[2] = color;
             colors.values[3] = color;
-            if (evtGetMessageWindowControlState() == 1) {
+            if (fclChkMessage() == 1) {
                 dspRequestMessageWindowModeOne();
                 goto return_zero;
             }
@@ -4948,7 +4948,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
             goto return_zero;
         }
     }
-    dspCloseChannel();
+    fclDestroyMessage();
     btlRecordListedLinkageSkills();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
@@ -5018,7 +5018,7 @@ s32 btlUpdateCommandNoticeTask(KwlnTask *task) {
             colors.values[1] = color;
             colors.values[2] = color;
             colors.values[3] = color;
-            if (evtGetMessageWindowControlState() != 1) {
+            if (fclChkMessage() != 1) {
                 work->phase++;
                 /* Retail jump: 0x001B5B14 `b` to the return-0 block 0x001B5B50 placed after the -1 arm.
                  * Plain return 0 puts that block next to the mode-one arm (7 of 122 words differ);
@@ -5029,7 +5029,7 @@ s32 btlUpdateCommandNoticeTask(KwlnTask *task) {
             return 0;
         }
     }
-    dspCloseChannel();
+    fclDestroyMessage();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
 return_zero:
@@ -5039,7 +5039,7 @@ return_zero:
 s32 btlDestroyTaskD(void) {
     KwlnTask *task = dds3SearchProcessName(D_003BB3D4);
     if (task != 0) {
-        dspCloseChannel();
+        fclDestroyMessage();
         if (btlGetTrackedTaskHandle(0xD) != 0) {
             dds3KillProcess((KwlnTask *)btlGetTrackedTaskHandle(0xD), 0);
         }
@@ -5254,7 +5254,7 @@ s32 func_001B6498(s8 mode) {
 
     if (mode == 0) {
         BattleCmdPanel *panel;
-        state = mdlFlagTest(0xC0E) != 0 ? 1 : 2;
+        state = evtBitCheck(0xC0E) != 0 ? 1 : 2;
         panel = btlCommandPanelWork;
         if (panel == NULL || panel->state == 0) {
             state = 1;
@@ -6312,7 +6312,7 @@ void btlUpdateActorPanelCursorState(s32 unused, BattleActorPanelWork *work, s32 
             work->activeEntries[slot].presentation.cursorPhase =
                 (work->activeEntries[slot].presentation.cursorPhase + 0x10) % 360;
             work->activeEntries[slot].presentation.unkF0 =
-                (sdfSinPoly((f32)((work->activeEntries[slot].presentation.cursorPhase + 90) % 360) /
+                (sdfSin((f32)((work->activeEntries[slot].presentation.cursorPhase + 90) % 360) /
                             180.0f * 3.14159f) + 1.0f) * 0.5f * 96.0f + 0.0f;
             work->activeEntries[slot].presentation.cursorEchoCount++;
             work->activeEntries[slot].presentation.cursorEchoCount =
@@ -6397,13 +6397,13 @@ void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s3
                 work->activeEntries[slot].presentation.highlightPhase[i] =
                     (work->activeEntries[slot].presentation.highlightPhase[i] + 8) % 360;
                 work->activeEntries[slot].presentation.highlightLevel[i] =
-                    (sdfSinPoly(((work->activeEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
+                    (sdfSin(((work->activeEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
                                180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
             } else {
                 work->reserveEntries[slot].presentation.highlightPhase[i] =
                     (work->reserveEntries[slot].presentation.highlightPhase[i] + 8) % 360;
                 work->reserveEntries[slot].presentation.highlightLevel[i] =
-                    (sdfSinPoly(((work->reserveEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
+                    (sdfSin(((work->reserveEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
                                180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
             }
         }
@@ -6442,7 +6442,7 @@ void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s3
     }
 }
 
-extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void eglLinkTri(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw an active/reserve slot's eight-alpha highlights, then reset primary blending. */
 void btlDrawActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 index, s8 reserve) {
@@ -6475,7 +6475,7 @@ void btlDrawActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 
     }
 
     if (state != 0) {
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
         if (reserve == 0) {
@@ -6503,20 +6503,20 @@ void btlDrawActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 
         }
         top = y + 49;
         middle = y + 63;
-        evtSubmitGradientTriangle(x + 54, top, x + 106, top, x + 93, middle,
+        eglLinkTri(x + 54, top, x + 106, top, x + 93, middle,
                       baseColor | (alpha[0] << 24),
                       baseColor | (alpha[1] << 24),
                       baseColor | (alpha[3] << 24));
-        evtSubmitGradientTriangle(x + 54, top, x + 93, middle, x + 40, middle,
+        eglLinkTri(x + 54, top, x + 93, middle, x + 40, middle,
                       baseColor | (alpha[0] << 24),
                       baseColor | (alpha[3] << 24),
                       baseColor | (alpha[2] << 24));
         bottom = y + 77;
-        evtSubmitGradientTriangle(x + 40, middle, x + 93, middle, x + 80, bottom,
+        eglLinkTri(x + 40, middle, x + 93, middle, x + 80, bottom,
                       baseColor | (alpha[4] << 24),
                       baseColor | (alpha[5] << 24),
                       baseColor | (alpha[7] << 24));
-        evtSubmitGradientTriangle(x + 40, middle, x + 80, bottom, x + 26, bottom,
+        eglLinkTri(x + 40, middle, x + 80, bottom, x + 26, bottom,
                       baseColor | (alpha[4] << 24),
                       baseColor | (alpha[7] << 24),
                       baseColor | (alpha[6] << 24));
@@ -6692,7 +6692,7 @@ void btlWriteTriangleHighlightPulse(BtlUnit *unusedUnit, BattleActorPanelWork *w
             work->activeEntries[slot].presentation.trianglePhase[i] =
                 (work->activeEntries[slot].presentation.trianglePhase[i] + 8) % 360;
             work->activeEntries[slot].presentation.triangleAlpha[i] =
-                (u32)((sdfSinPoly((f32)((work->activeEntries[slot].presentation.trianglePhase[i] + 90) % 360) /
+                (u32)((sdfSin((f32)((work->activeEntries[slot].presentation.trianglePhase[i] + 90) % 360) /
                                   180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f);
         }
         break;
@@ -6717,7 +6717,7 @@ void btlWriteTriangleHighlightPulse(BtlUnit *unusedUnit, BattleActorPanelWork *w
     }
 }
 
-extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void eglLinkTri(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw four transition triangles with per-vertex alpha; restore alpha mode. */
 void btlDrawActorPanelTransitionTriangles(void *task, BattleActorPanelWork *work, s32 index) {
@@ -6730,7 +6730,7 @@ void btlDrawActorPanelTransitionTriangles(void *task, BattleActorPanelWork *work
     s32 baseColor = 0x40FF50;
 
     if (work->activeEntries[index].presentation.transitionState != 0) {
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
         x = work->activeEntries[index].position[0];
@@ -6745,20 +6745,20 @@ void btlDrawActorPanelTransitionTriangles(void *task, BattleActorPanelWork *work
         alpha[7] = work->activeEntries[index].presentation.triangleAlpha[7];
         top = y + 49;
         middle = y + 63;
-        evtSubmitGradientTriangle(x + 54, top, x + 106, top, x + 93, middle,
+        eglLinkTri(x + 54, top, x + 106, top, x + 93, middle,
                       (alpha[0] << 24) | baseColor,
                       (alpha[1] << 24) | baseColor,
                       (alpha[3] << 24) | baseColor);
-        evtSubmitGradientTriangle(x + 54, top, x + 93, middle, x + 40, middle,
+        eglLinkTri(x + 54, top, x + 93, middle, x + 40, middle,
                       (alpha[0] << 24) | baseColor,
                       (alpha[3] << 24) | baseColor,
                       (alpha[2] << 24) | baseColor);
         bottom = y + 77;
-        evtSubmitGradientTriangle(x + 40, middle, x + 93, middle, x + 80, bottom,
+        eglLinkTri(x + 40, middle, x + 93, middle, x + 80, bottom,
                       (alpha[4] << 24) | baseColor,
                       (alpha[5] << 24) | baseColor,
                       (alpha[7] << 24) | baseColor);
-        evtSubmitGradientTriangle(x + 40, middle, x + 80, bottom, x + 26, bottom,
+        eglLinkTri(x + 40, middle, x + 80, bottom, x + 26, bottom,
                       (alpha[4] << 24) | baseColor,
                       (alpha[7] << 24) | baseColor,
                       (alpha[6] << 24) | baseColor);
@@ -7033,7 +7033,7 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
         pulse->alpha = alpha - remaining;
     } else {
         pulse->phase = (pulse->phase + 16) % 360;
-        pulse->alpha = (s32)((alpha + 119) * ((sdfSinPoly((f32)((pulse->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f) + 8.0f);
+        pulse->alpha = (s32)((alpha + 119) * ((sdfSin((f32)((pulse->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f) + 8.0f);
         if (pulse->phase >= 160 && pulse->phase <= 180) {
             pulse->active = 0;
             pulse->phase = 0;
@@ -7251,7 +7251,7 @@ typedef struct BattleHudSprites { s32 values[5]; } BattleHudSprites;
 extern const BattleHudSprites D_003A2DB0;
 extern const BattlePanelColors D_003A2DC8;
 extern SdfPoolNode D_003255A8;
-extern void evtSetDrawSurfaceIndex(u32);
+extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIconFixed64(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIcon(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
@@ -7291,7 +7291,7 @@ void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
         colors.values[1] = (level << 24) | (colors.values[1] & 0xFFFFFF);
         colors.values[2] = (level << 24) | (colors.values[2] & 0xFFFFFF);
         colors.values[3] = (level << 24) | (colors.values[3] & 0xFFFFFF);
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
         btlDrawButtonIconFixed64(&D_003255A8,
             work->activeEntries[slot].position[0] + 9,
@@ -7343,7 +7343,7 @@ void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
         colors.values[1] = opacity | (colors.values[1] & 0xFFFFFF);
         colors.values[2] = opacity | (colors.values[2] & 0xFFFFFF);
         colors.values[3] = opacity | (colors.values[3] & 0xFFFFFF);
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
         btlDrawButtonIconFixed64(&D_003255A8,
             work->reserveEntries[slot].position[0] + 9,
@@ -7428,14 +7428,14 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
         effDrawSpriteWithCornerColors((x + offset) << 4, y << 3, 0,
                                       colors.values, 0, btlResourceBlock->resA, sprite, 0x53);
         flags = 0x60;
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 1, 1, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
         break;
     case 2:
         colors.values[3] = colors.values[2] = colors.values[1] = colors.values[0] = 0xFFFFFF00 | alpha;
         flags = 0x60;
-        evtSetDrawSurfaceIndex(0x53);
+        eglSetOt(0x53);
         evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
         break;
@@ -7471,14 +7471,14 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
     s32 uRight;
     s32 vBottom;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    sdfConsCreateDrawPacket(list, texture, 0);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sdf2DLinkTexPacket(list, texture, 0);
     uFixed = u * 0x10;
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;
     vBottom = vFixed + height * 0x10;
-    sdfQueueGouraudTexturedQuad(list, 0x40,
+    sdfPrimLinkGt4(list, 0x40,
         x0 * 0x10 + 0x7000, y0 * 8 + 0x7900, uFixed, vFixed, colors[0],
         x1 * 0x10 + 0x7000, y1 * 8 + 0x7900, uRight, vFixed, colors[1],
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
@@ -8701,8 +8701,8 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
         btlCreateMessageWindow();
         btlInitializeCommandOptionState(object);
         if ((task->unit->status.flags & 0x200) && !(scene->battleFlags & 0x1000000)) {
-            if (mdlFlagTest(0x81B) == 0) {
-                mdlFlagSet(0x81B);
+            if (evtBitCheck(0x81B) == 0) {
+                evtBitOn(0x81B);
                 btlTrackedTaskHandles->status.bytes.blocked = 1;
                 scene->battleFlags &= ~0x100000;
                 handle = (u32)dds3StartProcess(D_003BB3D4, 0x2B0E, 1, 1,
@@ -8710,9 +8710,9 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                                        (u32)sdfAllocAndClearQuadwords(0x18));
                 dds3LinkProcess(scene->scriptOwner, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xD, handle);
-                dspCloseChannel();
-                evtCreateMessageWindowIfMissing(btlLinkageTutorialMessages);
-                dspStartEntry(2);
+                fclDestroyMessage();
+                fclInitMessage(btlLinkageTutorialMessages);
+                fclStartMessage(2);
                 btlSetCommandPanelFadeMode(0, 8);
             } else if (btlGetTaskState6() != 0) {
                 scene->battleFlags &= ~0x100000;
@@ -8721,8 +8721,8 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                                        (u32)sdfAllocAndClearQuadwords(0x18));
                 dds3LinkProcess(scene->scriptOwner, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xC, handle);
-                dspCloseChannel();
-                evtCreateMessageWindowIfMissing(btlLinkageTutorialMessages);
+                fclDestroyMessage();
+                fclInitMessage(btlLinkageTutorialMessages);
                 btlSetCommandPanelFadeMode(0, 8);
             } else {
                 scene->battleFlags |= 0x100000;
@@ -9237,28 +9237,28 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
             if (unit->status.flags & 0x200) {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
                     D_003BAA70 + unit->partyRecord.unitId * 17, 0);
-                width = frFontMeasureLines(glyph);
+                width = frGetStrWidth2(glyph);
                 btlDrawCenteredPanelSegments(width);
-                frFontSetGlyphPosition(glyph, (0x100 - (width >> 1)) << 4, 0x220);
+                frSetDrawPosition(glyph, (0x100 - (width >> 1)) << 4, 0x220);
                 frFontDrawGlyphChain(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);
             } else {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
                     D_003BAA74 + unit->partyRecord.unitId * 17, 0);
-                width = frFontMeasureLines(glyph);
+                width = frGetStrWidth2(glyph);
                 categoryGlyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
                     D_003BAA88 + datEnemyRecords[unit->partyRecord.unitId].pad04 * 7, 0);
-                categoryWidth = frFontMeasureLines(categoryGlyph);
+                categoryWidth = frGetStrWidth2(categoryGlyph);
                 totalWidth = width + categoryWidth;
                 btlDrawCenteredPanelSegments(totalWidth);
-                frFontSetGlyphPosition(categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
+                frSetDrawPosition(categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
                 frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)categoryGlyph, 1);
                 frDestroyFontRequestAfter(categoryGlyph);
                 if (categoryWidth == 0) {
                     s32 centeredNameX = -(width >> 1);
-                    frFontSetGlyphPosition(glyph, (centeredNameX + 0x100) << 4, 0x220);
+                    frSetDrawPosition(glyph, (centeredNameX + 0x100) << 4, 0x220);
                 } else {
-                    frFontSetGlyphPosition(glyph, (categoryWidth - (width >> 1) + 0xF8) << 4, 0x220);
+                    frSetDrawPosition(glyph, (categoryWidth - (width >> 1) + 0xF8) << 4, 0x220);
                 }
                 frFontDrawGlyphChain(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);

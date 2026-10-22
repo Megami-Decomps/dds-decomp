@@ -5,25 +5,25 @@
 
 struct ParSystem;
 
-struct ParSystem *parAllocateCellSystem(s32 count, s32 perCell,
+struct ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell,
                                       s32 groupDivisor, u32 kind);
-void parReleaseCellSystem(struct ParSystem *system);
-void parCellInit(struct ParSystem *system, s32 cellIndex);
-void parPrependCellNode(struct ParSystem *system);
-void parSetCellDrawBucket(struct ParSystem *system, u16 value);
-void parDrawPendingCellSystems(void);
-void parDecreaseStripCellAlpha(struct ParSystem *system, u32 centerWord,
+void dds3TrackPolyDelete(struct ParSystem *system);
+void dds3TrackPolyListInit(struct ParSystem *system, s32 cellIndex);
+void dds3TrackPolyDraw(struct ParSystem *system);
+void dds3TrackPolySetMode(struct ParSystem *system, u16 value);
+void dds3TrackPolyLinkOt(void);
+void dds3TrackPolyVC3Set_Acute(struct ParSystem *system, u32 centerWord,
                                u32 middleWord, u32 edgeWord);
-void parFillSymmetricCellColors(struct ParSystem *system, s32 centerWord,
+void dds3TrackPolyVC5Set_Normal(struct ParSystem *system, s32 centerWord,
                                  s32 middleWord, s32 edgeWord);
-void parDecreaseSymmetricCellAlpha(struct ParSystem *system, u32 centerWord,
+void dds3TrackPolyVC5Set_Acute(struct ParSystem *system, u32 centerWord,
                                    u32 middleWord, u32 edgeWord);
-void parIncreaseSymmetricCellAlpha(struct ParSystem *system, u32 centerWord,
+void dds3TrackPolyVC5Set_AcuteR(struct ParSystem *system, u32 centerWord,
                                    u32 middleWord, u32 edgeWord);
-void parRiseFallSymmetricCellAlpha(struct ParSystem *system, u32 centerWord,
+void dds3TrackPolyVC5Set_AcuteW(struct ParSystem *system, u32 centerWord,
                                    u32 middleWord, u32 edgeWord);
-void parUpdateCellVertexPair(struct ParSystem *system, s32 cellIndex,
+void dds3TrackPolySet(struct ParSystem *system, s32 cellIndex,
                              const u128 *vertices);
-void parFadeAlphaCell(struct ParSystem *system, s32 cellIndex);
+void dds3TrackPolyVCRefresh_ParType1(struct ParSystem *system, s32 cellIndex);
 
 #endif

@@ -23,7 +23,7 @@ extern SdfPendingRequest sdfGeneralReleaseRequest;
 
 
 /* Resize backing storage while preserving this resource's allocation descriptor. */
-void sdfResizeResourceAllocation(SdfMemBlock *allocation, s32 size) {
+void sdfMemReallocRecord(SdfMemBlock *allocation, s32 size) {
     SdfMemBlock *nextBlock;
     SdfMemBlock *replacement;
     s32 temporaryAddress;
@@ -90,7 +90,7 @@ void sdfResizeResourceAllocation(SdfMemBlock *allocation, s32 size) {
 
 
 /* Unlink the successor, not node itself, and reconnect both neighboring links. */
-void sdfSkipNextListNode(SdfMemBlock *node) {
+void sdfMemFreeMerge(SdfMemBlock *node) {
     SdfMemBlock *followingNode = node->next->next;
     followingNode->prev = node;
     node->next = followingNode;
@@ -107,11 +107,11 @@ void sdfMemFreeDirect(struct SdfMemBlock *allocation) {
     interruptsDisabled = DIntr();
     nextBlock = allocation->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode(allocation);
+        sdfMemFreeMerge(allocation);
         sdfChipFreeDirect(nextBlock);
     }
     if (allocation->prev->state == SDF_HEAP_BLOCK_FREE) {
-        sdfSkipNextListNode(allocation->prev);
+        sdfMemFreeMerge(allocation->prev);
         sdfChipFreeDirect(allocation);
     } else {
         allocation->state = SDF_HEAP_BLOCK_FREE;
@@ -123,15 +123,15 @@ void sdfMemFreeDirect(struct SdfMemBlock *allocation) {
 }
 
 /* Resolve a data address to its allocation record before releasing it. */
-void sdfMemFreeHandleDirect(void *address) {
+void sdfMemFreePtrDirect(void *address) {
     SdfMemBlock *allocation;
 
-    allocation = sdfFindGeneralBlockByAddress(address);
+    allocation = sdfMemGetHandleByPtr(address);
     sdfMemFreeDirect(allocation);
 }
 
 /* Clear the owner's handle before releasing the allocation it contained. */
-void sdfReleaseMemorySlot(s32 *handleSlot) {
+void sdfMemFreeHandleDirect(s32 *handleSlot) {
     s32 allocationHandle;
 
     allocationHandle = *handleSlot;
@@ -145,7 +145,7 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
 /* Zero is a sentinel and is never submitted to the pending queue. */
 void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation) {
     if (allocation != NULL) {
-        sdfPendingQueuePush(&sdfGeneralReleaseRequest, allocation);
+        sdfDelayedResrcEntry(&sdfGeneralReleaseRequest, allocation);
     }
 }
 
@@ -165,7 +165,7 @@ void sdfMemUnlock(SdfMemBlock *allocation) {
 }
 
 /* The address must belong to an existing used block: the end-marker path does not end this scan. */
-SdfMemBlock *sdfFindGeneralBlockByAddress(void *address) {
+SdfMemBlock *sdfMemGetHandleByPtr(void *address) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     SdfMemBlock *block;
     s32 interruptsDisabled;
@@ -188,7 +188,7 @@ SdfMemBlock *sdfFindGeneralBlockByAddress(void *address) {
 }
 
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
-void sdfGetGeneralHeapStats(SdfGeneralHeapStats *stats) {
+void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
     SdfMemBlock *block = sdfGeneralHeap.head.next;
     s32 totalBytes = 0;
     s32 freeBytes = 0;
@@ -243,7 +243,7 @@ SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
 extern SifRpcClientDataPrefix sdfNamedResourceRpcClient;
 
 /* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
-s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data, s32 *outSize) {
+s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize) {
     u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
     s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
@@ -287,8 +287,8 @@ void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *o
         if (sdfNamedResourceRpcClient.server != NULL) {
             break;
         }
-        retryStartTick = sdfReadTimerCount();
-        while ((s32)sdfGetElapsedTimerTicks(retryStartTick) < SDF_RPC_BIND_RETRY_TICKS) {
+        retryStartTick = sdfGetRunTimeCountBase();
+        while ((s32)sdfGetRunTimeCount(retryStartTick) < SDF_RPC_BIND_RETRY_TICKS) {
         }
     }
 }

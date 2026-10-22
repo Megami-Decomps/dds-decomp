@@ -27,27 +27,27 @@ typedef char EffSolidRectParams_bottom_offset_must_be_0x14[(u32)&((EffSolidRectP
 
 EffScreenDrawParams *effGetLoadDescA(void);
 EffScreenDrawParams *effGetLoadDescD(void);
-EffScreenDrawParams *effGetCh70Params(void);
+EffScreenDrawParams *Eve_BlurGetParam(void);
 EffScreenDrawParams *effGetCh73Params(void);
-EffSolidRectParams *effGetCh74Params(void);
+EffSolidRectParams *Eve_FilterGetParams(void);
 EffSolidRectParams *effEventGetSolidRectangleSetupParams(void);
 void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters);
-void effCopyColorRectangleParameters(EffSolidRectParams *parameters);
+void Eve_FilterSetParam(EffSolidRectParams *parameters);
 
 /* Enable or disable each event-effect draw family. */
-void effEnableRectangleBlur(void);
-void effDisableRectangleBlur(void);
-void effEnableTexturedBlur(void);
-void effDisableTexturedBlur(void);
-void effEnableFilterBlur(void);
-void effDisableFilterBlur(void);
-void effEnableStaggeredBlur(void);
-void effDisableStaggeredBlur(void);
+void Eve_BlurON(void);
+void Eve_BlurOFF(void);
+void Eve_PartialMultiBlurON(void);
+void Eve_PartialMultiBlurOFF(void);
+void Eve_DistortionBlurON(void);
+void Eve_DistortionBlurOFF(void);
+void Eve_RippleBlurON(void);
+void Eve_RippleBlurOFF(void);
 void effEnableFramebufferQuad(void);
 void effDisableFramebufferQuad(void);
-void effEnableColorRectangle(void);
-void effDisableColorRectangle(void);
-void effEnableTexturedSquare(void);
-void effDisableTexturedSquare(void);
+void Eve_FilterON(void);
+void Eve_FilterOFF(void);
+void Eve_PartialMultiFilterON(void);
+void Eve_PartialMultiFilterOFF(void);
 
 #endif

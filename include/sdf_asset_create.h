@@ -3,6 +3,6 @@
 
 struct SdfAsset;
 
-struct SdfAsset *sdfCreateAssetWithDrawEntries(void);
+struct SdfAsset *sdfMatNew(void);
 
 #endif /* SDF_ASSET_CREATE_H */

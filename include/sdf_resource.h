@@ -6,7 +6,7 @@
 /* General-heap descriptors are distinct from the data addresses they own. */
 struct SdfMemBlock;
 
-/* Six signed words written by sdfGetGeneralHeapStats. */
+/* Six signed words written by sdfMemGetInfo. */
 typedef struct SdfGeneralHeapStats {
     s32 totalBytes;
     s32 freeBytes;
@@ -32,38 +32,38 @@ typedef char SdfChipHeapStats_size_must_be_0x30[
     (sizeof(SdfChipHeapStats) == 0x30) ? 1 : -1];
 
 struct SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes);
-struct SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes);
-struct SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes);
-struct SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
-void sdfGetGeneralHeapStats(SdfGeneralHeapStats *stats);
-void sdfGetChipHeapStats(SdfChipHeapStats *stats);
+struct SdfMemBlock *sdfMemAllocFromTailDirect(s32 requestedBytes);
+struct SdfMemBlock *sdfMemAlloc2Direct(s32 requestedBytes);
+struct SdfMemBlock *sdfMemGetHandleByPtr(void *address);
+void sdfMemGetInfo(SdfGeneralHeapStats *stats);
+void sdfChipGetInfo(SdfChipHeapStats *stats);
 
 /* Return the descriptor's payload base as a byte address, not the descriptor. */
-u8 *sdfMemoryGetBlockAddress(const struct SdfMemBlock *block);
-s32 sdfMemoryGetBlockSize(const struct SdfMemBlock *block);
+u8 *sdfMemGetPtr(const struct SdfMemBlock *block);
+s32 sdfMemGetSize(const struct SdfMemBlock *block);
 /* Advance one descriptor; return NULL when its successor is the end marker. */
-struct SdfMemBlock *sdfMemoryNextBlock(struct SdfMemBlock *block);
+struct SdfMemBlock *sdfMemGetNext(struct SdfMemBlock *block);
 
 /* Route payload addresses between the chip and general heaps. */
-void *sdfAllocateBlockBySizeThreshold(s32 size);
-void sdfFreeMemoryFromEitherHeap(void *data);
-void sdfReleaseChipOrRetainedResource(void *data);
+void *sdfAllocAuto(s32 size);
+void sdfFreeAuto(void *data);
+void sdfFreeAutoDelayed(void *data);
 
 u32 sdfMemLock(struct SdfMemBlock *allocation);
 void sdfMemUnlock(struct SdfMemBlock *allocation);
 void sdfMemFreeDirect(struct SdfMemBlock *allocation);
-void sdfReleaseMemorySlot(s32 *slot);
+void sdfMemFreeHandleDirect(s32 *slot);
 
 /* The optional outputs contain a data address and file size, not a descriptor.
  * A null outAddress releases the allocation before returning its descriptor. */
-struct SdfMemBlock *sdfDevReadResourceWithExtraSpace(
+struct SdfMemBlock *sdfDevLoadFile(
     const char *name, u32 *outAddress, u32 *outSize, s32 extraBytes);
-struct SdfMemBlock *sdfReadNamedResource(
+struct SdfMemBlock *sdfDevLoadFileEx(
     const char *name, u32 *outAddress, u32 *outSize);
 
 /* Queue the two heap owners separately: the general heap stores descriptors,
  * while the chip heap stores the address of the cell to release. */
 void sdfMemFreeDelayedDirect(struct SdfMemBlock *allocation);
-void sdfQueuePendingChipRelease(void *memory);
+void sdfChipFreeDelayedDirect(void *memory);
 
 #endif /* SDF_RESOURCE_H */

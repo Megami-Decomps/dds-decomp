@@ -10,10 +10,10 @@
 
 extern u32 dds3WorldCounter;
 
-extern void dds3DestroyWorldNode(EffWorldNode *node);
+extern void dds3DeleteScene(EffWorldNode *node);
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
-void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
+void dds3GetTMPoseSet(EffWorldNode *object) {
     ObjectTransform *transform = object->inner;
     u32 flags = transform->flags;
 
@@ -21,14 +21,14 @@ void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
         VU0_LOAD_MATRIX(transform->matrix);
     } else {
         transform->flags = flags | OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-        dds3BuildVuTransformFromComponents(transform->scale, transform->rotation, transform->position);
+        dds3MakeMatrix(transform->scale, transform->rotation, transform->position);
         VU0_STORE_MATRIX(transform->matrix);
     }
 }
 
 extern float fabsf(float);
 
-s32 dds3TestObjectSphereOverlap(ObjectTransform *left, ObjectTransform *right) {
+s32 dds3ComparePosPoseSet(ObjectTransform *left, ObjectTransform *right) {
     f32 length;
     f32 leftLimit;
     f32 rightLimit;
@@ -46,7 +46,7 @@ s32 dds3TestObjectSphereOverlap(ObjectTransform *left, ObjectTransform *right) {
 }
 
 /* vu0 routine: whether the distance between the position vectors is inside the second object's radius */
-s32 dds3IsPointWithinObjectRadius(ObjectTransform *left, ObjectTransform *right) {
+s32 dds3ComparePosPoseSet2(ObjectTransform *left, ObjectTransform *right) {
     f32 length;
     f32 rightLimit;
 
@@ -64,7 +64,7 @@ s32 dds3IsPointWithinObjectRadius(ObjectTransform *left, ObjectTransform *right)
 
 
 /* Invoke the holder's first / second lifecycle callback when present; the result is 1 when there is nothing to call. */
-s32 dds3InvokeWorldCallbackFirst(EffWorldNode *holder) {
+s32 dds3CallBasicMainProc(EffWorldNode *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
@@ -77,7 +77,7 @@ s32 dds3InvokeWorldCallbackFirst(EffWorldNode *holder) {
     return result;
 }
 
-s32 dds3InvokeWorldCallbackSecond(EffWorldNode *holder) {
+s32 dds3CallBasicDrawProc(EffWorldNode *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
@@ -91,12 +91,12 @@ s32 dds3InvokeWorldCallbackSecond(EffWorldNode *holder) {
 }
 
 /* Advance and return the 16-bit sequence stored in a 32-bit backing word. */
-u32 dds3AdvanceWorldCounter(void) {
+u32 dds3AllocObjectId(void) {
     dds3WorldCounter = (dds3WorldCounter + 1) & 0xffff;
     return dds3WorldCounter;
 }
 
-void dds3SetWorldNodeValue(EffWorldNode *node, u32 worldNodeValue) {
+void dds3SetUnitObjectId(EffWorldNode *node, u32 worldNodeValue) {
     if (node != NULL) {
         node->value = (const char *)worldNodeValue;
     }
@@ -115,7 +115,7 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
 
 /* Allocate and clear the world node's 0x28-byte WorldInfo payload. The native
    callback stores the payload on the node before initializing its fields. */
-s32 dds3AllocateWorldObjectEntry(EffWorldNode *object) {
+s32 worldconstructor(EffWorldNode *object) {
     WorldInfo *entry;
 
     entry = (WorldInfo *)sdfChipAllocDirect(0x28);
@@ -138,7 +138,7 @@ s32 dds3AllocateWorldObjectEntry(EffWorldNode *object) {
     return 1;
 }
 
-void dds3DestroyWorldObjectEntry(EffWorldNode *object)
+void worlddestructor(EffWorldNode *object)
 {
     WorldInfo *entry = object->data;
 
@@ -146,10 +146,10 @@ void dds3DestroyWorldObjectEntry(EffWorldNode *object)
         return;
     }
     while (entry->firstNode != NULL) {
-        dds3DestroyWorldNode(entry->firstNode);
+        dds3DeleteScene(entry->firstNode);
     }
     while (entry->firstIndex != NULL) {
-        dds3DestroyWorldIndexNode(entry->firstIndex);
+        dds3FreeBasicArrayHandle(entry->firstIndex);
     }
     if (entry->entryAllocation != NULL) {
         sdfMemFreeDirect(entry->entryAllocation);
@@ -157,32 +157,32 @@ void dds3DestroyWorldObjectEntry(EffWorldNode *object)
     sdfChipFreeDirect(entry);
 }
 
-u32 dds3DispatchWorldEntryUpdateCallback(EffWorldNode *obj) {
+u32 worldmainprocuder(EffWorldNode *obj) {
     WorldInfo *entry = obj->data;
     EffWorldNode *callbackTarget;
 
     callbackTarget = (EffWorldNode *)entry->primaryObject;
     if (callbackTarget != NULL) {
-        dds3InvokeWorldCallbackFirst(callbackTarget);
+        dds3CallBasicMainProc(callbackTarget);
     }
     return 1;
 }
 
-u32 dds3DispatchWorldEntryDrawCallback(EffWorldNode *obj) {
+u32 worlddrawprocuder(EffWorldNode *obj) {
     WorldInfo *entry = obj->data;
     EffWorldNode *callbackTarget;
 
     callbackTarget = (EffWorldNode *)entry->primaryObject;
     if (callbackTarget != NULL) {
-        dds3InvokeWorldCallbackSecond(callbackTarget);
+        dds3CallBasicDrawProc(callbackTarget);
     }
     return 1;
 }
 
-extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
+extern EffWorldNode *dds3AllocBasic(u32 kind);
 extern EffWorldNode *dds3ActiveWorld;
 
-EffWorldNode *dds3CreateActiveWorldWithValueCapacity(s32 capacity) {
+EffWorldNode *dds3AddWorld(s32 capacity) {
     EffWorldNode *world;
     WorldInfo *info;
     struct SdfMemBlock *allocation;
@@ -195,7 +195,7 @@ EffWorldNode *dds3CreateActiveWorldWithValueCapacity(s32 capacity) {
         return NULL;
     }
 
-    world = dds3CreateWorldNodeForKind(0);
+    world = dds3AllocBasic(0);
     info = world->data;
     allocation = sdfMemAllocDirect(capacity * 8);
     info->entryAllocation = allocation;

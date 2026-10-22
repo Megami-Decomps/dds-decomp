@@ -11,7 +11,7 @@
 #include "sdf_vu_matrix.h"
 
 
-s32 evtCheckWorldObjectResourceScale(void *obj) {
+s32 evtCheckPathStat(void *obj) {
     f32 target = 1.0f;
     void *slot;
     Dds3PathCurveWork *handle;
@@ -20,50 +20,50 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
     if (obj == NULL) {
         return -1;
     }
-    slot = dds3GetSlot(obj, 1);
+    slot = dds3ObjectBaseGetControlBasic(obj, 1);
     if (slot == NULL) {
         return -1;
     }
-    handle = dds3GetObjectResourceHandle(slot);
+    handle = dds3MoverBasicGetPathControl(slot);
     if (handle == NULL) {
         return -1;
     }
-    kind = sdfGetFloatCounterDirection(&handle->counter);
+    kind = dds3PathBasicControlGetMode(&handle->counter);
     if (kind != 0) {
         if (kind != 1) {
             return -1;
         }
         target = 0.0f;
     }
-    if (evtGetValueScaleFactor(&handle->counter) == target) {
+    if (dds3PathBasicControlGetRatio(&handle->counter) == target) {
         return 0;
     }
     return 1;
 }
 
-void evtSetWorldSlotScaleWrapEnabled(void *worldObject, s32 enabled) {
-    Dds3PathCurveWork *data = dds3GetSlot1Data(worldObject);
+void evtPathLoop(void *worldObject, s32 enabled) {
+    Dds3PathCurveWork *data = dds3ObjectBaseGetPathControl(worldObject);
 
     if (data == NULL) {
         return;
     }
     if (enabled != 0) {
-        sdfEnableFloatCounterWrap(&data->counter);
+        dds3PathBasicLoopOn(&data->counter);
     } else {
-        sdfDisableFloatCounterWrap(&data->counter);
+        dds3PathBasicLoopOff(&data->counter);
     }
 }
 
-extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
-extern void effObjSetInnerFloat(s32 obj, f32 value);
+extern s32 dds3AddCameraObjectBasicTypeFree(s32 world, f32 *pos, f32 *rot);
+extern void dds3GetRadiusPoseSet(s32 obj, f32 value);
 
-s32 evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot) {
-    s32 obj = dds3CreateCameraObject(dds3AdvanceWorldCounter(), pos, rot);
+s32 evtAddCamera(f32 *pos, f32 *rot) {
+    s32 obj = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), pos, rot);
 
     if (obj == 0) {
         return obj;
     }
-    effObjSetInnerFloat(obj, 1.0f);
+    dds3GetRadiusPoseSet(obj, 1.0f);
     return obj;
 }
 
@@ -79,7 +79,7 @@ typedef struct EvtNodeOwner {
 } EvtNodeOwner;
 
 
-void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 nodeFlag) {
+void evtEffectLoopControl(EvtNodeOwner *owner, s32 nodeFlag) {
     EvtNodeInner *inner = owner->inner;
     void *node;
 
@@ -101,8 +101,8 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 nodeFlag) {
 
 #include "dds3_world_primary.h"
 
-s32 evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 modeValue) {
-    EffWorldNode *world = dds3GetWorldObject();
+s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
+    EffWorldNode *world = dds3GetActiveScene();
     EffWorldNode *node;
     s32 combinedMode;
 
@@ -111,7 +111,7 @@ s32 evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 modeValue) {
     }
     combinedMode = modeSelector * 3 + modeValue;
     for (node = ((EvtWorldTable *)world->data)->slots[6].head; node != NULL; node = node->next) {
-        dds3SetObjectModeAndDefaultWeight(node, combinedMode);
+        dds3ObjectBaseMatterAnimeSpeed(node, combinedMode);
     }
     return 1;
 }
@@ -119,7 +119,7 @@ s32 evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 modeValue) {
 
 
 /* vf10 = (a - b) with y replaced by 0 */
-void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b) {
+void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
     VU0_LOAD_VF(vf10, a);
     VU0_LOAD_VF(vf11, b);
     VU0_SUB(vf10, vf10, vf11);
@@ -127,7 +127,7 @@ void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b) {
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
-void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
+void evtGetUnitDirVector(EvtUnit *unit) {
     f32 v[4];
 
     VU0_LOAD_VF(vf10, unit->effObj->inner->rotation);
@@ -141,21 +141,21 @@ void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
-s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit) {
+s32 evtCheckMoveEnd(EvtUnit *unit) {
     f32 value;
 
     switch (unit->motionSubmode) {
     case 0:
     case 1:
     case 2:
-        evtComputeHorizontalDisplacementVu(unit->targetVector, unit->effObj->inner->position);
+        evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->inner->position);
         VU0_LENGTH_VF10(value);
         if (value <= 20.0f) {
             return 1;
         }
         break;
     case 3:
-        value = evtGetValueScaleFactor(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
+        value = dds3PathBasicControlGetRatio(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
@@ -169,7 +169,7 @@ s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit) {
 }
 
 
-s32 evtUnitStepScaledValue(EvtUnit *unit) {
+s32 evtGetNextMovePos(EvtUnit *unit) {
     f32 t;
 
     if (unit->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
@@ -180,7 +180,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
     case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
     case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
-        t = evtGetValueScaleFactor(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
+        t = dds3PathBasicControlGetRatio(&((Dds3PathCurveWork *)unit->pathHandle)->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
@@ -197,8 +197,8 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
         if (1.0f < t) {
             t = 1.0f;
         }
-        evtScaleValueByMultiplier(&((Dds3PathCurveWork *)unit->pathHandle)->counter, t);
-        dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
+        dds3PathBasicControlSetRatio(&((Dds3PathCurveWork *)unit->pathHandle)->counter, t);
+        dds3PathBasicControlGetPos((Dds3PathCurveWork *)unit->pathHandle);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
     }

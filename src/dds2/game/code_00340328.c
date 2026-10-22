@@ -98,7 +98,7 @@ extern char D_00438B60[];
  * remainder. The pass is a goto loop (no loop notes, so no loop alignment),
  * and its exit test is taken before the four stores. A do/while here adds
  * the loop's alignment nops (128 bytes vs 120 retail, 28 of 30 words differ). */
-u128 *sdfClearQuadwords(u128 *dst, s32 count) {
+u128 *sdfZeroMemQuad(u128 *dst, s32 count) {
     u128 *p = dst;
     s32 done;
 
@@ -127,7 +127,7 @@ loop:
 }
 
 
-char *sdfStrDup(const char *text) {
+char *sdfStrdupChip(const char *text) {
     u32 length;
     char *copy;
 
@@ -141,7 +141,7 @@ char *sdfStrDup(const char *text) {
     return copy;
 }
 
-s32 sdfBcdStrToInt(s32 packedDigits) {
+s32 sdfBcdToDecimal(s32 packedDigits) {
     s32 place = 1;
     s32 acc = 0;
 
@@ -188,22 +188,22 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
 }
 
 /* Release the backing allocation and the request object. */
-void sdfDestroyDevRequest(DevRequest *request) {
+void sdfItemArrayFree(DevRequest *request) {
     sdfMemFreeDirect(request->backingAllocation);
     sdfChipFreeDirect(request);
 }
 
-extern void sdfResizeResourceAllocation(struct SdfMemBlock *allocation, s32 size);
+extern void sdfMemReallocRecord(struct SdfMemBlock *allocation, s32 size);
 
 /* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
-void sdfDevBufferedRequestGrow(DevRequest *request) {
+void sdfItemArrayGrow(DevRequest *request) {
     if (request->backingAllocation == 0) {
         sdfDevResizeBufferedRequest(request, request->growStep);
         return;
     }
     sdfMemUnlock(request->backingAllocation);
     request->capacity = request->capacity + request->growStep;
-    sdfResizeResourceAllocation(request->backingAllocation, (s16)request->capacity * request->stride);
+    sdfMemReallocRecord(request->backingAllocation, (s16)request->capacity * request->stride);
     request->buffer = (void *)sdfMemLock(request->backingAllocation);
 }
 
@@ -224,7 +224,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     } else {
         sdfMemUnlock(request->backingAllocation);
         request->capacity = elementCount;
-        sdfResizeResourceAllocation(request->backingAllocation, request->stride * elementCount);
+        sdfMemReallocRecord(request->backingAllocation, request->stride * elementCount);
         request->buffer = (void *)sdfMemLock(request->backingAllocation);
         if (elementCount < request->usedCount) {
             request->usedCount = elementCount;
@@ -233,7 +233,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
 }
 
 /* Mirror the phase into a quarter turn, then evaluate an odd ninth-degree polynomial. */
-f32 sdfSinPoly(f32 angle) {
+f32 sdfSin(f32 angle) {
     f32 phase = angle * SDF_TRIG_INVERSE_TAU;
     f32 polynomialInput;
     f32 inputSquared;
@@ -264,14 +264,14 @@ f32 sdfSinPoly(f32 angle) {
 
 /* Apply a quarter-turn phase shift to the existing sine approximation. */
 f32 sdfCos(f32 angle) {
-    return sdfSinPoly(angle + SDF_TRIG_HALF_PI);
+    return sdfSin(angle + SDF_TRIG_HALF_PI);
 }
 
 /* Binary-search samples, using zero as the implicit lower endpoint.
  * The step is integer 1/sampleCount converted to f32, not a float reciprocal.
  * The caller must provide valid table bounds for the final sample index.
  */
-f32 sdfTableInterpolate(f32 lookupValue, const f32 *table, s32 sampleCount) {
+f32 sdfTableInterpolation(f32 lookupValue, const f32 *table, s32 sampleCount) {
     f32 positionStep = 1 / sampleCount;
     s32 lowerIndex = 0;
     s32 upperIndex = sampleCount;
@@ -299,7 +299,7 @@ f32 sdfTableInterpolate(f32 lookupValue, const f32 *table, s32 sampleCount) {
 }
 
 /* Odd fifth-degree atan approximation; the ratio is not range-checked here. */
-f32 sdfAtan2Poly(f32 ratio) {
+f32 sdfAtan(f32 ratio) {
     f32 ratioSquared = ratio * ratio;
     f32 ratioCubed = ratioSquared * ratio;
     f32 ratioFifthPower = ratioSquared * ratioCubed;
@@ -322,9 +322,9 @@ f32 sdfAtan2(f32 y, f32 x) {
         sy = 1;
     }
     if (y < x) {
-        r = sdfAtan2Poly(y / x);
+        r = sdfAtan(y / x);
     } else {
-        r = 1.5707963f - sdfAtan2Poly(x / y);
+        r = 1.5707963f - sdfAtan(x / y);
     }
     if (sx != 0) {
         r = 3.1415926f - r;
@@ -336,7 +336,7 @@ f32 sdfAtan2(f32 y, f32 x) {
 }
 
 /* Restore the input sign after sampling; magnitudes at or above one use half pi. */
-f32 sdfAsinTable(f32 x) {
+f32 sdfAsin(f32 x) {
     f32 inputSign;
     f32 angleMagnitude;
 
@@ -346,14 +346,14 @@ f32 sdfAsinTable(f32 x) {
     } else {
         inputSign = 1.0f;
     }
-    angleMagnitude = x >= 1.0f ? SDF_TRIG_HALF_PI : sdfTableInterpolate(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT) * SDF_TRIG_HALF_PI;
+    angleMagnitude = x >= 1.0f ? SDF_TRIG_HALF_PI : sdfTableInterpolation(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT) * SDF_TRIG_HALF_PI;
     return angleMagnitude * inputSign;
 }
 
 /* Return the input-signed complement of the sampled angle, not standard acos(x).
  * Magnitudes at or above one leave the angle magnitude at zero.
  */
-f32 sdfAcosTable(f32 x) {
+f32 sdfAcos(f32 x) {
     f32 inputSign;
     f32 angleMagnitude;
 
@@ -365,7 +365,7 @@ f32 sdfAcosTable(f32 x) {
     }
     angleMagnitude = 0.0f;
     if (!(x >= 1.0f)) {
-        angleMagnitude = (1.0f - sdfTableInterpolate(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT)) * SDF_TRIG_HALF_PI;
+        angleMagnitude = (1.0f - sdfTableInterpolation(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT)) * SDF_TRIG_HALF_PI;
     }
     return angleMagnitude * inputSign;
 }
@@ -373,7 +373,7 @@ f32 sdfAcosTable(f32 x) {
 /* Keep the cast-plus/minus-one turn adjustment; this is not general modulo.
  * Inputs already within the pi thresholds are returned unchanged.
  */
-f32 sdfWrapAngle(f32 angle) {
+f32 sdfClipAngleValuePI(f32 angle) {
     s32 adjustedTurns;
     if (angle > SDF_TRIG_PI) {
         adjustedTurns = (s32)(angle / SDF_TRIG_TAU) + 1;

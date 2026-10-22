@@ -49,10 +49,10 @@
 #include "prf_profile_cap.h"
 /* Declared before first use (were implicit int). */
 extern u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask);
-extern s32 datAdjustCurrentHp(DatPartyRecord *unit, s32 delta);
-extern s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddHp(DatPartyRecord *unit, s32 delta);
+extern s32 datAddMp(DatPartyRecord *unit, s32 delta);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText);
-extern void evtDestroySecondaryWorldNode(void);
+extern void evtFreeStage(void);
 extern void fldActivatePendingSceneCommand(void);
 extern s32 fldGetSceneCommandState(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
@@ -167,7 +167,7 @@ extern void evtStageTestAdvanceMotionQueue(void);
 
 
 
-extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot);
+extern EffWorldNode *evtAddCamera(f32 *pos, f32 *rot);
 
 extern char D_00437CB0[];
 
@@ -250,19 +250,19 @@ void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
 
     index = 0;
     do {
-        s32 x = (s32)(sdfGetRand(0) & 0x3F) * 4;
+        s32 x = (s32)(dds3GetRandA(0) & 0x3F) * 4;
         s32 startY;
         s32 endY;
         s32 alpha;
 
         if (entry->option == 0) {
-            startY = (s32)(sdfGetRand(0) & 7) + 8;
-            endY = startY + (s32)(sdfGetRand(0) & 0x1F) + 0x20;
+            startY = (s32)(dds3GetRandA(0) & 7) + 8;
+            endY = startY + (s32)(dds3GetRandA(0) & 0x1F) + 0x20;
         } else {
-            startY = (s32)(sdfGetRand(0) & 7) + 8;
-            endY = startY + (s32)(sdfGetRand(0) & 0x1F) + 0x10;
+            startY = (s32)(dds3GetRandA(0) & 7) + 8;
+            endY = startY + (s32)(dds3GetRandA(0) & 0x1F) + 0x10;
         }
-        alpha = (s32)(sdfGetRand(0) & 0x7F) + 0x80;
+        alpha = (s32)(dds3GetRandA(0) & 0x7F) + 0x80;
 
         /* Walk the complete allocation: each motion row has a paired position row. */
         *(s32 *)(row + POSITION_X) = x * 16;
@@ -387,7 +387,7 @@ void func_002BF000(s32 x, s32 y, s32 z, MenuQueuedCommand *command,
     u8 *row;
 
     done = 1;
-    color = uiBlendColors(0x372D804D, 0x372D8000, command->initialValue);
+    color = fclBlendColor(0x372D804D, 0x372D8000, command->initialValue);
     i = 0;
     if (command->particleCount > 0) {
         s32 phaseLimit = 0x200;
@@ -709,7 +709,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     if (panel->iconBundle != NULL) {
         u32 bundleFade = panel->iconBundle->fade;
         struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
-                          uiBlendColors(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
+                          fclBlendColor(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
         frSetFontColorNo(glyph, 3);
         frFontDrawGlyphChain(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
@@ -721,7 +721,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
                   1, panel->icon[2], 0, surface);
     {
         struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
-                          uiBlendColors(0xA09DC380, 0xA09DC300, alpha), text, NULL);
+                          fclBlendColor(0xA09DC380, 0xA09DC300, alpha), text, NULL);
         frFontDrawGlyphChain(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
     }
@@ -787,7 +787,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 barPosition[2];
     MenuPageSlot *panel = &menu->slots[panelIndex];
     s32 alpha = menu->transitionValue;
-    u32 textColor = uiBlendColors(0x80808080, 0x80808000, alpha);
+    u32 textColor = fclBlendColor(0x80808080, 0x80808000, alpha);
     s32 labelX;
     s32 labelY;
     FrFontGlyph *glyph;
@@ -1343,7 +1343,7 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
     u32 cornerColors[4];
     s32 color = state->color;
 
-    color = uiBlendColors(color, color & ~0xFF, state->blend);
+    color = fclBlendColor(color, color & ~0xFF, state->blend);
     panelSetVec4(cornerColors, 0, 0, color, color);
 
     uiDrawGradientColorRect(0, 0x700, 0, 0x2000, 0x700, cornerColors, surface);
@@ -1737,7 +1737,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     if (value > item->value14) {
         value = item->value14;
     }
-    color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     sprintf(text, D_00437C88, value);
     glyph = itfCreateFont2TextGlyph(x + 0x2D0, y, depth, color, text, 0);
     frSetFontColorNo(glyph, fontFlags);
@@ -1770,7 +1770,7 @@ MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     profileRecord = ptyGetCurrentProfileRecord(selectionState);
     mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), profileRecord->value);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
-        panel->randomOpacity[randomWordIndex] = sdfGetRand(0) % 0xC0 + 0x40;
+        panel->randomOpacity[randomWordIndex] = dds3GetRandA(0) % 0xC0 + 0x40;
     }
     panel->opacity = 0x100;
     return panel;
@@ -2208,27 +2208,27 @@ void mnuHandlePanelListPageJumpInput(MenuWindowContainer *window, u32 *buttons) 
 /* Bits 0x8000 and 0x4000 return early in that order; state bits may suppress navigation SE. */
 void mnuPlayInputSound(s32 unused, s32 inputFlags, u32 *stateFlags) {
     if (inputFlags & 0x8000) {
-        sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
         return;
     }
     if (inputFlags & 0x4000) {
-        sndSetSequenceVolumePan(0xC, 0x7F, 0x3F);
+        p2sdPlaySE(0xC, 0x7F, 0x3F);
         return;
     }
     if (inputFlags != 0) {
         if (inputFlags & MNU_INPUT_PRIORITY_BIT) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
         }
         if (inputFlags & 2) {
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
         }
         if (inputFlags & 0xCF0) {
             if (stateFlags != NULL) {
                 if ((*stateFlags & 3) != 2) {
-                    sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                    p2sdPlaySE(0, 0x7F, 0x3F);
                 }
             } else {
-                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                p2sdPlaySE(0, 0x7F, 0x3F);
             }
         }
     }
@@ -2237,38 +2237,38 @@ void mnuPlayInputSound(s32 unused, s32 inputFlags, u32 *stateFlags) {
 /* Only bit 0x8000 returns early; other flags may play multiple sounds of the selected kind. */
 void mnuPlayInputSoundKind(s32 inputFlags, s8 soundKind) {
     if (inputFlags & 0x8000) {
-        sndSetSequenceVolumePan(0xD, 0x7F, 0x3F);
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
         return;
     }
     if (inputFlags != 0) {
         if (inputFlags & 0x4000) {
-            sndSetSequenceVolumePan(0xC, 0x7F, 0x3F);
+            p2sdPlaySE(0xC, 0x7F, 0x3F);
         }
         if (inputFlags & MNU_INPUT_PRIORITY_BIT) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
         }
         if (inputFlags & 2) {
-            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
         }
         if (inputFlags & 0x1000) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
         }
         if (inputFlags & 0x2000) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
         }
         if (inputFlags & 0xF0FF0) {
             switch (soundKind) {
             case 1:
-                sndSetSequenceVolumePan(6, 0x7F, 0x3F);
+                p2sdPlaySE(6, 0x7F, 0x3F);
                 break;
             case 2:
-                sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+                p2sdPlaySE(1, 0x7F, 0x3F);
                 break;
             case 3:
-                sndSetSequenceVolumePan(0x15, 0x7F, 0x3F);
+                p2sdPlaySE(0x15, 0x7F, 0x3F);
                 break;
             default:
-                sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+                p2sdPlaySE(0, 0x7F, 0x3F);
                 break;
             }
         }
@@ -2449,13 +2449,13 @@ s32 mnuConsumeEntryCost(s32 commandId, DatPartyRecord *actorEntry) {
         if (actorEntry->hp < cost) {
             return 0;
         }
-        datAdjustCurrentHp((u8 *)actorEntry, -cost);
+        datAddHp((u8 *)actorEntry, -cost);
         return 1;
     case DAT_COMMAND_COST_MODE_MP:
         if (actorEntry->mp < cost) {
             return 0;
         }
-        datAdjustCurrentMp((u8 *)actorEntry, -cost);
+        datAddMp((u8 *)actorEntry, -cost);
         return 1;
     default:
         return 1;
@@ -2480,7 +2480,7 @@ s32 mnuGetAbilityTargetCategory(u16 commandId) {
     return 0;
 }
 
-void ptyCommitFieldSkillUse(u16 ability, DatPartyRecord *target, DatPartyRecord *entry) {
+void datDelDevil(u16 ability, DatPartyRecord *target, DatPartyRecord *entry) {
     sdfApplyCommandResults(ability, target, entry);
 }
 
@@ -2504,7 +2504,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
         if (btlCheckSelectedPartyCommandEligibility(ability, mask) != 0) {
             return 0;
         }
-        ptyCommitFieldSkillUse(ability, target, entry);
+        datDelDevil(ability, target, entry);
         mnuQueueListEntry(context,
                           mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
@@ -2516,7 +2516,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (btlCheckSelectedPartyCommandEligibility(ability, mask) == 0) {
-                    ptyCommitFieldSkillUse(ability, target, entry);
+                    datDelDevil(ability, target, entry);
                     applied = 1;
                 }
             }
@@ -2537,11 +2537,11 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
     }
 
     if (mnuGetCommandFlagMask(ability) & 0x4000) {
-        sndSetSequenceVolumePan(0x17, 0x7F, 0x3F);
+        p2sdPlaySE(0x17, 0x7F, 0x3F);
     } else if (multiTarget == 0) {
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
     } else {
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
     }
     return 1;
 }
@@ -2737,7 +2737,7 @@ s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
                 id += 0x17;
                 break;
             }
-            dspStartEntry(id);
+            fclStartMessage(id);
             return 1;
         }
     }
@@ -2844,12 +2844,12 @@ s32 ptyChooseFirstAvailableRosterId(void) {
     return ptyIsRosterEntryPresent(8) ? 8 : 1;
 }
 
-extern s32 fldIsFlagActive(void);
-extern void fldSetPrimarySceneFlag(void);
-extern s32 fldTestSecondarySceneFlag(void);
-extern void fldSetSecondarySceneFlag(void);
-extern s32 fldTestFieldTransitionFlag(void);
-extern void fldSetFieldTransitionFlag(void);
+extern s32 fldEsutoMaChk(void);
+extern void fldEsutoMaStart(void);
+extern s32 fldRiberaMaChk(void);
+extern void fldRiberaMaStart(void);
+extern s32 fldRifutoMaChk(void);
+extern void fldRifutoMaStart(void);
 extern u8 *datUnitNames;
 s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *target,
                   struct DatPartyRecord *selected) {
@@ -2858,36 +2858,36 @@ s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct DatPartyRecord *targ
     switch (result) {
     case 1:
         mnuQueueListEntry(page, mnuFindMatchingPartyEntryIndex(selected), 1, 0);
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         return 1;
     case 2:
         return result;
     }
     switch (ability) {
     case 0x3B:
-        if (fldIsFlagActive()) {
+        if (fldEsutoMaChk()) {
             sndPlayPartyItemSe(ability, 1);
             return 2;
         }
         sndPlayPartyItemSe(ability, 0);
-        fldSetPrimarySceneFlag();
+        fldEsutoMaStart();
         goto accepted;
     case 0x3C:
-        if (fldTestSecondarySceneFlag()) {
+        if (fldRiberaMaChk()) {
             sndPlayPartyItemSe(ability, 1);
             return 2;
         }
         sndPlayPartyItemSe(ability, 0);
-        fldSetSecondarySceneFlag();
+        fldRiberaMaStart();
         goto accepted;
     case 0x3D:
-        if (fldTestFieldTransitionFlag()) {
+        if (fldRifutoMaChk()) {
             sndPlayPartyItemSe(ability, 1);
             return 2;
         }
         evtCopyEntryStringToActiveWindow(0, datUnitNames + ptyChooseFirstAvailableRosterId() * 17);
         sndPlayPartyItemSe(ability, 0);
-        fldSetFieldTransitionFlag();
+        fldRifutoMaStart();
         goto accepted;
     case 0x3E:
         switch (fldGetSceneCommandState()) {
@@ -2908,7 +2908,7 @@ activate:
     fldActivatePendingSceneCommand();
 accepted:
     mnuQueueListEntry(page, mnuFindMatchingPartyEntryIndex(selected), 2, 0);
-    sndSetSequenceVolumePan(7, 0x7F, 0x3F);
+    p2sdPlaySE(7, 0x7F, 0x3F);
     return 1;
 }
 
@@ -3196,8 +3196,8 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
     if (motionIndex < 0) {
         motionIndex = 0;
     }
-    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
-        motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
+    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNumOfCut(evtStageTestState.model, 0)) {
+        motionIndex = mdlGetNumOfCut(evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
     evtStageTestApplyInitialMotion(-1);
@@ -3278,12 +3278,12 @@ extern u8 D_0042B528[];
 extern u8 D_0042B538[];
 extern u8 D_0042B548[];
 extern u8 D_0042B558[];
-extern void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second);
-extern void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
-extern void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
-extern void kwlnSetBackgroundColorTarget(s32 mode, f32 *color);
-extern void kwlnSetDrawColorTarget(s32 mode, f32 *color);
-extern void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w);
+extern void dds3SetSoftenBias(s32 frames, f32 first, f32 second);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetAmbientColor(s32 mode, f32 *color);
+extern void dds3SetFogColor(s32 mode, f32 *color);
+extern void dds3SetFogPara(s32 mode, f32 x, f32 y, f32 z, f32 w);
 
 /* Restore color targets, projection settings and the stage viewer's view vectors. */
 void evtStageTestResetViewAndLighting(void)
@@ -3297,18 +3297,18 @@ void evtStageTestResetViewAndLighting(void)
     memcpy(secondColor, D_0042B538, sizeof(secondColor));
     memcpy(backgroundColor, D_0042B548, sizeof(backgroundColor));
     memcpy(drawColor, D_0042B558, sizeof(drawColor));
-    evtToggleSavedDrawVectors(0, 5.0f, 0.0f);
-    kwlnSetLightColorTarget(0, 0, firstColor);
-    kwlnSetLightDirectionTarget(0, 0, secondColor);
-    kwlnSetBackgroundColorTarget(0, backgroundColor);
-    kwlnSetDrawColorTarget(0, drawColor);
-    evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
+    dds3SetSoftenBias(0, 5.0f, 0.0f);
+    dds3SetLightColor(0, 0, firstColor);
+    dds3SetLightDir(0, 0, secondColor);
+    dds3SetAmbientColor(0, backgroundColor);
+    dds3SetFogColor(0, drawColor);
+    dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     sdfSceneProjectionParameters.camera.fov = 0.7551905f;
     PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
     PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
     PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
 /* Set the horizontal projection offset while retaining the native GS-coordinate bias. */
@@ -3360,7 +3360,7 @@ void evtStageTestStop(void) {
         evtStageTestDestroyModelEffect();
     }
     if (stage->model != 0) {
-        mdlDestroyContext(stage->model);
+        mdlFree(stage->model);
         stage->model = 0;
         stage->modelUpdateStarted = 0;
     }
@@ -3375,7 +3375,7 @@ void mnuResetWorkFloats(void) {
 
 /* Remember the model asset request result for the stage viewer. */
 s32 evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
-    evtStageTestState.assetRequest = mdlRequestAsset(resource, modelId, option);
+    evtStageTestState.assetRequest = mdlPrepare(resource, modelId, option);
     return evtStageTestState.assetRequest;
 }
 
@@ -3453,8 +3453,8 @@ void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     } else {
         motionIndex = initialMotionIndex;
     }
-    if (model != NULL && motionIndex < mdlGetNodeRefHalf(model, 0)) {
-        mdlAddEntryFlagged(model, 0, motionIndex);
+    if (model != NULL && motionIndex < mdlGetNumOfCut(model, 0)) {
+        mdlLoopMotion(model, 0, motionIndex);
         model->first->frameStep = evtStageTestState.entries[slot->entryIndex].frame;
     }
 }
@@ -3477,7 +3477,7 @@ f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
     scaleVector[2] = scale;
     scaleVector[3] = 1.0f;
     VU0_LOAD_VF(vf10, scaleVector);
-    mdlStoreTertiaryVectorVU(model);
+    mdlSetScale(model);
     return scale;
 }
 
@@ -3494,7 +3494,7 @@ typedef struct MenuWorkPosition {
 } MenuWorkPosition;
 
 /* Reset target XYZ to (0, 0, -400) and eye XYZ to zero; leave their fourth words untouched. */
-void mnuResetWorkPair(void) {
+void cmpResetStatusModelPos(void) {
     ((MenuWorkCamera *)evtStageTestViewTargetVector)->x = 0;
     ((MenuWorkCamera *)evtStageTestViewTargetVector)->y = 0;
     ((MenuWorkCamera *)evtStageTestViewTargetVector)->depth = EVT_STAGE_DEFAULT_TARGET_Z;
@@ -3519,7 +3519,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
     if (evtStageTestState.flag != 1) {
         mnuSetModelScaleVector(model, 0);
         position[2] = ((StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries))->position[2];
-        mnuResetWorkPair();
+        cmpResetStatusModelPos();
     } else {
         scale = mnuSetModelScaleVector(model, 1);
         stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
@@ -3529,7 +3529,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
         ((MenuWorkCamera *)evtStageTestViewTargetVector)->depth = (EVT_STAGE_DEFAULT_TARGET_Z - stageEntry->position[2]) * scale;
     }
     VU0_LOAD_VF(vf10, position);
-    mdlStorePrimaryVectorVU(model);
+    mdlSetPosition(model);
 }
 
 /* Convert the active entry's degree angles to radians and update the model rotation basis. */
@@ -3538,7 +3538,7 @@ void evtStageTestApplyEntryRotation(MdlCtx *model) {
 
     sdfConvertEulerAnglesToQuaternionVU(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
                   stageEntry->rotation[2] * 3.14159265f / 180.0f);
-    mdlUpdateContextRotationBasisFromQuaternion(model);
+    mdlSetRotate(model);
 }
 
 
@@ -3549,7 +3549,7 @@ void evtStageTestUpdateCamera(void)
     s128 target;
     s32 drawBufferIndex;
 
-    drawBufferIndex = kwlnGetDrawBufferIndex();
+    drawBufferIndex = dds3GetFrameID();
     evtStageTestResetViewAndLighting();
     PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
     PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
@@ -3567,10 +3567,10 @@ void evtStageTestUpdateCamera(void)
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &target);
-    sdfVuBuildLookAtBasis(&eye, &target, sdfViewUpVector);
+    LookAtMatrix(&eye, &target, sdfViewUpVector);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
-    sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_003820F0 + drawBufferIndex * 8000), &sdfSceneProjectionParameters, sdfViewMatrix);
-    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003820F0 + drawBufferIndex * 8000), &sdfSceneProjectionParameters, sdfViewMatrix);
+    sdf3DSetCamera(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
@@ -3594,7 +3594,7 @@ s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
                 if (evtStageTestState.effect != 0) {
                     btlUpdateJobPositionFromModel(evtStageTestState.effect);
                 }
-                mdlProcessContextNodesAndTransforms(evtStageTestState.model, surfaces);
+                mdlLink(evtStageTestState.model, surfaces);
                 evtStageTestAdvanceMotionQueue();
             }
         }
@@ -3689,15 +3689,15 @@ void evtStageTestAdvanceMotionQueue(void) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
             motionIndex = activeSlot->motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
-                mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
+            if (motionIndex < mdlGetNumOfCut(model, 0)) {
+                mdlSmoothSingleMotion(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
         } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (model->first->state == SDF_MOTION_STATE_TERMINAL || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
-                mdlAddEntryFlaggedEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
+            if (motionIndex < mdlGetNumOfCut(model, 0)) {
+                mdlSmoothLoopMotion(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_FALLBACK_STARTED;
             }
         }
@@ -3742,7 +3742,7 @@ extern s32 D_00437CA4;
 extern const char *D_00437CA0;
 extern char D_00437CA8[];
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
+extern f32 dds3CameraObjectBasicGetFovy(EffWorldNode *camera);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);
 
@@ -3755,7 +3755,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
 void evtStageTestDrawCameraTransformDebug(void) {
-    EffWorldNode *world = (EffWorldNode *)dds3GetWorldObject();
+    EffWorldNode *world = (EffWorldNode *)dds3GetActiveScene();
     EffWorldNode *camera;
     const char *caption;
     const char *name;
@@ -3775,7 +3775,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
     if (D_00437CA4 == 0) {
         return;
     }
-    camera = dds3GetWorldCameraObject(world);
+    camera = dds3GetActiveCameraSceneBasic(world);
     if (camera == NULL) {
         return;
     }
@@ -3785,35 +3785,35 @@ void evtStageTestDrawCameraTransformDebug(void) {
         } else {
             camera = ((EvtWorldTable *)world->data)->slots[4].head;
         }
-        dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
-        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
+        dds3SetActiveCameraSceneBasic((EffWorldNode *)dds3GetActiveScene(), camera);
+        dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     } else if (kwlnTaskPadButtonStates[0x22] < 0) {
         if (camera->previous != NULL) {
             camera = camera->previous;
         } else {
             camera = ((EvtWorldTable *)world->data)->slots[4].tail;
         }
-        dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
-        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
+        dds3SetActiveCameraSceneBasic((EffWorldNode *)dds3GetActiveScene(), camera);
+        dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     }
     name = camera->value;
     caption = D_00437CA0;
     if (name != NULL) {
         caption = name;
     }
-    list = sdfCreateResetPacketList();
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8680, 0x79C0, 0xFF0000, 5, D_00437CA8, caption));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7240, 0x79C0, 0xFF0000, 0, "P:%.2f %.2f %.2f",
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_00437CA8, caption));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7240, 0x79C0, 0xFF0000, 0, "P:%.2f %.2f %.2f",
                                                            camera->inner->position[0],
                                                            camera->inner->position[1],
                                                            camera->inner->position[2]));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7240, 0x7A20, 0xFF0000, 0, "R:%.2f %.2f %.2f",
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7240, 0x7A20, 0xFF0000, 0, "R:%.2f %.2f %.2f",
                                                            camera->inner->rotation[0],
                                                            camera->inner->rotation[1],
                                                            camera->inner->rotation[2]));
     surface = &kwlnDrawSurfaces[96];
     surface->append(surface, list);
-    list = sdfCreateResetPacketList();
+    list = dds3FontReqAllocDrawTag();
     (&kwlnDrawSurfaces[40])->append(&kwlnDrawSurfaces[40], list);
 }
 
@@ -3826,7 +3826,7 @@ u32 evtStageTestCameraUpdate(void) {
 void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
-    EffWorldNode *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
+    EffWorldNode *cameraTarget = evtAddCamera(position, orientation);
 
     cameraTarget->value = D_00437CB0;
     return evtStageTestCameraUpdate;
@@ -3835,17 +3835,17 @@ void *evtCreateBattleStageTestCamera(void) {
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
 s32 evtBattleStageTestScreen(KwlnTask *task) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(EVT_STAGE_SCREEN_WORK_BYTES);
 
-    sdfInitPacketList(packetList);
-    kwlnDrawSpriteCell(packetList, 0x84, 0x46, 0x14, 9);
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    sdfDrawTagInit(packetList);
+    dds3ConsPanelTagLink(packetList, 0x84, 0x46, 0x14, 9);
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00380708.append(&D_00380708, packetList);
     if (kwlnTaskPadButtonStates[0x21] < 0) {
-        evtCreateWorldObjectForKey(D_00437CB8, D_00437CBC);
+        evtLoadArea(D_00437CB8, D_00437CBC);
         return (s32)evtCreateBattleStageTestCamera;
     }
     if (kwlnTaskPadButtonStates[0x25] & MNU_PAD_TRIGGER_BIT) {
@@ -3864,7 +3864,7 @@ s32 evtBattleStageTestScreen(KwlnTask *task) {
 }
 
 void evtDestroyBattleStageTestWorldNode(KwlnTask *task) {
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
 }
 
 /* Destroy the named battle-stage-test task hierarchy and disable the debug graph. */
@@ -3880,11 +3880,11 @@ void btlCreateStageTestTask(void) {
     dds3StartProcess(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
-/* A PAC file request's cleanup (filePollEntryCleanup delegates it): once the
+/* A PAC file request's cleanup (fileHandleFree delegates it): once the
  * request is complete, release its device state, packet queue nodes, name and
  * the request itself, returning zero; return one while it is pending. Retain
  * the K&R definition. */
-s32 btlDestroyStageTask(request)
+s32 pacFileHandleFree(request)
     FilePacRequest *request;
 {
     if (request->state == FILE_REQUEST_COMPLETE_STATE) {
@@ -3892,7 +3892,7 @@ s32 btlDestroyStageTask(request)
         if (deviceRequest != NULL) {
             sdfFileCmdFree((DevState *)deviceRequest);
         }
-        sdfPacReleasePacketQueueNodes(&request->packet);
+        sdfPacFree(&request->packet);
         sdfChipFreeDirect(request->name);
         sdfChipFreeDirect((void *)request);
         return 0;
@@ -3900,8 +3900,8 @@ s32 btlDestroyStageTask(request)
     return 1;
 }
 
-s32 btlStageTaskCleanupCallback(void *request) {
-    return btlDestroyStageTask(request);
+s32 pacFileHandleFree_(void *request) {
+    return pacFileHandleFree(request);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C58);

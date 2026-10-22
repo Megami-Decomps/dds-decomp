@@ -122,7 +122,7 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
     s32 item;
 
     dspRequestMessageWindowModeOne();
-    if (evtGetMessageWindowControlState() == 0) {
+    if (fclChkMessage() == 0) {
         item = menu->pendingItem;
         if (item != 0) {
             menu->pendingItem = 0;
@@ -404,7 +404,7 @@ void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
         evtCopyEntryStringToActiveWindow(0, D_003BAA70 + unit->unitId * 17);
         evtCopyEntryStringToActiveWindow(1, D_003BAA84 + equipped * 25);
         evtCopyEntryStringToActiveWindow(2, D_003BAA84 + itemId * 25);
-        dspStartEntry(0);
+        fclStartMessage(0);
         if (equipped != 0) {
             ptyAdjustItemQuantity(equipped, 1);
         }
@@ -413,7 +413,7 @@ void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
         equipContext->selectedItem = itemId;
     } else {
         evtCopyEntryStringToActiveWindow(0, D_003BAA84 + equipped * 25);
-        dspStartEntry(1);
+        fclStartMessage(1);
         equipContext->previousItem = 0;
         equipContext->selectedItem = 0;
     }
@@ -463,7 +463,7 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
         }
         mnuResetListNodeFadeCounters(menu->list->list);
     }
-    sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+    p2sdPlaySE(4, 0x7F, 0x3F);
     return 1;
 }
 
@@ -480,7 +480,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
         return state;
     }
     menu->inputState = 0;
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     mnuSetStateValue((u32 *)&context->transitionFade, 0);
@@ -549,7 +549,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
     mnuCreateStaffImageSprite(8);
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, partyEntry,
                   ((StaffImageContext *)context)->panelHandle, 0x53);
-    if (mdlFlagTest(0x901) != 0) {
+    if (evtBitCheck(0x901) != 0) {
         mnuDrawPartyInfoSprites(0, 0, 0, partyEntry,
                       ((StaffImageContext *)context)->spriteHandle, 0x53);
     }

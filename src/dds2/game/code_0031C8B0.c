@@ -15,13 +15,13 @@ extern f32 sdfViewEyeVector[4];
 
 extern f32 sdfViewTargetVector[4];
 
-extern Motion *mdlFindNodeById(MdlCtx *model, s32 id);
+extern Motion *mdlGetMotionCtrlr(MdlCtx *model, s32 id);
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
-    u32 broadcastLowBytes = mdlGetBroadcastValue(node->model) & 0xFFFFFF;
+    u32 broadcastLowBytes = mdlGetColor(node->model) & 0xFFFFFF;
 
-    mdlApplyBroadcastVia(mdlBroadcastMasked, node->model, broadcastLowBytes | ((u32)highByte << 24));
+    mdlApplyBroadcastVia(mdlSetColor, node->model, broadcastLowBytes | ((u32)highByte << 24));
 }
 
 void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
@@ -43,13 +43,13 @@ void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
  * sibling decision; no reset instruction survives in the emitted code.
  */
 void mnuSampleModelMotionAtFrame(MnuModelNode *node, f32 frame) {
-    Motion *motion = mdlFindNodeById(node->model, 0);
+    Motion *motion = mdlGetMotionCtrlr(node->model, 0);
     if (frame < 0.0f) {
-        u32 random = sdfGetRand(NULL);
-        sdfMotionSampleAtFrame(motion, (f32)(random % node->model->first->frameCount));
+        u32 random = dds3GetRandA(NULL);
+        sdfMotionSeek(motion, (f32)(random % node->model->first->frameCount));
         return;
     }
-    sdfMotionSampleAtFrame(motion, frame);
+    sdfMotionSeek(motion, frame);
     frame = 0.0f;
 }
 
@@ -106,10 +106,10 @@ void mnuUpdateSectionModelWork(MnuSectionModelWork *work, u32 flags) {
                     alpha = ratio * 128.0f;
                     mnuSetNodeModelBroadcastByte(node, alpha);
                 }
-                mdlProcessContextNodesAndTransforms(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
             } else {
                 mnuTranslateNodePrimaryVector(node, node->x, node->y, node->z);
-                mdlProcessContextNodesAndTransforms(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
                 if (node->value48 != 0 && --node->value48 != 0) {
                     ratio = (f32)node->value48 / (f32)node->value4A;
                     alpha = ratio * 128.0f;

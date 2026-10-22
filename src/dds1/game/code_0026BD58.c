@@ -8,7 +8,7 @@ extern u8 D_003BC590[];
 extern u8 D_003BC598[];
 
 
-extern s32 evtDestroySecondaryWorldNode(void);
+extern s32 evtFreeStage(void);
 
 extern u8 D_003BC5A0[];
 
@@ -28,7 +28,7 @@ extern void sdfDestroyRuntimeTask(void);
 
 /* The title-menu callback passes zero; the restart does not use it. */
 void mnuRestartRuntimeAfterViewer(s32 unused) {
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();
 }

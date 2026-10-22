@@ -85,7 +85,7 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
 }
 
 
-extern s8 dds3AdminReadPreviousSignedSample(void);
+extern s8 dds3AdminiGetPrevSequence(void);
 
 extern EffectList *mnuAllocateValueRecord(u32);
 
@@ -100,7 +100,7 @@ extern void mnuAppendStaffResourceRequests(void *);
 
 extern void mnuResetGradientFadeColor(void *, s32);
 
-extern void sndStartReducedBgm(void);
+extern void p2sdBgmVolDown(void);
 
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
@@ -113,25 +113,25 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     mnuClearPanelTransitionState(&menu->panel);
     /* Mode also selects the normal or alternate staff image table. */
     /* Keep the zero case first to preserve the matched branch layout. */
-    if (dds3AdminReadPreviousSignedSample() == 0) {
+    if (dds3AdminiGetPrevSequence() == 0) {
         menu->resourceQueue = mnuAllocateValueRecord(0);
     } else {
         menu->resourceQueue = mnuAllocateValueRecord(1);
     }
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuLoadBackdropAssetsAndTintSlots(menu->background);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)(s32)mnuCampMessagePack);
+    fclInitMessage((struct ItfMesSub *)(s32)mnuCampMessagePack);
     mnuLoadStaffImageResources(menu);
     mnuAppendStaffResourceRequests(menu);
     mnuResetGradientFadeColor(menu->timer, 0x40);
-    sndStartReducedBgm();
+    p2sdBgmVolDown();
     return menu;
 }
 
 extern s8 mnuCampTaskState;
 
 extern void mnuReleaseAssets(MenuAssets *assets);
-extern void sndStopReducedBgm(void);
+extern void p2sdBgmVolUp(void);
 
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
@@ -144,14 +144,14 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseStaffSpriteAndResourceHandles(menu);
     mnuDestroyScrollPanel(menu->scrollPanel);
     mnuShutdownContext((MenuPageWindow *)(menu->background + 0x20));
-    dspCloseChannel();
+    fclDestroyMessage();
     mnuReleaseAssets(menu->background);
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
     effDestroyEffectList(menu->resourceQueue);
     sdfMemFreeDirect(menu->resource);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
-    sndStopReducedBgm();
+    p2sdBgmVolUp();
 }
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface);
@@ -169,7 +169,7 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 void mnuDestroyCampTasks(void);
 
 extern s32 evtStageTestPollModelRequest(void);
-extern s32 fileConsumeConfigTaskReady(void);
+extern s32 checkConfigState(void);
 
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
@@ -181,10 +181,10 @@ s32 mnuStaffCampCancelCheck(KwlnTask *task) {
         return 0;
     }
     result = 0;
-    if (evtGetMessageWindowControlState() == 0) {
+    if (fclChkMessage() == 0) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
             if (evtStageTestPollModelRequest() != 1) {
-                if (fileConsumeConfigTaskReady() == 0) {
+                if (checkConfigState() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);
                     return -1;
@@ -215,7 +215,7 @@ void mnuCreateCampTasks(void) {
     dds3StartProcess(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, (u32)menu);
     dds3LinkProcess(drawTask, dds3StartProcess("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
     dds3LinkProcess(drawTask, dds3StartProcess("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
-    kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
+    dds3FadeIn(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
 }
 
@@ -246,7 +246,7 @@ s32 mnuAcknowledgeCampState(void) {
 u8 mnuIsFadeIdle(void) {
     s32 fadeActive;
 
-    fadeActive = kwlnFadeIsActive();
+    fadeActive = dds3FadeCheck();
     return fadeActive == 0;
 }
 
@@ -313,7 +313,7 @@ void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 contex
     itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->staffSlots.baseResources[1], 2, layer);
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
-        frFontSetChildColors(glyph, 0xA09DC366);
+        frSetFontColor(glyph, 0xA09DC366);
         frFontDrawGlyphChain(glyph, 0, layer);
         frDestroyFontRequestAfter(glyph);
     }

@@ -8,7 +8,7 @@
 #include "eff_manager_task.h"
 #include "eff_random.h"
 
-extern u32 sdfSoundIsCommandBusy(void);
+extern u32 p2sdGetPcmState(void);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
@@ -18,18 +18,18 @@ u32 fldCmdGetCurrentSceneSelectionResource(void) {
     s32 selectionResource;
 
     selectionResource = fldGetCurrentSceneSelectionResource();
-    scrSetIntegerReturnValue(selectionResource);
+    scrSetIntReturnValue(selectionResource);
     return 1;
 }
 
 
 
-extern s32 scrReadIntParameter(s32);
+extern s32 scrGetIntPara(s32);
 
 /* Clear the selected flag only if it was set, and report whether it changed. */
-s32 fldCommandClearSelectedFlag(void) {
+s32 fldCommand_FLD_GET_KIRETA(void) {
     s32 changed = 0;
-    switch (scrReadIntParameter(0)) {
+    switch (scrGetIntPara(0)) {
     case 0:
         if (fldAreaState.consumedFlags & 1) {
             fldAreaState.consumedFlags &= ~1;
@@ -55,7 +55,7 @@ s32 fldCommandClearSelectedFlag(void) {
         }
         break;
     }
-    scrSetIntegerReturnValue(changed);
+    scrSetIntReturnValue(changed);
     return 1;
 }
 
@@ -66,30 +66,30 @@ extern s32 fldMirroredSolarThresholds[];
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
-    if (solarPhaseThreshold >= (s32)sdfGetRandInt(0, 100)) {
-        scrSetIntegerReturnValue(1);
+    if (solarPhaseThreshold >= (s32)dds3GetRandIntA(0, 100)) {
+        scrSetIntReturnValue(1);
     } else {
-        scrSetIntegerReturnValue(0);
+        scrSetIntReturnValue(0);
     }
     return 1;
 }
 
-extern s32 sdfSoundSendNamedCommand(const char *name, u8 channel);
-extern void sdfSoundStopNamedPlayback(void);
+extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
+extern void p2sdSyncSound(void);
 
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
     s32 commandName;
-    commandName = scrReadStringParameter(0);
-    if (sdfSoundIsCommandBusy() != 0) {
-        sdfSoundStopNamedPlayback();
+    commandName = scrGetStrPara(0);
+    if (p2sdGetPcmState() != 0) {
+        p2sdSyncSound();
     }
-    sdfSoundSendNamedCommand(commandName, 0x7f);
+    p2sdLoadPcmFile(commandName, 0x7f);
     return 1;
 }
 
 u32 fldCommandSendSoundControl(void) {
-    sdfSoundStopNamedPlayback();
+    p2sdSyncSound();
     return 1;
 }
 
@@ -97,24 +97,24 @@ u32 fldCommandSendSoundControl(void) {
 u32 fldCommandIsSoundBusy(void) {
     u32 busy;
 
-    busy = sdfSoundIsCommandBusy();
-    scrSetIntegerReturnValue(busy);
+    busy = p2sdGetPcmState();
+    scrSetIntReturnValue(busy);
     return 1;
 }
 
 extern s32 D_0032E3C0[];
 
-extern s32 scrReadIntParameter(s32);
+extern s32 scrGetIntPara(s32);
 
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 
 /* Pass five field-script arguments to the underlying handler. */
 s32 fldCmdMarkBitmapRegion(void) {
-    s32 first = scrReadIntParameter(0);
-    s32 second = scrReadIntParameter(1);
-    s32 third = scrReadIntParameter(2);
-    s32 fourth = scrReadIntParameter(3);
-    fldMarkStageExplorationBitmapRegion(D_0032E3C0[0], first, second, third, fourth, scrReadIntParameter(4));
+    s32 first = scrGetIntPara(0);
+    s32 second = scrGetIntPara(1);
+    s32 third = scrGetIntPara(2);
+    s32 fourth = scrGetIntPara(3);
+    fldMarkStageExplorationBitmapRegion(D_0032E3C0[0], first, second, third, fourth, scrGetIntPara(4));
     return 1;
 }
 
@@ -129,13 +129,13 @@ extern void fileManagerResetSubsystems(void);
 
 extern void effInitializeBillResourceOwners(void);
 
-extern void parSysReset(void);
+extern void dds3PolygonManagerInit(void);
 
-extern void effSeedEmitterDelayRandomState(void);
+extern void dds3ParticleManagerInit(void);
 
 extern void effFieldTaskStartupHook(void);
 
-extern void effInitWorks(void);
+extern void Eve_EffectInit(void);
 
 extern void effBTLFieldColorResetFlags(void);
 
@@ -147,12 +147,12 @@ void fldCreateFieldEffectTask(void) {
     sdfRandomizeByTime((EffRandState *)effDefaultRandomState);
     fileManagerResetSubsystems();
     effInitializeBillResourceOwners();
-    parSysReset();
-    effSeedEmitterDelayRandomState();
+    dds3PolygonManagerInit();
+    dds3ParticleManagerInit();
     dds3StartProcess("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
-    dds3StartProcess(D_003BB008, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
+    dds3StartProcess(D_003BB008, 0x2B18, 0, 0, dds3EffectManagerRun, effManagerInitializeSubsystems, 0);
     effFieldTaskStartupHook();
-    effInitWorks();
+    Eve_EffectInit();
     effBTLFieldColorResetFlags();
 }
 

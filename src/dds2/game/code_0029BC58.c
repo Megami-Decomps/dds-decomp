@@ -38,27 +38,27 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     case 2:
     case 3:
         evtCopyEntryStringToActiveWindow(0, datUnitNames[unit->unitId]);
-        dspStartEntry(work->rewardMode + 25);
+        fclStartMessage(work->rewardMode + 25);
         break;
     case 5: {
         s32 roll;
         rewardIndex = unit->unitId * 4 - 4;
-        roll = sdfGetRand(NULL) & 3;
+        roll = dds3GetRandA(NULL) & 3;
 
         evtCopyEntryStringToActiveWindow(0, datUnitNames[unit->unitId]);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C[work->earnedItem]);
         switch (mnuSelectEventFlagCode()) {
         case 1:
-            dspStartEntry(rewardIndex + roll + 30);
+            fclStartMessage(rewardIndex + roll + 30);
             break;
         case 5:
-            dspStartEntry(rewardIndex + roll + 62);
+            fclStartMessage(rewardIndex + roll + 62);
             break;
         case 2:
-            dspStartEntry(rewardIndex + roll + 94);
+            fclStartMessage(rewardIndex + roll + 94);
             break;
         case 8:
-            dspStartEntry(rewardIndex + roll + 126);
+            fclStartMessage(rewardIndex + roll + 126);
             break;
         }
         break;
@@ -95,21 +95,21 @@ void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
         break;
     case 4:
         btlAddBaseStats(work->statGains, seq);
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 1:
         seq->hp = seq->maxHp;
         seq->mp = seq->maxMp;
         seq->status = 0;
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 2:
         seq->hp = seq->maxHp;
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 3:
         seq->mp = seq->maxMp;
-        sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     }
     mnuRefreshSelectedUnitPanels(seq, work);
@@ -140,7 +140,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
         return result;
     }
     if (panel->transition.state == 0) {
-        if (evtGetMessageWindowControlState() == 0) {
+        if (fclChkMessage() == 0) {
             if (panel->rewardMode != 0) {
                 mnuStartRewardDialogAndMotion(panel);
                 mnuTitleApplySequenceState(panel);
@@ -185,7 +185,7 @@ void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
         work->leadIconRow.x = 12;
         work->leadIconRow.y = 54;
         work->leadIconRow.opacity =
-            uiBlendColors(0x80808080, 0x80808000, weight) & 0xFF;
+            fclBlendColor(0x80808080, 0x80808000, weight) & 0xFF;
         if (work->leadIconRow.opacity >= 0x40) {
             for (i = 0; i < 4; i++) {
                 if (work->followIconRows[i].count == 0 && work->followIconRows[i].holdTicks == 0) {
@@ -239,7 +239,7 @@ void itfUpdateFadeColor(BrsSkillPackageWork *work) {
     if (work->opacityReady != 0) {
         return;
     }
-    opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
+    opacity = fclBlendColor(0x80808080, 0x80808000, remaining) & 0xFF;
     work->opacity = opacity;
     if (opacity >= 0x80) {
         work->opacityReady = 1;
@@ -274,7 +274,7 @@ void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
     u32 scale;
 
     memcpy(table, D_004284E0, sizeof(table));
-    count = mdlFlagTest(0x290) ? 9 : 8;
+    count = evtBitCheck(0x290) ? 9 : 8;
     if (work->teardownResource != NULL) {
         for (i = 0; i < count; i++) {
             scale = (work->opacity << 8) >> 7;
@@ -386,7 +386,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSumm
     struct FrFontGlyph *sprite;
     u32 packed;
 
-    if (mdlFlagTest(0x290) != 0) {
+    if (evtBitCheck(0x290) != 0) {
         packed = (alpha & 0xFF) | 0xA09DC300;
         sprintf(name, D_004379C8, res->macca);
         sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);

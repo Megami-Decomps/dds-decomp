@@ -35,7 +35,7 @@
 #include "kwln_fade_color.h"
 #include "evt_frame_state_packet.h"
 /* Declared before first use (were implicit int). */
-extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
+extern void eglSetOt(u32 surfaceIndex);
 extern void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
@@ -94,21 +94,21 @@ extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
 extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 
-extern void evtInitializeFrameStatePacketTemplates(void);
+extern void dds3InitZClearDrawTag(void);
 
-extern void evtEnsureDrawVectorState(void);
+extern void eglInit(void);
 
-extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
+extern void sdfGrSetScreen(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
 extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
-extern void kwlnPadStartMotor(u32, u8, s32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
+extern void dds3PadVibrationSet(u32, u8, s32);
 typedef s32 (*KwlnTaskUpdateCallback)();
 typedef void (*KwlnTaskDestroyCallback)();
 extern s32 kwlnDebugGraphUpdate(KwlnTask *task);
 extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
+extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;
 extern s32 kwlnRippleBlurErrorCount;
@@ -117,13 +117,13 @@ extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 extern SdfPoolNode D_00325708;
 
 
-extern void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor);
+extern void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 extern char dds3AdminTaskName[];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
-extern void dds3AdminReleaseTaskWork(KwlnTask *task);
+extern void dds3AdminiNeoShutdown(KwlnTask *task);
 
-void kwlnDebugTaskCreate(void) {
+void dds3InitAdmini(void) {
     AdminWork *work;
     s32 i;
 
@@ -140,7 +140,7 @@ void kwlnDebugTaskCreate(void) {
         }
         work->requestData = 0;
         work->requestSizeLowByte = 0;
-        dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, (u32)work);
+        dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminiNeoShutdown, (u32)work);
     }
 }
 
@@ -151,9 +151,9 @@ extern s32 D_003BA854;
 extern s32 D_003BA858;
 extern s32 D_003BA85C;
 
-s32 kwlnFindNamedSlot(const char *name);
+s32 fclEncycFreeEntry(const char *name);
 
-s32 kwlnRegisterNamedSlot(const char *name) {
+s32 fclEncycFindFreeSlot(const char *name) {
     s32 slotIndex;
     s32 characterIndex;
     s32 previous;
@@ -161,7 +161,7 @@ s32 kwlnRegisterNamedSlot(const char *name) {
     if (dds3SearchProcessName(D_0039E018) == NULL) {
         return -1;
     }
-    if (kwlnFindNamedSlot(name) >= 0) {
+    if (fclEncycFreeEntry(name) >= 0) {
         return -1;
     }
     for (slotIndex = 0; slotIndex < 32; slotIndex++) {
@@ -235,7 +235,7 @@ static inline void kwlnSetNamedSlotState(s32 index, s32 kind, TaskUpdate update,
 #define KWLN_DIAG_DEPTH 0x0FFFFF80
 
 /* Find an exact NUL-terminated name along the linked slot indices, or return -1. */
-s32 kwlnFindNamedSlot(const char *name) {
+s32 fclEncycFreeEntry(const char *name) {
     s32 slotIndex = D_003BA850;
     s32 characterIndex;
 
@@ -256,13 +256,13 @@ s32 kwlnFindNamedSlot(const char *name) {
 }
 
 /* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
-s32 kwlnUnregisterNamedSlot(const char *name) {
+s32 fclEncycFreeEntries(const char *name) {
     s32 slotIndex;
 
     if (dds3SearchProcessName(D_0039E018) == NULL) {
         return 0;
     }
-    slotIndex = kwlnFindNamedSlot(name);
+    slotIndex = fclEncycFreeEntry(name);
     if (slotIndex < 0) {
         return 0;
     }
@@ -295,7 +295,7 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
 }
 
 s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
-    s32 index = kwlnRegisterNamedSlot(name);
+    s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
     }
@@ -303,8 +303,8 @@ s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
     return 1;
 }
 
-s32 kwlnConfigureNamedSlotMode1(const char *name, TaskUpdate update, TaskDestroy destroy, void *userValue) {
-    s32 index = kwlnRegisterNamedSlot(name);
+s32 fclEncycAllocEntry(const char *name, TaskUpdate update, TaskDestroy destroy, void *userValue) {
+    s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
     }
@@ -313,7 +313,7 @@ s32 kwlnConfigureNamedSlotMode1(const char *name, TaskUpdate update, TaskDestroy
 }
 
 s32 kwlnConfigureNamedSlotMode2(const char *name, TaskUpdate update, TaskDestroy destroy, void *userValue) {
-    s32 index = kwlnRegisterNamedSlot(name);
+    s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
     }
@@ -321,14 +321,14 @@ s32 kwlnConfigureNamedSlotMode2(const char *name, TaskUpdate update, TaskDestroy
     return 1;
 }
 
-void kwlnRuntimeStartupHook(void) {
+void dds3InitDebugSystem(void) {
 }
 
 extern s8 kwlnTaskPadButtonStates[64];
 
 /* Fresh presses wrap; repeat-bit input stops at the implemented end bounds.
  * Without scrolling, forward motion is bounded by visibleRows, not itemCount. */
-void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows, s32 padSet, s32 forwardInput, s32 backwardInput) {
+void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows, s32 padSet, s32 forwardInput, s32 backwardInput) {
     s32 backwardState;
     s32 forwardState;
 
@@ -400,9 +400,9 @@ void kwlnStepListCursor(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 vi
 
 /* Step the primary then secondary cursor pair; return 1/-1 for confirm/cancel.
  * Any nonzero padSet tests set 1's confirm/cancel, while movement uses padSet. */
-s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible, s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll, s32 *secondaryCursor, s32 *primaryCursor) {
-    kwlnStepListCursor(primaryScroll, primaryCursor, primaryCount, primaryVisible, padSet, 7, 6);
-    kwlnStepListCursor(secondaryScroll, secondaryCursor, secondaryCount, secondaryVisible, padSet, 5, 4);
+s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible, s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll, s32 *secondaryCursor, s32 *primaryCursor) {
+    SelectSub(primaryScroll, primaryCursor, primaryCount, primaryVisible, padSet, 7, 6);
+    SelectSub(secondaryScroll, secondaryCursor, secondaryCount, secondaryVisible, padSet, 5, 4);
     if (padSet == 0) {
         if (kwlnTaskPadButtonStates[1] < 0) {
             return 1;
@@ -422,26 +422,26 @@ s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32
 }
 
 /* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
-void kwlnDrawSpriteCell(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
+void dds3ConsPanelTagLink(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
 
 /* Append the same cell rectangle with caller-selected depth. */
-void kwlnDrawSpriteCellZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
+void dds3ConsPanelTagLinkZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
 
 /* Periodically pulses both pad motors, varying the large-motor level. */
-s32 kwlnDebugPulsePadMotors(KwlnTask *task) {
+s32 dds3PadVibrationTest(KwlnTask *task) {
     if (dds3GetProcessRunTime(task) % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
-        kwlnPadStartMotor(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
-        kwlnPadStartMotor(KWLN_PAD_LARGE_MOTOR, (u8)(sdfGetRandInt(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
+        dds3PadVibrationSet(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
+        dds3PadVibrationSet(KWLN_PAD_LARGE_MOTOR, (u8)(dds3GetRandIntA(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
     }
     return 0;
 }
@@ -455,7 +455,7 @@ extern u8 D_003BA870[2][2][2];
 extern u8 D_003BA878[2][2];
 extern u8 D_003BD698[2];
 
-void kwlnPadResetInputAndMotorState(void) {
+void dds3PadInitialize(void) {
     s32 port;
     s32 bank;
     s32 i;
@@ -488,7 +488,7 @@ void kwlnPadResetInputAndMotorState(void) {
 }
 
 extern u8 sdfPadAnalogSticks[8];
-extern void kwlnUpdatePadMotorDurations(void);
+extern void dds3UpdateVibrationSlots(void);
 
 /* vu0 routine: native stick length, normalization and forward dot product. */
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
@@ -629,7 +629,7 @@ void kwlnUpdatePadInputState(void) {
             }
         }
     }
-    kwlnUpdatePadMotorDurations();
+    dds3UpdateVibrationSlots();
 }
 
 void kwlnPadStepLargeMotorLevel(void) {
@@ -653,12 +653,12 @@ void kwlnPadStepLargeMotorLevel(void) {
 }
 
 extern s32 fileTestSavedSlotFlags(u32 kind);
-extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
-extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
+extern void sdfPadSetAct0(s32 padIndex, u16 strength);
+extern void sdfPadSetAct1(s32 padIndex, u8 strength);
 
 /* Honor the saved rumble option, normalize small-motor strength and clamp
  * motor indices to the large motor. Preserve target update before output. */
-void kwlnPadStartMotor(u32 motor, u8 level, s32 duration) {
+void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     if (fileTestSavedSlotFlags(0) == 0) {
         return;
     }
@@ -678,9 +678,9 @@ void kwlnPadStartMotor(u32 motor, u8 level, s32 duration) {
     }
     D_003BD6A0[motor] = duration;
     if (motor == KWLN_PAD_SMALL_MOTOR) {
-        sdfPadSetSmallMotor(0, level);
+        sdfPadSetAct0(0, level);
     } else {
-        sdfPadSetLargeMotor(0, kwlnPadMotorLevels[motor]);
+        sdfPadSetAct1(0, kwlnPadMotorLevels[motor]);
     }
 }
 
@@ -690,11 +690,11 @@ void kwlnPadResetMotorLevelsAndOutput(void) {
     D_003BD6A0[KWLN_PAD_SMALL_MOTOR] = 0;
     kwlnPadMotorLevels[KWLN_PAD_LARGE_MOTOR] = 0;
     D_003BD6A0[KWLN_PAD_LARGE_MOTOR] = 0;
-    sdfDevConsSetEntryPair(0, 0, 0);
+    sdfPadSetAct(0, 0, 0);
 }
 
 /* Tick both rumble countdowns; stop expired motors and refresh the active large motor. */
-void kwlnUpdatePadMotorDurations(void) {
+void dds3UpdateVibrationSlots(void) {
     s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
     u8 *levels = kwlnPadMotorLevels;
     u8 *targets = D_003BD698;
@@ -708,15 +708,15 @@ void kwlnUpdatePadMotorDurations(void) {
             if (D_003BD6A0[motor] == 0) {
                 levels[motor] = 0;
                 if (motor == KWLN_PAD_SMALL_MOTOR) {
-                    sdfPadSetSmallMotor(0, 0);
+                    sdfPadSetAct0(0, 0);
                 } else {
-                    sdfPadSetLargeMotor(0, 0);
+                    sdfPadSetAct1(0, 0);
                 }
             } else if (motor == largeMotor) {
                 largeLevel = levels + KWLN_PAD_LARGE_MOTOR;
                 if (*largeLevel != targets[KWLN_PAD_LARGE_MOTOR]) {
                     kwlnPadStepLargeMotorLevel();
-                    sdfPadSetLargeMotor(0, *largeLevel);
+                    sdfPadSetAct1(0, *largeLevel);
                 }
             }
         }
@@ -728,7 +728,7 @@ s32 kwlnTaskNoopCallback(KwlnTask *task) {
 }
 
 /* Seed the shared effect random state with the fixed initialization seed. */
-void kwlnInitMagicState(void) {
+void dds3InitRandCB(void) {
     sdfRandomize(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
 }
 
@@ -741,43 +741,43 @@ extern u16 D_003BA886;
 extern char D_003BA888[];
 
 s32 kwlnDebugGraphUpdate(KwlnTask *task) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfGsBlendPacket *blendPacket;
     s32 originX = 0x7100;
     /* Keep the four real conversion epochs in one local; see docs/idioms.md,
      * "Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate". */
     s32 pixels;
 
-    sdfInitPacketList(packetList);
-    blendPacket = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildPrimaryAlphaBlendDmaPacket(blendPacket);
-    sdfAppendPacket(packetList, (u32)blendPacket);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(0x70D0, 0x85A8,
+    sdfDrawTagInit(packetList);
+    blendPacket = (SdfGsBlendPacket *)sdfGrAllocPacketBuff(0x40);
+    sdfPrimSetOpaquePacket(blendPacket);
+    sdfDrawTagLink(packetList, (u32)blendPacket);
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x70D0, 0x85A8,
                     0xFFFF7F, 0x1260, 0xF0, 0x20000000, 0x40806040));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(originX,
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(originX,
                     0x85C0, 0xFFFF80, 0, D_003BA888, (u16)D_003BA728));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(originX,
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(originX,
                     0x8620, 0xFFFF80, 0, D_003BA888, D_003BD32E));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x8080,
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x8080,
                     0x85C0, 0xFFFF80, 6, D_003BA888, D_003BA880));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x8080,
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x8080,
                     0x8620, 0xFFFF80, 6, D_003BA888, D_003BA882));
     pixels = (s32)((f32)(u16)D_003BA728 / 224.0f * 200.0f);
-    sdfCreatePacketA(packetList, 0x8000C000, 0, 0x73A0, 0x85F0,
+    sdfPrimLinkRect(packetList, 0x8000C000, 0, 0x73A0, 0x85F0,
                     originX + ((pixels + 0x2A) << 4),
                     0x8600, 0xFF0000, NULL);
     pixels = (s32)((f32)D_003BD32E / 224.0f * 200.0f);
-    sdfCreatePacketA(packetList, 0x80000080, 0, 0x73A0, 0x8650,
+    sdfPrimLinkRect(packetList, 0x80000080, 0, 0x73A0, 0x8650,
                     originX + ((pixels + 0x2A) << 4),
                     0x8660, 0xFF0000, NULL);
     pixels = (s32)((f32)D_003BA880 / 224.0f * 200.0f);
-    sdfCreatePacketA(packetList, 0x8000FFFF, 0,
+    sdfPrimLinkRect(packetList, 0x8000FFFF, 0,
                     originX + ((pixels + 0x2B) << 4),
                     0x85D0,
                     originX + 0x20 + ((pixels + 0x2B) << 4),
                     0x8610, 0xFF0000, NULL);
     pixels = (s32)((f32)D_003BA882 / 224.0f * 200.0f);
-    sdfCreatePacketA(packetList, 0x8000FFFF, 0,
+    sdfPrimLinkRect(packetList, 0x8000FFFF, 0,
                     originX + ((pixels + 0x2B) << 4),
                     0x8630,
                     originX + 0x20 + ((pixels + 0x2B) << 4),
@@ -818,7 +818,7 @@ void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
     s32 drawWidth;
     s32 drawHeight;
 
-    sdfConsCreateDrawPacket(packetList, image, 0);
+    sdf2DLinkTexPacket(packetList, image, 0);
     drawWidth = width * 0x10;
     drawHeight = height * 8;
     if (width < height) {
@@ -836,7 +836,7 @@ void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
     if (height == KWLN_PREVIEW_WRAP_TEXELS) {
         height--;
     }
-    sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
+    sdfPrimLinkSprite(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
                                 width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
 
@@ -848,7 +848,7 @@ void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
     s32 pageIndex = kwlnTextureGetPageIndex();
     s32 resourceCount = kwlnTextureCountIncompleteResources();
     sprintf(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
 
 extern const char *D_00324560[];
@@ -863,7 +863,7 @@ void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
     s32 formatMode = 0;
 
     sprintf(text, "W:%4d H:%4d", texture->width, texture->height);
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x82A0, 0x0FFFFF80, 0, text));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x82A0, 0x0FFFFF80, 0, text));
     switch (texture->pixelFormat) {
     case 0: formatIndex = 0; formatMode = 6; break;
     case 1: formatIndex = 1; formatMode = 6; break;
@@ -876,10 +876,10 @@ void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
     case 44: formatIndex = 8; formatMode = 5; break;
     default: break;
     }
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x8300, 0x0FFFFF80,
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x8300, 0x0FFFFF80,
                                                                 formatMode, D_00324560[formatIndex]));
     sprintf(text, "ID[%2d,%2d]", texture->resourceKey, texture->battleTextureSlot);
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x77C0, 0x8300, 0x0FFFFF80, 0, text));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x77C0, 0x8300, 0x0FFFFF80, 0, text));
 }
 
 #define KWLN_DIAG_PACKET_LIST_BYTES 0x20
@@ -993,13 +993,13 @@ void kwlnDrawTextureViewerFrame(void *surfaceContext, s32 handle) {
     if (handle == 0) {
         return;
     }
-    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(0x7160, 0x79B0, 0x0FFFFF7F, 0x1040, 0x80, 0x80000000, 0x80806020));
+    packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packetList);
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x79B0, 0x0FFFFF7F, 0x1040, 0x80, 0x80000000, 0x80806020));
     kwlnTextureDrawPageCounter(packetList);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
     kwlnDrawImageOutline(packetList, image);
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
     kwlnDrawTextureResourceDetails(packetList, image);
 
     if (D_003BA890 != 0) {
@@ -1102,7 +1102,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexRes
     if (columnIndex > 0) {
         rowUnits = (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_COLUMN_UNITS;
         if (remainingUnits >= rowUnits) {
-            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+            sdfPrimLinkLine(packetList, color, 0, leftX, topY,
                                          leftX + (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_CELL_X_STEP, topY + KWLN_MAP_ROW_Y_STEP,
                                          KWLN_DIAG_DEPTH, NULL);
             remainingUnits -= rowUnits;
@@ -1111,7 +1111,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexRes
             if (cellCount == 0) {
                 cellCount = remainingUnits != 0;
             }
-            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+            sdfPrimLinkLine(packetList, color, 0, leftX, topY,
                                          leftX + cellCount * KWLN_MAP_CELL_X_STEP, topY + KWLN_MAP_ROW_Y_STEP,
                                          KWLN_DIAG_DEPTH, NULL);
             remainingUnits = 0;
@@ -1119,13 +1119,13 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexRes
         topY += KWLN_MAP_ROW_Y_STEP;
     }
     while (remainingUnits >= KWLN_MAP_ROW_UNITS) {
-        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY, x + KWLN_MAP_ROW_SPAN, topY + KWLN_MAP_ROW_Y_STEP,
+        sdfPrimLinkLine(packetList, color, 0, x, topY, x + KWLN_MAP_ROW_SPAN, topY + KWLN_MAP_ROW_Y_STEP,
                                      KWLN_DIAG_DEPTH, NULL);
         remainingUnits -= KWLN_MAP_ROW_UNITS;
         topY += KWLN_MAP_ROW_Y_STEP;
     }
     if (remainingUnits != 0) {
-        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
+        sdfPrimLinkLine(packetList, color, 0, x, topY,
                                      x + ((remainingUnits >> KWLN_MAP_COLUMN_SHIFT) << KWLN_MAP_CELL_X_SHIFT), topY + KWLN_MAP_ROW_Y_STEP,
                                      KWLN_DIAG_DEPTH, NULL);
     }
@@ -1134,10 +1134,10 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexRes
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
 void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
-    SdfTexResource *block = sdfGetTextureListHead();
+    SdfTexResource *block = sdfGsMemGetLinkHead();
 
     if (block != NULL) {
-        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x - 0x20, y - 0x10,
+        sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x - 0x20, y - 0x10,
                                           0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {
@@ -1149,8 +1149,8 @@ void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
 
 /* Build an allocation-map packet list and submit it through the surface callback. */
 void kwlnTextureAttachTask(SdfPoolNode *surface) {
-    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
-    sdfInitPacketList(packetList);
+    SdfListHead *packetList = (SdfListHead *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
+    sdfDrawTagInit(packetList);
     kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
     surface->append(surface, packetList);
 }
@@ -1176,57 +1176,57 @@ extern u8 sdfViewMatrix[0x40];
 extern u8 D_00329790[0x40];
 extern SdfLightSources kwlnOverlayLightSources;
 extern f32 kwlnOverlayAmbientColor[4];
-extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
+extern void sdf3DLinkInitPacket(SdfListHead *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
 void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
-    sdfInitPacketList(&D_00325870[bufferIndex].initialList);
-    sdfConsAppendProgramReferencePacket(&D_00325870[bufferIndex].initialList,
+    sdfDrawTagInit(&D_00325870[bufferIndex].initialList);
+    sdf3DLinkInitPacket(&D_00325870[bufferIndex].initialList,
                                         &D_00325870[bufferIndex].programReference);
-    sdfInitPacketList(&D_00325870[bufferIndex].sceneList);
-    sdfClearLinkedPacketList(&D_00325870[bufferIndex].linkedList);
+    sdfDrawTagInit(&D_00325870[bufferIndex].sceneList);
+    sdfPreDrawTagInit(&D_00325870[bufferIndex].linkedList);
     sdfGrSetStdDrawEnv(&D_00325870[bufferIndex].scene, &D_003980E0);
     /* Update the RGBAQ color word while retaining its floating-point Q word. */
     *(u32 *)&D_00325870[bufferIndex].scene.centeredBounds.rgbaq.value = D_003BA8EC;
     if (kwlnDrawControlFlags & 0x10000000) {
-        sdfBuildCenteredViewBoundsPacket(&D_00325870[bufferIndex].scene.centeredBounds, 0, 0,
+        sdfGrSetClearPacket(&D_00325870[bufferIndex].scene.centeredBounds, 0, 0,
                                          D_003980E0.bufferFormat,
                                          D_003980E0.auxiliaryFormat);
         kwlnDrawControlFlags &= 0xEFFFFFFF;
     }
-    sdfAppendLinkedPacketPayload(&D_00325870[bufferIndex].sceneList,
+    sdfGrLinkStdDrawEnv(&D_00325870[bufferIndex].sceneList,
                                  &D_00325870[bufferIndex].linkedList,
                                  &D_00325870[bufferIndex].scene.link);
-    sdfConsBuildMatrixPacket(&D_00325870[bufferIndex].sceneMatrix,
+    sdf3DMakeViewportPacket(&D_00325870[bufferIndex].sceneMatrix,
                              &sdfSceneProjectionParameters, sdfViewMatrix);
-    sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
+    sdfDrawTagLink(&D_00325870[bufferIndex].sceneList,
                     (u32)&D_00325870[bufferIndex].sceneMatrix);
-    sdfBuildLightingPacket(&D_00325870[bufferIndex].scenePacketStorage,
+    sdf3DMakeLightParallelPacket(&D_00325870[bufferIndex].scenePacketStorage,
                   D_00324770, kwlnDefaultColorVector);
-    sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
+    sdfDrawTagLink(&D_00325870[bufferIndex].sceneList,
                     (u32)&D_00325870[bufferIndex].scenePacketStorage);
 
-    sdfInitPacketList(&D_00325870[bufferIndex].thirdList);
-    sdfConsBuildMatrixPacket(&D_00325870[bufferIndex].thirdMatrix,
+    sdfDrawTagInit(&D_00325870[bufferIndex].thirdList);
+    sdf3DMakeViewportPacket(&D_00325870[bufferIndex].thirdMatrix,
                              &D_00324980, D_00329790);
-    sdfAppendPacket(&D_00325870[bufferIndex].thirdList,
+    sdfDrawTagLink(&D_00325870[bufferIndex].thirdList,
                     (u32)&D_00325870[bufferIndex].thirdMatrix);
-    sdfBuildLightingPacket(&D_00325870[bufferIndex].overlayLightPacket,
+    sdf3DMakeLightParallelPacket(&D_00325870[bufferIndex].overlayLightPacket,
                   kwlnOverlayLightSources, kwlnOverlayAmbientColor);
-    sdfAppendPacket(&D_00325870[bufferIndex].thirdList,
+    sdfDrawTagLink(&D_00325870[bufferIndex].thirdList,
                     (u32)&D_00325870[bufferIndex].overlayLightPacket);
 }
 
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
-void evtResetDisplayProjectionAndVectorState(void) {
-    sdfGraphSetDisplayMode(1);
+void dds3InitDrawEnv(void) {
+    sdfGrSetScreen(1);
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     sdfCameraBuildProjection(&D_00324980.camera);
     kwlnInitializeFrameDrawPackets(0);
     kwlnInitializeFrameDrawPackets(1);
-    evtInitializeFrameStatePacketTemplates();
+    dds3InitZClearDrawTag();
     D_003BA7FC = 0;
-    evtEnsureDrawVectorState();
+    eglInit();
 }
 
 /* One 0x1F40-byte draw bank of the held-texture render target. */
@@ -1241,7 +1241,7 @@ extern f32 kwlnHeldTextureAmbientColor[4];
 extern u8 kwlnHeldTextureViewMatrix[0x40];
 
 /* Rebuild the held-texture render target's view and both frame banks. */
-void kwlnInitHeldTextureScenePackets(void) {
+void dds3InitRenderDrawEnv(void) {
     s32 i;
 
     kwlnHeldTextureDrawTarget.width = D_003BA8FC;
@@ -1254,35 +1254,35 @@ void kwlnInitHeldTextureScenePackets(void) {
     kwlnHeldTextureDrawTarget.buffers[2] = D_003980E0.buffers[2];
     sdfCameraBuildProjection(&D_003247B0.camera);
     for (i = 0; i != 2; i++) {
-        sdfInitPacketList(&D_00325870[i].heldTexture.list);
+        sdfDrawTagInit(&D_00325870[i].heldTexture.list);
         sdfGrSetDrawEnv(&D_00325870[i].heldTexture.scene, &kwlnHeldTextureDrawTarget, 0);
         *(u32 *)&D_00325870[i].heldTexture.scene.centeredBounds.rgbaq.value = D_003BA900;
-        sdfAppendPacket(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.scene);
-        sdfConsBuildMatrixPacket(&D_00325870[i].heldTexture.matrix, &D_003247B0, kwlnHeldTextureViewMatrix);
-        sdfAppendPacket(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.matrix);
-        sdfBuildLightingPacket(&D_00325870[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
-        sdfAppendPacket(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.lighting);
+        sdfDrawTagLink(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.scene);
+        sdf3DMakeViewportPacket(&D_00325870[i].heldTexture.matrix, &D_003247B0, kwlnHeldTextureViewMatrix);
+        sdfDrawTagLink(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.matrix);
+        sdf3DMakeLightParallelPacket(&D_00325870[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
+        sdfDrawTagLink(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.lighting);
     }
 }
 
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
-extern void kwlnTextureReleaseHeldReference(void);
-extern void kwlnInitHeldTextureScenePackets(void);
-extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
+extern void dds3FreeRenderTexture(void);
+extern void dds3InitRenderDrawEnv(void);
+extern SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
-s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 aspect) {
+s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
     SdfTex *texture;
 
     if (kwlnHeldTextureReference != 0) {
-        kwlnTextureReleaseHeldReference();
+        dds3FreeRenderTexture();
     }
     kwlnTextureReferenceFlag = 0;
     D_003BA8FC = width;
     D_003BA8FE = height;
-    D_003BA8F4 = sdfAllocImageBuffer(width, height, 0);
+    D_003BA8F4 = sdfGsAllocFrameBuff(width, height, 0);
     if (D_003BA8F4 == 0) {
         return 0;
     }
@@ -1291,17 +1291,17 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 aspect) {
         return 0;
     }
     kwlnHeldTextureReference = texture;
-    sdfTexSetClampMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
-    sdfTexCreateFirstPacket(texture);
+    sdfTexSetWrapMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
+    sdfTexMakeGIFPacket(texture);
     D_003247B0.camera.aspect = aspect;
     D_003247B0.camera.width = width;
     D_003247B0.camera.height = height;
-    kwlnInitHeldTextureScenePackets();
+    dds3InitRenderDrawEnv();
     return 1;
 }
 
 /* Release the held texture if present and clear tracking; no separate buffer free. */
-void kwlnTextureReleaseHeldReference(void) {
+void dds3FreeRenderTexture(void) {
     if (kwlnHeldTextureReference != 0) {
         sdfTexReleaseReference(kwlnHeldTextureReference);
     }
@@ -1313,7 +1313,7 @@ void kwlnTextureReleaseHeldReference(void) {
 /* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
 #include "kwln_texture_reference_flag_api.h"
 
-s32 kwlnTextureSetReferenceFlagIfPresent(void) {
+s32 dds3RenderTextureON(void) {
     s32 result = 0;
 
     if (kwlnHeldTextureReference == 0) {
@@ -1323,15 +1323,15 @@ s32 kwlnTextureSetReferenceFlagIfPresent(void) {
     return 1;
 }
 
-void kwlnTextureClearReferenceFlag(void) {
+void dds3RenderTextureOFF(void) {
     kwlnTextureReferenceFlag = 0;
 }
 
-u32 kwlnTextureGetReferenceFlag(void) {
+u32 dds3CheckRenderTexture(void) {
     return kwlnTextureReferenceFlag;
 }
 
-SdfTex *kwlnTextureGetHeldReference(void) {
+SdfTex *dds3GetRenderTexture(void) {
     return kwlnHeldTextureReference;
 }
 
@@ -1359,7 +1359,7 @@ void kwlnAdvanceShakeOffsets(void) {
     limits[1] = D_003BA91E * 0.01f;
     for (axis = 0; axis < 2; axis++) {
         if (limits[axis] != 0.0f) {
-            f32 step = sdfGetRandFloat(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
+            f32 step = dds3GetRandFloatA(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
 
             if (limits[axis] * weights[axis] <= fabsf(D_00324590[axis])) {
                 if (D_00324590[axis] <= 0.0f) {
@@ -1368,7 +1368,7 @@ void kwlnAdvanceShakeOffsets(void) {
                     D_00324590[axis] -= step;
                 }
             } else {
-                D_00324590[axis] += 2.0f * (step * (sdfGetRandFloat(0) - 0.5f));
+                D_00324590[axis] += 2.0f * (step * (dds3GetRandFloatA(0) - 0.5f));
             }
             if (D_00324590[axis] < -limits[axis]) {
                 D_00324590[axis] = -limits[axis];
@@ -1408,7 +1408,7 @@ void kwlnAdvanceShakeOffsets(void) {
 
 /* Store tenths in the 16-bit duration before deriving its forty-percent mark.
  * Zero frames only disables the configuration; mode zero stores the -1 sentinel. */
-void kwlnFadeSetupFrames(s32 fadeMode, s32 frames) {
+void dds3SetQuake(s32 fadeMode, s32 frames) {
     if (frames == 0) {
         D_003BA918 = 0;
         return;
@@ -1424,22 +1424,22 @@ void kwlnFadeSetupFrames(s32 fadeMode, s32 frames) {
 }
 
 /* Disable the configured fade without clearing its stored timing parameters. */
-void kwlnCancelConfiguredFadeFrames(void) {
+void dds3StopQuake(void) {
     D_003BA918 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", evtInitializeFrameStatePacketTemplates);
+INCLUDE_ASM(const s32, "game/code_00102ED8", dds3InitZClearDrawTag);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
-SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
-    SdfListHead *packetList = sdfCreateResetPacketList();
+SdfListHead *dds3LinkZClearDrawTag(s32 stateIndex) {
+    SdfListHead *packetList = dds3FontReqAllocDrawTag();
 
-    sdfAppendPacket(packetList, (u32)&evtFrameStatePacketTemplates[stateIndex][kwlnGetDrawBufferIndex()]);
+    sdfDrawTagLink(packetList, (u32)&evtFrameStatePacketTemplates[stateIndex][dds3GetFrameID()]);
     return packetList;
 }
 
 /* Cancel the foreground direction and zero RGBA; timing words are unchanged. */
-void kwlnFadeClear(void) {
+void dds3FadeClear(void) {
     kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
     kwlnFadeColor.r = 0;
     kwlnFadeColor.g = 0;
@@ -1448,7 +1448,7 @@ void kwlnFadeClear(void) {
 }
 
 /* Store RGBA and cancel foreground direction flags without changing timing. */
-void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha) {
+void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha) {
     kwlnDrawControlFlags &= ~KWLN_FADE_DIRECTION_BITS;
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
@@ -1470,7 +1470,7 @@ void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
 
 /* Start the countdown with caller RGB. A zero duration also clears RGB via FadeClear.
  * The signed alpha byte -0x80 carries the raw maximum-alpha value 0x80. */
-void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration) {
+void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;
@@ -1479,7 +1479,7 @@ void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration) {
         kwlnFadeColor.a = 0;
         kwlnFadeCounter = 0;
         kwlnFadeDuration = 0;
-        kwlnFadeClear();
+        dds3FadeClear();
         return;
     }
     kwlnFadeDuration = duration;
@@ -1488,7 +1488,7 @@ void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration) {
 }
 
 /* Start the same countdown using existing RGB; zero duration preserves RGB. */
-void kwlnFadeStartIn(s32 duration) {
+void dds3FadeIn2(s32 duration) {
     kwlnFadeColor.a = -KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
         kwlnFadeColor.a = 0;
@@ -1503,7 +1503,7 @@ void kwlnFadeStartIn(s32 duration) {
 }
 
 /* Start the count-up with caller RGB; zero duration leaves maximum alpha. */
-void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration) {
+void dds3FadeOut(s32 red, s32 green, s32 blue, s32 duration) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;
@@ -1521,7 +1521,7 @@ void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration) {
 }
 
 /* Start the same count-up using existing RGB; zero duration preserves RGB. */
-void kwlnFadeStartOut(s32 duration) {
+void dds3FadeOut2(s32 duration) {
     kwlnFadeColor.a = 0;
     if (duration == 0) {
         kwlnFadeCounter = 0;
@@ -1536,14 +1536,14 @@ void kwlnFadeStartOut(s32 duration) {
 }
 
 /* Return whether either foreground counter direction is enabled. */
-s32 kwlnFadeIsActive(void) {
+s32 dds3FadeCheck(void) {
     return (kwlnDrawControlFlags & KWLN_FADE_DIRECTION_BITS) != 0;
 }
 
 /* Step the u16 counter and sample alpha before testing exact completion.
  * Completion clears timing/flags but leaves the sampled endpoint alpha intact. */
-void kwlnFadeUpdate(void) {
-    if (kwlnFadeIsActive() != 0) {
+void dds3FadeUpdate(void) {
+    if (dds3FadeCheck() != 0) {
         if (kwlnDrawControlFlags & KWLN_FADE_COUNT_DOWN_BIT) {
             kwlnFadeCounter -= 1;
         } else {
@@ -1560,18 +1560,18 @@ void kwlnFadeUpdate(void) {
 
 /* Submit diagnostics when enabled and either counter is nonzero; only positive
  * counters produce text, so negative-only errors still submit an empty list. */
-void kwlnDrawBlurErrorCounters(void) {
+void dds3DrawDistRipOverError(void) {
     SdfListHead *packetList;
 
     if (D_003BA724 != 0) {
         if (kwlnDistanceBlurErrorCount != 0 || kwlnRippleBlurErrorCount != 0) {
-            packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
-            sdfInitPacketList(packetList);
+            packetList = (SdfListHead *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
+            sdfDrawTagInit(packetList);
             if (kwlnDistanceBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_0039E170, kwlnDistanceBlurErrorCount));
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_0039E170, kwlnDistanceBlurErrorCount));
             }
             if (kwlnRippleBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, D_0039E188, kwlnRippleBlurErrorCount));
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_0039E188, kwlnRippleBlurErrorCount));
             }
             D_00325708.append(&D_00325708, packetList);
         }
@@ -1706,7 +1706,7 @@ void kwlnDrawBackgroundFadeBands(void) {
         return;
     }
 
-    evtSetDrawSurfaceIndex(0x4F);
+    eglSetOt(0x4F);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
@@ -1714,7 +1714,7 @@ void kwlnDrawBackgroundFadeBands(void) {
     evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
 }
 
-void sdfSetViewFieldOfView(f32 fieldOfView) {
+void dds3SetScreenFovy(f32 fieldOfView) {
     D_003245EC[0] = fieldOfView;
 }
 

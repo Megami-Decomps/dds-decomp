@@ -57,38 +57,38 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-extern void sdfVuEmitSelectedNodePacket(VuWork *work);
+extern void corePktEmitBase(VuWork *work);
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(VuWork *work);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(VuWork *work);
 
-/* Split ring addressing at position 128; retain the native 96-byte stride. */ void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition);
+/* Split ring addressing at position 128; retain the native 96-byte stride. */ void corePktSetupPointBuff(VuWork *work, s32 ringPosition);
 
 /* Emit selected geometry, then apply flag callbacks; the first may change flags. */
-void sdfVuApplySelectedWorkFlags(VuWork *work) {
+void corePktEmitAllPasses(VuWork *work) {
     u32 selectedFlags;
 
-    sdfVuEmitSelectedNodePacket(work);
+    corePktEmitBase(work);
     selectedFlags = work->selectedFlags;
     if ((selectedFlags & 0x1000) != 0) {
-        sdfVuUpdateSelectedNodeGeometry(work);
+        corePktEmitMultiTexPass(work);
         selectedFlags = work->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {
-        sdfVuNodeVertexLighting((u32)work);
+        corePktEmitRefMapPass((u32)work);
         return;
     }
 }
 
-extern void sdfVuBuildRingTriangleRefs(VuWork *);
+extern void corePktBuildFaceList(VuWork *);
 
-extern void sdfVuLightNegatedNormals(u32, s32);
+extern void corePktRelightBackFaces(u32, s32);
 
-extern void sdfVuBuildIndexedTriangleRefs(VuWork *);
+extern void corePktBuildBackFaceList(VuWork *);
 
 /* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
-void sdfVuBeginPacketFromWork(VuWork *work) {
+void corePktOpenAndEmit(VuWork *work) {
     u128 savedVectors[3];
-    u32 packetStart = sdfGetPacketCursor();
+    u32 packetStart = sdfGrOpenPacketBuff();
     u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
 
     work->state = packetStart;
@@ -98,23 +98,23 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
-        sdfVuBuildRingTriangleRefs(work);
-        sdfVuApplySelectedWorkFlags(work);
-        sdfVuConfigureWorkRingDma(work, work->param1);
+        corePktBuildFaceList(work);
+        corePktEmitAllPasses(work);
+        corePktSetupPointBuff(work, work->param1);
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
-        sdfVuLightNegatedNormals(work->ringSrc, work->param1);
-        sdfVuBuildIndexedTriangleRefs(work);
-        sdfVuApplySelectedWorkFlags(work);
+        corePktRelightBackFaces(work->ringSrc, work->param1);
+        corePktBuildBackFaceList(work);
+        corePktEmitAllPasses(work);
     } else {
-        sdfVuBuildRingTriangleRefs(work);
-        sdfVuApplySelectedWorkFlags(work);
+        corePktBuildFaceList(work);
+        corePktEmitAllPasses(work);
     }
 }
 
 /* Pad and finalize the packet; inactive or empty work returns NULL. */
-u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
+u64 *corePktClosePacket(VuWork *work) {
     u32 cursor;
     u32 start;
     s32 quadwords;
@@ -129,7 +129,7 @@ u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
     cursor = (u32)work->cursor;
     start = (u32)work->dataStart;
     if (cursor == start) {
-        sdfSetPacketCursorAligned(work->state);
+        sdfGrClosePacketBuff(work->state);
         return NULL;
     }
 
@@ -144,7 +144,7 @@ u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
         cursor += 0x10;
     }
 
-    sdfSetPacketCursorAligned(cursor & 0x0FFFFFFF);
+    sdfGrClosePacketBuff(cursor & 0x0FFFFFFF);
     header = (u64 *)work->header;
     descriptor = 0x20000000 | (quadwords & 0xFFFF);
     gifTag = 0x1100000000000000ULL;

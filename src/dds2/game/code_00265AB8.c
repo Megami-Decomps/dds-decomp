@@ -4,5 +4,5 @@
 
 void dspStartActivePresetEntry(void) {
     dspSetActive(1);
-    dspStartEntry(0xe);
+    fclStartMessage(0xe);
 }

@@ -38,9 +38,9 @@ typedef struct UiQuadWords {
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 
-extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
+extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
-extern s32 sdfConsMeasurePacketWithHeader(s32 address);
+extern s32 sdf2DGetPrimPtr(s32 address);
 
 
 #include "sdf_packet_alloc.h"
@@ -505,7 +505,7 @@ s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTim
 }
 
 /* Unpack engine RGBA order into GS packed R/G and B/A word pairs. */
-void itfGridUnpackColorChannels(u64 *channels, u32 color) {
+void cmpExpandColor(u64 *channels, u32 color) {
     u64 blueBits;
     channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
     blueBits = color & 0xFF00;
@@ -535,7 +535,7 @@ extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 
 
-extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
+extern void sdf3DLinkInitPacket(SdfListHead *, DmaPacketHeader *);
 
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
@@ -543,125 +543,125 @@ void itfInitDoubleBufferedScenePackets(void) {
     s32 i;
 
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
-    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    LookAtMatrix(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
     for (i = 0; i < 2; i++) {
-        sdfInitPacketList(&D_003DFAB0[i]);
-        sdfConsAppendProgramReferencePacket(&D_003DFAB0[i], &D_003DFAF0[i]);
-        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &sdfSceneProjectionParameters, sdfViewMatrix);
-        sdfAppendPacket(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
-        sdfInitPacketList(&D_003DFB30[i]);
-        sdfBuildLightingPacket(&D_003DFB70[i], D_00324770, kwlnDefaultColorVector);
-        sdfAppendPacket(&D_003DFB30[i], (u32)&D_003DFB70[i]);
+        sdfDrawTagInit(&D_003DFAB0[i]);
+        sdf3DLinkInitPacket(&D_003DFAB0[i], &D_003DFAF0[i]);
+        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &sdfSceneProjectionParameters, sdfViewMatrix);
+        sdfDrawTagLink(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
+        sdfDrawTagInit(&D_003DFB30[i]);
+        sdf3DMakeLightParallelPacket(&D_003DFB70[i], D_00324770, kwlnDefaultColorVector);
+        sdfDrawTagLink(&D_003DFB30[i], (u32)&D_003DFB70[i]);
     }
 }
 
-void itfGridDrawBooleanDescriptor(u8 enabled, s32 alternate, s32 kind) {
+void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     u32 normalized = enabled != 0;
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[0] = normalized;
     if (!alternate) {
         descriptor[1] = 0x4A;
     } else {
         descriptor[1] = 0x4B;
     }
-    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(context);
-    sdfAppendPacket(context, (u32)packet);
+    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
     entry->append(entry, context);
 }
 
 void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
-    itfGridDrawBooleanDescriptor(value, 0, kind);
+    cmpDrawSpriteFlag(value, 0, kind);
 }
 
-void itfSubmitToggledGridWord(u64 data, s32 alternate, s32 kind) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[0] = data;
     if (!alternate) {
         descriptor[1] = 0x47;
     } else {
         descriptor[1] = 0x48;
     }
-    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(context);
-    sdfAppendPacket(context, (u32)packet);
+    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
     entry->append(entry, context);
 }
 
 void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind) {
-    itfSubmitToggledGridWord(data, 0, kind);
+    cmpDrawSprite(data, 0, kind);
 }
 
-void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[0] = data;
     if (!alternate) {
         descriptor[1] = 0x42;
     } else {
         descriptor[1] = 0x43;
     }
-    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(context);
-    sdfAppendPacket(context, (u32)packet);
+    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
     entry->append(entry, context);
 }
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
-    sdfSubmitGsAlphaRegisterPacket(data, 0, kind);
+    cmpDrawSprite2(data, 0, kind);
 }
 
-void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+void cmpDrawSpriteIndexed(s32 data, s32 kind) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
-    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(context);
-    sdfAppendPacket(context, (u32)packet);
+    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
     entry->append(entry, context);
 }
 
-void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
+void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr((s32)packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
-    context = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(context);
-    sdfAppendPacket(context, (u32)packet);
+    context = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
     entry->append(entry, context);
 }
@@ -674,36 +674,36 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 colorWord) {
     quad->unk00[3] = colorWord;
 }
 
-void itfDrawColoredTriangle(); /* no prototype: called here with a sixth argument */
+void cmpDrawTriG(); /* no prototype: called here with a sixth argument */
 
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
-    itfDrawColoredTriangle(xCoordinates, yCoordinates, z, (const u32 *)vertexColors, surfaceIndex, extraA, extraB, extraC);
+    cmpDrawTriG(xCoordinates, yCoordinates, z, (const u32 *)vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
-void itfDrawColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
+void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
 {
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(6, 1));
-    sdfConsInitPacketHeader(packet, 0x14B, 6, 0x515151, 1);
-    vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
-    itfGridUnpackColorChannels(vertices[0].colorChannels, colors[0]);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
+    vertices = (GridPackedVertex *)sdf2DGetPrimPtr((s32)packet);
+    cmpExpandColor(vertices[0].colorChannels, colors[0]);
     vertices[0].packedXY = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
     vertices[0].depth = z;
-    itfGridUnpackColorChannels(vertices[1].colorChannels, colors[1]);
+    cmpExpandColor(vertices[1].colorChannels, colors[1]);
     vertices[1].packedXY = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
     vertices[1].depth = z;
-    itfGridUnpackColorChannels(vertices[2].colorChannels, colors[2]);
+    cmpExpandColor(vertices[2].colorChannels, colors[2]);
     vertices[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
     vertices[2].depth = z;
-    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)packet);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -711,13 +711,13 @@ void itfDrawColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colo
 extern void itfDrawColoredRectangle(u32, u32, u32, u32, u32, const u32 *, u32, u32);
 
 /* Draw a rectangle as a four-vertex triangle strip with one packed color. */
-void uiDrawUniformRgbaRange(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 gsContext, u32 surfaceIndex) {
+void cmpDrawBoxSolid(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 gsContext, u32 surfaceIndex) {
     u32 vertexColors[4] = {color, color, color, color};
     itfDrawColoredRectangle(x, y, z, width, height, vertexColors, gsContext, surfaceIndex);
 }
 
 void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex) {
-    uiDrawUniformRgbaRange(x, y, z, width, height, color, 0, surfaceIndex);
+    cmpDrawBoxSolid(x, y, z, width, height, color, 0, surfaceIndex);
 }
 
 void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
@@ -730,26 +730,26 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     SdfPoolNode *surface;
     u64 right, bottom;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(8, 1));
-    sdfConsInitPacketHeader(packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
-    vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
-    itfGridUnpackColorChannels(vertices[0].colorChannels, colors[0]);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
+    vertices = (GridPackedVertex *)sdf2DGetPrimPtr((s32)packet);
+    cmpExpandColor(vertices[0].colorChannels, colors[0]);
     vertices[0].packedXY = (u64)left | topWord;
     vertices[0].depth = z;
-    itfGridUnpackColorChannels(vertices[1].colorChannels, colors[1]);
+    cmpExpandColor(vertices[1].colorChannels, colors[1]);
     right = (u32)(left + width);
     vertices[1].packedXY = right | topWord;
     vertices[1].depth = z;
-    itfGridUnpackColorChannels(vertices[2].colorChannels, colors[2]);
+    cmpExpandColor(vertices[2].colorChannels, colors[2]);
     bottom = (u64)(top + height) << 32;
     vertices[2].packedXY = (u64)left | bottom;
     vertices[2].depth = z;
-    itfGridUnpackColorChannels(vertices[3].colorChannels, colors[3]);
+    cmpExpandColor(vertices[3].colorChannels, colors[3]);
     vertices[3].packedXY = right | bottom;
     vertices[3].depth = z;
-    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)packet);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -758,25 +758,25 @@ void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     itfDrawColoredRectangle(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
 
-void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
+void cmpDrawPanelEffCell(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
 void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
-    uiDrawUniformColorLine(x, y, z, x + width, y, z, color, context);
-    uiDrawUniformColorLine(x, y, z, x, y + height, z, color, context);
-    uiDrawUniformColorLine(x + width, y, z, x + width, y + height, z, color, context);
-    uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
+    cmpDrawPanelEffCell(x, y, z, x + width, y, z, color, context);
+    cmpDrawPanelEffCell(x, y, z, x, y + height, z, color, context);
+    cmpDrawPanelEffCell(x + width, y, z, x + width, y + height, z, color, context);
+    cmpDrawPanelEffCell(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
-void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex);
 
-void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex) {
+void cmpDrawPanelEffCell(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex) {
     u32 vertexColors[2] = {color, color};
-    itfDrawGradientLine(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
+    cmpDrawBoxLine(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
 }
 
-void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex)
 {
     SdfDrawPacket *packet;
@@ -784,25 +784,25 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     SdfListHead *list;
     SdfPoolNode *surface;
 
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, 1));
-    sdfConsInitPacketHeader(packet, 0x149, 4, 0x5151, 1);
-    vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
-    itfGridUnpackColorChannels(vertices[0].colorChannels, colors[0]);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
+    vertices = (GridPackedVertex *)sdf2DGetPrimPtr((s32)packet);
+    cmpExpandColor(vertices[0].colorChannels, colors[0]);
     vertices[0].packedXY = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
     vertices[0].depth = z0;
-    itfGridUnpackColorChannels(vertices[1].colorChannels, colors[1]);
+    cmpExpandColor(vertices[1].colorChannels, colors[1]);
     vertices[1].packedXY = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
     vertices[1].depth = z1;
-    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)packet);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
 
 
 /* vu0 routine: the SDK quadword copies are present at 002C12F0..002C130C. */
-void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f32 *third,
+void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
                    const u32 *colors, s32 unused, SdfAsset *asset, s32 surfaceIndex) {
     SdfPrimitiveRequest request;
     u32 vertexColors[3];
@@ -812,11 +812,11 @@ void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f
     SdfPoolNode *surface;
     u32 firstColor, secondColor, thirdColor;
 
-    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
-    sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(sizeof(SdfListHead));
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
     if (asset != NULL) {
-        sdfConsAppendAssetPacket(list, asset, 0);
+        sdf3DPrimLinkMat(list, asset, 0);
     }
     memset(&request, 0, sizeof(request));
     firstColor = colors[0];
@@ -842,7 +842,7 @@ void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f
     textureCoordinates[1][1] = 0.0f;
     textureCoordinates[2][0] = 0.0f;
     textureCoordinates[2][1] = 0.0f;
-    sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(&request));
+    sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -854,12 +854,12 @@ extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChai
 extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
-    sdfInitPacketList(list);
-    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, texture, 0);
-    sdfAppendDmaTagToList(list, (u32)texture);
+    sdfDrawTagInit(list);
+    texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
         surface->append(surface, list);
@@ -867,12 +867,12 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
 }
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
-    sdfInitPacketList(list);
-    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, texture, 0);
-    sdfAppendDmaTagToList(list, (u32)texture);
+    sdfDrawTagInit(list);
+    texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
         surface->append(surface, list);

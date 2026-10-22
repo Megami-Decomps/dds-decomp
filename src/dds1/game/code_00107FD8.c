@@ -43,14 +43,14 @@
 extern void btlCreateStageTestTask(void);
 extern s32 btlExitWhenAudioAndTasksIdle(void);
 extern void evtBattleStageTestStopTask(void);
-extern void evtDestroySecondaryWorldNode(void);
-extern void evtStartTestTask(void);
+extern void evtFreeStage(void);
+extern void evtInitEventTest(void);
 extern void evtViewerCreateTaskWithSky(void);
 extern void fileMenuReleaseNoOp(void);
 extern void fileReleaseMenuResources(void);
 extern void fldCleanupFieldScene(void);
-extern void fldDispatchDeferredFieldCommand(void);
-extern void fldProcessDeferredSceneCommand(void);
+extern void fldProcNextJump(void);
+extern void fldProc_CallSisetuReturn(void);
 extern void fldRunPendingSceneAction(void);
 extern void fldStopLmapTask(void);
 extern void fldStopSceneTasks(void);
@@ -58,11 +58,11 @@ extern void itfInitializeAdminInterfaceNoop(void);
 extern void itfShutdownAdminInterfaceNoop(void);
 extern void itfStartFontTestScene(void);
 extern void mnuCampDestroyPanelTasks(void);
-extern void mnuConfigTasksDestroy(void);
+extern void dds3ConfigProcessEnd(void);
 extern void mnuCreateCampTasks(void);
-extern void mnuCreateMovieViewerTask(void);
+extern void InitMovieViewer(void);
 extern void mnuDestroyCampTasks(void);
-extern void mnuDestroyMovieViewerTask(void);
+extern void FinishMovieViewer(void);
 extern s32 mnuDestroyTitleMenuTask(void);
 extern s32 mnuOpenShopSceneWithInitialSelection(s32 *initialSelection);
 extern u32 mnuOpenTitleMenuForMode(s32 mode);
@@ -71,9 +71,9 @@ extern u32 mnuStaffDestroyTasks(void);
 extern u32 mnuStartStaffMovieRequest(void);
 extern s32 mnuStopStaffTasks(void);
 extern s32 mnuTerminalCreateTasks(s32 reduced, s32 slot);
-/* Original-style implicit int, kept: matched code depends on it: fldStartFieldSceneTasks. */
+/* Original-style implicit int, kept: matched code depends on it: fldProcTrigSequence. */
 
-extern void mnuCreateConfigTasks(s32 mode);
+extern void dds3ConfigProcessStart(s32 mode);
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -111,7 +111,7 @@ extern s32 mnuPollTaskState(void);
 
 extern u32 D_003BA958;
 
-extern s32 fileConsumeConfigTaskReady(void);
+extern s32 checkConfigState(void);
 
 extern s32 mnuAcknowledgeCampState(void);
 
@@ -131,14 +131,14 @@ extern u32 kwlnDrawControlFlags;
 
 extern s32 kwlnTaskNoopCallback(KwlnTask *task);
 
-extern void fldStartSequenceRecord(void);
+extern void fldMainLoadStart(void);
 extern void btlStart(s32 mode, s32 pack, s32 encounter);
 
 extern void evtEventViewerDestroyTask(void);
 
-extern void evtStopTestTasks(void);
+extern void evtChkEndProcess(void);
 
-extern void evtDestroySkyTask(void);
+extern void evtExitSky(void);
 
 #include "sdf_asset_create.h"
 
@@ -174,9 +174,9 @@ extern char D_0039E200[];
 
 extern s32 evtPendingEventSelection;
 
-extern void evtCreateEventScriptProcess(s32 eventId);
+extern void evtStartEvent(s32 eventId);
 
-extern s32 evtCreateSkyTask(void);
+extern s32 evtInitSky(void);
 
 typedef struct {
     f32 x;
@@ -246,7 +246,7 @@ extern u32 D_003C2BA0[4];
 extern u32 D_003C2BB0[4];
 
 /* Set an existing light slot's RGB target immediately or save packed blend endpoints. */
-void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color) {
+void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color) {
     u32 startColorWords[4];
     u32 targetColorWords[4];
     u32 packedStartColor;
@@ -283,9 +283,9 @@ extern u16 D_003BD6D8[4];
 extern u16 D_003BD6E0[4];
 extern f32 D_003C2BC0[][4];
 extern f32 D_003C2BF0[][4];
-extern void kwlnBuildShortestArcQuaternion(void);
+extern void dds3RotationArc(void);
 
-void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction) {
+void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
     u32 blendFlag;
 
     if (D_00324770[lightIndex] != NULL) {
@@ -309,7 +309,7 @@ void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction
             VU0_NORMALIZE_VF10();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
             VU0_STORE_VF_UNCLOBBERED(vf10, D_003C2BC0[lightIndex]);
-            kwlnBuildShortestArcQuaternion();
+            dds3RotationArc();
             VU0_STORE_VF(vf10, D_003C2BF0[lightIndex]);
         }
     }
@@ -322,7 +322,7 @@ extern u32 D_003BD6F0;
 extern u8 kwlnDefaultColorVector[];
 
 /* vu0 routine: replace the background color immediately or blend over blendFrames frames. */
-void kwlnSetBackgroundColorTarget(s32 blendFrames, f32 *color) {
+void dds3SetAmbientColor(s32 blendFrames, f32 *color) {
     s32 startColorWords[4];
     s32 targetColorWords[4];
     u32 packedStartColor;
@@ -356,7 +356,7 @@ extern u32 D_003BD6FC;
 extern u32 D_003BD700;
 
 /* vu0 routine: set the draw colour target: immediately (mode 0) or interpolate from the previous colour. */
-void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color) {
+void dds3SetFogColor(s32 blendFrames, f32 *color) {
     u32 targetColorWords[4];
     u32 packedTargetColor;
 
@@ -378,7 +378,7 @@ void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color) {
 
 
 /* Either replace the draw vector immediately or interpolate from its prior value. */
-void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
+void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     if (blendFrames == 0) {
         kwlnDrawControlFlags &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         kwlnDrawVector.fogNear = x;
@@ -414,7 +414,7 @@ static inline void eeUnpackRGBAWordFloatReadOnly(u32 color, f32 unit) {
 /* The color-blend site passes ratio and the 128.0f pack scale as ordinary GPR operands
    (VU0_SCALE_VF / eePackRGBAWord), so their SF->GPR reloads advance the spill ring
    ($2,$3,$4) and the vector-blend site starts at $4 (cc1probe --reload, uid650). */
-void kwlnUpdateDrawParameterTransitions(void) {
+void dds3SceneLightUpdateFirst(void) {
     s32 i;
     u32 mask;
     f32 ratio;
@@ -443,7 +443,7 @@ void kwlnUpdateDrawParameterTransitions(void) {
                 VU0_MOVE_VF(vf10, vf0);
                 VU0_SET_W_ONE(vf10);
                 VU0_LOAD_VF(vf11, &D_003C2BF0[i]);
-                effMiscQuaternionNlerpVU(ratio);
+                Lerp(ratio);
                 effMiscQuaternionToMatrixVU();
                 VU0_LOAD_VF(vf10, &D_003C2BC0[i]);
                 VU0_APPLY_MATRIX(vf10, vf10);
@@ -511,7 +511,7 @@ void kwlnUpdateDrawParameterTransitions(void) {
 }
 
 /* Replace the two scalar targets immediately, or retain start/end values for their blend. */
-void evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget) {
+void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget) {
     if (frames == 0) {
         kwlnDrawControlFlags &= ~EVT_SAVED_VECTOR_BLEND_FLAG;
         D_003BD358 = firstTarget;
@@ -530,14 +530,14 @@ void evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget) {
     }
 }
 
-void evtEnsureDrawVectorState(void) {
+void eglInit(void) {
     if (D_003BD6B0 == NULL) {
-        D_003BD6B0 = sdfCreateAssetWithDrawEntries();
+        D_003BD6B0 = sdfMatNew();
         ((EvtDrawState *)D_003BD6B0)->value1C = 1.0f;
     }
 }
 
-void evtSetDrawSurfaceIndex(u32 surfaceIndex) {
+void eglSetOt(u32 surfaceIndex) {
     kwlnDrawSurfaceIndex = surfaceIndex;
 }
 
@@ -554,10 +554,10 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 
 
-extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
-extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+extern s32 sdf2DGetPrimPtr(s32);
 
-extern u8 *sdfConsFinalizePacketHeader(void *, s32);
+extern u8 *sdf2DMakeStdPacket(void *, s32);
 
 
 
@@ -566,15 +566,15 @@ extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 /* Submit primary-context GS TEST settings. Z testing is always enabled;
    unusedZte is a retained native formal, not the source of the ZTE bit. */
 void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
-    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
-    sdfInitPacketList(list);
-    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = EVT_GS_TEST_PRIMARY;
-    sdfAppendPacket(list, (u32)(packet));
+    sdfDrawTagLink(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
@@ -583,15 +583,15 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
 
 /* Submit the same TEST bit layout for the secondary GS context, with ZTE forced on. */
 void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
-    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
-    sdfInitPacketList(list);
-    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = EVT_GS_TEST_SECONDARY;
-    sdfAppendPacket(list, (u32)(packet));
+    sdfDrawTagLink(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
@@ -600,13 +600,13 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
 
 /* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
 void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
-    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
 
-    sdfInitPacketList(list);
-    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     switch (blendMode) {
     case 1:
         command->data = 0x48;
@@ -637,7 +637,7 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
         break;
     }
     command->registerId = EVT_GS_ALPHA_PRIMARY;
-    sdfAppendPacket(list, (u32)(packet));
+    sdfDrawTagLink(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
@@ -646,15 +646,15 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
 
 /* Submit ALPHA_1 = (Cs - Cd) * FIX / 128 + Cd; retain the native unmasked FIX input. */
 void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
-    void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     void *packet;
     EvtGsCommand *command;
-    sdfInitPacketList(list);
-    packet = (void *)sdfAllocPacketAligned(EVT_GS_COMMAND_BYTES);
-    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, EVT_GS_COMMAND_BYTES);
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
     command->data = ((u64)fixedAlpha << 32) | EVT_FIXED_ALPHA_INTERPOLATION;
     command->registerId = EVT_GS_ALPHA_PRIMARY;
-    sdfAppendPacket(list, (u32)(packet));
+    sdfDrawTagLink(list, (u32)(packet));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
@@ -667,12 +667,12 @@ extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChai
 
 
 void evtSubmitPrimaryFramePacket(void) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
-    sdfInitPacketList(list);
-    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, framePacket, 0);
-    sdfAppendDmaTagToList(list, (u32)framePacket);
+    sdfDrawTagInit(list);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
@@ -682,12 +682,12 @@ void evtSubmitPrimaryFramePacket(void) {
 extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void evtSubmitAlternateFramePacket(void) {
-    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    SdfListHead *list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
-    sdfInitPacketList(list);
-    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, framePacket, 0);
-    sdfAppendDmaTagToList(list, (u32)framePacket);
+    sdfDrawTagInit(list);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
@@ -702,8 +702,8 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
 
-    list = sdfCreateResetPacketList();
-    sdfConsCreateDrawPacket(list, texture, 0);
+    list = dds3FontReqAllocDrawTag();
+    sdf2DLinkTexPacket(list, texture, 0);
     left = (x << 4) + 0x7000;
     top = (y << 3);
     right = (x << 4) + (width << 4) + 0x7000;
@@ -713,7 +713,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
     vTop = (v << 4);
     uRight = uLeft + (textureWidth << 4);
     vBottom = vTop + (textureHeight << 4);
-    sdfQueueGouraudTexturedQuad(list, 0x40,
+    sdfPrimLinkGt4(list, 0x40,
         left, top, uLeft, vTop, color0,
         right, top, uRight, vTop, color1,
         left, bottom, uLeft, vBottom, color3,
@@ -758,11 +758,11 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
     coords[5] = (y + h) * 8;
     coords[6] = x * 16;
     coords[7] = (y + h) * 8;
-    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
+    sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -784,7 +784,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
         dst += 2;
         pos += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     descriptor->append(descriptor, command);
 }
@@ -797,7 +797,7 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
 }
 
 /* Submit three packed vertex colors and XY pairs at the default depth. */
-void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
+void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
     s32 coords[3][2];
     SdfListHead *command;
     SdfDrawPacket *packet;
@@ -823,11 +823,11 @@ void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s
     coords[1][1] = y1 * 8;
     coords[2][0] = x2 * 16;
     coords[2][1] = y2 * 8;
-    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(command);
-    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
-    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 3);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    command = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 3));
+    sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < 3; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -845,7 +845,7 @@ void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s
             ((u64)(coords[i][1] + 0x7900) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, (u32)packet);
+    sdfDrawTagLink(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     descriptor->append(descriptor, command);
 }
@@ -856,7 +856,7 @@ void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s
 extern u64 D_003245A0[]; /* index table; only the first 8 bytes are used */
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
-void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
+void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
     SdfPrimitiveRequest desc;
     DrawVec4 verts[EVT_QUAD_VERTEX_COUNT];
     s32 indices[EVT_QUAD_VERTEX_COUNT];
@@ -864,10 +864,10 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     void *list;
     SdfPoolNode *surface;
 
-    list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
-    sdfConsAppendAssetPacket(list, D_003BD6B0, 0);
+    list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    sdf3DPrimLinkMat(list, D_003BD6B0, 0);
     memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
     desc.stripWordCount = 2;
@@ -892,13 +892,13 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     indices[2] = i3;
     indices[3] = i1;
     strip[0] = D_003245A0[0];
-    sdfAppendPacket(list, (u32)(sdfBuildPrimitiveAttributeVifPacket(&desc)));
+    sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->append(surface, list);
 }
 
 /* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
-void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
+void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
     SdfPrimitiveRequest desc;
     f32 verts[16];
     s32 indices[EVT_QUAD_VERTEX_COUNT];
@@ -908,12 +908,12 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     void *list;
     SdfPoolNode *surface;
 
-    asset = sdfCreateAssetWithDrawEntries();
+    asset = sdfMatNew();
     sdfSetAssetPrimaryTextureAddress(asset, (SdfTex *)bits);
-    list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
-    sdfConsAppendAssetPacket(list, asset, 0);
+    list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    sdf3DPrimLinkMat(list, asset, 0);
     memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
     desc.stripWordCount = 2;
@@ -947,10 +947,10 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     uvs[5] = v1;
     uvs[6] = u1;
     uvs[7] = v0;
-    sdfAppendPacket(list, (u32)(sdfBuildPrimitiveAttributeVifPacket(&desc)));
+    sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->append(surface, list);
-    sdfQueueAssetRelease((SdfAsset *)asset);
+    sdfMatFreeDelayed((SdfAsset *)asset);
 }
 
 extern f32 D_003245B0[][4];
@@ -958,7 +958,7 @@ extern f32 D_003245B0[][4];
 extern u32 D_003245D0[];
 
 
-void evtSubmitViewParamPacket(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second) {
+void eglLinkLine(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second) {
     void *list;
     D_003245B0[0][0] = x;
     D_003245B0[0][1] = y;
@@ -968,31 +968,31 @@ void evtSubmitViewParamPacket(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 firs
     D_003245B0[1][2] = w;
     D_003245D0[1] = second;
     D_003245D0[0] = first;
-    list = (void *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(sdfDrawCachedMatrixLinePairsVU(D_003245B0, D_003245D0, 2, 0x80)));
+    list = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)(effDebugDrawWireModel(D_003245B0, D_003245D0, 2, 0x80)));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);
     }
 }
 
-void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
+void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     SifCommand sifParameters;
     void *list;
     void *packet;
     SdfPoolNode *surface;
-    list = sdfCreateResetPacketList();
-    packet = (void *)sdfAllocPacketAligned(0x40);
-    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
-    sdfAppendPacket(list, (u32)(packet));
+    list = dds3FontReqAllocDrawTag();
+    packet = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfPrimSetOpaquePacket(packet);
+    sdfDrawTagLink(list, (u32)(packet));
     sdfPktInit(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
-    sdfAppendPacket(list, (u32)(sdfFormatSifPacket(&sifParameters, (const char *)drawArg)));
+    sdfDrawTagLink(list, (u32)(sdfDevPrintfEx(&sifParameters, (const char *)drawArg)));
     surface = &kwlnPositionedTextSurface;
     surface->append(surface, list);
 }
 
-void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *text) {
+void eglLinkKanji(s32 width, s32 height, s32 colors, const char *text) {
     struct FrFontGlyph *glyph;
 
     glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
@@ -1057,25 +1057,25 @@ void evtSelStateDestroy(void) {
     }
 }
 
-s32 evtStartSelCreate(void) {
+s32 CallDebug(void) {
     return dds3StartProcess(D_0039E1F0, 0x2AF9, 0, 0, (s32)kwlnTaskNoopCallback, 0, 0);
 }
 
-u32 evtStartSelDestroy(void) {
+u32 ExitDebug(void) {
     dds3KillProcessName(D_0039E1F0, 1);
     return 1;
 }
 
 /* Admin mode 0 cleanup: zero leaves the mode pending. */
-u32 evtKeepSelectionModePending(void) {
+u32 CheckDebug(void) {
     return 0;
 }
 
-void evtOpenFileMenuModeThree(void) {
+void CallBootMc(void) {
     fileEnterMcPackScene(3);
 }
 
-u32 evtPollFileMenuModeThree(void) {
+u32 ExitBootMc(void) {
     s32 operationResult;
     s32 status;
 
@@ -1089,70 +1089,70 @@ u32 evtPollFileMenuModeThree(void) {
     return status;
 }
 
-u8 evtWaitFileMenuTaskThree(void) {
+u8 CheckBootMc(void) {
     s32 operationResult;
 
     operationResult = fileMenuTaskExists();
     return operationResult == 0;
 }
 
-u32 evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *modeOverride) {
+u32 CallTitle(u32 unused, u32 *modeOverride) {
     if (modeOverride == 0) {
         return mnuOpenTitleMenuForMode(0);
     }
     return mnuOpenTitleMenuForMode(*modeOverride);
 }
 
-u32 evtCloseTitleMenu(void) {
+u32 ExitTitle(void) {
     mnuDestroyTitleMenuTask();
     return 0;
 }
 
 /* Admin mode 2 cleanup: zero leaves the mode pending. */
-u32 evtKeepTitleMenuModePending(void) {
+u32 CheckTitle(void) {
     return 0;
 }
 
-void evtOpenFileMenuModeOne(void) {
+void CallLoad(void) {
     fileEnterMcPackScene(1);
 }
 
-s32 evtCheckSelectionInput(void) {
+s32 ExitLoad(void) {
     fileMenuReleaseNoOp();
     fileReleaseMenuResources();
     if (fileMenuOperationSucceeded() != 0) {
-        fldStartSequenceRecord();
+        fldMainLoadStart();
         return 0;
     }
     return -1;
 }
 
-u8 evtIsFileMenuTaskAbsent(void) {
+u8 CheckLoad_dds3SequenceList(void) {
     s32 operationResult;
 
     operationResult = fileMenuTaskExists();
     return operationResult == 0;
 }
 
-u32 evtStartStaffMovieRequest(void) {
+u32 CallStaff(void) {
     return mnuStartStaffMovieRequest();
 }
 
-u32 evtStopStaffTasks(void) {
+u32 ExitStaff(void) {
     mnuStopStaffTasks();
     return 0;
 }
 
 /* Admin mode 12 cleanup: zero leaves the mode pending. */
-u32 evtKeepStaffMovieModePending(void) {
+u32 CheckStaff(void) {
     return 0;
 }
 
-void evtOpenFileMenuModeTwo(void) {
+void CallEndSave(void) {
     fileEnterMcPackScene(2);
 }
 
-u32 evtPollFileMenuModeTwo(void) {
+u32 ExitEndSave(void) {
     s32 operationResult;
     s32 status;
 
@@ -1166,7 +1166,7 @@ u32 evtPollFileMenuModeTwo(void) {
     return status;
 }
 
-u8 evtWaitFileMenuTaskExit(void) {
+u8 CheckEndSave(void) {
     s32 operationResult;
 
     operationResult = fileMenuTaskExists();
@@ -1174,14 +1174,14 @@ u8 evtWaitFileMenuTaskExit(void) {
 }
 
 struct FieldSequenceRecord;
-extern void fldStartFieldSceneTasks(struct FieldSequenceRecord *record, u32 mode);
+extern void fldProcTrigSequence(struct FieldSequenceRecord *record, u32 mode);
 
 void evtStartAreaFromSelection(u32 selection, u32 area) {
     kwlnFadeBackgroundStartOut(0);
-    fldStartFieldSceneTasks(area, selection);
+    fldProcTrigSequence(area, selection);
 }
 
-u32 evtPollSelectedAreaReady(void) {
+u32 ExitField(void) {
     s32 operationResult;
     s32 status;
 
@@ -1195,7 +1195,7 @@ u32 evtPollSelectedAreaReady(void) {
 }
 
 /* Admin mode 5 cleanup: zero leaves the mode pending. */
-u32 evtKeepSelectedAreaModePending(void) {
+u32 CheckField(void) {
     return 0;
 }
 
@@ -1229,14 +1229,14 @@ void evtDispatchSelectionValue(s32 valueSource, s32 *selectionParams) {
     if (eventSelection <= 0) {
         return;
     }
-    evtCreateSkyTask();
-    evtCreateEventScriptProcess(eventSelection);
+    evtInitSky();
+    evtStartEvent(eventSelection);
 }
 
 u32 evtCloseSkyEventTask(void) {
     D_003BA730 = 1;
-    evtDestroySkyTask();
-    fldDispatchDeferredFieldCommand();
+    evtExitSky();
+    fldProcNextJump();
     return 0;
 }
 
@@ -1262,63 +1262,63 @@ u8 evtWaitCampStateAcknowledged(void) {
 }
 
 /* Admin mode 8 entry intentionally performs no work. */
-void evtAdminModeEightEntryNoOp(void) {
+void CallRecover(void) {
 }
 
 /* Admin mode 8 destroy callback: no work, zero transition result. */
-u32 evtAdminModeEightDestroyNoOp(void) {
+u32 ExitRecover(void) {
     return 0;
 }
 
 /* Admin mode 8 cleanup: one immediately reports completion. */
-u32 evtIsAdminModeEightComplete(void) {
+u32 CheckRecover(void) {
     return 1;
 }
 
 /* Admin mode 9 entry intentionally performs no work. */
-void evtAdminModeNineEntryNoOp(void) {
+void CallTerminal(void) {
 }
 
 /* Admin mode 9 destroy: no work, zero transition result. */
-u32 evtAdminModeNineDestroyNoOp(void) {
+u32 ExitTerminal(void) {
     return 0;
 }
 
 /* Admin mode 9 cleanup: one immediately reports completion. */
-u32 evtIsAdminModeNineComplete(void) {
+u32 CheckTerminal(void) {
     return 1;
 }
 
-s32 evtCreateStaffTasks(void) {
+s32 CallResult2(void) {
     return mnuStaffCreateTasks();
 }
 
-u32 evtDestroyStaffTasks(void) {
-    fldDispatchDeferredFieldCommand();
+u32 ExitResult2(void) {
+    fldProcNextJump();
     mnuStaffDestroyTasks();
     return 0;
 }
 
-u8 evtWaitStaffTaskDone(void) {
+u8 CheckResult2(void) {
     s32 taskResult;
 
     taskResult = brsTaskConsumeDone();
     return taskResult == 0;
 }
 
-void evtCreateConfigTasks(void) {
-    mnuCreateConfigTasks(1);
+void CallConfig(void) {
+    dds3ConfigProcessStart(1);
 }
 
-u32 evtDestroyConfigTasks(void) {
-    mnuConfigTasksDestroy();
+u32 ExitConfig(void) {
+    dds3ConfigProcessEnd();
     return 0;
 }
 
-u8 evtWaitConfigTaskDone(void) {
+u8 CheckConfig(void) {
     s32 taskResult;
 
-    taskResult = fileConsumeConfigTaskReady();
+    taskResult = checkConfigState();
     return taskResult == 0;
 }
 
@@ -1333,8 +1333,8 @@ void evtDispatchSelectionCommand(s32 commandSource, s32 *commandParams) {
         }
     }
     else {
-        dds3AdminSetControlFlag();
-        fldDispatchDeferredFieldCommand();
+        dds3AdminiExitSequence();
+        fldProcNextJump();
     }
 }
 
@@ -1343,12 +1343,12 @@ s32 evtCheckBattleShutdown(void) {
     return btlExitWhenAudioAndTasksIdle();
 }
 
-u32 evtEnsureSelectionTask(void) {
+u32 CheckNewBattleTest(void) {
     if (dds3SearchProcessName(D_003BA950) != NULL) {
         return 0;
     }
     if (dds3SearchProcessPriority(0x3FA) == NULL) {
-        fldDispatchDeferredFieldCommand();
+        fldProcNextJump();
         return 1;
     }
     return 0;
@@ -1372,16 +1372,16 @@ u32 evtKeepBattleStageTestModePending(void) {
 s32 evtCreateTestAndSkyTasks(void) {
     D_003BA730 = 0;
     D_003BA958 = 0;
-    evtStartTestTask();
-    return evtCreateSkyTask();
+    evtInitEventTest();
+    return evtInitSky();
 }
 
 
 u32 evtInitializeSelectionScene(void) {
     D_003BA730 = 1;
     kwlnFadeBackgroundStartOut(0);
-    evtStopTestTasks();
-    evtDestroySkyTask();
+    evtChkEndProcess();
+    evtExitSky();
     return 1;
 }
 
@@ -1392,7 +1392,7 @@ u32 evtKeepTestSkyModePending(void) {
 
 void evtClearSecondaryWorldAndViewer(void) {
     D_003BA730 = 0;
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
     evtViewerCreateTaskWithSky();
 }
 
@@ -1439,39 +1439,39 @@ u8 mnuCheckCampStateAndAcknowledge(void) {
 }
 
 s32 evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
-    evtCreateSkyTask();
+    evtInitSky();
     return mnuOpenShopSceneWithInitialSelection(campMode);
 }
 
 u32 evtDestroySkyAndCampTasks(void) {
-    evtDestroySkyTask();
+    evtExitSky();
     mnuCampDestroyPanelTasks();
-    fldProcessDeferredSceneCommand();
+    fldProc_CallSisetuReturn();
     return 0;
 }
 
-u8 evtWaitSkyCampTaskState(void) {
+u8 CheckRecoverTest(void) {
     s32 taskState;
 
     taskState = mnuPollTaskState();
     return taskState == 0;
 }
 
-s32 evtCreateSkyAndFieldTasks(u32 unused, u32 *fieldArgs) {
-    evtCreateSkyTask();
+s32 CallTerminalTest(u32 unused, u32 *fieldArgs) {
+    evtInitSky();
     if (fieldArgs != 0) {
         return mnuTerminalCreateTasks(fieldArgs[0], fieldArgs[1]);
     }
     return mnuTerminalCreateTasks(0, 1);
 }
 
-u32 evtDestroySkyAndFieldTasks(void) {
-    evtDestroySkyTask();
+u32 ExitTerminalTest(void) {
+    evtExitSky();
     fldStopSceneTasks();
     return 0;
 }
 
-u8 evtWaitFieldSceneState(void) {
+u8 CheckTerminalTest(void) {
     s32 sceneState;
 
     sceneState = fldPollSceneState();
@@ -1495,52 +1495,52 @@ u8 evtWaitStaffTaskDoneAlternate(void) {
 }
 
 /* Admin mode 23 entry intentionally performs no work. */
-void evtAdminModeTwentyThreeEntryNoOp(void) {
+void CallSoundTest(void) {
 }
 
 /* Admin mode 23 destroy: no work, zero transition result. */
-u32 evtAdminModeTwentyThreeDestroyNoOp(void) {
+u32 ExitSoundTest(void) {
     return 0;
 }
 
 /* Admin mode 23 cleanup: zero leaves the mode pending. */
-u32 evtKeepAdminModeTwentyThreePending(void) {
+u32 CheckSoundTest(void) {
     return 0;
 }
 
 /* Admin mode 24 entry intentionally performs no work. */
-void evtAdminModeTwentyFourEntryNoOp(void) {
+void CallBillboardTest(void) {
 }
 
 /* Admin mode 24 destroy: no work, zero transition result. */
-u32 evtAdminModeTwentyFourDestroyNoOp(void) {
+u32 ExitBillboardTest(void) {
     return 0;
 }
 
 /* Admin mode 24 cleanup: zero leaves the mode pending. */
-u32 evtKeepAdminModeTwentyFourPending(void) {
+u32 CheckBillboardTest(void) {
     return 0;
 }
 
-void evtLaunchFontTestScene(void) {
+void CallFontTest(void) {
     itfStartFontTestScene();
 }
 
 /* Admin mode 25 destroy callback: no work, zero transition result. */
-u32 evtDestroyFontTestModeNoOp(void) {
+u32 ExitFontTest(void) {
     return 0;
 }
 
-u32 evtTestFontCheck(void) {
+u32 CheckFontTest(void) {
     return dds3SearchProcessName(D_0039E200) == NULL;
 }
 
 void evtCreateMovieViewerTask(void) {
-    mnuCreateMovieViewerTask();
+    InitMovieViewer();
 }
 
 u32 evtDestroyMovieViewerTask(void) {
-    mnuDestroyMovieViewerTask();
+    FinishMovieViewer();
     return 0;
 }
 
@@ -1587,16 +1587,16 @@ u8 evtWaitLmapTaskGone(void) {
 
 u32 evtEnsureFontResourceChain(void) {
     if (evtConsoleFontResourceChain == 0) {
-        evtConsoleFontResourceChain = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
-        sdfDevConsSetControlByte(evtConsoleFontResourceChain, 2);
-        sdfDevConsSetTextAttribute(evtConsoleFontResourceChain, 7);
+        evtConsoleFontResourceChain = sdfDevConsOpen(0x7100, 0x7A60, 0x28, 0x14);
+        sdfDevConsSetMode(evtConsoleFontResourceChain, 2);
+        sdfDevConsAttribute(evtConsoleFontResourceChain, 7);
     }
     return 0;
 }
 
 void evtDestroyFontResourceChain(void) {
     if (evtConsoleFontResourceChain != 0) {
-        sdfDevConsNodeDestroy(evtConsoleFontResourceChain);
+        sdfDevConsClose(evtConsoleFontResourceChain);
         evtConsoleFontResourceChain = 0;
     }
 }
@@ -1625,7 +1625,7 @@ extern u16 D_003BA970;
 extern u16 D_003BA972;
 extern char evtGeneralHeapPercentFormat[];
 
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
@@ -1636,20 +1636,20 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     s32 currentColumn;
     s32 peakColumn;
 
-    sdfGetGeneralHeapStats(&heapStats);
+    sdfMemGetInfo(&heapStats);
     freePercent = heapStats.freeBytes * 100 / heapStats.totalBytes;
-    list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    sdfInitPacketList(list);
-    packet = (void *)sdfAllocPacketAligned(0x40);
-    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
-    sdfAppendPacket(list, (u32)packet);
-    sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(0x70D0, 0x85A8, 0xFFFF7F, 0x1260, 0xC0, 0x20000000, 0x40806040));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x85C0, 0xFFFF80, 0, evtGeneralHeapPercentFormat, freePercent));
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8080, 0x85C0, 0xFFFF80, 6, evtGeneralHeapPercentFormat, D_003BA970));
+    list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfPrimSetOpaquePacket(packet);
+    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x70D0, 0x85A8, 0xFFFF7F, 0x1260, 0xC0, 0x20000000, 0x40806040));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7100, 0x85C0, 0xFFFF80, 0, evtGeneralHeapPercentFormat, freePercent));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8080, 0x85C0, 0xFFFF80, 6, evtGeneralHeapPercentFormat, D_003BA970));
     currentColumn = (s32)((f32)freePercent / 100.0f * 200.0f) + 0x2A;
-    sdfCreatePacketA(list, 0x8000C000, 0, 0x73A0, 0x85F0, currentColumn * 16 + originX, 0x8600, 0xFF0000, 0);
+    sdfPrimLinkRect(list, 0x8000C000, 0, 0x73A0, 0x85F0, currentColumn * 16 + originX, 0x8600, 0xFF0000, 0);
     peakColumn = (s32)((f32)D_003BA970 / 100.0f * 200.0f) + 0x2B;
-    sdfCreatePacketA(list, 0x8000FFFF, 0, peakColumn * 16 + originX, 0x85D0, (peakColumn + 2) * 16 + originX, 0x8610, 0xFF0000, 0);
+    sdfPrimLinkRect(list, 0x8000FFFF, 0, peakColumn * 16 + originX, 0x85D0, (peakColumn + 2) * 16 + originX, 0x8610, 0xFF0000, 0);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (D_003BA972 >= 0x47 || D_003BA970 < freePercent) {
         D_003BA970 = freePercent;
@@ -1717,7 +1717,7 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
         s32 remainingCells = 128 - columnIndex;
 
         if (blockSize >= remainingCells / bytesPerCell) {
-            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+            sdfPrimLinkLine(packetList, color, 0, leftX, topY,
                                          leftX + remainingCells * 16, topY + 8,
                                          0x0FFFFF80, NULL);
             blockSize -= remainingCells / (D_003BA97C >> 15);
@@ -1727,7 +1727,7 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
             if (cellCount == 0 && blockSize > 0) {
                 cellCount = 1;
             }
-            sdfAppendFillRectanglePacket(packetList, color, 0, leftX, topY,
+            sdfPrimLinkLine(packetList, color, 0, leftX, topY,
                                          leftX + cellCount * 16, topY + 8,
                                          0x0FFFFF80, NULL);
             blockSize = 0;
@@ -1735,19 +1735,19 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
         topY += 8;
     }
     while (blockSize >= (D_003BA97C >> 8)) {
-        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
+        sdfPrimLinkLine(packetList, color, 0, x, topY,
                                      x + 0x800, topY + 8, 0x0FFFFF80, NULL);
         blockSize -= D_003BA97C >> 8;
         topY += 8;
     }
     if (blockSize > 0) {
-        sdfAppendFillRectanglePacket(packetList, color, 0, x, topY,
+        sdfPrimLinkLine(packetList, color, 0, x, topY,
                                      x + (blockSize / (D_003BA97C >> 15)) * 16,
                                      topY + 8, 0x0FFFFF80, NULL);
     }
 }
 
-extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
+extern u16 sdfMemGetType(SdfMemBlock *);
 
 void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     SdfHeapOverlayBlock *snapshot;
@@ -1761,28 +1761,28 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     s32 markerX;
     s32 markerY;
 
-    snapshot = (SdfHeapOverlayBlock *)sdfGetPacketCursor();
+    snapshot = (SdfHeapOverlayBlock *)sdfGrOpenPacketBuff();
     restoreInterrupts = DIntr();
-    block = sdfGetFirstGeneralHeapBlock();
+    block = sdfMemGetTop();
     entry = snapshot;
-    heapBase = sdfMemoryGetBlockAddress(block);
+    heapBase = sdfMemGetPtr(block);
     /* Count only the interrupt-protected snapshot traversal. */
     count = 0;
     do {
         count++;
-        entry->address = sdfMemoryGetBlockAddress(block);
-        entry->state = sdfGetMemoryBlockState(block);
-        entry->size = sdfMemoryGetBlockSize(block);
+        entry->address = sdfMemGetPtr(block);
+        entry->state = sdfMemGetType(block);
+        entry->size = sdfMemGetSize(block);
         entry++;
-        block = sdfMemoryNextBlock(block);
+        block = sdfMemGetNext(block);
     } while (block != NULL);
     if (restoreInterrupts) {
         EIntr();
     }
-    sdfSetPacketCursorAligned((s32)entry);
+    sdfGrClosePacketBuff((s32)entry);
 
     entry = snapshot;
-    sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(x - 0x20, y - 0x10,
+    sdfDrawTagLink(list, (u32)dds3PrimFrameRect(x - 0x20, y - 0x10,
         0x0FFFFF7F, 0x840, (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x20,
         0x80000000, 0x80806020));
     for (i = 0; i < count; i++) {
@@ -1792,15 +1792,15 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     }
     markerY = y;
     markerX = x + 0x820;
-    sdfAppendFillRectanglePacket(list, 0x80806020, 0, markerX, markerY,
+    sdfPrimLinkLine(list, 0x80806020, 0, markerX, markerY,
         x + 0x8C0, markerY, 0x0FFFFF80, NULL);
     for (offset = 0x100000; offset < D_003BA97C; offset += 0x100000) {
         markerY = y + (offset / (D_003BA97C >> 8)) * 8;
-        sdfAppendFillRectanglePacket(list, 0x80806020, 0, markerX, markerY,
+        sdfPrimLinkLine(list, 0x80806020, 0, markerX, markerY,
             x + 0x870, markerY, 0x0FFFFF80, NULL);
     }
     markerY = y + (D_003BA97C / (D_003BA97C >> 8)) * 8;
-    sdfAppendFillRectanglePacket(list, 0x80806020, 0, markerX, markerY,
+    sdfPrimLinkLine(list, 0x80806020, 0, markerX, markerY,
         markerX + 0xA0, markerY, 0x0FFFFF80, NULL);
 }
 
@@ -1818,17 +1818,17 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     char statusText[100];
     void *packetList;
 
-    sdfGetGeneralHeapStats(&generalHeapStats);
+    sdfMemGetInfo(&generalHeapStats);
     D_003BA97C = generalHeapStats.totalBytes;
-    sdfGetChipHeapStats(&chipHeapStats);
-    packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    sdfInitPacketList(packetList);
+    sdfChipGetInfo(&chipHeapStats);
+    packetList = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(packetList);
     sdfDrawHeapMapOverlay(packetList, 0x86C0, 0x79C0);
     sprintf(statusText, D_003BA980, generalHeapStats.freeBytes);
-    sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
+    sdfDrawTagLink(packetList, (u32)(sdfDevPrintf(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText)));
     sprintf(statusText, D_003BA988, chipHeapStats.freeBytes);
-    sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
+    sdfDrawTagLink(packetList, (u32)(sdfDevPrintf(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText)));
     surface->append(surface, packetList);
 }
@@ -1842,9 +1842,9 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
     return 0;
 }
 
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
-extern s32 frFontGetParentGlyphCount(void);
-extern s32 frFontGetChildGlyphCount(void);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
+extern s32 frGetFontHandleNum(void);
+extern s32 frGetTextHandleNum(void);
 extern s32 effGetFontListCount(void);
 extern const char D_0039E220[];
 
@@ -1857,20 +1857,20 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     s32 textCount;
     s32 gsCount;
 
-    sdfGetGeneralHeapStats(&heapStats);
+    sdfMemGetInfo(&heapStats);
     /* The unused heap ratio retains the native zero-divisor check. */
     heapRatio = heapStats.freeBytes / heapStats.totalBytes;
-    list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    sdfInitPacketList(list);
-    packet = (void *)sdfAllocPacketAligned(0x40);
-    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
-    sdfAppendPacket(list, (u32)packet);
-    sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(0x70d0, 0x7968, 0xffff7f,
+    list = (SdfListHead *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfPrimSetOpaquePacket(packet);
+    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x70d0, 0x7968, 0xffff7f,
                                           0xf70, 0x98, 0x20000000, 0x40806040));
-    fontCount = frFontGetParentGlyphCount();
-    textCount = frFontGetChildGlyphCount();
+    fontCount = frGetFontHandleNum();
+    textCount = frGetTextHandleNum();
     gsCount = effGetFontListCount();
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x7980,
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7100, 0x7980,
                     0xffff80, 0, D_0039E220, fontCount, textCount, gsCount));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     return 0;
@@ -1888,7 +1888,7 @@ void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
 }
 
 /* Append to the event-work doubly linked list, maintaining both endpoints. */
-void evtLinkWorkNode(ScrData *node) {
+void scrLinkHandle(ScrData *node) {
     ScrData *tail = scrNamedProcessTail;
 
     if (tail == NULL) {
@@ -1907,7 +1907,7 @@ void evtLinkWorkNode(ScrData *node) {
 }
 
 /* Detach from either end or the middle, and clear the old links. */
-void evtUnlinkWorkNode(ScrData *node) {
+void scrUnlinkHandle(ScrData *node) {
     if (scrNamedProcessHead == node) {
         scrNamedProcessHead = node->next;
     }
@@ -1926,7 +1926,7 @@ void evtUnlinkWorkNode(ScrData *node) {
 }
 
 
-extern s32 itfMesCreateWindow(void *data);
+extern s32 itfMesMngInitialize(void *data);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
@@ -1996,9 +1996,9 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
         process->localFloat = NULL;
     }
     if (auxiliaryData != NULL) {
-        process->resourceIndex = itfMesCreateWindow(auxiliaryData);
+        process->resourceIndex = itfMesMngInitialize(auxiliaryData);
     }
-    evtLinkWorkNode(process);
+    scrLinkHandle(process);
     evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].name);
     return process;
 }
@@ -2006,7 +2006,7 @@ ScrData *bfContextCreate(void *rawHeader, ScrSection *sections, ScrLabel *proced
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
-ScrData *bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
+ScrData *fldFlowParse(BfFlw0Header *header, s32 procedureIndex) {
     ScrSection *sections;
     ScrLabel *procedures = NULL;
     ScrLabel *labels = NULL;

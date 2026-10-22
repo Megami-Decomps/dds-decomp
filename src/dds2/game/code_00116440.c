@@ -7,19 +7,19 @@
 /* Create an inner-vector object and snapshot its vector state after initialization. */
 
 
-extern void effObjInnerVecBackup(ObjectTransform *node);
+extern void dds3SetRadiusPoseSet(ObjectTransform *node);
 
-EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_RESOURCE_OWNER);
+EffWorldNode *dds3AddEventObjectBasic(s32 initialValue, void *firstVector, void *secondVector) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_RESOURCE_OWNER);
 
     obj->key = initialValue;
     dds3SetPosPoseSet(obj, firstVector);
     dds3SetRotPoseSet(obj, secondVector);
-    effObjInnerVecBackup(obj->inner);
+    dds3SetRadiusPoseSet(obj->inner);
     return obj;
 }
 
-ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object) {
+ObjBase *dds3EventObjectBasicGetControlWorkData(const EffWorldNode *object) {
     const DdsSlotResourceBlock *block = (const DdsSlotResourceBlock *)object->data;
     return block->resourceState;
 }
@@ -27,10 +27,10 @@ ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object) {
 extern void dds3ObjectBaseOnFlag(void *object, u32 mask);
 
 /* Allocate the kind-9 light payload and its auxiliary buffer. */
-u32 dds3InitializeInnerVectorEffectObject(EffWorldNode *object) {
+u32 lightconstructor(EffWorldNode *object) {
     EffLightData *obj;
 
-    effObjInnerCreate(object);
+    dds3InitPoseSet(object);
     obj = (EffLightData *)sdfChipAllocDirect(0x7C);
     object->data = obj;
     obj->resourceState = dds3CreateSlotResourceState(object);

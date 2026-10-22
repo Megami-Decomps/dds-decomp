@@ -33,7 +33,7 @@ enum {
 
 typedef struct EffWorldNode EffWorldNode;
 
-/* Separate 0xD0-byte allocation: DDS1 effObjInnerCreate (0010F570).
+/* Separate 0xD0-byte allocation: DDS1 dds3InitPoseSet (0010F570).
  * VU0 vector transfers and scalar camera reads use the same float vectors. */
 typedef struct ObjectTransform {
     u128 matrix[4];
@@ -73,11 +73,11 @@ typedef struct WorldValueIndices {
 typedef char WorldValueIndices_size_must_be_0x08[(sizeof(WorldValueIndices) == 0x08) ? 1 : -1];
 
 /* Complete 68-byte (0x44, not 0x68) allocation from
- * dds3CreateWorldNodeForKind at DDS1 0010F418 / DDS2 0010F640.
+ * dds3AllocBasic at DDS1 0010F418 / DDS2 0010F640.
  * Its kind byte at +0x0F determines both identity and payload interpretation. */
 struct EffWorldNode {
     u32 word0;
-    u32 key; /* Kind 2: evtSpawnActionObj2 at 00111188. */
+    u32 key; /* Kind 2: dds3AddAreaBasic at 00111188. */
     const char *value; /* Native caption string for named kinds; other kinds keep a scalar here. */
     u32 kindTag; /* Kind occupies the high byte; constructor clears low 24 bits. */
     EffWorldOps *ops;

@@ -44,23 +44,23 @@
 typedef ObjectTransform EffectParameters;
 
 
-void effObjFreeInner(EffWorldNode *node);
-void dds3DestroyObjectBase(void *objectBase);
+void dds3FreePoseSet(EffWorldNode *node);
+void dds3ObjectBaseFreeControlWorkData(void *objectBase);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
-   loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
-EffWorldNode *effObjCreateKindTwo(void *bill, void *vec, s32 extra);
-void billSetKind1Entry(void *arg, u32 entryIndex);
-EffWorldNode *effObjCreateBillNode(void *bill, void *vec, s32 extra);
+   loaded with lqc2 and the extra is forwarded to dds3AddEffectObjectBasic. */
+EffWorldNode *AddP2AEffect(void *bill, void *vec, s32 extra);
+void dds3BillboardSetAnimNumber(void *arg, u32 entryIndex);
+EffWorldNode *AddTMXEffect(void *bill, void *vec, s32 extra);
 EffWorldNode *effObjCreateWithBoundBill(void *bill, void *vec, void *secondVector);
 EffWorldNode *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
-EffWorldNode *effObjCreateEventNodeFromMixer();
-EffWorldNode *effObjCreateNamedScaledEffectObject(const char *name, void *firstVector, void *secondVector, f32 scale);
+EffWorldNode *AddBEDEffect();
+EffWorldNode *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
-EffWorldNode *effObjCreateMagatuhiForKind();
+EffWorldNode *AddMG12Effect();
 extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
-EffectDependencyState *effObjGetReadyData(EffWorldNode *obj);
-extern void effObjForwardOwnerBillEntry(EffWorldNode *obj);
+EffectDependencyState *CheckESP(EffWorldNode *obj);
+extern void dds3EffectObjectBasicGetObjectIndex(EffWorldNode *obj);
 
 struct EffNode;
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
@@ -69,35 +69,35 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 
 
-extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 id);
 
 
-extern void effObjInnerVecBackup(ObjectTransform *node);
-extern void effMagatuhiCopyFloatBlock(void *work, const void *src);
-extern void effMagatuhiSetControlPointParams(void *work, const void *src);
+extern void dds3SetRadiusPoseSet(ObjectTransform *node);
+extern void effMagaSCSetArea(void *work, const void *src);
+extern void effMagaP4SetPoint(void *work, const void *src);
 
 
 
 /* Release dependencies, object base, then slot data; the object and data must exist. */
-void effObjReleaseObjectData(EffWorldNode *obj) {
+void dds3EffectObjectBasicDestructor(EffWorldNode *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
-    effObjReleaseStateDependencies(data);
-    effObjFreeInner(obj);
-    dds3DestroyObjectBase(data->objectHandle);
+    FreeEffectData(data);
+    dds3FreePoseSet(obj);
+    dds3ObjectBaseFreeControlWorkData(data->objectHandle);
     sdfChipFreeDirect(obj->data);
     obj->data = NULL;
 }
 
 #include "dds3_world_primary.h"
-extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
-extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
-extern void effMiscNormalizeVU(void);
+extern s32 dds3SceneBasicExistBasicFromType(EffWorldNode *object, s32 slotIndex, EffWorldNode *value);
+extern void dds3OffPoseSetFlag(ObjectTransform *node, u32 flags);
+extern void Normalize(void);
 
 /* Refresh the world position and orientation from the owner link (or the object's own
    inner transform), then forward them to the bound node according to the state. */
-s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
+s32 dds3EffectObjectBasicMainProcedure(EffWorldNode *obj) {
     f32 matrix[16];
     f32 position[4];
     f32 rotation[4] = {0, 0, 0, 1.0f};
@@ -109,9 +109,9 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
 
     data = obj->data;
     if ((data->flags & EFF_OBJ_FLAG_OWNER_LINK) != 0) {
-        if (dds3ContainsNodeInObjectChain(dds3GetWorldObject(), data->ownerKind, data->owner) != 0) {
+        if (dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), data->ownerKind, data->owner) != 0) {
             if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) != 0) {
-                effObjForwardOwnerBillEntry(obj);
+                dds3EffectObjectBasicGetObjectIndex(obj);
             } else {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
@@ -134,7 +134,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
             VU0_LOAD_VF(vf10, &data->word10);
             VU0_SET_W_ONE(vf10);
             VU0_APPLY_MATRIX(vf31, vf10);
-            sdfMultiplyVuMatrixInPlace();
+            MultMatrixRevNoArg();
             VU0_MOVE_VF(vf10, vf0);
             VU0_APPLY_MATRIX(vf10, vf10);
             if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
@@ -150,21 +150,21 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
                 }
             }
             VU0_STORE_VF(vf10, position);
-            effObjInnerVecBackup(obj->inner);
+            dds3SetRadiusPoseSet(obj->inner);
             VU0_STORE_VF(vf10, obj->inner->position);
             moved = 1;
-            effObjClearNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+            dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         } else {
-            dds3ResetWorldResourceState(obj);
+            dds3EffectObjectBasicUnlinkObject(obj);
         }
     } else {
-        effObjClearNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         VU0_LOAD_VF(vf10, obj->inner->position);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-        effObjInnerVecBackup(obj->inner);
+        dds3SetRadiusPoseSet(obj->inner);
         VU0_LOAD_VF(vf10, obj->inner->rotation);
-        effMiscNormalizeVU();
+        Normalize();
         VU0_STORE_VF(vf10, rotation);
         moved = 1;
     }
@@ -185,7 +185,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
 
             data->flags = flags & ~1;
             if (flags & 2) {
-                dds3RemoveWorldObjectNode(obj);
+                dds3DeleteSceneBasicData(obj);
             }
         }
         return 1;
@@ -194,7 +194,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
         if (bill != NULL && moved) {
             effCopyVector(bill, position);
         }
-        result = billGetKindOneParameter(bill);
+        result = dds3BillboardGetAnimState(bill);
         goto expired;
     case EFF_OBJ_STATE_BILL_NODE:
         if (data->handle != NULL && moved) {
@@ -213,7 +213,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
                 if (record != NULL) {
                     PCP_COPY_VECTOR(record, position);
                     PCP_COPY_VECTOR(record + 0x10, rotation);
-                    effEventCopyFileRecordHeader((EffEventWork *)eventNode, record);
+                    effEveBEDCutSetParams((EffEventWork *)eventNode, record);
                 }
             }
         }
@@ -226,13 +226,13 @@ s32 effUpdateLinkedWorldObjectConsumers(EffWorldNode *obj) {
 struct BillObj;
 struct EffNode;
 
-extern void billInvokeCallback(struct BillObj *bill);
+extern void dds3BillboardDraw(struct BillObj *bill);
 
-s32 effObjUpdateDependencies(EffWorldNode *obj) {
+s32 dds3EffectObjectBasicDrawProcedure(EffWorldNode *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
-    effUpdateConfiguredBillboard(obj);
+    dds3EffectObjectBasicCalcFldEx(obj);
     if ((data->flags & 1) == 0) {
         return 1;
     }
@@ -245,13 +245,13 @@ s32 effObjUpdateDependencies(EffWorldNode *obj) {
     case 7:
     case 8:
         if (data->handle != NULL) {
-            effUpdateNode(data->handle);
+            dds3EffectDraw(data->handle);
         }
         break;
     case 2:
     case 3:
         if (data->handle != NULL) {
-            billInvokeCallback(data->handle);
+            dds3BillboardDraw(data->handle);
         }
         break;
     case 5:
@@ -264,23 +264,23 @@ s32 effObjUpdateDependencies(EffWorldNode *obj) {
 }
 
 /* Return the object-base handle without checking the object or its slot data. */
-ObjBase *effObjGetObjectHandle(EffWorldNode *object) {
+ObjBase *dds3EffectObjectBasicGetControlWorkData(EffWorldNode *object) {
     return ((EffectDependencyState *)object->data)->objectHandle;
 }
 
-EffWorldNode *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secondVec) {
+EffWorldNode *dds3AddEffectObjectBasic(u32 worldCounter, void *firstVec, void *secondVec) {
     EffWorldNode *obj;
     EffectDependencyState *data;
 
-    obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_OBJECT);
+    obj = dds3AddSceneBasicData(EFF_WORLD_KIND_EFFECT_OBJECT);
     if (obj == NULL) {
         return NULL;
     }
     obj->key = worldCounter;
-    dds3EnsureSlotData(obj);
+    dds3ObjectBaseCreateMover(obj);
     dds3SetPosPoseSet(obj, firstVec);
     dds3SetRotPoseSet(obj, secondVec);
-    effObjInnerVecBackup(obj->inner);
+    dds3SetRadiusPoseSet(obj->inner);
     data = obj->data;
     data->flags = 0;
     data->state = 0;
@@ -293,7 +293,7 @@ EffWorldNode *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *se
 
 
 
-EffWorldNode *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
+EffWorldNode *AddP2AEffect(void *bill, void *vec, s32 extra) {
     u8 vector[0x10];
     EffWorldNode *obj;
     EffectDependencyState *data;
@@ -301,7 +301,7 @@ EffWorldNode *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     EffWorldNode *id;
 
     memset(vector, 0, sizeof(vector));
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), vec, (void *)extra);
     if (obj == NULL) {
         return NULL;
     }
@@ -315,48 +315,48 @@ EffWorldNode *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    handle = effObjGetObjectHandle(obj);
+    handle = dds3EffectObjectBasicGetControlWorkData(obj);
     handle->resourceState = 2;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         handle->slots[5] = id;
-        dds3EnsureWorldNodeInSlot(id, obj);
+        dds3AreaBasicRegistItem(id, obj);
     }
     return obj;
 }
 
 /* Clone the shared bill and return the newly constructed effect object. */
-EffWorldNode *effObjSpawnSharedBillClone(EffWorldNode *obj, void *firstVector, s32 secondVectorAddress) {
+EffWorldNode *dds3AddP2AEffectObjectBasic3(EffWorldNode *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData((struct BillObj *)((EffectDependencyState *)obj->data)->handle);
-    return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
+    bill = dds3BillboardCopy((struct BillObj *)((EffectDependencyState *)obj->data)->handle);
+    return AddP2AEffect(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
-void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorAddress) {
+void dds3AddP2AEffectObjectBasic2(u32 billId, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
-    bill = billCreateIndexed(1, billId);
-    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
+    bill = dds3BillboardCreate(1, billId);
+    AddP2AEffect(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-one resource bill and return its effect object. */
-EffWorldNode *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 secondVectorAddress) {
+EffWorldNode *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = billCreateFromResource(1, path);
-    return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
+    return AddP2AEffect(bill, firstVector, secondVectorAddress);
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
-void effObjSelectStoredBill(EffWorldNode *obj, u32 entryIndex) {
-    billSetKind1Entry(((EffectDependencyState *)obj->data)->handle, entryIndex);
+void dds3EffectObjectBasicSetAnmeID(EffWorldNode *obj, u32 entryIndex) {
+    dds3BillboardSetAnimNumber(((EffectDependencyState *)obj->data)->handle, entryIndex);
 }
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
    secondVectorAddress retains the integer ABI used for the second vector pointer. */
-EffWorldNode *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorAddress) {
+EffWorldNode *AddTMXEffect(void *bill, void *firstVector, s32 secondVectorAddress) {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffWorldNode *obj;
     EffectDependencyState *data;
@@ -364,7 +364,7 @@ EffWorldNode *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVect
     EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, (void *)secondVectorAddress);
     if (obj == NULL) {
         return NULL;
     }
@@ -378,30 +378,30 @@ EffWorldNode *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVect
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    objectHandle = effObjGetObjectHandle(obj);
+    objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
-        dds3EnsureWorldNodeInSlot(worldNode, obj);
+        dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
 
 /* Clone the shared bill and return its state-three effect object. */
-EffWorldNode *effObjSpawnSharedBillNodeClone(EffWorldNode *obj, void *firstVector, s32 secondVectorAddress) {
+EffWorldNode *dds3AddTMXEffectObjectBasic3(EffWorldNode *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData((struct BillObj *)((EffectDependencyState *)obj->data)->handle);
-    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
+    bill = dds3BillboardCopy((struct BillObj *)((EffectDependencyState *)obj->data)->handle);
+    return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
 EffWorldNode *effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
-    bill = billCreateIndexed(0, billId);
-    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
+    bill = dds3BillboardCreate(0, billId);
+    return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
@@ -409,7 +409,7 @@ EffWorldNode *effObjCreateResourceKindZero(const char *path, void *firstVector, 
     void *bill;
 
     bill = billCreateFromResource(0, path);
-    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
+    return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.
@@ -422,7 +422,7 @@ EffWorldNode *effObjCreateWithBoundBill(void *bill, void *firstVector, void *sec
     EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -436,12 +436,12 @@ EffWorldNode *effObjCreateWithBoundBill(void *bill, void *firstVector, void *sec
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    objectHandle = effObjGetObjectHandle(obj);
+    objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
-        dds3EnsureWorldNodeInSlot(worldNode, obj);
+        dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
@@ -450,7 +450,7 @@ EffWorldNode *effObjCreateWithBoundBill(void *bill, void *firstVector, void *sec
 EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
-    bill = effCreateNodeFromDescriptor(descriptor);
+    bill = dds3EffectLoad(descriptor);
     return effObjCreateWithBoundBill(bill, firstVector, secondVector);
 }
 
@@ -458,7 +458,7 @@ EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descrip
 void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
-    bill = effLoadResourceNode(resourceName);
+    bill = dds3EffectFileLoad(resourceName);
     return effObjCreateWithBoundBill(bill, firstVector, secondVector);
 }
 
@@ -471,7 +471,7 @@ EffWorldNode *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 se
     EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, (void *)secondVectorAddress);
     if (obj == NULL) {
         return NULL;
     }
@@ -485,18 +485,18 @@ EffWorldNode *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 se
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    objectHandle = effObjGetObjectHandle(obj);
+    objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
-        dds3EnsureWorldNodeInSlot(worldNode, obj);
+        dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-EffWorldNode *effObjCreateBillboardFromFactory(u32 parameter, void *firstVector, s32 secondVectorAddress) {
+EffWorldNode *dds3AddD3PEffectObjectBasic(u32 parameter, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = effCreateNodeFromParameter(parameter);
@@ -506,7 +506,7 @@ EffWorldNode *effObjCreateBillboardFromFactory(u32 parameter, void *firstVector,
 extern const EffectEventVectorParameters D_0039F7D0;
 
 
-EffWorldNode *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
+EffWorldNode *AddBEDEffect(source, firstVector, secondVector)
     SoundMixer *source;
     const u128 *firstVector;
     const u128 *secondVector;
@@ -518,13 +518,13 @@ EffWorldNode *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     ObjBase *objectHandle;
     EffWorldNode *worldNode;
 
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
     PCP_COPY_VECTOR(parameters.firstVector, firstVector);
     PCP_COPY_VECTOR(parameters.secondVector, secondVector);
-    mixer = effEventCloneSoundMixer(source);
+    mixer = effEveBEDCreate(source);
     data = obj->data;
     data->state = EFF_OBJ_STATE_EVENT_NODE;
     data->handle = mixer;
@@ -535,37 +535,37 @@ EffWorldNode *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     data->ownerKind = 0;
     data->vector = sdfChipAllocDirect(sizeof(parameters));
     memcpy(data->vector, &parameters, sizeof(parameters));
-    objectHandle = effObjGetObjectHandle(obj);
+    objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
-        dds3EnsureWorldNodeInSlot(worldNode, obj);
+        dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
 
 
-void *effObjCreateEventNode(void *resource, void *position, void *scale) {
-    return effObjCreateEventNodeFromMixer(resource, position, scale);
+void *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale) {
+    return AddBEDEffect(resource, position, scale);
 }
 
 /* Resolve the resource address, create from it, then release the temporary resource. */
-void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *secondVector) {
+void *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector) {
     u32 resolvedId;
     void *resourceHandle;
     void *created;
 
     resolvedId = 0;
-    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = effObjCreateEventNodeFromMixer((SoundMixer *)resolvedId, firstVector, secondVector);
+    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    created = AddBEDEffect((SoundMixer *)resolvedId, firstVector, secondVector);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }
 
 /* For state-five data with a bill and vector, release the old event node and replace it.
    The lookup uses only the low sixteen bits; its result replaces the released node. */
-void effObjReplaceActiveEventNode(EffWorldNode *obj, u32 entryId) {
+void dds3StartBEDEffectObjectBasic(EffWorldNode *obj, u32 entryId) {
     EffectDependencyState *data;
 
     data = obj->data;
@@ -579,19 +579,19 @@ void effObjReplaceActiveEventNode(EffWorldNode *obj, u32 entryId) {
         return;
     }
     if (data->node != NULL) {
-        effEventReleaseNode(data->node);
+        effEveBEDCutDelete(data->node);
         data->node = NULL;
     }
-    data->node = effEventCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
+    data->node = effEveBEDCutCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
 }
 
-EffWorldNode *effObjCreateNamedScaledEffectObject(const char *name, void *firstVector, void *secondVector, f32 scale) {
+EffWorldNode *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
     EffWorldNode *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
     EffWorldNode *worldNode;
 
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -607,21 +607,21 @@ EffWorldNode *effObjCreateNamedScaledEffectObject(const char *name, void *firstV
     data->entryId = 0;
     data->ownerKind = 0;
     obj->value = name;
-    objectHandle = effObjGetObjectHandle(obj);
+    objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
-        dds3EnsureWorldNodeInSlot(worldNode, obj);
+        dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
 
-EffWorldNode *effObjCreateNamedScaledEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
-    return effObjCreateNamedScaledEffectObject(name, firstVector, secondVector, scale);
+EffWorldNode *dds3AddESPEffectObjectBasic(const char *name, void *firstVector, void *secondVector, f32 scale) {
+    return AddESPEffect(name, firstVector, secondVector, scale);
 }
 
-EffWorldNode *effObjCreateMagatuhiForKind(kind, descriptor)
+EffWorldNode *AddMG12Effect(kind, descriptor)
     s32 kind;
     struct EffNodeDescriptor *descriptor;
 {
@@ -640,8 +640,8 @@ EffWorldNode *effObjCreateMagatuhiForKind(kind, descriptor)
     secondVector[3] = 1.0f;
     memcpy(twoRows, D_0039F800, sizeof(twoRows));
     memcpy(fourRows, D_0039F828, sizeof(fourRows));
-    bill = effCreateNodeFromDescriptor(descriptor);
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    bill = dds3EffectLoad(descriptor);
+    obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -662,44 +662,44 @@ EffWorldNode *effObjCreateMagatuhiForKind(kind, descriptor)
     case 1:
         data->vector = sdfChipAllocDirect(sizeof(twoRows));
         memcpy(data->vector, twoRows, sizeof(twoRows));
-        effMagatuhiCopyFloatBlock(bill, data->vector);
+        effMagaSCSetArea(bill, data->vector);
         break;
     case 2:
         data->vector = sdfChipAllocDirect(sizeof(fourRows));
         memcpy(data->vector, fourRows, sizeof(fourRows));
-        effMagatuhiSetControlPointParams(bill, data->vector);
+        effMagaP4SetPoint(bill, data->vector);
         break;
     }
-    objectHandle = effObjGetObjectHandle(obj);
+    objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = 2;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
-        dds3EnsureWorldNodeInSlot(worldNode, obj);
+        dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
 
-EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor) {
-    return effObjCreateMagatuhiForKind(kind, descriptor);
+EffWorldNode *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor) {
+    return AddMG12Effect(kind, descriptor);
 }
 
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
-void *effObjCreateKindFromResource(s32 kind, void *resource) {
+void *dds3AddMG12EffectObjectBasic(s32 kind, void *resource) {
     u32 resolvedId;
     void *resourceHandle;
     void *created;
 
     resolvedId = 0;
-    resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = effObjCreateMagatuhiForKind(kind, resolvedId);
+    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    created = AddMG12Effect(kind, resolvedId);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }
 
 /* Return data only for a non-NULL effect-kind object in parameter-ready state.
    Matching objects are still assumed to contain valid slot data. */
-EffectDependencyState *effObjGetReadyData(EffWorldNode *obj) {
+EffectDependencyState *CheckESP(EffWorldNode *obj) {
     EffectDependencyState *data;
 
     data = NULL;
@@ -717,8 +717,8 @@ EffectDependencyState *effObjGetReadyData(EffWorldNode *obj) {
 }
 
 /* Load the ready parameter vector into vf10; return one for success, zero otherwise. */
-s32 effObjLoadReadyParameterVector(EffWorldNode *obj) {
-    if (effObjGetReadyData(obj) == NULL) {
+s32 GetESPPos(EffWorldNode *obj) {
+    if (CheckESP(obj) == NULL) {
         return 0;
     }
     VU0_LOAD_VF(vf10, obj->inner->position);
@@ -726,22 +726,22 @@ s32 effObjLoadReadyParameterVector(EffWorldNode *obj) {
 }
 
 /* Truncate the ready scalar float to s32; zero also represents unavailable data. */
-s32 effObjGetIntParam(EffWorldNode *obj) {
+s32 GetESPR(EffWorldNode *obj) {
     EffectParameters *parameters;
 
-    if (effObjGetReadyData(obj) == NULL) {
+    if (CheckESP(obj) == NULL) {
         return 0;
     }
     parameters = obj->inner;
     return (s32)parameters->scale[0];
 }
 
-extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
-extern void effMagatuhiDispatchByKind(void *bill);
+extern void effMagaP4Randomize(void *bill);
+extern void effMagaRandomize(void *bill);
 
 /* Dispatch bound-bill setup or four-row history initialization; two-row state does nothing.
    The legacy s32 result is unspecified and every caller discards it. */
-s32 effObjDispatchReadyState(EffWorldNode *obj) {
+s32 dds3EffectObjectPresetMG12(EffWorldNode *obj) {
     if (((u8 *)&obj->kindTag)[3] == EFF_OBJ_KIND) {
         EffectDependencyState *data = obj->data;
 
@@ -749,17 +749,17 @@ s32 effObjDispatchReadyState(EffWorldNode *obj) {
         case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
             break;
         case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
-            effMagatuhiInitializeInterpolatedHistory(data->handle);
+            effMagaP4Randomize(data->handle);
             break;
         case EFF_OBJ_STATE_BOUND_BILL:
-            effMagatuhiDispatchByKind(data->handle);
+            effMagaRandomize(data->handle);
             break;
         }
     }
 }
 /* Copy ready inputs into two or four vector rows, then dispatch the whole existing block.
    An unavailable input leaves its destination row/scalar unchanged, not zeroed. */
-s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *obj, EffWorldNode *first, EffWorldNode *second, EffWorldNode *third, EffWorldNode *fourth)
+s32 dds3EffectObjectSetMG12Pos(EffWorldNode *obj, EffWorldNode *first, EffWorldNode *second, EffWorldNode *third, EffWorldNode *fourth)
 {
     EffectDependencyState *data;
     f32 *parameterRows;
@@ -771,53 +771,53 @@ s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *obj, EffWorldNode *first, E
     switch (data->state) {
     case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
         parameterRows = data->vector;
-        if (effObjLoadReadyParameterVector(first)) {
+        if (GetESPPos(first)) {
             VU0_STORE_VF(vf10, parameterRows);
-            parameterRows[8] = effObjGetIntParam(first);
+            parameterRows[8] = GetESPR(first);
         }
-        if (effObjLoadReadyParameterVector(second)) {
+        if (GetESPPos(second)) {
             VU0_STORE_VF(vf10, parameterRows + 4);
-            parameterRows[9] = effObjGetIntParam(second);
+            parameterRows[9] = GetESPR(second);
         }
-        effMagatuhiCopyFloatBlock(data->handle, parameterRows);
+        effMagaSCSetArea(data->handle, parameterRows);
         return 1;
     case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
         parameterRows = data->vector;
-        if (effObjLoadReadyParameterVector(first)) {
+        if (GetESPPos(first)) {
             VU0_STORE_VF(vf10, parameterRows);
-            parameterRows[16] = effObjGetIntParam(first);
+            parameterRows[16] = GetESPR(first);
         }
-        if (effObjLoadReadyParameterVector(second)) {
+        if (GetESPPos(second)) {
             VU0_STORE_VF(vf10, parameterRows + 4);
-            parameterRows[17] = effObjGetIntParam(second);
+            parameterRows[17] = GetESPR(second);
         }
-        if (effObjLoadReadyParameterVector(third)) {
+        if (GetESPPos(third)) {
             VU0_STORE_VF(vf10, parameterRows + 8);
-            parameterRows[18] = effObjGetIntParam(third);
+            parameterRows[18] = GetESPR(third);
         }
-        if (effObjLoadReadyParameterVector(fourth)) {
+        if (GetESPPos(fourth)) {
             VU0_STORE_VF(vf10, parameterRows + 12);
-            parameterRows[19] = effObjGetIntParam(fourth);
+            parameterRows[19] = GetESPR(fourth);
         }
-        effMagatuhiSetControlPointParams(data->handle, parameterRows);
+        effMagaP4SetPoint(data->handle, parameterRows);
         return 1;
     }
     return 0;
 }
 
 /* OR the requested flag bits into slot data; no object/data validation is performed. */
-void effObjSetFlags(EffWorldNode *obj, s32 flags) {
+void dds3EffectObjectBasicStatOn(EffWorldNode *obj, s32 flags) {
     ((EffectDependencyState *)obj->data)->flags |= flags;
 }
 
 /* Clear the requested flag bits; retain the signed mask parameter used by DDS1. */
-void effObjClearFlags(EffWorldNode *obj, s32 flags) {
+void dds3EffectObjectBasicStatOff(EffWorldNode *obj, s32 flags) {
     ((EffectDependencyState *)obj->data)->flags &= ~flags;
 }
 
 /* Accept owner kinds [4,10) or seventeen, reset link bookkeeping, and return one.
    Unsupported kinds return zero without changing the destination; owner must exist. */
-s32 effObjBindValidatedOwner(EffWorldNode *obj, EffWorldNode *owner) {
+s32 dds3EffectObjectBasicLinkObject(EffWorldNode *obj, EffWorldNode *owner) {
     EffectDependencyState *data;
     u8 kind;
 
@@ -839,7 +839,7 @@ s32 effObjBindValidatedOwner(EffWorldNode *obj, EffWorldNode *owner) {
 
 /* Forward the saved entry only for flagged kind-five owners whose bill state is zero.
    Owner/bill/parameter pointers are trusted once the flag selects this path. */
-void effObjForwardOwnerBillEntry(EffWorldNode *obj) {
+void dds3EffectObjectBasicGetObjectIndex(EffWorldNode *obj) {
     EffectDependencyState *data;
     EffWorldNode *owner;
     ObjBase *objectBase;
@@ -854,17 +854,17 @@ void effObjForwardOwnerBillEntry(EffWorldNode *obj) {
                 return;
             }
             model = objectBase->resourceHandle;
-            sdfLoadMapRecordLookAtBasis(model->inner, data->entryId);
+            sdfModelGetMarkPosMatrix(model->inner, data->entryId);
         }
     }
 }
 
 /* Save a truncated u16 entry and enable forwarding after owner validation.
    Native status is always one, including rejected owners. */
-s32 effObjBindOwnerBillEntry(EffWorldNode *obj, EffWorldNode *owner, s32 entryId) {
+s32 dds3EffectObjectBasicLinkObjectIndex(EffWorldNode *obj, EffWorldNode *owner, s32 entryId) {
     EffectDependencyState *data;
 
-    if (effObjBindValidatedOwner(obj, owner) == 0) {
+    if (dds3EffectObjectBasicLinkObject(obj, owner) == 0) {
         return 1;
     }
     data = obj->data;

@@ -4,7 +4,7 @@
 #include "dds3_path.h"
 #include "evt_action_object.h"
 
-s32 dds3SelectOwnerWorldIndexSlot(u32 nodeKind) {
+s32 dds3AreaBasicTypeHasItems(u32 nodeKind) {
     s32 result = 0;
 
     if (nodeKind >= 4) {
@@ -15,20 +15,20 @@ s32 dds3SelectOwnerWorldIndexSlot(u32 nodeKind) {
     return result;
 }
 
-EffWorldNode *evtSpawnActionObj2(s32 key, s32 objectName) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_WORLD_INDEX_OWNER);
+EffWorldNode *dds3AddAreaBasic(s32 key, s32 objectName) {
+    EffWorldNode *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_WORLD_INDEX_OWNER);
 
     obj->key = key;
     obj->value = (const char *)objectName;
     return obj;
 }
 
-void dds3EnsureWorldNodeInSlot(EffWorldNode *ownerObject, EffWorldNode *node) {
-    WorldIndexNode *slot = dds3GetWorldSlotValue(ownerObject, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
+void dds3AreaBasicRegistItem(EffWorldNode *ownerObject, EffWorldNode *node) {
+    WorldIndexNode *slot = dds3AreaBasicReleaseItem(ownerObject, dds3AreaBasicTypeHasItems(((u8 *)node)[0xF]));
 
-    dds3ResetObjectValueCursor((WorldValueIndices *)slot);
-    if (dds3SeekWorldNode((WorldValueIndices *)slot, node) != 1) {
-        dds3GrowWorldValueChain((WorldValueIndices *)slot, 1);
-        dds3WriteIndexedWorldObjectWord((WorldValueIndices *)slot, (u32)node);
+    dds3SetFirstBasicArray((WorldValueIndices *)slot);
+    if (dds3SetSearchNextBasicArray((WorldValueIndices *)slot, node) != 1) {
+        dds3AddBasicArray((WorldValueIndices *)slot, 1);
+        dds3SetBasicArray((WorldValueIndices *)slot, (u32)node);
     }
 }

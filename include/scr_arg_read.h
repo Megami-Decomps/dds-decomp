@@ -4,6 +4,6 @@
 #include "common.h"
 
 /* Read the current script argument as a float, converting supported numeric tags. */
-f32 bfWaitReadArgFloat(s32 idx);
+f32 scrGetFloatPara(s32 idx);
 
 #endif

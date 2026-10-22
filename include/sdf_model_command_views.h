@@ -48,7 +48,7 @@ typedef char SdfModelLightingCallPacket_secondHeader_at_0x18[
 typedef char SdfModelLightingCallPacket_finalAddress_at_0x3C[
     ((u32)&((SdfModelLightingCallPacket *)0)->finalAddress == 0x3C) ? 1 : -1];
 
-/* Fields read by sdfModelBuildIndexedCommandPayload; the kind-specific gap
+/* Fields read by sdfModelSetNormalDrawPacket; the kind-specific gap
  * remains opaque, and no extent beyond these demonstrated words is claimed. */
 typedef struct SdfIndexedCommandView {
     u8 kind;

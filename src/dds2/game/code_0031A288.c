@@ -49,11 +49,11 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
                 if (work->round == 0) {
                     node->model->first->frameStep = 1.0f;
                     node->savedModelValue = 1.0f;
-                    mdlAddEntryFlaggedEx(node->model, 0, 2, 0.0f, 30.0f);
+                    mdlSmoothLoopMotion(node->model, 0, 2, 0.0f, 30.0f);
                 } else if (work->round == 2) {
                     node->model->first->frameStep = 1.0f;
                     node->savedModelValue = 1.0f;
-                    mdlAddEntryFlaggedEx(node->model, 0, 10, 0.0f, 30.0f);
+                    mdlSmoothLoopMotion(node->model, 0, 10, 0.0f, 30.0f);
                 }
                 entry->flagsBits.modelMotionStarted = 1;
             }

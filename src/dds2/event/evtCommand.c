@@ -37,19 +37,19 @@ enum {
 };
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
-s32 scrReadIntParameter(s32 idx);
+s32 scrGetIntPara(s32 idx);
 
-void *evtFindWorldObjectByIdAndKind(s32 objectKind, s32 worldObjectKey);
+void *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 
-s32 effObjBindValidatedOwner(EffWorldNode *obj, EffWorldNode *owner);
-s32 effObjCopyMagatuhiSourceParameters(EffWorldNode *obj, EffWorldNode *first,
+s32 dds3EffectObjectBasicLinkObject(EffWorldNode *obj, EffWorldNode *owner);
+s32 dds3EffectObjectSetMG12Pos(EffWorldNode *obj, EffWorldNode *first,
                                      EffWorldNode *second, EffWorldNode *third,
                                      EffWorldNode *fourth);
-s32 effObjBindOwnerBillEntry(EffWorldNode *obj, EffWorldNode *owner, s32 entryId);
+s32 dds3EffectObjectBasicLinkObjectIndex(EffWorldNode *obj, EffWorldNode *owner, s32 entryId);
 
 
 
-void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
+void dds3AdminiCallSequence(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
 #include "sdf_debug_api.h"
 
@@ -57,7 +57,7 @@ void scrDestroyAllNamedProcesses(void);
 
 void evtSubmitEventRequest(s32 eventId, s32 requestMode);
 
-void fldPlayCurrentBgmSound(void);
+void fldBgmStop(void);
 
 void fldRequestEncounterWithFade(u32 kind, s32 eventId);
 
@@ -65,28 +65,28 @@ extern u32 evtPendingEventSelection;
 
 void evtSubmitEventRequestImmediate(s32 eventId);
 
-void fldStopCurrentBgm(void);
+void fldPauseBgm(void);
 
-void fldReleaseCurrentBgm(void);
+void fldBgmFadeOut(void);
 
 
-void fldInitializeSequenceAndResetFlags(s32 request, s32 sequence, s32 variant, char *name);
+void fldSetSceneParam2(s32 request, s32 sequence, s32 variant, char *name);
 
 extern s32 D_00389780[];
 
-void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char *name);
+void fldSetSceneParam3(s32 request, s32 sequence, s32 variant, char *name);
 
-void sdfPrintFormattedDevMessage(const char *msg, ...);
+void sdfPrintf(const char *msg, ...);
 
-s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId);
+s32 evtRegistBEField(s32 eventId, s32 resourceId);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-void evtDrainSecondaryWorldNodes(void);
+void evtFreeAllUnit(void);
 
-s32 sdfCheckPendingWorkWithInterrupts(void);
+s32 sdfDelayedResrcCheck(void);
 
-void evtDestroySecondaryWorldNode(void);
+void evtFreeStage(void);
 
 extern u32 kwlnDrawControlFlags;
 
@@ -94,11 +94,11 @@ extern u32 kwlnDrawControlFlags;
 void dds3RefreshStoredVec3(EffWorldNode *object);
 
 
-void evtSetWorldSlotScaleWrapEnabled(void *unit, s32 enabled);
+void evtPathLoop(void *unit, s32 enabled);
 
-void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
+void evtEffectLoopControl(void *unit, s32 flag);
 
-void effObjSetFlags(void *unit, s32 flag);
+void dds3EffectObjectBasicStatOn(void *unit, s32 flag);
 
 
 
@@ -112,45 +112,45 @@ extern char D_00421F08[];
 
 extern char D_00421F68[];
 
-void evtSetWorldSlotStatusFlag(void *unit);
+void evtPathStop(void *unit);
 
-void evtClearWorldSlotStatusFlag(void *unit);
+void evtPathStart(void *unit);
 
-void evtScaleSlotByClampedMultiplier(void *unit, f32 value);
+void evtPathRate(void *unit, f32 value);
 
-s32 fldParseRoomNumberFromName(char *name);
+s32 fldCommand_GetHojiID(char *name);
 
 s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
 
 
-void evtSetWorldSlotValue(void *worldNode, u32 direction);
+void evtPathDir(void *worldNode, u32 direction);
 
-s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
+s32 evtPathLinkAndMake(void *target, void *path);
 
 extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
 extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
 /* Copy two source points into the primary effect object. */
-s32 evtCommandCopyEffectSourcePoints(void) {
+s32 evtCommand_EFFMG1_POS(void) {
     EffWorldNode *primaryEffect;
     EffWorldNode *sourcePoint0;
     EffWorldNode *sourcePoint1;
 
-    primaryEffect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    primaryEffect = evtSearchBasic(7, scrGetIntPara(0));
     if (primaryEffect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
         return 1;
     }
 
-    sourcePoint0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
-    sourcePoint1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    sourcePoint0 = evtSearchBasic(7, scrGetIntPara(1));
+    sourcePoint1 = evtSearchBasic(7, scrGetIntPara(2));
     if (sourcePoint0 == NULL || sourcePoint1 == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
         return 1;
     }
-    if (effObjCopyMagatuhiSourceParameters(primaryEffect, sourcePoint0, sourcePoint1, NULL, NULL) == 0) {
+    if (dds3EffectObjectSetMG12Pos(primaryEffect, sourcePoint0, sourcePoint1, NULL, NULL) == 0) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
         return 1;
     }
@@ -158,53 +158,53 @@ s32 evtCommandCopyEffectSourcePoints(void) {
 }
 
 /* Apply four effect parameters after resolving every input object. */
-s32 evtCommandSetMagatuhiSourcePoints(void) {
+s32 evtCommand_EFFMG2_POS(void) {
     EffWorldNode *primaryEffect;
     EffWorldNode *sourcePoint0;
     EffWorldNode *sourcePoint1;
     EffWorldNode *sourcePoint2;
     EffWorldNode *sourcePoint3;
 
-    primaryEffect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    primaryEffect = evtSearchBasic(7, scrGetIntPara(0));
     if (primaryEffect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
         return 1;
     }
 
-    sourcePoint0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
-    sourcePoint1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
-    sourcePoint2 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(3));
-    sourcePoint3 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(4));
+    sourcePoint0 = evtSearchBasic(7, scrGetIntPara(1));
+    sourcePoint1 = evtSearchBasic(7, scrGetIntPara(2));
+    sourcePoint2 = evtSearchBasic(7, scrGetIntPara(3));
+    sourcePoint3 = evtSearchBasic(7, scrGetIntPara(4));
 
     if (sourcePoint0 == NULL || sourcePoint1 == NULL || sourcePoint2 == NULL || sourcePoint3 == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
         return 1;
     }
-    if (effObjCopyMagatuhiSourceParameters(primaryEffect, sourcePoint0, sourcePoint1, sourcePoint2, sourcePoint3) == 0) {
+    if (dds3EffectObjectSetMG12Pos(primaryEffect, sourcePoint0, sourcePoint1, sourcePoint2, sourcePoint3) == 0) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
         return 1;
     }
     return 1;
 }
 
-s32 evtCommandEnablePathUnit(void)
+s32 evtCommand_EFFECT_ON(void)
 {
     s32 effectId;
     void *effectObject;
 
-    effectId = scrReadIntParameter(0);
-    effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+    effectId = scrGetIntPara(0);
+    effectObject = evtSearchBasic(7, effectId);
     if (effectObject != NULL) {
-        evtDispatchSupportedNodeOnClear(effectObject, 1);
-        effObjSetFlags(effectObject, 1);
+        evtEffectLoopControl(effectObject, 1);
+        dds3EffectObjectBasicStatOn(effectObject, 1);
     }
     return 1;
 }
 
 /* Bind the selected effect path to the first owner found in kinds 4..9.
  * Missing paths or owners complete the command without binding anything. */
-s32 evtCommandAssignEffectObjectOwner(void) {
-    EffWorldNode *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+s32 evtCommand_EFFECT_LINK(void) {
+    EffWorldNode *effectPath = evtSearchBasic(7, scrGetIntPara(0));
     void *owner;
     s32 objectKind;
 
@@ -213,19 +213,19 @@ s32 evtCommandAssignEffectObjectOwner(void) {
     }
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        owner = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        owner = evtSearchBasic(objectKind, scrGetIntPara(1));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
     if (owner == NULL) {
         return 1;
     }
-    effObjBindValidatedOwner(effectPath, owner);
+    dds3EffectObjectBasicLinkObject(effectPath, owner);
     return 1;
 }
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
-s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
-    EffWorldNode *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+s32 evtCommand_EFFECT_LINK2(void) {
+    EffWorldNode *effectPath = evtSearchBasic(7, scrGetIntPara(0));
     void *owner;
     s32 objectKind;
 
@@ -234,73 +234,73 @@ s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     }
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        owner = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        owner = evtSearchBasic(objectKind, scrGetIntPara(1));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
     if (owner == NULL) {
         return 1;
     }
-    effObjBindOwnerBillEntry(effectPath, owner, scrReadIntParameter(2));
+    dds3EffectObjectBasicLinkObjectIndex(effectPath, owner, scrGetIntPara(2));
     return 1;
 }
 
-s32 evtCmdResetWorldResourceState(void)
+s32 evtCommand_EFFECT_UNLINK(void)
 {
     s32 effectId;
     void *effectObject;
 
-    effectId = scrReadIntParameter(0);
-    effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+    effectId = scrGetIntPara(0);
+    effectObject = evtSearchBasic(7, effectId);
     if (effectObject == NULL) {
         return 1;
     }
-    dds3ResetWorldResourceState(effectObject);
+    dds3EffectObjectBasicUnlinkObject(effectObject);
     return 1;
 }
 
-s32 evtCommandClearSelectedEffectNode(void)
+s32 evtCommand_EFFECT_OFF(void)
 {
     s32 effectId;
     void *effectObject;
 
-    effectId = scrReadIntParameter(0);
-    effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+    effectId = scrGetIntPara(0);
+    effectObject = evtSearchBasic(7, effectId);
     if (effectObject != NULL) {
-        evtDispatchSupportedNodeOnClear(effectObject, 0);
+        evtEffectLoopControl(effectObject, 0);
     }
     return 1;
 }
 
-s32 evtCommandAttachLightToUnitPath(void) {
+s32 evtCommand_EFFECT_PATH_MOVE(void) {
     void *effect;
     void *path;
 
-    effect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    effect = evtSearchBasic(7, scrGetIntPara(0));
     if (effect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_MOVE not found eff!\n");
         return 1;
     }
-    path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    path = evtSearchBasic(0x10, scrGetIntPara(1));
     if (path == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_MOVE not found path!\n", effect);
         return 1;
     }
-    evtStageRelinkOwnedNodeResource(path, effect);
+    evtPathLinkAndMake(path, effect);
     return 1;
 }
 
-extern s32 evtCheckWorldObjectResourceScale(void *object);
+extern s32 evtCheckPathStat(void *object);
 
-s32 evtCommandWaitEffectResourceScale(void) {
-    s32 effectId = scrReadIntParameter(0);
-    void *effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+s32 evtCommand_EFFECT_PATH_WAIT(void) {
+    s32 effectId = scrGetIntPara(0);
+    void *effectObject = evtSearchBasic(7, effectId);
     s32 scaleStatus;
 
     if (effectObject == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
-    scaleStatus = evtCheckWorldObjectResourceScale(effectObject);
+    scaleStatus = evtCheckPathStat(effectObject);
     switch (scaleStatus) {
     case 0:
         return 1;
@@ -316,71 +316,71 @@ s32 evtCommandWaitEffectResourceScale(void) {
 
 
 /* Return the named world-chain node's key to the script VM. */
-s32 evtCommandReadSecondaryWorldIdValue(void) {
+s32 evtCommand_SEARCH_ID(void) {
     EffWorldNode *worldNode;
 
-    worldNode = dds3FindObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(),
-                                              (const u8 *)scrReadStringParameter(0));
+    worldNode = dds3SceneBasicSearchName((EffWorldNode *)dds3GetControlScene(),
+                                              (const u8 *)scrGetStrPara(0));
     if (worldNode == NULL) {
-        printf("ID : id not found!! <%s>\n", scrReadStringParameter(0));
-        evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
-        scrSetIntegerReturnValue(0);
+        printf("ID : id not found!! <%s>\n", scrGetStrPara(0));
+        evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrGetStrPara(0));
+        scrSetIntReturnValue(0);
     } else {
-        scrSetIntegerReturnValue(worldNode->key);
+        scrSetIntReturnValue(worldNode->key);
     }
     return 1;
 }
 
-u32 evtCommandOpenTitleMenu(void) {
-    dds3AdminSubmitModeRequest(2, 0, 0, 0);
+u32 evtCommand_RTRN_TITLE(void) {
+    dds3AdminiCallSequence(2, 0, 0, 0);
     return 1;
 }
 
-u32 evtCommandOpenMemoryCardMenu(void) {
-    dds3AdminSubmitModeRequest(0xc, 0, 0, 0);
+u32 evtCommand_CALL_STAFF(void) {
+    dds3AdminiCallSequence(0xc, 0, 0, 0);
     return 1;
 }
 
-u32 evtCommandStartStaffMovie(void) {
-    dds3AdminSubmitModeRequest(4, 0, 0, 0);
+u32 evtCommand_CALL_ENDSAVE(void) {
+    dds3AdminiCallSequence(4, 0, 0, 0);
     return 1;
 }
 
 /* Forward two VM integers as the admin request's two-word payload. */
-s32 evtCommandSubmitPairedAdminRequest(void)
+s32 evtCommand_CALL_SAVE(void)
 {
     s32 payload[2];
 
-    payload[0] = scrReadIntParameter(0);
-    payload[1] = scrReadIntParameter(1);
-    dds3AdminSubmitModeRequest(0x15, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 0);
-    scrSetIntegerReturnValue(0);
+    payload[0] = scrGetIntPara(0);
+    payload[1] = scrGetIntPara(1);
+    dds3AdminiCallSequence(0x15, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 0);
+    scrSetIntReturnValue(0);
     return 1;
 }
 
 extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
 /* Log all three arguments, then re-read command and parameter for dispatch. */
-s32 evtCommandDeferFieldTransition(void) {
-    s32 loggedArgument = scrReadIntParameter(0);
-    s32 loggedCommand = scrReadIntParameter(1);
-    s32 loggedParameter = scrReadIntParameter(2);
+s32 evtCommand_CALL_NEXT(void) {
+    s32 loggedArgument = scrGetIntPara(0);
+    s32 loggedCommand = scrGetIntPara(1);
+    s32 loggedParameter = scrGetIntPara(2);
     s32 command;
 
     printf("CALL_NEXT(%d,%d,%d)\n", loggedArgument, loggedCommand, loggedParameter);
-    command = scrReadIntParameter(1);
-    fldSetDeferredFieldCommand(command, scrReadIntParameter(2));
+    command = scrGetIntPara(1);
+    fldSetDeferredFieldCommand(command, scrGetIntPara(2));
     return 1;
 }
 
 /* The event ID becomes a four-byte dispatch payload. */
-s32 evtCommandCallEvent(void)
+s32 evtCommand_CALL_EVENT(void)
 {
     s32 eventId;
 
-    eventId = scrReadIntParameter(0);
+    eventId = scrGetIntPara(0);
     printf("call_event:%d\n", eventId);
-    dds3AdminSubmitModeRequest(6, (s32)&eventId, EVT_SCALAR_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(6, (s32)&eventId, EVT_SCALAR_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -390,7 +390,7 @@ u32 evtCommandSignalAdminAtTimerZero(void) {
 
     timer = scrGetCommandTimer();
     if (timer == 0) {
-        dds3AdminSetControlFlag();
+        dds3AdminiExitSequence();
     }
     return 0;
 }
@@ -401,12 +401,12 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
 {
     s32 payload[2];
 
-    fldPlayCurrentBgmSound();
+    fldBgmStop();
     fldRequestEncounterWithFade(2, eventId);
     evtPendingEventSelection = requestMode;
     payload[0] = 0;
     payload[1] = eventId;
-    dds3AdminSubmitModeRequest(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, requestMode > 0);
+    dds3AdminiCallSequence(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, requestMode > 0);
     scrDestroyAllNamedProcesses();
 }
 
@@ -414,7 +414,7 @@ s32 evtCommandSubmitEvent(void)
 {
     s32 eventId;
 
-    eventId = scrReadIntParameter(0);
+    eventId = scrGetIntPara(0);
     evtSubmitEventRequest(eventId, 0);
     return 1;
 }
@@ -424,64 +424,64 @@ void evtSubmitEventRequestImmediate(s32 eventId)
 {
     s32 payload[2];
 
-    fldStopCurrentBgm();
+    fldPauseBgm();
     fldRequestEncounterWithFade(2, eventId);
     evtPendingEventSelection = 0;
     payload[0] = 0;
     payload[1] = eventId;
-    dds3AdminSubmitModeRequest(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 1);
+    dds3AdminiCallSequence(0xe, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 1);
     scrDestroyAllNamedProcesses();
 }
 
-s32 evtCommandSubmitEventImmediate(void)
+s32 evtCommand_CALL_BATTLE2(void)
 {
     s32 eventId;
 
-    eventId = scrReadIntParameter(0);
+    eventId = scrGetIntPara(0);
     evtSubmitEventRequestImmediate(eventId);
     return 1;
 }
 
-s32 evtCommandSubmitEventWithMode(void)
+s32 evtCommand_RESTORE_BATTLE(void)
 {
     s32 eventId;
     s32 requestMode;
 
-    eventId = scrReadIntParameter(0);
-    requestMode = scrReadIntParameter(1);
+    eventId = scrGetIntPara(0);
+    requestMode = scrGetIntPara(1);
     evtSubmitEventRequest(eventId, requestMode);
     return 1;
 }
 
 /* A field-sequence request is a fixed 0xa0-byte VM message. */
-s32 evtCommandRequestFieldSequence(void)
+s32 evtCommand_CALL_FIELD(void)
 {
     s32 stage;
     s32 kind;
     char *sequenceName;
     u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
 
-    fldReleaseCurrentBgm();
-    stage = scrReadIntParameter(0);
-    kind = scrReadIntParameter(1);
-    sequenceName = scrReadStringParameter(2);
-    fldInitializeSequenceAndResetFlags((s32)requestBuffer, stage, kind, sequenceName);
-    dds3AdminSubmitModeRequest(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldBgmFadeOut();
+    stage = scrGetIntPara(0);
+    kind = scrGetIntPara(1);
+    sequenceName = scrGetStrPara(2);
+    fldSetSceneParam2((s32)requestBuffer, stage, kind, sequenceName);
+    dds3AdminiCallSequence(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
 
 /* Use the current group's stage with the VM's kind and sequence-name inputs. */
-s32 evtCommandRequestCurrentGroupSequence(void)
+s32 evtCommand_CALL_FIELD2(void)
 {
     s32 kind;
     char *sequenceName;
     u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
 
-    kind = scrReadIntParameter(0);
-    sequenceName = scrReadStringParameter(1);
-    fldInitializeSequenceAndResetFlags((s32)requestBuffer, D_00389780[0], kind, sequenceName);
-    dds3AdminSubmitModeRequest(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    kind = scrGetIntPara(0);
+    sequenceName = scrGetStrPara(1);
+    fldSetSceneParam2((s32)requestBuffer, D_00389780[0], kind, sequenceName);
+    dds3AdminiCallSequence(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -491,81 +491,81 @@ s32 evtCommandSubmitScalarAdminRequest(void)
 {
     s32 payloadValue;
 
-    payloadValue = scrReadIntParameter(0);
-    dds3AdminSubmitModeRequest(0x1c, (s32)&payloadValue, EVT_SCALAR_REQUEST_SIZE, 0);
+    payloadValue = scrGetIntPara(0);
+    dds3AdminiCallSequence(0x1c, (s32)&payloadValue, EVT_SCALAR_REQUEST_SIZE, 0);
     return 1;
 }
 
 /* Build the current group's field request using the alternate initializer. */
-s32 evtCommandRequestAlternateFieldSequence(void)
+s32 evtCommand_CALL_FIELD3(void)
 {
     s32 kind;
     char *sequenceName;
     u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
 
-    kind = scrReadIntParameter(0);
-    sequenceName = scrReadStringParameter(1);
-    fldInitializeAlternateSequence((s32)requestBuffer, D_00389780[0], kind, sequenceName);
-    dds3AdminSubmitModeRequest(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    kind = scrGetIntPara(0);
+    sequenceName = scrGetStrPara(1);
+    fldSetSceneParam3((s32)requestBuffer, D_00389780[0], kind, sequenceName);
+    dds3AdminiCallSequence(5, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
 
-s32 evtCommandDispatchFieldBE(void)
+s32 evtCommand_FIELD_BE(void)
 {
     s32 eventId;
     s32 resourceId;
 
-    sdfPrintFormattedDevMessage("FIELD_BE start\n");
-    eventId = scrReadIntParameter(0);
-    resourceId = scrReadIntParameter(1);
-    evtTryCreateWorldObjectFromPackResourceSet(eventId, resourceId);
-    sdfPrintFormattedDevMessage("FIELD_BE end\n");
+    sdfPrintf("FIELD_BE start\n");
+    eventId = scrGetIntPara(0);
+    resourceId = scrGetIntPara(1);
+    evtRegistBEField(eventId, resourceId);
+    sdfPrintf("FIELD_BE end\n");
     return 1;
 }
 
-s32 evtCommandHandleChangedSecondaryWorldKey(void)
+s32 evtCommand_FIELD_DSP(void)
 {
     s32 area;
     s32 room;
     s32 worldKey;
 
-    area = scrReadIntParameter(0);
-    room = scrReadIntParameter(1);
+    area = scrGetIntPara(0);
+    room = scrGetIntPara(1);
     worldKey = (area << 16) + room;
-    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != worldKey) {
-        area = scrReadIntParameter(0);
-        room = scrReadIntParameter(1);
-        evtCreateWorldObjectForKey(area, room);
+    if (dds3GetMapNo(dds3GetControlScene()) != worldKey) {
+        area = scrGetIntPara(0);
+        room = scrGetIntPara(1);
+        evtLoadArea(area, room);
     }
     return 1;
 }
 
-extern s32 evtApplyIndexValueToWorldNodes(s32 modeSelector, s32 modeValue);
+extern s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue);
 
-u32 evtCommandSetWorldNodeBaseMode(void) {
+u32 evtCommand_FIELD_ANIME_START(void) {
     s32 baseMode;
 
-    baseMode = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(0, baseMode);
+    baseMode = scrGetIntPara(0);
+    evtStageAnimeControl(0, baseMode);
     return 1;
 }
 
-u32 evtCommandSetWorldNodeUpperMode(void) {
+u32 evtCommand_FIELD_ANIME_STOP(void) {
     s32 upperMode;
 
-    upperMode = scrReadIntParameter(0);
-    evtApplyIndexValueToWorldNodes(1, upperMode);
+    upperMode = scrGetIntPara(0);
+    evtStageAnimeControl(1, upperMode);
     return 1;
 }
 
-s32 evtCommandShutdownStage(void)
+s32 evtCommand_FIELD_CLS(void)
 {
-    evtDrainSecondaryWorldNodes();
-    while (sdfCheckPendingWorkWithInterrupts()) {
+    evtFreeAllUnit();
+    while (sdfDelayedResrcCheck()) {
     }
-    evtDestroySecondaryWorldNode();
-    while (sdfCheckPendingWorkWithInterrupts()) {
+    evtFreeStage();
+    while (sdfDelayedResrcCheck()) {
     }
     kwlnDrawControlFlags |= 0x2000000;
     printf("event stage shutdown !!\n");
@@ -573,13 +573,13 @@ s32 evtCommandShutdownStage(void)
     return 1;
 }
 
-s32 evtCommandShutdownStageAlternate(void)
+s32 evtCommand_FIELD_CLS_STOP(void)
 {
-    evtDrainSecondaryWorldNodes();
-    while (sdfCheckPendingWorkWithInterrupts()) {
+    evtFreeAllUnit();
+    while (sdfDelayedResrcCheck()) {
     }
-    evtDestroySecondaryWorldNode();
-    while (sdfCheckPendingWorkWithInterrupts()) {
+    evtFreeStage();
+    while (sdfDelayedResrcCheck()) {
     }
     kwlnDrawControlFlags |= 0x2000000;
     printf("event stage shutdown2 !!\n");
@@ -587,18 +587,18 @@ s32 evtCommandShutdownStageAlternate(void)
     return 1;
 }
 
-s32 evtCommandClearAllUnits(void)
+s32 evtCommand_UNIT_CLS(void)
 {
-    evtDrainSecondaryWorldNodes();
+    evtFreeAllUnit();
     printf("unit all clear !!\n");
     evtPrintDeveloperConsoleMessage("unit all clear.\n");
     return 1;
 }
 
-s32 evtCommandClearAllUnitsAndWait(void)
+s32 evtCommand_UNIT_CLS_STOP(void)
 {
-    evtDrainSecondaryWorldNodes();
-    while (sdfCheckPendingWorkWithInterrupts()) {
+    evtFreeAllUnit();
+    while (sdfDelayedResrcCheck()) {
     }
     printf("unit all clear2 !!\n");
     evtPrintDeveloperConsoleMessage("unit all clear2.\n");
@@ -608,56 +608,56 @@ s32 evtCommandClearAllUnitsAndWait(void)
 s32 evtCommandAddEffectUnitToWorld(void) {
     EffWorldNode *cameraOwner;
 
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
-        cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        cameraOwner = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (cameraOwner == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), cameraOwner);
+    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), cameraOwner);
     return 1;
 }
 
-s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
+s32 evtCommand_CAM_SEL_FOVY(void) {
     EffWorldNode *cameraOwner;
     CameraData *cameraData;
 
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
-        cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        cameraOwner = evtSearchBasic(4, scrGetIntPara(0));
         cameraData = cameraOwner->data;
         cameraData->fovUpdatePending |= 1;
     }
     if (cameraOwner == NULL) {
         return 1;
     }
-    dds3SetWorldCameraObject(dds3GetWorldObject(), cameraOwner);
+    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), cameraOwner);
     return 1;
 }
 
 /* Relink the selected camera owner to its path, reporting any failure. */
-s32 evtCommandRelinkCameraOwnerToPath(void) {
+s32 evtCommand_CAM_PATH_MOVE(void) {
     void *owner;
     void *path;
 
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         owner = fldGetPlayerSceneState();
     } else {
-        owner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        owner = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (owner == NULL) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
-    path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    path = evtSearchBasic(0x10, scrGetIntPara(1));
     if (path == NULL) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
-    if (evtStageRelinkOwnedNodeResource(path, owner) == 0) {
+    if (evtPathLinkAndMake(path, owner) == 0) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
@@ -665,19 +665,19 @@ s32 evtCommandRelinkCameraOwnerToPath(void) {
 }
 
 
-s32 evtCommandWaitCameraOwnerResourceScale(void) {
+s32 evtCommand_CAM_PATH_WAIT(void) {
     void *cameraOwner;
     s32 scaleStatus;
 
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
-        cameraOwner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        cameraOwner = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (cameraOwner == NULL) {
         return 1;
     }
-    scaleStatus = evtCheckWorldObjectResourceScale(cameraOwner);
+    scaleStatus = evtCheckPathStat(cameraOwner);
     switch (scaleStatus) {
     case 0:
         return 1;
@@ -690,10 +690,10 @@ s32 evtCommandWaitCameraOwnerResourceScale(void) {
     }
 }
 
-extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
+extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32 world, void *pos, void *rot);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
-s32 evtCommandCreateWorldEffectObject(void) {
+s32 evtCommand_CAM_CREATE(void) {
     f32 position[4];
     f32 rotation[4];
     s32 world;
@@ -701,97 +701,97 @@ s32 evtCommandCreateWorldEffectObject(void) {
     memset(position, 0, 0x10);
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
-    world = dds3AdvanceWorldCounter();
-    effObjSetInnerFloat(dds3CreateCameraObject(world, position, rotation), 1.0f);
-    scrSetIntegerReturnValue(world);
+    world = dds3AllocObjectId();
+    dds3GetRadiusPoseSet(dds3AddCameraObjectBasicTypeFree(world, position, rotation), 1.0f);
+    scrSetIntReturnValue(world);
     return 1;
 }
 
-s32 evtCommandDestroyEffectUnitById(void)
+s32 evtCommand_CAM_CLS(void)
 {
     s32 effectUnitId;
     void *effectUnit;
 
-    effectUnitId = scrReadIntParameter(0);
-    effectUnit = evtFindWorldObjectByIdAndKind(4, effectUnitId);
+    effectUnitId = scrGetIntPara(0);
+    effectUnit = evtSearchBasic(4, effectUnitId);
     if (effectUnit == NULL) {
         return 1;
     }
-    dds3RemoveWorldObjectNode(effectUnit);
+    dds3DeleteSceneBasicData(effectUnit);
     return 1;
 }
 
-s32 evtCommandSetEffectUnitPosition(void) {
+s32 evtCommand_CAM_POS_XYZ(void) {
     void *effectUnit;
     f32 position[4];
 
     memset(position, 0, sizeof(position));
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         effectUnit = fldGetPlayerSceneState();
     } else {
-        effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        effectUnit = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (effectUnit == NULL) {
         return 1;
     }
-    position[0] = bfWaitReadArgFloat(1);
-    position[1] = bfWaitReadArgFloat(2);
-    position[2] = bfWaitReadArgFloat(3);
+    position[0] = scrGetFloatPara(1);
+    position[1] = scrGetFloatPara(2);
+    position[2] = scrGetFloatPara(3);
     dds3SetPosPoseSet(effectUnit, (u128 *)position);
     return 1;
 }
 
 /* Convert the three degree inputs before composing and storing a quaternion. */
-s32 evtCommandSetEffectUnitEulerRotation(void) {
+s32 evtCommand_CAM_ROT_XYZ(void) {
     void *effectUnit;
     f32 quaternion[4];
     f32 degreesToRadians;
     f32 pitch;
 
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         effectUnit = fldGetPlayerSceneState();
     } else {
-        effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        effectUnit = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (effectUnit == NULL) {
         return 1;
     }
     degreesToRadians = 0.017453293f;
-    pitch = bfWaitReadArgFloat(1) * degreesToRadians;
-    sdfConvertEulerAnglesToQuaternionVU(pitch, bfWaitReadArgFloat(2) * degreesToRadians, 0.0f);
+    pitch = scrGetFloatPara(1) * degreesToRadians;
+    sdfConvertEulerAnglesToQuaternionVU(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
     VU0_MOVE_VF(vf11, vf10);
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
     dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
     return 1;
 }
 
-s32 evtCommandSetEffectUnitQuaternionRotation(void) {
+s32 evtCommand_CAM_ROT_Q(void) {
     void *effectUnit;
     f32 quaternion[4];
 
-    if (scrReadIntParameter(0) < 0) {
+    if (scrGetIntPara(0) < 0) {
         effectUnit = fldGetPlayerSceneState();
     } else {
-        effectUnit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+        effectUnit = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (effectUnit == NULL) {
         return 1;
     }
-    quaternion[0] = bfWaitReadArgFloat(1);
-    quaternion[1] = bfWaitReadArgFloat(2);
-    quaternion[2] = bfWaitReadArgFloat(3);
-    quaternion[3] = bfWaitReadArgFloat(4);
+    quaternion[0] = scrGetFloatPara(1);
+    quaternion[1] = scrGetFloatPara(2);
+    quaternion[2] = scrGetFloatPara(3);
+    quaternion[3] = scrGetFloatPara(4);
     dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
     return 1;
 }
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *object);
+extern void dds3MoverBasicMakePath(EffWorldNode *object);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
-s32 evtCommandAttachObjectPath(void) {
+s32 evtCommand_OBJ_PATH_MOVE(void) {
     void *unit;
     EffWorldNode *target;
     ObjBase *objectData;
@@ -800,46 +800,46 @@ s32 evtCommandAttachObjectPath(void) {
     Dds3SlotResource *resource;
     s32 roomNumber;
 
-    unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
+    unit = evtSearchBasic(6, scrGetIntPara(0));
     if (unit == NULL) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        unit = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (unit == NULL) {
-            printf(D_00421E58, scrReadIntParameter(0));
-            printf(D_00421E68, scrReadIntParameter(1));
+            printf(D_00421E58, scrGetIntPara(0));
+            printf(D_00421E68, scrGetIntPara(1));
             printf(D_00421E78);
             return 1;
         }
     }
-    target = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    target = evtSearchBasic(0x10, scrGetIntPara(1));
     if (target == NULL)
         return 1;
-    objectData = effObjGetDataHandle(unit);
+    objectData = dds3MatterObjectBasicGetControlWorkData(unit);
     slotNode = objectData->slots[1];
     if (slotNode == NULL) {
-        dds3EnsureSlotData(unit);
+        dds3ObjectBaseCreateMover(unit);
         slotNode = objectData->slots[1];
     }
     resource = slotNode->data;
     if (resource->sourceObject == NULL) {
-        dds3SetSlotKey(slotNode, target);
-        dds3ReplaceObjectResource(slotNode);
+        dds3MoverBasicSetPath(slotNode, target);
+        dds3MoverBasicMakePath(slotNode);
     }
-    path = dds3GetObjectResourceHandle(slotNode);
+    path = dds3MoverBasicGetPathControl(slotNode);
     if (path == 0)
         return 1;
-    switch (scrReadIntParameter(2)) {
+    switch (scrGetIntPara(2)) {
     case 0:
-        sdfSetFloatCounterDirection(&path->counter, 0);
+        dds3PathBasicControlAlterMode(&path->counter, 0);
         if (target->value != 0) {
-            roomNumber = fldParseRoomNumberFromName((char *)target->value);
+            roomNumber = fldCommand_GetHojiID((char *)target->value);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         }
         break;
     case 1:
-        sdfSetFloatCounterDirection(&path->counter, 1);
+        dds3PathBasicControlAlterMode(&path->counter, 1);
         if (target->value != 0) {
-            roomNumber = fldParseRoomNumberFromName((char *)target->value);
+            roomNumber = fldCommand_GetHojiID((char *)target->value);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
         }
@@ -860,48 +860,48 @@ s32 evtCommandReattachObjectPath(void) {
     s32 targetId;
     s32 mode;
 
-    unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
+    unit = evtSearchBasic(6, scrGetIntPara(0));
     if (unit == NULL) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        unit = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (unit == NULL) {
-            printf(D_00421E58, scrReadIntParameter(0));
-            targetId = scrReadIntParameter(1);
+            printf(D_00421E58, scrGetIntPara(0));
+            targetId = scrGetIntPara(1);
             printf(D_00421E68, targetId);
             printf(D_00421E78);
             return 1;
         }
     }
-    target = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    target = evtSearchBasic(0x10, scrGetIntPara(1));
     if (target == NULL) {
         return 1;
     }
-    objectData = effObjGetDataHandle(unit);
+    objectData = dds3MatterObjectBasicGetControlWorkData(unit);
     slotNode = objectData->slots[1];
     if (slotNode == NULL) {
-        dds3EnsureSlotData(unit);
+        dds3ObjectBaseCreateMover(unit);
         slotNode = objectData->slots[1];
     }
     resource = slotNode->data;
     if (resource->sourceObject == NULL) {
-        dds3SetSlotKey(slotNode, target);
-        dds3ReplaceObjectResource(slotNode);
+        dds3MoverBasicSetPath(slotNode, target);
+        dds3MoverBasicMakePath(slotNode);
     } else {
         dds3RefreshStoredVec3(unit);
-        dds3SetSlotKey(slotNode, target);
-        dds3ReplaceObjectResource(slotNode);
+        dds3MoverBasicSetPath(slotNode, target);
+        dds3MoverBasicMakePath(slotNode);
         printf(D_00421E98);
     }
-    path = dds3GetObjectResourceHandle(slotNode);
+    path = dds3MoverBasicGetPathControl(slotNode);
     if (path == 0) {
         return 1;
     }
-    mode = scrReadIntParameter(2);
+    mode = scrGetIntPara(2);
     switch (mode) {
     case 0:
-        sdfSetFloatCounterDirection(&path->counter, 0);
+        dds3PathBasicControlAlterMode(&path->counter, 0);
         break;
     case 1:
-        sdfSetFloatCounterDirection(&path->counter, 1);
+        dds3PathBasicControlAlterMode(&path->counter, 1);
         break;
     }
     return 1;
@@ -915,22 +915,22 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E78);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 
-s32 evtCommandWaitObjectResourceScale(void) {
-    s32 objectId = scrReadIntParameter(0);
-    void *worldObject = evtFindWorldObjectByIdAndKind(6, objectId);
+s32 evtCommand_OBJ_PATH_WAIT(void) {
+    s32 objectId = scrGetIntPara(0);
+    void *worldObject = evtSearchBasic(6, objectId);
     s32 scaleStatus;
 
     if (worldObject == NULL) {
-        objectId = scrReadIntParameter(0);
-        worldObject = fldResolveWorldObjectByResourceId((u32)objectId);
+        objectId = scrGetIntPara(0);
+        worldObject = fldGetMatter_From_ModelRangeID((u32)objectId);
         if (worldObject == NULL) {
-            printf(D_00421E58, scrReadIntParameter(0));
-            printf(D_00421E68, scrReadIntParameter(1));
+            printf(D_00421E58, scrGetIntPara(0));
+            printf(D_00421E68, scrGetIntPara(1));
             printf("e OBJ_PATH_WAIT : obj==NULL\n");
             return 1;
         }
     }
-    scaleStatus = evtCheckWorldObjectResourceScale(worldObject);
+    scaleStatus = evtCheckPathStat(worldObject);
     switch (scaleStatus) {
     case 0:
         return 1;
@@ -943,63 +943,63 @@ s32 evtCommandWaitObjectResourceScale(void) {
     }
 }
 
-extern void evtEnableSolarPhaseAdvance(void);
+extern void evtEnableMoonCalc(void);
 
-u32 evtCommandEnableSolarAdvance(void) {
-    evtEnableSolarPhaseAdvance();
+u32 evtCommand_MOON_START(void) {
+    evtEnableMoonCalc();
     return 1;
 }
 
-extern void evtDisableSolarPhaseAdvance(void);
+extern void evtDisableMoonCalc(void);
 
-u32 evtCommandDisableSolarAdvance(void) {
-    evtDisableSolarPhaseAdvance();
+u32 evtCommand_MOON_STOP(void) {
+    evtDisableMoonCalc();
     return 1;
 }
 
-s32 evtCommandReadMirroredSolarPhase(void)
+s32 evtCommand_GET_MOON(void)
 {
-    scrSetIntegerReturnValue(evtGetMirroredSolarPhase());
+    scrSetIntReturnValue(evtGetMirroredSolarPhase());
     return 1;
 }
 
-s32 evtCommandReadSolarPhase(void)
+s32 evtCommand_GET_MOON16(void)
 {
-    scrSetIntegerReturnValue(evtGetSolarPhase());
+    scrSetIntReturnValue(evtGetAgeOfMoon16());
     return 1;
 }
 
-extern void evtSetSolarPhase(s32 phase);
+extern void evtSetAgeOfMoon(s32 phase);
 
-u32 evtCommandSetSolarPhase(void) {
+u32 evtCommand_CHG_MOON(void) {
     s32 phase;
 
-    phase = scrReadIntParameter(0);
-    evtSetSolarPhase(phase);
+    phase = scrGetIntPara(0);
+    evtSetAgeOfMoon(phase);
     return 1;
 }
 
 /* Create a missing camp task, then wait for its ready value.
  * No VM context completes immediately; a pending task returns zero. */
-s32 evtCommandWaitForCampTask(void) {
-    s32 taskId = scrReadIntParameter(0);
-    ScrData *commandWork = scrGetCurrentContext();
+s32 evtCommand_LOAD_BE(void) {
+    s32 taskId = scrGetIntPara(0);
+    ScrData *commandWork = scrGetScriptHandle();
     char *message;
 
     if (commandWork == NULL) {
         return 1;
     }
-    if (evtFindTaskById(taskId) == 0) {
+    if (evtSearchEventPack(taskId) == 0) {
         message = "load BE (%d)..\n";
         evtPrintDeveloperConsoleMessage(message, taskId);
-        sdfPrintFormattedDevMessage(message, taskId);
-        dds3LinkProcess(commandWork->task, mnuCampCreateTask(taskId));
+        sdfPrintf(message, taskId);
+        dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
         return 0;
     }
-    if (evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (evtGetEventPackStat(taskId) == EVT_CAMP_TASK_READY_VALUE) {
         message = D_00421ED8;
         evtPrintDeveloperConsoleMessage(message, taskId);
-        sdfPrintFormattedDevMessage(message, taskId);
+        sdfPrintf(message, taskId);
         return 1;
     }
     return 0;
@@ -1009,48 +1009,48 @@ s32 evtCommandWaitForCampTask(void) {
  * A missing VM context completes without creating a task. */
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
-s32 evtCommandStartCampTaskIfAbsent(void) {
-    s32 taskId = scrReadIntParameter(0);
-    ScrData *commandWork = scrGetCurrentContext();
+s32 evtCommand_READ_BE(void) {
+    s32 taskId = scrGetIntPara(0);
+    ScrData *commandWork = scrGetScriptHandle();
 
     if (commandWork == NULL) {
         return 1;
     }
-    if (evtFindTaskById(taskId) != 0) {
+    if (evtSearchEventPack(taskId) != 0) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
-    dds3LinkProcess(commandWork->task, mnuCampCreateTask(taskId));
+    dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
     return 1;
 }
 
 /* Store readiness in the VM result; the command itself always completes. */
-s32 evtCommandTestCampTaskReady(void) {
-    s32 taskId = scrReadIntParameter(0);
+s32 evtCommand_CHK_BE(void) {
+    s32 taskId = scrGetIntPara(0);
     s32 isReady;
 
-    if (scrGetCurrentContext() != 0 && evtFindTaskById(taskId) != 0 && evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (scrGetScriptHandle() != 0 && evtSearchEventPack(taskId) != 0 && evtGetEventPackStat(taskId) == EVT_CAMP_TASK_READY_VALUE) {
         evtPrintDeveloperConsoleMessage(D_00421ED8, taskId);
         isReady = 1;
     } else {
         isReady = 0;
     }
-    scrSetIntegerReturnValue(isReady);
+    scrSetIntReturnValue(isReady);
     return 1;
 }
 
 /* Destroy the requested camp task; missing context or task is a completed no-op. */
-s32 evtCommandDestroyCampTask(void) {
-    s32 taskId = scrReadIntParameter(0);
+s32 evtCommand_DEL_BE(void) {
+    s32 taskId = scrGetIntPara(0);
 
-    if (scrGetCurrentContext() == 0) {
+    if (scrGetScriptHandle() == 0) {
         return 1;
     }
-    if (evtFindTaskById(taskId) == 0) {
+    if (evtSearchEventPack(taskId) == 0) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage("del BE (%d)..\n", taskId);
-    mnuCampDestroyTaskById(taskId);
+    evtKillEventPack(taskId);
     return 1;
 }
 
@@ -1062,7 +1062,7 @@ extern void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
 s32 evtCommandStartPolygonMovie(void) {
-    ScrData *commandWork = scrGetCurrentContext();
+    ScrData *commandWork = scrGetScriptHandle();
     s32 eventId;
     s32 sceneId;
     KwlnTask *movieTask;
@@ -1074,13 +1074,13 @@ s32 evtCommandStartPolygonMovie(void) {
         printf(D_00421F08);
         return 1;
     }
-    eventId = scrReadIntParameter(0);
-    sceneId = scrReadIntParameter(1);
+    eventId = scrGetIntPara(0);
+    sceneId = scrGetIntPara(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
+    evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrGetIntPara(0), scrGetIntPara(1));
     dds3LinkProcess(commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
-    scrSetIntegerReturnValue((s32)(u32)movieTask);
+    scrSetIntReturnValue((s32)(u32)movieTask);
     return 1;
 }
 
@@ -1091,16 +1091,16 @@ s32 evtCommandClearPolygonMovieFlag(void)
 {
     s32 movieId;
 
-    movieId = scrReadIntParameter(0);
+    movieId = scrGetIntPara(0);
     evtPolygonMovieClearFlagBits((KwlnTask *)(u32)movieId, 1);
-    scrSetIntegerReturnValue(movieId);
+    scrSetIntReturnValue(movieId);
     return 1;
 }
 
 /* Create and return an event/scene movie task without setting bit 0.
  * The owning scheduler task supplies the viewer task's priority. */
-s32 evtCommandCreatePolygonMovie(void) {
-    ScrData *commandWork = scrGetCurrentContext();
+s32 evtCommand_PMV_RUN(void) {
+    ScrData *commandWork = scrGetScriptHandle();
     s32 eventId;
     s32 sceneId;
     KwlnTask *movieTask;
@@ -1112,78 +1112,78 @@ s32 evtCommandCreatePolygonMovie(void) {
         printf(D_00421F68);
         return 1;
     }
-    eventId = scrReadIntParameter(0);
-    sceneId = scrReadIntParameter(1);
+    eventId = scrGetIntPara(0);
+    sceneId = scrGetIntPara(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     dds3LinkProcess(commandWork->task, movieTask);
-    scrSetIntegerReturnValue((s32)(u32)movieTask);
+    scrSetIntReturnValue((s32)(u32)movieTask);
     return 1;
 }
 
 /* Look up a world unit across the six kinds before trying the fallback slot. */
-s32 evtCommandSetWorldSlotStatusFlag(void) {
+s32 evtCommand_PATH_STOP(void) {
     void *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        slotObject = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
     if (slotObject == 0) {
-        slotObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == 0) {
             return 1;
         }
     }
-    evtSetWorldSlotStatusFlag(slotObject);
+    evtPathStop(slotObject);
     return 1;
 }
 
 /* Clear the first matching unit's status flag, using the same fallback search. */
-s32 evtCommandClearWorldSlotStatusFlag(void) {
+s32 evtCommand_PATH_START(void) {
     void *slotObject;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        slotObject = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
     if (slotObject == 0) {
-        slotObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == 0) {
             return 1;
         }
     }
-    evtClearWorldSlotStatusFlag(slotObject);
+    evtPathStart(slotObject);
     return 1;
 }
 
 /* Apply the float state, then update a room flag when its parsed number is positive.
  * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
-s32 evtCommandSetUnitRoomFloatState(void) {
+s32 evtCommand_PATH_RATE(void) {
     EffWorldNode *worldNode;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        worldNode = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        worldNode = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && worldNode == NULL);
     if (worldNode == NULL) {
-        worldNode = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        worldNode = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (worldNode == NULL) {
             return 1;
         }
     }
-    evtScaleSlotByClampedMultiplier(worldNode, bfWaitReadArgFloat(1));
+    evtPathRate(worldNode, scrGetFloatPara(1));
     roomName = (char *)worldNode->value;
     if (roomName == 0) {
         return 1;
     }
-    roomNumber = fldParseRoomNumberFromName(roomName);
+    roomNumber = fldCommand_GetHojiID(roomName);
     if (roomNumber > 0) {
-        if (bfWaitReadArgFloat(1) > 0.5f) {
+        if (scrGetFloatPara(1) > 0.5f) {
             fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         } else {
             fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
@@ -1194,30 +1194,30 @@ s32 evtCommandSetUnitRoomFloatState(void) {
 
 /* Apply the integer state and update a positive parsed room number's flag.
  * Unlike the float command, an integer value of zero sets the room flag. */
-s32 evtCommandSetUnitRoomIntegerState(void) {
+s32 evtCommand_PATH_DIR(void) {
     EffWorldNode *worldNode;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        worldNode = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        worldNode = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && worldNode == NULL);
     if (worldNode == NULL) {
-        worldNode = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        worldNode = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (worldNode == NULL) {
             return 1;
         }
     }
-    evtSetWorldSlotValue(worldNode, scrReadIntParameter(1));
+    evtPathDir(worldNode, scrGetIntPara(1));
     roomName = (char *)worldNode->value;
     if (roomName == 0) {
         return 1;
     }
-    roomNumber = fldParseRoomNumberFromName(roomName);
+    roomNumber = fldCommand_GetHojiID(roomName);
     if (roomNumber > 0) {
-        if (scrReadIntParameter(1) == 0) {
+        if (scrGetIntPara(1) == 0) {
             fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         } else {
             fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
@@ -1227,51 +1227,51 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
 }
 
 /* Enable the scaled-value flag on the first unit found, including the fallback. */
-s32 evtCommandSetUnitScaledValueFlag(void)
+s32 evtCommand_PATH_LOOP_ON(void)
 {
     s32 objectKind;
     void *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        slotObject = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == NULL);
     if (slotObject == NULL) {
-        slotObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == NULL) {
             return 1;
         }
     }
-    evtSetWorldSlotScaleWrapEnabled(slotObject, 1);
+    evtPathLoop(slotObject, 1);
     return 1;
 }
 
 /* Disable the scaled-value flag using the same six-kind and fallback search. */
-s32 evtCommandClearUnitScaledValueFlag(void)
+s32 evtCommand_PATH_LOOP_OFF(void)
 {
     s32 objectKind;
     void *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        slotObject = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == NULL);
     if (slotObject == NULL) {
-        slotObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == NULL) {
             return 1;
         }
     }
-    evtSetWorldSlotScaleWrapEnabled(slotObject, 0);
+    evtPathLoop(slotObject, 0);
     return 1;
 }
 
-s32 evtCommandMoveLightAlongPathOrWarn(void) {
-    void *pathOwner = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0));
+s32 evtCommand_LIGHT_PATH_MOVE(void) {
+    void *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
 
-    if (evtStageRelinkOwnedNodeResource(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), pathOwner) != 0) {
+    if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != 0) {
         return 1;
     }
     printf(D_00421FB0);

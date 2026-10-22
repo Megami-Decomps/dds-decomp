@@ -20,7 +20,7 @@ typedef char SdfGsCenteredBoundsRegisters_rgbaq_at_0x20[
 typedef char SdfGsCenteredBoundsRegisters_xyz2_at_0x30[
     ((u32)&((SdfGsCenteredBoundsRegisters *)0)->xyz2 == 0x30) ? 1 : -1];
 
-void sdfBuildCenteredViewBoundsPacket(SdfGsCenteredBoundsRegisters *packet,
+void sdfGrSetClearPacket(SdfGsCenteredBoundsRegisters *packet,
     s32 width, s32 height, s32 unused0, s32 unused1);
 
 /* Shared A+D state for GS primitive modes, color clamping, dithering and TEXA. */
@@ -40,7 +40,7 @@ typedef char SdfGsDrawDefaultsRegisters_dthe_at_0x20[
 typedef char SdfGsDrawDefaultsRegisters_texa_at_0x30[
     ((u32)&((SdfGsDrawDefaultsRegisters *)0)->texa == 0x30) ? 1 : -1];
 
-void sdfInitDrawPacket(SdfGsDrawDefaultsRegisters *packet);
+void sdfGrSetDrawDefParmPacket(SdfGsDrawDefaultsRegisters *packet);
 
 /* TEST/ALPHA A+D state for the two independent GS drawing contexts. */
 typedef struct SdfGsSceneBlendRegisters {

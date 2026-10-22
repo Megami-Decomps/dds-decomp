@@ -124,19 +124,19 @@ extern s32 btlMarkInactiveActorCandidates();
 extern void btlRestorePartySlotSnapshots();
 
 
-extern void kwlnDrawSetOverlayTransition();
+extern void dds3SetBlur();
 
-extern void kwlnDrawEnableD88();
+extern void dds3Blur2Off();
 
-extern void kwlnDrawEnableDc8();
+extern void dds3Filter2Off();
 
-extern void kwlnDrawEnableE08();
+extern void dds3MFilterOff();
 
-extern void kwlnDrawSetupC70B();
+extern void dds3MultiBlurOff();
 
-extern void kwlnDrawEnableCd0();
+extern void dds3DistBlurOff();
 
-extern void kwlnDrawEnableD30();
+extern void dds3RipBlurOff();
 
 extern void btlMarkRuntimeUpdatePending();
 extern s32 btlAreWorkBuffersReady(void);
@@ -192,7 +192,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
 
     if (id < 0x400 && (datBattleSceneRecords[id].flags & 0x8000) != 0) {
         ((BtlState *)scene)->commandRestrictFlags |= 8;
-        kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
+        dds3FadeOut(0xFF, 0xFF, 0xFF, 0);
     }
     if (btlRollMajinEncounter() == 0) {
         if (btlRollSurpriseAttack() == 0) {
@@ -420,18 +420,18 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
         }
         if (!(scene->battleFlags & 0x4000)) {
             kwlnFadeBackgroundStartOut(0);
-            kwlnDrawSetOverlayTransition(0, 0, 1);
-            kwlnDrawEnableD88(0);
-            kwlnDrawEnableDc8(0);
-            kwlnDrawEnableE08(0);
-            kwlnDrawSetupC70B(0);
-            kwlnDrawEnableCd0(0);
-            kwlnDrawEnableD30(0);
+            dds3SetBlur(0, 0, 1);
+            dds3Blur2Off(0);
+            dds3Filter2Off(0);
+            dds3MFilterOff(0);
+            dds3MultiBlurOff(0);
+            dds3DistBlurOff(0);
+            dds3RipBlurOff(0);
             if (!(scene->commandRestrictFlags & 0x100000)) {
                 btlMarkRuntimeUpdatePending();
             }
             if (!(scene->commandRestrictFlags & 8)) {
-                kwlnFadeStartIn(0);
+                dds3FadeIn2(0);
             }
             if (fldGetEncounterRuntimeResult() != 0) {
                 fldSetEncounterPendingValue(1);
@@ -1212,7 +1212,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
 }
 
 
-extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+extern void dds3AdminiCallSequence(s32, void *, u32, s32);
 extern void btlDestroyUnit(u8 *);
 extern void fldUnloadPlayerModel(void);
 const char D_00417140[] __attribute__((aligned(8))) = "btl:wait ADPCM(Phase_END)\n";
@@ -1236,7 +1236,7 @@ extern void btlRemoveActorsWithFlags(u32 mask);
 extern void btlResetActorEntryState(void);
 extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamLocked(void);
-extern void sndQueueNoPayloadCommand1A0(void);
+extern void p2sdStopAllBgm(void);
 extern void sndQueueNoPayloadCommand210(void);
 
 s32 btlUpdateBattleEnd(BtlState *scene) {
@@ -1298,7 +1298,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         case 7:
             fldUnloadPlayerModel();
             request = 0x29D;
-            dds3AdminSubmitModeRequest(6, &request, 4, 0);
+            dds3AdminiCallSequence(6, &request, 4, 0);
             btlBossDebugPrintf(D_004171B8);
             break;
         case 4:
@@ -1319,13 +1319,13 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         if (scene->eventReady == 1) {
             if (!(scene->endFlags & 1)) {
                 sndQueueNoPayloadCommand210();
-                sndQueueNoPayloadCommand1A0();
+                p2sdStopAllBgm();
                 sndLoadAndPlayStationedSe(0x1C);
                 scene->endFlags |= 1;
             }
         } else {
             sndQueueNoPayloadCommand210();
-            sndQueueNoPayloadCommand1A0();
+            p2sdStopAllBgm();
         }
         if (scene->eventReady == 5) {
             task = scene->tasks;
@@ -1373,7 +1373,7 @@ extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 
-extern void datAdjustCurrentHp();
+extern void datAddHp();
 
 /* Nudge every active party entry's cursor by weight * 0.05 once scene flag
  * 0x40 is clear. */
@@ -1394,7 +1394,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
                         scene->unk2F8 != 0) {
                         if (!(datGameState->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
-                                datAdjustCurrentHp(&datGameState->party[i], (s32)((f32)datGameState->party[i].maxHp * scale));
+                                datAddHp(&datGameState->party[i], (s32)((f32)datGameState->party[i].maxHp * scale));
                             }
                         }
                     }
@@ -1432,7 +1432,7 @@ u32 fldStepAreaLoad(BtlState *work) {
             switch (work->loadStep) {
             case 0:
                 work->battleFlags &= ~0x10;
-                if (fldLoadAreaResource() != 0) {
+                if (fldLoadNextFile_BtlRet() != 0) {
                     work->loadStep = 1;
                 } else {
                     work->loadStep = 2;
@@ -1442,7 +1442,7 @@ u32 fldStepAreaLoad(BtlState *work) {
                 break;
             case 1:
                 fldPollAreaResourceLoad();
-                if (fldGetResourceReadyFlag() == 0) {
+                if (fldLoadNextGetStatus() == 0) {
                     work->loadStep = 2;
                     btlBossDebugPrintf("btl:field loding end\n");
                 }
@@ -1524,7 +1524,7 @@ void fldMarkSceneRefresh(BtlState *scene) {
 
 u32 fldBeginFadeWhenSceneReady(void) {
     if (btlUpdateDebugEncounterSelector() != 0) {
-        kwlnFadeInStart(0, 0, 0, 0);
+        dds3FadeOut(0, 0, 0, 0);
         return 2;
     }
     return 0;
@@ -1781,15 +1781,15 @@ void fldInitializeSceneSlots(void) {
                     bonus++;
                 }
                 if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xEA) != 0) {
-                    if (sdfGetRand(&effSharedRandomState) & 1) {
-                        actionTotal += sdfGetRandInt(NULL, 2);
+                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                        actionTotal += dds3GetRandIntA(NULL, 2);
                     } else {
-                        actionTotal -= sdfGetRandInt(NULL, 2);
+                        actionTotal -= dds3GetRandIntA(NULL, 2);
                     }
                 }
             }
         }
-        if (mdlFlagTest(0x81F) != 0) {
+        if (evtBitCheck(0x81F) != 0) {
             bonus--;
         }
         actionTotal += bonus;

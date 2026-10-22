@@ -4,8 +4,8 @@
 #include "common.h"
 
 /* Configure the foreground fade timing mode and frame duration. */
-void kwlnFadeSetupFrames(s32 mode, s32 frames);
+void dds3SetQuake(s32 mode, s32 frames);
 /* Disable configured timing while retaining the stored parameters. */
-void kwlnCancelConfiguredFadeFrames(void);
+void dds3StopQuake(void);
 
 #endif /* KWLN_FADE_TIMING_H */

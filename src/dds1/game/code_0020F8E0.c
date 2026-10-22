@@ -17,10 +17,10 @@ s32 btlFindScriptResource(char *name) {
         return -1;
     }
     sprintf(path, "e%03d_%s", battle->eventTaskId, name);
-    return bfFindScriptIndexByName((BfFlw0Header *)battle->scriptHandle, path);
+    return scrSearchProcedureName((BfFlw0Header *)battle->scriptHandle, path);
 }
 
-extern s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option);
+extern s32 scrStartScript2(s32 priority, s32 processId, s32 option);
 
 /* Start the requested skill script as a child of the battle owner task.
  * The new task uses the owner's scheduler priority minus one. */
@@ -30,9 +30,9 @@ void btlStartSkillEventTask(s32 skill) {
     if (battle->eventTaskId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
+    taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, skill);
-    scrSetCurrentActor((KwlnTask *)taskId, NULL);
+    scrSetUserData((KwlnTask *)taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
 }
@@ -78,9 +78,9 @@ void btlStartPrimaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
+    taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
-    scrSetCurrentActor((KwlnTask *)taskId, NULL);
+    scrSetUserData((KwlnTask *)taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 1;
@@ -119,9 +119,9 @@ void btlStartSecondaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
+    taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
-    scrSetCurrentActor((KwlnTask *)taskId, NULL);
+    scrSetUserData((KwlnTask *)taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 2;

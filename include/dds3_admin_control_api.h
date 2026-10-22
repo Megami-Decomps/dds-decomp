@@ -4,6 +4,6 @@
 #include "common.h"
 
 /* Set bit 1 in the active administration task's flags; that task must exist. */
-void dds3AdminSetControlFlag(void);
+void dds3AdminiExitSequence(void);
 
 #endif /* DDS3_ADMIN_CONTROL_API_H */

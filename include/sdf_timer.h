@@ -4,9 +4,9 @@
 #include "common.h"
 
 /* Read the raw free-running count from EE timer 0. */
-extern u32 sdfReadTimerCount(void);
+extern u32 sdfGetRunTimeCountBase(void);
 
 /* Return the modulo-16-bit elapsed count from the EE timer 0 value. */
-extern u32 sdfGetElapsedTimerTicks(u32 previous);
+extern u32 sdfGetRunTimeCount(u32 previous);
 
 #endif /* SDF_TIMER_H */

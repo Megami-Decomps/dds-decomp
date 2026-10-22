@@ -20,7 +20,7 @@ void mnuDrawMovieMenuBackdrop(void) {
     case 0:
         if (mnuMovieMenuState->cursor < 10) {
             factor = mnuMovieMenuState->cursor / 10.0f;
-            alpha = sdfSinPoly(factor * 1.5707963f) * 128.0f;
+            alpha = sdfSin(factor * 1.5707963f) * 128.0f;
         } else {
             factor = (30 - mnuMovieMenuState->cursor) / 20.0f;
             alpha = factor * 64.0f + 48.0f;
@@ -30,7 +30,7 @@ void mnuDrawMovieMenuBackdrop(void) {
             factor = 0.0f;
         } else if (mnuMovieMenuState->cursor < 10) {
             factor = (mnuMovieMenuState->cursor - 5) / 5.0f;
-            factor = sdfSinPoly(factor * 1.5707963f);
+            factor = sdfSin(factor * 1.5707963f);
         } else {
             factor = (30 - mnuMovieMenuState->cursor) / 20.0f;
         }
@@ -39,7 +39,7 @@ void mnuDrawMovieMenuBackdrop(void) {
     case 1:
     case 2:
         factor = mnuMovieMenuState->cursor / 90.0f;
-        factor = sdfSinPoly(factor * 6.2831852f - 1.5707963f);
+        factor = sdfSin(factor * 6.2831852f - 1.5707963f);
         factor = (factor + 1.0f) * 0.5f;
         mnuDrawSprite(0, 0, 0, (s32)(factor * 64.0f + 48.0f), 0, 6, 0x53);
         break;
@@ -63,12 +63,12 @@ s32 mnuHandleMovieMenuInput(void) {
 
     if (kwlnTaskPadButtonStates[0x26] & 2) {
         if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
         moved = 1;
     } else if (kwlnTaskPadButtonStates[0x27] & 2) {
         if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
-            sndSetSequenceVolumePan(0, 127, 63);
+            p2sdPlaySE(0, 127, 63);
         }
         moved = 1;
     }
@@ -82,15 +82,15 @@ s32 mnuHandleMovieMenuInput(void) {
         }
         if (selection >= 2) {
             if (selection == 2) {
-                sndSetSequenceVolumePan(2, 127, 63);
+                p2sdPlaySE(2, 127, 63);
             }
         } else {
-            sndSetSequenceVolumePan(0x310001, 127, 63);
+            p2sdPlaySE(0x310001, 127, 63);
         }
         return 1;
     }
     if (kwlnTaskPadButtonStates[0x23] < 0) {
-        sndSetSequenceVolumePan(10, 127, 63);
+        p2sdPlaySE(10, 127, 63);
         return 2;
     }
     return moved ? -1 : 0;
@@ -206,7 +206,7 @@ void mnuDrawMovieChoiceTransition(void) {
 
         if (mnuMovieMenuState->cursor < 5) {
             factor = mnuMovieMenuState->cursor / 5.0f;
-            factor = sdfSinPoly(factor * 1.5707963f);
+            factor = sdfSin(factor * 1.5707963f);
         } else if (mnuMovieMenuState->cursor < 20) {
             factor = (mnuMovieMenuState->cursor - 5) / 15.0f;
             factor = 1.0f - factor;

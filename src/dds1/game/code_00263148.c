@@ -43,9 +43,9 @@ void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
         ptyTestPrimaryProfileFlag(item, item->profileId) == 0) {
         ptyApplyProfile(item, item->profileId);
         scene->selectionApplied = 1;
-        if (mdlFlagTest(0x910) == 0) {
+        if (evtBitCheck(0x910) == 0) {
             scene->overlayFlags |= 1;
-            mdlFlagSet(0x910);
+            evtBitOn(0x910);
         }
     } else {
         scene->selectionApplied = 0;
@@ -80,7 +80,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
         prfResolveMantraNameOrFallback(profileId & 0xFFFF, &message);
         evtCopyEntryStringToActiveWindow(1, message);
         dspSetActive(1);
-        dspStartEntry(item->unitId + 2);
+        fclStartMessage(item->unitId + 2);
         scene->selectionApplied = 0;
     } else if (scene->pendingSkillCount > 0) {
         skillId = scene->skillList.skills[scene->pendingSkillIndex];
@@ -89,7 +89,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
         evtCopyEntryStringToActiveWindow(
             1, D_003BAA8C[skillId].encodedText);
         dspSetActive(1);
-        dspStartEntry(0);
+        fclStartMessage(0);
         scene->pendingSkillIndex++;
         scene->pendingSkillCount--;
     }
@@ -98,7 +98,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
 s32 kwlnItemDismissOverlay(BrsSkillPackageWork *scene) {
     if (scene->overlayFlags & 1) {
         dspSetActive(1);
-        dspStartEntry(1);
+        fclStartMessage(1);
         scene->overlayFlags &= ~1;
         return 1;
     }
@@ -109,9 +109,9 @@ s32 kwlnItemDismissOverlay(BrsSkillPackageWork *scene) {
 u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
     s32 alreadyVisited;
 
-    alreadyVisited = mdlFlagTest(0x911);
+    alreadyVisited = evtBitCheck(0x911);
     if (alreadyVisited == 0) {
-        mdlFlagSet(0x911);
+        evtBitOn(0x911);
     }
     return 0;
 }
@@ -130,7 +130,7 @@ s32 prfCapTaskStep(KwlnTask *request) {
     result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, request);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
-            (result = evtGetMessageWindowControlState(), result == 0)) {
+            (result = fclChkMessage(), result == 0)) {
             if (scene->selectedRow < scene->secondaryRewards.count ||
                 scene->pendingSkillCount > 0 ||
                 scene->selectionApplied != 0) {
@@ -151,7 +151,7 @@ s32 prfCapTaskStep(KwlnTask *request) {
                 return 0;
             }
             if (scene->primaryRewards.count == 0) {
-                kwlnFadeInStart(0, 0, 0, 0xF);
+                dds3FadeOut(0, 0, 0, 0xF);
                 mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
                 return 0;
             }
@@ -160,7 +160,7 @@ s32 prfCapTaskStep(KwlnTask *request) {
             }
             mnuStaffInitPanel(scene);
             mnuSetPopupEntryFlagged(dispatchStatus, brsPrimaryRewardPopupEntry);
-            sndQueueNoPayloadCommand40();
+            p2sdStopAllSe();
         }
         result = 0;
     }
@@ -217,9 +217,9 @@ void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
                                      D_003BAA70[item->unitId].encodedText);
     dspSetActive(1);
     if (scene->extentExhausted == 0) {
-        dspStartEntry(0x14);
+        fclStartMessage(0x14);
     } else {
-        dspStartEntry(0x15);
+        fclStartMessage(0x15);
     }
 }
 
@@ -251,9 +251,9 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         if (scene->extentExhausted == 0) {
-            dspStartEntry(0x12);
+            fclStartMessage(0x12);
         } else {
-            dspStartEntry(0x13);
+            fclStartMessage(0x13);
         }
         return;
     }
@@ -268,7 +268,7 @@ extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void sndReleaseTrackHandle(u32);
+extern void p2sdStopBGM(u32);
 extern char brsStatAssignmentPopupEntry[];
 extern char brsLevelChangePopupEntry[];
 
@@ -279,7 +279,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *task) {
     s32 *slots;
 
     evtStageTestUpdateCamera();
-    if (evtGetMessageWindowControlState() != 0) {
+    if (fclChkMessage() != 0) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
@@ -314,8 +314,8 @@ s32 brsProcessNextPrimaryReward(KwlnTask *task) {
             }
             mnuSetPopupEntry(dispatchStatus, brsLevelChangePopupEntry);
         } else {
-            sndReleaseTrackHandle(0x50001);
-            kwlnFadeInStart(0, 0, 0, 0xF);
+            p2sdStopBGM(0x50001);
+            dds3FadeOut(0, 0, 0, 0xF);
             mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
         }
     }
@@ -349,7 +349,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
         x = delta / 10 > 0 ? 0xBE0 : 0xC30;
     }
 
-    color = uiBlendColors(0xFFF06480, 0xFFF06400, fade);
+    color = fclBlendColor(0xFFF06480, 0xFFF06400, fade);
     sprintf(text, D_003BC550, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);

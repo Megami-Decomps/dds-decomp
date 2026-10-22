@@ -33,7 +33,7 @@ extern u16 mnuMovieTaskState;
 
 extern MnuStaffMovieWork *mnuMovieWork;
 
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
@@ -92,7 +92,7 @@ void mnuDrawAnimatedMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set,
         ex = entry->x;
         ey = entry->y;
         center = 128.0f;
-        sdfSinPoly((f32)entry->timer / (f32)entry->duration * 3.141592503f);
+        sdfSin((f32)entry->timer / (f32)entry->duration * 3.141592503f);
         if ((u32)(D_003BC618 - 1) < 3U && (mnuCheckMovieDecoderStatus() != 0 || mnuGetMoviePlaybackMode() != 0)) {
             dy = y1 - (ey + center);
             dx = x1 - (ex + center);
@@ -224,30 +224,30 @@ void mnuDrawStaffRollFrame(s32 surface) {
     i = 0;
 }
 
-extern void mnuLoadStaffFonts(void);
+extern void frwLoadStaffFont(void);
 
 void mnuPrepareStaffRollText(void) {
-    mnuLoadStaffFonts();
+    frwLoadStaffFont();
 }
 
-extern void mnuUnloadStaffFonts(void);
+extern void frwFreeStaffFont(void);
 
 void mnuReleaseStaffRollText(void) {
-    mnuUnloadStaffFonts();
+    frwFreeStaffFont();
 }
 
-extern FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
+extern FrFontGlyph *frwGetStaffFontFRQ();
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
     FrFontGlyph *glyph;
 
     if (alternate == 0) {
-        glyph = frFontBuildColoredGlyphWithSharedFlags(
+        glyph = frwGetStaffFontFRQ(
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 1, 1, (u64)10, color, source, 0);
     } else {
-        glyph = frFontBuildColoredGlyphWithSharedFlags(
+        glyph = frwGetStaffFontFRQ(
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, (u64)8, color, source, 0);
     }
-    frFontMeasureLines(glyph);
+    frGetStrWidth2(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
     return frDestroyFontRequestAfter(glyph);
 }
@@ -258,7 +258,7 @@ extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
 extern void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task);
 extern s32 mnuStaffImageProc(KwlnTask *task);
-extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+extern void dds3AdminiCallSequence(s32, void *, u32, s32);
 
 s32 mnuUpdateStaffRoll(KwlnTask *task) {
     char text[128];
@@ -271,7 +271,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
     switch (mnuMovieWork->phase) {
     case 0:
         if (mnuPollTitleStreamStateLocked() == 2) {
-            if (sdfCheckPendingWorkWithInterrupts() == 0) {
+            if (sdfDelayedResrcCheck() == 0) {
                 mnuMovieWork->phase = 1;
                 mnuMovieWork->scrollTicks = 0;
             }
@@ -283,7 +283,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
         dds3StartProcess(D_003B1140, 0x2B19, 0, 0, mnuStaffImageProc,
                        mnuReleaseMovieResourceAfterPendingWork, 0);
         mnuTitleStreamUpdateAndLogBgm();
-        kwlnFadeOutStart(0, 0, 0, 0x1E);
+        dds3FadeIn(0, 0, 0, 0x1E);
         mnuMovieWork->phase = 3;
         mnuMovieWork->scrollTicks = 0;
         break;
@@ -307,7 +307,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
         }
         mnuMovieWork->scrollTicks++;
         if (mnuMovieWork->scrollTicks == (mnuStaffRollTextRows[0xFF].offsetY + 0xE0) / 60 * 60 + 0x12C) {
-            kwlnFadeInStart(0, 0, 0, 0x28);
+            dds3FadeOut(0, 0, 0, 0x28);
         }
         if (mnuMovieWork->scrollTicks / 60 > (mnuStaffRollTextRows[0xFF].offsetY + 0xE0) / 60 + 5) {
             mnuAdvanceTitleStateUnderSemaphore();
@@ -317,7 +317,7 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
                 return 0;
             }
             request = 0x293;
-            dds3AdminSubmitModeRequest(6, &request, 4, 0);
+            dds3AdminiCallSequence(6, &request, 4, 0);
         }
         break;
     default:
@@ -327,8 +327,8 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
 }
 
 extern s32 mnuCheckMovieDecoderStatus(void);
-extern void mnuStopMovieDrawTask(void);
-extern void mnuRequestIndexedMovieResource(s32 index);
+extern void movieStop(void);
+extern void dds3PlayMovieByIndex(s32 index);
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 
@@ -374,7 +374,7 @@ void mnuAdvanceStaffImageSequence(void) {
     case 3:
         mnuMovieWork->fadeOutTicks++;
         if (mnuMovieWork->fadeOutTicks >= 260) {
-            mnuStopMovieDrawTask();
+            movieStop();
             i = ++D_003BC614;
             mnuMovieWork->imageAlpha = 0;
             if (i == 15) {
@@ -405,11 +405,11 @@ void mnuAdvanceStaffImageSequence(void) {
                 sdfSetGridScaledDrawBounds(mnuStaffRollImageRecords[D_003BC614].x, mnuStaffRollImageRecords[D_003BC614].y,
                     mnuStaffRollImageRecords[D_003BC614].width, mnuStaffRollImageRecords[D_003BC614].height, 0);
                 if (D_003BC614 == 0) {
-                    mnuRequestIndexedMovieResource(mnuStaffRollImageRecords[0].movieIndex);
+                    dds3PlayMovieByIndex(mnuStaffRollImageRecords[0].movieIndex);
                     D_003BC614 = 0;
                     mnuMovieWork->imageIndex = mnuStaffRollImageRecords[0].imageIndex;
                 } else {
-                    mnuRequestIndexedMovieResource(mnuStaffRollImageRecords[i].movieIndex);
+                    dds3PlayMovieByIndex(mnuStaffRollImageRecords[i].movieIndex);
                     D_003BC614 = i;
                     mnuMovieWork->imageIndex = mnuStaffRollImageRecords[i].imageIndex;
                 }
@@ -440,7 +440,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     mnuResetTitleStreamLocked();
     mnuReleaseStaffRollText();
     do {
-        pendingWork = sdfCheckPendingWorkWithInterrupts();
+        pendingWork = sdfDelayedResrcCheck();
     } while (pendingWork != 0);
     sdfMemFreeDelayedDirect(mnuMovieWork->allocation);
     mnuMovieWork = NULL;
@@ -448,7 +448,7 @@ void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
 
 void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task) {
     effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    while (sdfDelayedResrcCheck() != 0) {
     }
     sdfSetStreamFrameDrawMode(0);
 }
@@ -510,37 +510,37 @@ s32 mnuStopStaffTasks(void) {
     return 0;
 }
 
-s32 mnuMovieDraw(KwlnTask *task) {
+s32 movieDrawProc(KwlnTask *task) {
     sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003253C8);
     return 0;
 }
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
-        mnuMovieDrawTask = dds3StartProcess(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+        movieOpenStream(&mnuMovieDrawContext, descriptor, fileName);
+        mnuMovieDrawTask = dds3StartProcess(D_003B1A78, 0x2afb, 1, 1, movieDrawProc, 0, 0);
     }
 }
 
-void mnuRequestIndexedMovieResource(s32 movieIndex) {
+void dds3PlayMovieByIndex(s32 movieIndex) {
     MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[movieIndex];
 
     mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
-void mnuStopMovieDrawTask(void) {
+void movieStop(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    sdfCancelAndReleaseMovieStreamWork(&mnuMovieDrawContext);
+    movieCloseStream(&mnuMovieDrawContext);
     dds3KillProcess(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
-extern s32 sdfPacCheckDecoderStatus(MovObj *job);
+extern s32 sdfMovieIsFinished(MovObj *job);
 
 s32 mnuCheckMovieDecoderStatus(void) {
-    sdfPacCheckDecoderStatus(&mnuMovieDrawContext);
+    sdfMovieIsFinished(&mnuMovieDrawContext);
 }
 
 

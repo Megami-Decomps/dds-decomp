@@ -4,9 +4,9 @@
 #include "common.h"
 
 u32 fldGetSceneReadyFlag(void);
-u32 fldGetResourceReadyFlag(void);
-u8 fldIsAreaResourceReady(void);
+u32 fldLoadNextGetStatus(void);
+u8 fldLoadNextGetStatus2(void);
 u32 fldPollAreaResourceLoad(void);
-s32 fldLoadAreaResource(void);
+s32 fldLoadNextFile_BtlRet(void);
 
 #endif

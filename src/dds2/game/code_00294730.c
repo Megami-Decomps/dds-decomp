@@ -155,7 +155,7 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
     struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
     s32 alpha;
 
-    alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
+    alpha = (s32)((f32)amplitude * sdfSin((object->pulseFrame / 120.0f) * 6.2831853f));
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[1][BRS_ICON_X] << 4, mnuCommonIconPlacements[1][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, mnuCommonIconPlacements[1][BRS_ICON_ID], drawArg);
     object->pulseFrame++;
@@ -315,7 +315,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
         if (context->pulseFrame >= 0x3D) {
             context->pulseFrame = 0;
         }
-        pulseAlpha = sdfSinPoly(((f32)context->pulseFrame / 60.0f) * 3.1415926f) * alpha;
+        pulseAlpha = sdfSin(((f32)context->pulseFrame / 60.0f) * 3.1415926f) * alpha;
         value = list->cursor->index;
         row = value - headIndex;
 
@@ -701,7 +701,7 @@ void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
         s32 transitionFrames = 20;
         s32 displayedValue;
 
-        sndSetSequenceVolumePan(19, 127, 63);
+        p2sdPlaySE(19, 127, 63);
         state->elapsedFrames++;
         displayedValue = state->previousValue +
                          ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /

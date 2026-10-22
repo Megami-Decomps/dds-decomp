@@ -16,18 +16,18 @@
 
 
 
-extern void dds3ReplaceObjectResource(EffWorldNode *object);
+extern void dds3MoverBasicMakePath(EffWorldNode *object);
 
 const char evtStageResourcePathFormat[0x10] = "%sf%03d_%03d";
 
 const char evtScriptResourcePathFormat[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
 
-void evtDestroySecondaryWorldNode(void) {
+void evtFreeStage(void) {
     EffWorldNode *secondary;
 
-    secondary = (EffWorldNode *)dds3GetWorldSecondaryObject();
+    secondary = (EffWorldNode *)dds3GetControlScene();
     if (secondary != 0) {
-        dds3DestroyWorldNode(secondary);
+        dds3DeleteScene(secondary);
         return;
     }
 }
@@ -35,14 +35,14 @@ void evtDestroySecondaryWorldNode(void) {
 
 
 /* Detach every unit node from the secondary object's per-kind list. */
-void evtDrainSecondaryWorldNodes(void) {
-    EffWorldNode *secondaryObject = (EffWorldNode *)dds3GetWorldSecondaryObject();
+void evtFreeAllUnit(void) {
+    EffWorldNode *secondaryObject = (EffWorldNode *)dds3GetControlScene();
     EvtWorldTable *worldTable;
 
     if (secondaryObject != NULL) {
         worldTable = ((EvtWorldTable *)secondaryObject->data);
         while (worldTable->slots[EVT_WORLD_SLOT_UNIT].head != NULL) {
-            dds3RemoveWorldObjectNode(worldTable->slots[EVT_WORLD_SLOT_UNIT].head);
+            dds3DeleteSceneBasicData(worldTable->slots[EVT_WORLD_SLOT_UNIT].head);
         }
     }
 }
@@ -50,84 +50,84 @@ void evtDrainSecondaryWorldNodes(void) {
 extern char D_003C8BA0[];
 extern KwlnDrawVectorParams D_003C8C60[];
 extern char D_003C8C80[];
-extern EffWorldNode *dds3AppendWorldNode(void);
-extern void mdlSpawnViewerWorldObject(void);
-extern void sdfSetViewFieldOfView(f32 fieldOfView);
-extern void dds3DrawSetLightSourcePointer(void *lightSource, s32 index);
-extern void kwlnDrawCopyWords20(KwlnDrawVectorParams *source);
-extern void kwlnDrawCopyRow128(u128 *source);
+extern EffWorldNode *dds3AddScene(void);
+extern void evtSetTestCamera(void);
+extern void dds3SetScreenFovy(f32 fieldOfView);
+extern void dds3SetLight(void *lightSource, s32 index);
+extern void dds3SetFog(KwlnDrawVectorParams *source);
+extern void dds3SetAmbient(u128 *source);
 
-s32 evtCreateWorldObjectForKey(s32 area, s32 room)
+s32 evtLoadArea(s32 area, s32 room)
 {
     char directory[0x40];
     char resourcePath[0x50];
     EffWorldNode *worldObject;
 
-    evtDestroySecondaryWorldNode();
-    worldObject = dds3AppendWorldNode();
-    dds3SetWorldSecondaryObject(worldObject);
-    dds3SetWorldObject(worldObject);
-    dds3SetWorldObjectValue(worldObject, (area << 16) + room);
-    fldFormatAreaDirectory(directory, area, room);
+    evtFreeStage();
+    worldObject = dds3AddScene();
+    dds3SetControlScene(worldObject);
+    dds3SetActiveScene(worldObject);
+    dds3SetMapNo(worldObject, (area << 16) + room);
+    fldMakeFilePath(directory, area, room);
     sprintf(resourcePath, evtStageResourcePathFormat, directory, area, room);
-    dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
-    mdlSpawnViewerWorldObject();
+    dds3SceneBasicMakeScene(worldObject, (u32)resourcePath);
+    evtSetTestCamera();
     if (area < 10) {
-        sdfSetViewFieldOfView(0.9424777031f);
+        dds3SetScreenFovy(0.9424777031f);
     } else {
-        sdfSetViewFieldOfView(0.75398216f);
+        dds3SetScreenFovy(0.75398216f);
     }
-    dds3DrawSetLightSourcePointer(D_003C8BA0, 0);
-    dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x40, 1);
-    dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x80, 2);
-    kwlnDrawCopyWords20(D_003C8C60);
-    kwlnDrawCopyRow128((u128 *)D_003C8C80);
+    dds3SetLight(D_003C8BA0, 0);
+    dds3SetLight(D_003C8BA0 + 0x40, 1);
+    dds3SetLight(D_003C8BA0 + 0x80, 2);
+    dds3SetFog(D_003C8C60);
+    dds3SetAmbient((u128 *)D_003C8C80);
     return 1;
 }
 
-extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,
+extern void dds3SceneBasicMakeScene_FromMemory(EffWorldNode *object, u32 area, u32 room,
                                                        u32 resource0Data, u32 resource1Data,
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
-extern s32 sdfCheckPendingWorkWithInterrupts(void);
+extern s32 sdfDelayedResrcCheck(void);
 
-s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
+s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                      const SdfTextureOffsetListHeader *textureOffsets, s32 flags)
 {
     EffWorldNode *worldObject;
     char directory[0x40];
 
-    evtDestroySecondaryWorldNode();
-    worldObject = dds3AppendWorldNode();
-    dds3SetWorldSecondaryObject(worldObject);
-    dds3SetWorldObject(worldObject);
-    dds3SetWorldObjectValue(worldObject, (area << 16) + room);
-    fldFormatAreaDirectory(directory, area, room);
-    dds3AttachConstructedResourceToWorldObject(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
-    mdlSpawnViewerWorldObject();
-    sdfSetViewFieldOfView(0.75398216f);
-    dds3DrawSetLightSourcePointer(D_003C8BA0, 0);
-    dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x40, 1);
-    dds3DrawSetLightSourcePointer(D_003C8BA0 + 0x80, 2);
-    kwlnDrawCopyWords20(D_003C8C60);
-    kwlnDrawCopyRow128((u128 *)D_003C8C80);
-    while (sdfCheckPendingWorkWithInterrupts() != 0) {
+    evtFreeStage();
+    worldObject = dds3AddScene();
+    dds3SetControlScene(worldObject);
+    dds3SetActiveScene(worldObject);
+    dds3SetMapNo(worldObject, (area << 16) + room);
+    fldMakeFilePath(directory, area, room);
+    dds3SceneBasicMakeScene_FromMemory(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
+    evtSetTestCamera();
+    dds3SetScreenFovy(0.75398216f);
+    dds3SetLight(D_003C8BA0, 0);
+    dds3SetLight(D_003C8BA0 + 0x40, 1);
+    dds3SetLight(D_003C8BA0 + 0x80, 2);
+    dds3SetFog(D_003C8C60);
+    dds3SetAmbient((u128 *)D_003C8C80);
+    while (sdfDelayedResrcCheck() != 0) {
     }
     return 1;
 }
 
 extern char evtScriptResourcePathBuffer[];
-extern s32 scrCreateProcessTaskFromResource(s32 priority, const char *path, s32 option);
+extern s32 scrStartScriptByName(s32 priority, const char *path, s32 option);
 #include "sdf_debug_api.h"
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
-void evtCreateEventScriptProcess(s32 eventId) {
+void evtStartEvent(s32 eventId) {
     sprintf(evtScriptResourcePathBuffer, evtScriptResourcePathFormat, eventId - eventId % 10, eventId, eventId);
-    scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
+    scrStartScriptByName(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 
 const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n";
 
-void evtKillFieldScriptTasks(void) {
+void evtKillFieldScript(void) {
     s32 taskState;
     s32 taskIndex;
     KwlnTask *task;
@@ -146,32 +146,32 @@ void evtKillFieldScriptTasks(void) {
     }
 }
 
-void evtSetWorldSlotStatusFlag(void *object) {
+void evtPathStop(void *object) {
     Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data(object);
+    slotData = dds3ObjectBaseGetPathControl(object);
     if (slotData != 0) {
-        sdfFreezeFloatCounter(&slotData->counter);
+        dds3PathBasicPauseOn(&slotData->counter);
         return;
     }
 }
 
-void evtClearWorldSlotStatusFlag(void *object) {
+void evtPathStart(void *object) {
     Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data(object);
+    slotData = dds3ObjectBaseGetPathControl(object);
     if (slotData != 0) {
-        sdfUnfreezeFloatCounter(&slotData->counter);
+        dds3PathBasicPauseOff(&slotData->counter);
         return;
     }
 }
 
 
 /* Scale the object's retained path time within the clamped multiplier range. */
-void evtScaleSlotByClampedMultiplier(void *worldNode, f32 multiplier) {
+void evtPathRate(void *worldNode, f32 multiplier) {
     Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data(worldNode);
+    slotData = dds3ObjectBaseGetPathControl(worldNode);
     if (slotData != 0) {
         if (multiplier < 0.0f) {
             multiplier = 0.0f;
@@ -179,28 +179,28 @@ void evtScaleSlotByClampedMultiplier(void *worldNode, f32 multiplier) {
         if (multiplier > 1.0f) {
             multiplier = 1.0f;
         }
-        evtScaleValueByMultiplier(&slotData->counter, multiplier);
+        dds3PathBasicControlSetRatio(&slotData->counter, multiplier);
     }
 }
 
-void evtSetWorldSlotValue(void *worldNode, u32 direction) {
+void evtPathDir(void *worldNode, u32 direction) {
     Dds3PathCurveWork *slotData;
 
-    slotData = dds3GetSlot1Data(worldNode);
+    slotData = dds3ObjectBaseGetPathControl(worldNode);
     if (slotData != 0) {
-        sdfSetFloatCounterDirection(&slotData->counter, direction);
+        dds3PathBasicControlAlterMode(&slotData->counter, direction);
     }
 }
 
 /* Attach object to the node referenced by owner's owned handle. */
-s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
+s32 evtPathLinkAndMake(void *object, void *owner) {
     ObjBase *ref;
     void *slotNode;
 
     if (object == NULL) {
         return 0;
     }
-    ref = dds3GetObjectOwnedHandle(owner);
+    ref = dds3GetBaseControlWorkData(owner);
     if (ref == NULL) {
         return 0;
     }
@@ -208,7 +208,7 @@ s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
     if (slotNode == NULL) {
         return 0;
     }
-    dds3SetSlotKey(slotNode, object);
-    dds3ReplaceObjectResource(slotNode);
+    dds3MoverBasicSetPath(slotNode, object);
+    dds3MoverBasicMakePath(slotNode);
     return 1;
 }

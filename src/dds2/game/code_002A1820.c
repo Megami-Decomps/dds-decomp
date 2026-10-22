@@ -86,7 +86,7 @@ extern u32 D_00437A20[2];
 
 extern u32 D_00437A28;
 
-extern void sndEnsureMidiBankResident(s32);
+extern void p2sdLoadSMGFile(s32);
 
 extern void mnuInitializeTitleAudioStreams(void);
 
@@ -248,11 +248,11 @@ void mnuUpdateTitleAudioStreams(void) {
     }
 }
 
-extern void sdfSleepThreadCount(s32 requestedSleepCount);
+extern void sdfWaitVblank(s32 requestedSleepCount);
 
 void mnuRunTitleStreamThread(void) {
     for (;;) {
-        sdfSleepThreadCount(1);
+        sdfWaitVblank(1);
         WaitSema(mnuTitleStreamSemaphore);
         mnuUpdateTitleAudioStreams();
         SignalSema(mnuTitleStreamSemaphore);
@@ -263,10 +263,10 @@ extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 void mnuCreateTitleStreamThread(void) {
-    mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
-    sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
+    mnuTitleStreamSemaphore = sdfCreateSema(1, 0xff, 0);
+    sdfStartThreadAndWait(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
                   0x1000, 0x45, 0);
-    sdfThreadSleepSelf();
+    sdfSetMainThreadPriority();
 }
 
 extern u32 mnuTitleStreamDecoderState[];
@@ -298,10 +298,10 @@ void mnuInitializeTitleAudioStreams(void) {
     mnuInitTitleSoundRemoteRequest(0x400);
 
     mnuTitleStreamDecoderState[1] = (u32)mnuTitleStreamDecodedSamples;
-    mnuTitleStreamDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfMemAllocDirect(0x68CA));
+    mnuTitleStreamDecoderState[3] = (u32)sdfMemGetPtr(sdfMemAllocDirect(0x68CA));
     mnuTitleStreamDecoderState[4] = 0;
     mnuTitleSoundBufferDecoderState[1] = (u32)mnuTitleSoundBufferDecodedSamples;
-    mnuTitleSoundBufferDecoderState[3] = (u32)sdfMemoryGetBlockAddress(sdfMemAllocDirect(0x68CA));
+    mnuTitleSoundBufferDecoderState[3] = (u32)sdfMemGetPtr(sdfMemAllocDirect(0x68CA));
     mnuTitleSoundBufferDecoderState[4] = 2;
 
     mnuCreateTitleStreamThread();
@@ -331,8 +331,8 @@ void mnuWriteTitleStreamStatusLocked(TitleAudioStreamStatusSnapshot *statusValue
 void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamState) {
     void *fileData;
     s32 frameCount;
-    struct SdfMemBlock *resourceHandle = sdfReadNamedResource(filePath, (u32 *)&fileData, 0);
-    s32 fileBytes = sdfMemoryGetBlockSize(resourceHandle);
+    struct SdfMemBlock *resourceHandle = sdfDevLoadFileEx(filePath, (u32 *)&fileData, 0);
+    s32 fileBytes = sdfMemGetSize(resourceHandle);
     memcpy(streamState->compressedData, fileData, fileBytes);
     frameCount = fileBytes / streamState->frameBytes;
     streamState->frameIndex = 0;
@@ -341,7 +341,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamSt
 }
 
 void mnuStoreTaskResult(char *audioPath) {
-    mnuTitleStreamFileRequest = fileQueueDefaultCallbackRequest(audioPath);
+    mnuTitleStreamFileRequest = fileLoad(audioPath);
     mnuTitleStreamStatus.loadState = 1;
 }
 
@@ -352,17 +352,17 @@ extern void at3decReset(u32 *);
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
  * ordering; return 1 after a ready file is copied, otherwise its ready result. */
 s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
-    s32 ready = fileIsRequestReadyInCurrentMode(mnuTitleStreamFileRequest);
+    s32 ready = pacFileCheckEnd(mnuTitleStreamFileRequest);
 
     if (ready != 0) {
-        struct SdfMemBlock *resourceHandle = fileGetResourceHandle(mnuTitleStreamFileRequest);
-        void *fileData = fileGetLoadedDataAddress(mnuTitleStreamFileRequest);
-        s32 fileBytes = (s32)fileGetResourceSize(mnuTitleStreamFileRequest);
+        struct SdfMemBlock *resourceHandle = fileGetMemHandle(mnuTitleStreamFileRequest);
+        void *fileData = fileGetLoadPtr(mnuTitleStreamFileRequest);
+        s32 fileBytes = (s32)fileGetLoadSize(mnuTitleStreamFileRequest);
         struct SdfMemBlock *allocation;
 
-        filePollEntryCleanup(mnuTitleStreamFileRequest);
-        allocation = sdfAllocGeneralBlockHigh(fileBytes);
-        mnuTitleStreamStatus.compressedData = (u8 *)sdfMemoryGetBlockAddress(allocation);
+        fileHandleFree(mnuTitleStreamFileRequest);
+        allocation = sdfMemAllocFromTailDirect(fileBytes);
+        mnuTitleStreamStatus.compressedData = (u8 *)sdfMemGetPtr(allocation);
         mnuTitleStreamStatus.allocation = allocation;
         memcpy(destinationState->compressedData, fileData, fileBytes);
         destinationState->frameCount = fileBytes / destinationState->frameBytes;
@@ -464,14 +464,14 @@ s32 mnuPollTitleStreamStateLocked(void) {
 
 extern u32 D_00454D68[];
 
-extern void fileWaitIdle(void);
+extern void fileSyncAll(void);
 
 /* Wait/copy a pending file while locked, then prepare a commit for controls
  * other than 1. Unlike DDS1, this entry point has no BGM banner output. */
 void mnuResetTitleStreamAfterFileIdle(void) {
     WaitSema(mnuTitleStreamSemaphore);
     if (mnuUpdateTitleTransition() == MNU_STREAM_LOAD_PENDING) {
-        fileWaitIdle();
+        fileSyncAll();
         mnuCompleteTitleStreamFileLoad(&mnuTitleStreamStatus);
     }
     if (mnuTitleStreamStatus.control != 1) {
@@ -546,7 +546,7 @@ void mnuInitializeTitleSoundBuffer(void) {
     WaitSema(mnuTitleStreamSemaphore);
     streamState->decoder = decoder;
     allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_MEDIUM);
-    bufferAddress = sdfMemoryGetBlockAddress(allocation);
+    bufferAddress = sdfMemGetPtr(allocation);
     streamState->allocation = allocation;
     streamState->control = 2;
     streamState->decoder[2] = 2;
@@ -594,7 +594,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
         allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
     }
-    bufferAddress = sdfMemoryGetBlockAddress(allocation);
+    bufferAddress = sdfMemGetPtr(allocation);
     mnuTitleSoundBufferState.allocation = allocation;
     mnuTitleSoundBufferState.compressedData = bufferAddress;
     sprintf(soundPath, D_00428650, D_003E0F60[soundEntryIndex].filename);
@@ -638,7 +638,7 @@ void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32
         allocation = sdfMemAllocDirect(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
     }
-    bufferAddress = sdfMemoryGetBlockAddress(allocation);
+    bufferAddress = sdfMemGetPtr(allocation);
     mnuTitleSoundBufferState.allocation = allocation;
     mnuTitleSoundBufferState.compressedData = bufferAddress;
     memcpy(bufferAddress, compressedData, dataBytes);
@@ -793,7 +793,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
         break;
     case 3:
-        kwlnFadeInStart(0, 0, 0, 0);
+        dds3FadeOut(0, 0, 0, 0);
         mnuSlideBarSetStateSmall(mnuMovieMenuState->barSmall, 3);
         mnuPairedSlideBarSetState(&mnuMovieMenuState->paired, 3);
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedA, 2, 0);
@@ -898,7 +898,7 @@ typedef struct SlideBarPair {
     s32 pos[2];
 } SlideBarPair;
 
-extern void kwlnFadeClear(void);
+extern void dds3FadeClear(void);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern u8 mnuHasSpriteHandle(void);
 extern void mnuDrawMovieMenuSpriteSlot1F(s32);
@@ -915,10 +915,10 @@ extern u32 mnuGetMovieMenuSelectionIndex(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
 extern void mnuStartTitleMovieDraw(void);
-extern void sndReleaseTrackHandle(u32);
+extern void p2sdStopBGM(u32);
 extern void sdfSoundSetChannelCount(u32);
-extern void sndStartTrackExtended(s32);
-extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+extern void p2sdPlayBGMFade(s32);
+extern void dds3AdminiCallSequence(s32, void *, u32, s32);
 extern void mnuRestartRuntimeAfterViewer(s32);
 extern void mnuAdvanceTimedSlideBar(SlideBarTimed *, s32);
 extern void mnuAdvanceMultiSpriteSlideBar(SlideBar *, s32);
@@ -942,7 +942,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     case 0:
         mnuMovieMenuState->cursor = 0;
         mnuMovieMenuState->state = 2;
-        sndApplyTrackOperation(sndEnsureMidiBankResident, 0x310000);
+        sndApplyTrackOperation(p2sdLoadSMGFile, 0x310000);
         break;
     case 1:
     case 22:
@@ -964,7 +964,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
                 }
             }
         } else {
-            kwlnFadeOutStart(0, 0, 0, 0x14);
+            dds3FadeIn(0, 0, 0, 0x14);
             mnuMovieMenuState->state = 5;
         }
         mnuMovieMenuState->mode = 0;
@@ -980,22 +980,22 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     case 4:
         if (mnuHasSpriteHandle() != 0) {
             mnuMovieMenuState->state = 31;
-            kwlnFadeOutStart(0, 0, 0, 0x14);
+            dds3FadeIn(0, 0, 0, 0x14);
             if (mnuMovieMenuState->mode >= 0) {
                 if (mnuMovieMenuState->mode < 2) {
-                    sndApplyTrackOperation(sndStartTrackExtended, 0x310000);
+                    sndApplyTrackOperation(p2sdPlayBGMFade, 0x310000);
                 }
             }
         }
         break;
     case 5:
-        kwlnFadeOutStart(0, 0, 0, 0x14);
+        dds3FadeIn(0, 0, 0, 0x14);
         mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
         mnuMovieMenuState->state++;
         break;
     case 6:
         mnuDrawMovieMenuSpriteSlot1F(0x80);
-        if (kwlnFadeIsActive() == 0) {
+        if (dds3FadeCheck() == 0) {
             mnuMovieMenuState->cursor = 0;
             mnuMovieMenuState->state++;
         }
@@ -1086,7 +1086,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         if (mnuMovieMenuState->cursor < 0x4B) {
             mnuMovieMenuState->cursor++;
         } else {
-            kwlnFadeInStart(0, 0, 0, 0x16);
+            dds3FadeOut(0, 0, 0, 0x16);
             mnuMovieMenuState->cursor = 0;
             mnuMovieMenuState->state++;
         }
@@ -1096,7 +1096,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             mnuDrawMovieMenuSpriteSlot21(0x80);
             mnuMovieMenuState->cursor++;
         } else {
-            kwlnFadeOutStart(0, 0, 0, 0x1E);
+            dds3FadeIn(0, 0, 0, 0x1E);
             mnuMovieMenuState->state = 15;
             mnuMovieMenuState->cursor = 0;
         }
@@ -1118,7 +1118,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         if (mnuIsAnyMenuInputPressed() != 0) {
             mnuMovieMenuState->state = 18;
             mnuMovieMenuState->cursor = 0;
-            kwlnFadeInStart(0, 0, 0, 0x16);
+            dds3FadeOut(0, 0, 0, 0x16);
             sdfSoundSetChannelCount(0x2D);
             mnuMovieMenuState->movieOpened = 1;
         }
@@ -1137,7 +1137,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         }
         break;
     case 19:
-        kwlnFadeOutStart(0, 0, 0, 0x1E);
+        dds3FadeIn(0, 0, 0, 0x1E);
         if (mnuMovieMenuState->movieOpened != 0) {
             mnuMovieMenuState->state = 23;
         } else {
@@ -1199,8 +1199,8 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             mnuUpdateTitlePageByMode();
             mnuMovieMenuState->state = 28;
             mnuMovieMenuState->cursor = 0;
-            kwlnFadeInStart(0, 0, 0, 0xF);
-            sndReleaseTrackHandle(0x310000);
+            dds3FadeOut(0, 0, 0, 0xF);
+            p2sdStopBGM(0x310000);
         }
         break;
     case 28:
@@ -1215,7 +1215,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         }
         break;
     case 30:
-        if (kwlnFadeIsActive() == 0) {
+        if (dds3FadeCheck() == 0) {
             mnuMovieMenuState->state = 31;
             mnuMovieMenuState->cursor = 0;
             mnuTitleResetSequenceTimers();
@@ -1229,7 +1229,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             mnuDrawTitleSceneForPhase();
             mnuMovieMenuState->state = 32;
             mnuMovieMenuState->cursor = 0;
-            kwlnFadeInStart(0, 0, 0, 0xF);
+            dds3FadeOut(0, 0, 0, 0xF);
             break;
         case 2:
             mnuDrawTitleSceneForPhase();
@@ -1251,21 +1251,21 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             selectedItem = mnuGetMovieMenuSelectionIndex();
             switch (selectedItem) {
             case 1:
-                kwlnFadeOutStart(0, 0, 0, 0x14);
+                dds3FadeIn(0, 0, 0, 0x14);
                 mnuMovieMenuState->state = 34;
                 mnuMovieMenuState->cursor = 0;
                 break;
             case 0:
                 mnuMovieMenuState->mode = 1;
-                dds3AdminSubmitModeRequest(3, 0, 0, 0);
+                dds3AdminiCallSequence(3, 0, 0, 0);
                 mnuMovieMenuState->state = 35;
                 break;
             case 2:
-                sndReleaseTrackHandle(0x310000);
+                p2sdStopBGM(0x310000);
                 mnuMovieMenuState->mode = selectedItem;
                 mnuMovieMenuState->cursor = 0;
-                kwlnFadeOutStart(0, 0, 0, 0xA);
-                dds3AdminSubmitModeRequest(0xD, 0, 0, 0);
+                dds3FadeIn(0, 0, 0, 0xA);
+                dds3AdminiCallSequence(0xD, 0, 0, 0);
                 mnuMovieMenuState->state = 35;
                 break;
             }
@@ -1277,9 +1277,9 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         mnuMovieMenuState->cursor = 0;
         break;
     case 34:
-        kwlnFadeClear();
+        dds3FadeClear();
         mnuRestartRuntimeAfterViewer(0);
-        dds3AdminSubmitModeRequest(0x1E, 0, 0, 0);
+        dds3AdminiCallSequence(0x1E, 0, 0, 0);
         mnuMovieMenuState->state = 35;
         mnuMovieMenuState->mode = 3;
         mnuMovieMenuState->cursor = 0;
@@ -1313,13 +1313,13 @@ u32 mnuOpenTitleMenuDefaultMode(void) {
     return 0;
 }
 
-extern void evtDestroySecondaryWorldNode(void);
+extern void evtFreeStage(void);
 extern void sdfCreateRuntimeTask(void);
 extern void sdfDestroyRuntimeTask(void);
 
 /* The title-menu callback passes zero; the restart does not use it. */
 void mnuRestartRuntimeAfterViewer(s32 unused) {
-    evtDestroySecondaryWorldNode();
+    evtFreeStage();
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();
 }

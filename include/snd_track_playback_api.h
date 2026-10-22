@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-void sndStartTrackDefault(s32 trackId);
+void p2sdPlayBGM(s32 trackId);
 
 #endif

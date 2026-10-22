@@ -30,7 +30,7 @@ typedef struct FileSlotTable {
 } FileSlotTable;
 
 FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *configuration);
-void fileReleaseGridRecordHandle(FileSlotTable *record);
+void effPCPHelperBEDGetModel(FileSlotTable *record);
 void fileClearRecordReferences(FileSlotTable *record);
 void fileAcquireRecord(FileSlotTable *record);
 

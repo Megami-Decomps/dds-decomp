@@ -19,10 +19,10 @@ typedef char EffNodeDescriptor_header_size_must_be_16[
     (sizeof(EffNodeDescriptor) == 0x10) ? 1 : -1];
 
 /* Applies the version-dependent payload compatibility fixes in place. */
-void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor);
+void dds3EffectDataRevision(EffNodeDescriptor *descriptor);
 
 struct EffNode;
-struct EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor);
-struct EffNode *effLoadResourceNode(const char *resourceName);
+struct EffNode *dds3EffectLoad(EffNodeDescriptor *descriptor);
+struct EffNode *dds3EffectFileLoad(const char *resourceName);
 
 #endif

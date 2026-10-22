@@ -40,105 +40,105 @@ extern u8 D_00435BC0[];
 extern s32 kwlnPrepareFrameDrawPackets(KwlnTask *task);
 extern s32 kwlnBuildFrameScenePackets(KwlnTask *task);
 extern s32 kwlnRenderFrame(KwlnTask *task);
-extern s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task);
-extern s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task);
+extern s32 dds3BasicMainProcess(KwlnTask *task);
+extern s32 dds3BasicDrawProcess(KwlnTask *task);
 extern s32 frFlipPacketBuf(KwlnTask *task);
-extern void frFontReleaseAll(KwlnTask *task);
-extern s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task);
+extern void frDestroyFontTable(KwlnTask *task);
+extern s32 dds3DebugDevDumpProcess(KwlnTask *task);
 
 struct EffWorldNode;
-extern struct EffWorldNode * dds3CreateActiveWorldWithValueCapacity(s32 capacity);
-extern void btlInitializeCommandSemaphoreSlots(void);
+extern struct EffWorldNode * dds3AddWorld(s32 capacity);
+extern void mdlInitManager(void);
 extern void btlLoadInputIconsAndSystemSounds(void);
 extern void evtEnsureSolarOverlayTaskAndResetPhase(void);
-extern void evtResetDisplayProjectionAndVectorState(void);
-extern void fileManInit(void);
+extern void dds3InitDrawEnv(void);
+extern void fileSysInit(void);
 extern void fldCreateEncounterTask(void);
 extern void fldCreateFieldEffectTask(void);
-extern void fldInitializeDisplayAndSceneSound(void);
-extern void frFontInitializeSystem(s32 rowBudget, s32 poolCount);
-extern void itfMesInit(void);
-extern void kwlnDebugTaskCreate(void);
-extern void kwlnFadeClear(void);
-extern void kwlnInitMagicState(void);
-extern void kwlnResetPadInputAndMotorState(void);
-extern void kwlnRuntimeStartupHook(void);
-extern void mnuCreateMovieManagerTask(void);
+extern void fldFirstInit(void);
+extern void frInitFontTable(s32 rowBudget, s32 poolCount);
+extern void itfMesMngInitializeManager(void);
+extern void dds3InitAdmini(void);
+extern void dds3FadeClear(void);
+extern void dds3InitRandCB(void);
+extern void dds3PadInitialize(void);
+extern void dds3InitDebugSystem(void);
+extern void dds3StartMovieManager(void);
 extern void mnuInitializeTitleAudioAndEffects(void);
 extern void mnuLoadCampResources(void);
 extern void sdfCreateRuntimeTask(void);
 extern void sdfDevConsInit(void);
 extern void sdfResetChannels(void);
 
-extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
+extern void dds3AdminiCallSequence(s32 requestedMode, void *requestData, u32 dataBytes, s32 markHistory);
 
 void kwlnInitializeRuntime(void) {
-    evtResetDisplayProjectionAndVectorState();
-    kwlnResetPadInputAndMotorState();
+    dds3InitDrawEnv();
+    dds3PadInitialize();
     dds3StartProcess(D_00435BB8, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
     dds3StartProcess(D_00435BC0, 0x2710, 0, 0, kwlnBuildFrameScenePackets, 0, 0);
     dds3StartProcess("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);
-    dds3StartProcess("basic_main", 0x3FC, 1, 1, dds3RunWorldPrimaryCallbacks, 0, 0);
-    dds3StartProcess("basic_draw", 0x2B09, 1, 1, dds3RunWorldSecondaryCallbacks, 0, 0);
-    frFontInitializeSystem(0x100, 0x200);
-    dds3StartProcess("font_sys", 0x4E1F, 0, 0, frFlipPacketBuf, frFontReleaseAll, 0);
-    fileManInit();
-    itfMesInit();
+    dds3StartProcess("basic_main", 0x3FC, 1, 1, dds3BasicMainProcess, 0, 0);
+    dds3StartProcess("basic_draw", 0x2B09, 1, 1, dds3BasicDrawProcess, 0, 0);
+    frInitFontTable(0x100, 0x200);
+    dds3StartProcess("font_sys", 0x4E1F, 0, 0, frFlipPacketBuf, frDestroyFontTable, 0);
+    fileSysInit();
+    itfMesMngInitializeManager();
     mnuInitializeTitleAudioAndEffects();
     sdfDevConsInit();
-    btlInitializeCommandSemaphoreSlots();
+    mdlInitManager();
     fldCreateFieldEffectTask();
-    fldInitializeDisplayAndSceneSound();
+    fldFirstInit();
     sdfResetChannels();
     btlLoadInputIconsAndSystemSounds();
     mnuLoadCampResources();
-    mnuCreateMovieManagerTask();
+    dds3StartMovieManager();
     sdfCreateRuntimeTask();
     D_00435B88 = 0;
     D_00435B80 = 0;
-    dds3CreateActiveWorldWithValueCapacity(0x2710);
-    kwlnInitMagicState();
-    kwlnDebugTaskCreate();
-    dds3AdminSubmitModeRequest(0, 0, 0, 0);
-    kwlnRuntimeStartupHook();
-    dds3StartProcess("DbgDevDump", 0x5215, 0, 0, kwlnUpdateDevelopmentDumpTask, 0, 0);
-    kwlnFadeClear();
+    dds3AddWorld(0x2710);
+    dds3InitRandCB();
+    dds3InitAdmini();
+    dds3AdminiCallSequence(0, 0, 0, 0);
+    dds3InitDebugSystem();
+    dds3StartProcess("DbgDevDump", 0x5215, 0, 0, dds3DebugDevDumpProcess, 0, 0);
+    dds3FadeClear();
     evtEnsureSolarOverlayTaskAndResetPhase();
     fldCreateEncounterTask();
-    dds3AdminSubmitModeRequest(1, 0, 0, 0);
+    dds3AdminiCallSequence(1, 0, 0, 0);
 }
 
-void kwlnRequestMainLoopExit(void) {
+void dds3SoftReset(void) {
     D_00435B88 = 1;
 }
 
-u32 kwlnGetFrameCounter(void) {
+u32 dds3GetKernelCount(void) {
     return D_00435B80;
 }
 
-u32 kwlnGetDrawBufferIndex(void) {
+u32 dds3GetFrameID(void) {
     return D_00438D80;
 }
 
-void kwlnPauseTaskScheduler(void) {
+void dds3PauseOn(void) {
     D_00435B90 = 0;
     D_00435B8C = 1;
     D_00435B94 = 0;
 }
 
-void kwlnResumeTaskScheduler(void) {
+void dds3PauseOff(void) {
     D_00435B8C = 0;
     D_00435B90 = 0;
     D_00435B94 = 0;
 }
 
-void kwlnSetTaskPauseCount(u32 pauseCount) {
+void dds3Stop(u32 pauseCount) {
     D_00435B90 = pauseCount;
     D_00435B8C = 1;
     D_00435B94 = 0;
 }
 
-void kwlnSetFrameControlParameters(u32 first, u32 second) {
+void dds3SlowOn(u32 first, u32 second) {
     s32 value = D_00435B84;
     D_00435B94 = 1;
     D_00435B98 = first;
@@ -148,7 +148,7 @@ void kwlnSetFrameControlParameters(u32 first, u32 second) {
     D_00435B90 = 0;
 }
 
-void kwlnResetFrameControl(void) {
+void dds3SlowOff(void) {
     D_00435B8C = 0;
     D_00435B98 = 4;
     D_00435B90 = 0;
@@ -161,11 +161,11 @@ void func_00100488(void) {
 void func_00100490(void) {
 }
 
-void fileClearMemoryCardOperationActive(void) {
+void dds3SoftResetOn(void) {
     D_00435B89 = 0;
 }
 
-void fileSetMemoryCardOperationActive(void) {
+void dds3SoftResetOff(void) {
     D_00435B89 = 1;
 }
 
@@ -175,11 +175,11 @@ extern s8 D_00435BB4;
 extern u16 D_00438A1E;
 extern u16 D_00438A24;
 extern u16 mnuMovieTaskState;
-extern void sdfSleepThreadCount(s32 count);
+extern void sdfWaitVblank(s32 count);
 extern void sdfGrReqDrawDelay(s32);
 extern void sdfPadBuildButtonStates(void);
-extern void sdfFileCmdThreadSetHiPrio(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
+extern void sdfFileCmdThreadSetHiPrio(void);
 
 extern s32 dds3ProcessMain(void);
 
@@ -189,20 +189,20 @@ void kwlnRunMainLoop(void) {
     kwlnInitializeRuntime();
     D_00438D80 = 0;
     while (D_00435B88 == 0) {
-        sdfSleepThreadCount(mnuMovieTaskState);
+        sdfWaitVblank(mnuMovieTaskState);
         sdfGrReqDrawDelay(mnuMovieTaskState - 1);
         sdfPadBuildButtonStates();
         if (D_00435BB4 != 0) {
-            sdfFileCmdThreadSetHiPrio();
+            sdfFileCmdThreadSetLoPrio();
         }
         if (D_00435B8C == 0) {
-            startTick = sdfReadTimerCount();
+            startTick = sdfGetRunTimeCountBase();
             kwlnUpdatePadInputState();
             if (dds3ProcessMain() == 0) {
                 break;
             }
             D_00435B80++;
-            D_00435BA8 = sdfGetElapsedTimerTicks(startTick) - D_00438A24;
+            D_00435BA8 = sdfGetRunTimeCount(startTick) - D_00438A24;
             D_00438D80 ^= 1;
             D_00435BAA = D_00438A1E;
         } else if (D_00435B90 > 0) {
@@ -213,14 +213,14 @@ void kwlnRunMainLoop(void) {
         }
         D_00435B84++;
         if (D_00435BB4 == 0) {
-            sdfFileCmdThreadSetLoPrio();
+            sdfFileCmdThreadSetHiPrio();
         }
     }
     LoadExecPS2("cdrom0:\\SLPS_999.99;1", 0, NULL);
 }
 
 /* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
-void kwlnTaskRemoveFromStateQueue(KwlnTask *task) {
+void DeleteProcessList(KwlnTask *task) {
     switch (task->flags & 0xF) {
     case 0:
         return;
@@ -276,7 +276,7 @@ void kwlnTaskRemoveFromStateQueue(KwlnTask *task) {
     }
 }
 
-void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask *task) {
+void AddProcessList(KwlnTask *task) {
     KwlnTask *cur;
     KwlnTask *prev;
 

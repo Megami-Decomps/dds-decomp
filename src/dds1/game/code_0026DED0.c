@@ -18,30 +18,30 @@ void mnuSpawnMovieParticleNodes(MnuSpriteResourceGroup *resource, SdfList *list,
     case 0:
         node = mnuCreateMovieParticleNode(resource, NULL, 0);
         node->mode = 3;
-        node->variant = sdfGetRandInt(NULL, 2);
+        node->variant = dds3GetRandIntA(NULL, 2);
         sdfListAppend(list, list->count, node);
         break;
     case 1:
-        chance = sdfGetRandFloat(NULL);
+        chance = dds3GetRandFloatA(NULL);
         if (chance < 0.8f) {
             node = mnuCreateMovieParticleNode(resource, parent, 0);
             node->mode = mode;
-            node->variant = sdfGetRandInt(NULL, 2);
+            node->variant = dds3GetRandIntA(NULL, 2);
             sdfListAppend(list, list->count, node);
         }
         /* The same roll can admit both branches. */
         if (chance < 0.9f) {
             node = mnuCreateMovieParticleNode(resource, parent, 1);
             node->mode = 2;
-            node->variant = sdfGetRandInt(NULL, 2);
+            node->variant = dds3GetRandIntA(NULL, 2);
             sdfListAppend(list, list->count, node);
         }
         break;
     case 2:
-        if (sdfGetRandFloat(NULL) < 0.8f) {
+        if (dds3GetRandFloatA(NULL) < 0.8f) {
             node = mnuCreateMovieParticleNode(resource, parent, 0);
             node->mode = mode;
-            node->variant = sdfGetRandInt(NULL, 2);
+            node->variant = dds3GetRandIntA(NULL, 2);
             sdfListAppend(list, list->count, node);
         }
         break;
@@ -49,7 +49,7 @@ void mnuSpawnMovieParticleNodes(MnuSpriteResourceGroup *resource, SdfList *list,
         for (i = 0; i < 6; i++) {
             node = mnuCreateMovieParticleNode(resource, parent, i);
             node->mode = 1;
-            node->variant = sdfGetRandInt(NULL, 2);
+            node->variant = dds3GetRandIntA(NULL, 2);
             sdfListAppend(list, list->count, node);
         }
         break;

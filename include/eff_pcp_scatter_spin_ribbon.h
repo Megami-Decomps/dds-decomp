@@ -133,9 +133,9 @@ typedef char PcpScatterRibbonWork_duplicateAllocation_offset_must_be_0x68[
     ((u32)&((PcpScatterRibbonWork *)0)->duplicateAllocation == 0x68) ? 1 : -1];
 
 /* Constructors copy these serialized parameter heads into runtime work. */
-PcpScatterSpinWork *effScatterCreateSpinWork(
+PcpScatterSpinWork *effPCPHamaCardSphereCreate(
     const PcpScatterSpinParams *params, u32 resource, void *particleParams);
-PcpScatterRibbonWork *effScatterCreateRibbonWork(
+PcpScatterRibbonWork *effPCPHamaCardScatterCreate(
     const PcpScatterRibbonParams *params, u32 resource, void *particleParams);
 
 #endif

@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-s32 kwlnTextureSetReferenceFlagIfPresent(void);
+s32 dds3RenderTextureON(void);
 
 #endif

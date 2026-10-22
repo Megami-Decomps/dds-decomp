@@ -16,16 +16,16 @@ extern SdfQuad fldLocalMapSecondCameraVector;
 
 
 
-extern void effObjSetInnerFloat(EffWorldNode *object, f32 value);
+extern void dds3GetRadiusPoseSet(EffWorldNode *object, f32 value);
 
 
-extern EffWorldNode *dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
+extern EffWorldNode *dds3AddCameraObjectBasicTypeFree(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
-    fldLocalMapCameraObject = dds3CreateCameraObject(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
-    dds3SetWorldNodeValue(fldLocalMapCameraObject, (u32)"Lmap_Cam");
-    effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);
+    fldLocalMapCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
+    dds3SetUnitObjectId(fldLocalMapCameraObject, (u32)"Lmap_Cam");
+    dds3GetRadiusPoseSet(fldLocalMapCameraObject, 2.0f);
+    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), fldLocalMapCameraObject);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", fldLocalMapCameraObject);

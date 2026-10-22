@@ -40,7 +40,7 @@
 #include "fr_font.h"
 #include "mnu_staff.h"
 /* Declared before first use (were implicit int). */
-extern void evtCreateEventScriptProcess(s32 eventId);
+extern void evtStartEvent(s32 eventId);
 extern void fldDrawCameraColorLayerPass(void);
 /* Original-style implicit int, kept: matched code depends on it: evtViewerCleanupMessageWindow. */
 
@@ -101,34 +101,34 @@ extern char D_003AF428[]; extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
+extern s32 evtStopEventBgm(s32 id, s32 fade);
 extern s32 mnuShopPrimarySpriteNames[];
 
 #define CAMP_TASK_PRIORITY 0x3EC
 
 
 /* Schedule the camp task only if no task currently owns this event ID. */
-KwlnTask *mnuCampCreateTask(s32 taskId) {
+KwlnTask *evtLoadEventPack(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
     EvtPackLoadState *taskData;
     KwlnTask *task;
 
-    task = evtFindTaskById(taskId);
+    task = evtSearchEventPack(taskId);
     if (task == 0) {
-        evtFormatTaskName(taskId, taskName);
+        evtMakeEventPackName(taskId, taskName);
         taskData = sdfChipAllocDirect(sizeof(EvtPackLoadState));
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
         taskData->eventId = taskId;
         taskData->loaded = 0;
-        task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, (u32)taskData);
+        task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtCheckScriptDone, evtWaitEventPackLoad, (u32)taskData);
     }
     return task;
 }
 
-void mnuCampDestroyTaskById(s32 taskId) {
+void evtKillEventPack(s32 taskId) {
     KwlnTask *taskHandle;
 
-    taskHandle = evtFindTaskById(taskId);
+    taskHandle = evtSearchEventPack(taskId);
     if (taskHandle != 0) {
         dds3KillProcess(taskHandle, 0);
         return;
@@ -356,8 +356,8 @@ void mnuInitializeCampPanelVisualDefaults(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e
     *e = 0.0f;
 }
 
-extern void evtBlendVectorRows(s32 enable, f32 t, f32 *first, f32 *second, f32 *out);
-extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 first, f32 second);
+extern void evtHokanSceneLight(s32 enable, f32 t, f32 *first, f32 *second, f32 *out);
+extern f32 evtHokanFloat(s32 enable, f32 t, f32 first, f32 second);
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **selected, EvtRuntimeChild **future);
 
 /* Sample three panel vectors and two scalar values from neighboring timeline keys. */
@@ -443,10 +443,10 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
         *outValueA = selectedValueA;
         *outValueB = selectedValueB;
     } else {
-        evtBlendVectorRows(blendMode, fraction, selectedRows, futureRows, outVectors[0]);
-        *outValueA = evtMovieInterpolateFloatIfEnabled(blendMode, fraction,
+        evtHokanSceneLight(blendMode, fraction, selectedRows, futureRows, outVectors[0]);
+        *outValueA = evtHokanFloat(blendMode, fraction,
                                                         selectedValueA, futureValueA);
-        *outValueB = evtMovieInterpolateFloatIfEnabled(blendMode, fraction,
+        *outValueB = evtHokanFloat(blendMode, fraction,
                                                         selectedValueB, futureValueB);
     }
 }
@@ -454,8 +454,8 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
 
 
 #include "sdf_packet_alloc.h"
-extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
-extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfMiscDrawAlphaPrim(SdfListHead *packet, s32 table, s32 mode);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
@@ -734,16 +734,16 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     mnuCampQuadColor[3] = display->color[3];
     variant = display->variant;
     if (display->color[3] != 0) {
-        packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(packetList);
+        packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(packetList);
         if (variant == 0) {
-            itfSendTablePacket(packetList, 0, 0);
+            itfMiscDrawAlphaPrim(packetList, 0, 0);
         } else if (variant == 1) {
-            itfSendTablePacket(packetList, 1, 0);
+            itfMiscDrawAlphaPrim(packetList, 1, 0);
         } else if (variant == 2) {
-            itfSendTablePacket(packetList, 2, 0);
+            itfMiscDrawAlphaPrim(packetList, 2, 0);
         }
-        itfQueueTextureBoundQuadPacket(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
+        itfMiscDrawSpritePrim(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
                                       0xFF, texture, 0, packetList);
         D_003255A8.append(&D_003255A8, packetList);
     }
@@ -866,7 +866,7 @@ void mnuCampInitFontResource(EvtRuntime *scene) {
     scene->glyph = 0;
     fontHandle = (s32)(u32)frFontBuildGlyphChain((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)fontHandle,
+    frSetDrawPosition((struct FrFontGlyph *)(u32)fontHandle,
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
@@ -880,7 +880,7 @@ void mnuCampCheckClockDivisor(void) {
     SdfGeneralHeapStats heapStats;
     s32 quotient;
 
-    sdfGetGeneralHeapStats(&heapStats);
+    sdfMemGetInfo(&heapStats);
     quotient = 1 / heapStats.totalBytes;
 }
 
@@ -891,7 +891,7 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
 }
 
 extern SdfTex *kwlnHeldTextureReference;
-extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
+extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
 extern void mnuShopSubmitDescriptor(EvtRuntime *scene);
 extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
@@ -902,7 +902,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
     switch (scene->menuState) {
     case 1:
         if (kwlnHeldTextureReference == 0) {
-            kwlnCreateHeldTextureBuffer(CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, 100.75f);
+            dds3AllocRenderTexture(CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
     case 3:
@@ -933,17 +933,17 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     s32 handle;
 
     if (scene->pendingResource == 0) {
-        handle = (s32)sdfAllocGeneralBlockHigh(0x70000);
+        handle = (s32)sdfMemAllocFromTailDirect(0x70000);
         scene->pendingResource = handle;
         scene->pendingWork = (s32)sdfMemLock((struct SdfMemBlock *)(handle));
     }
     memset((void *)scene->pendingWork, 0x40, 0x70000);
     surface = sdfPrimAllocDrawTag(0);
-    context = (SdfLinkedPacketList *)sdfAllocPacketAligned(0x10);
-    sdfClearLinkedPacketList(context);
-    sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xE0,
+    context = (SdfLinkedPacketList *)sdfGrAllocPacketBuff(0x10);
+    sdfPreDrawTagInit(context);
+    sdfLinkStoreFrameImage(surface, context, 0, 0, 0x200, 0xE0,
                                     scene->pendingWork, 0, 0, 0);
-    sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
+    sdfPreDrawChainLink((SdfPacketChain *)D_00325860, context);
     D_00325708.append(&D_00325708, surface);
 }
 
@@ -952,7 +952,7 @@ void mnuShopSubmitDescriptor(EvtRuntime *scene) {
 
     if (scene->pendingWork != 0) {
         drawPacket = sdfPrimAllocDrawTag(0);
-        sdfCreateDescriptorPacket(drawPacket,
+        sdfLinkLoadImage(drawPacket,
                                   kwlnHeldTextureReference->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   scene->pendingWork, 0);
@@ -991,9 +991,9 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     D_00368C20[1] = 0x180;
     D_00368C20[2] = 0x2000;
     D_00368C20[3] = 0xB90;
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    packet = (SdfPacket *)sdfAllocPacketAligned(0x40);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    packet = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
     packet[0].unk0 = 3;
     packet[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet[0].unk10 = ((u64)0x10000000 << 32) | 0x8002;
@@ -1002,8 +1002,8 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     packet[1].unk8 = 0x47;
     packet[1].unk10 = ((u64)(color >> 24) << 32) | 0x64;
     packet[1].unk18 = 0x42;
-    sdfAppendPacket(list, (u32)packet);
-    itfQueueTextureBoundQuadPacket(D_00368C10, D_00368C20, D_00368C30,
+    sdfDrawTagLink(list, (u32)packet);
+    itfMiscDrawSpritePrim(D_00368C10, D_00368C20, D_00368C30,
                                   0xFEFF9B, kwlnHeldTextureReference, 0, list);
     D_003255A8.append(&D_003255A8, list);
 }
@@ -1134,7 +1134,7 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
         do {
             s32 identifier = *idCursor++;
             processedCount++;
-            evtQueueValidatedBgmSoundCode(scene->windowContext->eventId, identifier);
+            evtStopEventBgm(scene->windowContext->eventId, identifier);
         } while (processedCount < scene->registeredCount);
     }
     scene->registeredCount = 0;
@@ -1257,7 +1257,7 @@ s32 campFlagRowValue(s32 row) {
     s32 i;
 
     for (i = 7; i >= 0; i--) {
-        if (mnuCampFlagRows[row].flag[i] > 0 && mdlFlagTest(mnuCampFlagRows[row].flag[i])) {
+        if (mnuCampFlagRows[row].flag[i] > 0 && evtBitCheck(mnuCampFlagRows[row].flag[i])) {
             return mnuCampFlagRows[row].value[i + 1];
         }
     }
@@ -1272,7 +1272,7 @@ s32 mnuCampFindActiveSlot(void) {
     u8 *slotTable = mnuShopRankPriceRows;
     s16 *flagId = (s16 *)(slotTable + CAMP_SLOT_LAST_ROW_OFFSET);
     for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--, flagId = (s16 *)((u8 *)flagId - CAMP_SLOT_ROW_STRIDE)) {
-        if (*flagId > 0 && mdlFlagTest(*flagId)) {
+        if (*flagId > 0 && evtBitCheck(*flagId)) {
             return rowIndex;
         }
     }
@@ -1356,19 +1356,19 @@ extern ShopProgressPriceScale mnuShopProgressPriceScales[];
 
 s32 mnuCampGetProgressStage(void) {
     s32 result = 0;
-    if (mdlFlagTest(0x970)) {
+    if (evtBitCheck(0x970)) {
         result = 1;
     }
-    if (mdlFlagTest(0x971)) {
+    if (evtBitCheck(0x971)) {
         result = 2;
     }
-    if (mdlFlagTest(0x972)) {
+    if (evtBitCheck(0x972)) {
         result = 3;
     }
-    if (mdlFlagTest(0x973)) {
+    if (evtBitCheck(0x973)) {
         result = 4;
     }
-    if (mdlFlagTest(0x974)) {
+    if (evtBitCheck(0x974)) {
         result = 5;
     }
     return result;
@@ -1420,7 +1420,7 @@ ShopScene *mnuShopCreateScene(void) {
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", &obj->messageResource);
-    evtCreateMessageWindowIfMissing((struct ItfMesSub *)obj->messageResource.dataAddress);
+    fclInitMessage((struct ItfMesSub *)obj->messageResource.dataAddress);
     D_003BC520 = obj->spriteResource;
     obj->pendingPriceStage = mnuCampGetShopPriceStage();
     obj->activePartyCount = mnuCountActivePartyEntries();
@@ -1437,7 +1437,7 @@ void mnuShopDestroyScene(KwlnTask *task) {
         mnuReleaseShopSceneSpriteResources(scene);
         mnuShopReleaseSceneObjects(scene);
         mnuDrainPanelTransitions(&scene->transitionWork, task);
-        dspCloseChannel();
+        fclDestroyMessage();
         evtReleaseResourcePairHandle(&scene->messageResource);
         sdfMemFreeDirect(scene->resourceHandle);
         D_003BC39C = 2;
@@ -2007,7 +2007,7 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
                 parameters->price = value;
             } else if ((u32)(i - 0x60) < 0x20) {
                 parameters = &mnuAppendWindowListNode(scene->window, D_003BAA84[i])->camp;
-                phase = evtGetSolarPhase();
+                phase = evtGetAgeOfMoon16();
                 value = mnuShopSolarPhaseSalePrices[i - 0x60][phase];
                 parameters->id = i;
                 parameters->value = value;
@@ -2031,7 +2031,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
-        frFontSetChildColors(handle, 0x80808040);
+        frSetFontColor(handle, 0x80808040);
         frFontDrawGlyphChain(handle, 0, flags);
         frDestroyFontRequestAfter(handle);
     }
@@ -2073,7 +2073,7 @@ extern void mnuSetValueListTransition(struct MenuList *, u32);
 extern s32 mnuDrawShopPanelTransition(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
-extern void sndReleaseTrackHandle(s32);
+extern void p2sdStopBGM(s32);
 
 extern s32 mnuDrawShopCommandPanel(ShopScene *context);
 
@@ -2112,12 +2112,12 @@ extern void mnuSelectLastListNode(struct MenuList *);
 
 /* Wait until both the keyword fade and the dispatch callback are idle. */
 s32 evtIsFadeDispatchIdle(void) {
-    s32 fading = kwlnFadeIsActive();
+    s32 fading = dds3FadeCheck();
 
     if (fading != 0) {
         return 0;
     }
-    return evtGetMessageWindowControlState() == 0;
+    return fclChkMessage() == 0;
 }
 
 /* Install a dispatch state table and point the popup at the shared shop entry. */
@@ -2622,7 +2622,7 @@ s32 evtQueryStateProgress(KwlnTask *callbackContext) {
     s32 dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (dispatchResult == 0) {
-        if ((((ShopScene *)stateAddress)->dispatchState == 0) && (evtGetMessageWindowControlState() == 0)) {
+        if ((((ShopScene *)stateAddress)->dispatchState == 0) && (fclChkMessage() == 0)) {
             s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
             if ((f32)progressTicks < 20.0f) {
@@ -2731,13 +2731,13 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
             }
         }
         if (input & 0xF0) {
-            sndSetSequenceVolumePan(1, 0x7F, 0x3F);
+            p2sdPlaySE(1, 0x7F, 0x3F);
         }
         if (input & 1) {
-            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            p2sdPlaySE(8, 0x7F, 0x3F);
         }
         if (input & 2) {
-            sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+            p2sdPlaySE(10, 0x7F, 0x3F);
         }
         break;
     }
@@ -2798,7 +2798,7 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     sprintf(text, D_003BC3B8, values->value * scene->counter);
     evtCopyEntryStringToActiveWindow(3, text);
     dspSetActive(1);
-    dspStartEntry(message);
+    fclStartMessage(message);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xB);
     scene->window->list->drawCallback = mnuDrawShopRowTextAndValue;
@@ -2882,7 +2882,7 @@ s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
             datAddCurrencyClamped(values->value * scene->counter);
             datGameState->inventory.counts[itemId] -= scene->counter;
             if (itemId == 0x6C) {
-                mdlFlagSet(0x97F);
+                evtBitOn(0x97F);
             }
             break;
         }
@@ -2908,7 +2908,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    if (*dispatchSlot == 0 && evtGetMessageWindowControlState() == 0) {
+    if (*dispatchSlot == 0 && fclChkMessage() == 0) {
         if (state->extraOption != 0) {
             selectedOperation = state->ownedWindows[0]->list->cursor->index + 1;
         } else {
@@ -2985,10 +2985,10 @@ s32 evtPlayDispatchModeCue(KwlnTask *task) {
     dspSetActive(1);
     switch (state->menuMode) {
     case 1:
-        dspStartEntry(5);
+        fclStartMessage(5);
         break;
     case 2:
-        dspStartEntry(6);
+        fclStartMessage(6);
         break;
     }
     return 1;
@@ -3025,7 +3025,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
     dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
-        if ((*dispatchSlot == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
+        if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == 0)) {
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)(u32)(((ShopScene *)stateAddress)->stateTable));
         }
         result = 0;
@@ -3081,8 +3081,8 @@ s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
 }
 
 u32 evtStartScriptFadeAndResetDisplayFlags(void) {
-    evtCreateEventScriptProcess(0x323);
-    kwlnFadeOutStart(0, 0, 0, 0xf);
+    evtStartEvent(0x323);
+    dds3FadeIn(0, 0, 0, 0xf);
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
     evtSetBoundedDisplayValue(1, 1);
@@ -3096,8 +3096,8 @@ u32 mnuShopMessageLeaveNoOp(void) {
 
 extern const char D_003AF528[];
 extern s32 evtIsActiveFlagSet(s32);
-extern void sndEnsureMidiBankResident(s32);
-extern void sndStartTrackExtended(s32);
+extern void p2sdLoadSMGFile(s32);
+extern void p2sdPlayBGMFade(s32);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF528);
 
@@ -3121,19 +3121,19 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
             if (allowed) {
                 switch (state->action) {
                 case 0:
-                    sndEnsureMidiBankResident(0x300000);
-                    sndStartTrackExtended(0x300000);
+                    p2sdLoadSMGFile(0x300000);
+                    p2sdPlayBGMFade(0x300000);
                     state->action = 1;
                     break;
 
                 case 1:
                     if (state->pendingPriceStage != 0) {
                         dspSetActive(1);
-                        dspStartEntry(state->pendingPriceStage + 0xD);
+                        fclStartMessage(state->pendingPriceStage + 0xD);
                         {
                             s32 flagIds[5] = {0x970, 0x971, 0x972, 0x973, 0x974};
 
-                            mdlFlagSet(flagIds[state->pendingPriceStage - 1]);
+                            evtBitOn(flagIds[state->pendingPriceStage - 1]);
                         }
                         state->action = 2;
                     } else {
@@ -3142,7 +3142,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     break;
 
                 case 2:
-                    if (evtGetMessageWindowControlState() == 0) {
+                    if (fclChkMessage() == 0) {
                         evtFinishMessageWindowAndNotify();
                         state->pendingPriceStage = mnuCampGetShopPriceStage();
                         state->action = 3;
@@ -3171,7 +3171,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                                 state->scanIndex = index + 1;
                                 dspSetActive(1);
                                 evtCopyEntryStringToActiveWindow(0, D_003BAA84[itemId]);
-                                dspStartEntry(13);
+                                fclStartMessage(13);
                                 break;
                             }
                             index++;
@@ -3186,7 +3186,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 }
 
                 case 4:
-                    if (evtGetMessageWindowControlState() == 0) {
+                    if (fclChkMessage() == 0) {
                         evtFinishMessageWindowAndNotify();
                         if (state->scanIndex == -1) {
                             if (state->pendingPriceStage == 2) {
@@ -3202,12 +3202,12 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
 
                 case 6:
                     dspSetActive(1);
-                    dspStartEntry(0x16);
+                    fclStartMessage(0x16);
                     state->action = 7;
                     break;
 
                 case 7:
-                    if (evtGetMessageWindowControlState() == 0) {
+                    if (fclChkMessage() == 0) {
                         evtFinishMessageWindowAndNotify();
                         state->action = 1;
                     }
@@ -3251,12 +3251,12 @@ u32 evtResetStateFlags(void) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 1);
     evtSetBoundedDisplayValue(1, 0);
-    sndReleaseTrackHandle(0x300000);
+    p2sdStopBGM(0x300000);
     return 1;
 }
 
 u32 evtStartFadeOut(void) {
-    kwlnFadeOutStart(0, 0, 0, 0);
+    dds3FadeIn(0, 0, 0, 0);
     return 1;
 }
 
@@ -3338,15 +3338,15 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
 
     for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_ENTRY_COUNT; pairIndex++) {
         snapshot[pairIndex].firstFlag = mnuSceneFlagEventEntries[pairIndex].requiredFlag;
-        snapshot[pairIndex].firstOn = mdlFlagTest(snapshot[pairIndex].firstFlag);
+        snapshot[pairIndex].firstOn = evtBitCheck(snapshot[pairIndex].firstFlag);
         snapshot[pairIndex].secondFlag = mnuSceneFlagEventEntries[pairIndex].handledFlag;
-        snapshot[pairIndex].secondOn = mdlFlagTest(snapshot[pairIndex].secondFlag);
+        snapshot[pairIndex].secondOn = evtBitCheck(snapshot[pairIndex].secondFlag);
     }
     for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_ENTRY_COUNT; pairIndex++) {
         snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag = mnuPartyFlagEventEntries[pairIndex].requiredFlag;
-        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag);
+        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstOn = evtBitCheck(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag);
         snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag = mnuPartyFlagEventEntries[pairIndex].handledFlag;
-        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag);
+        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondOn = evtBitCheck(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag);
     }
     return snapshotHandle;
 }
@@ -3359,15 +3359,15 @@ void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
     /* Scene pairs restore only their second flag; party pairs restore both. */
     for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_ENTRY_COUNT; pairIndex++) {
         if (snapshot[pairIndex].secondOn != 0) {
-            mdlFlagSet(snapshot[pairIndex].secondFlag);
+            evtBitOn(snapshot[pairIndex].secondFlag);
         }
     }
     for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_ENTRY_COUNT; pairIndex++) {
         if (snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstOn != 0) {
-            mdlFlagSet(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag);
+            evtBitOn(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag);
         }
         if (snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondOn != 0) {
-            mdlFlagSet(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag);
+            evtBitOn(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag);
         }
     }
 }

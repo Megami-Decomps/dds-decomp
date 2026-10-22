@@ -17,7 +17,7 @@
 #include "sdf.h"
 #include "sdf_texture_primary_buffer_api.h"
 
-extern void billAppendChildQuad(BillObj *, BillChildPayload *);
+extern void dds3BillboardTagLink(BillObj *, BillChildPayload *);
 extern void billAppendPairedQuadEntry(BillObj *, BillRenderPair *);
 
 
@@ -28,8 +28,8 @@ BillData *billCreateAnimationDataFromResource(void *resourceData);
 
 #include "sdf_packet_alloc.h"
 typedef struct DmaPacketHeader DmaPacketHeader;
-extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
-extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
+extern void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 source, s32 bytes);
+extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 billChildFacingReferenceAxis[4];
@@ -39,7 +39,7 @@ extern BillChildPayload *billPendingChildList;
 
 /* Keep each child's pending list synchronized with the instance's draw mode,
  * then append one quad to its fifteen-record streams. */
-void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
+void dds3BillboardTagLink(BillObj *obj, BillChildPayload *child) {
     f32 matrix[16];
     f32 direction[4];
     f32 dot;
@@ -57,21 +57,21 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     if (selected != obj->requestedPacketListIndex) {
         work = child->work;
         if (work->count > 0) {
-            vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+            vertexPacket = sdfBillBoardMakeN((const u128 *)work->positions, work->colors,
                 work->uv, work->offsets, work->count, 0);
-            sdfAppendPacket(child->pendingLists[selected], (u32)vertexPacket);
+            sdfDrawTagLink(child->pendingLists[selected], (u32)vertexPacket);
             work->count = 0;
         }
         selected = obj->requestedPacketListIndex;
         child->packetListIndex = selected;
     }
     if (child->pendingLists[selected] == NULL) {
-        child->pendingLists[selected] = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(child->pendingLists[selected]);
-        packet = sdfAllocPacketAligned(0x20);
-        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer(child->texture),
-            sdfTexGetPrimaryBufferSize(child->texture));
+        child->pendingLists[selected] = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(child->pendingLists[selected]);
+        packet = sdfGrAllocPacketBuff(0x20);
+        sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
+            (u32)sdfTexGetPacket(child->texture),
+            sdfTexGetPacketLength(child->texture));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
@@ -90,9 +90,9 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         } else {
             EE_MMI_UNIT_MATRIX(matrix);
         }
-        geometry = (u8 *)sdfAllocPacketAligned(0x38);
-        sdfInitGeometryDmaPacket(geometry, matrix);
-        sdfAppendPacket(child->pendingLists[selected], (u32)geometry);
+        geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
+        sdfBillBoardMakeTMPacket(geometry, matrix);
+        sdfDrawTagLink(child->pendingLists[selected], (u32)geometry);
         if (child->next == child) {
             child->next = billPendingChildList;
             billPendingChildList = child;
@@ -118,7 +118,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         work->offsets[index][7] = y + halfHeight;
     } else {
         cosine = sdfCos(obj->rotationAngle);
-        sine = sdfSinPoly(obj->rotationAngle);
+        sine = sdfSin(obj->rotationAngle);
         cornerX = x - halfWidth;
         cornerY = y - halfHeight;
         work->offsets[index][0] = cornerX * cosine - cornerY * sine;
@@ -138,9 +138,9 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     }
     work->count++;
     if (work->count == 15) {
-        vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
+        vertexPacket = sdfBillBoardMakeN((const u128 *)work->positions, work->colors,
             work->uv, work->offsets, 15, 0);
-        sdfAppendPacket(child->pendingLists[selected], (u32)vertexPacket);
+        sdfDrawTagLink(child->pendingLists[selected], (u32)vertexPacket);
         work->count = 0;
     }
 }
@@ -163,9 +163,9 @@ void billFlushPendingChildPackets(void) {
             s32 listIndex;
 
             if (count > 0) {
-                u32 *vertexPacket = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors, work->uv,
+                u32 *vertexPacket = sdfBillBoardMakeN((const u128 *)work->positions, work->colors, work->uv,
                                            work->offsets, count, 0);
-                sdfAppendPacket(node->pendingLists[node->packetListIndex], (u32)vertexPacket);
+                sdfDrawTagLink(node->pendingLists[node->packetListIndex], (u32)vertexPacket);
                 work->count = 0;
             }
 
@@ -193,7 +193,7 @@ extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferen
 extern f32 billPairFacingReferenceAxis[4];
 extern f32 billPairFacingScale[4];
 extern BillRenderPair *billPendingRenderPairList;
-extern void billFlushPairedQuadStreams(BillRenderPair *node);
+extern void dds3MultiBillboardPktLink(BillRenderPair *node);
 
 /* Initialize the paired texture/state list, then append one quad to each
  * child stream. The second child owns the geometry and common batch count. */
@@ -214,12 +214,12 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
     f32 cornerX, cornerY;
 
     if (node->packetList == NULL) {
-        node->packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-        sdfInitPacketList(node->packetList);
-        framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-        sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, framePacket, 0);
-        sdfAppendDmaTagToList(node->packetList, (u32)framePacket);
-        state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
+        node->packetList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(node->packetList);
+        framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
+        sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+        sdfDrawTagLinkRefGif(node->packetList, (u32)framePacket);
+        state = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
         state->dmaTag = 3;
         state->vifCommands = 0x5000000310000000ULL;
         state->gifTag = 0x1000000000008002ULL;
@@ -228,8 +228,8 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         state->testRegister = 0x47;
         state->alpha = 0x44;
         state->alphaRegister = 0x42;
-        sdfAppendPacket(node->packetList, (u32)state);
-        state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
+        sdfDrawTagLink(node->packetList, (u32)state);
+        state = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
         state->dmaTag = 3;
         state->vifCommands = 0x5000000310000000ULL;
         state->gifTag = 0x1000000000008002ULL;
@@ -248,18 +248,18 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
             break;
         }
         state->alphaRegister = 0x43;
-        sdfAppendPacket(node->packetList, (u32)state);
-        packet = sdfAllocPacketAligned(0x20);
-        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer(node->children[0]->texture),
-            sdfTexGetPrimaryBufferSize(node->children[0]->texture));
+        sdfDrawTagLink(node->packetList, (u32)state);
+        packet = sdfGrAllocPacketBuff(0x20);
+        sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
+            (u32)sdfTexGetPacket(node->children[0]->texture),
+            sdfTexGetPacketLength(node->children[0]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
-        packet = sdfAllocPacketAligned(0x20);
-        sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetOrInitializeSecondaryBuffer(node->children[1]->texture),
-            sdfTexGetSecondaryBufferSize(node->children[1]->texture));
+        packet = sdfGrAllocPacketBuff(0x20);
+        sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
+            (u32)sdfTexGetPacketCtx2(node->children[1]->texture),
+            sdfTexGetPacketCtx2Length(node->children[1]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
-        geometry = (u8 *)sdfAllocPacketAligned(0x38);
+        geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
@@ -277,8 +277,8 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         } else {
             EE_MMI_UNIT_MATRIX(matrix);
         }
-        sdfInitGeometryDmaPacket(geometry, matrix);
-        sdfAppendPacket(node->packetList, (u32)geometry);
+        sdfBillBoardMakeTMPacket(geometry, matrix);
+        sdfDrawTagLink(node->packetList, (u32)geometry);
         node->next = billPendingRenderPairList;
         billPendingRenderPairList = node;
     }
@@ -324,7 +324,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         work->offsets[index][7] = y + halfHeight;
     } else {
         cosine = sdfCos(obj->rotationAngle);
-        sine = sdfSinPoly(obj->rotationAngle);
+        sine = sdfSin(obj->rotationAngle);
         cornerX = x - halfWidth;
         cornerY = y - halfHeight;
         work->offsets[index][0] = cornerX * cosine - cornerY * sine;
@@ -345,15 +345,15 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
     PCP_COPY_VECTOR(work->positions[index], obj->position);
     work->count++;
     if (work->count == 7) {
-        billFlushPairedQuadStreams(node);
+        dds3MultiBillboardPktLink(node);
     }
 }
 
-extern u32 *sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes,
+extern u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttributes,
                    void *wordAttributes, s32 count, void *(*allocatePacket)(s32));
 
 /* Pair-mode streams flush after seven quads (see the entry renderer). */
-void billFlushPairedQuadStreams(BillRenderPair *pair) {
+void dds3MultiBillboardPktLink(BillRenderPair *pair) {
     u32 colors[7][2];
     u16 uv[7][4][4];
     BillPacketWork *data[2];
@@ -383,8 +383,8 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
         uv[quadIndex][3][2] = data[1]->uv[quadIndex].components[6];
         uv[quadIndex][3][3] = data[1]->uv[quadIndex].components[7];
     }
-    sdfAppendPacket(pair->packetList,
-        (u32)sdfBuildPairedQuadVifPacket((u128 *)data[1]->positions, colors, uv, data[1]->offsets, count, NULL));
+    sdfDrawTagLink(pair->packetList,
+        (u32)sdfMultiBillBoardMakeN((u128 *)data[1]->positions, colors, uv, data[1]->offsets, count, NULL));
     data[0]->count = 0;
     data[1]->count = 0;
 }
@@ -402,19 +402,19 @@ void billFlushPendingRenderPairs(void) {
         do {
             BillPacketWork *work = node->children[1]->work;
             if (work->count != 0) {
-                billFlushPairedQuadStreams(node);
+                dds3MultiBillboardPktLink(node);
             }
             D_00380228.append(&D_00380228, node->packetList);
             node->packetList = NULL;
             node = node->next;
         } while (node != NULL);
     }
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, texture, 0);
-    sdfAppendDmaTagToList(list, (u32)texture);
-    packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
+    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfDrawTagLinkRefGif(list, (u32)texture);
+    packet = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
     packet->vifCommands = 0x5000000310000000ULL;
     packet->gifTag = 0x1000000000008002ULL;
@@ -423,12 +423,12 @@ void billFlushPendingRenderPairs(void) {
     packet->testRegister = 0x47;
     packet->alpha = 0x48;
     packet->alphaRegister = 0x42;
-    sdfAppendPacket(list, (u32)packet);
+    sdfDrawTagLink(list, (u32)packet);
     D_00380228.append(&D_00380228, list);
     billPendingRenderPairList = NULL;
 }
 
-void billInitializeCommonDrawState(BillObj *billboard) {
+void dds3Billboard_BasicInit(BillObj *billboard) {
     f32 zero = 0.0f;
     f32 one = 1.0f;
     billboard->requestedPacketListIndex = 0;
@@ -450,7 +450,7 @@ BillObj *billAllocChild(SdfTextureFileHeader *resourceData) {
     obj = sdfChipAllocDirect(0x34);
     obj->child = NULL;
     if (resourceData != NULL) {
-        obj->child = billCreateChildPayloadFromTextureResource(resourceData);
+        obj->child = BillboardLoadTex(resourceData);
     }
     return obj;
 }
@@ -465,11 +465,11 @@ void billReleaseChild(BillObj *obj) {
     sdfChipFreeDirect(obj);
 }
 
-void billProcessChild(BillObj *obj) {
-    billAppendChildQuad(obj, obj->child);
+void dds3Billboard_NormalDraw(BillObj *obj) {
+    dds3BillboardTagLink(obj, obj->child);
 }
 
-BillObj *billAllocList(void *resourceData) {
+BillObj *dds3Billboard_P2ACreate(void *resourceData) {
     BillData *data;
     BillObj *newobj;
     s32 n;
@@ -486,11 +486,11 @@ BillObj *billAllocList(void *resourceData) {
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
     newobj->pair.cameraFacingMode = 0;
-    billSetAnimationEntry(newobj, 0);
+    dds3Billboard_P2ASetNumber(newobj, 0);
     return newobj;
 }
 
-BillObj *billCloneList(const BillObj *obj) {
+BillObj *dds3Billboard_P2ACopy(const BillObj *obj) {
     BillData *data;
     s32 n;
     BillObj *newobj;
@@ -504,18 +504,18 @@ BillObj *billCloneList(const BillObj *obj) {
     newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
-    billSetAnimationEntry(newobj, 0);
+    dds3Billboard_P2ASetNumber(newobj, 0);
     return newobj;
 }
 
-void billReleaseList(BillObj *obj) {
+void dds3Billboard_P2ADelete(BillObj *obj) {
     billReleaseSharedEntryBlock(obj->animationData);
     sdfChipFreeDirect(obj);
 }
 
 /* Advance an entry's frame timer and apply its current record to the shared
  * child payload. Plural descriptors are handled by the dispatcher instead. */
-BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *out) {
+BillChildPayload *dds3Billboard_P2AAnimDraw(BillObj *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
     BillData *data = obj->animationData;
     BillRecord *record;
@@ -580,7 +580,7 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
 }
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
-u32 effBillModulateColors(u32 colorA, u32 colorB) {
+u32 dds3Billboard_P2AColorMul(u32 colorA, u32 colorB) {
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -600,7 +600,7 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
 
 /* Indexed entries and restore order preserve the native PLUS and lifetimes;
  * see docs/idioms.md, "Trace-justified indexing: billboard update". */
-void billUpdateAnimation(BillObj *obj) {
+void dds3Billboard_P2ADraw(BillObj *obj) {
     BillChildPayload *child;
     u32 savedColor;
     f32 savedAngle;
@@ -622,14 +622,14 @@ void billUpdateAnimation(BillObj *obj) {
                 if (obj->resolvedEntries[i].frameIndex >= 0) {
                     f32 savedX;
                     f32 savedY;
-                    child = billStepAnimationEntryAndUpdateChild(obj, &obj->resolvedEntries[i]);
+                    child = dds3Billboard_P2AAnimDraw(obj, &obj->resolvedEntries[i]);
                     savedX = child->x;
                     savedY = child->y;
                     child->x = record->x;
                     child->y = -record->y;
-                    obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+                    obj->childParam = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
                     obj->rotationAngle += savedAngle;
-                    billAppendChildQuad(obj, child);
+                    dds3BillboardTagLink(obj, child);
                     child->x = savedX;
                     child->y = savedY;
                 } else {
@@ -645,24 +645,24 @@ void billUpdateAnimation(BillObj *obj) {
         if (obj->modeFlags & 0x40) {
             savedColor = obj->childParam;
             savedAngle = obj->rotationAngle;
-            child = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
-            obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+            child = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries);
+            obj->childParam = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
             obj->rotationAngle += savedAngle;
-            billAppendChildQuad(obj, child);
-            child = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries + 1);
-            obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+            dds3BillboardTagLink(obj, child);
+            child = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries + 1);
+            obj->childParam = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
             obj->rotationAngle += savedAngle;
-            billAppendChildQuad(obj, child);
+            dds3BillboardTagLink(obj, child);
             obj->rotationAngle = savedAngle;
             obj->childParam = savedColor;
         } else if (obj->modeFlags & 0x80) {
             u32 flags;
             savedColor = obj->childParam;
             savedAngle = obj->rotationAngle;
-            obj->pair.children[0] = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
-            obj->pair.colors[0] = effBillModulateColors(savedColor, obj->childParam);
-            obj->pair.children[1] = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries + 1);
-            obj->pair.colors[1] = effBillModulateColors(savedColor, obj->childParam);
+            obj->pair.children[0] = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries);
+            obj->pair.colors[0] = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
+            obj->pair.children[1] = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries + 1);
+            obj->pair.colors[1] = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
             flags = obj->resolvedEntries[1].entry->flags;
             if (flags & BILL_ANIMATION_FLAG_PACKET_LIST_2) {
                 obj->pair.kind = 2;
@@ -678,10 +678,10 @@ void billUpdateAnimation(BillObj *obj) {
         } else {
             savedColor = obj->childParam;
             savedAngle = obj->rotationAngle;
-            child = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
-            obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+            child = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries);
+            obj->childParam = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
             obj->rotationAngle += savedAngle;
-            billAppendChildQuad(obj, child);
+            dds3BillboardTagLink(obj, child);
             obj->rotationAngle = savedAngle;
             obj->childParam = savedColor;
         }
@@ -689,7 +689,7 @@ void billUpdateAnimation(BillObj *obj) {
 }
 
 /* Resolve a frame list and initialize its signed hold-time counter. */
-void billResolveEntry(BillData *animationData, s32 entryIndex, BillOut *resolvedEntry) {
+void dds3Billboard_P2ASetAnim(BillData *animationData, s32 entryIndex, BillOut *resolvedEntry) {
     s16 framesRemaining;
     s32 offset;
     BillAnimationEntry *entry;
@@ -709,7 +709,7 @@ void billResolveEntry(BillData *animationData, s32 entryIndex, BillOut *resolved
 #include "sdf_debug_api.h"
 
 /* Select an animation and initialize the plural records' signed start delays. */
-void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
+void dds3Billboard_P2ASetNumber(BillObj *obj, s32 animationEntryIndex) {
     BillData *data = obj->animationData;
     BillAnimationEntry *entry = data->entries + animationEntryIndex;
 
@@ -727,7 +727,7 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
         obj->entryCount = entry->frameCount;
         records = (BillPluralRecord *)(data->base + entry->offset);
         for (; i < entry->frameCount; i++) {
-            billResolveEntry(data, records[i].entryIndex, obj->resolvedEntries + i);
+            dds3Billboard_P2ASetAnim(data, records[i].entryIndex, obj->resolvedEntries + i);
             (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
         }
     } else if (entry->entryModeFlags & 0xC0) {
@@ -735,13 +735,13 @@ void billSetAnimationEntry(BillObj *obj, s32 animationEntryIndex) {
         obj->modeFlags = entry->entryModeFlags;
         obj->animationEntryIndex = animationEntryIndex;
         obj->entryCount = 2;
-        billResolveEntry(data, animationEntryIndex, obj->resolvedEntries);
-        billResolveEntry(data, animationEntryIndex + 1, obj->resolvedEntries + 1);
+        dds3Billboard_P2ASetAnim(data, animationEntryIndex, obj->resolvedEntries);
+        dds3Billboard_P2ASetAnim(data, animationEntryIndex + 1, obj->resolvedEntries + 1);
     } else {
         obj->modeFlags = 0;
         obj->entryCount = 1;
         obj->animationEntryIndex = animationEntryIndex;
-        billResolveEntry(data, animationEntryIndex, obj->resolvedEntries);
+        dds3Billboard_P2ASetAnim(data, animationEntryIndex, obj->resolvedEntries);
     }
     if (entry->entryModeFlags & 0x100) {
         printf("billAnim..P2A POLYGON\n");
@@ -771,7 +771,7 @@ BillData *billCreateAnimationDataFromResource(void *resourceData) {
     data->entries = (BillAnimationEntry *)(copiedBase + 8);
     data->children = (BillChildPayload **)(copiedBase + *(s32 *)copiedBase + 8);
     for (resourceIndex = 0; resourceIndex < childCount; resourceIndex++) {
-        data->children[resourceIndex] = billCreateChildPayloadFromTextureResource(
+        data->children[resourceIndex] = BillboardLoadTex(
             (SdfTextureFileHeader *)(sourceBytes + *childOffsetCursor++));
     }
     data->entryCount = data->listRefCount = 1;
@@ -818,7 +818,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
     BillChildPayload *record;
 
     if (obj->kind == 1) {
-        record = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
+        record = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries);
     } else if (obj->kind == 0 || obj->kind == 3) {
         record = obj->child;
     } else {
@@ -834,11 +834,11 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
 
 extern BillDispatch D_003AA990[];
 
-BillObj *billCreateIndexed(s32 index, u32 data) {
+BillObj *dds3BillboardCreate(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_003AA990[index].func(data);
-    billInitializeCommonDrawState(newobj);
+    dds3Billboard_BasicInit(newobj);
     newobj->kind = index;
     newobj->callback = D_003AA990[index].callback;
     return newobj;
@@ -849,27 +849,27 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
     BillObj *billboard;
     u32 header[4];
 
-    allocation = sdfReadNamedResource(path, header, 0);
-    billboard = billCreateIndexed(kind, header[0]);
+    allocation = sdfDevLoadFileEx(path, header, 0);
+    billboard = dds3BillboardCreate(kind, header[0]);
     sdfMemFreeDirect(allocation);
     return billboard;
 }
 
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
-BillObj *billCloneObjectRetainingSharedData(const BillObj *source) {
+BillObj *dds3BillboardCopy(const BillObj *source) {
     BillObj *copy;
     BillChildPayload *data;
     u16 sourceKind;
     void (*sourceCallback)();
 
     if (source->kind == 1) {
-        copy = billCloneList(source);
-        billInitializeCommonDrawState(copy);
+        copy = dds3Billboard_P2ACopy(source);
+        dds3Billboard_BasicInit(copy);
         copy->kind = source->kind;
         copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
-        billInitializeCommonDrawState(copy);
+        dds3Billboard_BasicInit(copy);
         sourceKind = source->kind;
         data = source->child;
         sourceCallback = source->callback;
@@ -881,10 +881,10 @@ BillObj *billCloneObjectRetainingSharedData(const BillObj *source) {
     return copy;
 }
 
-void billDispatchByKind(BillObj *obj) {
+void dds3BillboardDelete(BillObj *obj) {
     D_003AA990[obj->kind].destroy(obj);
 }
 
-void billInvokeCallback(BillObj *obj) {
+void dds3BillboardDraw(BillObj *obj) {
     obj->callback(obj);
 }

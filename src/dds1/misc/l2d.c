@@ -8,13 +8,13 @@
 extern SdfPoolNode D_003255A8;
 
 /* Emit one filled rectangle into a fresh packet list. */
-void l2dDrawColoredRect(void *rectangleData)
+void dds3FontReqDrawBoxLine(void *rectangleData)
 {
     Dds3L2dRectangle *rect = rectangleData;
     SdfListHead *list;
 
     list = (SdfListHead *)sdfPrimAllocDrawTag(0);
-    sdfAppendClosedRectanglePacket(list, rect->color, 0, rect->left, rect->top,
+    sdfPrimLinkBoxLine(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);
     D_003255A8.append(&D_003255A8, list);
@@ -23,7 +23,7 @@ void l2dDrawColoredRect(void *rectangleData)
 extern Dds3IntrusiveNodeCallbacks D_003BAAD8;
 
 /* Allocate a rectangle record and register it with its owner list. */
-Dds3L2dRectangle *l2dCreateOwnedColoredRectangle(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
+Dds3L2dRectangle *dds3FontReqAddBox(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
     Dds3L2dRectangle *rect = sdfAllocAndClearQuadwords(sizeof(Dds3L2dRectangle));
 
     rect->left = left;
@@ -32,7 +32,7 @@ Dds3L2dRectangle *l2dCreateOwnedColoredRectangle(s32 left, s32 top, s32 depth, s
     rect->height = height;
     rect->depth = depth;
     rect->color = color;
-    dds3RegisterOwnedIntrusiveNode(&rect->owner, &D_003BAAD8);
+    dds3FontReqListAdd(&rect->owner, &D_003BAAD8);
     return rect;
 }
 

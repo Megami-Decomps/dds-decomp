@@ -29,7 +29,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
-extern s32 fldFindTableEntry(s32 index);
+extern s32 fldDoor_ElvTakasaToFloor(s32 index);
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -80,13 +80,13 @@ extern s32 fldTestDrawUpdate(KwlnTask *task);
 
 extern void fldClearCameraMoveMode(void);
 
-extern void fldSetCameraMoveMode(s32);
+extern void fldSetElvCameraScene(s32);
 
 
 
 extern FldActivationEntry D_0034C8F0[256];
 
-extern void fldActivateObjectById(s32);
+extern void fldFindTakaraSlot(s32);
 
 
 extern void ptyReturnOne(s32);
@@ -108,21 +108,21 @@ void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[5] = second;
 }
 
-struct SdfListHead *sdfCreateResetPacketList(void) {
-    struct SdfListHead *packet = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+struct SdfListHead *dds3FontReqAllocDrawTag(void) {
+    struct SdfListHead *packet = (struct SdfListHead *)sdfGrAllocPacketBuff(0x20);
 
-    sdfInitPacketList(packet);
+    sdfDrawTagInit(packet);
     return packet;
 }
 
 /* Build the 0x80-byte bordered rectangle packet: the rectangle with its two color words, then its outline corners. */
-u64 *sdfCreateBorderedRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
+u64 *dds3PrimFrameRect(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
     u64 *packet;
     s32 right;
     s32 bottom;
     u64 depthHigh;
 
-    packet = (u64 *)sdfAllocPacketAligned(0x80);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x80);
     packet[0] = 7;
     right = x + width;
     bottom = y + height;
@@ -145,8 +145,8 @@ u64 *sdfCreateBorderedRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 he
     return packet;
 }
 
-u64 *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
-    u64 *packet = (u64 *)sdfAllocPacketAligned(0x50);
+u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x50);
 
     packet[0] = 4;
     packet[1] = 0x5000000400000000ULL;
@@ -168,7 +168,7 @@ extern const f32 D_0032B090[4];
 extern const u8 D_0032B060[20][2];
 
 /* Build the light-direction gizmo packet: 20 GS lines over 13 transformed outline points. */
-void *func_0011D6B0(s32 x, s32 y, s32 z, s32 highlighted) {
+void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
     u64 xyz[13];
     u64 color[13];
     volatile f32 axis[4] __attribute__((aligned(16)));
@@ -222,7 +222,7 @@ void *func_0011D6B0(s32 x, s32 y, s32 z, s32 highlighted) {
         color[i] = (u32)(shade * point[2] | 0x80000000) | ((u64)0x3F800000 << 32);
     }
 
-    packet = (u64 *)sdfAllocPacketAligned(0x2C0);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x2C0);
     packet[0] = 0x2B;
     packet[1] = 0x5000002B00000000ULL;
     packet[2] = 0x1400000000000001ULL;
@@ -297,7 +297,7 @@ void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 minimum, f32 maxi
     *controlledValue = adjustedValue;
 }
 
-void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
+void dds3DebugFloatEdit(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
     fldStepValueByPad(value, D_00324530, min, max, step, bigStep);
 }
 
@@ -386,7 +386,7 @@ void fldStepIntByPad(void *valueAddress, s32 storageType, s64 min, s64 max, s64 
     }
 }
 
-void fldAdjustIntegerUsingMainPad(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep) {
+void dds3DebugIntEdit(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep) {
     fldStepIntByPad(valueAddress, storageType, min, max, step, bigStep, (s8 *)D_00324530);
 }
 
@@ -456,13 +456,13 @@ s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *padState) {
     return updatedColor != originalColor;
 }
 
-void fldStepColorChannelByCurrentPad(u32 *color, s32 channel) {
+void dds3DebugColorEdit(u32 *color, s32 channel) {
     fldStepColorChannelByPad(color, channel, D_00324530);
 }
 
 /* Emit one whole-value character and two fractional digits after rounding.
  * At whole >= 10 only the fractional digits become 9; whole is not clamped. */
-void fldFormatSecondsText(char *text, f32 displayValue) {
+void dds3MenuStepValue(char *text, f32 displayValue) {
     s32 whole;
     s32 tenths;
     s32 hundredths;
@@ -486,16 +486,16 @@ void fldFormatSecondsText(char *text, f32 displayValue) {
     text[4] = 0;
 }
 
-extern u64 *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
+extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_0032B0A0[];
 
 extern char *D_0032B0A8[];
 
 /* Draw three RGB value rows and their clamped colour preview. */
-void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values) {
+void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *values) {
     char text[16];
     u32 color = 0x80000000;
     s32 i;
@@ -514,10 +514,10 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
         }
         color |= 0x80000000;
     }
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x510, y + 0x18,
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x510, y + 0x18,
                      0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y,
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y,
                         0xFF0080, D_0032B0A0[i], D_0032B0A8[i]));
         style = selected == i ? 6 : 0;
         if (values == NULL) {
@@ -527,9 +527,9 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
             text[3] = '-';
             text[4] = 0;
         } else {
-            fldFormatSecondsText(text, values[i]);
+            dds3MenuStepValue(text, values[i]);
         }
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x + 0x180,
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x + 0x180,
                         y, 0xFF0080, style, text));
         y += 0x60;
     }
@@ -545,7 +545,7 @@ extern char D_003BAAF8[];
 
 extern char D_003BAB00[];
 
-void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
+void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
                    u32 color, s32 showNormalized) {
     s32 i;
     s32 style;
@@ -553,7 +553,7 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
     const char *label;
 
     color = (color & 0xFFFFFF) | 0x80000000;
-    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x510, y + 0x18,
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x510, y + 0x18,
                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
         switch (i) {
@@ -573,15 +573,15 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
             channel = (color >> 16) & 0xFF;
             break;
         }
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
                         x, y, 0xFF0080, style, label));
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
                         x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
                         D_003BAAF8, channel));
         if (showNormalized != 0) {
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
                             x, y + 0x180, 0xFF0080, style, label));
-            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
                             x + 0x240, y + 0x180, 0xFF0080, 0,
                             D_003BAB00, channel * (1.0f / 255.0f)));
         }
@@ -589,17 +589,17 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
     }
 }
 
-u32 fldIsUpdateInhibited(void) {
+u32 dds3NullDrawProc(void) {
     return 0;
 }
 
 
 
-extern void fldSetGsAlphaBlendEquation(s32);
+extern void rsetAlpha(s32);
 
-extern void fldSelectDisplayBuffer(u32);
+extern void rsetOtOfs(u32);
 
-extern void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
+extern void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
                                 f32 x0, f32 y0, f32 z0,
                                 f32 x1, f32 y1, f32 z1,
                                 f32 x2, f32 y2, f32 z2);
@@ -626,11 +626,11 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
         return;
     }
     if ((u32)(fldAreaState.area - 0xC9) < 0x12B) {
-        fldSelectDisplayBuffer(0x20);
+        rsetOtOfs(0x20);
     } else {
-        fldSelectDisplayBuffer(0x39);
+        rsetOtOfs(0x39);
     }
-    fldSetGsAlphaBlendEquation(5);
+    rsetAlpha(5);
     fade = fade / 2;
     color = (fade * 7 * 16 / 128) & 0xFF;
     if (color > 0x70) {
@@ -648,74 +648,74 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
         angle = (i + 360) % 360;
         prev = (i + 350) % 360;
         a = (f32)angle * 3.14f / 180.0f;
-        sinA = sdfSinPoly(a) * radius;
+        sinA = sdfSin(a) * radius;
         cosA = sdfCos(a) * radius;
         b = (f32)prev * 3.14f / 180.0f;
-        sinB = sdfSinPoly(b) * radius;
+        sinB = sdfSin(b) * radius;
         cosB = sdfCos(b) * radius;
-        fldSubmitGsTriangle(color, 0x80101010, 0x80101010,
+        fldDrawPoly3(color, 0x80101010, 0x80101010,
                             x + 0.0f, y - 2.0f, z + 0.0f,
                             x + sinA, y - 2.0f, z + cosA,
                             x + sinB, y - 2.0f, z + cosB);
     }
-    fldSetGsAlphaBlendEquation(0);
+    rsetAlpha(0);
 }
 
-extern u8 fldGetCampSceneControlMode(void);
+extern u8 fldProcCampChk(void);
 
-extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void fldSetGsAlphaBlendEquation(s32);
+extern void rsetAlpha(s32);
 
 extern void fldDrawCameraColorScrollingGradient(void);
 
-extern void fldDrawSkyGradient(void);
+extern void fldSkyDrawFilter(void);
 
 extern void fldSubmitTexturedOverlaySprite(void);
 
 extern u32 fldDisplayStateWords[];
 
-extern void fldSelectDisplayBuffer(u32);
+extern void rsetOtOfs(u32);
 
 s32 fldTestDrawUpdate(KwlnTask *task) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
-    if (fldGetCampSceneControlMode() == 1) {
+    if (fldProcCampChk() == 1) {
         return 0;
     }
-    fldSelectDisplayBuffer(0x53);
-    fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
-    fldSetGsAlphaBlendEquation(0);
+    rsetOtOfs(0x53);
+    rsetTest(1, 0, 0x81, 3, 0, 0, 1, 1);
+    rsetAlpha(0);
     fldDrawCameraColorScrollingGradient();
-    fldDrawSkyGradient();
+    fldSkyDrawFilter();
     if (fldDisplayStateWords[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
-            fldSelectDisplayBuffer(0x53);
+            rsetOtOfs(0x53);
         } else {
-            fldSelectDisplayBuffer(0x5E);
+            rsetOtOfs(0x5E);
         }
         fldSubmitTexturedOverlaySprite();
     }
-    fldSelectDisplayBuffer(0x27);
-    fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    fldSetGsAlphaBlendEquation(0);
-    fldSelectDisplayBuffer(0x39);
-    fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    fldSetGsAlphaBlendEquation(0);
+    rsetOtOfs(0x27);
+    rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
+    rsetOtOfs(0x39);
+    rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
     return 0;
 }
 
-void fldTestDrawCreate(void) {
+void InitOoyTest(void) {
     dds3StartProcess(D_0039FA00, 0x2AF8, 0, 0, fldTestDrawUpdate, 0, 0);
 }
 
-void fldTestDrawDestroy(void) {
+void KillOoyTest(void) {
     dds3KillProcessName(D_0039FA00, 1);
 }
 
 extern void frSetFontDrawOT(u32);
-extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 first, const u8 *second);
+extern void fldKanjiDraw(s32 x, s32 y, u32 first, const u8 *second);
 extern char D_0032C840[13][4];
 
 static inline char *fldNumberGlyphText(s32 index) {
@@ -731,7 +731,7 @@ void fldDrawPercentValue(s32 x, s32 y, s32 value) {
     frSetFontDrawOT(0x54);
     if (value > 1000) {
         s32 halfY = y / 2;
-        fldDrawConvertedTextGlyph(x, halfY, 0xA09DC380, (const u8 *)fldNumberGlyphText(12));
+        fldKanjiDraw(x, halfY, 0xA09DC380, (const u8 *)fldNumberGlyphText(12));
         return;
     }
     text[0] = 0;
@@ -758,14 +758,14 @@ void fldDrawPercentValue(s32 x, s32 y, s32 value) {
     }
     x += 0x10;
     strcat(text, fldNumberGlyphText(11));
-    fldDrawConvertedTextGlyph(x, y / 2, 0xA09DC380, (const u8 *)text);
+    fldKanjiDraw(x, y / 2, 0xA09DC380, (const u8 *)text);
 }
 
-void fldConfigureCameraMoveTracking(s32 start, s32 end) {
+void fldElvSetFloor(s32 start, s32 end) {
     s32 first;
     s32 endEntry;
 
-    first = fldFindTableEntry(start);
+    first = fldDoor_ElvTakasaToFloor(start);
     fldCameraMoveTrackingCancelPressed = 0;
     fldCameraMoveTrackingStart = first;
     if (first > 1000) {
@@ -780,7 +780,7 @@ void fldConfigureCameraMoveTracking(s32 start, s32 end) {
         fldCameraMoveTrackingStartLabel = -999;
     }
 
-    endEntry = fldFindTableEntry(end);
+    endEntry = fldDoor_ElvTakasaToFloor(end);
     fldCameraMoveTrackingTarget = endEntry;
     if (endEntry > 1000) {
         fldCameraMoveTrackingTargetLabel = endEntry;
@@ -796,9 +796,9 @@ void fldConfigureCameraMoveTracking(s32 start, s32 end) {
     if (fldCameraMoveTrackingCurrent != -999 && fldCameraMoveTrackingStepFrames != -999) {
         fldCameraMoveTrackingStepFrames++;
         if (fldCameraMoveTrackingStart < fldCameraMoveTrackingTarget) {
-            fldSetCameraMoveMode(1);
+            fldSetElvCameraScene(1);
         } else {
-            fldSetCameraMoveMode(-1);
+            fldSetElvCameraScene(-1);
         }
     }
 }
@@ -816,15 +816,15 @@ void fldResetCameraMoveTracking(void) {
 }
 
 /* Return 2 for pending mode, 1 when tracking requests a move, or 0 otherwise. */
-s32 fldEvaluateCameraMoveTracking(void) {
+s32 fldElvCheckEnd(void) {
     if (fldCameraMoveTrackingCancelPressed == 1) {
         return 2;
     }
     if (fldCameraMoveTrackingStepFrames != FIELD_CAMERA_TRACKING_UNSET && fldCameraMoveTrackingCurrent == fldCameraMoveTrackingTarget) {
         if (fldCameraMoveTrackingStart < fldCameraMoveTrackingCurrent) {
-            fldSetCameraMoveMode(2);
+            fldSetElvCameraScene(2);
         } else {
-            fldSetCameraMoveMode(-2);
+            fldSetElvCameraScene(-2);
         }
         return 1;
     }
@@ -833,14 +833,14 @@ s32 fldEvaluateCameraMoveTracking(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldUpdateCameraMoveTracking);
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldElvDrawFloorNum);
 
 
-extern void fldSelectDisplayBuffer(u32);
+extern void rsetOtOfs(u32);
 
-extern void fldSubmitBackgroundResourcePacket(void);
+extern void fldDrwZSave(void);
 
-extern void fldSubmitBackgroundDescriptorPacket(void);
+extern void fldDrwZLoad(void);
 
 extern s32 D_0032E3C0[];
 
@@ -851,33 +851,33 @@ enum {
 
 /* Submit both background packets when a world-list-5 object passes the flag checks.
  * The whole value chain is visited and destroyed before the scene override. */
-void fldSubmitVisibleWorldBackground(void) {
+void drawSceneBasicList(void) {
     s32 hasEligibleBackground = 0;
     WorldIndexNode *objectChain;
     EffWorldNode *worldObject;
 
-    objectChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 5);
+    objectChain = dds3SceneBasicGetList(dds3GetControlScene(), 5);
     if (objectChain != 0) {
-        if (dds3ResetObjectValueCursor((WorldValueIndices *)objectChain) != 0) {
+        if (dds3SetFirstBasicArray((WorldValueIndices *)objectChain) != 0) {
             do {
-                worldObject = (EffWorldNode *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)objectChain);
+                worldObject = (EffWorldNode *)dds3GetBasicArray((WorldValueIndices *)objectChain);
                 if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
                     if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
                         hasEligibleBackground = 1;
                     }
                 }
-            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)objectChain) != 0);
+            } while (dds3SetNextBasicArray((WorldValueIndices *)objectChain) != 0);
         }
-        dds3DestroyWorldIndexNode(objectChain);
+        dds3FreeBasicArrayHandle(objectChain);
     }
     if (D_0032E3C0[0] == 1) {
         hasEligibleBackground = 0;
     }
     if (hasEligibleBackground != 0) {
-        fldSelectDisplayBuffer(0x24);
-        fldSubmitBackgroundResourcePacket();
-        fldSelectDisplayBuffer(0x26);
-        fldSubmitBackgroundDescriptorPacket();
+        rsetOtOfs(0x24);
+        fldDrwZSave();
+        rsetOtOfs(0x26);
+        fldDrwZLoad();
     }
 }
 
@@ -893,17 +893,17 @@ void fldSubmitVisibleWorldBackground(void) {
 #include "sdf.h"
 
 /* All declarations below refer to the existing primary runtime owners. */
-extern EvtUnit *effObjGetTransitionWork(EffWorldNode *);
-extern void *dds3GetWorldObject(void);
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
-extern void fldCalcTrianglePlane(f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
-extern void fldSubmitGsRect(s32, s32, s32, s32, u32, u32, u32, u32);
+extern EvtUnit *dds3GetUnitHandleObjectBasic(EffWorldNode *);
+extern void *dds3GetActiveScene(void);
+extern EffWorldNode *dds3SearchSceneBasic(EffWorldNode *, u32, s32);
+extern s32 sdfModelGetMarkPos(SdfModel *, s32);
+extern void fldMakeEveHitPlanes(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void aDrawBoxF_Direct(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void fldSubmitPrimaryFramePacket(void);
 extern void fldSubmitAlternateFramePacket(void);
 extern void fldPrepareProjectionMatrix(void);
-extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
+extern void *sdf3DPrimMakePoly(SdfPrimitiveRequest *);
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern u32 fldDisplayRow;
 extern u32 D_003BACEC;
@@ -942,7 +942,7 @@ extern s32 D_0032C608[][3], D_0032C750[][3];
 
 /* Submits the accumulated strip request and starts an empty one. */
 static inline void fldFlushShadowStrip(SdfListHead *list, SdfPrimitiveRequest *request) {
-    sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(request));
+    sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(request));
     request->stripWordCount = 0;
     request->vertexCount = 0;
 }
@@ -1045,10 +1045,10 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     triangleStrip = D_0032C8C0;
     quadStrip = D_0032C880;
     opacity = 100.0f;
-    base = dds3GetObjectOwnedHandle(object);
+    base = dds3GetBaseControlWorkData(object);
     model = ((MdlCtx *)dds3ObjectBaseGetModelHandle(object))->inner;
     if (dds3ObjectBaseCheckFlag(object, 0x4000)) {
-        transition = effObjGetTransitionWork(object);
+        transition = dds3GetUnitHandleObjectBasic(object);
         D_003BAB28 = transition->shadowLevel;
         D_003BAB2C = 1;
     } else if (D_003BAB2C == 1) {
@@ -1063,9 +1063,9 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     secondVertex[1] = 0.0f;
     secondVertex[2] = 0.0f;
     secondVertex[3] = 1.0f;
-    fldSelectDisplayBuffer(0x25);
+    rsetOtOfs(0x25);
     if (fldAreaState.area >= 500) {
-        transition = effObjGetTransitionWork(object);
+        transition = dds3GetUnitHandleObjectBasic(object);
         if (transition != NULL) {
             if (transition->flags & 0x40000) {
                 D_003C2E90[0] = transition->vec10[0];
@@ -1090,9 +1090,9 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
                 }
                 length = 200.0f;
             } else {
-                target = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), data->activeId, 9);
-                transition = effObjGetTransitionWork(object);
-                if (sdfLoadMapRecordPositionVector(transition->owner->inner, 0)) {
+                target = dds3SearchSceneBasic(dds3GetActiveScene(), data->activeId, 9);
+                transition = dds3GetUnitHandleObjectBasic(object);
+                if (sdfModelGetMarkPos(transition->owner->inner, 0)) {
                     VU0_STORE_VF_UNCLOBBERED(vf10, anchorPosition);
                     D_003C2E90[0] = anchorPosition[0] - target->inner->position[0];
                     D_003C2E90[1] = anchorPosition[1] - target->inner->position[1];
@@ -1191,9 +1191,9 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
     VU0_LOAD_VF_PTR(vf10, viewDirection);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF_UNCLOBBERED(vf10, viewDirection);
-    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    fldSetGsAlphaBlendEquation(1);
-    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(1);
+    aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
 
     for (slot = 0; slot < base->resourceSlotCount; slot++) {
         i = base->resourceSlots[slot];
@@ -1327,7 +1327,7 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
             planeVertices[2][1] = thirdVertex[1];
             planeVertices[2][2] = thirdVertex[2];
             planeVertices[2][3] = thirdVertex[3];
-            fldCalcTrianglePlane(planeVertices[0], &plane[0], &plane[1], &plane[2], &plane[3]);
+            fldMakeEveHitPlanes(planeVertices[0], &plane[0], &plane[1], &plane[2], &plane[3]);
             VU0_LOAD_VF_PTR(vf10, plane);
             VU0_NORMALIZE_VF10();
             VU0_LOAD_VF_PTR(vf11, D_003C2E90);
@@ -1416,13 +1416,13 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
         }
         minimumX = minimumY = 4096.0f;
         maximumX = maximumY = -4096.0f;
-        fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 3);
+        rsetTest(1, 0, 0x80, 1, 0, 0, 1, 3);
         fldSubmitPrimaryFramePacket();
         for (pass = 0; pass < 2; pass++) {
-            quadList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-            sdfInitPacketList(quadList);
-            sdfConsAppendClearPacket(quadList, NULL);
-            sdfConsAppendAssetPacket(quadList, (void *)D_003BACEC, NULL);
+            quadList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(quadList);
+            sdf3DPrimLinkResetTm(quadList, NULL);
+            sdf3DPrimLinkMat(quadList, (void *)D_003BACEC, NULL);
             memset(&quadRequest, 0, sizeof(quadRequest));
             quadRequest.positions = quadVertices;
             quadRequest.strip = quadStrip.words;
@@ -1430,10 +1430,10 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
             quadRequest.vertexCount = 0;
             if (pass == 0) quadRequest.color = 0x80000000;
             else quadRequest.color = 0;
-            triangleList = (SdfListHead *)sdfAllocPacketAligned(0x20);
-            sdfInitPacketList(triangleList);
-            sdfConsAppendClearPacket(triangleList, NULL);
-            sdfConsAppendAssetPacket(triangleList, (void *)D_003BACEC, NULL);
+            triangleList = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(triangleList);
+            sdf3DPrimLinkResetTm(triangleList, NULL);
+            sdf3DPrimLinkMat(triangleList, (void *)D_003BACEC, NULL);
             memset(&triangleRequest, 0, sizeof(triangleRequest));
             triangleRequest.positions = triangleVertices;
             triangleRequest.strip = triangleStrip.words;
@@ -1567,16 +1567,16 @@ void fldDrawEffectObjectShadow(EffWorldNode *object) {
             fldAppendToDisplaySurface(quadList);
         }
         fldSubmitAlternateFramePacket();
-        fldSubmitFrameQuad(1, 1, 0x80, 1, 1, 1, 1, 3);
-        fldSetGsAlphaBlendEquation(0);
+        rsetTest(1, 1, 0x80, 1, 1, 1, 1, 3);
+        rsetAlpha(0);
         alpha = (s32)((f32)D_003BAB28 * opacity / 100.0f);
         if (alpha < 0) alpha = 0;
-        fldSubmitGsRect((s32)(minimumX * 16.0f), (s32)(minimumY * 16.0f),
+        aDrawBoxF_Direct((s32)(minimumX * 16.0f), (s32)(minimumY * 16.0f),
                         (s32)(maximumX * 16.0f), (s32)(maximumY * 16.0f),
                         0, 0, 0, alpha);
     }
-    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
-    fldSetGsAlphaBlendEquation(0);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    rsetAlpha(0);
 }
 
 extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032E5C8[];
@@ -1586,26 +1586,26 @@ extern FldNpcMotion D_00336A60[];
 extern FldCameraSetting *fldCameraSettings;
 
 void fldLoadFieldTables(void) {
-    DevState *command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
+    DevState *command = sdfFileOpen("/fld/f/bin/FLDALL.TBL");
 
-    sdfDevQueueReadAndWait(command, D_0033EC90, 0x3D8);
-    sdfDevQueueReadAndWait(command, D_0033F068, 0x3800);
-    sdfDevQueueReadAndWait(command, D_00342868, 0x3800);
-    sdfDevQueueReadAndWait(command, D_00346068, 0x1C00);
-    sdfDevQueueReadAndWait(command, D_00347C68, 0x640);
-    sdfDevQueueReadAndWait(command, D_003482A8, 0xC80);
-    sdfDevQueueReadAndWait(command, D_00349030, 0x3840);
-    sdfDevQueueReadAndWait(command, D_0034C8F0, 0x1000);
-    sdfDevQueueReadAndWait(command, D_0032EF18, 0xC8);
-    sdfDevQueueReadAndWait(command, D_0032EFE0, 0x190);
-    sdfDevQueueReadAndWait(command, D_0032F510, 0x500);
-    sdfDevQueueReadAndWait(command, fldCameraFollowRows, 0xC00);
-    sdfDevQueueReadAndWait(command, fldCameraSettings, 0x2A0);
-    sdfDevQueueReadAndWait(command, D_0032C9B0, 0x1400);
-    sdfDevQueueReadAndWait(command, fldStageCoordinateRecords, 0x600);
-    sdfDevQueueReadAndWait(command, D_0032E5C8, 0x880);
-    sdfDevQueueReadAndWait(command, D_00336A60, 0x1200); /* 64 FldNpcMotion rows */
-    sdfDevWaitThenReleaseCommandState(command);
+    sdfFileRead(command, D_0033EC90, 0x3D8);
+    sdfFileRead(command, D_0033F068, 0x3800);
+    sdfFileRead(command, D_00342868, 0x3800);
+    sdfFileRead(command, D_00346068, 0x1C00);
+    sdfFileRead(command, D_00347C68, 0x640);
+    sdfFileRead(command, D_003482A8, 0xC80);
+    sdfFileRead(command, D_00349030, 0x3840);
+    sdfFileRead(command, D_0034C8F0, 0x1000);
+    sdfFileRead(command, D_0032EF18, 0xC8);
+    sdfFileRead(command, D_0032EFE0, 0x190);
+    sdfFileRead(command, D_0032F510, 0x500);
+    sdfFileRead(command, fldCameraFollowRows, 0xC00);
+    sdfFileRead(command, fldCameraSettings, 0x2A0);
+    sdfFileRead(command, D_0032C9B0, 0x1400);
+    sdfFileRead(command, fldStageCoordinateRecords, 0x600);
+    sdfFileRead(command, D_0032E5C8, 0x880);
+    sdfFileRead(command, D_00336A60, 0x1200); /* 64 FldNpcMotion rows */
+    sdfFileClose(command);
 }
 
 extern void fldClearAllAreaFloorFlags(void);
@@ -1998,9 +1998,9 @@ s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
 
 void fldActivateFlaggedObject(u32 flagIndex) {
     datGameState->activationFlags[(s32)flagIndex >> 3] |= 1 << (flagIndex & 7);
-    fldActivateObjectById(flagIndex);
+    fldFindTakaraSlot(flagIndex);
     if (flagIndex >= 0xF0 && flagIndex < 0x100) {
-        mdlFlagSet(flagIndex + 0x610);
+        evtBitOn(flagIndex + 0x610);
     }
     if (D_0034C8F0[flagIndex].kind == 2) {
         ptyReturnOne(D_0034C8F0[flagIndex].parameter);
@@ -2126,7 +2126,7 @@ FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
     return NULL;
 }
 
-extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
+extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 
 /* Convert a scene-relative offset to a signed bitmap byte, row and bit. */
 s32 fldGetStageBitmapBitCoordinates(s32 scene, s32 floor, f32 xOffset, f32 zOffset,
@@ -2139,7 +2139,7 @@ s32 fldGetStageBitmapBitCoordinates(s32 scene, s32 floor, f32 xOffset, f32 zOffs
     s32 byte;
     s32 bit;
 
-    fldGetSceneEntryPosition(scene, &entryX, &entryZ);
+    fldAllIconDel(scene, &entryX, &entryZ);
     record = fldFindStageCoordinateRecord(D_0032E3C0[0], floor);
     if (record == NULL) {
         return 0;
@@ -2176,7 +2176,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
     s32 column;
     s32 bit;
 
-    fldGetSceneEntryPosition(room, &originX, &originZ);
+    fldAllIconDel(room, &originX, &originZ);
     area = &fldAreaState;
     record = fldFindStageCoordinateRecord(area->area, stage);
     if (record == NULL) {

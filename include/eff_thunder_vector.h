@@ -81,12 +81,12 @@ typedef char EffThunderParameterHead_size_check[sizeof(EffThunderParameterHead) 
 typedef char EffThunderVectorCell_size_check[sizeof(EffThunderVectorCell) == 0x2C ? 1 : -1];
 typedef char EffThunderVectorWork_size_check[sizeof(EffThunderVectorWork) == 0x64 ? 1 : -1];
 
-EffThunderVectorWork *effCreateThunderCellSystemWork(EffThunderAlphaParams *parameters);
-EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters);
-EffThunderParameterHead *effThunderGetParameterHead(EffThunderVectorWork *work);
-void effThunderReleaseVectorWork(EffThunderVectorWork *work);
-void effThunderSetVectorTint(EffThunderVectorWork *work, u32 tintColor);
-void effThunderScaleVectorDimensions(f32 factor, EffThunderVectorWork *work);
-void effThunderUpdateVectorCells(EffThunderVectorWork *work);
+EffThunderVectorWork *effPCPThunderSpherePolyCreate(EffThunderAlphaParams *parameters);
+EffThunderVectorWork *effBTLBindCreateTrack(EffThunderVectorParams *parameters);
+EffThunderParameterHead *effPCPThunderSpherePolyGetParam(EffThunderVectorWork *work);
+void effPCPThunderSpherePolyDelete(EffThunderVectorWork *work);
+void effPCPThunderSpherePolySetColor(EffThunderVectorWork *work, u32 tintColor);
+void effPCPThunderSpherePolySetScale(f32 factor, EffThunderVectorWork *work);
+void effPCPThunderSpherePolyDraw(EffThunderVectorWork *work);
 
 #endif
