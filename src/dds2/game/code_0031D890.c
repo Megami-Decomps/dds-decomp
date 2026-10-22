@@ -7,74 +7,29 @@
 
 enum { SLOT_IN_USE = 1 };
 
-typedef struct WideSlot {
-    u32 flags;
-    s32 x;
-    s32 y;
-    s32 value;
-    s32 age;
-} WideSlot;
-
-typedef struct CompactSlot {
-    u32 flags;
-    u32 firstPayload;
-    u32 secondPayload;
-    s32 age;
-} CompactSlot;
-
-typedef struct WideSlotPool {
-    sdfMemHandle_t *allocation;
-    WideSlot *slots;
-    s32 count;
-} WideSlotPool;
-
-typedef struct CompactSlotPool {
-    sdfMemHandle_t *allocation;
-    CompactSlot *slots;
-    s32 count;
-} CompactSlotPool;
-
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 
-typedef char WideSlotLayoutAssert[
-    (sizeof(WideSlot) == 0x14 &&
-     (unsigned long)&((WideSlot *)0)->x == 4 &&
-     (unsigned long)&((WideSlot *)0)->y == 8 &&
-     (unsigned long)&((WideSlot *)0)->value == 0xC &&
-     (unsigned long)&((WideSlot *)0)->age == 0x10) ? 1 : -1];
-typedef char CompactSlotLayoutAssert[
-    (sizeof(CompactSlot) == 0x10 &&
-     (unsigned long)&((CompactSlot *)0)->age == 0xC) ? 1 : -1];
-typedef char PoolLayoutAssert[
-    (sizeof(WideSlotPool) == 0xC &&
-     sizeof(CompactSlotPool) == 0xC &&
-     (unsigned long)&((WideSlotPool *)0)->slots == 4 &&
-     (unsigned long)&((WideSlotPool *)0)->count == 8 &&
-     (unsigned long)&((CompactSlotPool *)0)->slots == 4 &&
-     (unsigned long)&((CompactSlotPool *)0)->count == 8) ? 1 : -1];
-
-
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
-WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
+MnuSpriteNumberPool *itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    WideSlotPool *pool = (WideSlotPool *)sdfMemGetPtr(allocation);
+    MnuSpriteNumberPool *pool = (MnuSpriteNumberPool *)sdfMemGetPtr(allocation);
     memset(pool, 0, size);
     pool->allocation = allocation;
     pool->count = count;
-    pool->slots = (WideSlot *)(pool + 1);
+    pool->slots = (MnuSpriteNumberSlot *)(pool + 1);
     evtPrintDeveloperConsoleMessage("Sprite Num Work Crate Size[%d]\n", size);
     return pool;
 }
 
 /* Release the allocation containing the sprite-number pool header and slots. */
-void itfReleaseSpriteWorkPool(WideSlotPool *pool) {
+void itfReleaseSpriteWorkPool(MnuSpriteNumberPool *pool) {
     sdfMemFreeDirect(pool->allocation);
 }
 
-/* Reserve the first unclaimed 0x14-byte slot in the wide pool. */
-WideSlot *itfClaimFreeWideSlot(WideSlotPool *pool) {
-    WideSlot *entry;
+/* Reserve the first unclaimed sprite-number slot. */
+MnuSpriteNumberSlot *itfClaimFreeWideSlot(MnuSpriteNumberPool *pool) {
+    MnuSpriteNumberSlot *entry;
     s32 index;
 
     index = 0;
@@ -92,30 +47,31 @@ WideSlot *itfClaimFreeWideSlot(WideSlotPool *pool) {
     return NULL;
 }
 
-WideSlot *itfClaimWideSlotWithTaggedPayload(u32 a, u32 b, u32 c, s8 tag, WideSlotPool *pool) {
-    WideSlot *slot = itfClaimFreeWideSlot(pool);
+MnuSpriteNumberSlot *itfClaimWideSlotWithTaggedPayload(s32 screenX, s32 screenY,
+        s32 value, s8 tag, MnuSpriteNumberPool *pool) {
+    MnuSpriteNumberSlot *slot = itfClaimFreeWideSlot(pool);
     u32 bits = (tag & 0xFF) << 1;
 
     if (slot != NULL) {
-        slot->x = a;
-        slot->y = b;
-        slot->value = c;
-        slot->age = 0;
+        slot->screenX = screenX;
+        slot->screenY = screenY;
+        slot->value = value;
+        slot->ageFrames = 0;
         slot->flags = (slot->flags & ~0x1FE) | bits;
     }
     return slot;
 }
 
-/* Return a wide slot to the pool without disturbing its other flags. */
-void itfReleaseWideSlot(WideSlot *slot) {
+/* Return a number-popup slot to the pool without disturbing its tag. */
+void itfReleaseWideSlot(MnuSpriteNumberSlot *slot) {
     slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
 extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
 
 /* Draw decimal digits and optional tags with fade/rise; bit 0 pauses aging. */
-void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
-    WideSlot *slot = pool->slots;
+void itfUpdateAndDrawSpriteNumbers(MnuSpriteNumberPool *pool, u32 flags) {
+    MnuSpriteNumberSlot *slot = pool->slots;
     s32 slotIndex;
     char text[32];
     s8 length;
@@ -130,25 +86,25 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
     for (slotIndex = 0; slotIndex < pool->count; slotIndex++, slot++) {
         if ((slot->flags & SLOT_IN_USE) != 0) {
             if ((flags & 1) == 0) {
-                slot->age++;
+                slot->ageFrames++;
             }
-            if (slot->age < 20) {
-                opacity = (f32)slot->age / 20.0f;
-            } else if (slot->age < 70) {
+            if (slot->ageFrames < 20) {
+                opacity = (f32)slot->ageFrames / 20.0f;
+            } else if (slot->ageFrames < 70) {
                 opacity = 1.0f;
             } else {
-                opacity = (f32)(90 - slot->age) / 20.0f;
+                opacity = (f32)(90 - slot->ageFrames) / 20.0f;
             }
-            if (slot->age < 20) {
-                rise = (f32)slot->age / 20.0f;
+            if (slot->ageFrames < 20) {
+                rise = (f32)slot->ageFrames / 20.0f;
             } else {
                 rise = 1.0f;
             }
             memset(text, 0, sizeof(text));
             length = 0;
             sprintf(text, "%d", slot->value);
-            x = slot->x;
-            y = slot->y;
+            x = slot->screenX;
+            y = slot->screenY;
             width = 0;
             while (text[length] != 0) {
                 length++;
@@ -192,7 +148,7 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
                     break;
                 }
             }
-            if (slot->age >= 91) {
+            if (slot->ageFrames >= 91) {
                 itfReleaseWideSlot(slot);
             }
         }
@@ -200,27 +156,27 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
 }
 
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
-CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
+MnuHitEffectPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
     u32 size = count * 0x10 + 0xC;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    CompactSlotPool *pool = (CompactSlotPool *)sdfMemGetPtr(allocation);
+    MnuHitEffectPool *pool = (MnuHitEffectPool *)sdfMemGetPtr(allocation);
 
     memset(pool, 0, size);
     pool->allocation = allocation;
     pool->count = count;
-    pool->slots = (CompactSlot *)(pool + 1);
+    pool->slots = (MnuHitEffectSlot *)(pool + 1);
     evtPrintDeveloperConsoleMessage("Sprite HitEffect Work Crate Size[%d]\n", size);
     return pool;
 }
 
 /* Release the allocation containing the hit-effect pool header and records. */
-void itfReleaseSpriteHitEffectWorkPool(CompactSlotPool *pool) {
+void itfReleaseSpriteHitEffectWorkPool(MnuHitEffectPool *pool) {
     sdfMemFreeDirect(pool->allocation);
 }
 
-/* Reserve the first unclaimed 0x10-byte slot in the compact pool. */
-CompactSlot *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
-    CompactSlot *entry;
+/* Reserve the first unclaimed hit-effect slot. */
+MnuHitEffectSlot *itfClaimFreeCompactSlot(MnuHitEffectPool *pool) {
+    MnuHitEffectSlot *entry;
     s32 index;
 
     index = 0;
@@ -238,20 +194,21 @@ CompactSlot *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
     return NULL;
 }
 
-/* Claim a compact slot and fill its two payload words; returns the slot (NULL if the pool is full). */
-CompactSlot *itfClaimCompactSlotWithPayload(u32 first, u32 second, CompactSlotPool *pool) {
-    CompactSlot *slot = itfClaimFreeCompactSlot(pool);
+/* Claim a hit-effect slot at the supplied screen point. */
+MnuHitEffectSlot *itfClaimCompactSlotWithPayload(s32 screenX, s32 screenY,
+        MnuHitEffectPool *pool) {
+    MnuHitEffectSlot *slot = itfClaimFreeCompactSlot(pool);
 
     if (slot != NULL) {
-        slot->firstPayload = first;
-        slot->secondPayload = second;
-        slot->age = 0;
+        slot->screenX = screenX;
+        slot->screenY = screenY;
+        slot->ageFrames = 0;
     }
     return slot;
 }
 
-/* Return a compact slot to the pool without disturbing its other flags. */
-void itfReleaseCompactSlot(CompactSlot *slot) {
+/* Return a hit-effect slot to the pool. */
+void itfReleaseCompactSlot(MnuHitEffectSlot *slot) {
     slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
@@ -259,8 +216,8 @@ extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 extern void itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 scale);
 
-void itfUpdateAndDrawSpriteHitEffects(CompactSlotPool *pool, u32 flags) {
-    CompactSlot *slot;
+void itfUpdateAndDrawSpriteHitEffects(MnuHitEffectPool *pool, u32 flags) {
+    MnuHitEffectSlot *slot;
     s32 i;
     f32 phase;
 
@@ -271,12 +228,12 @@ void itfUpdateAndDrawSpriteHitEffects(CompactSlotPool *pool, u32 flags) {
     for (i = 0; i < pool->count; i++, slot++) {
         if ((slot->flags & SLOT_IN_USE) != 0) {
             if ((flags & 1) == 0) {
-                slot->age++;
+                slot->ageFrames++;
             }
-            phase = (f32)slot->age / 10.0f;
-            itfDrawUniformlyScaledIndexedImage(slot->firstPayload, slot->secondPayload, 0,
+            phase = (f32)slot->ageFrames / 10.0f;
+            itfDrawUniformlyScaledIndexedImage(slot->screenX, slot->screenY, 0,
                 (s32)((1.0f - phase) * 128.0f * 0.8f), 0, 8, 0x54, phase * 2.0f + 0.5f);
-            if (slot->age >= 11) {
+            if (slot->ageFrames >= 11) {
                 itfReleaseCompactSlot(slot);
             }
         }
