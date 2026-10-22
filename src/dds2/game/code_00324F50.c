@@ -419,7 +419,7 @@ typedef struct SdfRelocatedResource {
 
 extern u32 *dds3PackNestedResourceRecords(MnuCallbackList **);
 
-extern void dds3ApplyNamedRelocations(u32 *);
+extern s32 dds3ApplyNamedRelocations(u32 *);
 
 extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
 
